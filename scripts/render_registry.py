@@ -99,8 +99,13 @@ def summary_table(registry: Registry, link_prefix: str) -> str:
     for info, datasets in by_provider(registry):
         counts = Counter(d.status for d in datasets)
         names = ", ".join(
-            f"`{d.name}`" if d.status is Status.AVAILABLE else f"_{d.name}_" for d in datasets
+            f"`{d.name}`" if d.status is Status.AVAILABLE else f"_{d.name}_"
+            for d in datasets
+            if d.status is not Status.PLANNED
         )
+        if counts[Status.PLANNED]:
+            names = f"{names}, " if names else ""
+            names += f"+{counts[Status.PLANNED]} planned"
         next_up = ", ".join(f"`{d.name}`" for d in datasets if d.target == nxt) or "—"
         lines.append(
             f"| [{info.name}]({link_prefix}{info.id}.md) "
@@ -114,7 +119,7 @@ def render_readme_block(registry: Registry) -> str:
     """Block for the top-level README."""
     return (
         summary_table(registry, "docs/providers/")
-        + "\nAvailable datasets are in `code`; stubs and planned ones in _italics_. "
+        + "\nAvailable datasets are in `code`, stubs in _italics_; planned ones are counted. "
         "Each provider page has access notes and full dataset details; "
         "[docs/roadmap.md](docs/roadmap.md) lists datasets by target version.\n"
     )

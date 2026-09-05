@@ -12,15 +12,15 @@ provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 <!-- registry:start -->
 | Provider | Available | Stub | Planned | Next up (0.3) | Datasets |
 |---|---:|---:|---:|---|---|
-| [NOAA](docs/providers/noaa.md) | 2 | 1 | 1 | `coastwatch-sst` | `ghcn-daily`, `nexrad-level2`, _goes-abi_, _coastwatch-sst_ |
-| [Census Bureau](docs/providers/census.md) | 0 | 0 | 1 | — | _acs-5year_ |
-| [EPA](docs/providers/epa.md) | 0 | 0 | 1 | — | _aqs-daily_ |
-| [FEMA](docs/providers/fema.md) | 0 | 0 | 1 | — | _nfhl_ |
-| [NASA](docs/providers/nasa.md) | 0 | 0 | 1 | — | _gpm-imerg_ |
-| [USDA](docs/providers/usda.md) | 0 | 0 | 1 | — | _cropland-data-layer_ |
-| [USGS](docs/providers/usgs.md) | 0 | 0 | 3 | — | _earthquakes_, _water-daily_, _3dep-elevation_ |
+| [NOAA](docs/providers/noaa.md) | 2 | 1 | 26 | `coastwatch-sst` | `ghcn-daily`, `nexrad-level2`, _coastwatch-sst_, +26 planned |
+| [Census Bureau](docs/providers/census.md) | 0 | 0 | 1 | — | +1 planned |
+| [EPA](docs/providers/epa.md) | 0 | 0 | 1 | — | +1 planned |
+| [FEMA](docs/providers/fema.md) | 0 | 0 | 1 | — | +1 planned |
+| [NASA](docs/providers/nasa.md) | 0 | 0 | 1 | — | +1 planned |
+| [USDA](docs/providers/usda.md) | 0 | 0 | 1 | — | +1 planned |
+| [USGS](docs/providers/usgs.md) | 0 | 0 | 3 | — | +3 planned |
 
-Available datasets are in `code`; stubs and planned ones in _italics_. Each provider page has access notes and full dataset details; [docs/roadmap.md](docs/roadmap.md) lists datasets by target version.
+Available datasets are in `code`, stubs in _italics_; planned ones are counted. Each provider page has access notes and full dataset details; [docs/roadmap.md](docs/roadmap.md) lists datasets by target version.
 <!-- registry:end -->
 
 ## Install

@@ -18,6 +18,10 @@ All notable changes to this project are documented here. The format follows
   `target` (planned phase or `later`). `search` and `info` show them; the roadmap lists
   datasets by target version, generated from the registry.
 
+- 26 NOAA registry entries spanning 18 domains, each verified for anonymous access
+  (except GHCN-Hourly, whose entry says its bulk path is unconfirmed), with target phases.
+  The NOAA provider page gains a data-landscape table mapping domains to entries.
+
 ### Changed
 
 - `usdata search` hides planned datasets unless `--planned` is given.
