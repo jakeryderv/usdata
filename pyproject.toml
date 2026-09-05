@@ -1,17 +1,62 @@
 [project]
 name = "usdata"
-version = "0.1.0"
-description = "Utilities for working with US public data"
+version = "0.2.0"
+description = "Unified Python SDK and CLI for discovering, fetching, and tracking provenance of U.S. public scientific data"
 readme = "README.md"
+license = "Apache-2.0"
 authors = [
     { name = "Jake Van Slyke", email = "jakervanslyke@gmail.com" }
 ]
-requires-python = ">=3.10"
-dependencies = []
+requires-python = ">=3.11"
+keywords = ["noaa", "usgs", "nasa", "open-data", "scientific-data", "provenance"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+    "typer>=0.12",
+]
+
+[project.urls]
+Homepage = "https://github.com/jakeryderv/usdata"
+Repository = "https://github.com/jakeryderv/usdata"
 
 [project.scripts]
-usdata = "usdata:main"
+usdata = "usdata.cli:app"
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.380",
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
 
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]
 build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.pyright]
+include = ["src", "tests"]
+pythonVersion = "3.11"
+typeCheckingMode = "standard"
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: hits live services; skipped unless --run-integration is passed",
+]
+addopts = "-ra"

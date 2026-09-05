@@ -1,0 +1,49 @@
+# Curated dataset registry. One entry per dataset usdata knows how to fetch.
+# Adapter classes live under usdata.providers and are stubs until implemented.
+datasets:
+  - id: noaa:nexrad-level2
+    provider: noaa
+    title: NEXRAD Level II Radar
+    description: >-
+      Raw volume scans from the WSR-88D weather radar network, published via
+      NOAA Open Data Dissemination on S3. One archive file per radar site per
+      volume scan. No server-side subsetting; whole files are fetched.
+    keywords: [radar, weather, storms, tornado, precipitation, reflectivity, nexrad, wsr-88d]
+    protocol: s3
+    homepage: https://registry.opendata.aws/noaa-nexrad/
+    license: US Government Work (public domain)
+    spatial_extent: { west: -180.0, south: 15.0, east: -60.0, north: 72.0 }
+    temporal_extent: { start: "1991-06-01T00:00:00Z" }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+    adapter: usdata.providers.noaa.nexrad:NexradLevel2
+
+  - id: noaa:ghcn-daily
+    provider: noaa
+    title: GHCN-Daily Station Observations
+    description: >-
+      Global Historical Climatology Network daily summaries: temperature,
+      precipitation, snow, and other elements from land surface stations,
+      served by the NCEI Access Data Service with station and date filtering.
+    keywords: [climate, weather, temperature, precipitation, snow, stations, daily, ghcn, ncei]
+    protocol: http
+    homepage: https://www.ncei.noaa.gov/products/land-based-station/global-historical-climatology-network-daily
+    license: US Government Work (public domain)
+    spatial_extent: { west: -180.0, south: -90.0, east: 180.0, north: 90.0 }
+    temporal_extent: { start: "1763-01-01T00:00:00Z" }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+    adapter: usdata.providers.noaa.ghcnd:GhcnDaily
+
+  - id: noaa:coastwatch-sst
+    provider: noaa
+    title: CoastWatch Sea Surface Temperature
+    description: >-
+      Gridded blended sea surface temperature from NOAA CoastWatch, served
+      through ERDDAP with full server-side spatial, temporal, and variable
+      subsetting.
+    keywords: [ocean, sst, sea surface temperature, satellite, erddap, coastwatch, gridded]
+    protocol: erddap
+    homepage: https://coastwatch.noaa.gov/
+    license: US Government Work (public domain)
+    spatial_extent: { west: -180.0, south: -90.0, east: 180.0, north: 90.0 }
+    capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: true }
+    adapter: usdata.providers.noaa.coastwatch:CoastwatchSst
