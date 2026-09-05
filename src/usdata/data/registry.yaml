@@ -1,9 +1,10 @@
 # Curated dataset registry: the single source of truth for what usdata knows about.
 # Rendered to docs/reference/datasets.md and the README by `just docs`.
 #
-# status: available = adapter implemented and tested
-#         stub      = adapter class exists but raises NotImplementedProvider
-#         planned   = entry only, no adapter; here so search and docs show the roadmap
+# status: available = adapter implemented and tested (since: version it shipped in)
+#         stub      = adapter class exists but raises NotImplementedProvider (target: version or later)
+#         planned   = entry only, no adapter (target: version or later)
+# domain: one of the ids under `domains:`; shared across providers.
 
 providers:
   noaa:   { name: "NOAA",          homepage: https://www.noaa.gov/ }
@@ -14,11 +15,40 @@ providers:
   census: { name: "Census Bureau", homepage: https://www.census.gov/ }
   usda:   { name: "USDA",          homepage: https://www.usda.gov/ }
 
+domains:
+  surface-weather:        { name: "Surface weather" }
+  severe-weather:         { name: "Severe weather" }
+  weather-radar:          { name: "Weather radar" }
+  weather-satellites:     { name: "Weather satellites" }
+  tropical-cyclones:      { name: "Tropical cyclones" }
+  weather-models:         { name: "Weather models" }
+  climate:                { name: "Climate" }
+  snow-ice:               { name: "Snow and ice" }
+  ocean-physics:          { name: "Ocean physics" }
+  sea-level-tides:        { name: "Sea level and tides" }
+  ocean-chemistry:        { name: "Ocean chemistry" }
+  marine-life:            { name: "Marine life and fisheries" }
+  satellite-oceanography: { name: "Satellite oceanography" }
+  bathymetry:             { name: "Bathymetry and hydrography" }
+  coastal:                { name: "Coastal" }
+  geophysics:             { name: "Geophysics" }
+  natural-hazards:        { name: "Natural hazards" }
+  paleoclimate:           { name: "Paleoclimate" }
+  space-weather:          { name: "Space weather" }
+  land-environment:       { name: "Land and environment" }
+  water-resources:        { name: "Water resources" }
+  terrain-elevation:      { name: "Terrain and elevation" }
+  air-quality:            { name: "Air quality" }
+  demographics:           { name: "Demographics" }
+  agriculture:            { name: "Agriculture" }
+
 datasets:
   # ---------------------------------------------------------------- NOAA
   - id: noaa:nexrad-level2
     provider: noaa
     status: available
+    domain: weather-radar
+    since: "0.2"
     title: NEXRAD Level II Radar
     description: >-
       Raw volume scans from the WSR-88D weather radar network, archived in the
@@ -37,6 +67,8 @@ datasets:
   - id: noaa:ghcn-daily
     provider: noaa
     status: available
+    domain: surface-weather
+    since: "0.2"
     title: GHCN-Daily Station Observations
     description: >-
       Global Historical Climatology Network daily summaries: temperature,
@@ -54,6 +86,8 @@ datasets:
   - id: noaa:coastwatch-sst
     provider: noaa
     status: stub
+    domain: satellite-oceanography
+    target: "0.3"
     title: CoastWatch Sea Surface Temperature
     description: >-
       Gridded blended sea surface temperature from NOAA CoastWatch, served
@@ -70,6 +104,8 @@ datasets:
   - id: noaa:goes-abi
     provider: noaa
     status: planned
+    domain: weather-satellites
+    target: "0.4"
     title: GOES-R ABI Satellite Imagery
     description: >-
       Advanced Baseline Imager Level 1b radiances and Level 2 products from
@@ -85,6 +121,8 @@ datasets:
   - id: usgs:water-daily
     provider: usgs
     status: planned
+    domain: water-resources
+    target: "0.4"
     title: Streamflow and Water Daily Values
     description: >-
       Daily statistics (streamflow, gage height, temperature) for USGS
@@ -99,6 +137,8 @@ datasets:
   - id: usgs:earthquakes
     provider: usgs
     status: planned
+    domain: natural-hazards
+    target: later
     title: Earthquake Catalog (ComCat)
     description: >-
       Global earthquake events with location, magnitude, and depth from the
@@ -113,6 +153,8 @@ datasets:
   - id: usgs:3dep-elevation
     provider: usgs
     status: planned
+    domain: terrain-elevation
+    target: later
     title: 3DEP Elevation
     description: >-
       Seamless digital elevation models from the 3D Elevation Program (1/3
@@ -128,6 +170,8 @@ datasets:
   - id: nasa:gpm-imerg
     provider: nasa
     status: planned
+    domain: weather-satellites
+    target: "0.4"
     title: GPM IMERG Precipitation
     description: >-
       Global half-hourly and daily merged satellite precipitation estimates.
@@ -143,6 +187,8 @@ datasets:
   - id: epa:aqs-daily
     provider: epa
     status: planned
+    domain: air-quality
+    target: later
     title: Air Quality System Daily Summaries
     description: >-
       Daily pollutant summaries (ozone, PM2.5, NO2, and others) from regulatory
@@ -157,6 +203,8 @@ datasets:
   - id: fema:nfhl
     provider: fema
     status: planned
+    domain: natural-hazards
+    target: later
     title: National Flood Hazard Layer
     description: >-
       Effective flood zones, base flood elevations, and related features from
@@ -172,6 +220,8 @@ datasets:
   - id: census:acs-5year
     provider: census
     status: planned
+    domain: demographics
+    target: later
     title: American Community Survey 5-Year Estimates
     description: >-
       Population, housing, income, and demographic estimates for every
@@ -187,6 +237,8 @@ datasets:
   - id: usda:cropland-data-layer
     provider: usda
     status: planned
+    domain: agriculture
+    target: later
     title: Cropland Data Layer
     description: >-
       Annual 30 m raster of crop type across the contiguous United States

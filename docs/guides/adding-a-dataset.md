@@ -22,7 +22,10 @@ Add to `src/usdata/data/registry.yaml`:
 ```yaml
   - id: noaa:ghcn-daily            # <provider>:<name>, stable forever
     provider: noaa                  # must appear under top-level `providers:`
+    domain: surface-weather         # one of the ids under top-level `domains:`
     status: available               # planned (no adapter) | stub | available
+    since: "0.2"                    # available: version it shipped in
+    # target: "0.4" | later         # planned/stub: phase it is aimed at
     title: GHCN-Daily Station Observations
     description: >-                 # what it is, how it is served, what subsetting exists
       ...
@@ -39,7 +42,10 @@ Add to `src/usdata/data/registry.yaml`:
 Every field must be true. The registry test suite loads all entries and
 imports every non-planned adapter. A dataset can start life as `planned`
 with just this entry, which puts it in search results and the docs; flip it
-to `stub` when the class exists and `available` when the live test passes.
+to `stub` when the class exists and `available` when the live test passes,
+replacing `target` with `since`. Planned datasets are hidden from `usdata search`
+unless `--planned` is passed; `info` always works. Moving a dataset to a different
+phase is a one-line change to `target`; the roadmap and provider tables follow.
 Run `just docs` after editing: the README summary and `docs/providers/` tables are
 generated. A new provider gets a page created from a template; fill in its access notes.
 

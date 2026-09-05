@@ -11,16 +11,18 @@ No notes yet. Add how this agency publishes data, authentication requirements, q
 <!-- datasets:start -->
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-| Dataset | Status | Description | Protocol | Server-side subsetting |
-|---|---|---|---|---|
-| [`fema:nfhl`](#femanfhl) | planned | Effective flood zones, base flood elevations, and related features from FEMA's flood insurance rate maps, available as county or state extracts and through ArcGIS services. | http | spatial |
+| Dataset | Domain | Status | Version | Description | Protocol |
+|---|---|---|---|---|---|
+| [`fema:nfhl`](#femanfhl) | Natural hazards | planned | target later | Effective flood zones, base flood elevations, and related features from FEMA's flood insurance rate maps, available as county or state extracts and through ArcGIS services. | http |
 
 ### fema:nfhl
 
-**National Flood Hazard Layer** · planned
+**National Flood Hazard Layer** · planned · target later
 
 Effective flood zones, base flood elevations, and related features from FEMA's flood insurance rate maps, available as county or state extracts and through ArcGIS services.
 
+- Domain: Natural hazards
+- Server-side subsetting: spatial
 - Homepage: https://www.fema.gov/flood-maps/national-flood-hazard-layer
 - License: US Government Work (public domain)
 - Extent: not stated

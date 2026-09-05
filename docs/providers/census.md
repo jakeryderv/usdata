@@ -11,16 +11,18 @@ No notes yet. Add how this agency publishes data, authentication requirements, q
 <!-- datasets:start -->
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-| Dataset | Status | Description | Protocol | Server-side subsetting |
-|---|---|---|---|---|
-| [`census:acs-5year`](#censusacs-5year) | planned | Population, housing, income, and demographic estimates for every geography down to block group, via the Census Data API. | http | spatial, temporal, variable |
+| Dataset | Domain | Status | Version | Description | Protocol |
+|---|---|---|---|---|---|
+| [`census:acs-5year`](#censusacs-5year) | Demographics | planned | target later | Population, housing, income, and demographic estimates for every geography down to block group, via the Census Data API. | http |
 
 ### census:acs-5year
 
-**American Community Survey 5-Year Estimates** · planned
+**American Community Survey 5-Year Estimates** · planned · target later
 
 Population, housing, income, and demographic estimates for every geography down to block group, via the Census Data API. Anonymous for light use; an API key lifts rate limits.
 
+- Domain: Demographics
+- Server-side subsetting: spatial, temporal, variable
 - Homepage: https://www.census.gov/data/developers/data-sets/acs-5year.html
 - License: US Government Work (public domain)
 - Extent: not stated

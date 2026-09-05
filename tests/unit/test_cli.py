@@ -19,6 +19,13 @@ def test_search_lists_matching_datasets_with_status() -> None:
     assert "noaa:nexrad-level2" in result.stdout and "available" in result.stdout
 
 
+def test_search_planned_flag() -> None:
+    hidden = runner.invoke(app, ["search", "earthquakes"])
+    assert hidden.exit_code == 1
+    shown = runner.invoke(app, ["search", "earthquakes", "--planned"])
+    assert shown.exit_code == 0 and "target later" in shown.stdout
+
+
 def test_fetch_planned_dataset_exits_3() -> None:
     result = runner.invoke(app, ["fetch", "usgs:earthquakes", "--state", "OK"])
     assert result.exit_code == 3
