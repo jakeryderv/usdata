@@ -39,7 +39,7 @@ def test_search_hides_planned_unless_asked(registry: Registry) -> None:
 def test_domains_declared_and_next_target(registry: Registry) -> None:
     assert registry.domain("weather-radar").name == "Weather radar"
     assert {ds.domain for ds in registry} <= {d.id for d in registry.domains()}
-    assert registry.next_target() == "0.3"
+    assert registry.next_target() == "0.5"
     ds = registry.get("noaa:ghcn-daily")
     with pytest.raises(ValueError, match="unknown domain"):
         Registry([ds.model_copy(update={"domain": "nope"})], domains=registry.domains())

@@ -1,12 +1,11 @@
 name: Publish to PyPI
 
-# Runs when a version bump lands on main. Publishes the version declared in
-# pyproject.toml, then tags it and creates the GitHub release. Re-running for a
-# version already on PyPI is a no-op.
+# Publish only the exact main-branch commit whose CI has succeeded.
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
-    paths: [pyproject.toml]
   workflow_dispatch:
 
 concurrency:
@@ -15,15 +14,31 @@ concurrency:
 
 jobs:
   publish:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
       id-token: write
       contents: write
+      actions: read
+    env:
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ env.RELEASE_SHA }}
+      - name: Require successful main CI for the release commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          passed=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$RELEASE_SHA&branch=main&event=push&per_page=100" \
+            --jq 'any(.workflow_runs[]; .conclusion == "success")')
+          test "$passed" = true
       - uses: astral-sh/setup-uv@v7
       - id: version
         run: |
@@ -44,4 +59,4 @@ jobs:
           V: ${{ steps.version.outputs.version }}
         run: |
           uv run --no-project python scripts/changelog.py notes "$V" > notes.md
-          gh release create "v$V" --target "$GITHUB_SHA" --title "v$V" --notes-file notes.md
+          gh release create "v$V" --target "$RELEASE_SHA" --title "v$V" --notes-file notes.md

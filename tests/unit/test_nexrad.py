@@ -68,7 +68,7 @@ def test_site_selection_rules(adapter: NexradLevel2) -> None:
     assert len(adapter.select_sites(build_query(lat=35.39, lon=-97.60, nearest=3))) == 3
     with pytest.raises(QueryError):
         adapter.select_sites(build_query())
-    with pytest.raises(KeyError):
+    with pytest.raises(QueryError):
         adapter.select_sites(build_query(site="XXXX"))
 
 

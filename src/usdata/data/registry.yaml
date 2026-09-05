@@ -87,7 +87,7 @@ datasets:
     provider: noaa
     status: stub
     domain: satellite-oceanography
-    target: "0.3"
+    target: "0.5"
     title: CoastWatch Blended Sea Surface Temperature
     description: >-
       NOAA geo-polar blended daily SST analysis (day and night) on a global
@@ -105,7 +105,7 @@ datasets:
     provider: noaa
     status: planned
     domain: weather-satellites
-    target: "0.4"
+    target: "0.5"
     title: GOES-R ABI Satellite Imagery
     description: >-
       Advanced Baseline Imager products from GOES-16, 18, and 19 in the public
@@ -139,7 +139,7 @@ datasets:
     provider: noaa
     status: planned
     domain: severe-weather
-    target: "0.4"
+    target: "0.5"
     title: Storm Events Database
     description: >-
       NCEI's record of significant weather events since 1950 (tornadoes, hail,
@@ -157,7 +157,7 @@ datasets:
     provider: noaa
     status: planned
     domain: tropical-cyclones
-    target: "0.4"
+    target: "0.5"
     title: HURDAT2 Atlantic and Pacific Best Tracks
     description: >-
       National Hurricane Center best-track database: six-hourly position,
@@ -175,7 +175,7 @@ datasets:
     provider: noaa
     status: planned
     domain: tropical-cyclones
-    target: "0.4"
+    target: "0.5"
     title: IBTrACS Global Tropical Cyclone Tracks
     description: >-
       International Best Track Archive for Climate Stewardship: merged best
@@ -538,7 +538,7 @@ datasets:
     provider: usgs
     status: planned
     domain: water-resources
-    target: "0.4"
+    target: "0.5"
     title: Streamflow and Water Daily Values
     description: >-
       Daily statistics (streamflow, gage height, temperature) for USGS
@@ -587,7 +587,7 @@ datasets:
     provider: nasa
     status: planned
     domain: weather-satellites
-    target: "0.4"
+    target: "0.6"
     title: GPM IMERG Precipitation
     description: >-
       Global half-hourly and daily merged satellite precipitation estimates.

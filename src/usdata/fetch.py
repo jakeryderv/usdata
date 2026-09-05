@@ -7,15 +7,14 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from usdata import provenance
+from usdata._files import staged_path
 from usdata.cache import asset_path, sha256_file
 from usdata.models import Asset, Dataset, Provenance, Query
-from usdata.providers import load_adapter
+from usdata.providers import Provider, load_adapter
 
 
 class ChecksumMismatch(RuntimeError):
     """A fetched file's sha256 did not match the checksum the adapter declared."""
-
-    pass
 
 
 class FetchedAsset(BaseModel):
@@ -27,28 +26,54 @@ class FetchedAsset(BaseModel):
     from_cache: bool
 
 
+def _fetch_asset(
+    dataset: Dataset,
+    asset: Asset,
+    adapter: Provider,
+    *,
+    root: Path | None = None,
+    force: bool = False,
+) -> FetchedAsset:
+    if asset.dataset_id != dataset.id:
+        raise ValueError(f"asset dataset {asset.dataset_id!r} does not match {dataset.id!r}")
+    path = asset_path(asset, root)
+    if not force and path.is_file():
+        try:
+            prov = provenance.read(path)
+        except (ValueError, OSError):
+            prov = None
+        if (
+            prov is not None
+            and prov.dataset_id == dataset.id
+            and prov.provider == dataset.provider
+            and prov.source_url == asset.href
+            and prov.size == path.stat().st_size
+            and (asset.checksum is None or prov.checksum == asset.checksum)
+            and sha256_file(path) == prov.checksum
+        ):
+            return FetchedAsset(asset=asset, path=path, provenance=prov, from_cache=True)
+    with staged_path(path) as tmp:
+        adapter.fetch(asset, tmp)
+        prov = provenance.record(dataset, asset, tmp)
+        if asset.checksum and prov.checksum != asset.checksum:
+            raise ChecksumMismatch(f"{asset.id}: expected {asset.checksum}, got {prov.checksum}")
+    # A crash between replacements leaves a detectable mismatch, never a trusted partial file.
+    provenance.write(prov, path)
+    return FetchedAsset(asset=asset, path=path, provenance=prov, from_cache=False)
+
+
 def fetch_asset(
     dataset: Dataset, asset: Asset, *, root: Path | None = None, force: bool = False
 ) -> FetchedAsset:
-    """Fetch one asset via its provider unless it is already cached with a provenance sidecar."""
-    path = asset_path(asset, root)
-    if not force and path.exists() and provenance.sidecar_path(path).exists():
-        return FetchedAsset(
-            asset=asset, path=path, provenance=provenance.read(path), from_cache=True
-        )
-    path.parent.mkdir(parents=True, exist_ok=True)
-    load_adapter(dataset).fetch(asset, path)
-    if asset.checksum and (got := sha256_file(path)) != asset.checksum:
-        path.unlink(missing_ok=True)
-        raise ChecksumMismatch(f"{asset.id}: expected {asset.checksum}, got {got}")
-    prov = provenance.record(dataset, asset, path)
-    provenance.write(prov, path)
-    return FetchedAsset(asset=asset, path=path, provenance=prov, from_cache=False)
+    """Fetch one asset, reusing the cache only when bytes and provenance agree."""
+    with load_adapter(dataset) as adapter:
+        return _fetch_asset(dataset, asset, adapter, root=root, force=force)
 
 
 def fetch(
     dataset: Dataset, query: Query, *, root: Path | None = None, force: bool = False
 ) -> list[FetchedAsset]:
-    """Resolve ``query`` against ``dataset`` and fetch everything it matches."""
-    assets = load_adapter(dataset).list_assets(query)
-    return [fetch_asset(dataset, a, root=root, force=force) for a in assets]
+    """Resolve and fetch a query, sharing one adapter and closing its owned resources."""
+    with load_adapter(dataset) as adapter:
+        assets = adapter.list_assets(query)
+        return [_fetch_asset(dataset, a, adapter, root=root, force=force) for a in assets]

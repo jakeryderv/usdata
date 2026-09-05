@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from usdata import __version__
+from usdata._files import atomic_write_text
 from usdata.cache import sha256_file
 from usdata.models import Asset, Dataset, Provenance
 
@@ -34,7 +35,7 @@ def sidecar_path(path: Path) -> Path:
 def write(prov: Provenance, path: Path) -> Path:
     """Write a provenance record beside ``path`` and return the sidecar path."""
     out = sidecar_path(path)
-    out.write_text(prov.model_dump_json(indent=2))
+    atomic_write_text(out, prov.model_dump_json(indent=2))
     return out
 
 

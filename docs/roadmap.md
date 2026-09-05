@@ -25,22 +25,23 @@ with checksum verification and provenance sidecars, the NCEI REST pattern
 (GHCN-Daily) and the anonymous S3 pattern (NEXRAD Level II). v0.1.0 was a
 name-reserving placeholder.
 
-**Now (v0.3)**: finish the reproducibility spine and the third access pattern.
+**Shipped (v0.3)**: manifest pull, locked restoration, and local verification.
 
-- [ ] ERDDAP protocol client with griddap subsetting
-- [x] `usdata pull manifest.yaml` producing a lockfile; `usdata verify` against it
-- [ ] Full state and county bounding boxes generated from Census boundary files
+**Now (v0.4)**: harden reproducibility before expanding dataset support.
 
-**Next (v0.4)**: first cross-provider phase and the bulk-file patterns.
+- [x] Verified cache reuse and safe cache paths
+- [x] Atomic file and metadata replacement with recovery from interrupted downloads
+- [x] Strict manifest fields and consistent CLI input errors
+- [x] Provider resource ownership and custom registry fixes
+- [x] Publishing gated on successful CI for the exact release commit
+
+**Next (v0.5)**: prove cross-provider access, then add the third protocol.
 
 - [ ] USGS provider; confirm legacy NWIS versus the new Water Data APIs first
-- [ ] NASA provider wrapping `earthaccess`; design how credentials enter the system (ADR)
-- [ ] NCEI bulk-file directory pattern (HTTPS listings, per-year archives)
-- [ ] Single-file archive pattern (one download, no listing)
-- [ ] Second S3 dataset reusing the NEXRAD path with product selection
-
-**v0.5**: more APIs and gridded products.
-
+- [ ] ERDDAP protocol client with griddap subsetting
+- [ ] Full state and county bounding boxes generated from Census boundary files
+- [ ] NCEI bulk-file directory and single-file archive patterns
+- [ ] Second S3 dataset with product selection
 - [ ] CO-OPS tides and currents REST pattern
 - [ ] Further NCEI Access Data Service datasets sharing the GHCN client
 - [ ] Gridded S3 products with product and level selection (MRMS)
@@ -48,6 +49,7 @@ name-reserving placeholder.
 
 **v0.6**: model output and climate data records.
 
+- [ ] NASA provider wrapping `earthaccess`; design credential handling first (ADR)
 - [ ] GRIB2 model output on S3 with cycle and forecast-hour selection
 - [ ] NetCDF CDRs and static global grids
 - [ ] Remote cache backends (S3 and R2 compatible) behind `fsspec`
@@ -59,29 +61,23 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 Move a dataset between phases by editing its `target` in the registry.
 
-**Target 0.3**
-
-- [`noaa:coastwatch-sst`](providers/noaa.md#noaacoastwatch-sst) CoastWatch Blended Sea Surface Temperature · stub
-
-**Target 0.4**
-
-- [`nasa:gpm-imerg`](providers/nasa.md#nasagpm-imerg) GPM IMERG Precipitation · planned
-- [`noaa:goes-abi`](providers/noaa.md#noaagoes-abi) GOES-R ABI Satellite Imagery · planned
-- [`noaa:hurdat2`](providers/noaa.md#noaahurdat2) HURDAT2 Atlantic and Pacific Best Tracks · planned
-- [`noaa:ibtracs`](providers/noaa.md#noaaibtracs) IBTrACS Global Tropical Cyclone Tracks · planned
-- [`noaa:storm-events`](providers/noaa.md#noaastorm-events) Storm Events Database · planned
-- [`usgs:water-daily`](providers/usgs.md#usgswater-daily) Streamflow and Water Daily Values · planned
-
 **Target 0.5**
 
 - [`noaa:climate-normals`](providers/noaa.md#noaaclimate-normals) U.S. Climate Normals 1991-2020 · planned
+- [`noaa:coastwatch-sst`](providers/noaa.md#noaacoastwatch-sst) CoastWatch Blended Sea Surface Temperature · stub
 - [`noaa:coops-water-levels`](providers/noaa.md#noaacoops-water-levels) CO-OPS Water Levels and Tides · planned
+- [`noaa:goes-abi`](providers/noaa.md#noaagoes-abi) GOES-R ABI Satellite Imagery · planned
 - [`noaa:gsom`](providers/noaa.md#noaagsom) Global Summary of the Month · planned
 - [`noaa:gsoy`](providers/noaa.md#noaagsoy) Global Summary of the Year · planned
+- [`noaa:hurdat2`](providers/noaa.md#noaahurdat2) HURDAT2 Atlantic and Pacific Best Tracks · planned
+- [`noaa:ibtracs`](providers/noaa.md#noaaibtracs) IBTrACS Global Tropical Cyclone Tracks · planned
 - [`noaa:mrms`](providers/noaa.md#noaamrms) Multi-Radar Multi-Sensor (MRMS) · planned
+- [`noaa:storm-events`](providers/noaa.md#noaastorm-events) Storm Events Database · planned
+- [`usgs:water-daily`](providers/usgs.md#usgswater-daily) Streamflow and Water Daily Values · planned
 
 **Target 0.6**
 
+- [`nasa:gpm-imerg`](providers/nasa.md#nasagpm-imerg) GPM IMERG Precipitation · planned
 - [`noaa:etopo`](providers/noaa.md#noaaetopo) ETOPO 2022 Global Relief · planned
 - [`noaa:gfs`](providers/noaa.md#noaagfs) GFS Forecast Model Output · planned
 - [`noaa:hrrr`](providers/noaa.md#noaahrrr) HRRR Forecast Model Output · planned

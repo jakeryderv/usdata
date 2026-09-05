@@ -10,6 +10,7 @@ fetching anything.
 
 from __future__ import annotations
 
+from contextlib import ExitStack
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -17,9 +18,9 @@ from pydantic import BaseModel
 
 from usdata import __version__, provenance
 from usdata.cache import asset_path, sha256_file
-from usdata.fetch import ChecksumMismatch, FetchedAsset, fetch_asset
+from usdata.fetch import ChecksumMismatch, FetchedAsset, _fetch_asset, fetch
 from usdata.manifest import LockedAsset, Lockfile, Manifest, lockfile_path
-from usdata.providers import load_adapter
+from usdata.providers import Provider, load_adapter
 from usdata.registry import Registry, default_registry
 
 
@@ -67,10 +68,9 @@ def resolve(
     locked: list[LockedAsset] = []
     for source in manifest.sources:
         dataset = reg.get(source.dataset)
-        for asset in load_adapter(dataset).list_assets(source.to_query()):
-            item = fetch_asset(dataset, asset, root=root)
+        for item in fetch(dataset, source.to_query(), root=root):
             fetched.append(item)
-            pinned = asset.model_copy(update={"checksum": item.provenance.checksum})
+            pinned = item.asset.model_copy(update={"checksum": item.provenance.checksum})
             locked.append(LockedAsset(asset=pinned, provenance=item.provenance))
     lock = Lockfile(
         manifest=manifest.name,
@@ -97,18 +97,25 @@ def restore(
             "pull with force to re-resolve"
         )
     fetched: list[FetchedAsset] = []
-    for entry in lock.assets:
-        dataset = reg.get(entry.asset.dataset_id)
-        path = asset_path(entry.asset, root)
-        if path.exists() and sha256_file(path) == entry.provenance.checksum:
-            fetched.append(
-                FetchedAsset(
-                    asset=entry.asset, path=path, provenance=entry.provenance, from_cache=True
+    adapters: dict[str, Provider] = {}
+    with ExitStack() as stack:
+        for entry in lock.assets:
+            dataset = reg.get(entry.asset.dataset_id)
+            path = asset_path(entry.asset, root)
+            if path.is_file() and sha256_file(path) == entry.provenance.checksum:
+                provenance.write(entry.provenance, path)
+                fetched.append(
+                    FetchedAsset(
+                        asset=entry.asset, path=path, provenance=entry.provenance, from_cache=True
+                    )
                 )
+                continue
+            if dataset.id not in adapters:
+                adapters[dataset.id] = stack.enter_context(load_adapter(dataset))
+            pinned = entry.asset.model_copy(update={"checksum": entry.provenance.checksum})
+            fetched.append(
+                _fetch_asset(dataset, pinned, adapters[dataset.id], root=root, force=True)
             )
-            continue
-        # fetch_asset verifies against asset.checksum, which resolve() pinned.
-        fetched.append(fetch_asset(dataset, entry.asset, root=root, force=True))
     return PullResult(lockfile=lock, lockfile_path=lock_path, fetched=fetched, from_lockfile=True)
 
 

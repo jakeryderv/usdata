@@ -7,6 +7,22 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Breaking
+
+- Manifest and source fields reject unknown keys instead of silently ignoring them;
+  provider-specific inputs remain supported under `params`.
+
+### Fixed
+
+- Verify cached bytes and source provenance before reuse or fresh lockfile creation.
+- Reject unsafe cache paths, including symlinks escaping the cache root.
+- Preserve existing files after failed downloads or checksum mismatches; replace downloads,
+  provenance, and lockfiles atomically using unique temporary files.
+- Reuse provider clients across downloads and close internally owned clients on success or failure.
+- Report invalid dates, radar IDs, manifest YAML, and lockfiles with clear CLI input errors.
+- Infer multiple domains correctly when constructing a custom registry without a domain catalog.
+- Gate package publishing on successful CI for the exact main-branch release commit.
+
 ## [0.3.0] - 2026-09-05
 
 ### Added
