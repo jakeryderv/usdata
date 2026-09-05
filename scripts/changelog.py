@@ -61,7 +61,7 @@ def roll(version: str) -> None:
         sys.exit("Unreleased section is empty; add changelog entries before releasing")
     if any(n == version for n, _, _ in sections):
         sys.exit(f"version {version} already has a changelog section")
-    today = dt.date.today().isoformat()
+    today = dt.datetime.now(dt.UTC).date().isoformat()
     new = [("Unreleased", None, ""), (version, today, body), *sections[1:]]
     PATH.write_text(render(preamble, new))
     print(f"rolled Unreleased into [{version}] - {today}")
