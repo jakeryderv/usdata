@@ -28,7 +28,7 @@ name-reserving placeholder.
 **Now (v0.3)**: finish the reproducibility spine and the third access pattern.
 
 - [ ] ERDDAP protocol client with griddap subsetting
-- [ ] `usdata pull manifest.yaml` producing a lockfile; `usdata verify` against it
+- [x] `usdata pull manifest.yaml` producing a lockfile; `usdata verify` against it
 - [ ] Full state and county bounding boxes generated from Census boundary files
 
 **Next (v0.4)**: first cross-provider phase and the bulk-file patterns.

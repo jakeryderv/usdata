@@ -29,6 +29,7 @@ user arguments ─► build_query ─► Query
 | `cache` | Cache directory resolution and content hashing. |
 | `provenance` | Builds and persists a `Provenance` record beside each fetched file. |
 | `manifest` | `Manifest` (declared inputs) and `Lockfile` (what was actually fetched, with checksums). |
+| `pull` | Resolve a manifest through adapters and write the lockfile, or restore exactly what a lockfile pins; `verify` re-hashes against it. |
 | `cli` | Typer app. Thin: argument parsing and exit codes only, no logic. |
 
 Provider-specific knowledge (endpoints, auth, quirks) lives in `docs/providers/<id>.md`, not here.

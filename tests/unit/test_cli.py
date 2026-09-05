@@ -76,9 +76,16 @@ def test_fetch_dry_run_lists_assets() -> None:
     assert "ncei.noaa.gov" in result.stdout
 
 
-def test_pull_validates_manifest(tmp_path: Path) -> None:
+def test_pull_rejects_unknown_dataset_and_stub(tmp_path: Path) -> None:
     m = tmp_path / "dataset.yaml"
-    m.write_text("name: t\nsources:\n  - dataset: noaa:ghcn-daily\n")
-    assert runner.invoke(app, ["pull", str(m)]).exit_code == 3
     m.write_text("name: t\nsources:\n  - dataset: nope:x\n")
     assert runner.invoke(app, ["pull", str(m)]).exit_code == 2
+    m.write_text("name: t\nsources:\n  - dataset: noaa:coastwatch-sst\n")
+    assert runner.invoke(app, ["pull", str(m), "--cache-dir", str(tmp_path)]).exit_code == 3
+
+
+def test_verify_without_lockfile_exits_2(tmp_path: Path) -> None:
+    m = tmp_path / "dataset.yaml"
+    m.write_text("name: t\nsources:\n  - dataset: noaa:ghcn-daily\n")
+    result = runner.invoke(app, ["verify", str(m)])
+    assert result.exit_code == 2 and "run pull first" in result.output

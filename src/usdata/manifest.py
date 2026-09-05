@@ -66,7 +66,9 @@ class Lockfile(BaseModel):
     """Exactly what a manifest resolved to, with checksums, so it can be reproduced."""
 
     manifest: str
+    manifest_checksum: str = Field(description="sha256 of the manifest file when it was resolved")
     generated_at: datetime
+    usdata_version: str
     assets: list[LockedAsset] = Field(default_factory=list)
 
     @classmethod

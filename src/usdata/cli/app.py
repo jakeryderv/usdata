@@ -9,10 +9,13 @@ import httpx
 import typer
 
 from usdata import __version__, build_query, default_registry
-from usdata.fetch import fetch_asset
-from usdata.manifest import Manifest
+from usdata.fetch import ChecksumMismatch, fetch_asset
+from usdata.manifest import lockfile_path
 from usdata.providers import load_adapter
 from usdata.providers.base import NotImplementedProvider
+from usdata.pull import ManifestChanged, UnknownDatasets
+from usdata.pull import pull as pull_manifest
+from usdata.pull import verify as verify_manifest
 from usdata.query import UnknownPlace
 from usdata.registry import DatasetNotFound
 
@@ -175,13 +178,47 @@ def fetch(
 
 
 @app.command()
-def pull(manifest: Annotated[Path, typer.Argument(exists=True, dir_okay=False)]) -> None:
-    """Fetch every source in a manifest and write a lockfile."""
-    m = Manifest.load(manifest)
-    missing = m.validate_against()
-    if missing:
-        typer.secho(f"Unknown datasets in manifest: {', '.join(missing)}", err=True, fg="red")
+def pull(
+    manifest: Annotated[Path, typer.Argument(exists=True, dir_okay=False)],
+    cache_dir: Annotated[Path | None, typer.Option(help="Override the cache directory.")] = None,
+    force: Annotated[
+        bool,
+        typer.Option(help="Ignore an existing lockfile: re-resolve every source and rewrite it."),
+    ] = False,
+) -> None:
+    """Fetch every source in a manifest and write (or restore from) its lockfile."""
+    try:
+        result = pull_manifest(manifest, root=cache_dir, force=force)
+    except (UnknownDatasets, ManifestChanged, UnknownPlace, ValueError) as e:
+        typer.secho(str(e), err=True, fg="red")
+        raise typer.Exit(code=2) from None
+    except NotImplementedProvider as e:
+        typer.secho(str(e), err=True, fg="yellow")
+        raise typer.Exit(code=3) from None
+    except (httpx.HTTPError, ChecksumMismatch) as e:
+        typer.secho(f"fetch failed: {e}", err=True, fg="red")
+        raise typer.Exit(code=4) from None
+    for f in result.fetched:
+        tag = "cached" if f.from_cache else "fetched"
+        typer.echo(f"{f.path}\t{tag}\t{f.provenance.size} bytes")
+    mode = "restored from" if result.from_lockfile else "wrote"
+    typer.echo(f"{len(result.fetched)} asset(s); {mode} {result.lockfile_path}", err=True)
+
+
+@app.command()
+def verify(
+    manifest: Annotated[Path, typer.Argument(exists=True, dir_okay=False)],
+    cache_dir: Annotated[Path | None, typer.Option(help="Override the cache directory.")] = None,
+) -> None:
+    """Check cached files against a manifest's lockfile. Exit 1 on any drift."""
+    lock = lockfile_path(manifest)
+    if not lock.exists():
+        typer.secho(f"no lockfile at {lock}; run pull first", err=True, fg="red")
         raise typer.Exit(code=2)
-    typer.echo(f"{m.name} v{m.version}: {len(m.sources)} source(s) validated")
-    typer.secho("pull is not implemented yet; no data was fetched.", err=True, fg="yellow")
-    raise typer.Exit(code=3)
+    drift = verify_manifest(manifest, root=cache_dir)
+    for d in drift:
+        typer.echo(f"{d.asset_id}\t{d.problem}\t{d.path}")
+    if drift:
+        typer.secho(f"{len(drift)} asset(s) drifted from {lock.name}", err=True, fg="red")
+        raise typer.Exit(code=1)
+    typer.echo(f"all assets match {lock.name}", err=True)
