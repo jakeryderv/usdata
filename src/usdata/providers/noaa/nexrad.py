@@ -29,8 +29,13 @@ KEY_RE = re.compile(r"^(?P<site>[A-Z]{4})(?P<stamp>\d{8}_\d{6})(?:_V0[36])?(?:\.
 
 def _sites_param(raw: object) -> list[str]:
     if isinstance(raw, str):
-        return [s.strip().upper() for s in raw.split(",") if s.strip()]
-    return [str(s).upper() for s in raw]  # type: ignore[union-attr]
+        raw = raw.split(",")
+    if not isinstance(raw, (list, tuple)) or not all(isinstance(s, str) for s in raw):
+        raise QueryError("sites must be a string or list of strings")
+    ids = list(dict.fromkeys(s.strip().upper() for s in raw if s.strip()))
+    if not ids:
+        raise QueryError("sites must not be empty")
+    return ids
 
 
 def scan_time(key: str) -> datetime | None:
@@ -62,8 +67,14 @@ class NexradLevel2(Provider):
 
     def select_sites(self, query: Query) -> list[str]:
         """Radar site ids the query refers to; see the module docstring for the rules."""
+        if unknown := set(query.params) - {"site", "sites", "nearest"}:
+            raise QueryError(f"unsupported NEXRAD params: {', '.join(sorted(unknown))}")
+        if "site" in query.params and "sites" in query.params:
+            raise QueryError("pass only one of site or sites")
+        if "nearest" in query.params and {"site", "sites"}.intersection(query.params):
+            raise QueryError("nearest cannot be combined with site or sites")
         raw = query.params.get("sites", query.params.get("site"))
-        if raw is not None:
+        if {"site", "sites"}.intersection(query.params):
             ids = _sites_param(raw)
             for sid in ids:
                 try:
@@ -76,7 +87,16 @@ class NexradLevel2(Provider):
         b = query.bbox
         lat, lon = (b.south + b.north) / 2, (b.west + b.east) / 2
         if "nearest" in query.params:
-            return [s.id for s in sites.nearest(lat, lon, int(query.params["nearest"]))]
+            count = query.params["nearest"]
+            if isinstance(count, bool) or not isinstance(count, (int, str)):
+                raise QueryError("nearest must be a positive integer")
+            try:
+                count = int(count)
+            except ValueError:
+                raise QueryError("nearest must be a positive integer") from None
+            if count < 1:
+                raise QueryError("nearest must be a positive integer")
+            return [s.id for s in sites.nearest(lat, lon, count)]
         inside = sites.sites_in(b)
         if inside:
             return [s.id for s in inside]

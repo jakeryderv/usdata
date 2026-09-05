@@ -99,3 +99,19 @@ def test_fetch_http_error_leaves_no_partial_file(tmp_path: Path, adapter: GhcnDa
     with pytest.raises(httpx.HTTPStatusError), respx.mock() as mock:
         mock.get(DATA_URL).mock(return_value=httpx.Response(404))
         fetch_asset(adapter.dataset, asset, root=tmp_path)
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"stations": "X", "untis": "standard"},
+        {"stations": "X", "units": "kelvin"},
+        {"stations": ""},
+        {"stations": []},
+        {"stations": 123},
+        {"stations": [123]},
+    ],
+)
+def test_rejects_invalid_provider_params(adapter: GhcnDaily, params: dict) -> None:
+    with pytest.raises(QueryError):
+        adapter.list_assets(build_query(start="2024-05-06", end="2024-05-07", **params))

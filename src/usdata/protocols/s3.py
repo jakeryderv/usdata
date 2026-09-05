@@ -59,7 +59,7 @@ def list_objects(
     params: dict[str, str | int] = {"list-type": 2, "prefix": prefix, "max-keys": page_size}
     try:
         while True:
-            resp = client.get(https_url(bucket), params=params)
+            resp = http.get(https_url(bucket), client, params=params)
             resp.raise_for_status()
             root = ET.fromstring(resp.text)
             for contents in root.iter(NS + "Contents"):

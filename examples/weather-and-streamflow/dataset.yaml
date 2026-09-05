@@ -1,0 +1,17 @@
+name: weather-and-streamflow
+version: "1.0"
+sources:
+  - dataset: noaa:ghcn-daily
+    start: 2024-05-06
+    end: 2024-05-07
+    variables: [PRCP, TMAX]
+    params:
+      stations: USW00013967
+      units: metric
+  - dataset: usgs:water-daily
+    start: 2024-05-06
+    end: 2024-05-07
+    variables: ["00060"]
+    params:
+      sites: "07164500"
+      statistic_id: "00003"

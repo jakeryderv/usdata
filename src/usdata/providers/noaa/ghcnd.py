@@ -34,8 +34,13 @@ def _date(value: Any) -> str:
 
 def _stations_param(raw: Any) -> list[str]:
     if isinstance(raw, str):
-        return [s.strip() for s in raw.split(",") if s.strip()]
-    return [str(s) for s in raw]
+        raw = raw.split(",")
+    if not isinstance(raw, (list, tuple)) or not all(isinstance(s, str) for s in raw):
+        raise QueryError("stations must be a string or list of strings")
+    stations = list(dict.fromkeys(s.strip() for s in raw if s.strip()))
+    if not stations:
+        raise QueryError("stations must not be empty")
+    return stations
 
 
 class GhcnDaily(Provider):
@@ -75,7 +80,7 @@ class GhcnDaily(Provider):
         found: list[str] = []
         seen: set[str] = set()
         while True:
-            resp = self._http().get(SEARCH_URL, params=params)
+            resp = http.get(SEARCH_URL, self._http(), params=params)
             resp.raise_for_status()
             body = resp.json()
             results = body.get("results", [])
@@ -95,6 +100,10 @@ class GhcnDaily(Provider):
         """One CSV asset per chunk of up to STATIONS_PER_ASSET stations for the query window."""
         if query.time is None or query.time.start is None or query.time.end is None:
             raise QueryError(f"{self.dataset.id} requires both start and end dates")
+        if unknown := set(query.params) - {"stations", "units"}:
+            raise QueryError(f"unsupported GHCN params: {', '.join(sorted(unknown))}")
+        if query.params.get("units", "metric") not in ("metric", "standard"):
+            raise QueryError("units must be metric or standard")
         if "stations" in query.params:
             stations = _stations_param(query.params["stations"])
         elif query.bbox is not None:

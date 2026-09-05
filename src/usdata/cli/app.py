@@ -14,7 +14,7 @@ from usdata.fetch import fetch as fetch_query
 from usdata.manifest import lockfile_path
 from usdata.providers import load_adapter
 from usdata.providers.base import NotImplementedProvider
-from usdata.pull import ManifestChanged, UnknownDatasets
+from usdata.pull import EmptySource, ManifestChanged, UnknownDatasets
 from usdata.pull import pull as pull_manifest
 from usdata.pull import verify as verify_manifest
 from usdata.query import UnknownPlace
@@ -190,6 +190,9 @@ def pull(
     """Fetch every source in a manifest and write (or restore from) its lockfile."""
     try:
         result = pull_manifest(manifest, root=cache_dir, force=force)
+    except EmptySource as e:
+        typer.secho(str(e), err=True, fg="yellow")
+        raise typer.Exit(code=1) from None
     except (DatasetNotFound, UnknownDatasets, ManifestChanged, UnknownPlace, ValueError) as e:
         typer.secho(str(e), err=True, fg="red")
         raise typer.Exit(code=2) from None
@@ -218,7 +221,7 @@ def verify(
         raise typer.Exit(code=2)
     try:
         drift = verify_manifest(manifest, root=cache_dir)
-    except (ValueError, OSError) as e:
+    except (ManifestChanged, ValueError, OSError) as e:
         typer.secho(str(e), err=True, fg="red")
         raise typer.Exit(code=2) from None
     for d in drift:

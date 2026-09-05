@@ -52,7 +52,20 @@ cache, and provenance together; the CLI calls it rather than adapters directly.
 | Code | Meaning |
 |---|---|
 | 0 | success |
-| 1 | no results |
+| 1 | no results, a required manifest source is empty, or cached assets drifted |
 | 2 | bad input (unknown dataset, place, or manifest error) |
 | 3 | operation not implemented yet |
 | 4 | upstream request failed |
+
+## Failure boundaries
+
+A manifest source must resolve to assets unless it sets `allow_empty: true`.
+A failed resolution leaves an existing lockfile untouched, although earlier
+successful downloads remain cached. Restore and verify both check the exact
+manifest checksum before trusting its lockfile. See the
+[manifest reference](reference/manifests.md) for the reproducibility contract.
+
+`protocols.http.get` and `download` share a bounded retry policy for transient
+GET failures. Metadata retries preserve the original request; download retries
+restart with a new temporary file. Provider code uses these helpers with its
+owned or injected client. Transport remains independent of dataset semantics.

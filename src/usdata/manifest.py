@@ -21,6 +21,7 @@ class SourceSpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     dataset: str
+    allow_empty: bool = False
     location: str | None = None
     bbox: BBox | None = None
     start: str | date | datetime | None = None

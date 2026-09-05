@@ -7,6 +7,31 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Breaking
+
+- Manifest pulls now fail when a required source resolves to no assets. Set
+  `allow_empty: true` per source to permit an intentionally empty result.
+- `verify` rejects a manifest edited since locking (exit 2), matching `pull`.
+- NOAA adapters reject unknown provider parameters, empty explicit identifiers,
+  invalid units, and conflicting or invalid radar selectors.
+
+### Fixed
+
+- Generated provider and roadmap docs distinguish unreleased implementations
+  from support included in the declared package version.
+- GET metadata and download requests retry transient failures up to three attempts,
+  respecting bounded `Retry-After` delays and preserving existing files on failure.
+- Release publishing promotes the distributions from successful CI for the exact
+  release commit, with version checks, instead of rebuilding.
+
+### Changed
+
+- Narrow v0.5 to USGS, ERDDAP/CoastWatch, complete place lookup, and reliability;
+  additional NOAA adapters and optional readers remain follow-up work.
+- Enforce offline unit tests and smoke-test the installed wheel on Linux, macOS,
+  and Windows. Add release-tool regression tests.
+- Add a manifest reference and a small NOAA/USGS example with a live round-trip test.
+
 ### Added
 
 - `usgs:water-daily`: the first non-NOAA adapter, using the modern USGS Water Data

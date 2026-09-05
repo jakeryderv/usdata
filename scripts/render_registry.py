@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import re
 import sys
+import tomllib
 from collections import Counter
 from pathlib import Path
 
@@ -26,6 +27,7 @@ from usdata.models import LATER, Dataset, ProviderInfo, Status
 from usdata.registry import Registry, version_key
 
 ROOT = Path(__file__).resolve().parents[1]
+PACKAGE_VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
 README = ROOT / "README.md"
 PROVIDERS_DIR = ROOT / "docs/providers"
 INDEX = PROVIDERS_DIR / "README.md"
@@ -120,6 +122,8 @@ def render_readme_block(registry: Registry) -> str:
     return (
         summary_table(registry, "docs/providers/")
         + "\nAvailable datasets are in `code`, stubs in _italics_; planned ones are counted. "
+        "Available means implemented in this source checkout; consult the "
+        "[releases](https://github.com/jakeryderv/usdata/releases) for published support. "
         "Each provider page has access notes and full dataset details; "
         "[docs/roadmap.md](docs/roadmap.md) lists datasets by target version.\n"
     )
@@ -131,9 +135,17 @@ def render_index(registry: Registry) -> str:
         "# Providers\n\n"
         + GENERATED_NOTE
         + "\n\nStatus: **available** has a tested adapter, **stub** has an adapter class "
-        "that is not implemented yet, **planned** is a registry entry only.\n\n"
-        + summary_table(registry, "")
+        "that is not implemented yet, **planned** is a registry entry only. "
+        "These describe this source checkout; unreleased implementations are labeled below "
+        "on the provider pages.\n\n" + summary_table(registry, "")
     )
+
+
+def implementation_version(ds: Dataset) -> str:
+    """Distinguish upcoming implementations from the declared package version."""
+    if ds.since and version_key(ds.since) > version_key(PACKAGE_VERSION):
+        return f"unreleased; planned {ds.since}"
+    return ds.version_label
 
 
 def render_datasets_block(registry: Registry, datasets: list[Dataset]) -> str:
@@ -148,14 +160,15 @@ def render_datasets_block(registry: Registry, datasets: list[Dataset]) -> str:
         link = f"[`{ds.id}`](#{_anchor(ds.id.replace(':', ''))})"
         lines.append(
             f"| {link} | {registry.domain(ds.domain).name} | {ds.status.value} "
-            f"| {ds.version_label} | {_first_sentence(ds.description)} | {ds.protocol.value} |"
+            f"| {implementation_version(ds)} | {_first_sentence(ds.description)} "
+            f"| {ds.protocol.value} |"
         )
     for ds in datasets:
         lines += [
             "",
             f"### {ds.id}",
             "",
-            f"**{ds.title}** · {ds.status.value} · {ds.version_label}",
+            f"**{ds.title}** · {ds.status.value} · {implementation_version(ds)}",
             "",
             ds.description.strip(),
             "",
@@ -192,7 +205,12 @@ def render_roadmap_block(registry: Registry) -> str:
     for v in sorted(targeted, key=version_key):
         lines += group(f"Target {v}" if v != LATER else "Later", targeted[v])
     for v in sorted(shipped, key=version_key, reverse=True):
-        lines += group(f"Shipped in {v}", shipped[v])
+        title = (
+            f"Implemented, unreleased (planned {v})"
+            if version_key(v) > version_key(PACKAGE_VERSION)
+            else f"Included since {v}"
+        )
+        lines += group(title, shipped[v])
     return "\n".join(lines) + "\n"
 
 

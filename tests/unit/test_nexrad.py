@@ -127,3 +127,25 @@ def test_s3_url_helpers() -> None:
     assert s3.https_url("b", "a/b c") == "https://b.s3.amazonaws.com/a/b%20c"
     with pytest.raises(ValueError):
         s3.parse_s3_url("https://x")
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"site": "KTLX", "nearestt": 2},
+        {"site": "KTLX", "sites": "KVNX"},
+        {"site": "KTLX", "nearest": 2},
+        {"sites": ""},
+        {"sites": None},
+        {"sites": [123]},
+        {"sites": 123},
+        {"nearest": 0},
+        {"nearest": -1},
+        {"nearest": 1.5},
+        {"nearest": True},
+        {"nearest": "two"},
+    ],
+)
+def test_rejects_invalid_provider_params(adapter: NexradLevel2, params: dict) -> None:
+    with pytest.raises(QueryError):
+        adapter.select_sites(build_query(location="ok", **params))

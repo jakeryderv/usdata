@@ -37,6 +37,10 @@ build:
     rm -rf dist
     uv build
 
+# Install the built wheel in isolation and check SDK, CLI, and bundled resources
+smoke:
+    uv run --no-project python scripts/smoke_wheel.py
+
 # Run the CLI
 run *args:
     uv run usdata {{args}}
@@ -52,6 +56,7 @@ release bump="minor":
     v=$(uv version --short)
     uv run python scripts/changelog.py roll "$v"
     uv lock -q
+    uv run python scripts/render_registry.py
     git checkout -q -b "release/v$v"
     git commit -qam "chore: release v$v"
     git push -q -u origin "release/v$v"

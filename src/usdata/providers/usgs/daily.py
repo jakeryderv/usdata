@@ -106,7 +106,7 @@ class WaterDaily(Provider):
         offset = 0
         while True:
             url = httpx.URL(ITEMS_URL, params={**params, "offset": str(offset)})
-            response = self._http().get(url)
+            response = http.get(url, self._http())
             response.raise_for_status()
             try:
                 body = response.json()

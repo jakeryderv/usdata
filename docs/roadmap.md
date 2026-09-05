@@ -35,17 +35,33 @@ name-reserving placeholder.
 - [x] Provider resource ownership and custom registry fixes
 - [x] Publishing gated on successful CI for the exact release commit
 
-**Now (v0.5)**: prove cross-provider access, then add the third protocol.
+**Now (v0.5)**: cross-provider access, gridded subsetting, and trustworthy inputs.
 
 - [x] USGS daily values via the modern Water Data API (next release; available from source)
-- [ ] ERDDAP protocol client with griddap subsetting
-- [ ] Full state and county bounding boxes generated from Census boundary files
-- [ ] NCEI bulk-file directory and single-file archive patterns
-- [ ] Second S3 dataset with product selection
-- [ ] CO-OPS tides and currents REST pattern
-- [ ] Further NCEI Access Data Service datasets sharing the GHCN client
-- [ ] Gridded S3 products with product and level selection (MRMS)
-- [ ] Optional `open()` on fetched assets behind extras (pandas, xarray, geopandas)
+- [ ] [CoastWatch SST and ERDDAP griddap](https://github.com/jakeryderv/usdata/issues/5):
+  a verified dataset, spatial/time/variable subsetting, stable asset IDs, and a tiny live test
+- [ ] [State and county lookup](https://github.com/jakeryderv/usdata/issues/7):
+  generated Census bounding boxes, names/postal codes/FIPS, documented vintage and limits
+- [x] [Review follow-ups](https://github.com/jakeryderv/usdata/issues/30) (implemented in source):
+  empty-source policy, manifest consistency, strict provider params,
+  bounded HTTP retries, manifest guide, and installed-wheel CI checks
+
+Release acceptance: all remaining items above complete, `just check` and the live
+integration suite pass, and the NOAA/USGS manifest example pulls, restores, and
+verifies. v0.5 does not require the entire NOAA expansion backlog.
+
+**Following v0.5 (not yet assigned a release)**:
+
+- [Optional `open()`](https://github.com/jakeryderv/usdata/issues/10), starting with CSV
+  and NetCDF readers behind extras once the gridded adapter is established
+- Further NCEI Access Data Service datasets (GSOM, GSOY, climate normals)
+- Bulk directories and archives (Storm Events, HURDAT2, IBTrACS)
+- A second S3 dataset with product selection (GOES ABI), then MRMS
+- CO-OPS tides and currents
+- Progress reporting and download-size summaries for large fetches
+
+Refine each access pattern into an issue with acceptance criteria when it becomes
+next. Registry targets remain `later` until a release commitment is made.
 
 **v0.6**: model output and climate data records.
 
@@ -63,16 +79,7 @@ Move a dataset between phases by editing its `target` in the registry.
 
 **Target 0.5**
 
-- [`noaa:climate-normals`](providers/noaa.md#noaaclimate-normals) U.S. Climate Normals 1991-2020 · planned
 - [`noaa:coastwatch-sst`](providers/noaa.md#noaacoastwatch-sst) CoastWatch Blended Sea Surface Temperature · stub
-- [`noaa:coops-water-levels`](providers/noaa.md#noaacoops-water-levels) CO-OPS Water Levels and Tides · planned
-- [`noaa:goes-abi`](providers/noaa.md#noaagoes-abi) GOES-R ABI Satellite Imagery · planned
-- [`noaa:gsom`](providers/noaa.md#noaagsom) Global Summary of the Month · planned
-- [`noaa:gsoy`](providers/noaa.md#noaagsoy) Global Summary of the Year · planned
-- [`noaa:hurdat2`](providers/noaa.md#noaahurdat2) HURDAT2 Atlantic and Pacific Best Tracks · planned
-- [`noaa:ibtracs`](providers/noaa.md#noaaibtracs) IBTrACS Global Tropical Cyclone Tracks · planned
-- [`noaa:mrms`](providers/noaa.md#noaamrms) Multi-Radar Multi-Sensor (MRMS) · planned
-- [`noaa:storm-events`](providers/noaa.md#noaastorm-events) Storm Events Database · planned
 
 **Target 0.6**
 
@@ -88,27 +95,36 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`epa:aqs-daily`](providers/epa.md#epaaqs-daily) Air Quality System Daily Summaries · planned
 - [`fema:nfhl`](providers/fema.md#femanfhl) National Flood Hazard Layer · planned
 - [`noaa:cdr-ndvi`](providers/noaa.md#noaacdr-ndvi) NDVI Climate Data Record · planned
+- [`noaa:climate-normals`](providers/noaa.md#noaaclimate-normals) U.S. Climate Normals 1991-2020 · planned
+- [`noaa:coops-water-levels`](providers/noaa.md#noaacoops-water-levels) CO-OPS Water Levels and Tides · planned
 - [`noaa:ersst`](providers/noaa.md#noaaersst) ERSST Monthly Sea Surface Temperature · planned
 - [`noaa:ghcn-hourly`](providers/noaa.md#noaaghcn-hourly) GHCN-Hourly Station Observations · planned
+- [`noaa:goes-abi`](providers/noaa.md#noaagoes-abi) GOES-R ABI Satellite Imagery · planned
 - [`noaa:goes-glm`](providers/noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · planned
+- [`noaa:gsom`](providers/noaa.md#noaagsom) Global Summary of the Month · planned
+- [`noaa:gsoy`](providers/noaa.md#noaagsoy) Global Summary of the Year · planned
+- [`noaa:hurdat2`](providers/noaa.md#noaahurdat2) HURDAT2 Atlantic and Pacific Best Tracks · planned
+- [`noaa:ibtracs`](providers/noaa.md#noaaibtracs) IBTrACS Global Tropical Cyclone Tracks · planned
 - [`noaa:lcd`](providers/noaa.md#noaalcd) Local Climatological Data · planned
+- [`noaa:mrms`](providers/noaa.md#noaamrms) Multi-Radar Multi-Sensor (MRMS) · planned
 - [`noaa:nbm`](providers/noaa.md#noaanbm) National Blend of Models · planned
 - [`noaa:nclimdiv`](providers/noaa.md#noaanclimdiv) nClimDiv Climate Divisional Data · planned
 - [`noaa:nexrad-level3`](providers/noaa.md#noaanexrad-level3) NEXRAD Level III Products · planned
 - [`noaa:ocads`](providers/noaa.md#noaaocads) Ocean Carbon and Acidification Data System · planned
 - [`noaa:paleo-search`](providers/noaa.md#noaapaleo-search) World Data Service for Paleoclimatology · planned
 - [`noaa:sea-ice-index`](providers/noaa.md#noaasea-ice-index) Sea Ice Index · planned
+- [`noaa:storm-events`](providers/noaa.md#noaastorm-events) Storm Events Database · planned
 - [`noaa:swpc-realtime`](providers/noaa.md#noaaswpc-realtime) SWPC Real-Time Space Weather Products · planned
 - [`noaa:tsunami-events`](providers/noaa.md#noaatsunami-events) Global Historical Tsunami Database · planned
 - [`usda:cropland-data-layer`](providers/usda.md#usdacropland-data-layer) Cropland Data Layer · planned
 - [`usgs:3dep-elevation`](providers/usgs.md#usgs3dep-elevation) 3DEP Elevation · planned
 - [`usgs:earthquakes`](providers/usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · planned
 
-**Shipped in 0.5**
+**Implemented, unreleased (planned 0.5)**
 
 - [`usgs:water-daily`](providers/usgs.md#usgswater-daily) Streamflow and Water Daily Values · available
 
-**Shipped in 0.2**
+**Included since 0.2**
 
 - [`noaa:ghcn-daily`](providers/noaa.md#noaaghcn-daily) GHCN-Daily Station Observations · available
 - [`noaa:nexrad-level2`](providers/noaa.md#noaanexrad-level2) NEXRAD Level II Radar · available

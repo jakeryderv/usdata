@@ -35,3 +35,20 @@ sources:
     restored = pull(manifest, root=tmp_path / "cache")
     assert restored.from_lockfile and not restored.fetched[0].from_cache
     assert verify(manifest, root=tmp_path / "cache") == []
+
+
+def test_documented_noaa_usgs_example(tmp_path: Path) -> None:
+    example = Path(__file__).resolve().parents[2] / "examples/weather-and-streamflow/dataset.yaml"
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_bytes(example.read_bytes())
+    first = pull(manifest, root=tmp_path / "cache")
+    assert len(first.fetched) == 2
+    assert {item.asset.dataset_id for item in first.fetched} == {
+        "noaa:ghcn-daily",
+        "usgs:water-daily",
+    }
+    assert verify(manifest, root=tmp_path / "cache") == []
+    again = pull(manifest, root=tmp_path / "cache")
+    assert all(item.from_cache for item in again.fetched)
+    first.fetched[0].path.unlink()
+    assert not pull(manifest, root=tmp_path / "cache").fetched[0].from_cache

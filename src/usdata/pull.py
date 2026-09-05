@@ -32,6 +32,18 @@ class UnknownDatasets(ValueError):
     """The manifest references dataset ids the registry does not know."""
 
 
+class EmptySource(RuntimeError):
+    """A required manifest source resolved to no assets."""
+
+
+def _check_manifest(manifest_path: Path, lock: Lockfile) -> None:
+    if sha256_file(manifest_path) != lock.manifest_checksum:
+        raise ManifestChanged(
+            f"{manifest_path.name} changed since {lockfile_path(manifest_path).name} was written; "
+            "pull with force to re-resolve"
+        )
+
+
 class Drift(BaseModel):
     """One lockfile entry whose local copy is missing or altered."""
 
@@ -66,9 +78,15 @@ def resolve(
     manifest = _load(manifest_path, reg)
     fetched: list[FetchedAsset] = []
     locked: list[LockedAsset] = []
-    for source in manifest.sources:
+    for index, source in enumerate(manifest.sources, start=1):
         dataset = reg.get(source.dataset)
-        for item in fetch(dataset, source.to_query(), root=root):
+        items = fetch(dataset, source.to_query(), root=root)
+        if not items and not source.allow_empty:
+            raise EmptySource(
+                f"source {index} ({dataset.id}) matched no assets; "
+                "check the query or set allow_empty: true for this source"
+            )
+        for item in items:
             fetched.append(item)
             pinned = item.asset.model_copy(update={"checksum": item.provenance.checksum})
             locked.append(LockedAsset(asset=pinned, provenance=item.provenance))
@@ -91,11 +109,7 @@ def restore(
     reg = registry or default_registry()
     lock_path = lockfile_path(manifest_path)
     lock = Lockfile.load(lock_path)
-    if sha256_file(manifest_path) != lock.manifest_checksum:
-        raise ManifestChanged(
-            f"{manifest_path.name} changed since {lock_path.name} was written; "
-            "pull with force to re-resolve"
-        )
+    _check_manifest(manifest_path, lock)
     fetched: list[FetchedAsset] = []
     adapters: dict[str, Provider] = {}
     with ExitStack() as stack:
@@ -133,8 +147,9 @@ def pull(
 
 
 def verify(manifest_path: Path, *, root: Path | None = None) -> list[Drift]:
-    """Compare cached files against the lockfile. Empty list means everything matches."""
+    """Check manifest consistency, then compare cached files against the lockfile."""
     lock = Lockfile.load(lockfile_path(manifest_path))
+    _check_manifest(manifest_path, lock)
     drift: list[Drift] = []
     for entry in lock.assets:
         path = asset_path(entry.asset, root)
@@ -158,6 +173,7 @@ def verify(manifest_path: Path, *, root: Path | None = None) -> list[Drift]:
 __all__ = [
     "ChecksumMismatch",
     "Drift",
+    "EmptySource",
     "ManifestChanged",
     "PullResult",
     "UnknownDatasets",
