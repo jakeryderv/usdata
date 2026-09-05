@@ -85,8 +85,9 @@ Releases: `just release minor` opens a version-bump PR; merging it publishes
 to PyPI and creates the tag and GitHub release. See
 [docs/versioning.md](docs/versioning.md).
 
-See [docs/architecture.md](docs/architecture.md) for how the pieces fit and
-[docs/adr/](docs/adr/) for why.
+See [docs/architecture.md](docs/architecture.md) for how the pieces fit,
+[docs/adr/](docs/adr/) for why, and [CONTRIBUTING.md](CONTRIBUTING.md) to add
+a dataset.
 
 ## License
 

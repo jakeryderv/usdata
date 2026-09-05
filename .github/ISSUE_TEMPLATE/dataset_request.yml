@@ -1,0 +1,42 @@
+name: Dataset request
+description: Ask for a new dataset or provider to be added to the registry
+labels: ["area: providers", "priority: normal"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Dataset
+      description: Agency and dataset name, e.g. "USGS NWIS daily values"
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Where does it live?
+      description: Homepage, API docs, or bucket name
+    validations:
+      required: true
+  - type: dropdown
+    id: access
+    attributes:
+      label: How is it accessed?
+      options:
+        - REST API
+        - Public S3 bucket
+        - ERDDAP
+        - OPeNDAP / THREDDS
+        - Bulk download (HTTP/FTP)
+        - Not sure
+    validations:
+      required: true
+  - type: checkboxes
+    id: auth
+    attributes:
+      label: Access requirements
+      options:
+        - label: Anonymous access works (no account or API key)
+  - type: textarea
+    id: why
+    attributes:
+      label: What would you use it for?
+      description: Helps prioritize and shapes which query parameters matter.

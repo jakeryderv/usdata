@@ -10,6 +10,7 @@ All notable changes to this project are documented here. The format follows
 ### Added
 
 - Type information is shipped (`py.typed`).
+- Contributor docs: `CONTRIBUTING.md`, `SECURITY.md`, a guide to adding datasets, issue and PR templates.
 
 ## [0.2.0] - 2026-09-05
 
