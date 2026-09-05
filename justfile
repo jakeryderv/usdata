@@ -30,8 +30,7 @@ check:
     uv run ruff check
     uv run pyright
     uv run pytest --cov=usdata --cov-report=term-missing:skip-covered
-    just docs > /dev/null
-    git diff --exit-code -- docs/reference || (echo "generated docs are stale: run 'just docs' and commit"; exit 1)
+    uv run python scripts/render_registry.py --check
 
 # Build sdist and wheel into dist/
 build:

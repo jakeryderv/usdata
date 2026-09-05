@@ -21,7 +21,8 @@ Add to `src/usdata/data/registry.yaml`:
 
 ```yaml
   - id: noaa:ghcn-daily            # <provider>:<name>, stable forever
-    provider: noaa
+    provider: noaa                  # must appear under top-level `providers:`
+    status: available               # planned (no adapter) | stub | available
     title: GHCN-Daily Station Observations
     description: >-                 # what it is, how it is served, what subsetting exists
       ...
@@ -36,7 +37,10 @@ Add to `src/usdata/data/registry.yaml`:
 ```
 
 Every field must be true. The registry test suite loads all entries and
-imports every adapter.
+imports every non-planned adapter. A dataset can start life as `planned`
+with just this entry, which puts it in search results and the docs; flip it
+to `stub` when the class exists and `available` when the live test passes.
+Run `just docs` after editing: the README and reference tables are generated.
 
 ## 3. Adapter
 

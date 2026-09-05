@@ -15,7 +15,7 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, ConfigDict
 
-from usdata.models import Dataset, Query
+from usdata.models import Dataset, ProviderInfo, Query
 
 _TOKEN = re.compile(r"[a-z0-9]+")
 
@@ -62,18 +62,26 @@ def _score(dataset: Dataset, terms: set[str]) -> float:
 class Registry:
     """An in-memory collection of datasets addressable by id and searchable by keyword."""
 
-    def __init__(self, datasets: Iterable[Dataset]) -> None:
+    def __init__(self, datasets: Iterable[Dataset], providers: Iterable[ProviderInfo] = ()) -> None:
         self._by_id: dict[str, Dataset] = {}
         for ds in datasets:
             if ds.id in self._by_id:
                 raise ValueError(f"duplicate dataset id {ds.id!r}")
             self._by_id[ds.id] = ds
+        self._providers = {p.id: p for p in providers}
+        for ds in self._by_id.values():
+            self._providers.setdefault(
+                ds.provider, ProviderInfo(id=ds.provider, name=ds.provider.upper())
+            )
 
     @classmethod
     def from_yaml(cls, path: Path) -> Registry:
-        """Load a registry from a YAML file with a top-level ``datasets`` list."""
+        """Load a registry from YAML with top-level ``providers`` and ``datasets``."""
         raw = yaml.safe_load(path.read_text()) or {}
-        return cls(Dataset.model_validate(d) for d in raw.get("datasets", []))
+        providers = [
+            ProviderInfo(id=pid, **(info or {})) for pid, info in raw.get("providers", {}).items()
+        ]
+        return cls((Dataset.model_validate(d) for d in raw.get("datasets", [])), providers)
 
     @classmethod
     def bundled(cls) -> Registry:
@@ -98,8 +106,12 @@ class Registry:
             raise DatasetNotFound(dataset_id) from None
 
     def providers(self) -> set[str]:
-        """The set of provider names present in the registry."""
+        """The set of provider ids present in the registry."""
         return {ds.provider for ds in self}
+
+    def provider(self, provider_id: str) -> ProviderInfo:
+        """Display information for a provider id."""
+        return self._providers[provider_id]
 
     def search(self, query: Query) -> list[SearchResult]:
         """Rank datasets by keyword match, filtered by provider, space, and time."""

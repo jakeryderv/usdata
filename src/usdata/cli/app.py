@@ -62,7 +62,7 @@ def search(
         raise typer.Exit(code=1)
     width = max(len(r.dataset.id) for r in results)
     for r in results:
-        typer.echo(f"{r.dataset.id:<{width}}  {r.dataset.title}")
+        typer.echo(f"{r.dataset.id:<{width}}  {r.dataset.status.value:<9}  {r.dataset.title}")
 
 
 @app.command()
@@ -77,6 +77,7 @@ def info(
         raise typer.Exit(code=2) from None
     typer.echo(f"{ds.id}\n  {ds.title}\n")
     typer.echo(f"  {ds.description.strip()}\n")
+    typer.echo(f"  status:    {ds.status.value}")
     typer.echo(f"  provider:  {ds.provider}")
     typer.echo(f"  protocol:  {ds.protocol.value}")
     typer.echo(f"  license:   {ds.license or 'unknown'}")

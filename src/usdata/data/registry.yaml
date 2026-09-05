@@ -1,8 +1,24 @@
-# Curated dataset registry. One entry per dataset usdata knows how to fetch.
-# Adapter classes live under usdata.providers and are stubs until implemented.
+# Curated dataset registry: the single source of truth for what usdata knows about.
+# Rendered to docs/reference/datasets.md and the README by `just docs`.
+#
+# status: available = adapter implemented and tested
+#         stub      = adapter class exists but raises NotImplementedProvider
+#         planned   = entry only, no adapter; here so search and docs show the roadmap
+
+providers:
+  noaa:   { name: "NOAA",          homepage: https://www.noaa.gov/ }
+  usgs:   { name: "USGS",          homepage: https://www.usgs.gov/ }
+  nasa:   { name: "NASA",          homepage: https://www.earthdata.nasa.gov/ }
+  epa:    { name: "EPA",           homepage: https://www.epa.gov/ }
+  fema:   { name: "FEMA",          homepage: https://www.fema.gov/ }
+  census: { name: "Census Bureau", homepage: https://www.census.gov/ }
+  usda:   { name: "USDA",          homepage: https://www.usda.gov/ }
+
 datasets:
+  # ---------------------------------------------------------------- NOAA
   - id: noaa:nexrad-level2
     provider: noaa
+    status: available
     title: NEXRAD Level II Radar
     description: >-
       Raw volume scans from the WSR-88D weather radar network, archived in the
@@ -20,6 +36,7 @@ datasets:
 
   - id: noaa:ghcn-daily
     provider: noaa
+    status: available
     title: GHCN-Daily Station Observations
     description: >-
       Global Historical Climatology Network daily summaries: temperature,
@@ -36,6 +53,7 @@ datasets:
 
   - id: noaa:coastwatch-sst
     provider: noaa
+    status: stub
     title: CoastWatch Sea Surface Temperature
     description: >-
       Gridded blended sea surface temperature from NOAA CoastWatch, served
@@ -48,3 +66,133 @@ datasets:
     spatial_extent: { west: -180.0, south: -90.0, east: 180.0, north: 90.0 }
     capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: true }
     adapter: usdata.providers.noaa.coastwatch:CoastwatchSst
+
+  - id: noaa:goes-abi
+    provider: noaa
+    status: planned
+    title: GOES-R ABI Satellite Imagery
+    description: >-
+      Advanced Baseline Imager Level 1b radiances and Level 2 products from
+      GOES-16/18/19, published to public S3 buckets. Same anonymous S3 access
+      pattern as NEXRAD; whole files per product per scan.
+    keywords: [satellite, imagery, goes, abi, clouds, fire, radiance]
+    protocol: s3
+    homepage: https://registry.opendata.aws/noaa-goes/
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+
+  # ---------------------------------------------------------------- USGS
+  - id: usgs:water-daily
+    provider: usgs
+    status: planned
+    title: Streamflow and Water Daily Values
+    description: >-
+      Daily statistics (streamflow, gage height, temperature) for USGS
+      monitoring sites. The legacy NWIS web services are being replaced by the
+      USGS Water Data APIs; the adapter must target whichever is current.
+    keywords: [water, streamflow, discharge, rivers, gages, hydrology, nwis]
+    protocol: http
+    homepage: https://api.waterdata.usgs.gov/
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: true }
+
+  - id: usgs:earthquakes
+    provider: usgs
+    status: planned
+    title: Earthquake Catalog (ComCat)
+    description: >-
+      Global earthquake events with location, magnitude, and depth from the
+      ANSS Comprehensive Catalog via the FDSN event web service. Anonymous
+      REST with bbox, time, and magnitude filters.
+    keywords: [earthquakes, seismic, geology, hazards, comcat, fdsn]
+    protocol: http
+    homepage: https://earthquake.usgs.gov/fdsnws/event/1/
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: false }
+
+  - id: usgs:3dep-elevation
+    provider: usgs
+    status: planned
+    title: 3DEP Elevation
+    description: >-
+      Seamless digital elevation models from the 3D Elevation Program (1/3
+      arc-second and 1 m where available). Tiled rasters on public cloud
+      storage; spatial selection by tile.
+    keywords: [elevation, dem, terrain, lidar, 3dep, topography]
+    protocol: s3
+    homepage: https://www.usgs.gov/3d-elevation-program
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: true, temporal_subset: false, variable_subset: false }
+
+  # ---------------------------------------------------------------- NASA
+  - id: nasa:gpm-imerg
+    provider: nasa
+    status: planned
+    title: GPM IMERG Precipitation
+    description: >-
+      Global half-hourly and daily merged satellite precipitation estimates.
+      Discovered through NASA CMR and downloaded from GES DISC. Requires a
+      free Earthdata Login; the first credentialed dataset.
+    keywords: [precipitation, rainfall, satellite, gpm, imerg, climate]
+    protocol: http
+    homepage: https://gpm.nasa.gov/data/imerg
+    license: NASA open data
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+
+  # ---------------------------------------------------------------- EPA
+  - id: epa:aqs-daily
+    provider: epa
+    status: planned
+    title: Air Quality System Daily Summaries
+    description: >-
+      Daily pollutant summaries (ozone, PM2.5, NO2, and others) from regulatory
+      monitors via the AQS Data API. Requires a free API key issued by email.
+    keywords: [air quality, pollution, ozone, pm2.5, monitors, aqs]
+    protocol: http
+    homepage: https://aqs.epa.gov/aqsweb/documents/data_api.html
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: true }
+
+  # ---------------------------------------------------------------- FEMA
+  - id: fema:nfhl
+    provider: fema
+    status: planned
+    title: National Flood Hazard Layer
+    description: >-
+      Effective flood zones, base flood elevations, and related features from
+      FEMA's flood insurance rate maps, available as county or state extracts
+      and through ArcGIS services.
+    keywords: [flood, hazards, floodplain, insurance, firm, nfhl]
+    protocol: http
+    homepage: https://www.fema.gov/flood-maps/national-flood-hazard-layer
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: true, temporal_subset: false, variable_subset: false }
+
+  # ---------------------------------------------------------------- Census
+  - id: census:acs-5year
+    provider: census
+    status: planned
+    title: American Community Survey 5-Year Estimates
+    description: >-
+      Population, housing, income, and demographic estimates for every
+      geography down to block group, via the Census Data API. Anonymous for
+      light use; an API key lifts rate limits.
+    keywords: [population, demographics, housing, income, acs, census]
+    protocol: http
+    homepage: https://www.census.gov/data/developers/data-sets/acs-5year.html
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: true }
+
+  # ---------------------------------------------------------------- USDA
+  - id: usda:cropland-data-layer
+    provider: usda
+    status: planned
+    title: Cropland Data Layer
+    description: >-
+      Annual 30 m raster of crop type across the contiguous United States
+      from NASS, served through CropScape with bbox extraction.
+    keywords: [agriculture, crops, land cover, raster, nass, cdl]
+    protocol: http
+    homepage: https://www.nass.usda.gov/Research_and_Science/Cropland/SARS1a.php
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: false }
