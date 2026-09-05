@@ -77,7 +77,7 @@ Use explicit IDs when exact site selection is required.
 
 ## CoastWatch SST
 
-Available from source for v0.5. The verified dataset is
+Available since v0.5. The verified dataset is
 [`noaacwBLENDEDsstDNDaily`](https://coastwatch.noaa.gov/erddap/info/noaacwBLENDEDsstDNDaily/index.html),
 a daily blended day/night SST analysis on `(time, latitude, longitude)`.
 Latitude has 3,600 centers from -89.975 to 89.975; longitude has 7,200 from
@@ -171,7 +171,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | [`noaa:ersst`](#noaaersst) | Ocean physics | planned | target later | Extended Reconstructed SST v5: monthly global 2 degree analysis since 1854, one NetCDF per month in an NCEI HTTPS directory. | http |
 | [`noaa:coops-water-levels`](#noaacoops-water-levels) | Sea level and tides | planned | target later | Observed and predicted water levels, tide predictions, and related products for NWLON tide stations from the CO-OPS Data API, with a companion metadata API for station lookup. | http |
 | [`noaa:ocads`](#noaaocads) | Ocean chemistry | planned | target later | Archived ocean carbon, pH, and related chemistry datasets (cruises, moorings, syntheses such as SOCAT and GLODAP) in an NCEI HTTPS directory organized by accession. | http |
-| [`noaa:coastwatch-sst`](#noaacoastwatch-sst) | Satellite oceanography | available | unreleased; planned 0.5 | NOAA geo-polar blended daily SST analysis (day and night) on a global 5 km grid, ERDDAP dataset noaacwBLENDEDsstDNDaily on the CoastWatch server, with server-side spatial, temporal, and variable subsetting. | erddap |
+| [`noaa:coastwatch-sst`](#noaacoastwatch-sst) | Satellite oceanography | available | since 0.5 | NOAA geo-polar blended daily SST analysis (day and night) on a global 5 km grid, ERDDAP dataset noaacwBLENDEDsstDNDaily on the CoastWatch server, with server-side spatial, temporal, and variable subsetting. | erddap |
 | [`noaa:etopo`](#noaaetopo) | Bathymetry and hydrography | planned | target 0.6 | Global topography and bathymetry at 15, 30, and 60 arc-seconds as NetCDF and GeoTIFF tiles, served through the NCEI THREDDS catalog with OPeNDAP access; the THREDDS pattern. | thredds |
 | [`noaa:tsunami-events`](#noaatsunami-events) | Natural hazards | planned | target later | Tsunami source events and runup observations since 2100 BCE from NCEI, served as JSON by the HazEL hazard-service API with year, magnitude, and location filters. | http |
 | [`noaa:paleo-search`](#noaapaleo-search) | Paleoclimate | planned | target later | Proxy climate records (tree rings, ice cores, sediments, corals) with a JSON study-search API from NCEI that returns study metadata and data file URLs filtered by data type, region, and time span. | http |
@@ -502,7 +502,7 @@ Archived ocean carbon, pH, and related chemistry datasets (cruises, moorings, sy
 
 ### noaa:coastwatch-sst
 
-**CoastWatch Blended Sea Surface Temperature** · available · unreleased; planned 0.5
+**CoastWatch Blended Sea Surface Temperature** · available · since 0.5
 
 NOAA geo-polar blended daily SST analysis (day and night) on a global 5 km grid, ERDDAP dataset noaacwBLENDEDsstDNDaily on the CoastWatch server, with server-side spatial, temporal, and variable subsetting. Raw CSV subsets retain grid coordinates and units without volatile NetCDF history.
 

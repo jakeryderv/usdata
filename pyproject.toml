@@ -1,6 +1,6 @@
 [project]
 name = "usdata"
-version = "0.4.0"
+version = "0.5.0"
 description = "Unified Python SDK and CLI for discovering, fetching, and tracking provenance of U.S. public scientific data"
 readme = "README.md"
 license = "Apache-2.0"
