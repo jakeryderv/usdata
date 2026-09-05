@@ -4,21 +4,22 @@ Unified Python SDK and CLI for discovering, fetching, and tracking the
 provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 
 > Status: pre-alpha. `noaa:ghcn-daily` and `noaa:nexrad-level2` fetch real
-> data with provenance. USGS daily values are available from source for the
-> next release; other entries are stubs or planned.
+> data with provenance. USGS daily values, CoastWatch SST subsets, and full
+> Census state/county lookup are available from source for v0.5; other datasets
+> are planned.
 > See [docs/roadmap.md](docs/roadmap.md).
 
 ## Providers
 
 <!-- registry:start -->
-| Provider | Available | Stub | Planned | Next up (0.5) | Datasets |
+| Provider | Available | Stub | Planned | Next up (0.6) | Datasets |
 |---|---:|---:|---:|---|---|
-| [NOAA](docs/providers/noaa.md) | 2 | 1 | 26 | `coastwatch-sst` | `ghcn-daily`, `nexrad-level2`, _coastwatch-sst_, +26 planned |
+| [NOAA](docs/providers/noaa.md) | 3 | 0 | 26 | `gfs`, `hrrr`, `oisst`, `etopo` | `ghcn-daily`, `nexrad-level2`, `coastwatch-sst`, +26 planned |
 | [USGS](docs/providers/usgs.md) | 1 | 0 | 2 | — | `water-daily`, +2 planned |
 | [Census Bureau](docs/providers/census.md) | 0 | 0 | 1 | — | +1 planned |
 | [EPA](docs/providers/epa.md) | 0 | 0 | 1 | — | +1 planned |
 | [FEMA](docs/providers/fema.md) | 0 | 0 | 1 | — | +1 planned |
-| [NASA](docs/providers/nasa.md) | 0 | 0 | 1 | — | +1 planned |
+| [NASA](docs/providers/nasa.md) | 0 | 0 | 1 | `gpm-imerg` | +1 planned |
 | [USDA](docs/providers/usda.md) | 0 | 0 | 1 | — | +1 planned |
 
 Available datasets are in `code`, stubs in _italics_; planned ones are counted. Available means implemented in this source checkout; consult the [releases](https://github.com/jakeryderv/usdata/releases) for published support. Each provider page has access notes and full dataset details; [docs/roadmap.md](docs/roadmap.md) lists datasets by target version.
@@ -54,6 +55,7 @@ for item in fetch(ds, query):
 
 ```sh
 usdata search "tornado radar" --state OK
+usdata search precipitation --location "Cleveland County, OK"  # v0.5 / source
 usdata info noaa:ghcn-daily
 usdata fetch noaa:ghcn-daily --lat 35.39 --lon -97.60 --radius-km 15 \
     --start 2024-05-06 --end 2024-05-07 --vars PRCP,TMAX
@@ -63,6 +65,8 @@ usdata fetch noaa:nexrad-level2 --lat 35.47 --lon -97.52 \
 usdata fetch noaa:nexrad-level2 -p site=KTLX --start 2024-05-06T20:00 --end 2024-05-06T20:30 --dry-run
 usdata fetch usgs:water-daily -p sites=07164500 --vars 00060 \
     --start 2024-05-06 --end 2024-05-07                  # next release / source install
+usdata fetch noaa:coastwatch-sst --bbox=-80.08,30.02,-80.02,30.08 \
+    --start 2024-05-06T12:00Z --end 2024-05-06T12:00Z    # v0.5 / source; four grid cells
 usdata pull dataset.yaml            # resolve, fetch, write dataset.lock.json
 usdata verify dataset.yaml          # exit 1 if any cached input drifted
 ```
@@ -70,6 +74,11 @@ usdata verify dataset.yaml          # exit 1 if any cached input drifted
 Fetched files land in `~/.cache/usdata/<provider>/<dataset>/` (override with
 `USDATA_CACHE_DIR` or `--cache-dir`), each with a `.provenance.json` sidecar
 recording source URL, retrieval time, checksum, size, and license.
+
+Locations accept state names/postal codes, county/state names, and quoted FIPS
+codes. These select bounding rectangles; see [place lookup](docs/reference/places.md)
+for coverage, ambiguity, and antimeridian limits. CoastWatch CSV includes a
+second header row containing units; see its [access notes](docs/providers/noaa.md#coastwatch-sst).
 
 Manifest and source fields are validated strictly; unknown fields are errors.
 Provider-specific options belong under `params`.

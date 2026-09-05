@@ -44,7 +44,7 @@ def test_info() -> None:
 
 
 def test_fetch_reports_unimplemented_adapter() -> None:
-    result = runner.invoke(app, ["fetch", "noaa:coastwatch-sst", "--state", "OK"])
+    result = runner.invoke(app, ["fetch", "noaa:goes-abi", "--state", "OK"])
     assert result.exit_code == 3
 
 
@@ -76,11 +76,11 @@ def test_fetch_dry_run_lists_assets() -> None:
     assert "ncei.noaa.gov" in result.stdout
 
 
-def test_pull_rejects_unknown_dataset_and_stub(tmp_path: Path) -> None:
+def test_pull_rejects_unknown_dataset_and_planned(tmp_path: Path) -> None:
     m = tmp_path / "dataset.yaml"
     m.write_text("name: t\nsources:\n  - dataset: nope:x\n")
     assert runner.invoke(app, ["pull", str(m)]).exit_code == 2
-    m.write_text("name: t\nsources:\n  - dataset: noaa:coastwatch-sst\n")
+    m.write_text("name: t\nsources:\n  - dataset: noaa:goes-abi\n")
     assert runner.invoke(app, ["pull", str(m), "--cache-dir", str(tmp_path)]).exit_code == 3
 
 
@@ -89,3 +89,16 @@ def test_verify_without_lockfile_exits_2(tmp_path: Path) -> None:
     m.write_text("name: t\nsources:\n  - dataset: noaa:ghcn-daily\n")
     result = runner.invoke(app, ["verify", str(m)])
     assert result.exit_code == 2 and "run pull first" in result.output
+
+
+def test_location_alias_accepts_counties_and_reports_ambiguity() -> None:
+    county = runner.invoke(app, ["search", "radar", "--location", "Cleveland County, OK"])
+    fips = runner.invoke(app, ["search", "radar", "--state", "40027"])
+    assert county.exit_code == fips.exit_code == 0
+    assert county.stdout == fips.stdout
+    ambiguous = runner.invoke(app, ["search", "radar", "--location", "Washington County"])
+    assert ambiguous.exit_code == 2 and "ambiguous" in ambiguous.output
+    fetch = runner.invoke(
+        app, ["fetch", "noaa:ghcn-daily", "--location", "Washington County", "--dry-run"]
+    )
+    assert fetch.exit_code == 2 and "ambiguous" in fetch.output

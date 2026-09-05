@@ -38,15 +38,16 @@ name-reserving placeholder.
 **Now (v0.5)**: cross-provider access, gridded subsetting, and trustworthy inputs.
 
 - [x] USGS daily values via the modern Water Data API (next release; available from source)
-- [ ] [CoastWatch SST and ERDDAP griddap](https://github.com/jakeryderv/usdata/issues/5):
+- [x] [CoastWatch SST and ERDDAP griddap](https://github.com/jakeryderv/usdata/issues/5):
   a verified dataset, spatial/time/variable subsetting, stable asset IDs, and a tiny live test
-- [ ] [State and county lookup](https://github.com/jakeryderv/usdata/issues/7):
+- [x] [State and county lookup](https://github.com/jakeryderv/usdata/issues/7):
   generated Census bounding boxes, names/postal codes/FIPS, documented vintage and limits
 - [x] [Review follow-ups](https://github.com/jakeryderv/usdata/issues/30) (implemented in source):
   empty-source policy, manifest consistency, strict provider params,
   bounded HTTP retries, manifest guide, and installed-wheel CI checks
 
-Release acceptance: all remaining items above complete, `just check` and the live
+The v0.5 features are implemented in source and await release.
+Release acceptance: `just check` and the live
 integration suite pass, and the NOAA/USGS manifest example pulls, restores, and
 verifies. v0.5 does not require the entire NOAA expansion backlog.
 
@@ -76,10 +77,6 @@ next. Registry targets remain `later` until a release commitment is made.
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
 Move a dataset between phases by editing its `target` in the registry.
-
-**Target 0.5**
-
-- [`noaa:coastwatch-sst`](providers/noaa.md#noaacoastwatch-sst) CoastWatch Blended Sea Surface Temperature · stub
 
 **Target 0.6**
 
@@ -122,6 +119,7 @@ Move a dataset between phases by editing its `target` in the registry.
 
 **Implemented, unreleased (planned 0.5)**
 
+- [`noaa:coastwatch-sst`](providers/noaa.md#noaacoastwatch-sst) CoastWatch Blended Sea Surface Temperature · available
 - [`usgs:water-daily`](providers/usgs.md#usgswater-daily) Streamflow and Water Daily Values · available
 
 **Included since 0.2**

@@ -85,19 +85,21 @@ datasets:
 
   - id: noaa:coastwatch-sst
     provider: noaa
-    status: stub
+    status: available
     domain: satellite-oceanography
-    target: "0.5"
+    since: "0.5"
     title: CoastWatch Blended Sea Surface Temperature
     description: >-
       NOAA geo-polar blended daily SST analysis (day and night) on a global
       5 km grid, ERDDAP dataset noaacwBLENDEDsstDNDaily on the CoastWatch
-      server, with full server-side spatial, temporal, and variable subsetting.
+      server, with server-side spatial, temporal, and variable subsetting. Raw CSV
+      subsets retain grid coordinates and units without volatile NetCDF history.
     keywords: [ocean, sst, sea surface temperature, satellite, erddap, coastwatch, gridded, blended]
     protocol: erddap
     homepage: https://coastwatch.noaa.gov/erddap/griddap/noaacwBLENDEDsstDNDaily.html
-    license: US Government Work (public domain)
-    spatial_extent: { west: -180.0, south: -90.0, east: 180.0, north: 90.0 }
+    license: GHRSST free and open data
+    spatial_extent: { west: -179.975, south: -89.975, east: 179.975, north: 89.975 }
+    temporal_extent: { start: "2019-07-22T12:00:00Z" }
     capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: true }
     adapter: usdata.providers.noaa.coastwatch:CoastwatchSst
 

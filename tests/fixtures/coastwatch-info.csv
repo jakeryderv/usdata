@@ -1,0 +1,17 @@
+Row Type,Variable Name,Attribute Name,Data Type,Value
+dimension,time,,double,"nValues=2584, evenlySpaced=false, averageSpacing=1 day 0h 9m 29s"
+attribute,time,actual_range,double,"1.5637968E9, 1.7884368E9"
+attribute,time,units,String,seconds since 1970-01-01T00:00:00Z
+dimension,latitude,,float,"nValues=3600, evenlySpaced=true, averageSpacing=0.049999999999999996"
+attribute,latitude,actual_range,float,"-89.975, 89.975"
+attribute,latitude,units,String,degrees_north
+dimension,longitude,,float,"nValues=7200, evenlySpaced=true, averageSpacing=0.049999999999999996"
+attribute,longitude,actual_range,float,"-179.975, 179.975"
+attribute,longitude,units,String,degrees_east
+variable,analysed_sst,,float,"time, latitude, longitude"
+attribute,analysed_sst,units,String,degree_C
+variable,analysis_error,,float,"time, latitude, longitude"
+attribute,analysis_error,units,String,degree_C
+variable,sea_ice_fraction,,float,"time, latitude, longitude"
+attribute,sea_ice_fraction,units,String,1
+variable,mask,,byte,"time, latitude, longitude"

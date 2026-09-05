@@ -39,7 +39,7 @@ def test_search_hides_planned_unless_asked(registry: Registry) -> None:
 def test_domains_declared_and_next_target(registry: Registry) -> None:
     assert registry.domain("weather-radar").name == "Weather radar"
     assert {ds.domain for ds in registry} <= {d.id for d in registry.domains()}
-    assert registry.next_target() == "0.5"
+    assert registry.next_target() == "0.6"
     ds = registry.get("noaa:ghcn-daily")
     with pytest.raises(ValueError, match="unknown domain"):
         Registry([ds.model_copy(update={"domain": "nope"})], domains=registry.domains())
@@ -63,14 +63,6 @@ def test_every_adapter_resolves_to_a_provider(registry: Registry) -> None:
                 load_adapter(ds)
         else:
             assert isinstance(load_adapter(ds), Provider)
-
-
-def test_stub_adapters_say_so(registry: Registry) -> None:
-    stubs = [ds for ds in registry if ds.status is Status.STUB]
-    assert stubs, "expected at least one stub while adapters are outstanding"
-    for ds in stubs:
-        with pytest.raises(NotImplementedProvider):
-            load_adapter(ds).list_assets(Query())
 
 
 def test_duplicate_ids_rejected(registry: Registry) -> None:

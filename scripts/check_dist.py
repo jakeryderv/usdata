@@ -11,7 +11,8 @@ from pathlib import Path
 REQUIRED = {
     "usdata/py.typed",
     "usdata/data/registry.yaml",
-    "usdata/data/places.yaml",
+    "usdata/data/places.csv",
+    "usdata/data/places.sources.json",
     "usdata/data/nexrad_sites.csv",
 }
 

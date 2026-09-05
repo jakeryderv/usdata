@@ -99,3 +99,30 @@ def test_generated_docs_distinguish_unreleased_implementations(monkeypatch) -> N
     monkeypatch.setattr(module, "PACKAGE_VERSION", "0.5.0")
     assert module.implementation_version(water) == "since 0.5"
     assert "Included since 0.5" in module.render_roadmap_block(reg)
+
+
+def test_census_kml_parser_preserves_geometry_names_and_fips() -> None:
+    module = script("build_places")
+    kml = b"""<kml xmlns="http://www.opengis.net/kml/2.2"><Placemark>
+    <ExtendedData><SchemaData>
+    <SimpleData name="GEOID">40027</SimpleData>
+    <SimpleData name="NAME">Cleveland</SimpleData>
+    <SimpleData name="NAMELSAD">Cleveland County</SimpleData>
+    <SimpleData name="STUSPS">OK</SimpleData>
+    <SimpleData name="STATE_NAME">Oklahoma</SimpleData>
+    </SchemaData></ExtendedData><MultiGeometry><Polygon><outerBoundaryIs><LinearRing>
+    <coordinates>-98,34,0 -97,34,0 -97,36,0 -98,34,0</coordinates>
+    </LinearRing></outerBoundaryIs></Polygon></MultiGeometry>
+    </Placemark></kml>"""
+    (row,) = module.parse_kml(kml, "county")
+    assert row["geoid"] == "40027" and row["qualified_name"] == "Cleveland County"
+    assert (row["west"], row["south"], row["east"], row["north"]) == (
+        "-98.000000",
+        "34.000000",
+        "-97.000000",
+        "36.000000",
+    )
+    with pytest.raises(ValueError, match="outside WGS84"):
+        module.parse_kml(kml.replace(b"-98,34,0", b"-198,34,0"), "county")
+    with pytest.raises(ValueError, match="no KML"):
+        module.parse_kml(b'<kml xmlns="http://www.opengis.net/kml/2.2"/>', "county")

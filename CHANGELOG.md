@@ -34,6 +34,13 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `noaa:coastwatch-sst`: bounded ERDDAP gridded CSV subsets by location, UTC
+  time, and variable, with optional spatial stride and reproducible restoration.
+- Census 2025 lookup for 56 states/DC/territories and 3,235 counties/equivalents,
+  including county/state names and quoted FIPS. Add `--location` as an alias for
+  `--state`. Generated bounds replace the six approximate seed boxes, so
+  geographic queries may select different stations; existing lockfiles stay pinned.
+
 - `usgs:water-daily`: the first non-NOAA adapter, using the modern USGS Water Data
   API for paginated CSV downloads by site or bbox, dates, parameter codes, and
   statistic. Preserves units and quality metadata; supports cached fetches,
