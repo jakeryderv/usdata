@@ -1,0 +1,30 @@
+name: Bug report
+description: Something does not work as documented
+labels: ["priority: normal"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: usdata version
+      description: Output of `usdata --version`
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: What did you run?
+      description: The exact command or code, with dataset id and query.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else?
+      description: OS, Python version, network restrictions, upstream outage notices.
