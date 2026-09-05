@@ -50,10 +50,22 @@ Validation: `just check` and the live integration suite pass, including the
 NOAA/USGS manifest example pulling, restoring, and verifying. The remaining
 NOAA expansion backlog continues below.
 
-**Following v0.5 (not yet assigned a release)**:
+**Now (v0.6)**: opening fetched data for analysis.
 
-- [Optional `open()`](https://github.com/jakeryderv/usdata/issues/10), starting with CSV
-  and NetCDF readers behind extras once the gridded adapter is established
+- [x] [Optional CSV `open()`](https://github.com/jakeryderv/usdata/issues/10),
+  implemented in source with pandas behind an extra, ERDDAP units handling,
+  and identifier preservation
+- [x] Fetch → open → analyze example and reader reference
+- [x] Core-only and pandas CI/wheel checks; release-status documentation checks
+
+Release acceptance: both dependency profiles pass `just check`, installed-wheel
+checks pass on all supported CI platforms, and the small SST example runs against
+the live service. This phase adds no new data providers or remote storage.
+
+**Following v0.6 (not yet assigned a release)**:
+
+- NetCDF, radar, and geospatial readers behind extras, driven by concrete
+  supported datasets and format fixtures
 - Further NCEI Access Data Service datasets (GSOM, GSOY, climate normals)
 - Bulk directories and archives (Storm Events, HURDAT2, IBTrACS)
 - A second S3 dataset with product selection (GOES ABI), then MRMS
@@ -63,7 +75,7 @@ NOAA expansion backlog continues below.
 Refine each access pattern into an issue with acceptance criteria when it becomes
 next. Registry targets remain `later` until a release commitment is made.
 
-**v0.6**: model output and climate data records.
+**Further access patterns**: refine scope before assigning a release.
 
 - [ ] NASA provider wrapping `earthaccess`; design credential handling first (ADR)
 - [ ] GRIB2 model output on S3 with cycle and forecast-hour selection
@@ -77,28 +89,24 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 Move a dataset between phases by editing its `target` in the registry.
 
-**Target 0.6**
-
-- [`nasa:gpm-imerg`](providers/nasa.md#nasagpm-imerg) GPM IMERG Precipitation · planned
-- [`noaa:etopo`](providers/noaa.md#noaaetopo) ETOPO 2022 Global Relief · planned
-- [`noaa:gfs`](providers/noaa.md#noaagfs) GFS Forecast Model Output · planned
-- [`noaa:hrrr`](providers/noaa.md#noaahrrr) HRRR Forecast Model Output · planned
-- [`noaa:oisst`](providers/noaa.md#noaaoisst) OISST Daily Sea Surface Temperature · planned
-
 **Later**
 
 - [`census:acs-5year`](providers/census.md#censusacs-5year) American Community Survey 5-Year Estimates · planned
 - [`epa:aqs-daily`](providers/epa.md#epaaqs-daily) Air Quality System Daily Summaries · planned
 - [`fema:nfhl`](providers/fema.md#femanfhl) National Flood Hazard Layer · planned
+- [`nasa:gpm-imerg`](providers/nasa.md#nasagpm-imerg) GPM IMERG Precipitation · planned
 - [`noaa:cdr-ndvi`](providers/noaa.md#noaacdr-ndvi) NDVI Climate Data Record · planned
 - [`noaa:climate-normals`](providers/noaa.md#noaaclimate-normals) U.S. Climate Normals 1991-2020 · planned
 - [`noaa:coops-water-levels`](providers/noaa.md#noaacoops-water-levels) CO-OPS Water Levels and Tides · planned
 - [`noaa:ersst`](providers/noaa.md#noaaersst) ERSST Monthly Sea Surface Temperature · planned
+- [`noaa:etopo`](providers/noaa.md#noaaetopo) ETOPO 2022 Global Relief · planned
+- [`noaa:gfs`](providers/noaa.md#noaagfs) GFS Forecast Model Output · planned
 - [`noaa:ghcn-hourly`](providers/noaa.md#noaaghcn-hourly) GHCN-Hourly Station Observations · planned
 - [`noaa:goes-abi`](providers/noaa.md#noaagoes-abi) GOES-R ABI Satellite Imagery · planned
 - [`noaa:goes-glm`](providers/noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · planned
 - [`noaa:gsom`](providers/noaa.md#noaagsom) Global Summary of the Month · planned
 - [`noaa:gsoy`](providers/noaa.md#noaagsoy) Global Summary of the Year · planned
+- [`noaa:hrrr`](providers/noaa.md#noaahrrr) HRRR Forecast Model Output · planned
 - [`noaa:hurdat2`](providers/noaa.md#noaahurdat2) HURDAT2 Atlantic and Pacific Best Tracks · planned
 - [`noaa:ibtracs`](providers/noaa.md#noaaibtracs) IBTrACS Global Tropical Cyclone Tracks · planned
 - [`noaa:lcd`](providers/noaa.md#noaalcd) Local Climatological Data · planned
@@ -107,6 +115,7 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`noaa:nclimdiv`](providers/noaa.md#noaanclimdiv) nClimDiv Climate Divisional Data · planned
 - [`noaa:nexrad-level3`](providers/noaa.md#noaanexrad-level3) NEXRAD Level III Products · planned
 - [`noaa:ocads`](providers/noaa.md#noaaocads) Ocean Carbon and Acidification Data System · planned
+- [`noaa:oisst`](providers/noaa.md#noaaoisst) OISST Daily Sea Surface Temperature · planned
 - [`noaa:paleo-search`](providers/noaa.md#noaapaleo-search) World Data Service for Paleoclimatology · planned
 - [`noaa:sea-ice-index`](providers/noaa.md#noaasea-ice-index) Sea Ice Index · planned
 - [`noaa:storm-events`](providers/noaa.md#noaastorm-events) Storm Events Database · planned

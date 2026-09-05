@@ -126,3 +126,55 @@ def test_census_kml_parser_preserves_geometry_names_and_fips() -> None:
         module.parse_kml(kml.replace(b"-98,34,0", b"-198,34,0"), "county")
     with pytest.raises(ValueError, match="no KML"):
         module.parse_kml(b'<kml xmlns="http://www.opengis.net/kml/2.2"/>', "county")
+
+
+@pytest.mark.parametrize(
+    "notice",
+    [
+        "Available from source for v0.5.",
+        "Requires a source installation until v0.5 is published.",
+        "# v0.5 / source",
+        "The v0.5 features are implemented in source and await release.",
+        "**Now (v0.5)**: feature work.",
+        "Available from\nsource for v0.5.0.",
+    ],
+)
+def test_release_check_catches_shipped_source_only_notices(notice) -> None:
+    module = script("check_release_docs")
+    assert module.stale_notices("# Title\n\n" + notice, "0.5.0")[0][0] == 3
+    assert module.stale_notices(notice, "0.4.0") == []
+
+
+def test_release_check_keeps_future_plans_and_excludes_history(tmp_path) -> None:
+    module = script("check_release_docs")
+    assert not module.stale_notices("Available since v0.5. **Shipped (v0.5)**", "0.5.0")
+    assert not module.stale_notices("Available from source for v0.10.", "0.9.0")
+    (tmp_path / "pyproject.toml").write_text('[project]\nversion="0.5.0"\n')
+    (tmp_path / "README.md").write_text("Available since v0.5.")
+    adr = tmp_path / "docs/adr"
+    adr.mkdir(parents=True)
+    (adr / "0001.md").write_text("Available from source for v0.5.")
+    example = tmp_path / "examples/weather"
+    example.mkdir(parents=True)
+    (example / "README.md").write_text("Available from source for v0.5.")
+    errors = module.check(tmp_path)
+    assert len(errors) == 1 and errors[0].startswith("examples/weather/README.md:1:")
+
+
+def test_registry_summary_does_not_schedule_available_datasets_without_a_target() -> None:
+    from usdata.registry import Registry, default_registry
+
+    module = script("render_registry")
+    bundled = default_registry()
+    available = bundled.get("noaa:ghcn-daily")
+    planned = bundled.get("noaa:gfs").model_copy(update={"target": "later"})
+    unscheduled = Registry([available, planned], domains=bundled.domains())
+    summary = module.summary_table(unscheduled, "")
+    assert "Next up (unassigned)" in summary
+    row = summary.splitlines()[2].split("|")
+    assert row[5].strip() == "—"
+    planned = planned.model_copy(update={"target": "0.9"})
+    scheduled = Registry([available, planned], domains=bundled.domains())
+    summary = module.summary_table(scheduled, "")
+    assert "Next up (0.9)" in summary
+    assert summary.splitlines()[2].split("|")[5].strip() == "`gfs`"
