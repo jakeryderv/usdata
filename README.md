@@ -7,6 +7,22 @@ provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 > data with provenance; other registry entries are stubs.
 > See [docs/roadmap.md](docs/roadmap.md).
 
+## Providers
+
+<!-- registry:start -->
+| Provider | Available | Stub | Planned | Datasets |
+|---|---:|---:|---:|---|
+| [NOAA](docs/reference/datasets.md#noaa) | 2 | 1 | 1 | `ghcn-daily`, `nexrad-level2`, _coastwatch-sst_, _goes-abi_ |
+| [Census Bureau](docs/reference/datasets.md#census-bureau) | 0 | 0 | 1 | _acs-5year_ |
+| [EPA](docs/reference/datasets.md#epa) | 0 | 0 | 1 | _aqs-daily_ |
+| [FEMA](docs/reference/datasets.md#fema) | 0 | 0 | 1 | _nfhl_ |
+| [NASA](docs/reference/datasets.md#nasa) | 0 | 0 | 1 | _gpm-imerg_ |
+| [USDA](docs/reference/datasets.md#usda) | 0 | 0 | 1 | _cropland-data-layer_ |
+| [USGS](docs/reference/datasets.md#usgs) | 0 | 0 | 3 | _3dep-elevation_, _earthquakes_, _water-daily_ |
+
+Available datasets are in `code`; stubs and planned ones in _italics_. Full details in [docs/reference/datasets.md](docs/reference/datasets.md).
+<!-- registry:end -->
+
 ## Install
 
 ```sh

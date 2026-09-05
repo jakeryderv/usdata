@@ -25,6 +25,22 @@ class Protocol(StrEnum):
     THREDDS = "thredds"
 
 
+class Status(StrEnum):
+    """How far along a dataset's support is."""
+
+    AVAILABLE = "available"  # adapter implemented and tested
+    STUB = "stub"  # registered with an adapter class that is not implemented yet
+    PLANNED = "planned"  # registry entry only; no adapter
+
+
+class ProviderInfo(BaseModel):
+    """An agency or program that publishes datasets."""
+
+    id: str
+    name: str
+    homepage: str | None = None
+
+
 class BBox(BaseModel):
     """Geographic bounding box in WGS84 degrees. Antimeridian crossing is not supported yet."""
 
@@ -116,15 +132,24 @@ class Dataset(BaseModel):
     spatial_extent: BBox | None = None
     temporal_extent: TimeRange | None = None
     capabilities: Capabilities = Field(default_factory=Capabilities)
-    adapter: str = Field(description="Dotted path 'package.module:ClassName' of the Provider")
+    status: Status
+    adapter: str | None = Field(
+        default=None,
+        description="'package.module:ClassName' of the Provider; required unless planned",
+    )
 
     @model_validator(mode="after")
-    def _id_matches_provider(self) -> Dataset:
+    def _consistent(self) -> Dataset:
         prefix = f"{self.provider}:"
         if not self.id.startswith(prefix) or len(self.id) <= len(prefix):
             raise ValueError(f"dataset id {self.id!r} must be '{self.provider}:<name>'")
-        if ":" not in self.adapter:
-            raise ValueError("adapter must be 'package.module:ClassName'")
+        if self.status is Status.PLANNED:
+            if self.adapter is not None:
+                raise ValueError("planned datasets must not name an adapter")
+        elif self.adapter is None or ":" not in self.adapter:
+            raise ValueError(
+                f"{self.status.value} datasets need adapter 'package.module:ClassName'"
+            )
         return self
 
     @property

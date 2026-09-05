@@ -13,10 +13,16 @@ def test_version() -> None:
     assert result.stdout.startswith("usdata ")
 
 
-def test_search_lists_matching_datasets() -> None:
+def test_search_lists_matching_datasets_with_status() -> None:
     result = runner.invoke(app, ["search", "radar", "--state", "OK"])
     assert result.exit_code == 0
-    assert "noaa:nexrad-level2" in result.stdout
+    assert "noaa:nexrad-level2" in result.stdout and "available" in result.stdout
+
+
+def test_fetch_planned_dataset_exits_3() -> None:
+    result = runner.invoke(app, ["fetch", "usgs:earthquakes", "--state", "OK"])
+    assert result.exit_code == 3
+    assert "planned" in result.output
 
 
 def test_search_unknown_state_exits_2() -> None:

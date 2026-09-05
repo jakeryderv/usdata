@@ -7,6 +7,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Datasets carry a `status` (available, stub, planned). `search` and `info` show it; fetching a
+  planned dataset exits 3 with a clear message.
+- Planned registry entries for USGS, NASA, EPA, FEMA, Census, USDA, and GOES so the roadmap is
+  visible from `usdata search` and the docs.
+- Provider metadata (name, homepage) in the registry; README gains a generated per-provider table.
+
+### Changed
+
+- `docs/reference/datasets.md` is now grouped by provider with a status column.
+
 ## [0.2.1] - 2026-09-05
 
 ### Added
