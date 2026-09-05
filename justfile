@@ -35,3 +35,23 @@ build:
 # Run the CLI
 run *args:
     uv run usdata {{args}}
+
+# Open a release PR: bump version (patch|minor|major), roll CHANGELOG, auto-merge
+release bump="minor":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    [ "$(git branch --show-current)" = "main" ] || { echo "run from main"; exit 1; }
+    git diff --quiet HEAD || { echo "working tree is not clean"; exit 1; }
+    git pull -q --ff-only
+    uv version --bump {{bump}} > /dev/null
+    v=$(uv version --short)
+    uv run python scripts/changelog.py roll "$v"
+    uv lock -q
+    git checkout -q -b "release/v$v"
+    git commit -qam "chore: release v$v"
+    git push -q -u origin "release/v$v"
+    gh pr create --title "chore: release v$v" \
+        --body "Bumps the version to $v and rolls CHANGELOG. Merging publishes to PyPI and creates the GitHub release."
+    gh pr merge --auto --squash
+    git checkout -q main
+    echo "release PR opened; it merges and publishes when CI passes"

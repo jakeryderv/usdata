@@ -32,5 +32,7 @@ data, with provenance and reproducible manifests. Read
 
 - `just check` must pass before a PR. It runs ruff format check, ruff lint, pyright, pytest.
 - Conventional commits (`feat:`, `fix:`, `docs:`, ...). No Co-Authored-By trailers.
-- Trunk-based: short branch → PR → main.
+- Trunk-based: short branch → PR → squash merge to main. `main` is protected; never push to it directly.
+- User-visible changes add a line under `Unreleased` in `CHANGELOG.md` in the same PR.
+- Releases: `just release <bump>`. Never create tags or GitHub releases by hand. See `docs/versioning.md`.
 - A design choice that gets argued about becomes an ADR in `docs/adr/`.
