@@ -1,0 +1,20 @@
+name: Integration
+
+# Live-service tests, run on a schedule so upstream changes surface without
+# blocking pull requests. Trigger manually from the Actions tab as needed.
+on:
+  schedule:
+    - cron: "0 6 * * 1"  # Mondays 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: extractions/setup-just@v2
+      - run: just setup
+      - run: just test-integration
