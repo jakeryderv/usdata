@@ -27,7 +27,7 @@ name-reserving placeholder.
 
 **Shipped (v0.3)**: manifest pull, locked restoration, and local verification.
 
-**Now (v0.4)**: harden reproducibility before expanding dataset support.
+**Shipped (v0.4)**: harden reproducibility before expanding dataset support.
 
 - [x] Verified cache reuse and safe cache paths
 - [x] Atomic file and metadata replacement with recovery from interrupted downloads
@@ -35,9 +35,9 @@ name-reserving placeholder.
 - [x] Provider resource ownership and custom registry fixes
 - [x] Publishing gated on successful CI for the exact release commit
 
-**Next (v0.5)**: prove cross-provider access, then add the third protocol.
+**Now (v0.5)**: prove cross-provider access, then add the third protocol.
 
-- [ ] USGS provider; confirm legacy NWIS versus the new Water Data APIs first
+- [x] USGS daily values via the modern Water Data API (next release; available from source)
 - [ ] ERDDAP protocol client with griddap subsetting
 - [ ] Full state and county bounding boxes generated from Census boundary files
 - [ ] NCEI bulk-file directory and single-file archive patterns
@@ -73,7 +73,6 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`noaa:ibtracs`](providers/noaa.md#noaaibtracs) IBTrACS Global Tropical Cyclone Tracks · planned
 - [`noaa:mrms`](providers/noaa.md#noaamrms) Multi-Radar Multi-Sensor (MRMS) · planned
 - [`noaa:storm-events`](providers/noaa.md#noaastorm-events) Storm Events Database · planned
-- [`usgs:water-daily`](providers/usgs.md#usgswater-daily) Streamflow and Water Daily Values · planned
 
 **Target 0.6**
 
@@ -104,6 +103,10 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usda:cropland-data-layer`](providers/usda.md#usdacropland-data-layer) Cropland Data Layer · planned
 - [`usgs:3dep-elevation`](providers/usgs.md#usgs3dep-elevation) 3DEP Elevation · planned
 - [`usgs:earthquakes`](providers/usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · planned
+
+**Shipped in 0.5**
+
+- [`usgs:water-daily`](providers/usgs.md#usgswater-daily) Streamflow and Water Daily Values · available
 
 **Shipped in 0.2**
 

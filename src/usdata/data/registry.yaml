@@ -536,19 +536,21 @@ datasets:
   # ---------------------------------------------------------------- USGS
   - id: usgs:water-daily
     provider: usgs
-    status: planned
+    status: available
     domain: water-resources
-    target: "0.5"
+    since: "0.5"
     title: Streamflow and Water Daily Values
     description: >-
       Daily statistics (streamflow, gage height, temperature) for USGS
-      monitoring sites. The legacy NWIS web services are being replaced by the
-      USGS Water Data APIs; the adapter must target whichever is current.
+      monitoring sites via the modern USGS Water Data OGC API. Anonymous,
+      paginated CSV downloads filtered by site or bbox, dates, and parameter
+      codes; daily mean by default, with units and quality metadata preserved.
     keywords: [water, streamflow, discharge, rivers, gages, hydrology, nwis]
     protocol: http
     homepage: https://api.waterdata.usgs.gov/
     license: US Government Work (public domain)
     capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: true }
+    adapter: usdata.providers.usgs.daily:WaterDaily
 
   - id: usgs:earthquakes
     provider: usgs
