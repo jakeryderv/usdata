@@ -22,8 +22,14 @@ for r in search("precipitation", location="Oklahoma"):
     print(r.dataset.id, r.dataset.title)
 
 ds = get("noaa:ghcn-daily")
-query = build_query(lat=35.39, lon=-97.60, radius_km=15,
-                    start="2024-05-06", end="2024-05-07", variables=["PRCP", "TMAX"])
+query = build_query(
+    lat=35.39,
+    lon=-97.60,
+    radius_km=15,
+    start="2024-05-06",
+    end="2024-05-07",
+    variables=["PRCP", "TMAX"],
+)
 for item in fetch(ds, query):
     print(item.path, item.provenance.checksum)
 ```
