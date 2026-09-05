@@ -13,10 +13,14 @@ from usdata.providers import load_adapter
 
 
 class ChecksumMismatch(RuntimeError):
+    """A fetched file's sha256 did not match the checksum the adapter declared."""
+
     pass
 
 
 class FetchedAsset(BaseModel):
+    """One asset on disk with its provenance and whether the cache satisfied it."""
+
     asset: Asset
     path: Path
     provenance: Provenance

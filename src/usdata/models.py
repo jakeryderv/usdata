@@ -56,6 +56,7 @@ class BBox(BaseModel):
         )
 
     def intersects(self, other: BBox) -> bool:
+        """True if the boxes share any area, edges included."""
         return not (
             other.west > self.east
             or other.east < self.west
@@ -64,9 +65,11 @@ class BBox(BaseModel):
         )
 
     def contains_point(self, lat: float, lon: float) -> bool:
+        """True if the point lies inside or on the edge of the box."""
         return self.west <= lon <= self.east and self.south <= lat <= self.north
 
     def as_tuple(self) -> tuple[float, float, float, float]:
+        """The box as (west, south, east, north)."""
         return (self.west, self.south, self.east, self.north)
 
 
@@ -85,6 +88,7 @@ class TimeRange(BaseModel):
         return self
 
     def overlaps(self, other: TimeRange) -> bool:
+        """True if the ranges share any instant; open bounds match everything on that side."""
         starts_after = self.start is not None and other.end is not None and self.start > other.end
         ends_before = self.end is not None and other.start is not None and self.end < other.start
         return not (starts_after or ends_before)
@@ -125,6 +129,7 @@ class Dataset(BaseModel):
 
     @property
     def name(self) -> str:
+        """The dataset name without the provider prefix."""
         return self.id.split(":", 1)[1]
 
 

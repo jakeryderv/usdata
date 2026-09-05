@@ -21,6 +21,8 @@ NS = "{http://s3.amazonaws.com/doc/2006-03-01/}"
 
 
 class S3Object(BaseModel):
+    """One key from a bucket listing."""
+
     key: str
     size: int
     etag: str | None = None
@@ -28,6 +30,7 @@ class S3Object(BaseModel):
 
 
 def parse_s3_url(url: str) -> tuple[str, str]:
+    """Split 's3://bucket/key' into (bucket, key)."""
     if not url.startswith("s3://"):
         raise ValueError(f"not an s3:// URL: {url}")
     bucket, _, key = url[5:].partition("/")
@@ -35,6 +38,7 @@ def parse_s3_url(url: str) -> tuple[str, str]:
 
 
 def https_url(bucket: str, key: str = "") -> str:
+    """The virtual-hosted HTTPS URL for a bucket key, with the key percent-encoded."""
     return f"https://{bucket}.s3.amazonaws.com/{quote(key)}"
 
 

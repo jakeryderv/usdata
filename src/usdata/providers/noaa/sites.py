@@ -15,6 +15,8 @@ EARTH_RADIUS_KM = 6371.0
 
 
 class RadarSite(BaseModel):
+    """A radar site from the bundled table. ``type`` is NEXRAD, TDWR, or TEST."""
+
     model_config = ConfigDict(frozen=True)
 
     id: str
@@ -26,6 +28,7 @@ class RadarSite(BaseModel):
     type: str
 
     def distance_km(self, lat: float, lon: float) -> float:
+        """Great-circle distance from this site to a point, in kilometres."""
         p1, p2 = math.radians(self.lat), math.radians(lat)
         dphi = p2 - p1
         dlam = math.radians(lon - self.lon)
@@ -35,6 +38,7 @@ class RadarSite(BaseModel):
 
 @lru_cache(maxsize=1)
 def all_sites() -> dict[str, RadarSite]:
+    """The bundled site table keyed by ICAO id."""
     text = (resources.files("usdata.data") / "nexrad_sites.csv").read_text()
     sites = {}
     for row in csv.DictReader(text.splitlines()):
@@ -45,6 +49,7 @@ def all_sites() -> dict[str, RadarSite]:
 
 
 def get_site(site_id: str) -> RadarSite:
+    """Look up a site by ICAO id, case-insensitively."""
     try:
         return all_sites()[site_id.upper()]
     except KeyError:
@@ -52,6 +57,7 @@ def get_site(site_id: str) -> RadarSite:
 
 
 def sites_in(bbox: BBox, *, types: tuple[str, ...] = ("NEXRAD",)) -> list[RadarSite]:
+    """Sites of the given types whose location lies inside ``bbox``, sorted by id."""
     return sorted(
         (s for s in all_sites().values() if s.type in types and bbox.contains_point(s.lat, s.lon)),
         key=lambda s: s.id,
@@ -61,5 +67,6 @@ def sites_in(bbox: BBox, *, types: tuple[str, ...] = ("NEXRAD",)) -> list[RadarS
 def nearest(
     lat: float, lon: float, n: int = 1, *, types: tuple[str, ...] = ("NEXRAD",)
 ) -> list[RadarSite]:
+    """The ``n`` closest sites of the given types to a point, nearest first."""
     candidates = [s for s in all_sites().values() if s.type in types]
     return sorted(candidates, key=lambda s: s.distance_km(lat, lon))[:n]

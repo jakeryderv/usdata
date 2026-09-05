@@ -1,3 +1,5 @@
+"""The Provider interface every dataset adapter implements, and how adapters are loaded."""
+
 from __future__ import annotations
 
 import importlib
@@ -31,6 +33,7 @@ class Provider(ABC):
 
 
 def load_adapter(dataset: Dataset) -> Provider:
+    """Instantiate the Provider named by a dataset's ``adapter`` dotted path."""
     module_name, _, class_name = dataset.adapter.partition(":")
     module = importlib.import_module(module_name)
     cls = getattr(module, class_name)

@@ -27,14 +27,17 @@ def record(dataset: Dataset, asset: Asset, path: Path) -> Provenance:
 
 
 def sidecar_path(path: Path) -> Path:
+    """The provenance JSON file that sits beside a cached file."""
     return path.with_name(path.name + SIDECAR_SUFFIX)
 
 
 def write(prov: Provenance, path: Path) -> Path:
+    """Write a provenance record beside ``path`` and return the sidecar path."""
     out = sidecar_path(path)
     out.write_text(prov.model_dump_json(indent=2))
     return out
 
 
 def read(path: Path) -> Provenance:
+    """Load the provenance record stored beside ``path``."""
     return Provenance.model_validate_json(sidecar_path(path).read_text())

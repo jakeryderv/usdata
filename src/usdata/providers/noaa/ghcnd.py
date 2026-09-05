@@ -39,6 +39,8 @@ def _stations_param(raw: Any) -> list[str]:
 
 
 class GhcnDaily(Provider):
+    """GHCN-Daily adapter. Params: ``stations`` (list or comma string), ``units``."""
+
     def __init__(self, dataset: Dataset, client: httpx.Client | None = None) -> None:
         super().__init__(dataset)
         self._client = client
@@ -83,6 +85,7 @@ class GhcnDaily(Provider):
         return found
 
     def list_assets(self, query: Query) -> list[Asset]:
+        """One CSV asset per chunk of up to STATIONS_PER_ASSET stations for the query window."""
         if query.time is None or query.time.start is None or query.time.end is None:
             raise QueryError(f"{self.dataset.id} requires both start and end dates")
         if "stations" in query.params:
@@ -125,4 +128,5 @@ class GhcnDaily(Provider):
         return assets
 
     def fetch(self, asset: Asset, dest: Path) -> Path:
+        """Stream the CSV response to ``dest``."""
         return http.download(asset.href, dest, self._http())

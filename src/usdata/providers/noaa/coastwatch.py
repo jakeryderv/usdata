@@ -9,8 +9,12 @@ from usdata.providers.base import NotImplementedProvider, Provider
 
 
 class CoastwatchSst(Provider):
+    """Placeholder adapter; see issue #5."""
+
     def list_assets(self, query: Query) -> list[Asset]:
+        """Not implemented yet."""
         raise NotImplementedProvider(f"{self.dataset.id} adapter is not implemented yet")
 
     def fetch(self, asset: Asset, dest: Path) -> Path:
+        """Not implemented yet."""
         raise NotImplementedProvider(f"{self.dataset.id} adapter is not implemented yet")

@@ -1,3 +1,5 @@
+"""Typer application: argument parsing and exit codes only; logic lives in the library."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -34,6 +36,7 @@ def main(
         typer.Option("--version", callback=_version_callback, is_eager=True, help="Show version."),
     ] = None,
 ) -> None:
+    """usdata: discover, fetch, and track provenance of U.S. public scientific data."""
     pass
 
 

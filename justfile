@@ -20,12 +20,18 @@ fmt:
     uv run ruff format
     uv run ruff check --fix
 
-# Everything CI runs: format check, lint, typecheck, tests
+# Regenerate documentation derived from code and data
+docs:
+    uv run python scripts/render_registry.py
+
+# Everything CI runs: format check, lint, typecheck, tests, generated docs current
 check:
     uv run ruff format --check
     uv run ruff check
     uv run pyright
     uv run pytest --cov=usdata --cov-report=term-missing:skip-covered
+    just docs > /dev/null
+    git diff --exit-code -- docs/reference || (echo "generated docs are stale: run 'just docs' and commit"; exit 1)
 
 # Build sdist and wheel into dist/
 build:
