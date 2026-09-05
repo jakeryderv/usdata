@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -24,6 +25,27 @@ class FetchedAsset(BaseModel):
     path: Path
     provenance: Provenance
     from_cache: bool
+
+    def open(
+        self,
+        *,
+        reader: str | None = None,
+        dtype: dict[str, str] | None = None,
+        parse_dates: list[str] | None = None,
+        usecols: list[str] | None = None,
+        nrows: int | None = None,
+    ) -> Any:
+        """Open this local CSV as a DataFrame; requires the ``pandas`` extra.
+
+        ERDDAP units are kept in ``frame.attrs["units"]`` and source provenance
+        in ``frame.attrs["usdata"]``. See ``usdata.readers.open_asset`` for options.
+        Cached files and provenance sidecars are never changed.
+        """
+        from usdata.readers import open_asset
+
+        return open_asset(
+            self, reader=reader, dtype=dtype, parse_dates=parse_dates, usecols=usecols, nrows=nrows
+        )
 
 
 def _fetch_asset(

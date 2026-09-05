@@ -26,6 +26,7 @@ user arguments ─► build_query ─► Query
 | `providers` | One `Provider` subclass per dataset, loaded by dotted path from the registry entry. Translates `Query` to agency-specific listing and download. |
 | `protocols` | Transport clients with no dataset knowledge. `http.download` streams to disk atomically; `s3.list_objects` paginates ListObjectsV2 anonymously. |
 | `fetch` | Core loop: adapter resolves assets, cache is checked, bytes fetched, provenance written. |
+| `readers` | Local CSV opening behind the pandas extra; media/protocol dispatch, units and source metadata, no fetching or cache writes. |
 | `cache` | Cache directory resolution and content hashing. |
 | `provenance` | Builds and persists a `Provenance` record beside each fetched file. |
 | `manifest` | `Manifest` (declared inputs) and `Lockfile` (what was actually fetched, with checksums). |
@@ -69,3 +70,8 @@ manifest checksum before trusting its lockfile. See the
 GET failures. Metadata retries preserve the original request; download retries
 restart with a new temporary file. Provider code uses these helpers with its
 owned or injected client. Transport remains independent of dataset semantics.
+
+`FetchedAsset.open()` delegates to `readers` on demand. It does not change models,
+lockfiles, source bytes, or sidecars. Format selection uses the asset rather than
+a current registry lookup, so restored results remain readable. See the
+[reader reference](reference/readers.md) and [ADR 0006](adr/0006-optional-local-csv-readers.md).

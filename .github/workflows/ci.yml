@@ -16,6 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         python: ["3.11", "3.14"]
+        readers: [core, pandas]
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
@@ -25,8 +26,19 @@ jobs:
       - uses: extractions/setup-just@v4
       - name: Lockfile is in sync with pyproject
         run: uv lock --check
-      - run: just setup
+      - if: matrix.readers == 'core'
+        run: just setup
+      - if: matrix.readers == 'pandas'
+        run: uv sync --all-groups --extra pandas
+      - name: Check dependency profile
+        env:
+          EXPECT_PANDAS: ${{ matrix.readers == 'pandas' && '1' || '0' }}
+        run: >-
+          uv run --no-sync python -c
+          "import importlib.util, os; assert (importlib.util.find_spec('pandas') is not None) == (os.environ['EXPECT_PANDAS'] == '1')"
       - run: just check
+        env:
+          UV_NO_SYNC: '1'
 
   build:
     runs-on: ubuntu-latest

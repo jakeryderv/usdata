@@ -14,6 +14,8 @@ from check_dist import check_dist
 ROOT = Path(__file__).resolve().parents[1]
 SMOKE = '''
 import os
+import sys
+from importlib.util import find_spec
 from importlib import resources
 from pathlib import Path
 from unittest.mock import patch
@@ -24,6 +26,8 @@ from usdata.providers.noaa.sites import get_site
 from usdata.query import resolve_place
 
 assert usdata.__version__ == os.environ["USDATA_EXPECTED_VERSION"]
+assert find_spec("pandas") is None
+assert "pandas" not in sys.modules
 assert Path(usdata.__file__).resolve().is_relative_to(Path.cwd().resolve())
 assert (resources.files("usdata") / "py.typed").is_file()
 assert usdata.get("noaa:ghcn-daily").id == "noaa:ghcn-daily"
@@ -51,8 +55,33 @@ with patch("usdata.protocols.http.client", lambda: httpx.Client(transport=transp
     assert usdata.verify(manifest, root=Path("cache")) == []
     first.fetched[0].path.unlink()
     assert not usdata.pull(manifest, root=Path("cache")).fetched[0].from_cache
-print("installed-wheel smoke passed")
+from usdata.readers import MissingReaderDependency
+try:
+    first.fetched[0].open()
+except MissingReaderDependency as error:
+    assert "usdata[pandas]" in str(error)
+else:
+    raise AssertionError("core-only wheel must not install pandas")
+print("installed-wheel core smoke passed")
 '''
+
+
+SMOKE_READERS = """
+import sys
+from pathlib import Path
+import usdata
+assert "pandas" not in sys.modules
+result = usdata.pull(Path("dataset.yaml"), root=Path("cache"))
+item = result.fetched[0]
+before = item.path.read_bytes()
+frame = item.open(parse_dates=["DATE"])
+assert frame.PRCP.sum() == 1
+assert frame.DATE.iloc[0].year == 2024
+assert frame.attrs["usdata"]["provenance"]["checksum"] == item.provenance.checksum
+assert item.path.read_bytes() == before
+assert usdata.verify(Path("dataset.yaml"), root=Path("cache")) == []
+print("installed-wheel pandas smoke passed")
+"""
 
 
 def main() -> None:
@@ -88,6 +117,13 @@ def main() -> None:
             cwd=work,
             env=env,
         )
+        subprocess.run(
+            ["uv", "pip", "install", "--python", str(python), f"{wheel}[pandas]"],
+            check=True,
+            env=env,
+            cwd=work,
+        )
+        subprocess.run([str(python), "-I", "-c", SMOKE_READERS], check=True, cwd=work, env=env)
 
 
 if __name__ == "__main__":
