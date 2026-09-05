@@ -13,6 +13,8 @@ from usdata.models import BBox, Query, TimeRange
 
 
 class UnknownPlace(ValueError):
+    """A place name that is not in the bundled place table."""
+
     pass
 
 

@@ -21,10 +21,14 @@ _TOKEN = re.compile(r"[a-z0-9]+")
 
 
 class DatasetNotFound(KeyError):
+    """No registry entry has the requested id."""
+
     pass
 
 
 class SearchResult(BaseModel):
+    """A dataset and its keyword-match score."""
+
     model_config = ConfigDict(frozen=True)
 
     dataset: Dataset
@@ -56,6 +60,8 @@ def _score(dataset: Dataset, terms: set[str]) -> float:
 
 
 class Registry:
+    """An in-memory collection of datasets addressable by id and searchable by keyword."""
+
     def __init__(self, datasets: Iterable[Dataset]) -> None:
         self._by_id: dict[str, Dataset] = {}
         for ds in datasets:
@@ -65,11 +71,13 @@ class Registry:
 
     @classmethod
     def from_yaml(cls, path: Path) -> Registry:
+        """Load a registry from a YAML file with a top-level ``datasets`` list."""
         raw = yaml.safe_load(path.read_text()) or {}
         return cls(Dataset.model_validate(d) for d in raw.get("datasets", []))
 
     @classmethod
     def bundled(cls) -> Registry:
+        """The registry shipped inside the package."""
         with resources.as_file(resources.files("usdata.data") / "registry.yaml") as p:
             return cls.from_yaml(p)
 
@@ -83,12 +91,14 @@ class Registry:
         return dataset_id in self._by_id
 
     def get(self, dataset_id: str) -> Dataset:
+        """Return the dataset with this id or raise DatasetNotFound."""
         try:
             return self._by_id[dataset_id]
         except KeyError:
             raise DatasetNotFound(dataset_id) from None
 
     def providers(self) -> set[str]:
+        """The set of provider names present in the registry."""
         return {ds.provider for ds in self}
 
     def search(self, query: Query) -> list[SearchResult]:
@@ -111,4 +121,5 @@ class Registry:
 
 @lru_cache(maxsize=1)
 def default_registry() -> Registry:
+    """The bundled registry, loaded once per process."""
     return Registry.bundled()

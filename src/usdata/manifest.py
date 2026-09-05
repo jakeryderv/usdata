@@ -26,6 +26,7 @@ class SourceSpec(BaseModel):
     params: dict[str, Any] = Field(default_factory=dict)
 
     def to_query(self) -> Query:
+        """Build the Query this source resolves to."""
         return build_query(
             location=self.location,
             bbox=self.bbox,
@@ -37,12 +38,15 @@ class SourceSpec(BaseModel):
 
 
 class Manifest(BaseModel):
+    """A declarative list of inputs a project needs: usdata pull fetches them."""
+
     name: str
     version: str = "1.0"
     sources: list[SourceSpec] = Field(min_length=1)
 
     @classmethod
     def load(cls, path: Path) -> Manifest:
+        """Parse a manifest YAML file."""
         return cls.model_validate(yaml.safe_load(path.read_text()) or {})
 
     def validate_against(self, registry: Registry | None = None) -> list[str]:
@@ -52,22 +56,29 @@ class Manifest(BaseModel):
 
 
 class LockedAsset(BaseModel):
+    """One resolved asset and the provenance of the copy that was fetched."""
+
     asset: Asset
     provenance: Provenance
 
 
 class Lockfile(BaseModel):
+    """Exactly what a manifest resolved to, with checksums, so it can be reproduced."""
+
     manifest: str
     generated_at: datetime
     assets: list[LockedAsset] = Field(default_factory=list)
 
     @classmethod
     def load(cls, path: Path) -> Lockfile:
+        """Read a lockfile written by ``save``."""
         return cls.model_validate_json(path.read_text())
 
     def save(self, path: Path) -> None:
+        """Write the lockfile as indented JSON."""
         path.write_text(self.model_dump_json(indent=2))
 
 
 def lockfile_path(manifest_path: Path) -> Path:
+    """The lockfile that pairs with a manifest: <manifest stem>.lock.json."""
     return manifest_path.with_suffix(".lock.json")

@@ -42,6 +42,8 @@ def scan_time(key: str) -> datetime | None:
 
 
 class NexradLevel2(Provider):
+    """NEXRAD Level II adapter. Params: ``site``/``sites`` (ICAO ids), ``nearest`` (int)."""
+
     def __init__(self, dataset: Dataset, client: httpx.Client | None = None) -> None:
         super().__init__(dataset)
         self._client = client
@@ -52,6 +54,7 @@ class NexradLevel2(Provider):
         return self._client
 
     def select_sites(self, query: Query) -> list[str]:
+        """Radar site ids the query refers to; see the module docstring for the rules."""
         raw = query.params.get("sites", query.params.get("site"))
         if raw is not None:
             ids = _sites_param(raw)
@@ -70,6 +73,7 @@ class NexradLevel2(Provider):
         return [s.id for s in sites.nearest(lat, lon, 1)]
 
     def list_assets(self, query: Query) -> list[Asset]:
+        """Every volume scan for the selected sites inside the query's UTC time window."""
         if query.time is None or query.time.start is None or query.time.end is None:
             raise QueryError(f"{self.dataset.id} requires both start and end times")
         start = query.time.start.astimezone(UTC)
@@ -99,4 +103,5 @@ class NexradLevel2(Provider):
         return assets
 
     def fetch(self, asset: Asset, dest: Path) -> Path:
+        """Download one scan object anonymously to ``dest``."""
         return s3.download(asset.href, dest, self._http())

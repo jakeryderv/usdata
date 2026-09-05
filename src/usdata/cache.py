@@ -12,6 +12,7 @@ ENV_VAR = "USDATA_CACHE_DIR"
 
 
 def cache_dir() -> Path:
+    """Cache root: $USDATA_CACHE_DIR, else $XDG_CACHE_HOME/usdata, else ~/.cache/usdata."""
     if override := os.environ.get(ENV_VAR):
         return Path(override).expanduser()
     xdg = os.environ.get("XDG_CACHE_HOME")
@@ -20,12 +21,14 @@ def cache_dir() -> Path:
 
 
 def asset_path(asset: Asset, root: Path | None = None) -> Path:
+    """Where an asset lives in the cache: <root>/<provider>/<dataset>/<asset id>."""
     provider, name = asset.dataset_id.split(":", 1)
     safe_id = asset.id.replace("/", "_")
     return (root or cache_dir()) / provider / name / safe_id
 
 
 def sha256_file(path: Path, chunk_size: int = 1 << 20) -> str:
+    """Hex sha256 of a file, prefixed 'sha256:' to match Asset.checksum."""
     h = hashlib.sha256()
     with path.open("rb") as f:
         while chunk := f.read(chunk_size):
