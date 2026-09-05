@@ -21,7 +21,7 @@ access patterns, then ship the reproducibility spine.
 
 - [x] Skeleton: models, curated registry, query normalization, CLI, tests, CI
 - [x] `noaa:ghcn-daily` adapter (NCEI search service for stations, data service for CSV)
-- [ ] `noaa:nexrad-level2` adapter (NODD S3, anonymous listing, point-to-site lookup)
+- [x] `noaa:nexrad-level2` adapter (unidata-nexrad-level2 S3, anonymous listing, site lookup)
 - [ ] `noaa:coastwatch-sst` adapter (ERDDAP, true server-side subsetting)
 - [x] Cache with checksum verification, provenance sidecars written on fetch
 - [ ] `usdata pull manifest.yaml` producing a lockfile; `usdata verify` against it

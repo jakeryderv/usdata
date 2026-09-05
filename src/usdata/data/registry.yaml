@@ -5,9 +5,10 @@ datasets:
     provider: noaa
     title: NEXRAD Level II Radar
     description: >-
-      Raw volume scans from the WSR-88D weather radar network, published via
-      NOAA Open Data Dissemination on S3. One archive file per radar site per
-      volume scan. No server-side subsetting; whole files are fetched.
+      Raw volume scans from the WSR-88D weather radar network, archived in the
+      public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination).
+      One object per radar site per volume scan. No server-side subsetting;
+      whole files are fetched. Select radars by site id, bbox, or nearest to a point.
     keywords: [radar, weather, storms, tornado, precipitation, reflectivity, nexrad, wsr-88d]
     protocol: s3
     homepage: https://registry.opendata.aws/noaa-nexrad/

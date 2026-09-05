@@ -3,8 +3,9 @@
 Unified Python SDK and CLI for discovering, fetching, and tracking the
 provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 
-> Status: pre-alpha. `noaa:ghcn-daily` fetches real data with provenance;
-> other registry entries are stubs. See [docs/roadmap.md](docs/roadmap.md).
+> Status: pre-alpha. `noaa:ghcn-daily` and `noaa:nexrad-level2` fetch real
+> data with provenance; other registry entries are stubs.
+> See [docs/roadmap.md](docs/roadmap.md).
 
 ## Install
 
@@ -40,6 +41,9 @@ usdata info noaa:ghcn-daily
 usdata fetch noaa:ghcn-daily --lat 35.39 --lon -97.60 --radius-km 15 \
     --start 2024-05-06 --end 2024-05-07 --vars PRCP,TMAX
 usdata fetch noaa:ghcn-daily -p stations=USW00013967 --start 2024-01-01 --end 2024-12-31
+usdata fetch noaa:nexrad-level2 --lat 35.47 --lon -97.52 \
+    --start 2024-05-06T20:00 --end 2024-05-06T23:00        # nearest radar (KTLX)
+usdata fetch noaa:nexrad-level2 -p site=KTLX --start 2024-05-06T20:00 --end 2024-05-06T20:30 --dry-run
 usdata pull dataset.yaml
 ```
 

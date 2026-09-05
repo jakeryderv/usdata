@@ -24,15 +24,16 @@ user arguments ─► build_query ─► Query
 | `registry` | Loads the curated `data/registry.yaml`; keyword-ranked search filtered by provider, space, and time. |
 | `query` | Turns loose user input (state names, ISO dates, lat/lon) into a normalized `Query`. Place lookup uses `data/places.yaml`. |
 | `providers` | One `Provider` subclass per dataset, loaded by dotted path from the registry entry. Translates `Query` to agency-specific listing and download. |
-| `protocols` | Transport clients with no dataset knowledge. `http.download` streams to disk atomically. |
+| `protocols` | Transport clients with no dataset knowledge. `http.download` streams to disk atomically; `s3.list_objects` paginates ListObjectsV2 anonymously. |
 | `fetch` | Core loop: adapter resolves assets, cache is checked, bytes fetched, provenance written. |
 | `cache` | Cache directory resolution and content hashing. |
 | `provenance` | Builds and persists a `Provenance` record beside each fetched file. |
 | `manifest` | `Manifest` (declared inputs) and `Lockfile` (what was actually fetched, with checksums). |
 | `cli` | Typer app. Thin: argument parsing and exit codes only, no logic. |
 
-`protocols/` holds transport clients shared by adapters (`http` today; S3 and
-ERDDAP when their adapters land). `fetch` is the core loop that ties adapter,
+`protocols/` holds transport clients shared by adapters. `http` streams
+downloads; `s3` lists and reads public buckets over plain HTTPS with no AWS SDK.
+ERDDAP arrives with its adapter. `fetch` is the core loop that ties adapter,
 cache, and provenance together; the CLI calls it rather than adapters directly.
 
 ## Boundaries

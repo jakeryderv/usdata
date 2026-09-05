@@ -31,7 +31,7 @@ def test_info() -> None:
 
 
 def test_fetch_reports_unimplemented_adapter() -> None:
-    result = runner.invoke(app, ["fetch", "noaa:nexrad-level2", "--state", "OK"])
+    result = runner.invoke(app, ["fetch", "noaa:coastwatch-sst", "--state", "OK"])
     assert result.exit_code == 3
 
 

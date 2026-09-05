@@ -46,7 +46,7 @@ def test_every_adapter_resolves_to_a_provider(registry: Registry) -> None:
 
 
 def test_stub_adapters_say_so(registry: Registry) -> None:
-    for dataset_id in ("noaa:nexrad-level2", "noaa:coastwatch-sst"):
+    for dataset_id in ("noaa:coastwatch-sst",):
         with pytest.raises(NotImplementedProvider):
             load_adapter(registry.get(dataset_id)).list_assets(Query())
 
