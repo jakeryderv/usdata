@@ -81,8 +81,9 @@ just run search radar
 
 Integration tests that hit live services run with `just test-integration`.
 
-Releases are published to PyPI by tagging: create a GitHub release and the
-`publish.yml` workflow uploads via trusted publishing.
+Releases: `just release minor` opens a version-bump PR; merging it publishes
+to PyPI and creates the tag and GitHub release. See
+[docs/versioning.md](docs/versioning.md).
 
 See [docs/architecture.md](docs/architecture.md) for how the pieces fit and
 [docs/adr/](docs/adr/) for why.

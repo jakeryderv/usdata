@@ -1,8 +1,17 @@
 name: Publish to PyPI
 
+# Runs when a version bump lands on main. Publishes the version declared in
+# pyproject.toml, then tags it and creates the GitHub release. Re-running for a
+# version already on PyPI is a no-op.
 on:
-  release:
-    types: [published]
+  push:
+    branches: [main]
+    paths: [pyproject.toml]
+  workflow_dispatch:
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
 
 jobs:
   publish:
@@ -10,9 +19,29 @@ jobs:
     environment: pypi
     permissions:
       id-token: write
-      contents: read
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: astral-sh/setup-uv@v6
-      - run: uv build
-      - run: uv publish
+      - id: version
+        run: |
+          v=$(uv version --short)
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          if git rev-parse -q --verify "refs/tags/v$v" > /dev/null; then
+            echo "tagged=true" >> "$GITHUB_OUTPUT"
+            echo "v$v already tagged; nothing to publish"
+          fi
+      - if: steps.version.outputs.tagged != 'true'
+        run: uv build
+      - if: steps.version.outputs.tagged != 'true'
+        run: uv publish --check-url https://pypi.org/simple/usdata/
+      - if: steps.version.outputs.tagged != 'true'
+        name: Tag and create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          V: ${{ steps.version.outputs.version }}
+        run: |
+          uv run --no-project python scripts/changelog.py notes "$V" > notes.md
+          gh release create "v$V" --target "$GITHUB_SHA" --title "v$V" --notes-file notes.md
