@@ -5,10 +5,15 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python: ["3.11", "3.14"]
     steps:
@@ -16,6 +21,50 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python }}
+          enable-cache: true
       - uses: extractions/setup-just@v2
+      - name: Lockfile is in sync with pyproject
+        run: uv lock --check
       - run: just setup
       - run: just check
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv build
+      - name: Wheel contains bundled data and type marker
+        run: |
+          uv run --no-project python - <<'PY'
+          import glob, sys, zipfile
+          wheel = glob.glob("dist/*.whl")[0]
+          names = set(zipfile.ZipFile(wheel).namelist())
+          required = {
+              "usdata/py.typed",
+              "usdata/data/registry.yaml",
+              "usdata/data/places.yaml",
+              "usdata/data/nexrad_sites.csv",
+          }
+          missing = required - names
+          if missing:
+              sys.exit(f"missing from {wheel}: {sorted(missing)}")
+          print(f"{wheel}: ok ({len(names)} files)")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  # Single required status check for branch protection.
+  ci:
+    needs: [check, build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: All jobs succeeded
+        run: |
+          test "${{ needs.check.result }}" = "success"
+          test "${{ needs.build.result }}" = "success"

@@ -25,7 +25,7 @@ check:
     uv run ruff format --check
     uv run ruff check
     uv run pyright
-    uv run pytest
+    uv run pytest --cov=usdata --cov-report=term-missing:skip-covered
 
 # Build sdist and wheel into dist/
 build:
