@@ -7,6 +7,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-05
+
 ### Breaking
 
 - Manifest and source fields reject unknown keys instead of silently ignoring them;
@@ -75,7 +77,8 @@ First usable release.
 
 - Placeholder release reserving the package name. No functionality.
 
-[Unreleased]: https://github.com/jakeryderv/usdata/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/jakeryderv/usdata/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/jakeryderv/usdata/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/jakeryderv/usdata/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/jakeryderv/usdata/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/jakeryderv/usdata/compare/v0.1.0...v0.2.0
