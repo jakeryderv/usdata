@@ -40,7 +40,8 @@ Every field must be true. The registry test suite loads all entries and
 imports every non-planned adapter. A dataset can start life as `planned`
 with just this entry, which puts it in search results and the docs; flip it
 to `stub` when the class exists and `available` when the live test passes.
-Run `just docs` after editing: the README and reference tables are generated.
+Run `just docs` after editing: the README summary and `docs/providers/` tables are
+generated. A new provider gets a page created from a template; fill in its access notes.
 
 ## 3. Adapter
 
@@ -78,5 +79,6 @@ Rules:
 ## 5. Docs and changelog
 
 - Add a CLI example to the README if the dataset introduces a new kind of query.
+- Add anything you learned about the source to the access notes in `docs/providers/<provider>.md`.
 - Add a line under `Unreleased` in `CHANGELOG.md`.
 - If you made a non-obvious design choice, write an ADR.

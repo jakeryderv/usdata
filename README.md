@@ -12,15 +12,15 @@ provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 <!-- registry:start -->
 | Provider | Available | Stub | Planned | Datasets |
 |---|---:|---:|---:|---|
-| [NOAA](docs/reference/datasets.md#noaa) | 2 | 1 | 1 | `ghcn-daily`, `nexrad-level2`, _coastwatch-sst_, _goes-abi_ |
-| [Census Bureau](docs/reference/datasets.md#census-bureau) | 0 | 0 | 1 | _acs-5year_ |
-| [EPA](docs/reference/datasets.md#epa) | 0 | 0 | 1 | _aqs-daily_ |
-| [FEMA](docs/reference/datasets.md#fema) | 0 | 0 | 1 | _nfhl_ |
-| [NASA](docs/reference/datasets.md#nasa) | 0 | 0 | 1 | _gpm-imerg_ |
-| [USDA](docs/reference/datasets.md#usda) | 0 | 0 | 1 | _cropland-data-layer_ |
-| [USGS](docs/reference/datasets.md#usgs) | 0 | 0 | 3 | _3dep-elevation_, _earthquakes_, _water-daily_ |
+| [NOAA](docs/providers/noaa.md) | 2 | 1 | 1 | `ghcn-daily`, `nexrad-level2`, _coastwatch-sst_, _goes-abi_ |
+| [Census Bureau](docs/providers/census.md) | 0 | 0 | 1 | _acs-5year_ |
+| [EPA](docs/providers/epa.md) | 0 | 0 | 1 | _aqs-daily_ |
+| [FEMA](docs/providers/fema.md) | 0 | 0 | 1 | _nfhl_ |
+| [NASA](docs/providers/nasa.md) | 0 | 0 | 1 | _gpm-imerg_ |
+| [USDA](docs/providers/usda.md) | 0 | 0 | 1 | _cropland-data-layer_ |
+| [USGS](docs/providers/usgs.md) | 0 | 0 | 3 | _3dep-elevation_, _earthquakes_, _water-daily_ |
 
-Available datasets are in `code`; stubs and planned ones in _italics_. Full details in [docs/reference/datasets.md](docs/reference/datasets.md).
+Available datasets are in `code`; stubs and planned ones in _italics_. Each provider page has access notes and full dataset details.
 <!-- registry:end -->
 
 ## Install
@@ -101,7 +101,8 @@ Releases: `just release minor` opens a version-bump PR; merging it publishes
 to PyPI and creates the tag and GitHub release. See
 [docs/versioning.md](docs/versioning.md).
 
-See [docs/architecture.md](docs/architecture.md) for how the pieces fit,
+See [docs/providers/](docs/providers/) for per-provider access notes,
+[docs/architecture.md](docs/architecture.md) for how the pieces fit,
 [docs/adr/](docs/adr/) for why, and [CONTRIBUTING.md](CONTRIBUTING.md) to add
 a dataset.
 

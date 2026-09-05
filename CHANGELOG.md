@@ -17,7 +17,7 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
-- `docs/reference/datasets.md` is now grouped by provider with a status column.
+- Dataset reference moved to `docs/providers/`: one page per provider with hand-written access notes and a generated dataset table, plus a generated index.
 
 ## [0.2.1] - 2026-09-05
 
