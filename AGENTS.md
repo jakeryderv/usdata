@@ -20,6 +20,7 @@ data, with provenance and reproducible manifests. Read
 - `tests/unit/`: fast, offline. `tests/integration/` (when present): live services, marked `integration`.
 - `docs/adr/`: decisions already made. Read before proposing to reverse one.
 - `docs/guides/adding-a-dataset.md`: the procedure for new datasets. Follow it exactly.
+- `docs/providers/<id>.md`: access notes per agency (hand-written) plus generated dataset tables. Read before touching an adapter.
 
 ## Constraints
 

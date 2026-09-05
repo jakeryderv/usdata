@@ -31,6 +31,8 @@ user arguments ─► build_query ─► Query
 | `manifest` | `Manifest` (declared inputs) and `Lockfile` (what was actually fetched, with checksums). |
 | `cli` | Typer app. Thin: argument parsing and exit codes only, no logic. |
 
+Provider-specific knowledge (endpoints, auth, quirks) lives in `docs/providers/<id>.md`, not here.
+
 `protocols/` holds transport clients shared by adapters. `http` streams
 downloads; `s3` lists and reads public buckets over plain HTTPS with no AWS SDK.
 ERDDAP arrives with its adapter. `fetch` is the core loop that ties adapter,
