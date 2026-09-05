@@ -185,7 +185,7 @@ def test_fetch_reuses_and_closes_owned_client(tmp_path: Path, monkeypatch, fail:
             fetch(get("noaa:ghcn-daily"), query, root=tmp_path)
     else:
         assert len(fetch(get("noaa:ghcn-daily"), query, root=tmp_path)) == 2
-    assert len(requests) == (1 if fail else 2)
+    assert len(requests) == (3 if fail else 2)
     assert len(clients) == 1 and clients[0].is_closed
 
 

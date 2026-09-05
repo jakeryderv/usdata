@@ -105,7 +105,7 @@ datasets:
     provider: noaa
     status: planned
     domain: weather-satellites
-    target: "0.5"
+    target: later
     title: GOES-R ABI Satellite Imagery
     description: >-
       Advanced Baseline Imager products from GOES-16, 18, and 19 in the public
@@ -139,7 +139,7 @@ datasets:
     provider: noaa
     status: planned
     domain: severe-weather
-    target: "0.5"
+    target: later
     title: Storm Events Database
     description: >-
       NCEI's record of significant weather events since 1950 (tornadoes, hail,
@@ -157,7 +157,7 @@ datasets:
     provider: noaa
     status: planned
     domain: tropical-cyclones
-    target: "0.5"
+    target: later
     title: HURDAT2 Atlantic and Pacific Best Tracks
     description: >-
       National Hurricane Center best-track database: six-hourly position,
@@ -175,7 +175,7 @@ datasets:
     provider: noaa
     status: planned
     domain: tropical-cyclones
-    target: "0.5"
+    target: later
     title: IBTrACS Global Tropical Cyclone Tracks
     description: >-
       International Best Track Archive for Climate Stewardship: merged best
@@ -192,7 +192,7 @@ datasets:
     provider: noaa
     status: planned
     domain: sea-level-tides
-    target: "0.5"
+    target: later
     title: CO-OPS Water Levels and Tides
     description: >-
       Observed and predicted water levels, tide predictions, and related
@@ -209,7 +209,7 @@ datasets:
     provider: noaa
     status: planned
     domain: surface-weather
-    target: "0.5"
+    target: later
     title: Global Summary of the Month
     description: >-
       Monthly station summaries derived from GHCN-Daily (means, extremes,
@@ -225,7 +225,7 @@ datasets:
     provider: noaa
     status: planned
     domain: surface-weather
-    target: "0.5"
+    target: later
     title: Global Summary of the Year
     description: >-
       Annual station summaries derived from GHCN-Daily via the NCEI Access Data
@@ -240,7 +240,7 @@ datasets:
     provider: noaa
     status: planned
     domain: climate
-    target: "0.5"
+    target: later
     title: U.S. Climate Normals 1991-2020
     description: >-
       Daily and monthly station normals via the NCEI Access Data Service
@@ -257,7 +257,7 @@ datasets:
     provider: noaa
     status: planned
     domain: weather-radar
-    target: "0.5"
+    target: later
     title: Multi-Radar Multi-Sensor (MRMS)
     description: >-
       Gridded CONUS products merged from all radars plus other sensors

@@ -13,7 +13,7 @@ provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 <!-- registry:start -->
 | Provider | Available | Stub | Planned | Next up (0.5) | Datasets |
 |---|---:|---:|---:|---|---|
-| [NOAA](docs/providers/noaa.md) | 2 | 1 | 26 | `gsom`, `gsoy`, `storm-events`, `mrms`, `goes-abi`, `hurdat2`, `ibtracs`, `climate-normals`, `coops-water-levels`, `coastwatch-sst` | `ghcn-daily`, `nexrad-level2`, _coastwatch-sst_, +26 planned |
+| [NOAA](docs/providers/noaa.md) | 2 | 1 | 26 | `coastwatch-sst` | `ghcn-daily`, `nexrad-level2`, _coastwatch-sst_, +26 planned |
 | [USGS](docs/providers/usgs.md) | 1 | 0 | 2 | — | `water-daily`, +2 planned |
 | [Census Bureau](docs/providers/census.md) | 0 | 0 | 1 | — | +1 planned |
 | [EPA](docs/providers/epa.md) | 0 | 0 | 1 | — | +1 planned |
@@ -21,7 +21,7 @@ provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 | [NASA](docs/providers/nasa.md) | 0 | 0 | 1 | — | +1 planned |
 | [USDA](docs/providers/usda.md) | 0 | 0 | 1 | — | +1 planned |
 
-Available datasets are in `code`, stubs in _italics_; planned ones are counted. Each provider page has access notes and full dataset details; [docs/roadmap.md](docs/roadmap.md) lists datasets by target version.
+Available datasets are in `code`, stubs in _italics_; planned ones are counted. Available means implemented in this source checkout; consult the [releases](https://github.com/jakeryderv/usdata/releases) for published support. Each provider page has access notes and full dataset details; [docs/roadmap.md](docs/roadmap.md) lists datasets by target version.
 <!-- registry:end -->
 
 ## Install
@@ -78,8 +78,15 @@ A manifest declares every input a project needs. `pull` resolves each source,
 fetches it, and writes `dataset.lock.json` pinning every asset with its checksum
 and provenance. A second `pull` restores exactly what the lockfile pins without
 re-querying upstream, so the inputs stay reproducible even if the source
-changes. `verify` re-hashes the cached files against the lockfile. Editing the
-manifest after locking requires `pull --force` to re-resolve.
+changes. `verify` checks the manifest checksum and re-hashes cached files
+against the lockfile. Editing the manifest after locking requires `pull --force`
+to re-resolve. A required source matching no assets fails the pull; set
+`allow_empty: true` on a source only when an empty result is intentional.
+
+Checksums detect upstream changes; they cannot recover historical bytes that
+are no longer available. Preserve the cache for long-lived reproducibility.
+See the [manifest reference](docs/reference/manifests.md) and the small
+[NOAA/USGS example](examples/weather-and-streamflow/README.md).
 
 ```yaml
 name: tornado-environment
@@ -102,11 +109,16 @@ Requires [uv](https://docs.astral.sh/uv/) and [just](https://just.systems/).
 git clone https://github.com/jakeryderv/usdata && cd usdata
 just setup     # install toolchain and dependencies
 just test      # unit tests
-just check     # format, lint, typecheck, tests (what CI runs)
+just check     # format, lint, typecheck, offline tests, generated docs
+just build     # build wheel and sdist
+just smoke     # install and exercise the built wheel outside the checkout
 just run search radar
 ```
 
-Integration tests that hit live services run with `just test-integration`.
+Unit tests mechanically block network connections. Integration tests that hit
+live services run with `just test-integration`. CI checks Python 3.11 and 3.14 on
+Linux and smoke-tests the installed wheel on Linux, macOS, and Windows. The
+full unit and live-service suites currently run on Linux.
 
 Releases: `just release minor` opens a version-bump PR; merging it publishes
 to PyPI and creates the tag and GitHub release. See

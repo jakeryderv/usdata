@@ -55,7 +55,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | Dataset | Domain | Status | Version | Description | Protocol |
 |---|---|---|---|---|---|
 | [`usgs:earthquakes`](#usgsearthquakes) | Natural hazards | planned | target later | Global earthquake events with location, magnitude, and depth from the ANSS Comprehensive Catalog via the FDSN event web service. | http |
-| [`usgs:water-daily`](#usgswater-daily) | Water resources | available | since 0.5 | Daily statistics (streamflow, gage height, temperature) for USGS monitoring sites via the modern USGS Water Data OGC API. | http |
+| [`usgs:water-daily`](#usgswater-daily) | Water resources | available | unreleased; planned 0.5 | Daily statistics (streamflow, gage height, temperature) for USGS monitoring sites via the modern USGS Water Data OGC API. | http |
 | [`usgs:3dep-elevation`](#usgs3dep-elevation) | Terrain and elevation | planned | target later | Seamless digital elevation models from the 3D Elevation Program (1/3 arc-second and 1 m where available). | s3 |
 
 ### usgs:earthquakes
@@ -74,7 +74,7 @@ Global earthquake events with location, magnitude, and depth from the ANSS Compr
 
 ### usgs:water-daily
 
-**Streamflow and Water Daily Values** · available · since 0.5
+**Streamflow and Water Daily Values** · available · unreleased; planned 0.5
 
 Daily statistics (streamflow, gage height, temperature) for USGS monitoring sites via the modern USGS Water Data OGC API. Anonymous, paginated CSV downloads filtered by site or bbox, dates, and parameter codes; daily mean by default, with units and quality metadata preserved.
 

@@ -67,11 +67,15 @@ Rules:
 - Raise `QueryError` with a helpful message when the query lacks something the
   source needs (a time window, a station list). The CLI turns it into exit code 2.
 - Accept provider-specific inputs through `query.params` (`stations=`, `site=`)
-  and document them in the module docstring.
+  and document them in the module docstring and provider access notes. Reject
+  unknown parameters, empty explicit identifiers, and conflicting selectors with
+  `QueryError`; do not silently fall back after a typo.
 - Use `usdata.protocols.http` or `usdata.protocols.s3` for transport. Take an
   optional `httpx.Client` in `__init__` so tests can inject one. Override
   `close()` to release internally owned resources; injected clients remain the
-  caller's responsibility. Core uses adapters as context managers.
+  caller's responsibility. Core uses adapters as context managers. Use
+  `http.get(url, client, params=...)` for metadata and `http.download` for bytes
+  so retries cover both listing and downloads.
 - Give assets stable ids: they become cache filenames and lockfile keys.
 - Set `size` and `time` on assets when the listing provides them.
 - Do not write to the cache or create provenance. `usdata.fetch` does that.
@@ -79,7 +83,7 @@ Rules:
 ## 4. Tests
 
 - `tests/unit/test_<name>.py`: mock every HTTP call with `respx`. Cover query
-  validation, pagination, and the fetch path. These run on every PR.
+  validation, pagination, and the fetch path. These run on every PR; real network connections are blocked automatically.
 - `tests/integration/test_<name>_live.py`: mark the module
   `pytestmark = pytest.mark.integration`. Fetch the smallest real object you
   can find. These run weekly.

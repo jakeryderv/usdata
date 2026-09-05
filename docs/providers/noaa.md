@@ -60,6 +60,20 @@ marked type `TEST` so default site selection skips them.
 Licensing: NOAA data is a U.S. Government work in the public domain unless a
 dataset page says otherwise.
 
+## Query validation
+
+GHCN accepts only `stations` and `units` (`metric` or `standard`, following the
+[NCEI API](https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation)).
+NEXRAD accepts only `site`, `sites`, and `nearest`. Explicit identifier lists
+must be non-empty strings. `site` and `sites` are mutually exclusive, and
+`nearest` must be a positive integer used with a geographic query instead of
+explicit IDs. Unknown options are rejected before requests are sent.
+
+Geographic lookup uses rectangles, which can include stations outside a state's
+actual boundary. The current bundled state boxes are approximate. For NEXRAD,
+selection falls back to the nearest radar if none lies inside the rectangle.
+Use explicit IDs when exact site selection is required.
+
 ## Data landscape
 
 What NOAA publishes, by domain, and which registry entries cover it. Domains
@@ -97,27 +111,27 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | Dataset | Domain | Status | Version | Description | Protocol |
 |---|---|---|---|---|---|
 | [`noaa:ghcn-daily`](#noaaghcn-daily) | Surface weather | available | since 0.2 | Global Historical Climatology Network daily summaries: temperature, precipitation, snow, and other elements from land surface stations, served by the NCEI Access Data Service with station and date filtering. | http |
-| [`noaa:gsom`](#noaagsom) | Surface weather | planned | target 0.5 | Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. | http |
-| [`noaa:gsoy`](#noaagsoy) | Surface weather | planned | target 0.5 | Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. | http |
 | [`noaa:ghcn-hourly`](#noaaghcn-hourly) | Surface weather | planned | target later | Global hourly and sub-hourly surface observations, the successor to ISD. | http |
+| [`noaa:gsom`](#noaagsom) | Surface weather | planned | target later | Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. | http |
+| [`noaa:gsoy`](#noaagsoy) | Surface weather | planned | target later | Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. | http |
 | [`noaa:lcd`](#noaalcd) | Surface weather | planned | target later | Hourly, daily, and monthly observations from airport and first-order stations via the NCEI Access Data Service dataset local-climatological-data, addressed by WBAN-based station ids. | http |
-| [`noaa:storm-events`](#noaastorm-events) | Severe weather | planned | target 0.5 | NCEI's record of significant weather events since 1950 (tornadoes, hail, wind, floods, and more) with locations, damage, and narratives. | http |
+| [`noaa:storm-events`](#noaastorm-events) | Severe weather | planned | target later | NCEI's record of significant weather events since 1950 (tornadoes, hail, wind, floods, and more) with locations, damage, and narratives. | http |
 | [`noaa:nexrad-level2`](#noaanexrad-level2) | Weather radar | available | since 0.2 | Raw volume scans from the WSR-88D weather radar network, archived in the public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). | s3 |
-| [`noaa:mrms`](#noaamrms) | Weather radar | planned | target 0.5 | Gridded CONUS products merged from all radars plus other sensors (reflectivity, precipitation rate and accumulation, severe weather diagnostics), as two-minute gzipped GRIB2 files in the public noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/. | s3 |
+| [`noaa:mrms`](#noaamrms) | Weather radar | planned | target later | Gridded CONUS products merged from all radars plus other sensors (reflectivity, precipitation rate and accumulation, severe weather diagnostics), as two-minute gzipped GRIB2 files in the public noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/. | s3 |
 | [`noaa:nexrad-level3`](#noaanexrad-level3) | Weather radar | planned | target later | Derived single-radar products (base reflectivity, velocity, storm totals, and others) in the public unidata-nexrad-level3 S3 bucket, with flat keys SITE_PRODUCT_YYYY_MM_DD_HH_MM_SS where the site id drops its leading K. | s3 |
-| [`noaa:goes-abi`](#noaagoes-abi) | Weather satellites | planned | target 0.5 | Advanced Baseline Imager products from GOES-16, 18, and 19 in the public noaa-goes16/18/19 S3 buckets, laid out as PRODUCT/YYYY/DDD/HH/ with one NetCDF per scan (for example ABI-L2-CMIPC). | s3 |
+| [`noaa:goes-abi`](#noaagoes-abi) | Weather satellites | planned | target later | Advanced Baseline Imager products from GOES-16, 18, and 19 in the public noaa-goes16/18/19 S3 buckets, laid out as PRODUCT/YYYY/DDD/HH/ with one NetCDF per scan (for example ABI-L2-CMIPC). | s3 |
 | [`noaa:goes-glm`](#noaagoes-glm) | Weather satellites | planned | target later | Lightning flash, group, and event detections (GLM-L2-LCFA) in 20-second NetCDF files under the same GOES S3 buckets and layout as ABI. | s3 |
-| [`noaa:hurdat2`](#noaahurdat2) | Tropical cyclones | planned | target 0.5 | National Hurricane Center best-track database: six-hourly position, intensity, pressure, and wind radii for Atlantic (since 1851) and eastern North Pacific (since 1949) tropical cyclones. | http |
-| [`noaa:ibtracs`](#noaaibtracs) | Tropical cyclones | planned | target 0.5 | International Best Track Archive for Climate Stewardship: merged best tracks from all agencies worldwide since 1842. | http |
+| [`noaa:hurdat2`](#noaahurdat2) | Tropical cyclones | planned | target later | National Hurricane Center best-track database: six-hourly position, intensity, pressure, and wind radii for Atlantic (since 1851) and eastern North Pacific (since 1949) tropical cyclones. | http |
+| [`noaa:ibtracs`](#noaaibtracs) | Tropical cyclones | planned | target later | International Best Track Archive for Climate Stewardship: merged best tracks from all agencies worldwide since 1842. | http |
 | [`noaa:gfs`](#noaagfs) | Weather models | planned | target 0.6 | Global Forecast System output in GRIB2 from the public noaa-gfs-bdp-pds S3 bucket, laid out as gfs.YYYYMMDD/HH/atmos/ with files per resolution and forecast hour (for example pgrb2.0p25.fNNN). | s3 |
 | [`noaa:hrrr`](#noaahrrr) | Weather models | planned | target 0.6 | High-Resolution Rapid Refresh 3 km hourly forecasts in GRIB2 from the public noaa-hrrr-bdp-pds S3 bucket, laid out as hrrr.YYYYMMDD/conus/ with one file per cycle and forecast hour. | s3 |
 | [`noaa:nbm`](#noaanbm) | Weather models | planned | target later | Statistically blended forecast guidance in GRIB2 from the public noaa-nbm-grib2-pds S3 bucket, laid out as blend.YYYYMMDD/HH/core/ with files per region and forecast hour. | s3 |
-| [`noaa:climate-normals`](#noaaclimate-normals) | Climate | planned | target 0.5 | Daily and monthly station normals via the NCEI Access Data Service datasets normals-daily-1991-2020 and normals-monthly-1991-2020. | http |
+| [`noaa:climate-normals`](#noaaclimate-normals) | Climate | planned | target later | Daily and monthly station normals via the NCEI Access Data Service datasets normals-daily-1991-2020 and normals-monthly-1991-2020. | http |
 | [`noaa:nclimdiv`](#noaanclimdiv) | Climate | planned | target later | Monthly temperature, precipitation, and drought indices for U.S. | http |
 | [`noaa:sea-ice-index`](#noaasea-ice-index) | Snow and ice | planned | target later | Daily and monthly Arctic and Antarctic sea ice extent and concentration (NOAA@NSIDC G02135) as CSV, GeoTIFF, and shapefiles in an HTTPS directory hosted by NSIDC. | http |
 | [`noaa:oisst`](#noaaoisst) | Ocean physics | planned | target 0.6 | Optimum Interpolation SST v2.1: daily global 0.25 degree analysis since September 1981 as one NetCDF per day, from the NOAA CDR S3 bucket (data/v2.1/avhrr/YYYYMM/) or the NCEI HTTPS mirror. | s3 |
 | [`noaa:ersst`](#noaaersst) | Ocean physics | planned | target later | Extended Reconstructed SST v5: monthly global 2 degree analysis since 1854, one NetCDF per month in an NCEI HTTPS directory. | http |
-| [`noaa:coops-water-levels`](#noaacoops-water-levels) | Sea level and tides | planned | target 0.5 | Observed and predicted water levels, tide predictions, and related products for NWLON tide stations from the CO-OPS Data API, with a companion metadata API for station lookup. | http |
+| [`noaa:coops-water-levels`](#noaacoops-water-levels) | Sea level and tides | planned | target later | Observed and predicted water levels, tide predictions, and related products for NWLON tide stations from the CO-OPS Data API, with a companion metadata API for station lookup. | http |
 | [`noaa:ocads`](#noaaocads) | Ocean chemistry | planned | target later | Archived ocean carbon, pH, and related chemistry datasets (cruises, moorings, syntheses such as SOCAT and GLODAP) in an NCEI HTTPS directory organized by accession. | http |
 | [`noaa:coastwatch-sst`](#noaacoastwatch-sst) | Satellite oceanography | stub | target 0.5 | NOAA geo-polar blended daily SST analysis (day and night) on a global 5 km grid, ERDDAP dataset noaacwBLENDEDsstDNDaily on the CoastWatch server, with full server-side spatial, temporal, and variable subsetting. | erddap |
 | [`noaa:etopo`](#noaaetopo) | Bathymetry and hydrography | planned | target 0.6 | Global topography and bathymetry at 15, 30, and 60 arc-seconds as NetCDF and GeoTIFF tiles, served through the NCEI THREDDS catalog with OPeNDAP access; the THREDDS pattern. | thredds |
@@ -140,9 +154,23 @@ Global Historical Climatology Network daily summaries: temperature, precipitatio
 - Keywords: climate, weather, temperature, precipitation, snow, stations, daily, ghcn, ncei
 - Adapter: `usdata.providers.noaa.ghcnd:GhcnDaily`
 
+### noaa:ghcn-hourly
+
+**GHCN-Hourly Station Observations** · planned · target later
+
+Global hourly and sub-hourly surface observations, the successor to ISD. Published as per-station and per-year bulk files by NCEI; the exact access path has not been confirmed yet and must be verified before an adapter is built.
+
+- Domain: Surface weather
+- Server-side subsetting: temporal
+- Homepage: https://www.ncei.noaa.gov/products/global-historical-climatology-network-hourly
+- License: US Government Work (public domain)
+- Extent: not stated
+- Keywords: weather, hourly, stations, global, ghcnh, ncei
+- Adapter: none yet
+
 ### noaa:gsom
 
-**Global Summary of the Month** · planned · target 0.5
+**Global Summary of the Month** · planned · target later
 
 Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. Shares the GHCN-Daily client and station search.
 
@@ -156,7 +184,7 @@ Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via 
 
 ### noaa:gsoy
 
-**Global Summary of the Year** · planned · target 0.5
+**Global Summary of the Year** · planned · target later
 
 Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. Shares the GHCN-Daily client.
 
@@ -166,20 +194,6 @@ Annual station summaries derived from GHCN-Daily via the NCEI Access Data Servic
 - License: US Government Work (public domain)
 - Extent: not stated
 - Keywords: climate, annual, stations, temperature, precipitation, gsoy, ncei
-- Adapter: none yet
-
-### noaa:ghcn-hourly
-
-**GHCN-Hourly Station Observations** · planned · target later
-
-Global hourly and sub-hourly surface observations, the successor to ISD. Published as per-station and per-year bulk files by NCEI; the exact access path has not been confirmed yet and must be verified before an adapter is built.
-
-- Domain: Surface weather
-- Server-side subsetting: temporal
-- Homepage: https://www.ncei.noaa.gov/products/global-historical-climatology-network-hourly
-- License: US Government Work (public domain)
-- Extent: not stated
-- Keywords: weather, hourly, stations, global, ghcnh, ncei
 - Adapter: none yet
 
 ### noaa:lcd
@@ -198,7 +212,7 @@ Hourly, daily, and monthly observations from airport and first-order stations vi
 
 ### noaa:storm-events
 
-**Storm Events Database** · planned · target 0.5
+**Storm Events Database** · planned · target later
 
 NCEI's record of significant weather events since 1950 (tornadoes, hail, wind, floods, and more) with locations, damage, and narratives. Published as per-year gzipped CSV files (details, fatalities, locations) in a plain HTTPS directory; the first NCEI bulk-directory dataset.
 
@@ -226,7 +240,7 @@ Raw volume scans from the WSR-88D weather radar network, archived in the public 
 
 ### noaa:mrms
 
-**Multi-Radar Multi-Sensor (MRMS)** · planned · target 0.5
+**Multi-Radar Multi-Sensor (MRMS)** · planned · target later
 
 Gridded CONUS products merged from all radars plus other sensors (reflectivity, precipitation rate and accumulation, severe weather diagnostics), as two-minute gzipped GRIB2 files in the public noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/.
 
@@ -254,7 +268,7 @@ Derived single-radar products (base reflectivity, velocity, storm totals, and ot
 
 ### noaa:goes-abi
 
-**GOES-R ABI Satellite Imagery** · planned · target 0.5
+**GOES-R ABI Satellite Imagery** · planned · target later
 
 Advanced Baseline Imager products from GOES-16, 18, and 19 in the public noaa-goes16/18/19 S3 buckets, laid out as PRODUCT/YYYY/DDD/HH/ with one NetCDF per scan (for example ABI-L2-CMIPC). Same anonymous S3 pattern as NEXRAD, plus product, satellite, and channel selection.
 
@@ -282,7 +296,7 @@ Lightning flash, group, and event detections (GLM-L2-LCFA) in 20-second NetCDF f
 
 ### noaa:hurdat2
 
-**HURDAT2 Atlantic and Pacific Best Tracks** · planned · target 0.5
+**HURDAT2 Atlantic and Pacific Best Tracks** · planned · target later
 
 National Hurricane Center best-track database: six-hourly position, intensity, pressure, and wind radii for Atlantic (since 1851) and eastern North Pacific (since 1949) tropical cyclones. One fixed-format text file per basin, refreshed each season; the single-file pattern.
 
@@ -296,7 +310,7 @@ National Hurricane Center best-track database: six-hourly position, intensity, p
 
 ### noaa:ibtracs
 
-**IBTrACS Global Tropical Cyclone Tracks** · planned · target 0.5
+**IBTrACS Global Tropical Cyclone Tracks** · planned · target later
 
 International Best Track Archive for Climate Stewardship: merged best tracks from all agencies worldwide since 1842. CSV and NetCDF files by basin or period from an NCEI HTTPS directory (v04r01).
 
@@ -352,7 +366,7 @@ Statistically blended forecast guidance in GRIB2 from the public noaa-nbm-grib2-
 
 ### noaa:climate-normals
 
-**U.S. Climate Normals 1991-2020** · planned · target 0.5
+**U.S. Climate Normals 1991-2020** · planned · target later
 
 Daily and monthly station normals via the NCEI Access Data Service datasets normals-daily-1991-2020 and normals-monthly-1991-2020. The daily dataset requires start and end dates inside a placeholder year (for example 2010-01-01 to 2010-12-31).
 
@@ -422,7 +436,7 @@ Extended Reconstructed SST v5: monthly global 2 degree analysis since 1854, one 
 
 ### noaa:coops-water-levels
 
-**CO-OPS Water Levels and Tides** · planned · target 0.5
+**CO-OPS Water Levels and Tides** · planned · target later
 
 Observed and predicted water levels, tide predictions, and related products for NWLON tide stations from the CO-OPS Data API, with a companion metadata API for station lookup. Anonymous REST with station, product, datum, and date-range parameters.
 

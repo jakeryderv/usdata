@@ -122,3 +122,54 @@ def test_cli_pull_and_verify_roundtrip(manifest: Path, tmp_path: Path) -> None:
         stale = runner.invoke(app, ["pull", str(manifest), "--cache-dir", str(tmp_path)])
     # Restore refetches the altered file; upstream now differs from the lock: exit 4.
     assert stale.exit_code == 4 and "expected sha256" in stale.output
+
+
+def test_verify_rejects_changed_manifest(manifest: Path, tmp_path: Path) -> None:
+    with respx.mock() as mock:
+        mock.get(DATA_URL).respond(200, content=CSV_V1)
+        pull(manifest, root=tmp_path)
+    manifest.write_text(MANIFEST.replace("2024-05-07", "2024-05-08"))
+    with pytest.raises(ManifestChanged):
+        verify(manifest, root=tmp_path)
+    result = CliRunner().invoke(app, ["verify", str(manifest), "--cache-dir", str(tmp_path)])
+    assert result.exit_code == 2 and "changed" in result.output
+
+
+@pytest.mark.parametrize("allow_empty", [False, True])
+def test_empty_source_is_explicit_and_failed_resolve_preserves_lock(
+    manifest: Path, tmp_path: Path, allow_empty: bool
+) -> None:
+    with respx.mock() as mock:
+        mock.get(DATA_URL).respond(200, content=CSV_V1)
+        pull(manifest, root=tmp_path)
+    original_lock = lockfile_path(manifest).read_bytes()
+    manifest.write_text(
+        MANIFEST + "  - dataset: noaa:ghcn-daily\n"
+        "    location: ok\n    start: 2024-05-06\n    end: 2024-05-07\n"
+        f"    allow_empty: {str(allow_empty).lower()}\n"
+    )
+    with respx.mock() as mock:
+        mock.get(SEARCH_URL).respond(200, json={"results": [], "count": 0})
+        result = CliRunner().invoke(
+            app, ["pull", str(manifest), "--cache-dir", str(tmp_path), "--force"]
+        )
+    if allow_empty:
+        assert result.exit_code == 0
+        assert len(Lockfile.load(lockfile_path(manifest)).assets) == 1
+        assert verify(manifest, root=tmp_path) == []
+    else:
+        assert result.exit_code == 1 and "source 2" in result.output
+        assert lockfile_path(manifest).read_bytes() == original_lock
+
+
+def test_empty_initial_pull_does_not_create_lockfile(tmp_path: Path) -> None:
+    manifest = tmp_path / "empty.yaml"
+    manifest.write_text(
+        "name: empty\nsources:\n  - dataset: noaa:ghcn-daily\n"
+        "    location: ok\n    start: 2024-05-06\n    end: 2024-05-07\n"
+    )
+    with respx.mock() as mock:
+        mock.get(SEARCH_URL).respond(200, json={"results": [], "count": 0})
+        result = CliRunner().invoke(app, ["pull", str(manifest), "--cache-dir", str(tmp_path)])
+    assert result.exit_code == 1 and "matched no assets" in result.output
+    assert not lockfile_path(manifest).exists()

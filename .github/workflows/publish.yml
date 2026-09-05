@@ -32,13 +32,15 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ env.RELEASE_SHA }}
-      - name: Require successful main CI for the release commit
+      - name: Select successful main CI for the release commit
+        id: ci
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          passed=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$RELEASE_SHA&branch=main&event=push&per_page=100" \
-            --jq 'any(.workflow_runs[]; .conclusion == "success")')
-          test "$passed" = true
+          run_id=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$RELEASE_SHA&branch=main&event=push&per_page=100" \
+            --jq '[.workflow_runs[] | select(.conclusion == "success")][0].id // empty')
+          test -n "$run_id"
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
       - uses: astral-sh/setup-uv@v7
       - id: version
         run: |
@@ -49,7 +51,17 @@ jobs:
             echo "v$v already tagged; nothing to publish"
           fi
       - if: steps.version.outputs.tagged != 'true'
-        run: uv build
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.ci.outputs.run_id }}
+      - if: steps.version.outputs.tagged != 'true'
+        name: Validate the CI distributions against the release version
+        env:
+          V: ${{ steps.version.outputs.version }}
+        run: uv run --no-project python scripts/check_dist.py dist --version "$V"
       - if: steps.version.outputs.tagged != 'true'
         run: uv publish --check-url https://pypi.org/simple/usdata/
       - if: steps.version.outputs.tagged != 'true'
