@@ -24,7 +24,7 @@ from usdata.providers.noaa.sites import get_site
 from usdata.query import resolve_place
 
 assert usdata.__version__ == os.environ["USDATA_EXPECTED_VERSION"]
-assert Path(usdata.__file__).resolve().is_relative_to(Path.cwd())
+assert Path(usdata.__file__).resolve().is_relative_to(Path.cwd().resolve())
 assert (resources.files("usdata") / "py.typed").is_file()
 assert usdata.get("noaa:ghcn-daily").id == "noaa:ghcn-daily"
 assert usdata.search("radar")
