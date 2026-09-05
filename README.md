@@ -4,7 +4,8 @@ Unified Python SDK and CLI for discovering, fetching, and tracking the
 provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 
 > Status: pre-alpha. `noaa:ghcn-daily` and `noaa:nexrad-level2` fetch real
-> data with provenance; other registry entries are stubs.
+> data with provenance. USGS daily values are available from source for the
+> next release; other entries are stubs or planned.
 > See [docs/roadmap.md](docs/roadmap.md).
 
 ## Providers
@@ -13,12 +14,12 @@ provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 | Provider | Available | Stub | Planned | Next up (0.5) | Datasets |
 |---|---:|---:|---:|---|---|
 | [NOAA](docs/providers/noaa.md) | 2 | 1 | 26 | `gsom`, `gsoy`, `storm-events`, `mrms`, `goes-abi`, `hurdat2`, `ibtracs`, `climate-normals`, `coops-water-levels`, `coastwatch-sst` | `ghcn-daily`, `nexrad-level2`, _coastwatch-sst_, +26 planned |
+| [USGS](docs/providers/usgs.md) | 1 | 0 | 2 | — | `water-daily`, +2 planned |
 | [Census Bureau](docs/providers/census.md) | 0 | 0 | 1 | — | +1 planned |
 | [EPA](docs/providers/epa.md) | 0 | 0 | 1 | — | +1 planned |
 | [FEMA](docs/providers/fema.md) | 0 | 0 | 1 | — | +1 planned |
 | [NASA](docs/providers/nasa.md) | 0 | 0 | 1 | — | +1 planned |
 | [USDA](docs/providers/usda.md) | 0 | 0 | 1 | — | +1 planned |
-| [USGS](docs/providers/usgs.md) | 0 | 0 | 3 | `water-daily` | +3 planned |
 
 Available datasets are in `code`, stubs in _italics_; planned ones are counted. Each provider page has access notes and full dataset details; [docs/roadmap.md](docs/roadmap.md) lists datasets by target version.
 <!-- registry:end -->
@@ -60,6 +61,8 @@ usdata fetch noaa:ghcn-daily -p stations=USW00013967 --start 2024-01-01 --end 20
 usdata fetch noaa:nexrad-level2 --lat 35.47 --lon -97.52 \
     --start 2024-05-06T20:00 --end 2024-05-06T23:00        # nearest radar (KTLX)
 usdata fetch noaa:nexrad-level2 -p site=KTLX --start 2024-05-06T20:00 --end 2024-05-06T20:30 --dry-run
+usdata fetch usgs:water-daily -p sites=07164500 --vars 00060 \
+    --start 2024-05-06 --end 2024-05-07                  # next release / source install
 usdata pull dataset.yaml            # resolve, fetch, write dataset.lock.json
 usdata verify dataset.yaml          # exit 1 if any cached input drifted
 ```

@@ -7,6 +7,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `usgs:water-daily`: the first non-NOAA adapter, using the modern USGS Water Data
+  API for paginated CSV downloads by site or bbox, dates, parameter codes, and
+  statistic. Preserves units and quality metadata; supports cached fetches,
+  manifest pull, locked restoration, and verification without new dependencies.
+
 ## [0.4.0] - 2026-09-05
 
 ### Breaking
