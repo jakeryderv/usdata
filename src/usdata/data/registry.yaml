@@ -88,14 +88,14 @@ datasets:
     status: stub
     domain: satellite-oceanography
     target: "0.3"
-    title: CoastWatch Sea Surface Temperature
+    title: CoastWatch Blended Sea Surface Temperature
     description: >-
-      Gridded blended sea surface temperature from NOAA CoastWatch, served
-      through ERDDAP with full server-side spatial, temporal, and variable
-      subsetting.
-    keywords: [ocean, sst, sea surface temperature, satellite, erddap, coastwatch, gridded]
+      NOAA geo-polar blended daily SST analysis (day and night) on a global
+      5 km grid, ERDDAP dataset noaacwBLENDEDsstDNDaily on the CoastWatch
+      server, with full server-side spatial, temporal, and variable subsetting.
+    keywords: [ocean, sst, sea surface temperature, satellite, erddap, coastwatch, gridded, blended]
     protocol: erddap
-    homepage: https://coastwatch.noaa.gov/
+    homepage: https://coastwatch.noaa.gov/erddap/griddap/noaacwBLENDEDsstDNDaily.html
     license: US Government Work (public domain)
     spatial_extent: { west: -180.0, south: -90.0, east: 180.0, north: 90.0 }
     capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: true }
@@ -108,14 +108,430 @@ datasets:
     target: "0.4"
     title: GOES-R ABI Satellite Imagery
     description: >-
-      Advanced Baseline Imager Level 1b radiances and Level 2 products from
-      GOES-16/18/19, published to public S3 buckets. Same anonymous S3 access
-      pattern as NEXRAD; whole files per product per scan.
-    keywords: [satellite, imagery, goes, abi, clouds, fire, radiance]
+      Advanced Baseline Imager products from GOES-16, 18, and 19 in the public
+      noaa-goes16/18/19 S3 buckets, laid out as PRODUCT/YYYY/DDD/HH/ with one
+      NetCDF per scan (for example ABI-L2-CMIPC). Same anonymous S3 pattern as
+      NEXRAD, plus product, satellite, and channel selection.
+    keywords: [satellite, imagery, goes, abi, clouds, fire, radiance, netcdf]
     protocol: s3
     homepage: https://registry.opendata.aws/noaa-goes/
     license: US Government Work (public domain)
+    temporal_extent: { start: "2017-01-01T00:00:00Z" }
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+
+  - id: noaa:goes-glm
+    provider: noaa
+    status: planned
+    domain: weather-satellites
+    target: later
+    title: GOES Geostationary Lightning Mapper
+    description: >-
+      Lightning flash, group, and event detections (GLM-L2-LCFA) in 20-second
+      NetCDF files under the same GOES S3 buckets and layout as ABI.
+    keywords: [lightning, glm, goes, satellite, storms]
+    protocol: s3
+    homepage: https://registry.opendata.aws/noaa-goes/
+    license: US Government Work (public domain)
+    temporal_extent: { start: "2017-01-01T00:00:00Z" }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+
+  - id: noaa:storm-events
+    provider: noaa
+    status: planned
+    domain: severe-weather
+    target: "0.4"
+    title: Storm Events Database
+    description: >-
+      NCEI's record of significant weather events since 1950 (tornadoes, hail,
+      wind, floods, and more) with locations, damage, and narratives. Published
+      as per-year gzipped CSV files (details, fatalities, locations) in a plain
+      HTTPS directory; the first NCEI bulk-directory dataset.
+    keywords: [storms, tornado, hail, wind, flood, damage, severe weather, events]
+    protocol: http
+    homepage: https://www.ncdc.noaa.gov/stormevents/
+    license: US Government Work (public domain)
+    temporal_extent: { start: "1950-01-01T00:00:00Z" }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+
+  - id: noaa:hurdat2
+    provider: noaa
+    status: planned
+    domain: tropical-cyclones
+    target: "0.4"
+    title: HURDAT2 Atlantic and Pacific Best Tracks
+    description: >-
+      National Hurricane Center best-track database: six-hourly position,
+      intensity, pressure, and wind radii for Atlantic (since 1851) and
+      eastern North Pacific (since 1949) tropical cyclones. One fixed-format
+      text file per basin, refreshed each season; the single-file pattern.
+    keywords: [hurricane, tropical cyclone, best track, nhc, atlantic, pacific]
+    protocol: http
+    homepage: https://www.nhc.noaa.gov/data/#hurdat
+    license: US Government Work (public domain)
+    temporal_extent: { start: "1851-01-01T00:00:00Z" }
+    capabilities: { spatial_subset: false, temporal_subset: false, variable_subset: false }
+
+  - id: noaa:ibtracs
+    provider: noaa
+    status: planned
+    domain: tropical-cyclones
+    target: "0.4"
+    title: IBTrACS Global Tropical Cyclone Tracks
+    description: >-
+      International Best Track Archive for Climate Stewardship: merged best
+      tracks from all agencies worldwide since 1842. CSV and NetCDF files by
+      basin or period from an NCEI HTTPS directory (v04r01).
+    keywords: [tropical cyclone, hurricane, typhoon, best track, ibtracs, global]
+    protocol: http
+    homepage: https://www.ncei.noaa.gov/products/international-best-track-archive
+    license: US Government Work (public domain)
+    temporal_extent: { start: "1842-01-01T00:00:00Z" }
+    capabilities: { spatial_subset: false, temporal_subset: false, variable_subset: false }
+
+  - id: noaa:coops-water-levels
+    provider: noaa
+    status: planned
+    domain: sea-level-tides
+    target: "0.5"
+    title: CO-OPS Water Levels and Tides
+    description: >-
+      Observed and predicted water levels, tide predictions, and related
+      products for NWLON tide stations from the CO-OPS Data API, with a
+      companion metadata API for station lookup. Anonymous REST with
+      station, product, datum, and date-range parameters.
+    keywords: [tides, water level, sea level, coastal, coops, nwlon, stations]
+    protocol: http
+    homepage: https://api.tidesandcurrents.noaa.gov/api/prod/
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+
+  - id: noaa:gsom
+    provider: noaa
+    status: planned
+    domain: surface-weather
+    target: "0.5"
+    title: Global Summary of the Month
+    description: >-
+      Monthly station summaries derived from GHCN-Daily (means, extremes,
+      totals) via the NCEI Access Data Service dataset global-summary-of-the-month.
+      Shares the GHCN-Daily client and station search.
+    keywords: [climate, monthly, stations, temperature, precipitation, gsom, ncei]
+    protocol: http
+    homepage: https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-month
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+
+  - id: noaa:gsoy
+    provider: noaa
+    status: planned
+    domain: surface-weather
+    target: "0.5"
+    title: Global Summary of the Year
+    description: >-
+      Annual station summaries derived from GHCN-Daily via the NCEI Access Data
+      Service dataset global-summary-of-the-year. Shares the GHCN-Daily client.
+    keywords: [climate, annual, stations, temperature, precipitation, gsoy, ncei]
+    protocol: http
+    homepage: https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-year
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+
+  - id: noaa:climate-normals
+    provider: noaa
+    status: planned
+    domain: climate
+    target: "0.5"
+    title: U.S. Climate Normals 1991-2020
+    description: >-
+      Daily and monthly station normals via the NCEI Access Data Service
+      datasets normals-daily-1991-2020 and normals-monthly-1991-2020. The
+      daily dataset requires start and end dates inside a placeholder year
+      (for example 2010-01-01 to 2010-12-31).
+    keywords: [climate, normals, averages, stations, temperature, precipitation]
+    protocol: http
+    homepage: https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+
+  - id: noaa:mrms
+    provider: noaa
+    status: planned
+    domain: weather-radar
+    target: "0.5"
+    title: Multi-Radar Multi-Sensor (MRMS)
+    description: >-
+      Gridded CONUS products merged from all radars plus other sensors
+      (reflectivity, precipitation rate and accumulation, severe weather
+      diagnostics), as two-minute gzipped GRIB2 files in the public
+      noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/.
+    keywords: [radar, mrms, precipitation, reflectivity, gridded, grib2, conus]
+    protocol: s3
+    homepage: https://registry.opendata.aws/noaa-mrms-pds/
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+
+  - id: noaa:nexrad-level3
+    provider: noaa
+    status: planned
+    domain: weather-radar
+    target: later
+    title: NEXRAD Level III Products
+    description: >-
+      Derived single-radar products (base reflectivity, velocity, storm
+      totals, and others) in the public unidata-nexrad-level3 S3 bucket, with
+      flat keys SITE_PRODUCT_YYYY_MM_DD_HH_MM_SS where the site id drops its
+      leading K. Recent data only; the archive is at NCEI.
+    keywords: [radar, nexrad, level iii, reflectivity, velocity, products]
+    protocol: s3
+    homepage: https://registry.opendata.aws/noaa-nexrad/
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+
+  - id: noaa:hrrr
+    provider: noaa
+    status: planned
+    domain: weather-models
+    target: "0.6"
+    title: HRRR Forecast Model Output
+    description: >-
+      High-Resolution Rapid Refresh 3 km hourly forecasts in GRIB2 from the
+      public noaa-hrrr-bdp-pds S3 bucket, laid out as hrrr.YYYYMMDD/conus/
+      with one file per cycle and forecast hour. Large files; cycle and
+      forecast-hour selection are essential.
+    keywords: [forecast, model, hrrr, grib2, weather, nwp]
+    protocol: s3
+    homepage: https://registry.opendata.aws/noaa-hrrr-pds/
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+
+  - id: noaa:gfs
+    provider: noaa
+    status: planned
+    domain: weather-models
+    target: "0.6"
+    title: GFS Forecast Model Output
+    description: >-
+      Global Forecast System output in GRIB2 from the public noaa-gfs-bdp-pds
+      S3 bucket, laid out as gfs.YYYYMMDD/HH/atmos/ with files per resolution
+      and forecast hour (for example pgrb2.0p25.fNNN).
+    keywords: [forecast, model, gfs, grib2, global, nwp]
+    protocol: s3
+    homepage: https://registry.opendata.aws/noaa-gfs-bdp-pds/
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+
+  - id: noaa:nbm
+    provider: noaa
+    status: planned
+    domain: weather-models
+    target: later
+    title: National Blend of Models
+    description: >-
+      Statistically blended forecast guidance in GRIB2 from the public
+      noaa-nbm-grib2-pds S3 bucket, laid out as blend.YYYYMMDD/HH/core/ with
+      files per region and forecast hour.
+    keywords: [forecast, blend, nbm, grib2, guidance]
+    protocol: s3
+    homepage: https://registry.opendata.aws/noaa-nbm/
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+
+  - id: noaa:oisst
+    provider: noaa
+    status: planned
+    domain: ocean-physics
+    target: "0.6"
+    title: OISST Daily Sea Surface Temperature
+    description: >-
+      Optimum Interpolation SST v2.1: daily global 0.25 degree analysis since
+      September 1981 as one NetCDF per day, from the NOAA CDR S3 bucket
+      (data/v2.1/avhrr/YYYYMM/) or the NCEI HTTPS mirror.
+    keywords: [sst, sea surface temperature, ocean, climate data record, oisst, netcdf]
+    protocol: s3
+    homepage: https://www.ncei.noaa.gov/products/optimum-interpolation-sst
+    license: US Government Work (public domain)
+    temporal_extent: { start: "1981-09-01T00:00:00Z" }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+
+  - id: noaa:ersst
+    provider: noaa
+    status: planned
+    domain: ocean-physics
+    target: later
+    title: ERSST Monthly Sea Surface Temperature
+    description: >-
+      Extended Reconstructed SST v5: monthly global 2 degree analysis since
+      1854, one NetCDF per month in an NCEI HTTPS directory.
+    keywords: [sst, sea surface temperature, ocean, climate, ersst, monthly, netcdf]
+    protocol: http
+    homepage: https://www.ncei.noaa.gov/products/extended-reconstructed-sst
+    license: US Government Work (public domain)
+    temporal_extent: { start: "1854-01-01T00:00:00Z" }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+
+  - id: noaa:etopo
+    provider: noaa
+    status: planned
+    domain: bathymetry
+    target: "0.6"
+    title: ETOPO 2022 Global Relief
+    description: >-
+      Global topography and bathymetry at 15, 30, and 60 arc-seconds as
+      NetCDF and GeoTIFF tiles, served through the NCEI THREDDS catalog with
+      OPeNDAP access; the THREDDS pattern.
+    keywords: [bathymetry, topography, elevation, relief, dem, etopo, global]
+    protocol: thredds
+    homepage: https://www.ncei.noaa.gov/products/etopo-global-relief-model
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: true, temporal_subset: false, variable_subset: true }
+
+  - id: noaa:nclimdiv
+    provider: noaa
+    status: planned
+    domain: climate
+    target: later
+    title: nClimDiv Climate Divisional Data
+    description: >-
+      Monthly temperature, precipitation, and drought indices for U.S.
+      climate divisions, states, and regions since 1895, as fixed-width text
+      files in an NCEI monitoring-content directory refreshed monthly.
+    keywords: [climate, divisions, drought, temperature, precipitation, nclimdiv, monthly]
+    protocol: http
+    homepage: https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/
+    license: US Government Work (public domain)
+    temporal_extent: { start: "1895-01-01T00:00:00Z" }
+    capabilities: { spatial_subset: false, temporal_subset: false, variable_subset: false }
+
+  - id: noaa:lcd
+    provider: noaa
+    status: planned
+    domain: surface-weather
+    target: later
+    title: Local Climatological Data
+    description: >-
+      Hourly, daily, and monthly observations from airport and first-order
+      stations via the NCEI Access Data Service dataset
+      local-climatological-data, addressed by WBAN-based station ids.
+    keywords: [weather, hourly, airports, stations, lcd, ncei]
+    protocol: http
+    homepage: https://www.ncei.noaa.gov/products/land-based-station/local-climatological-data
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+
+  - id: noaa:ghcn-hourly
+    provider: noaa
+    status: planned
+    domain: surface-weather
+    target: later
+    title: GHCN-Hourly Station Observations
+    description: >-
+      Global hourly and sub-hourly surface observations, the successor to ISD.
+      Published as per-station and per-year bulk files by NCEI; the exact
+      access path has not been confirmed yet and must be verified before an
+      adapter is built.
+    keywords: [weather, hourly, stations, global, ghcnh, ncei]
+    protocol: http
+    homepage: https://www.ncei.noaa.gov/products/global-historical-climatology-network-hourly
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+
+  - id: noaa:sea-ice-index
+    provider: noaa
+    status: planned
+    domain: snow-ice
+    target: later
+    title: Sea Ice Index
+    description: >-
+      Daily and monthly Arctic and Antarctic sea ice extent and concentration
+      (NOAA@NSIDC G02135) as CSV, GeoTIFF, and shapefiles in an HTTPS
+      directory hosted by NSIDC.
+    keywords: [sea ice, arctic, antarctic, extent, concentration, nsidc, polar]
+    protocol: http
+    homepage: https://nsidc.org/data/g02135
+    license: US Government Work (public domain)
+    temporal_extent: { start: "1978-10-26T00:00:00Z" }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+
+  - id: noaa:ocads
+    provider: noaa
+    status: planned
+    domain: ocean-chemistry
+    target: later
+    title: Ocean Carbon and Acidification Data System
+    description: >-
+      Archived ocean carbon, pH, and related chemistry datasets (cruises,
+      moorings, syntheses such as SOCAT and GLODAP) in an NCEI HTTPS directory
+      organized by accession.
+    keywords: [ocean, carbon, acidification, ph, chemistry, ocads, socat]
+    protocol: http
+    homepage: https://www.ncei.noaa.gov/products/ocean-carbon-acidification-data-system
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: false, variable_subset: false }
+
+  - id: noaa:tsunami-events
+    provider: noaa
+    status: planned
+    domain: natural-hazards
+    target: later
+    title: Global Historical Tsunami Database
+    description: >-
+      Tsunami source events and runup observations since 2100 BCE from NCEI,
+      served as JSON by the HazEL hazard-service API with year, magnitude,
+      and location filters.
+    keywords: [tsunami, hazards, earthquakes, historical, hazel, ncei]
+    protocol: http
+    homepage: https://www.ngdc.noaa.gov/hazel/view/hazards/tsunami/event-search
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: false }
+
+  - id: noaa:paleo-search
+    provider: noaa
+    status: planned
+    domain: paleoclimate
+    target: later
+    title: World Data Service for Paleoclimatology
+    description: >-
+      Proxy climate records (tree rings, ice cores, sediments, corals) with
+      a JSON study-search API from NCEI that returns study metadata and data
+      file URLs filtered by data type, region, and time span.
+    keywords: [paleoclimate, proxies, tree rings, ice cores, sediments, corals]
+    protocol: http
+    homepage: https://www.ncei.noaa.gov/products/paleoclimatology
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: false }
+
+  - id: noaa:swpc-realtime
+    provider: noaa
+    status: planned
+    domain: space-weather
+    target: later
+    title: SWPC Real-Time Space Weather Products
+    description: >-
+      Planetary K index, solar wind, and other real-time indices as small
+      JSON files from the Space Weather Prediction Center services host.
+      Rolling recent windows only; historical archives live elsewhere.
+    keywords: [space weather, solar wind, geomagnetic, kp index, swpc]
+    protocol: http
+    homepage: https://www.swpc.noaa.gov/products-and-data
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: false, variable_subset: true }
+
+  - id: noaa:cdr-ndvi
+    provider: noaa
+    status: planned
+    domain: land-environment
+    target: later
+    title: NDVI Climate Data Record
+    description: >-
+      Daily global normalized difference vegetation index from AVHRR and
+      VIIRS since 1981, one NetCDF per day in the public noaa-cdr-ndvi-pds S3
+      bucket laid out as data/YYYY/.
+    keywords: [vegetation, ndvi, land, climate data record, avhrr, viirs]
+    protocol: s3
+    homepage: https://www.ncei.noaa.gov/products/climate-data-records/normalized-difference-vegetation-index
+    license: US Government Work (public domain)
+    temporal_extent: { start: "1981-06-24T00:00:00Z" }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
 
   # ---------------------------------------------------------------- USGS
   - id: usgs:water-daily
