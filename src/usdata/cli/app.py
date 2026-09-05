@@ -3,9 +3,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Annotated
 
+import httpx
 import typer
 
 from usdata import __version__, build_query, default_registry
+from usdata.fetch import fetch_asset
 from usdata.manifest import Manifest
 from usdata.providers import load_adapter
 from usdata.providers.base import NotImplementedProvider
@@ -88,25 +90,79 @@ def info(
 
 @app.command()
 def fetch(
-    dataset_id: Annotated[str, typer.Argument(help="Dataset id, e.g. noaa:nexrad-level2")],
+    dataset_id: Annotated[str, typer.Argument(help="Dataset id, e.g. noaa:ghcn-daily")],
     state: Annotated[str | None, typer.Option(help="State name or postal code.")] = None,
+    bbox: Annotated[str | None, typer.Option(help="west,south,east,north in degrees.")] = None,
     lat: Annotated[float | None, typer.Option()] = None,
     lon: Annotated[float | None, typer.Option()] = None,
+    radius_km: Annotated[float, typer.Option(help="Radius around --lat/--lon.")] = 50.0,
     start: Annotated[str | None, typer.Option(help="ISO date or datetime.")] = None,
     end: Annotated[str | None, typer.Option(help="ISO date or datetime.")] = None,
+    variables: Annotated[
+        str | None, typer.Option("--vars", help="Comma-separated variable names.")
+    ] = None,
+    param: Annotated[
+        list[str] | None,
+        typer.Option("--param", "-p", help="Provider-specific key=value, repeatable."),
+    ] = None,
+    cache_dir: Annotated[Path | None, typer.Option(help="Override the cache directory.")] = None,
+    force: Annotated[bool, typer.Option(help="Re-download even if cached.")] = False,
+    dry_run: Annotated[
+        bool, typer.Option(help="List matching assets without downloading.")
+    ] = False,
 ) -> None:
     """Resolve a query against one dataset and download the matching assets."""
+    params: dict[str, str] = {}
+    for item in param or []:
+        key, sep, value = item.partition("=")
+        if not sep:
+            typer.secho(f"--param expects key=value, got {item!r}", err=True, fg="red")
+            raise typer.Exit(code=2)
+        params[key] = value
+    box = None
+    if bbox:
+        try:
+            w, s, e, n = (float(x) for x in bbox.split(","))
+        except ValueError:
+            typer.secho("--bbox expects west,south,east,north", err=True, fg="red")
+            raise typer.Exit(code=2) from None
+        box = (w, s, e, n)
     try:
         ds = default_registry().get(dataset_id)
-        query = build_query(location=state, lat=lat, lon=lon, start=start, end=end)
-        assets = load_adapter(ds).list_assets(query)
+        query = build_query(
+            location=state,
+            bbox=box,
+            lat=lat,
+            lon=lon,
+            radius_km=radius_km,
+            start=start,
+            end=end,
+            variables=[v.strip() for v in variables.split(",")] if variables else None,
+            **params,
+        )
+        adapter = load_adapter(ds)
+        assets = adapter.list_assets(query)
+        if dry_run:
+            for a in assets:
+                typer.echo(f"{a.id}\t{a.href}")
+            typer.echo(f"{len(assets)} asset(s) matched", err=True)
+            return
+        fetched = [fetch_asset(ds, a, root=cache_dir, force=force) for a in assets]
     except (DatasetNotFound, UnknownPlace, ValueError) as e:
         typer.secho(str(e), err=True, fg="red")
         raise typer.Exit(code=2) from None
     except NotImplementedProvider as e:
         typer.secho(str(e), err=True, fg="yellow")
         raise typer.Exit(code=3) from None
-    typer.echo(f"{len(assets)} asset(s) matched")
+    except httpx.HTTPError as e:
+        typer.secho(f"request failed: {e}", err=True, fg="red")
+        raise typer.Exit(code=4) from None
+    if not fetched:
+        typer.echo("No assets matched.", err=True)
+        raise typer.Exit(code=1)
+    for f in fetched:
+        tag = "cached" if f.from_cache else "fetched"
+        typer.echo(f"{f.path}\t{tag}\t{f.provenance.size} bytes")
 
 
 @app.command()

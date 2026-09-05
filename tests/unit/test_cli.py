@@ -35,6 +35,34 @@ def test_fetch_reports_unimplemented_adapter() -> None:
     assert result.exit_code == 3
 
 
+def test_fetch_rejects_bad_query() -> None:
+    result = runner.invoke(app, ["fetch", "noaa:ghcn-daily", "--state", "OK"])
+    assert result.exit_code == 2
+    assert "start and end" in result.output
+    assert runner.invoke(app, ["fetch", "noaa:ghcn-daily", "--bbox", "1,2"]).exit_code == 2
+    assert runner.invoke(app, ["fetch", "noaa:ghcn-daily", "-p", "novalue"]).exit_code == 2
+
+
+def test_fetch_dry_run_lists_assets() -> None:
+    result = runner.invoke(
+        app,
+        [
+            "fetch",
+            "noaa:ghcn-daily",
+            "-p",
+            "stations=USW00013967",
+            "--start",
+            "2024-05-06",
+            "--end",
+            "2024-05-07",
+            "--dry-run",
+        ],
+    )
+    assert result.exit_code == 0
+    assert "daily-summaries_2024-05-06_2024-05-07" in result.stdout
+    assert "ncei.noaa.gov" in result.stdout
+
+
 def test_pull_validates_manifest(tmp_path: Path) -> None:
     m = tmp_path / "dataset.yaml"
     m.write_text("name: t\nsources:\n  - dataset: noaa:ghcn-daily\n")

@@ -24,13 +24,16 @@ user arguments ─► build_query ─► Query
 | `registry` | Loads the curated `data/registry.yaml`; keyword-ranked search filtered by provider, space, and time. |
 | `query` | Turns loose user input (state names, ISO dates, lat/lon) into a normalized `Query`. Place lookup uses `data/places.yaml`. |
 | `providers` | One `Provider` subclass per dataset, loaded by dotted path from the registry entry. Translates `Query` to agency-specific listing and download. |
+| `protocols` | Transport clients with no dataset knowledge. `http.download` streams to disk atomically. |
+| `fetch` | Core loop: adapter resolves assets, cache is checked, bytes fetched, provenance written. |
 | `cache` | Cache directory resolution and content hashing. |
 | `provenance` | Builds and persists a `Provenance` record beside each fetched file. |
 | `manifest` | `Manifest` (declared inputs) and `Lockfile` (what was actually fetched, with checksums). |
 | `cli` | Typer app. Thin: argument parsing and exit codes only, no logic. |
 
-Planned but not yet present: a `protocols/` package with shared HTTP, S3, and
-ERDDAP clients once two adapters need the same one.
+`protocols/` holds transport clients shared by adapters (`http` today; S3 and
+ERDDAP when their adapters land). `fetch` is the core loop that ties adapter,
+cache, and provenance together; the CLI calls it rather than adapters directly.
 
 ## Boundaries
 
@@ -48,3 +51,4 @@ ERDDAP clients once two adapters need the same one.
 | 1 | no results |
 | 2 | bad input (unknown dataset, place, or manifest error) |
 | 3 | operation not implemented yet |
+| 4 | upstream request failed |

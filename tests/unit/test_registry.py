@@ -42,10 +42,13 @@ def test_search_filters_by_provider_and_bbox(registry: Registry) -> None:
 
 def test_every_adapter_resolves_to_a_provider(registry: Registry) -> None:
     for ds in registry:
-        adapter = load_adapter(ds)
-        assert isinstance(adapter, Provider)
+        assert isinstance(load_adapter(ds), Provider)
+
+
+def test_stub_adapters_say_so(registry: Registry) -> None:
+    for dataset_id in ("noaa:nexrad-level2", "noaa:coastwatch-sst"):
         with pytest.raises(NotImplementedProvider):
-            adapter.list_assets(Query())
+            load_adapter(registry.get(dataset_id)).list_assets(Query())
 
 
 def test_duplicate_ids_rejected(registry: Registry) -> None:

@@ -20,10 +20,10 @@ v0.1.0 on PyPI is a name-reserving placeholder. Prove the abstraction against th
 access patterns, then ship the reproducibility spine.
 
 - [x] Skeleton: models, curated registry, query normalization, CLI, tests, CI
-- [ ] `noaa:ghcn-daily` adapter (NCEI Access Data Service, REST with filtering)
+- [x] `noaa:ghcn-daily` adapter (NCEI search service for stations, data service for CSV)
 - [ ] `noaa:nexrad-level2` adapter (NODD S3, anonymous listing, point-to-site lookup)
 - [ ] `noaa:coastwatch-sst` adapter (ERDDAP, true server-side subsetting)
-- [ ] Cache with checksum verification, provenance sidecars written on fetch
+- [x] Cache with checksum verification, provenance sidecars written on fetch
 - [ ] `usdata pull manifest.yaml` producing a lockfile; `usdata verify` against it
 - [ ] Full state and county bounding boxes generated from Census boundary files
 

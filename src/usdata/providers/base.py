@@ -11,6 +11,10 @@ class NotImplementedProvider(NotImplementedError):
     """Raised by adapters that are registered but not yet built."""
 
 
+class QueryError(ValueError):
+    """The query cannot be satisfied by this dataset (missing or unsupported constraints)."""
+
+
 class Provider(ABC):
     """One adapter per dataset. Translates a normalized query into concrete assets."""
 
