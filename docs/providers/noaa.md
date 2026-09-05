@@ -77,7 +77,7 @@ Use explicit IDs when exact site selection is required.
 
 ## CoastWatch SST
 
-Available from source for v0.5. The verified dataset is
+Available since v0.5. The verified dataset is
 [`noaacwBLENDEDsstDNDaily`](https://coastwatch.noaa.gov/erddap/info/noaacwBLENDEDsstDNDaily/index.html),
 a daily blended day/night SST analysis on `(time, latitude, longitude)`.
 Latitude has 3,600 centers from -89.975 to 89.975; longitude has 7,200 from

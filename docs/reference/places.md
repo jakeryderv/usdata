@@ -1,6 +1,6 @@
 # State and county lookup
 
-Available from source for v0.5. `build_query(location=...)`, manifest `location`,
+Available since v0.5. `build_query(location=...)`, manifest `location`,
 and CLI `--location` (also `--state`) use the same bundled, offline table.
 
 | Input | Meaning |

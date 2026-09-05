@@ -3,10 +3,9 @@
 Unified Python SDK and CLI for discovering, fetching, and tracking the
 provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 
-> Status: pre-alpha. `noaa:ghcn-daily` and `noaa:nexrad-level2` fetch real
-> data with provenance. USGS daily values, CoastWatch SST subsets, and full
-> Census state/county lookup are available from source for v0.5; other datasets
-> are planned.
+> Status: pre-alpha. v0.5 supports GHCN-Daily, NEXRAD Level II, USGS daily
+> values, and CoastWatch SST subsets with provenance, plus Census state/county
+> lookup. Other datasets are planned.
 > See [docs/roadmap.md](docs/roadmap.md).
 
 ## Providers
@@ -55,7 +54,7 @@ for item in fetch(ds, query):
 
 ```sh
 usdata search "tornado radar" --state OK
-usdata search precipitation --location "Cleveland County, OK"  # v0.5 / source
+usdata search precipitation --location "Cleveland County, OK"
 usdata info noaa:ghcn-daily
 usdata fetch noaa:ghcn-daily --lat 35.39 --lon -97.60 --radius-km 15 \
     --start 2024-05-06 --end 2024-05-07 --vars PRCP,TMAX
@@ -64,9 +63,9 @@ usdata fetch noaa:nexrad-level2 --lat 35.47 --lon -97.52 \
     --start 2024-05-06T20:00 --end 2024-05-06T23:00        # nearest radar (KTLX)
 usdata fetch noaa:nexrad-level2 -p site=KTLX --start 2024-05-06T20:00 --end 2024-05-06T20:30 --dry-run
 usdata fetch usgs:water-daily -p sites=07164500 --vars 00060 \
-    --start 2024-05-06 --end 2024-05-07                  # next release / source install
+    --start 2024-05-06 --end 2024-05-07
 usdata fetch noaa:coastwatch-sst --bbox=-80.08,30.02,-80.02,30.08 \
-    --start 2024-05-06T12:00Z --end 2024-05-06T12:00Z    # v0.5 / source; four grid cells
+    --start 2024-05-06T12:00Z --end 2024-05-06T12:00Z    # four grid cells
 usdata pull dataset.yaml            # resolve, fetch, write dataset.lock.json
 usdata verify dataset.yaml          # exit 1 if any cached input drifted
 ```

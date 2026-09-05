@@ -4,7 +4,7 @@ Fetch two days of station weather near Oklahoma City and streamflow at the
 USGS Tulsa site. This example demonstrates collecting and preserving inputs;
 it does not infer a causal relationship between the two sites.
 
-USGS support requires a source installation until v0.5 is published. Follow
+Requires usdata v0.5 or newer. To run the bundled example, follow
 [development setup](../../README.md#development), then run from the repo root:
 
 ```sh

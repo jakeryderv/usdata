@@ -35,21 +35,20 @@ name-reserving placeholder.
 - [x] Provider resource ownership and custom registry fixes
 - [x] Publishing gated on successful CI for the exact release commit
 
-**Now (v0.5)**: cross-provider access, gridded subsetting, and trustworthy inputs.
+**Shipped (v0.5)**: cross-provider access, gridded subsetting, and trustworthy inputs.
 
-- [x] USGS daily values via the modern Water Data API (next release; available from source)
+- [x] USGS daily values via the modern Water Data API
 - [x] [CoastWatch SST and ERDDAP griddap](https://github.com/jakeryderv/usdata/issues/5):
   a verified dataset, spatial/time/variable subsetting, stable asset IDs, and a tiny live test
 - [x] [State and county lookup](https://github.com/jakeryderv/usdata/issues/7):
   generated Census bounding boxes, names/postal codes/FIPS, documented vintage and limits
-- [x] [Review follow-ups](https://github.com/jakeryderv/usdata/issues/30) (implemented in source):
+- [x] [Review follow-ups](https://github.com/jakeryderv/usdata/issues/30):
   empty-source policy, manifest consistency, strict provider params,
   bounded HTTP retries, manifest guide, and installed-wheel CI checks
 
-The v0.5 features are implemented in source and await release.
-Release acceptance: `just check` and the live
-integration suite pass, and the NOAA/USGS manifest example pulls, restores, and
-verifies. v0.5 does not require the entire NOAA expansion backlog.
+Validation: `just check` and the live integration suite pass, including the
+NOAA/USGS manifest example pulling, restoring, and verifying. The remaining
+NOAA expansion backlog continues below.
 
 **Following v0.5 (not yet assigned a release)**:
 
