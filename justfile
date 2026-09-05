@@ -24,6 +24,10 @@ fmt:
 docs:
     uv run python scripts/render_registry.py
 
+# Regenerate Census state/county boxes (downloads source archives unless --source-dir is set)
+places *args:
+    uv run python scripts/build_places.py {{args}}
+
 # Everything CI runs: format check, lint, typecheck, tests, generated docs current
 check:
     uv run ruff format --check

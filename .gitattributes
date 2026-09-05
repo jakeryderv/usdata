@@ -1,0 +1,3 @@
+# Generated data hashes must be identical across checkout platforms.
+src/usdata/data/*.csv text eol=lf
+src/usdata/data/*.json text eol=lf

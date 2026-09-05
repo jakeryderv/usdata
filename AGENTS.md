@@ -14,7 +14,7 @@ data, with provenance and reproducible manifests. Read
 - `src/usdata/models.py`: all shared pydantic types. Change here ripples everywhere.
 - `src/usdata/data/registry.yaml`: the curated dataset catalog. Adding a dataset = a YAML entry + an adapter class.
 - `src/usdata/providers/<agency>/`: one `Provider` subclass per dataset.
-- `src/usdata/protocols/`: transport only (`http`, `s3`). No dataset knowledge here.
+- `src/usdata/protocols/`: transport only (`http`, `s3`, `erddap`). No dataset knowledge here.
 - `scripts/`: generators for bundled data files. Regenerate, don't hand-edit `data/*.csv`.
 - `src/usdata/cli/app.py`: Typer app. Keep it thin; logic lives in the library.
 - `tests/unit/`: fast, offline. `tests/integration/` (when present): live services, marked `integration`.

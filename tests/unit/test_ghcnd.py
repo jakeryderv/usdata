@@ -63,7 +63,8 @@ def test_bbox_query_paginates_station_search(
         assets = adapter.list_assets(q)
     assert route.call_count == 2
     first = route.calls[0].request.url.params
-    assert first["bbox"].split(",")[0] == "37.0"  # north first
+    assert q.bbox is not None
+    assert float(first["bbox"].split(",")[0]) == q.bbox.north  # north first
     assert first["dataTypes"] == "PRCP"
     assert [httpx.URL(a.href).params["stations"] for a in assets] == ["A,B", "C"]
     assert all(httpx.URL(a.href).params["dataTypes"] == "PRCP" for a in assets)

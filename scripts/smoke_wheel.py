@@ -29,6 +29,8 @@ assert (resources.files("usdata") / "py.typed").is_file()
 assert usdata.get("noaa:ghcn-daily").id == "noaa:ghcn-daily"
 assert usdata.search("radar")
 assert resolve_place("OK").contains_point(35.39, -97.60)
+assert resolve_place("Cleveland County, OK") == resolve_place("40027")
+assert usdata.get("noaa:coastwatch-sst").status.value == "available"
 assert get_site("KTLX").state == "OK"
 manifest = Path("dataset.yaml")
 manifest.write_text("""name: wheel-smoke

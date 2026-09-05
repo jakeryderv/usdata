@@ -22,7 +22,7 @@ user arguments ─► build_query ─► Query
 |---|---|
 | `models` | Pydantic types shared everywhere: `BBox`, `TimeRange`, `Dataset`, `Query`, `Asset`, `Provenance`. STAC-shaped: Dataset is a Collection, Asset is a file-level Asset. |
 | `registry` | Loads the curated `data/registry.yaml`; keyword-ranked search filtered by provider, space, and time. |
-| `query` | Turns loose user input (state names, ISO dates, lat/lon) into a normalized `Query`. Place lookup uses `data/places.yaml`. |
+| `query` | Turns loose user input (state/county names, FIPS, ISO dates, lat/lon) into a normalized `Query`. Place lookup uses `data/places.csv`. |
 | `providers` | One `Provider` subclass per dataset, loaded by dotted path from the registry entry. Translates `Query` to agency-specific listing and download. |
 | `protocols` | Transport clients with no dataset knowledge. `http.download` streams to disk atomically; `s3.list_objects` paginates ListObjectsV2 anonymously. |
 | `fetch` | Core loop: adapter resolves assets, cache is checked, bytes fetched, provenance written. |
@@ -36,7 +36,7 @@ Provider-specific knowledge (endpoints, auth, quirks) lives in `docs/providers/<
 
 `protocols/` holds transport clients shared by adapters. `http` streams
 downloads; `s3` lists and reads public buckets over plain HTTPS with no AWS SDK.
-ERDDAP arrives with its adapter. `fetch` is the core loop that ties adapter,
+`erddap` reads grid metadata/axes and builds coordinate-based CSV subset URLs. `fetch` is the core loop that ties adapter,
 cache, and provenance together; the CLI calls it rather than adapters directly.
 
 ## Boundaries

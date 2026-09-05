@@ -1,0 +1,20 @@
+{
+  "vintage": "2025",
+  "scale": "1:500,000",
+  "coordinate_system": "WGS84 longitude/latitude",
+  "generator": "scripts/build_places.py",
+  "sources": [
+    {
+      "url": "https://www2.census.gov/geo/tiger/GENZ2025/kml/cb_2025_us_state_500k.zip",
+      "sha256": "4295a503ff47e6787adfb520ad6706557e41c2ce57ced5a134087f8e35143a02",
+      "records": 56
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/GENZ2025/kml/cb_2025_us_county_500k.zip",
+      "sha256": "fd8e3d57d59d43ab16692ba62a3c139705a899acd6ad4db3d66a05e3a21a54c6",
+      "records": 3235
+    }
+  ],
+  "csv_sha256": "ab1ff74793ffa8fe6dc6d9e0fb6a89292c5d1652cbcefe88992a93af70b32c67",
+  "antimeridian": "Conservative min/max envelopes; Alaska and Aleutians West span most longitudes."
+}

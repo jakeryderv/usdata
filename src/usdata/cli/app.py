@@ -50,7 +50,10 @@ def search(
     provider: Annotated[
         str | None, typer.Option(help="Restrict to one provider, e.g. noaa.")
     ] = None,
-    state: Annotated[str | None, typer.Option(help="State name or postal code.")] = None,
+    state: Annotated[
+        str | None,
+        typer.Option("--location", "--state", help="State, 'County, ST', or quoted FIPS code."),
+    ] = None,
     start: Annotated[str | None, typer.Option(help="ISO date or datetime.")] = None,
     end: Annotated[str | None, typer.Option(help="ISO date or datetime.")] = None,
     planned: Annotated[
@@ -104,7 +107,10 @@ def info(
 @app.command()
 def fetch(
     dataset_id: Annotated[str, typer.Argument(help="Dataset id, e.g. noaa:ghcn-daily")],
-    state: Annotated[str | None, typer.Option(help="State name or postal code.")] = None,
+    state: Annotated[
+        str | None,
+        typer.Option("--location", "--state", help="State, 'County, ST', or quoted FIPS code."),
+    ] = None,
     bbox: Annotated[str | None, typer.Option(help="west,south,east,north in degrees.")] = None,
     lat: Annotated[float | None, typer.Option()] = None,
     lon: Annotated[float | None, typer.Option()] = None,

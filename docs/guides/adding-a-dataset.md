@@ -70,7 +70,7 @@ Rules:
   and document them in the module docstring and provider access notes. Reject
   unknown parameters, empty explicit identifiers, and conflicting selectors with
   `QueryError`; do not silently fall back after a typo.
-- Use `usdata.protocols.http` or `usdata.protocols.s3` for transport. Take an
+- Use `usdata.protocols.http`, `usdata.protocols.s3`, or `usdata.protocols.erddap` for transport. Take an
   optional `httpx.Client` in `__init__` so tests can inject one. Override
   `close()` to release internally owned resources; injected clients remain the
   caller's responsibility. Core uses adapters as context managers. Use

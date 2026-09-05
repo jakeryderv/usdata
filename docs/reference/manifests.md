@@ -43,11 +43,12 @@ Each source accepts:
 Unknown manifest and source fields are rejected. `params` must not repeat
 `location`, `bbox`, `start`, `end`, or `variables`.
 
-Place lookup currently contains only Oklahoma, Texas, Kansas, California,
-Florida, and Colorado (names or postal codes). Their boxes are approximate;
-full Census state/county coverage is planned. A bounding box is a rectangle,
-so it can include points outside the actual state/county boundary. Antimeridian
-crossing is not supported. Prefer explicit station IDs for a small repeatable query.
+Place lookup uses 2025 Census bounding boxes for 56 states/DC/territories and
+3,235 counties/equivalents. Use names/postal codes, `"Cleveland County, OK"`, or
+quoted FIPS such as `"40027"`. Rectangles can include points outside the actual
+boundary. Alaska and other antimeridian-spanning regions have very wide boxes;
+prefer explicit station IDs or a local bbox there. See the
+[place reference](places.md) for aliases, source vintage, and limitations.
 
 ## Provider options
 
@@ -55,6 +56,7 @@ crossing is not supported. Prefer explicit station IDs for a small repeatable qu
 |---|---|---|
 | `noaa:ghcn-daily` | `stations`: non-empty comma-separated string or list; otherwise requires a geographic query. `units`: `metric` (default) or `standard`. Explicit stations take precedence over geographic selection. | Names such as `PRCP`, `TMAX`; inclusive calendar dates, time of day ignored. |
 | `noaa:nexrad-level2` | `site` or `sites`: radar IDs, mutually exclusive. Alternatively `nearest`: positive integer with a geographic query. Do not combine `nearest` with explicit IDs. | Whole scans, without variable subsetting. UTC timestamps; both interval bounds included. A date-only end means midnight at the start of that day. |
+| `noaa:coastwatch-sst` | Requires a bbox or location. `stride`: positive integer, default 1, subsamples both spatial axes. At most 1,000,000 grid rows per request. | `analysed_sst` (default), `analysis_error`, `sea_ice_fraction`, `mask`. Inclusive UTC timestamps; date-only values mean midnight. CSV retains coordinate columns and the units row. |
 | `usgs:water-daily` | `site` or `sites`: quoted monitoring IDs, mutually exclusive. Alternatively a geographic query. `statistic_id`: quoted five-digit code, default `"00003"` (daily mean). Explicit sites and a geographic filter both apply when present. | Quoted parameter codes such as `"00060"`; inclusive local calendar dates, time of day ignored. |
 
 Station/site options accept strings or lists of strings. NOAA radar IDs are
