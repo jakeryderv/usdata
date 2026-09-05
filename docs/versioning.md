@@ -49,8 +49,8 @@ just release minor    # or: patch, major
 
 The recipe bumps `pyproject.toml`, rolls the `Unreleased` section of
 `CHANGELOG.md` into a dated version heading, opens a release pull request, and
-enables auto-merge. When CI passes and the PR merges, the `Publish to PyPI`
-workflow builds the package, uploads it via trusted publishing, then creates
+enables auto-merge. After the PR merges and CI succeeds on that exact main-branch commit, the
+`Publish to PyPI` workflow builds that commit, uploads it via trusted publishing, then creates
 the `vX.Y.Z` tag and GitHub release with notes taken from the changelog.
 
 The workflow publishes whatever version `pyproject.toml` declares and tags that
@@ -60,3 +60,6 @@ that is already on PyPI is a no-op.
 Every pull request that changes user-visible behavior adds a line under
 `Unreleased` in `CHANGELOG.md`. The release recipe refuses to run if that
 section is empty.
+
+The `pypi` environment accepts only `main`. Manual publishing also requires a
+successful main-branch CI run for the selected commit.

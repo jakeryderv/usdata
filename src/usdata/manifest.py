@@ -7,8 +7,9 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from usdata._files import atomic_write_text
 from usdata.models import Asset, BBox, Provenance, Query
 from usdata.query import build_query
 from usdata.registry import Registry, default_registry
@@ -17,6 +18,8 @@ from usdata.registry import Registry, default_registry
 class SourceSpec(BaseModel):
     """One entry under ``sources:`` in a manifest."""
 
+    model_config = ConfigDict(extra="forbid")
+
     dataset: str
     location: str | None = None
     bbox: BBox | None = None
@@ -24,6 +27,13 @@ class SourceSpec(BaseModel):
     end: str | date | datetime | None = None
     variables: list[str] = Field(default_factory=list)
     params: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _reserved_params(self) -> SourceSpec:
+        reserved = {"location", "bbox", "start", "end", "variables"}
+        if overlap := reserved.intersection(self.params):
+            raise ValueError(f"params contains reserved query fields: {', '.join(sorted(overlap))}")
+        return self
 
     def to_query(self) -> Query:
         """Build the Query this source resolves to."""
@@ -40,6 +50,8 @@ class SourceSpec(BaseModel):
 class Manifest(BaseModel):
     """A declarative list of inputs a project needs: usdata pull fetches them."""
 
+    model_config = ConfigDict(extra="forbid")
+
     name: str
     version: str = "1.0"
     sources: list[SourceSpec] = Field(min_length=1)
@@ -47,7 +59,11 @@ class Manifest(BaseModel):
     @classmethod
     def load(cls, path: Path) -> Manifest:
         """Parse a manifest YAML file."""
-        return cls.model_validate(yaml.safe_load(path.read_text()) or {})
+        try:
+            raw = yaml.safe_load(path.read_text())
+        except yaml.YAMLError as e:
+            raise ValueError(f"invalid manifest YAML in {path}: {e}") from e
+        return cls.model_validate(raw or {})
 
     def validate_against(self, registry: Registry | None = None) -> list[str]:
         """Return the dataset ids referenced by this manifest that the registry lacks."""
@@ -60,6 +76,17 @@ class LockedAsset(BaseModel):
 
     asset: Asset
     provenance: Provenance
+
+    @model_validator(mode="after")
+    def _consistent(self) -> LockedAsset:
+        if (
+            self.asset.dataset_id != self.provenance.dataset_id
+            or self.asset.href != self.provenance.source_url
+        ):
+            raise ValueError("locked asset and provenance must identify the same source")
+        if self.asset.checksum is not None and self.asset.checksum != self.provenance.checksum:
+            raise ValueError("locked asset and provenance checksums must agree")
+        return self
 
 
 class Lockfile(BaseModel):
@@ -78,7 +105,7 @@ class Lockfile(BaseModel):
 
     def save(self, path: Path) -> None:
         """Write the lockfile as indented JSON."""
-        path.write_text(self.model_dump_json(indent=2))
+        atomic_write_text(path, self.model_dump_json(indent=2))
 
 
 def lockfile_path(manifest_path: Path) -> Path:

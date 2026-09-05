@@ -9,7 +9,8 @@ import httpx
 import typer
 
 from usdata import __version__, build_query, default_registry
-from usdata.fetch import ChecksumMismatch, fetch_asset
+from usdata.fetch import ChecksumMismatch
+from usdata.fetch import fetch as fetch_query
 from usdata.manifest import lockfile_path
 from usdata.providers import load_adapter
 from usdata.providers.base import NotImplementedProvider
@@ -59,8 +60,8 @@ def search(
     """Search the curated dataset registry."""
     try:
         query = build_query(text, provider=provider, location=state, start=start, end=end)
-    except UnknownPlace as e:
-        typer.secho(f"Unknown place: {e}", err=True, fg="red")
+    except ValueError as e:
+        typer.secho(str(e), err=True, fg="red")
         raise typer.Exit(code=2) from None
     results = default_registry().search(query, include_planned=planned)
     if not results:
@@ -152,21 +153,21 @@ def fetch(
             variables=[v.strip() for v in variables.split(",")] if variables else None,
             **params,
         )
-        adapter = load_adapter(ds)
-        assets = adapter.list_assets(query)
         if dry_run:
+            with load_adapter(ds) as adapter:
+                assets = adapter.list_assets(query)
             for a in assets:
                 typer.echo(f"{a.id}\t{a.href}")
             typer.echo(f"{len(assets)} asset(s) matched", err=True)
             return
-        fetched = [fetch_asset(ds, a, root=cache_dir, force=force) for a in assets]
+        fetched = fetch_query(ds, query, root=cache_dir, force=force)
     except (DatasetNotFound, UnknownPlace, ValueError) as e:
         typer.secho(str(e), err=True, fg="red")
         raise typer.Exit(code=2) from None
     except NotImplementedProvider as e:
         typer.secho(str(e), err=True, fg="yellow")
         raise typer.Exit(code=3) from None
-    except httpx.HTTPError as e:
+    except (httpx.HTTPError, ChecksumMismatch) as e:
         typer.secho(f"request failed: {e}", err=True, fg="red")
         raise typer.Exit(code=4) from None
     if not fetched:
@@ -189,7 +190,7 @@ def pull(
     """Fetch every source in a manifest and write (or restore from) its lockfile."""
     try:
         result = pull_manifest(manifest, root=cache_dir, force=force)
-    except (UnknownDatasets, ManifestChanged, UnknownPlace, ValueError) as e:
+    except (DatasetNotFound, UnknownDatasets, ManifestChanged, UnknownPlace, ValueError) as e:
         typer.secho(str(e), err=True, fg="red")
         raise typer.Exit(code=2) from None
     except NotImplementedProvider as e:
@@ -215,7 +216,11 @@ def verify(
     if not lock.exists():
         typer.secho(f"no lockfile at {lock}; run pull first", err=True, fg="red")
         raise typer.Exit(code=2)
-    drift = verify_manifest(manifest, root=cache_dir)
+    try:
+        drift = verify_manifest(manifest, root=cache_dir)
+    except (ValueError, OSError) as e:
+        typer.secho(str(e), err=True, fg="red")
+        raise typer.Exit(code=2) from None
     for d in drift:
         typer.echo(f"{d.asset_id}\t{d.problem}\t{d.path}")
     if drift:

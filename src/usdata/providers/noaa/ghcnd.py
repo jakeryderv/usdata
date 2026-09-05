@@ -44,6 +44,13 @@ class GhcnDaily(Provider):
     def __init__(self, dataset: Dataset, client: httpx.Client | None = None) -> None:
         super().__init__(dataset)
         self._client = client
+        self._owns_client = client is None
+
+    def close(self) -> None:
+        """Close an internally created HTTP client; injected clients belong to the caller."""
+        if self._owns_client and self._client is not None:
+            self._client.close()
+            self._client = None
 
     def _http(self) -> httpx.Client:
         if self._client is None:

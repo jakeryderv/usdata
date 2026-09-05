@@ -47,6 +47,13 @@ class NexradLevel2(Provider):
     def __init__(self, dataset: Dataset, client: httpx.Client | None = None) -> None:
         super().__init__(dataset)
         self._client = client
+        self._owns_client = client is None
+
+    def close(self) -> None:
+        """Close an internally created HTTP client; injected clients belong to the caller."""
+        if self._owns_client and self._client is not None:
+            self._client.close()
+            self._client = None
 
     def _http(self) -> httpx.Client:
         if self._client is None:
@@ -59,7 +66,10 @@ class NexradLevel2(Provider):
         if raw is not None:
             ids = _sites_param(raw)
             for sid in ids:
-                sites.get_site(sid)  # validate
+                try:
+                    sites.get_site(sid)
+                except KeyError as e:
+                    raise QueryError(str(e)) from e
             return ids
         if query.bbox is None:
             raise QueryError(f"{self.dataset.id} needs a location, bbox, lat/lon, or site=...")

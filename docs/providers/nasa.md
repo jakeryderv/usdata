@@ -13,11 +13,11 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 | Dataset | Domain | Status | Version | Description | Protocol |
 |---|---|---|---|---|---|
-| [`nasa:gpm-imerg`](#nasagpm-imerg) | Weather satellites | planned | target 0.4 | Global half-hourly and daily merged satellite precipitation estimates. | http |
+| [`nasa:gpm-imerg`](#nasagpm-imerg) | Weather satellites | planned | target 0.6 | Global half-hourly and daily merged satellite precipitation estimates. | http |
 
 ### nasa:gpm-imerg
 
-**GPM IMERG Precipitation** · planned · target 0.4
+**GPM IMERG Precipitation** · planned · target 0.6
 
 Global half-hourly and daily merged satellite precipitation estimates. Discovered through NASA CMR and downloaded from GES DISC. Requires a free Earthdata Login; the first credentialed dataset.
 

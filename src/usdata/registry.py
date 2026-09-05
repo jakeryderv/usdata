@@ -82,11 +82,12 @@ class Registry:
             self._by_id[ds.id] = ds
         self._providers = {p.id: p for p in providers}
         self._domains = {d.id: d for d in domains}
+        explicit_domains = bool(self._domains)
         for ds in self._by_id.values():
             self._providers.setdefault(
                 ds.provider, ProviderInfo(id=ds.provider, name=ds.provider.upper())
             )
-            if self._domains and ds.domain not in self._domains:
+            if explicit_domains and ds.domain not in self._domains:
                 raise ValueError(f"{ds.id}: unknown domain {ds.domain!r}")
             self._domains.setdefault(ds.domain, DomainInfo(id=ds.domain, name=ds.domain))
 

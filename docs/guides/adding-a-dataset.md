@@ -69,7 +69,9 @@ Rules:
 - Accept provider-specific inputs through `query.params` (`stations=`, `site=`)
   and document them in the module docstring.
 - Use `usdata.protocols.http` or `usdata.protocols.s3` for transport. Take an
-  optional `httpx.Client` in `__init__` so tests can inject one.
+  optional `httpx.Client` in `__init__` so tests can inject one. Override
+  `close()` to release internally owned resources; injected clients remain the
+  caller's responsibility. Core uses adapters as context managers.
 - Give assets stable ids: they become cache filenames and lockfile keys.
 - Set `size` and `time` on assets when the listing provides them.
 - Do not write to the cache or create provenance. `usdata.fetch` does that.

@@ -5,6 +5,8 @@ from __future__ import annotations
 import importlib
 from abc import ABC, abstractmethod
 from pathlib import Path
+from types import TracebackType
+from typing import Self
 
 from usdata.models import Asset, Dataset, Query
 
@@ -22,6 +24,21 @@ class Provider(ABC):
 
     def __init__(self, dataset: Dataset) -> None:
         self.dataset = dataset
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        self.close()
+
+    def close(self) -> None:
+        """Release owned resources. Providers with resources override this method."""
+        return None
 
     @abstractmethod
     def list_assets(self, query: Query) -> list[Asset]:

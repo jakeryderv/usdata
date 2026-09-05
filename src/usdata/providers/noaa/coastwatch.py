@@ -1,4 +1,4 @@
-"""CoastWatch SST via ERDDAP. Registered in the registry; implementation is planned for v0.1."""
+"""CoastWatch SST via ERDDAP. Registered in the registry; implementation is planned for v0.5."""
 
 from __future__ import annotations
 

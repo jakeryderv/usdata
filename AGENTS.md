@@ -26,7 +26,7 @@ data, with provenance and reproducible manifests. Read
 
 - Core must not import any provider module; use `load_adapter`.
 - Providers must not write to the cache or provenance; they return assets and fetch bytes to a given path.
-- Core runtime deps are pydantic, pyyaml, typer. Anything heavier goes behind an extra.
+- Core runtime deps are pydantic, pyyaml, typer, httpx. Anything heavier goes behind an extra.
 - Unit tests must not touch the network. Mock HTTP; mark live tests `integration`.
 - Every registry entry must be true: real id, real endpoint, correct capabilities.
 

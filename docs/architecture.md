@@ -45,7 +45,7 @@ cache, and provenance together; the CLI calls it rather than adapters directly.
 - **Providers never touch the cache or write provenance.** They resolve queries to assets and fetch bytes to a path they are given. The core wraps that with caching and provenance so every source gets it for free.
 - **The registry is data, not code.** Adding a dataset is a YAML entry plus an adapter class. Entries carry a `status`; planned ones have no adapter and exist so search, docs, and the roadmap agree.
 - **Search is over the registry, not live catalogs.** See ADR 0001.
-- **Heavy scientific dependencies are optional.** Core depends on pydantic, pyyaml, and typer. Anything that opens data (xarray, pandas, geopandas, Py-ART) lives behind extras.
+- **Heavy scientific dependencies are optional.** Core depends on pydantic, pyyaml, typer, and httpx. Anything that opens data (xarray, pandas, geopandas, Py-ART) lives behind extras.
 
 ## CLI exit codes
 

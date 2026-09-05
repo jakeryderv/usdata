@@ -10,15 +10,15 @@ provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 ## Providers
 
 <!-- registry:start -->
-| Provider | Available | Stub | Planned | Next up (0.3) | Datasets |
+| Provider | Available | Stub | Planned | Next up (0.5) | Datasets |
 |---|---:|---:|---:|---|---|
-| [NOAA](docs/providers/noaa.md) | 2 | 1 | 26 | `coastwatch-sst` | `ghcn-daily`, `nexrad-level2`, _coastwatch-sst_, +26 planned |
+| [NOAA](docs/providers/noaa.md) | 2 | 1 | 26 | `gsom`, `gsoy`, `storm-events`, `mrms`, `goes-abi`, `hurdat2`, `ibtracs`, `climate-normals`, `coops-water-levels`, `coastwatch-sst` | `ghcn-daily`, `nexrad-level2`, _coastwatch-sst_, +26 planned |
 | [Census Bureau](docs/providers/census.md) | 0 | 0 | 1 | — | +1 planned |
 | [EPA](docs/providers/epa.md) | 0 | 0 | 1 | — | +1 planned |
 | [FEMA](docs/providers/fema.md) | 0 | 0 | 1 | — | +1 planned |
 | [NASA](docs/providers/nasa.md) | 0 | 0 | 1 | — | +1 planned |
 | [USDA](docs/providers/usda.md) | 0 | 0 | 1 | — | +1 planned |
-| [USGS](docs/providers/usgs.md) | 0 | 0 | 3 | — | +3 planned |
+| [USGS](docs/providers/usgs.md) | 0 | 0 | 3 | `water-daily` | +3 planned |
 
 Available datasets are in `code`, stubs in _italics_; planned ones are counted. Each provider page has access notes and full dataset details; [docs/roadmap.md](docs/roadmap.md) lists datasets by target version.
 <!-- registry:end -->
@@ -67,6 +67,9 @@ usdata verify dataset.yaml          # exit 1 if any cached input drifted
 Fetched files land in `~/.cache/usdata/<provider>/<dataset>/` (override with
 `USDATA_CACHE_DIR` or `--cache-dir`), each with a `.provenance.json` sidecar
 recording source URL, retrieval time, checksum, size, and license.
+
+Manifest and source fields are validated strictly; unknown fields are errors.
+Provider-specific options belong under `params`.
 
 A manifest declares every input a project needs. `pull` resolves each source,
 fetches it, and writes `dataset.lock.json` pinning every asset with its checksum
