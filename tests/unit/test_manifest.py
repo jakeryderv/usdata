@@ -48,7 +48,9 @@ def test_lockfile_roundtrip(tmp_path: Path) -> None:
     )
     lock = Lockfile(
         manifest="tornado-environment",
+        manifest_checksum="sha256:" + "1" * 64,
         generated_at=datetime.now(UTC),
+        usdata_version="0.3.0",
         assets=[LockedAsset(asset=asset, provenance=prov)],
     )
     path = tmp_path / "dataset.lock.json"

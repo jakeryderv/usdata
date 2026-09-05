@@ -60,15 +60,20 @@ usdata fetch noaa:ghcn-daily -p stations=USW00013967 --start 2024-01-01 --end 20
 usdata fetch noaa:nexrad-level2 --lat 35.47 --lon -97.52 \
     --start 2024-05-06T20:00 --end 2024-05-06T23:00        # nearest radar (KTLX)
 usdata fetch noaa:nexrad-level2 -p site=KTLX --start 2024-05-06T20:00 --end 2024-05-06T20:30 --dry-run
-usdata pull dataset.yaml
+usdata pull dataset.yaml            # resolve, fetch, write dataset.lock.json
+usdata verify dataset.yaml          # exit 1 if any cached input drifted
 ```
 
 Fetched files land in `~/.cache/usdata/<provider>/<dataset>/` (override with
 `USDATA_CACHE_DIR` or `--cache-dir`), each with a `.provenance.json` sidecar
 recording source URL, retrieval time, checksum, size, and license.
 
-A manifest declares every input a project needs; `pull` fetches them and writes
-a lockfile with checksums and provenance so the inputs can be reproduced:
+A manifest declares every input a project needs. `pull` resolves each source,
+fetches it, and writes `dataset.lock.json` pinning every asset with its checksum
+and provenance. A second `pull` restores exactly what the lockfile pins without
+re-querying upstream, so the inputs stay reproducible even if the source
+changes. `verify` re-hashes the cached files against the lockfile. Editing the
+manifest after locking requires `pull --force` to re-resolve.
 
 ```yaml
 name: tornado-environment

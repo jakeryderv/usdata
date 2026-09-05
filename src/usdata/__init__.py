@@ -11,6 +11,7 @@ except PackageNotFoundError:  # running from a source tree without an install
     __version__ = "0.0.0"
 
 from usdata.models import Asset, BBox, Dataset, Provenance, Query, TimeRange
+from usdata.pull import pull, verify
 from usdata.query import build_query
 from usdata.registry import DatasetNotFound, Registry, SearchResult, default_registry
 
@@ -28,7 +29,9 @@ __all__ = [
     "build_query",
     "default_registry",
     "get",
+    "pull",
     "search",
+    "verify",
 ]
 
 

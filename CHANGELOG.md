@@ -9,6 +9,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `usdata pull` fetches every source in a manifest and writes a lockfile pinning each asset's
+  checksum and provenance; a later `pull` restores from the lockfile without re-resolving, and
+  refuses (until `--force`) if the manifest changed. `usdata verify` reports missing or altered
+  cached files. Python API: `usdata.pull`, `usdata.verify`.
 - Datasets carry a `status` (available, stub, planned). `search` and `info` show it; fetching a
   planned dataset exits 3 with a clear message.
 - Planned registry entries for USGS, NASA, EPA, FEMA, Census, USDA, and GOES so the roadmap is
