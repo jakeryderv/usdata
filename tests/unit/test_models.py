@@ -38,40 +38,44 @@ def test_time_range_overlap_with_open_bounds() -> None:
         TimeRange(start=t(2001), end=t(2000))
 
 
+def _dataset(**overrides: object) -> Dataset:
+    base: dict[str, object] = {
+        "id": "noaa:thing",
+        "provider": "noaa",
+        "title": "x",
+        "protocol": Protocol.HTTP,
+        "domain": "climate",
+        "status": Status.STUB,
+        "target": "later",
+        "adapter": "m:C",
+    }
+    return Dataset.model_validate({**base, **overrides})
+
+
 def test_dataset_id_must_match_provider() -> None:
-    def make(id: str, adapter: str | None = "m:C", status: Status = Status.STUB) -> Dataset:
-        return Dataset(
-            id=id,
-            provider="noaa",
-            title="x",
-            protocol=Protocol.HTTP,
-            adapter=adapter,
-            status=status,
-        )
-
-    make("noaa:thing")
+    assert _dataset().name == "thing"
     with pytest.raises(ValidationError):
-        make("usgs:thing")
+        _dataset(id="usgs:thing")
     with pytest.raises(ValidationError):
-        make("noaa:")
+        _dataset(id="noaa:")
     with pytest.raises(ValidationError):
-        make("noaa:thing", adapter="bad")
+        _dataset(adapter="bad")
 
 
-def test_dataset_status_and_adapter_agree() -> None:
-    def make(status: Status, adapter: str | None) -> Dataset:
-        return Dataset(
-            id="noaa:x",
-            provider="noaa",
-            title="x",
-            protocol=Protocol.HTTP,
-            status=status,
-            adapter=adapter,
-        )
-
-    make(Status.PLANNED, None)
-    make(Status.AVAILABLE, "m:C")
+def test_dataset_status_adapter_and_versions_agree() -> None:
+    assert _dataset(status=Status.PLANNED, adapter=None).version_label == "target later"
+    assert _dataset(target="0.3").version_label == "target 0.3"
+    shipped = _dataset(status=Status.AVAILABLE, target=None, since="0.2")
+    assert shipped.version_label == "since 0.2"
     with pytest.raises(ValidationError, match="must not name an adapter"):
-        make(Status.PLANNED, "m:C")
+        _dataset(status=Status.PLANNED)
     with pytest.raises(ValidationError, match="need adapter"):
-        make(Status.STUB, None)
+        _dataset(adapter=None)
+    with pytest.raises(ValidationError, match="need a target"):
+        _dataset(target=None)
+    with pytest.raises(ValidationError, match="shipped in"):
+        _dataset(status=Status.AVAILABLE, target=None)
+    with pytest.raises(ValidationError, match="no target"):
+        _dataset(status=Status.AVAILABLE, since="0.2")
+    with pytest.raises(ValidationError, match="minor version"):
+        _dataset(target="v0.4")

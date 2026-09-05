@@ -8,6 +8,7 @@ lets STAC-backed sources map in without translation layers.
 from __future__ import annotations
 
 import math
+import re
 from datetime import datetime
 from enum import StrEnum
 from typing import Any
@@ -39,6 +40,22 @@ class ProviderInfo(BaseModel):
     id: str
     name: str
     homepage: str | None = None
+
+
+class DomainInfo(BaseModel):
+    """A subject area datasets are grouped under, shared across providers."""
+
+    id: str
+    name: str
+
+
+VERSION_RE = re.compile(r"^\d+\.\d+$")
+LATER = "later"
+
+
+def _check_version(value: str | None, field: str) -> None:
+    if value is not None and value != LATER and not VERSION_RE.match(value):
+        raise ValueError(f"{field} must be a minor version like '0.4' or '{LATER}'")
 
 
 class BBox(BaseModel):
@@ -132,7 +149,12 @@ class Dataset(BaseModel):
     spatial_extent: BBox | None = None
     temporal_extent: TimeRange | None = None
     capabilities: Capabilities = Field(default_factory=Capabilities)
+    domain: str = Field(description="Id of a domain declared in the registry")
     status: Status
+    since: str | None = Field(default=None, description="Version an available dataset shipped in")
+    target: str | None = Field(
+        default=None, description="Version a stub or planned dataset is aimed at, or 'later'"
+    )
     adapter: str | None = Field(
         default=None,
         description="'package.module:ClassName' of the Provider; required unless planned",
@@ -150,7 +172,23 @@ class Dataset(BaseModel):
             raise ValueError(
                 f"{self.status.value} datasets need adapter 'package.module:ClassName'"
             )
+        _check_version(self.since, "since")
+        _check_version(self.target, "target")
+        if self.status is Status.AVAILABLE:
+            if self.since is None or self.since == LATER:
+                raise ValueError("available datasets must state the version they shipped in")
+            if self.target is not None:
+                raise ValueError("available datasets have no target")
+        elif self.target is None:
+            raise ValueError(f"{self.status.value} datasets need a target version or 'later'")
         return self
+
+    @property
+    def version_label(self) -> str:
+        """'since 0.2' for shipped datasets, 'target 0.4' or 'target later' otherwise."""
+        if self.status is Status.AVAILABLE:
+            return f"since {self.since}"
+        return f"target {self.target}"
 
     @property
     def name(self) -> str:

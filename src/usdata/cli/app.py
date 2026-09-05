@@ -49,6 +49,9 @@ def search(
     state: Annotated[str | None, typer.Option(help="State name or postal code.")] = None,
     start: Annotated[str | None, typer.Option(help="ISO date or datetime.")] = None,
     end: Annotated[str | None, typer.Option(help="ISO date or datetime.")] = None,
+    planned: Annotated[
+        bool, typer.Option("--planned", help="Include planned datasets that have no adapter yet.")
+    ] = False,
 ) -> None:
     """Search the curated dataset registry."""
     try:
@@ -56,13 +59,14 @@ def search(
     except UnknownPlace as e:
         typer.secho(f"Unknown place: {e}", err=True, fg="red")
         raise typer.Exit(code=2) from None
-    results = default_registry().search(query)
+    results = default_registry().search(query, include_planned=planned)
     if not results:
         typer.echo("No datasets matched.")
         raise typer.Exit(code=1)
     width = max(len(r.dataset.id) for r in results)
     for r in results:
-        typer.echo(f"{r.dataset.id:<{width}}  {r.dataset.status.value:<9}  {r.dataset.title}")
+        ds = r.dataset
+        typer.echo(f"{ds.id:<{width}}  {ds.status.value:<9}  {ds.version_label:<12}  {ds.title}")
 
 
 @app.command()
@@ -77,7 +81,8 @@ def info(
         raise typer.Exit(code=2) from None
     typer.echo(f"{ds.id}\n  {ds.title}\n")
     typer.echo(f"  {ds.description.strip()}\n")
-    typer.echo(f"  status:    {ds.status.value}")
+    typer.echo(f"  status:    {ds.status.value} ({ds.version_label})")
+    typer.echo(f"  domain:    {ds.domain}")
     typer.echo(f"  provider:  {ds.provider}")
     typer.echo(f"  protocol:  {ds.protocol.value}")
     typer.echo(f"  license:   {ds.license or 'unknown'}")

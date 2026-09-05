@@ -29,13 +29,26 @@ def test_search_ranks_by_keyword(registry: Registry) -> None:
     assert results[0].dataset.id == "noaa:nexrad-level2"
 
 
-def test_search_empty_text_returns_everything(registry: Registry) -> None:
-    assert len(registry.search(Query())) == len(registry)
+def test_search_hides_planned_unless_asked(registry: Registry) -> None:
+    default = registry.search(Query())
+    assert default and all(r.dataset.status is not Status.PLANNED for r in default)
+    everything = registry.search(Query(), include_planned=True)
+    assert len(everything) == len(registry) > len(default)
+
+
+def test_domains_declared_and_next_target(registry: Registry) -> None:
+    assert registry.domain("weather-radar").name == "Weather radar"
+    assert {ds.domain for ds in registry} <= {d.id for d in registry.domains()}
+    assert registry.next_target() == "0.3"
+    ds = registry.get("noaa:ghcn-daily")
+    with pytest.raises(ValueError, match="unknown domain"):
+        Registry([ds.model_copy(update={"domain": "nope"})], domains=registry.domains())
 
 
 def test_search_filters_by_provider_and_bbox(registry: Registry) -> None:
     assert registry.search(Query(provider="nope")) == []
-    assert {r.dataset.provider for r in registry.search(Query(provider="usgs"))} == {"usgs"}
+    usgs = registry.search(Query(provider="usgs"), include_planned=True)
+    assert {r.dataset.provider for r in usgs} == {"usgs"}
     # NEXRAD extent excludes the eastern hemisphere; global datasets remain.
     eastern = BBox(west=100, south=0, east=110, north=10)
     ids = {r.dataset.id for r in registry.search(Query(bbox=eastern))}

@@ -14,6 +14,13 @@ All notable changes to this project are documented here. The format follows
 - Planned registry entries for USGS, NASA, EPA, FEMA, Census, USDA, and GOES so the roadmap is
   visible from `usdata search` and the docs.
 - Provider metadata (name, homepage) in the registry; README gains a generated per-provider table.
+- Datasets carry a `domain` (shared taxonomy across providers), `since` (version shipped) or
+  `target` (planned phase or `later`). `search` and `info` show them; the roadmap lists
+  datasets by target version, generated from the registry.
+
+### Changed
+
+- `usdata search` hides planned datasets unless `--planned` is given.
 
 ### Changed
 

@@ -14,32 +14,75 @@ rebuilt from a manifest. Think "pip for U.S. scientific data": discovery,
 acquisition, normalization, and provenance are the SDK's job; transformation
 and publishing to Hugging Face, Zenodo, or Kaggle belong downstream.
 
-## Shipped (v0.2)
+## Phases
 
-v0.1.0 on PyPI was a name-reserving placeholder. v0.2.0 proves the
-abstraction against two NOAA datasets with different access patterns.
+Each phase adds an access pattern or a piece of the reproducibility spine, not
+just datasets. Which datasets land in which phase is recorded in the registry
+(`target:` field) and rendered below; this section describes the rest.
 
-- Skeleton: models, curated registry, query normalization, CLI, tests, CI
-- `noaa:ghcn-daily` adapter (NCEI search service for stations, data service for CSV)
-- `noaa:nexrad-level2` adapter (unidata-nexrad-level2 S3, anonymous listing, site lookup)
-- Cache with checksum verification, provenance sidecars written on fetch
+**Shipped (v0.2)**: skeleton, curated registry, query normalization, CLI, cache
+with checksum verification and provenance sidecars, the NCEI REST pattern
+(GHCN-Daily) and the anonymous S3 pattern (NEXRAD Level II). v0.1.0 was a
+name-reserving placeholder.
 
-## Now (v0.3)
+**Now (v0.3)**: finish the reproducibility spine and the third access pattern.
 
-Finish the reproducibility spine and the third access pattern.
-
-- [ ] `noaa:coastwatch-sst` adapter (ERDDAP, true server-side subsetting)
+- [ ] ERDDAP protocol client with griddap subsetting
 - [ ] `usdata pull manifest.yaml` producing a lockfile; `usdata verify` against it
 - [ ] Full state and county bounding boxes generated from Census boundary files
 
-## Next (v0.4)
+**Next (v0.4)**: first cross-provider phase and the bulk-file patterns.
 
-- USGS provider. Verify the current status of legacy NWIS services versus the
-  new Water Data APIs before choosing an endpoint.
-- NASA provider wrapping `earthaccess` (CMR search plus Earthdata Login).
-- Optional `open()` on fetched assets dispatching to xarray, pandas, or
-  geopandas behind extras. Core stays dependency-light.
-- Remote cache backends (S3 and R2 compatible) behind `fsspec`.
+- [ ] USGS provider; confirm legacy NWIS versus the new Water Data APIs first
+- [ ] NASA provider wrapping `earthaccess`; design how credentials enter the system (ADR)
+- [ ] NCEI bulk-file directory pattern (HTTPS listings, per-year archives)
+- [ ] Single-file archive pattern (one download, no listing)
+- [ ] Second S3 dataset reusing the NEXRAD path with product selection
+
+**v0.5**: more APIs and gridded products.
+
+- [ ] CO-OPS tides and currents REST pattern
+- [ ] Further NCEI Access Data Service datasets sharing the GHCN client
+- [ ] Gridded S3 products with product and level selection (MRMS)
+- [ ] Optional `open()` on fetched assets behind extras (pandas, xarray, geopandas)
+
+**v0.6**: model output and climate data records.
+
+- [ ] GRIB2 model output on S3 with cycle and forecast-hour selection
+- [ ] NetCDF CDRs and static global grids
+- [ ] Remote cache backends (S3 and R2 compatible) behind `fsspec`
+
+## Datasets by version
+
+<!-- datasets:start -->
+Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+
+Move a dataset between phases by editing its `target` in the registry.
+
+**Target 0.3**
+
+- [`noaa:coastwatch-sst`](providers/noaa.md#noaacoastwatch-sst) CoastWatch Sea Surface Temperature · stub
+
+**Target 0.4**
+
+- [`nasa:gpm-imerg`](providers/nasa.md#nasagpm-imerg) GPM IMERG Precipitation · planned
+- [`noaa:goes-abi`](providers/noaa.md#noaagoes-abi) GOES-R ABI Satellite Imagery · planned
+- [`usgs:water-daily`](providers/usgs.md#usgswater-daily) Streamflow and Water Daily Values · planned
+
+**Later**
+
+- [`census:acs-5year`](providers/census.md#censusacs-5year) American Community Survey 5-Year Estimates · planned
+- [`epa:aqs-daily`](providers/epa.md#epaaqs-daily) Air Quality System Daily Summaries · planned
+- [`fema:nfhl`](providers/fema.md#femanfhl) National Flood Hazard Layer · planned
+- [`usda:cropland-data-layer`](providers/usda.md#usdacropland-data-layer) Cropland Data Layer · planned
+- [`usgs:3dep-elevation`](providers/usgs.md#usgs3dep-elevation) 3DEP Elevation · planned
+- [`usgs:earthquakes`](providers/usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · planned
+
+**Shipped in 0.2**
+
+- [`noaa:ghcn-daily`](providers/noaa.md#noaaghcn-daily) GHCN-Daily Station Observations · available
+- [`noaa:nexrad-level2`](providers/noaa.md#noaanexrad-level2) NEXRAD Level II Radar · available
+<!-- datasets:end -->
 
 ## Later
 

@@ -40,19 +40,21 @@ dataset page says otherwise.
 <!-- datasets:start -->
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-| Dataset | Status | Description | Protocol | Server-side subsetting |
-|---|---|---|---|---|
-| [`noaa:ghcn-daily`](#noaaghcn-daily) | available | Global Historical Climatology Network daily summaries: temperature, precipitation, snow, and other elements from land surface stations, served by the NCEI Access Data Service with station and date filtering. | http | temporal, variable |
-| [`noaa:nexrad-level2`](#noaanexrad-level2) | available | Raw volume scans from the WSR-88D weather radar network, archived in the public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). | s3 | temporal |
-| [`noaa:coastwatch-sst`](#noaacoastwatch-sst) | stub | Gridded blended sea surface temperature from NOAA CoastWatch, served through ERDDAP with full server-side spatial, temporal, and variable subsetting. | erddap | spatial, temporal, variable |
-| [`noaa:goes-abi`](#noaagoes-abi) | planned | Advanced Baseline Imager Level 1b radiances and Level 2 products from GOES-16/18/19, published to public S3 buckets. | s3 | temporal, variable |
+| Dataset | Domain | Status | Version | Description | Protocol |
+|---|---|---|---|---|---|
+| [`noaa:ghcn-daily`](#noaaghcn-daily) | Surface weather | available | since 0.2 | Global Historical Climatology Network daily summaries: temperature, precipitation, snow, and other elements from land surface stations, served by the NCEI Access Data Service with station and date filtering. | http |
+| [`noaa:nexrad-level2`](#noaanexrad-level2) | Weather radar | available | since 0.2 | Raw volume scans from the WSR-88D weather radar network, archived in the public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). | s3 |
+| [`noaa:goes-abi`](#noaagoes-abi) | Weather satellites | planned | target 0.4 | Advanced Baseline Imager Level 1b radiances and Level 2 products from GOES-16/18/19, published to public S3 buckets. | s3 |
+| [`noaa:coastwatch-sst`](#noaacoastwatch-sst) | Satellite oceanography | stub | target 0.3 | Gridded blended sea surface temperature from NOAA CoastWatch, served through ERDDAP with full server-side spatial, temporal, and variable subsetting. | erddap |
 
 ### noaa:ghcn-daily
 
-**GHCN-Daily Station Observations** · available
+**GHCN-Daily Station Observations** · available · since 0.2
 
 Global Historical Climatology Network daily summaries: temperature, precipitation, snow, and other elements from land surface stations, served by the NCEI Access Data Service with station and date filtering.
 
+- Domain: Surface weather
+- Server-side subsetting: temporal, variable
 - Homepage: https://www.ncei.noaa.gov/products/land-based-station/global-historical-climatology-network-daily
 - License: US Government Work (public domain)
 - Extent: -180, -90, 180, 90; 1763-01-01 to present
@@ -61,37 +63,43 @@ Global Historical Climatology Network daily summaries: temperature, precipitatio
 
 ### noaa:nexrad-level2
 
-**NEXRAD Level II Radar** · available
+**NEXRAD Level II Radar** · available · since 0.2
 
 Raw volume scans from the WSR-88D weather radar network, archived in the public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). One object per radar site per volume scan. No server-side subsetting; whole files are fetched. Select radars by site id, bbox, or nearest to a point.
 
+- Domain: Weather radar
+- Server-side subsetting: temporal
 - Homepage: https://registry.opendata.aws/noaa-nexrad/
 - License: US Government Work (public domain)
 - Extent: -180, 15, -60, 72; 1991-06-01 to present
 - Keywords: radar, weather, storms, tornado, precipitation, reflectivity, nexrad, wsr-88d
 - Adapter: `usdata.providers.noaa.nexrad:NexradLevel2`
 
-### noaa:coastwatch-sst
-
-**CoastWatch Sea Surface Temperature** · stub
-
-Gridded blended sea surface temperature from NOAA CoastWatch, served through ERDDAP with full server-side spatial, temporal, and variable subsetting.
-
-- Homepage: https://coastwatch.noaa.gov/
-- License: US Government Work (public domain)
-- Extent: -180, -90, 180, 90
-- Keywords: ocean, sst, sea surface temperature, satellite, erddap, coastwatch, gridded
-- Adapter: `usdata.providers.noaa.coastwatch:CoastwatchSst`
-
 ### noaa:goes-abi
 
-**GOES-R ABI Satellite Imagery** · planned
+**GOES-R ABI Satellite Imagery** · planned · target 0.4
 
 Advanced Baseline Imager Level 1b radiances and Level 2 products from GOES-16/18/19, published to public S3 buckets. Same anonymous S3 access pattern as NEXRAD; whole files per product per scan.
 
+- Domain: Weather satellites
+- Server-side subsetting: temporal, variable
 - Homepage: https://registry.opendata.aws/noaa-goes/
 - License: US Government Work (public domain)
 - Extent: not stated
 - Keywords: satellite, imagery, goes, abi, clouds, fire, radiance
 - Adapter: none yet
+
+### noaa:coastwatch-sst
+
+**CoastWatch Sea Surface Temperature** · stub · target 0.3
+
+Gridded blended sea surface temperature from NOAA CoastWatch, served through ERDDAP with full server-side spatial, temporal, and variable subsetting.
+
+- Domain: Satellite oceanography
+- Server-side subsetting: spatial, temporal, variable
+- Homepage: https://coastwatch.noaa.gov/
+- License: US Government Work (public domain)
+- Extent: -180, -90, 180, 90
+- Keywords: ocean, sst, sea surface temperature, satellite, erddap, coastwatch, gridded
+- Adapter: `usdata.providers.noaa.coastwatch:CoastwatchSst`
 <!-- datasets:end -->

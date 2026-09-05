@@ -32,9 +32,11 @@ __all__ = [
 ]
 
 
-def search(text: str | None = None, **kwargs: Any) -> list[SearchResult]:
+def search(
+    text: str | None = None, *, include_planned: bool = False, **kwargs: Any
+) -> list[SearchResult]:
     """Search the curated registry. Keyword arguments match ``build_query``."""
-    return default_registry().search(build_query(text, **kwargs))
+    return default_registry().search(build_query(text, **kwargs), include_planned=include_planned)
 
 
 def get(dataset_id: str) -> Dataset:

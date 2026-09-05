@@ -8,6 +8,8 @@ Outputs:
   files are created from a template.
 - ``README.md``: the same provider summary between ``<!-- registry:start -->``
   and ``<!-- registry:end -->``.
+- ``docs/roadmap.md``: datasets grouped by shipped/target version between
+  ``<!-- datasets:start -->`` and ``<!-- datasets:end -->``.
 
 Run via ``just docs``. ``--check`` renders without writing and exits 1 if any
 generated content on disk differs, which is what ``just check`` and CI run.
@@ -20,13 +22,14 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from usdata.models import Dataset, ProviderInfo, Status
-from usdata.registry import Registry
+from usdata.models import LATER, Dataset, ProviderInfo, Status
+from usdata.registry import Registry, version_key
 
 ROOT = Path(__file__).resolve().parents[1]
 README = ROOT / "README.md"
 PROVIDERS_DIR = ROOT / "docs/providers"
 INDEX = PROVIDERS_DIR / "README.md"
+ROADMAP = ROOT / "docs/roadmap.md"
 README_MARKS = ("<!-- registry:start -->", "<!-- registry:end -->")
 PAGE_MARKS = ("<!-- datasets:start -->", "<!-- datasets:end -->")
 STATUS_ORDER = [Status.AVAILABLE, Status.STUB, Status.PLANNED]
@@ -70,30 +73,39 @@ def by_provider(registry: Registry) -> list[tuple[ProviderInfo, list[Dataset]]]:
         counts = Counter(d.status for d in groups[pid])
         return (-counts[Status.AVAILABLE], -counts[Status.STUB], registry.provider(pid).name)
 
-    return [
-        (
-            registry.provider(pid),
-            sorted(groups[pid], key=lambda d: (STATUS_ORDER.index(d.status), d.id)),
+    domain_order = [d.id for d in registry.domains()]
+
+    def dataset_key(d: Dataset) -> tuple[int, int, tuple[int, ...], str]:
+        return (
+            domain_order.index(d.domain),
+            STATUS_ORDER.index(d.status),
+            version_key(d.target or d.since or LATER),
+            d.id,
         )
+
+    return [
+        (registry.provider(pid), sorted(groups[pid], key=dataset_key))
         for pid in sorted(groups, key=progress)
     ]
 
 
 def summary_table(registry: Registry, link_prefix: str) -> str:
     """Per-provider counts; ``link_prefix`` is the relative path to docs/providers/."""
+    nxt = registry.next_target()
     lines = [
-        "| Provider | Available | Stub | Planned | Datasets |",
-        "|---|---:|---:|---:|---|",
+        f"| Provider | Available | Stub | Planned | Next up ({nxt}) | Datasets |",
+        "|---|---:|---:|---:|---|---|",
     ]
     for info, datasets in by_provider(registry):
         counts = Counter(d.status for d in datasets)
         names = ", ".join(
             f"`{d.name}`" if d.status is Status.AVAILABLE else f"_{d.name}_" for d in datasets
         )
+        next_up = ", ".join(f"`{d.name}`" for d in datasets if d.target == nxt) or "—"
         lines.append(
             f"| [{info.name}]({link_prefix}{info.id}.md) "
             f"| {counts[Status.AVAILABLE]} | {counts[Status.STUB]} | {counts[Status.PLANNED]} "
-            f"| {names} |"
+            f"| {next_up} | {names} |"
         )
     return "\n".join(lines) + "\n"
 
@@ -103,7 +115,8 @@ def render_readme_block(registry: Registry) -> str:
     return (
         summary_table(registry, "docs/providers/")
         + "\nAvailable datasets are in `code`; stubs and planned ones in _italics_. "
-        "Each provider page has access notes and full dataset details.\n"
+        "Each provider page has access notes and full dataset details; "
+        "[docs/roadmap.md](docs/roadmap.md) lists datasets by target version.\n"
     )
 
 
@@ -118,34 +131,63 @@ def render_index(registry: Registry) -> str:
     )
 
 
-def render_datasets_block(info: ProviderInfo, datasets: list[Dataset]) -> str:
+def render_datasets_block(registry: Registry, datasets: list[Dataset]) -> str:
     """Generated block for one provider page: table, then details."""
     lines = [
         GENERATED_NOTE,
         "",
-        "| Dataset | Status | Description | Protocol | Server-side subsetting |",
-        "|---|---|---|---|---|",
+        "| Dataset | Domain | Status | Version | Description | Protocol |",
+        "|---|---|---|---|---|---|",
     ]
     for ds in datasets:
+        link = f"[`{ds.id}`](#{_anchor(ds.id.replace(':', ''))})"
         lines.append(
-            f"| [`{ds.id}`](#{_anchor(ds.id.replace(':', ''))}) | {ds.status.value} "
-            f"| {_first_sentence(ds.description)} | {ds.protocol.value} | {_caps(ds)} |"
+            f"| {link} | {registry.domain(ds.domain).name} | {ds.status.value} "
+            f"| {ds.version_label} | {_first_sentence(ds.description)} | {ds.protocol.value} |"
         )
     for ds in datasets:
         lines += [
             "",
             f"### {ds.id}",
             "",
-            f"**{ds.title}** · {ds.status.value}",
+            f"**{ds.title}** · {ds.status.value} · {ds.version_label}",
             "",
             ds.description.strip(),
             "",
+            f"- Domain: {registry.domain(ds.domain).name}",
+            f"- Server-side subsetting: {_caps(ds)}",
             f"- Homepage: {ds.homepage or 'not stated'}",
             f"- License: {ds.license or 'not stated'}",
             f"- Extent: {_extent(ds)}",
             f"- Keywords: {', '.join(ds.keywords) or 'none'}",
             f"- Adapter: `{ds.adapter}`" if ds.adapter else "- Adapter: none yet",
         ]
+    return "\n".join(lines) + "\n"
+
+
+def render_roadmap_block(registry: Registry) -> str:
+    """Datasets grouped by the version they shipped in or are targeted at."""
+    shipped: dict[str, list[Dataset]] = {}
+    targeted: dict[str, list[Dataset]] = {}
+    for ds in registry:
+        if ds.status is Status.AVAILABLE:
+            shipped.setdefault(ds.since or LATER, []).append(ds)
+        else:
+            targeted.setdefault(ds.target or LATER, []).append(ds)
+
+    def group(title: str, datasets: list[Dataset]) -> list[str]:
+        out = ["", f"**{title}**", ""]
+        for ds in sorted(datasets, key=lambda d: (d.provider, d.id)):
+            page = f"providers/{ds.provider}.md#{_anchor(ds.id.replace(':', ''))}"
+            out.append(f"- [`{ds.id}`]({page}) {ds.title} · {ds.status.value}")
+        return out
+
+    lines = [GENERATED_NOTE, ""]
+    lines.append("Move a dataset between phases by editing its `target` in the registry.")
+    for v in sorted(targeted, key=version_key):
+        lines += group(f"Target {v}" if v != LATER else "Later", targeted[v])
+    for v in sorted(shipped, key=version_key, reverse=True):
+        lines += group(f"Shipped in {v}", shipped[v])
     return "\n".join(lines) + "\n"
 
 
@@ -178,7 +220,8 @@ def render_all(registry: Registry) -> dict[Path, str]:
     for info, datasets in by_provider(registry):
         page = PROVIDERS_DIR / f"{info.id}.md"
         current = page.read_text() if page.exists() else page_template(info)
-        outputs[page] = splice(current, PAGE_MARKS, render_datasets_block(info, datasets))
+        outputs[page] = splice(current, PAGE_MARKS, render_datasets_block(registry, datasets))
+    outputs[ROADMAP] = splice(ROADMAP.read_text(), PAGE_MARKS, render_roadmap_block(registry))
     return outputs
 
 
