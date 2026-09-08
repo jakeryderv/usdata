@@ -136,7 +136,7 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usgs:3dep-elevation`](providers/usgs.md#usgs3dep-elevation) 3DEP Elevation · planned
 - [`usgs:earthquakes`](providers/usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · planned
 
-**Implemented, unreleased (planned 0.7)**
+**Included since 0.7**
 
 - [`noaa:gsom`](providers/noaa.md#noaagsom) Global Summary of the Month · available
 
