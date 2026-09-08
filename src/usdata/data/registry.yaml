@@ -293,7 +293,7 @@ datasets:
     provider: noaa
     status: planned
     domain: weather-models
-    target: "0.6"
+    target: later
     title: HRRR Forecast Model Output
     description: >-
       High-Resolution Rapid Refresh 3 km hourly forecasts in GRIB2 from the
@@ -310,7 +310,7 @@ datasets:
     provider: noaa
     status: planned
     domain: weather-models
-    target: "0.6"
+    target: later
     title: GFS Forecast Model Output
     description: >-
       Global Forecast System output in GRIB2 from the public noaa-gfs-bdp-pds
@@ -342,7 +342,7 @@ datasets:
     provider: noaa
     status: planned
     domain: ocean-physics
-    target: "0.6"
+    target: later
     title: OISST Daily Sea Surface Temperature
     description: >-
       Optimum Interpolation SST v2.1: daily global 0.25 degree analysis since
@@ -375,7 +375,7 @@ datasets:
     provider: noaa
     status: planned
     domain: bathymetry
-    target: "0.6"
+    target: later
     title: ETOPO 2022 Global Relief
     description: >-
       Global topography and bathymetry at 15, 30, and 60 arc-seconds as
@@ -591,7 +591,7 @@ datasets:
     provider: nasa
     status: planned
     domain: weather-satellites
-    target: "0.6"
+    target: later
     title: GPM IMERG Precipitation
     description: >-
       Global half-hourly and daily merged satellite precipitation estimates.

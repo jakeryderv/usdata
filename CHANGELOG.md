@@ -7,6 +7,20 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Optional `FetchedAsset.open()` CSV reading through `usdata[pandas]`, including
+  ERDDAP units metadata, string identifiers/codes, explicit dtype/date/column/row
+  options, and a fetch-to-analysis example. Opening leaves raw bytes and provenance intact.
+
+### Changed
+
+- Test core-only and pandas installations in CI and installed-wheel checks.
+- Check versioned source-only documentation notices during validation so release
+  PRs cannot carry known stale availability wording.
+- Focus v0.6 on optional CSV readers and practical usage; NASA, model output,
+  climate grids, and remote caching remain follow-up work.
+
 ## [0.5.0] - 2026-09-05
 
 ### Breaking

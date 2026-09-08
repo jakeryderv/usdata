@@ -95,7 +95,7 @@ def summary_table(registry: Registry, link_prefix: str) -> str:
     """Per-provider counts; ``link_prefix`` is the relative path to docs/providers/."""
     nxt = registry.next_target()
     lines = [
-        f"| Provider | Available | Stub | Planned | Next up ({nxt}) | Datasets |",
+        f"| Provider | Available | Stub | Planned | Next up ({nxt or 'unassigned'}) | Datasets |",
         "|---|---:|---:|---:|---|---|",
     ]
     for info, datasets in by_provider(registry):
@@ -108,7 +108,9 @@ def summary_table(registry: Registry, link_prefix: str) -> str:
         if counts[Status.PLANNED]:
             names = f"{names}, " if names else ""
             names += f"+{counts[Status.PLANNED]} planned"
-        next_up = ", ".join(f"`{d.name}`" for d in datasets if d.target == nxt) or "—"
+        next_up = (
+            ", ".join(f"`{d.name}`" for d in datasets if nxt is not None and d.target == nxt) or "—"
+        )
         lines.append(
             f"| [{info.name}]({link_prefix}{info.id}.md) "
             f"| {counts[Status.AVAILABLE]} | {counts[Status.STUB]} | {counts[Status.PLANNED]} "

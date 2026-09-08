@@ -11,14 +11,14 @@ provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 ## Providers
 
 <!-- registry:start -->
-| Provider | Available | Stub | Planned | Next up (0.6) | Datasets |
+| Provider | Available | Stub | Planned | Next up (unassigned) | Datasets |
 |---|---:|---:|---:|---|---|
-| [NOAA](docs/providers/noaa.md) | 3 | 0 | 26 | `gfs`, `hrrr`, `oisst`, `etopo` | `ghcn-daily`, `nexrad-level2`, `coastwatch-sst`, +26 planned |
+| [NOAA](docs/providers/noaa.md) | 3 | 0 | 26 | — | `ghcn-daily`, `nexrad-level2`, `coastwatch-sst`, +26 planned |
 | [USGS](docs/providers/usgs.md) | 1 | 0 | 2 | — | `water-daily`, +2 planned |
 | [Census Bureau](docs/providers/census.md) | 0 | 0 | 1 | — | +1 planned |
 | [EPA](docs/providers/epa.md) | 0 | 0 | 1 | — | +1 planned |
 | [FEMA](docs/providers/fema.md) | 0 | 0 | 1 | — | +1 planned |
-| [NASA](docs/providers/nasa.md) | 0 | 0 | 1 | `gpm-imerg` | +1 planned |
+| [NASA](docs/providers/nasa.md) | 0 | 0 | 1 | — | +1 planned |
 | [USDA](docs/providers/usda.md) | 0 | 0 | 1 | — | +1 planned |
 
 Available datasets are in `code`, stubs in _italics_; planned ones are counted. Available means implemented in this source checkout; consult the [releases](https://github.com/jakeryderv/usdata/releases) for published support. Each provider page has access notes and full dataset details; [docs/roadmap.md](docs/roadmap.md) lists datasets by target version.
@@ -109,6 +109,13 @@ sources:
     end: 2024-05-31
 ```
 
+## Opening CSV data (next release)
+
+`FetchedAsset.open()` is available from source for v0.6 with the optional pandas
+extra. It reads cached CSV into a DataFrame, preserves identifier strings, and
+keeps CoastWatch units as metadata. See the [reader reference](docs/reference/readers.md)
+and [fetch → open → analyze example](examples/sst-analysis/README.md).
+
 ## Development
 
 Requires [uv](https://docs.astral.sh/uv/) and [just](https://just.systems/).
@@ -117,16 +124,18 @@ Requires [uv](https://docs.astral.sh/uv/) and [just](https://just.systems/).
 git clone https://github.com/jakeryderv/usdata && cd usdata
 just setup     # install toolchain and dependencies
 just test      # unit tests
-just check     # format, lint, typecheck, offline tests, generated docs
+just check     # format, lint, typecheck, offline tests, generated docs, release notices
+just check-pandas  # install the CSV extra and run the same checks
 just build     # build wheel and sdist
-just smoke     # install and exercise the built wheel outside the checkout
+just smoke     # exercise core and pandas wheel installations outside the checkout
 just run search radar
 ```
 
 Unit tests mechanically block network connections. Integration tests that hit
 live services run with `just test-integration`. CI checks Python 3.11 and 3.14 on
-Linux and smoke-tests the installed wheel on Linux, macOS, and Windows. The
-full unit and live-service suites currently run on Linux.
+Linux, both with and without pandas, and smoke-tests both installed-wheel
+profiles on Linux, macOS, and Windows. The full unit and live-service suites currently run on Linux. `just setup` restores
+a core-only development environment; `just check-pandas` installs the extra.
 
 Releases: `just release minor` opens a version-bump PR; merging it publishes
 to PyPI and creates the tag and GitHub release. See

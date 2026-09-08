@@ -71,3 +71,12 @@ it never rebuilds. If the CI artifact has expired, rerun CI for the selected
 main commit before retrying publishing. A manual publish selects a successful
 main push CI run for the exact commit, subject to the same artifact checks.
 The release recipe also regenerates registry docs after changing the version.
+
+`just check` also runs `scripts/check_release_docs.py`. It rejects known versioned
+source-only notices and roadmap `Now` headings at or below the declared package
+version. On a release PR, update those handwritten notes to shipped wording;
+generated registry sections still come from `just docs`. Prefer explicit wording
+that names the target minor version for upcoming implemented features so
+the check can detect the transition. It scans README, maintained docs, and example
+READMEs, excluding historical ADRs and the changelog. It does not interpret every
+possible phrasing or decide whether future backlog items have shipped.

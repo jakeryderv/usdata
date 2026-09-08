@@ -35,6 +35,12 @@ check:
     uv run pyright
     uv run pytest --cov=usdata --cov-report=term-missing:skip-covered
     uv run python scripts/render_registry.py --check
+    uv run python scripts/check_release_docs.py
+
+# Run the full checks with optional CSV readers installed
+check-pandas:
+    uv sync --all-groups --extra pandas
+    UV_NO_SYNC=1 just check
 
 # Build sdist and wheel into dist/
 build:
