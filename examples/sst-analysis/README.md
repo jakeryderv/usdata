@@ -1,6 +1,6 @@
 # Fetch, open, and summarize SST
 
-Available from source for v0.6. Follow [development setup](../../README.md#development),
+Available since v0.6. Follow [development setup](../../README.md#development),
 then run from the repository root:
 
 ```sh
