@@ -1,9 +1,9 @@
 # Opening fetched data
 
-Available from source for v0.6. CSV readers require the optional pandas extra.
-Follow [development setup](../../README.md#development), then install it with
-`uv sync --all-groups --extra pandas`. Once released, install `usdata[pandas]`
-with pip or add it to a project with `uv add "usdata[pandas]"`.
+Available since v0.6. Install the optional pandas extra with
+`pip install "usdata[pandas]"` or `uv add "usdata[pandas]"`.
+For a source checkout, follow [development setup](../../README.md#development)
+and run `uv sync --all-groups --extra pandas`.
 
 ```python
 from usdata import build_query, get

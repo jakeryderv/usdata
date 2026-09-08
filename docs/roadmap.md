@@ -55,17 +55,18 @@ health can change independently of offline checks; consult the
 [Integration workflow](https://github.com/jakeryderv/usdata/actions/workflows/integration.yml)
 for current results. The remaining NOAA expansion backlog continues below.
 
-**Now (v0.6)**: opening fetched data for analysis.
+**Shipped (v0.6)**: opening fetched data for analysis.
 
 - [x] [Optional CSV `open()`](https://github.com/jakeryderv/usdata/issues/10),
-  implemented in source with pandas behind an extra, ERDDAP units handling,
+  with pandas behind an extra, ERDDAP units handling,
   and identifier preservation
 - [x] Fetch → open → analyze example and reader reference
 - [x] Core-only and pandas CI/wheel checks; release-status documentation checks
 
-Release acceptance: both dependency profiles pass `just check`, installed-wheel
+Validated on 2026-09-08: both dependency profiles pass `just check`, installed-wheel
 checks pass on all supported CI platforms, and the small SST example runs against
-the live service. This phase adds no new data providers or remote storage.
+the live service (four cells; mean SST 26.89 degree_C). This phase adds no new data
+providers or remote storage.
 
 **Following v0.6 (not yet assigned a release)**:
 

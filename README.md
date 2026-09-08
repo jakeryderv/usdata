@@ -3,9 +3,9 @@
 Unified Python SDK and CLI for discovering, fetching, and tracking the
 provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 
-> Status: pre-alpha. v0.5 supports GHCN-Daily, NEXRAD Level II, USGS daily
+> Status: pre-alpha. v0.6 supports GHCN-Daily, NEXRAD Level II, USGS daily
 > values, and CoastWatch SST subsets with provenance, plus Census state/county
-> lookup. Other datasets are planned.
+> lookup and optional pandas CSV readers. Other datasets are planned.
 > See [docs/roadmap.md](docs/roadmap.md).
 
 ## Providers
@@ -109,11 +109,12 @@ sources:
     end: 2024-05-31
 ```
 
-## Opening CSV data (next release)
+## Opening CSV data
 
-`FetchedAsset.open()` is available from source for v0.6 with the optional pandas
-extra. It reads cached CSV into a DataFrame, preserves identifier strings, and
-keeps CoastWatch units as metadata. See the [reader reference](docs/reference/readers.md)
+`FetchedAsset.open()` is available since v0.6 with the optional pandas
+extra (`pip install "usdata[pandas]"`). It reads cached CSV into a DataFrame,
+preserves identifier strings, and keeps CoastWatch units as metadata.
+See the [reader reference](docs/reference/readers.md)
 and [fetch → open → analyze example](examples/sst-analysis/README.md).
 
 ## Development
