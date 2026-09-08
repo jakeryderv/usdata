@@ -13,6 +13,9 @@ All notable changes to this project are documented here. The format follows
   independent live checks for geographic discovery and explicit-station downloads.
 - `noaa:gsom` monthly station CSVs through NCEI, with geographic discovery,
   complete-month selection, reproducible restoration, and a pandas analysis example.
+- Terminal progress for CLI fetch and pull, showing known asset sizes, HTTP download
+  bytes and retry attempts, and validated cache hits. Disable with `--no-progress`;
+  redirected output retains its existing format.
 
 ## [0.6.0] - 2026-09-08
 

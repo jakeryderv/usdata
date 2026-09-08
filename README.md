@@ -109,6 +109,16 @@ sources:
     end: 2024-05-31
 ```
 
+Terminal progress is available from source for v0.7. On a terminal, `fetch` and
+`pull` show progress on stderr: resolved asset counts,
+known bytes and unknown sizes, HTTP download bytes for the current attempt, and
+validated cache hits. `fetch --dry-run` also summarizes known sizes. Asset totals
+include possible cache hits; each manifest source is resolved separately. Bytes
+from a failed HTTP attempt reset on retry; encoded responses have unknown decoded
+size. Adapters that assemble files from metadata requests show asset-level progress.
+Use `--no-progress` to disable it. Progress is automatically disabled when either
+stdout or stderr is redirected; existing output lines and exit codes are unchanged.
+
 ## Opening CSV data
 
 `FetchedAsset.open()` is available since v0.6 with the optional pandas

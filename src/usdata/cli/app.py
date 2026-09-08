@@ -9,6 +9,8 @@ import httpx
 import typer
 
 from usdata import __version__, build_query, default_registry
+from usdata._progress import batch
+from usdata.cli.progress import progress
 from usdata.fetch import ChecksumMismatch
 from usdata.fetch import fetch as fetch_query
 from usdata.manifest import lockfile_path
@@ -126,6 +128,7 @@ def fetch(
     ] = None,
     cache_dir: Annotated[Path | None, typer.Option(help="Override the cache directory.")] = None,
     force: Annotated[bool, typer.Option(help="Re-download even if cached.")] = False,
+    no_progress: Annotated[bool, typer.Option(help="Disable terminal progress.")] = False,
     dry_run: Annotated[
         bool, typer.Option(help="List matching assets without downloading.")
     ] = False,
@@ -165,8 +168,11 @@ def fetch(
             for a in assets:
                 typer.echo(f"{a.id}\t{a.href}")
             typer.echo(f"{len(assets)} asset(s) matched", err=True)
+            with progress(disabled=no_progress):
+                batch([asset.size for asset in assets])
             return
-        fetched = fetch_query(ds, query, root=cache_dir, force=force)
+        with progress(disabled=no_progress):
+            fetched = fetch_query(ds, query, root=cache_dir, force=force)
     except (DatasetNotFound, UnknownPlace, ValueError) as e:
         typer.secho(str(e), err=True, fg="red")
         raise typer.Exit(code=2) from None
@@ -192,10 +198,12 @@ def pull(
         bool,
         typer.Option(help="Ignore an existing lockfile: re-resolve every source and rewrite it."),
     ] = False,
+    no_progress: Annotated[bool, typer.Option(help="Disable terminal progress.")] = False,
 ) -> None:
     """Fetch every source in a manifest and write (or restore from) its lockfile."""
     try:
-        result = pull_manifest(manifest, root=cache_dir, force=force)
+        with progress(disabled=no_progress):
+            result = pull_manifest(manifest, root=cache_dir, force=force)
     except EmptySource as e:
         typer.secho(str(e), err=True, fg="yellow")
         raise typer.Exit(code=1) from None
