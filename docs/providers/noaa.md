@@ -68,7 +68,7 @@ dataset page says otherwise.
 
 ## Query validation
 
-GHCN accepts only `stations` and `units` (`metric` or `standard`, following the
+GHCN and GSOM accept only `stations` and `units` (`metric` or `standard`, following the
 [NCEI API](https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation)).
 NEXRAD accepts only `site`, `sites`, and `nearest`. Explicit identifier lists
 must be non-empty strings. `site` and `sites` are mutually exclusive, and
@@ -80,6 +80,56 @@ actual boundary. Bundled boxes use generalized 2025 Census boundaries;
 [place lookup](../reference/places.md) documents their limits. For NEXRAD,
 selection falls back to the nearest radar if none lies inside the rectangle.
 Use explicit IDs when exact site selection is required.
+
+## Global Summary of the Month
+
+Available from source for v0.7 as `noaa:gsom`. The NCEI dataset is
+`global-summary-of-the-month`, with anonymous CSV access and the same station
+search/50-station chunking as GHCN-Daily. Geographic selection discovers station
+IDs through the search endpoint; data requests use those explicit IDs. A data
+request with only a bbox returns HTTP 400 (a station is required).
+Use either `stations` or a location/bbox, not both. `units` is `metric` (default)
+or `standard`; unknown parameters are rejected.
+
+Both start and end dates are required. Every UTC calendar month touched by the
+interval is returned in full: May 6–7 selects May; May 31–June 1 selects both
+months. The adapter expands search and data bounds to those whole months, so
+requests for the same months have identical asset URLs and IDs. Asset time bounds
+cover full months; provenance pins the normalized source URL, while the manifest
+retains the original query. CSV `DATE` is `YYYY-MM`.
+
+Common variables include `PRCP` (monthly precipitation total) and `TAVG` (monthly
+mean temperature). With metric output these are millimeters and degrees Celsius.
+Variable availability depends on the station; unrecognized codes are rejected by
+NCEI. The API CSV has no units row, so `open()` retains the URL's `units` setting
+in provenance without adding a DataFrame units map. See the
+[NCEI API documentation](https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation)
+and [monthly example](../../examples/monthly-climate/README.md).
+
+Bounded live probes verified on 2026-09-08 (one airport, one month):
+
+```sh
+curl --get 'https://www.ncei.noaa.gov/access/services/data/v1' \
+  --data-urlencode 'dataset=global-summary-of-the-month' \
+  --data-urlencode 'stations=USW00013967' \
+  --data-urlencode 'startDate=2024-05-06' --data-urlencode 'endDate=2024-05-07' \
+  --data-urlencode 'dataTypes=PRCP,TAVG' --data-urlencode 'units=metric' \
+  --data-urlencode 'format=csv' --data-urlencode 'includeStationLocation=1'
+
+curl --get 'https://www.ncei.noaa.gov/access/services/search/v1/data' \
+  --data-urlencode 'dataset=global-summary-of-the-month' \
+  --data-urlencode 'bbox=35.40,-97.62,35.38,-97.58' \
+  --data-urlencode 'startDate=2024-05-01' --data-urlencode 'endDate=2024-05-31' \
+  --data-urlencode 'dataTypes=PRCP,TAVG' \
+  --data-urlencode 'limit=1' --data-urlencode 'offset=0'
+```
+
+The data probe returned one `2024-05` row (91.8 mm, 21.7 °C); these are observed
+values, not permanent test expectations. Search returned `USW00013967`, `count=1`,
+and dataset-wide `totalCount=127947`; repeating with `offset=1` returned no results.
+Integration tests independently check geographic discovery and a manifest's
+explicit-station download/locked restoration. Upstream revisions can still
+change CSV bytes and correctly fail a locked restore.
 
 ## CoastWatch SST
 
@@ -155,8 +205,8 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | Dataset | Domain | Status | Version | Description | Protocol |
 |---|---|---|---|---|---|
 | [`noaa:ghcn-daily`](#noaaghcn-daily) | Surface weather | available | since 0.2 | Global Historical Climatology Network daily summaries: temperature, precipitation, snow, and other elements from land surface stations, served by the NCEI Access Data Service with station and date filtering. | http |
+| [`noaa:gsom`](#noaagsom) | Surface weather | available | unreleased; planned 0.7 | Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. | http |
 | [`noaa:ghcn-hourly`](#noaaghcn-hourly) | Surface weather | planned | target later | Global hourly and sub-hourly surface observations, the successor to ISD. | http |
-| [`noaa:gsom`](#noaagsom) | Surface weather | planned | target later | Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. | http |
 | [`noaa:gsoy`](#noaagsoy) | Surface weather | planned | target later | Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. | http |
 | [`noaa:lcd`](#noaalcd) | Surface weather | planned | target later | Hourly, daily, and monthly observations from airport and first-order stations via the NCEI Access Data Service dataset local-climatological-data, addressed by WBAN-based station ids. | http |
 | [`noaa:storm-events`](#noaastorm-events) | Severe weather | planned | target later | NCEI's record of significant weather events since 1950 (tornadoes, hail, wind, floods, and more) with locations, damage, and narratives. | http |
@@ -198,6 +248,20 @@ Global Historical Climatology Network daily summaries: temperature, precipitatio
 - Keywords: climate, weather, temperature, precipitation, snow, stations, daily, ghcn, ncei
 - Adapter: `usdata.providers.noaa.ghcnd:GhcnDaily`
 
+### noaa:gsom
+
+**Global Summary of the Month** · available · unreleased; planned 0.7
+
+Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. Selects whole calendar months and explicit stations, or discovers stations through the companion search service.
+
+- Domain: Surface weather
+- Server-side subsetting: temporal, variable
+- Homepage: https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-month
+- License: US Government Work (public domain)
+- Extent: -180, -90, 180, 90
+- Keywords: climate, monthly, stations, temperature, precipitation, gsom, ncei
+- Adapter: `usdata.providers.noaa.gsom:GlobalSummaryMonthly`
+
 ### noaa:ghcn-hourly
 
 **GHCN-Hourly Station Observations** · planned · target later
@@ -210,20 +274,6 @@ Global hourly and sub-hourly surface observations, the successor to ISD. Publish
 - License: US Government Work (public domain)
 - Extent: not stated
 - Keywords: weather, hourly, stations, global, ghcnh, ncei
-- Adapter: none yet
-
-### noaa:gsom
-
-**Global Summary of the Month** · planned · target later
-
-Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. Shares the GHCN-Daily client and station search.
-
-- Domain: Surface weather
-- Server-side subsetting: temporal, variable
-- Homepage: https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-month
-- License: US Government Work (public domain)
-- Extent: not stated
-- Keywords: climate, monthly, stations, temperature, precipitation, gsom, ncei
 - Adapter: none yet
 
 ### noaa:gsoy

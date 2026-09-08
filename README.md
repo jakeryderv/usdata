@@ -13,7 +13,7 @@ provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 <!-- registry:start -->
 | Provider | Available | Stub | Planned | Next up (unassigned) | Datasets |
 |---|---:|---:|---:|---|---|
-| [NOAA](docs/providers/noaa.md) | 3 | 0 | 26 | — | `ghcn-daily`, `nexrad-level2`, `coastwatch-sst`, +26 planned |
+| [NOAA](docs/providers/noaa.md) | 4 | 0 | 25 | — | `ghcn-daily`, `gsom`, `nexrad-level2`, `coastwatch-sst`, +25 planned |
 | [USGS](docs/providers/usgs.md) | 1 | 0 | 2 | — | `water-daily`, +2 planned |
 | [Census Bureau](docs/providers/census.md) | 0 | 0 | 1 | — | +1 planned |
 | [EPA](docs/providers/epa.md) | 0 | 0 | 1 | — | +1 planned |

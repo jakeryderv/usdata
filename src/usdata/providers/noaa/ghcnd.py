@@ -48,6 +48,8 @@ def _stations_param(raw: Any) -> list[str]:
 class GhcnDaily(Provider):
     """GHCN-Daily adapter. Params: ``stations`` (list or comma string), ``units``."""
 
+    ncei_dataset = NCEI_DATASET
+
     def __init__(self, dataset: Dataset, client: httpx.Client | None = None) -> None:
         super().__init__(dataset)
         self._client = client
@@ -70,7 +72,7 @@ class GhcnDaily(Provider):
             raise QueryError("station search needs a bounding box and a time range")
         b = query.bbox
         params: dict[str, Any] = {
-            "dataset": NCEI_DATASET,
+            "dataset": self.ncei_dataset,
             "bbox": f"{b.north},{b.west},{b.south},{b.east}",
             "startDate": _date(query.time.start),
             "endDate": _date(query.time.end),
@@ -120,7 +122,7 @@ class GhcnDaily(Provider):
         if query.time is None or query.time.start is None or query.time.end is None:
             raise QueryError(f"{self.dataset.id} requires both start and end dates")
         if unknown := set(query.params) - {"stations", "units"}:
-            raise QueryError(f"unsupported GHCN params: {', '.join(sorted(unknown))}")
+            raise QueryError(f"unsupported {self.dataset.id} params: {', '.join(sorted(unknown))}")
         if query.params.get("units", "metric") not in ("metric", "standard"):
             raise QueryError("units must be metric or standard")
         if "stations" in query.params:
@@ -137,7 +139,7 @@ class GhcnDaily(Provider):
         for i in range(0, len(stations), STATIONS_PER_ASSET):
             chunk = stations[i : i + STATIONS_PER_ASSET]
             params: dict[str, Any] = {
-                "dataset": NCEI_DATASET,
+                "dataset": self.ncei_dataset,
                 "stations": ",".join(chunk),
                 "startDate": start,
                 "endDate": end,
@@ -151,7 +153,7 @@ class GhcnDaily(Provider):
             digest = hashlib.sha1(url.encode()).hexdigest()[:12]
             assets.append(
                 Asset(
-                    id=f"{NCEI_DATASET}_{start}_{end}_{digest}.csv",
+                    id=f"{self.ncei_dataset}_{start}_{end}_{digest}.csv",
                     dataset_id=self.dataset.id,
                     href=url,
                     protocol=Protocol.HTTP,
