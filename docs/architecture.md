@@ -75,3 +75,8 @@ owned or injected client. Transport remains independent of dataset semantics.
 lockfiles, source bytes, or sidecars. Format selection uses the asset rather than
 a current registry lookup, so restored results remain readable. See the
 [reader reference](reference/readers.md) and [ADR 0006](adr/0006-optional-local-csv-readers.md).
+
+CLI progress uses private, synchronous events scoped by a context variable. Core
+reports resolved batches and verified assets; HTTP reports bytes per attempt.
+Providers and public SDK signatures are unchanged. Rendering is confined to the
+CLI and disabled for redirected streams. See [ADR 0007](adr/0007-scoped-cli-progress.md).

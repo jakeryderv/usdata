@@ -7,7 +7,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from usdata import provenance
+from usdata import _progress, provenance
 from usdata._files import staged_path
 from usdata.cache import asset_path, sha256_file
 from usdata.models import Asset, Dataset, Provenance, Query
@@ -58,6 +58,7 @@ def _fetch_asset(
 ) -> FetchedAsset:
     if asset.dataset_id != dataset.id:
         raise ValueError(f"asset dataset {asset.dataset_id!r} does not match {dataset.id!r}")
+    _progress.emit(_progress.AssetProgress(asset.id, "start", asset.size))
     path = asset_path(asset, root)
     if not force and path.is_file():
         try:
@@ -73,6 +74,7 @@ def _fetch_asset(
             and (asset.checksum is None or prov.checksum == asset.checksum)
             and sha256_file(path) == prov.checksum
         ):
+            _progress.emit(_progress.AssetProgress(asset.id, "cached", prov.size))
             return FetchedAsset(asset=asset, path=path, provenance=prov, from_cache=True)
     with staged_path(path) as tmp:
         adapter.fetch(asset, tmp)
@@ -81,6 +83,7 @@ def _fetch_asset(
             raise ChecksumMismatch(f"{asset.id}: expected {asset.checksum}, got {prov.checksum}")
     # A crash between replacements leaves a detectable mismatch, never a trusted partial file.
     provenance.write(prov, path)
+    _progress.emit(_progress.AssetProgress(asset.id, "fetched", prov.size))
     return FetchedAsset(asset=asset, path=path, provenance=prov, from_cache=False)
 
 
@@ -98,4 +101,5 @@ def fetch(
     """Resolve and fetch a query, sharing one adapter and closing its owned resources."""
     with load_adapter(dataset) as adapter:
         assets = adapter.list_assets(query)
+        _progress.batch([asset.size for asset in assets])
         return [_fetch_asset(dataset, a, adapter, root=root, force=force) for a in assets]

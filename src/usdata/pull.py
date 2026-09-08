@@ -16,7 +16,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from usdata import __version__, provenance
+from usdata import __version__, _progress, provenance
 from usdata.cache import asset_path, sha256_file
 from usdata.fetch import ChecksumMismatch, FetchedAsset, _fetch_asset, fetch
 from usdata.manifest import LockedAsset, Lockfile, Manifest, lockfile_path
@@ -111,13 +111,21 @@ def restore(
     lock = Lockfile.load(lock_path)
     _check_manifest(manifest_path, lock)
     fetched: list[FetchedAsset] = []
+    _progress.batch([entry.provenance.size for entry in lock.assets])
     adapters: dict[str, Provider] = {}
     with ExitStack() as stack:
         for entry in lock.assets:
             dataset = reg.get(entry.asset.dataset_id)
             path = asset_path(entry.asset, root)
+            if path.is_file():
+                _progress.emit(
+                    _progress.AssetProgress(entry.asset.id, "start", entry.provenance.size)
+                )
             if path.is_file() and sha256_file(path) == entry.provenance.checksum:
                 provenance.write(entry.provenance, path)
+                _progress.emit(
+                    _progress.AssetProgress(entry.asset.id, "cached", entry.provenance.size)
+                )
                 fetched.append(
                     FetchedAsset(
                         asset=entry.asset, path=path, provenance=entry.provenance, from_cache=True

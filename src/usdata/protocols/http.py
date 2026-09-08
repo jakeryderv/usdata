@@ -11,7 +11,7 @@ from typing import Any, TypeVar
 
 import httpx
 
-from usdata import __version__
+from usdata import __version__, _progress
 from usdata._files import staged_path
 
 USER_AGENT = f"usdata/{__version__} (+https://github.com/jakeryderv/usdata)"
@@ -80,13 +80,30 @@ def download(url: str, dest: Path, http: httpx.Client | None = None) -> Path:
     """Download atomically, restarting interrupted GETs up to three total attempts."""
     own = http is None
     active = http or client()
+    attempt = 0
 
     def request() -> Path:
+        nonlocal attempt
+        attempt += 1
+        _progress.emit(_progress.TransferProgress(0, None, attempt))
         with staged_path(dest) as tmp, active.stream("GET", url) as resp:
             resp.raise_for_status()
+            length = resp.headers.get("Content-Length", "")
+            # iter_bytes writes decoded bytes; an encoded length is not comparable.
+            total = (
+                int(length)
+                if length.isascii()
+                and length.isdigit()
+                and resp.headers.get("Content-Encoding", "identity").lower() == "identity"
+                else None
+            )
+            completed = 0
+            _progress.emit(_progress.TransferProgress(completed, total, attempt))
             with tmp.open("wb") as f:
                 for chunk in resp.iter_bytes():
                     f.write(chunk)
+                    completed += len(chunk)
+                    _progress.emit(_progress.TransferProgress(completed, total, attempt))
         return dest
 
     try:
