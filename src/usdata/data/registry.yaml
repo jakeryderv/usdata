@@ -209,19 +209,22 @@ datasets:
 
   - id: noaa:gsom
     provider: noaa
-    status: planned
+    status: available
     domain: surface-weather
-    target: later
+    since: "0.7"
     title: Global Summary of the Month
     description: >-
       Monthly station summaries derived from GHCN-Daily (means, extremes,
       totals) via the NCEI Access Data Service dataset global-summary-of-the-month.
-      Shares the GHCN-Daily client and station search.
+      Selects whole calendar months and explicit stations, or discovers stations
+      through the companion search service.
     keywords: [climate, monthly, stations, temperature, precipitation, gsom, ncei]
     protocol: http
     homepage: https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-month
     license: US Government Work (public domain)
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+    spatial_extent: { west: -180.0, south: -90.0, east: 180.0, north: 90.0 }
+    adapter: usdata.providers.noaa.gsom:GlobalSummaryMonthly
 
   - id: noaa:gsoy
     provider: noaa

@@ -68,11 +68,16 @@ checks pass on all supported CI platforms, and the small SST example runs agains
 the live service (four cells; mean SST 26.89 degree_C). This phase adds no new data
 providers or remote storage.
 
-**Following v0.6 (not yet assigned a release)**:
+**In progress (v0.7 / source)**:
+
+- [x] GSOM monthly station CSVs, whole-month queries, locked restoration, and
+  a [monthly climate example](../examples/monthly-climate/README.md)
+
+**Following v0.6 (remaining work not yet assigned a release)**:
 
 - NetCDF, radar, and geospatial readers behind extras, driven by concrete
   supported datasets and format fixtures
-- Further NCEI Access Data Service datasets (GSOM, GSOY, climate normals)
+- Further NCEI Access Data Service datasets (GSOY, climate normals)
 - Bulk directories and archives (Storm Events, HURDAT2, IBTrACS)
 - A second S3 dataset with product selection (GOES ABI), then MRMS
 - CO-OPS tides and currents
@@ -110,7 +115,6 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`noaa:ghcn-hourly`](providers/noaa.md#noaaghcn-hourly) GHCN-Hourly Station Observations · planned
 - [`noaa:goes-abi`](providers/noaa.md#noaagoes-abi) GOES-R ABI Satellite Imagery · planned
 - [`noaa:goes-glm`](providers/noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · planned
-- [`noaa:gsom`](providers/noaa.md#noaagsom) Global Summary of the Month · planned
 - [`noaa:gsoy`](providers/noaa.md#noaagsoy) Global Summary of the Year · planned
 - [`noaa:hrrr`](providers/noaa.md#noaahrrr) HRRR Forecast Model Output · planned
 - [`noaa:hurdat2`](providers/noaa.md#noaahurdat2) HURDAT2 Atlantic and Pacific Best Tracks · planned
@@ -130,6 +134,10 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usda:cropland-data-layer`](providers/usda.md#usdacropland-data-layer) Cropland Data Layer · planned
 - [`usgs:3dep-elevation`](providers/usgs.md#usgs3dep-elevation) 3DEP Elevation · planned
 - [`usgs:earthquakes`](providers/usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · planned
+
+**Implemented, unreleased (planned 0.7)**
+
+- [`noaa:gsom`](providers/noaa.md#noaagsom) Global Summary of the Month · available
 
 **Included since 0.5**
 

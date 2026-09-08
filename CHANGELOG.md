@@ -11,6 +11,8 @@ All notable changes to this project are documented here. The format follows
 
 - Opt-in GHCN station-search diagnostics with bounded response details, and
   independent live checks for geographic discovery and explicit-station downloads.
+- `noaa:gsom` monthly station CSVs through NCEI, with geographic discovery,
+  complete-month selection, reproducible restoration, and a pandas analysis example.
 
 ## [0.6.0] - 2026-09-08
 
