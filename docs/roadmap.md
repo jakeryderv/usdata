@@ -68,14 +68,19 @@ checks pass on all supported CI platforms, and the small SST example runs agains
 the live service (four cells; mean SST 26.89 degree_C). This phase adds no new data
 providers or remote storage.
 
-**In progress (v0.7 / source)**:
+**Shipped (v0.7)**: monthly climate data and download visibility.
 
+- [x] GHCN search diagnostics and independent discovery/download live tests
 - [x] GSOM monthly station CSVs, whole-month queries, locked restoration, and
   a [monthly climate example](../examples/monthly-climate/README.md)
 - [x] Progress reporting and download-size summaries for large fetches
-  (available from source for v0.7; terminal-only, with `--no-progress`)
+  (terminal-only, with `--no-progress`)
 
-**Following v0.6 (remaining work not yet assigned a release)**:
+Validated on 2026-09-08: 219 core-only tests and 231 tests with pandas pass,
+along with all nine live tests. Cross-platform installed-wheel CI and a real
+terminal fetch/cache check pass; redirected output retains its existing format.
+
+**Following v0.7 (remaining work not yet assigned a release)**:
 
 - NetCDF, radar, and geospatial readers behind extras, driven by concrete
   supported datasets and format fixtures
@@ -136,7 +141,7 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usgs:3dep-elevation`](providers/usgs.md#usgs3dep-elevation) 3DEP Elevation · planned
 - [`usgs:earthquakes`](providers/usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · planned
 
-**Implemented, unreleased (planned 0.7)**
+**Included since 0.7**
 
 - [`noaa:gsom`](providers/noaa.md#noaagsom) Global Summary of the Month · available
 

@@ -83,7 +83,7 @@ Use explicit IDs when exact site selection is required.
 
 ## Global Summary of the Month
 
-Available from source for v0.7 as `noaa:gsom`. The NCEI dataset is
+Available since v0.7 as `noaa:gsom`. The NCEI dataset is
 `global-summary-of-the-month`, with anonymous CSV access and the same station
 search/50-station chunking as GHCN-Daily. Geographic selection discovers station
 IDs through the search endpoint; data requests use those explicit IDs. A data
@@ -205,7 +205,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | Dataset | Domain | Status | Version | Description | Protocol |
 |---|---|---|---|---|---|
 | [`noaa:ghcn-daily`](#noaaghcn-daily) | Surface weather | available | since 0.2 | Global Historical Climatology Network daily summaries: temperature, precipitation, snow, and other elements from land surface stations, served by the NCEI Access Data Service with station and date filtering. | http |
-| [`noaa:gsom`](#noaagsom) | Surface weather | available | unreleased; planned 0.7 | Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. | http |
+| [`noaa:gsom`](#noaagsom) | Surface weather | available | since 0.7 | Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. | http |
 | [`noaa:ghcn-hourly`](#noaaghcn-hourly) | Surface weather | planned | target later | Global hourly and sub-hourly surface observations, the successor to ISD. | http |
 | [`noaa:gsoy`](#noaagsoy) | Surface weather | planned | target later | Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. | http |
 | [`noaa:lcd`](#noaalcd) | Surface weather | planned | target later | Hourly, daily, and monthly observations from airport and first-order stations via the NCEI Access Data Service dataset local-climatological-data, addressed by WBAN-based station ids. | http |
@@ -250,7 +250,7 @@ Global Historical Climatology Network daily summaries: temperature, precipitatio
 
 ### noaa:gsom
 
-**Global Summary of the Month** · available · unreleased; planned 0.7
+**Global Summary of the Month** · available · since 0.7
 
 Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. Selects whole calendar months and explicit stations, or discovers stations through the companion search service.
 

@@ -7,6 +7,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-09-08
+
 ### Added
 
 - Opt-in GHCN station-search diagnostics with bounded response details, and
@@ -144,7 +146,8 @@ First usable release.
 
 - Placeholder release reserving the package name. No functionality.
 
-[Unreleased]: https://github.com/jakeryderv/usdata/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/jakeryderv/usdata/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/jakeryderv/usdata/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/jakeryderv/usdata/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/jakeryderv/usdata/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/jakeryderv/usdata/compare/v0.3.0...v0.4.0
