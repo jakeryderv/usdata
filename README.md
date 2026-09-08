@@ -109,7 +109,8 @@ sources:
     end: 2024-05-31
 ```
 
-On a terminal, `fetch` and `pull` show progress on stderr: resolved asset counts,
+Terminal progress is available from source for v0.7. On a terminal, `fetch` and
+`pull` show progress on stderr: resolved asset counts,
 known bytes and unknown sizes, HTTP download bytes for the current attempt, and
 validated cache hits. `fetch --dry-run` also summarizes known sizes. Asset totals
 include possible cache hits; each manifest source is resolved separately. Bytes

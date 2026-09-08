@@ -82,7 +82,7 @@ providers or remote storage.
 - A second S3 dataset with product selection (GOES ABI), then MRMS
 - CO-OPS tides and currents
 - [x] Progress reporting and download-size summaries for large fetches
-  (implemented in source for v0.7; terminal-only, with `--no-progress`)
+  (available from source for v0.7; terminal-only, with `--no-progress`)
 
 Refine each access pattern into an issue with acceptance criteria when it becomes
 next. Registry targets remain `later` until a release commitment is made.
