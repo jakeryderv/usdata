@@ -3,9 +3,10 @@
 Unified Python SDK and CLI for discovering, fetching, and tracking the
 provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 
-> Status: pre-alpha. v0.6 supports GHCN-Daily, NEXRAD Level II, USGS daily
-> values, and CoastWatch SST subsets with provenance, plus Census state/county
-> lookup and optional pandas CSV readers. Other datasets are planned.
+> Status: pre-alpha. v0.7 supports GHCN-Daily, GSOM monthly summaries,
+> NEXRAD Level II, USGS daily values, and CoastWatch SST subsets with provenance,
+> plus Census state/county lookup, optional pandas CSV readers, and terminal
+> download progress. Other datasets are planned.
 > See [docs/roadmap.md](docs/roadmap.md).
 
 ## Providers
@@ -109,7 +110,7 @@ sources:
     end: 2024-05-31
 ```
 
-Terminal progress is available from source for v0.7. On a terminal, `fetch` and
+Terminal progress is available since v0.7. On a terminal, `fetch` and
 `pull` show progress on stderr: resolved asset counts,
 known bytes and unknown sizes, HTTP download bytes for the current attempt, and
 validated cache hits. `fetch --dry-run` also summarizes known sizes. Asset totals

@@ -83,7 +83,7 @@ Use explicit IDs when exact site selection is required.
 
 ## Global Summary of the Month
 
-Available from source for v0.7 as `noaa:gsom`. The NCEI dataset is
+Available since v0.7 as `noaa:gsom`. The NCEI dataset is
 `global-summary-of-the-month`, with anonymous CSV access and the same station
 search/50-station chunking as GHCN-Daily. Geographic selection discovers station
 IDs through the search endpoint; data requests use those explicit IDs. A data

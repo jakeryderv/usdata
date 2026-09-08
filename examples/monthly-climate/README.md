@@ -1,6 +1,6 @@
 # Monthly airport climate
 
-Available from source for v0.7. This example fetches May 2024 precipitation
+Available since v0.7. This example fetches May 2024 precipitation
 and mean temperature at Will Rogers World Airport in Oklahoma City, writes a
 manifest lockfile, and opens the CSV with optional pandas support.
 
