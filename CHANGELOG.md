@@ -7,6 +7,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-08
+
 ### Added
 
 - Optional `FetchedAsset.open()` CSV reading through `usdata[pandas]`, including
@@ -132,7 +134,8 @@ First usable release.
 
 - Placeholder release reserving the package name. No functionality.
 
-[Unreleased]: https://github.com/jakeryderv/usdata/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/jakeryderv/usdata/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/jakeryderv/usdata/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/jakeryderv/usdata/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/jakeryderv/usdata/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/jakeryderv/usdata/compare/v0.2.1...v0.3.0
