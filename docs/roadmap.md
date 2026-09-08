@@ -46,9 +46,14 @@ name-reserving placeholder.
   empty-source policy, manifest consistency, strict provider params,
   bounded HTTP retries, manifest guide, and installed-wheel CI checks
 
-Validation: `just check` and the live integration suite pass, including the
-NOAA/USGS manifest example pulling, restoring, and verifying. The remaining
-NOAA expansion backlog continues below.
+Validation on 2026-09-08: all six live integration tests pass locally and in the
+GitHub rerun, including
+the NOAA/USGS manifest example pulling, restoring, and verifying. The scheduled
+2026-09-07 run returned no GHCN-Daily stations for the Oklahoma City query;
+the same query passes on recheck, and the cause remains unconfirmed. Live-service
+health can change independently of offline checks; consult the
+[Integration workflow](https://github.com/jakeryderv/usdata/actions/workflows/integration.yml)
+for current results. The remaining NOAA expansion backlog continues below.
 
 **Now (v0.6)**: opening fetched data for analysis.
 
