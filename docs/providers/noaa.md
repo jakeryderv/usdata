@@ -21,6 +21,12 @@ NOAA publishes through several unrelated systems. The ones usdata touches:
   companion **search service** (`/access/services/search/v1/data`) to find
   stations. In search responses `count` is the number of matches and
   `totalCount` is dataset-wide; paginate on `count`.
+  Enable Python DEBUG logging for `usdata.providers.noaa.ghcnd` to inspect each
+  search page's request URL, HTTP status, content type, match/result counts,
+  new station count, and up to five station IDs. Pages yielding no new stations
+  include at most 512 response characters. Live tests capture these diagnostics
+  on failure and check geographic discovery separately from explicit-station
+  downloads, so a search outage does not obscure data-service health.
 - **ERDDAP** servers (CoastWatch, PolarWatch, and others): griddap and
   tabledap URLs with true server-side subsetting. Anonymous. CoastWatch SST
   uses griddap CSV for `noaacwBLENDEDsstDNDaily`; see the details below.

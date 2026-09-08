@@ -7,6 +7,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Opt-in GHCN station-search diagnostics with bounded response details, and
+  independent live checks for geographic discovery and explicit-station downloads.
+
 ## [0.6.0] - 2026-09-08
 
 ### Added

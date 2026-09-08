@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import httpx
@@ -49,8 +50,9 @@ def test_explicit_stations_skip_search(adapter: GhcnDaily) -> None:
 
 
 def test_bbox_query_paginates_station_search(
-    monkeypatch: pytest.MonkeyPatch, adapter: GhcnDaily
+    monkeypatch: pytest.MonkeyPatch, adapter: GhcnDaily, caplog: pytest.LogCaptureFixture
 ) -> None:
+    caplog.set_level(logging.DEBUG, logger="usdata.providers.noaa.ghcnd")
     monkeypatch.setattr("usdata.providers.noaa.ghcnd.SEARCH_PAGE_SIZE", 2)
     monkeypatch.setattr("usdata.providers.noaa.ghcnd.STATIONS_PER_ASSET", 2)
     q = build_query(location="ok", start="2024-05-06", end="2024-05-06", variables=["PRCP"])
@@ -68,6 +70,26 @@ def test_bbox_query_paginates_station_search(
     assert first["dataTypes"] == "PRCP"
     assert [httpx.URL(a.href).params["stations"] for a in assets] == ["A,B", "C"]
     assert all(httpx.URL(a.href).params["dataTypes"] == "PRCP" for a in assets)
+    assert "count=3 totalCount=132438 results=2 new_stations=2" in caplog.text
+    assert "offset=2" in caplog.text
+    assert "station_sample=['C']" in caplog.text
+
+
+@pytest.mark.parametrize("results", [[], [{"unexpected": "x" * 2000}]])
+def test_empty_station_search_has_bounded_diagnostics(
+    adapter: GhcnDaily, caplog: pytest.LogCaptureFixture, results: list[dict]
+) -> None:
+    caplog.set_level(logging.DEBUG, logger="usdata.providers.noaa.ghcnd")
+    query = build_query(location="ok", start="2024-05-06", end="2024-05-07")
+    with respx.mock() as mock:
+        mock.get(SEARCH_URL).respond(
+            200, json={"count": len(results), "totalCount": 132438, "results": results}
+        )
+        assert adapter.list_assets(query) == []
+    assert "status=200 content_type=application/json" in caplog.text
+    assert "new_stations=0 station_sample=[]" in caplog.text
+    assert "response_prefix=" in caplog.text
+    assert "x" * 513 not in caplog.text
 
 
 def test_fetch_writes_file_and_provenance_then_uses_cache(

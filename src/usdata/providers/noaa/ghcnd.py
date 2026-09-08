@@ -12,6 +12,7 @@ always goes through search first. Stations are chunked so URLs stay short.
 from __future__ import annotations
 
 import hashlib
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +27,7 @@ DATA_URL = "https://www.ncei.noaa.gov/access/services/data/v1"
 NCEI_DATASET = "daily-summaries"
 SEARCH_PAGE_SIZE = 1000
 STATIONS_PER_ASSET = 50
+logger = logging.getLogger(__name__)
 
 
 def _date(value: Any) -> str:
@@ -84,12 +86,29 @@ class GhcnDaily(Provider):
             resp.raise_for_status()
             body = resp.json()
             results = body.get("results", [])
+            before = len(found)
             for result in results:
                 for station in result.get("stations", []):
                     sid = station.get("id")
                     if sid and sid not in seen:
                         seen.add(sid)
                         found.append(sid)
+            logger.debug(
+                "NCEI station search: url=%s status=%s content_type=%s "
+                "count=%r totalCount=%r results=%s new_stations=%s station_sample=%r",
+                resp.request.url,
+                resp.status_code,
+                resp.headers.get("content-type"),
+                body.get("count"),
+                body.get("totalCount"),
+                len(results),
+                len(found) - before,
+                found[before : before + 5],
+            )
+            if len(found) == before and logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "NCEI search page yielded no new stations; response_prefix=%r", resp.text[:512]
+                )
             # "count" is the number matching this query; "totalCount" is dataset-wide.
             params["offset"] += SEARCH_PAGE_SIZE
             if not results or params["offset"] >= int(body.get("count", 0)):
