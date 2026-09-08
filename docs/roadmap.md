@@ -72,6 +72,8 @@ providers or remote storage.
 
 - [x] GSOM monthly station CSVs, whole-month queries, locked restoration, and
   a [monthly climate example](../examples/monthly-climate/README.md)
+- [x] Progress reporting and download-size summaries for large fetches
+  (available from source for v0.7; terminal-only, with `--no-progress`)
 
 **Following v0.6 (remaining work not yet assigned a release)**:
 
@@ -81,8 +83,6 @@ providers or remote storage.
 - Bulk directories and archives (Storm Events, HURDAT2, IBTrACS)
 - A second S3 dataset with product selection (GOES ABI), then MRMS
 - CO-OPS tides and currents
-- [x] Progress reporting and download-size summaries for large fetches
-  (available from source for v0.7; terminal-only, with `--no-progress`)
 
 Refine each access pattern into an issue with acceptance criteria when it becomes
 next. Registry targets remain `later` until a release commitment is made.
