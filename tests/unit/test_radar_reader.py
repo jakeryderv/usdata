@@ -1,3 +1,4 @@
+import bz2
 import struct
 from datetime import UTC, datetime
 from pathlib import Path
@@ -10,7 +11,7 @@ import respx
 from usdata.cache import sha256_file
 from usdata.fetch import FetchedAsset
 from usdata.models import Asset, Protocol, Provenance
-from usdata.readers import MissingReaderDependency
+from usdata.readers import MissingReaderDependency, RadarDecodeError
 
 FIXTURES = Path(__file__).parents[1] / "fixtures" / "radar"
 
@@ -150,6 +151,73 @@ def test_decoder_closed_when_eager_loading_fails() -> None:
     backend = Mock()
     radar = backend.io.open_nexradlevel2_datatree.return_value
     radar.load.side_effect = OSError("decode failed")
-    with patch("usdata._radar.import_module", return_value=backend), pytest.raises(OSError):
+    with (
+        patch("usdata._radar.import_module", return_value=backend),
+        patch("usdata._radar._check_sweeps"),
+        pytest.raises(OSError),
+    ):
         item.open()
     radar.close.assert_called_once()
+
+
+@pytest.mark.parametrize("selection", [-1, True, "0", 0.5, [], [0, -1], [False], [0, 0]])
+def test_invalid_sweep_selection_before_backend_import(selection: Any):
+    item = radar_asset(FIXTURES / "example_nexrad_archive_msg1.bz2")
+    with patch("usdata._radar.import_module") as loader, pytest.raises(ValueError, match="sweep"):
+        item.open(sweep=selection)
+    loader.assert_not_called()
+
+
+@pytest.mark.parametrize("reader", ["csv", "erddap-csv", "netcdf"])
+def test_sweep_rejected_for_other_readers(reader):
+    item = radar_asset(FIXTURES / "example_nexrad_archive_msg1.bz2")
+    with pytest.raises(ValueError, match="only to the NEXRAD"):
+        item.open(reader=reader, sweep=0)
+
+
+@pytest.mark.parametrize("selection,groups", [(0, ["sweep_0"]), ([0, 2], ["sweep_0", "sweep_2"])])
+def test_selected_sweeps_match_full_volume(selection, groups):
+    xr = pytest.importorskip("xarray")
+    pytest.importorskip("xradar")
+    item = radar_asset(FIXTURES / "example_nexrad_archive_msg1.bz2")
+    full = item.open()
+    selected = item.open(sweep=selection)
+    assert selected.attrs["usdata"]["sweeps"] == groups
+    assert [g.lstrip("/") for g in selected.groups if g.startswith("/sweep_")] == groups
+    for group in groups:
+        xr.testing.assert_equal(full[group].to_dataset(), selected[group].to_dataset())
+    with pytest.raises(ValueError, match="outside this volume"):
+        item.open(sweep=7)
+
+
+def test_missing_interior_end_marker_rejects_shifted_coordinates(tmp_path):
+    backend = pytest.importorskip("xradar.io.backends.nexrad_level2")
+    # Reproduce the KTLX 2024-05-07 04:40:53 structural defect on the small
+    # legacy fixture: change only sweep 1's final radial status from end (2)
+    # to intermediate (1). Moment bytes are untouched. This is deliberately
+    # damaged test data, not another archived scientific observation.
+    raw = bytearray(bz2.decompress((FIXTURES / "example_nexrad_archive_msg1.bz2").read_bytes()))
+    with backend.NEXRADLevel2File(bytes(raw), loaddata=False) as volume:
+        _ = volume.incomplete_sweeps
+        # Record prefix 12 bytes + message header 16 + MSG_1 status offset 12.
+        offset = volume.msg_31_header[1][-1]["filepos"] + 12 + 16 + 12
+    assert struct.unpack_from(">H", raw, offset) == (2,)
+    struct.pack_into(">H", raw, offset, 1)
+    path = tmp_path / "missing-interior-end.ar2v"
+    path.write_bytes(raw)
+    item = radar_asset(path)
+    checksum = item.provenance.checksum
+    for selection in [None, 1, 2, 4, 6, [0, 4]]:
+        with pytest.raises(RadarDecodeError, match="No sweeps were silently dropped"):
+            item.open(sweep=selection)
+    # Sweep 4 has the same ray count as the wrongly paired sweep 5: a shape
+    # check alone cannot catch this loss of coordinate/timestamp alignment.
+    with backend.NEXRADLevel2File(bytes(raw), loaddata=False) as volume:
+        _ = volume.incomplete_sweeps
+        assert len(volume.msg_31_header[4]) == 366
+        assert volume.data[4]["record_end"] - volume.data[4]["record_number"] + 1 == 366
+        assert volume.msg_31_header[4][0]["record_number"] != volume.data[4]["record_number"]
+    selected = item.open(sweep=0)
+    assert selected["sweep_0"].DBZH.shape == (367, 460)
+    assert selected.attrs["usdata"]["sweeps"] == ["sweep_0"]
+    assert selected.attrs["usdata"]["provenance"]["checksum"] == checksum == sha256_file(path)

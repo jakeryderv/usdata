@@ -7,7 +7,7 @@ import gzip
 from importlib import import_module
 from typing import TYPE_CHECKING, Any
 
-from usdata.readers import MissingReaderDependency
+from usdata.readers import MissingReaderDependency, RadarDecodeError
 
 # NOAA RDA/RPG ICD 2620002Y, Table XVII-I notes 21 and 30.
 MOMENT_FLAG_COUNTS = {
@@ -24,7 +24,45 @@ if TYPE_CHECKING:
     from usdata.fetch import FetchedAsset
 
 
-def open_nexrad(fetched: FetchedAsset) -> Any:
+def _check_sweeps(content: bytes, sweep: int | list[int] | None) -> None:
+    """Reject decoder tables that pair a sweep with another sweep's coordinates.
+
+    xradar 0.12 can omit an interior sweep without an end marker from its data
+    table while keeping its moment metadata. The coordinate list then shifts.
+    Compare record identities, not just ray counts: equal-length sweeps can
+    otherwise silently acquire another sweep's coordinates and timestamps.
+    """
+    backend = import_module("xradar.io.backends.nexrad_level2")
+    with backend.NEXRADLevel2File(content, loaddata=False) as volume:
+        # Parsing completeness also populates the per-sweep data tables.
+        _ = volume.incomplete_sweeps
+        moments = volume.msg_31_data_header
+        coordinates = volume.msg_31_header
+        requested = (
+            list(range(len(moments)))
+            if sweep is None
+            else (sweep if isinstance(sweep, list) else [sweep])
+        )
+        for index in requested:
+            if index >= len(moments):
+                raise ValueError(f"sweep {index} is outside this volume's {len(moments)} sweeps")
+            data = volume.data.get(index)
+            rays = coordinates[index] if index < len(coordinates) else []
+            if (
+                data is None
+                or not rays
+                or moments[index]["record_number"] != data["record_number"]
+                or rays[0]["record_number"] != data["record_number"]
+                or rays[-1]["record_number"] != data["record_end"]
+            ):
+                raise RadarDecodeError(
+                    f"cannot safely decode sweep {index}: NEXRAD moment and coordinate records "
+                    "do not agree; select an unaffected sweep explicitly with open(sweep=...) "
+                    "or use another decoder. No sweeps were silently dropped."
+                )
+
+
+def open_nexrad(fetched: FetchedAsset, *, sweep: int | list[int] | None = None) -> Any:
     """Decode a local volume into a fully loaded xarray DataTree."""
     try:
         xradar = import_module("xradar")
@@ -43,7 +81,8 @@ def open_nexrad(fetched: FetchedAsset) -> Any:
         content = gzip.decompress(content)
     elif content.startswith(b"BZh"):
         content = bz2.decompress(content)
-    radar = xradar.io.open_nexradlevel2_datatree(content, incomplete_sweep="pad")
+    _check_sweeps(content, sweep)
+    radar = xradar.io.open_nexradlevel2_datatree(content, sweep=sweep, incomplete_sweep="pad")
     try:
         radar.load()
     finally:
@@ -69,5 +108,6 @@ def open_nexrad(fetched: FetchedAsset) -> Any:
     radar.attrs["usdata"] = {
         "asset_id": fetched.asset.id,
         "provenance": fetched.provenance.model_dump(mode="json"),
+        "sweeps": [name.lstrip("/") for name in radar.groups if name.startswith("/sweep_")],
     }
     return radar
