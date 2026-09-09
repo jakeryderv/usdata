@@ -14,8 +14,15 @@ All notable changes to this project are documented here. The format follows
 
 ### Development
 
+
 - Allow focused manual live-test and notebook CI runs while retaining complete
   weekly coverage; summarize test failures, skips, and timings in Actions.
+
+
+- Prepare releases on a branch before editing files, validate draft release PRs
+  before review/merge, check navigation and notebook release notices, and provide
+  guarded cleanup for merged local branches and worktrees.
+
 
 - Add optional fast commit hooks, workflow linting, and PR-title validation; pin
   GitHub Actions to reviewed commits while retaining Dependabot updates.

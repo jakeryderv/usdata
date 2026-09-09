@@ -20,6 +20,15 @@ same configuration and workflow checks even when hooks are not installed.
 Dependabot proposes weekly updates to the SHA-pinned GitHub Actions. To refresh
 hook revisions, run `uv run pre-commit autoupdate` and review them in a PR.
 
+## After merging
+
+Return to the main checkout (`git switch main` when working in the primary
+checkout), then run `just cleanup PR_NUMBER`. Cleanup verifies that the PR merged
+into main and that the local branch still matches its exact head. It removes a
+clean associated topic worktree and the local branch, then leaves main current.
+It refuses dirty worktrees, changed branch tips, and fork PRs. GitHub deletes the
+remote branch after merge. Keep any branch with additional work for a separate PR.
+
 ## Adding a dataset
 
 This is the main way the project grows. The full walkthrough is in

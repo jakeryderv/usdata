@@ -290,3 +290,33 @@ def test_ci_summary_reports_failures_skips_and_timings(tmp_path):
         json.dumps([{"path": "examples/a/example.ipynb", "status": "failed", "seconds": 2}])
     )
     assert "a/example.ipynb | failed | 2.00" in module.notebook_summary(path)
+
+
+def test_release_notices_include_navigation_and_notebook_markdown_only(tmp_path):
+    module = script("check_release_docs")
+    (tmp_path / "pyproject.toml").write_text('[project]\nversion="0.10.0"\n')
+    (tmp_path / "README.md").write_text("Available since v0.10")
+    (tmp_path / "zensical.toml").write_text('nav = [{"Annual (v0.10 / source)" = "annual.md"}]')
+    examples = tmp_path / "examples"
+    examples.mkdir()
+    (examples / "example.ipynb").write_text(
+        json.dumps(
+            {
+                "cells": [
+                    {
+                        "cell_type": "markdown",
+                        "source": ["Available from source for the unreleased v0.10."],
+                    },
+                    {
+                        "cell_type": "code",
+                        "source": "# v0.10 / source",
+                        "outputs": [{"text": "v0.10 / source"}],
+                    },
+                ]
+            }
+        )
+    )
+    errors = module.check(tmp_path)
+    assert len(errors) == 2
+    assert any("zensical.toml:1" in error for error in errors)
+    assert any("example.ipynb:cell 1:1" in error for error in errors)

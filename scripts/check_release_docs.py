@@ -7,6 +7,7 @@ This is a guard for known release transitions, not a general prose validator.
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 import tomllib
@@ -17,7 +18,7 @@ VERSION = r"(?P<version>\d+\.\d+(?:\.\d+)?)"
 PATTERNS = [
     re.compile(pattern, re.IGNORECASE)
     for pattern in (
-        rf"available\s+from\s+source\s+for\s+v{VERSION}",
+        rf"available\s+from\s+source\s+for\s+(?:the\s+unreleased\s+)?v{VERSION}",
         rf"until\s+v{VERSION}\s+is\s+published",
         rf"v{VERSION}\s*/\s*source",
         rf"v{VERSION}\s+features\s+are\s+implemented\s+in\s+source\s+and\s+await\s+release",
@@ -49,11 +50,26 @@ def check(root: Path) -> list[str]:
     paths = [root / "README.md"]
     paths.extend(path for path in (root / "docs").rglob("*.md") if "adr" not in path.parts)
     paths.extend((root / "examples").rglob("*.md"))
-    return [
+    paths.extend(path for path in [root / "zensical.toml"] if path.exists())
+    errors = [
         f"{path.relative_to(root)}:{line}: stale for {version}: {notice}"
         for path in sorted(paths)
         for line, notice in stale_notices(path.read_text(encoding="utf-8"), version)
     ]
+    for path in sorted((root / "examples").rglob("*.ipynb")):
+        if ".ipynb_checkpoints" in path.parts:
+            continue
+        notebook = json.loads(path.read_text(encoding="utf-8"))
+        for index, cell in enumerate(notebook["cells"], 1):
+            if cell["cell_type"] != "markdown":
+                continue
+            source = cell["source"]
+            text = "".join(source) if isinstance(source, list) else source
+            errors.extend(
+                f"{path.relative_to(root)}:cell {index}:{line}: stale for {version}: {notice}"
+                for line, notice in stale_notices(text, version)
+            )
+    return errors
 
 
 if __name__ == "__main__":
