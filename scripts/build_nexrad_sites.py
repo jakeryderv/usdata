@@ -41,7 +41,7 @@ def main() -> None:
     names = [header[a:b].strip() for a, b in cols]
     idx = {n: cols[i] for i, n in enumerate(names)}
     with OUT.open("w", newline="") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(["id", "name", "state", "lat", "lon", "elev_ft", "type"])
         n = 0
         for row in rows:

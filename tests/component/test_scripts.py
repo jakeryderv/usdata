@@ -212,3 +212,37 @@ def test_registry_generation_rejects_ambiguous_markers(body) -> None:
     module = script("render_registry")
     with pytest.raises(ValueError):
         module.splice(body, ("START", "END"), "replacement")
+
+
+def test_radar_generator_writes_lf(tmp_path, monkeypatch):
+    module = script("build_nexrad_sites")
+    source = tmp_path / "stations.txt"
+    columns = module.COLUMNS
+    values = ["KOUN", "NORMAN", "OK", "35.2", "-97.4", "1200", "NEXRAD"]
+    source.write_text(
+        " ".join(f"{value:<10}" for value in columns)
+        + "\n"
+        + " ".join("-" * 10 for _ in columns)
+        + "\n"
+        + " ".join(f"{value:<10}" for value in values)
+        + "\n"
+    )
+    output = tmp_path / "sites.csv"
+    monkeypatch.setattr(module, "OUT", output)
+    monkeypatch.setattr(module.sys, "argv", ["build_nexrad_sites.py", str(source)])
+    module.main()
+    assert output.read_bytes() == (
+        b"id,name,state,lat,lon,elev_ft,type\nKOUN,Norman,OK,35.2,-97.4,1200,TEST\n"
+    )
+
+
+@pytest.mark.parametrize(
+    "title", ["feat: add dataset", "fix(csv)!: preserve bytes", "docs: explain"]
+)
+def test_conventional_pr_titles(title):
+    assert script("check_pr_title").valid_title(title)
+
+
+@pytest.mark.parametrize("title", ["", "Add dataset", "fix:", "feat: \nrun", "fix: x\nci: y"])
+def test_invalid_pr_titles(title):
+    assert not script("check_pr_title").valid_title(title)

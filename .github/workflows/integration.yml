@@ -17,7 +17,7 @@ jobs:
       live: ${{ steps.discover.outputs.live }}
       notebooks: ${{ steps.discover.outputs.notebooks }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - id: discover
         run: python scripts/ci_inventory.py >> "$GITHUB_OUTPUT"
 
@@ -30,12 +30,12 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.inventory.outputs.live) }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
         with:
           python-version: "3.14"
           enable-cache: true
-      - uses: extractions/setup-just@v4
+      - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4
       - if: matrix.extra == 'core'
         run: just setup
       - if: matrix.extra != 'core'
@@ -46,7 +46,7 @@ jobs:
           LIVE_TEST: ${{ matrix.path }}
           UV_NO_SYNC: '1'
         run: just test-live "$LIVE_TEST" --junitxml=reports/live.xml --durations=15
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:
           name: live-${{ matrix.id }}
@@ -62,16 +62,16 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.inventory.outputs.notebooks) }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
         with:
           python-version: "3.14"
           enable-cache: true
-      - uses: extractions/setup-just@v4
+      - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4
       - env:
           NOTEBOOK: ${{ matrix.path }}
         run: just run-notebooks --notebook "$NOTEBOOK" --output-dir reports/notebooks
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:
           name: notebook-${{ matrix.id }}
@@ -82,8 +82,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
         with:
           python-version: "3.11"
           enable-cache: true
@@ -96,7 +96,7 @@ jobs:
           uv pip freeze > reports/minimum-requirements.txt
       - name: Run offline suite without resynchronizing the lockfile
         run: .venv/bin/python -m pytest --cov=usdata --cov-branch --cov-report=xml:reports/coverage.xml --junitxml=reports/minimum.xml --durations=15
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:
           name: minimum-dependencies
