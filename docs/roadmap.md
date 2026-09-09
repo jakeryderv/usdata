@@ -94,7 +94,7 @@ terminal fetch/cache check pass; redirected output retains its existing format.
 
 **Following v0.7 (remaining work not yet assigned a release)**:
 
-- NetCDF and geospatial readers behind extras, driven by concrete
+- Geospatial readers behind extras, driven by concrete
   supported datasets and format fixtures
 - Further NCEI Access Data Service datasets (GSOY, climate normals)
 - Bulk directories and archives (HURDAT2, IBTrACS)
