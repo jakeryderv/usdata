@@ -13,7 +13,6 @@ All notable changes to this project are documented here. The format follows
 
 - Optional local NetCDF4 opening with eager xarray loading, CF decoding,
   closed file resources, source metadata, and an executed GOES infrared notebook.
-
 - `noaa:goes-abi` CONUS Cloud and Moisture Imagery with explicit satellite/channel
   selection, precise scan times and sizes, and checksum-verified NetCDF downloads.
 - Storm Events annual event-details gzip CSVs, selecting current creation-date
@@ -29,6 +28,8 @@ All notable changes to this project are documented here. The format follows
 - Replace example analysis scripts with executed Jupyter notebooks containing
   compact data previews, plots, and source provenance. Add an optional examples
   environment, offline notebook checks, and isolated live execution/refresh commands.
+- Pin the development interpreter to Python 3.14.7 to avoid an upstream crash
+  affecting NetCDF decoding in older Linux uv Python builds.
 
 ## [0.7.0] - 2026-09-08
 

@@ -80,19 +80,23 @@ Validated on 2026-09-08: 219 core-only tests and 231 tests with pandas pass,
 along with all nine live tests. Cross-platform installed-wheel CI and a real
 terminal fetch/cache check pass; redirected output retains its existing format.
 
-**In progress (v0.8 / source)**:
+**Shipped (v0.8)**: radar and satellite analysis, annual event archives, and executed notebooks.
 
 - [x] GOES ABI CONUS single-channel scenes with explicit satellite/time selection
 - [x] NetCDF4 reader and executed GOES brightness-temperature notebook
 - [x] Storm Events annual details archives, pinned revisions, local gzip CSV reading,
   and an [executed report-analysis notebook](../examples/storm-events/example.ipynb)
-  (available from source for v0.8)
+  (available since v0.8)
 
 - [x] Optional NEXRAD Level II reader with xradar sweep DataTrees, flag masking,
   attributed format fixtures, and an [executed reflectivity notebook](../examples/radar-reflectivity/example.ipynb)
-  (available from source for v0.8)
+  (available since v0.8)
 
-**Following v0.7 (remaining work not yet assigned a release)**:
+Validated for release: 291 core-only tests and 316 tests with all reader extras
+pass, with 98% coverage in the full profile. All eleven live adapter tests and
+six notebooks pass; installed-wheel checks cover Linux, macOS, and Windows.
+
+**Following v0.8 (remaining work not yet assigned a release)**:
 
 - Geospatial readers behind extras, driven by concrete
   supported datasets and format fixtures

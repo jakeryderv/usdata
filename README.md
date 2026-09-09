@@ -3,10 +3,11 @@
 Unified Python SDK and CLI for discovering, fetching, and tracking the
 provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 
-> Status: pre-alpha. v0.7 supports GHCN-Daily, GSOM monthly summaries,
-> NEXRAD Level II, USGS daily values, and CoastWatch SST subsets with provenance,
-> plus Census state/county lookup, optional pandas CSV readers, and terminal
-> download progress. Other datasets are planned.
+> Status: pre-alpha. v0.8 supports GHCN-Daily, GSOM monthly summaries,
+> NEXRAD Level II, GOES ABI CONUS imagery, Storm Events annual archives,
+> USGS daily values, and CoastWatch SST subsets with provenance. It includes
+> optional CSV, radar, and NetCDF4 readers, six executed notebooks, Census
+> state/county lookup, and terminal download progress. Other datasets are planned.
 > See [docs/roadmap.md](docs/roadmap.md).
 
 ## Providers
@@ -71,7 +72,7 @@ usdata pull dataset.yaml            # resolve, fetch, write dataset.lock.json
 usdata verify dataset.yaml          # exit 1 if any cached input drifted
 ```
 
-Storm Events bulk access is available from source for v0.8. Dates select complete
+Storm Events bulk access is available since v0.8. Dates select complete
 annual details archives; filter rows locally after opening the gzip CSV. For example:
 
 ```sh
@@ -131,7 +132,7 @@ size. Adapters that assemble files from metadata requests show asset-level progr
 Use `--no-progress` to disable it. Progress is automatically disabled when either
 stdout or stderr is redirected; existing output lines and exit codes are unchanged.
 
-For single-channel GOES CONUS imagery (available from source for v0.8):
+For single-channel GOES CONUS imagery (available since v0.8):
 
 ```sh
 usdata fetch noaa:goes-abi --start 2024-05-06T12:01:18.1Z --end 2024-05-06T12:01:18.1Z -p satellite=18 -p channel=6
@@ -153,7 +154,7 @@ with saved data previews, small plots, and source provenance. Start with weather
 and streamflow for manifest workflows, SST for gridded CSV reading, or monthly
 climate for GSOM observations.
 
-NetCDF4 scene opening is available from source for v0.8 with `usdata[netcdf]`.
+NetCDF4 scene opening is available since v0.8 with `usdata[netcdf]`.
 See the executed [GOES infrared notebook](examples/goes-imagery/example.ipynb).
 
 ## Development
@@ -170,6 +171,8 @@ just setup     # install toolchain and dependencies
 just test      # unit tests
 just check     # format, lint, typecheck, offline tests, generated docs, release notices
 just check-pandas  # install the CSV extra and run the same checks
+just check-radar   # install the radar extra and run the same checks
+just check-netcdf  # install the NetCDF4 extra and run the same checks
 just notebooks    # launch the optional Jupyter examples environment
 just run-notebooks # execute notebooks live in fresh kernels and temporary caches
 just build     # build wheel and sdist
@@ -179,9 +182,11 @@ just run search radar
 
 Unit tests mechanically block network connections. Integration tests that hit
 live services run with `just test-integration`. CI checks Python 3.11 and 3.14 on
-Linux, both with and without pandas, and smoke-tests both installed-wheel
-profiles on Linux, macOS, and Windows. The full unit and live-service suites currently run on Linux. `just setup` restores
-a core-only development environment; `just check-pandas` installs the extra.
+Linux with core-only, pandas, radar, and NetCDF dependency profiles. Installed-wheel
+checks cover all four profiles on Linux, macOS, and Windows. The full unit and
+live-service suites run on Linux. `just setup` restores a core-only development
+environment; the `check-pandas`, `check-radar`, and `check-netcdf` commands install
+their respective extras.
 
 Releases: `just release minor` opens a version-bump PR; merging it publishes
 to PyPI and creates the tag and GitHub release. See

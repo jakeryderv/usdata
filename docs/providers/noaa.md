@@ -83,7 +83,7 @@ Use explicit IDs when exact site selection is required.
 
 ## GOES ABI CONUS imagery
 
-Available from source for v0.8 as `noaa:goes-abi`. The initial product is
+Available since v0.8 as `noaa:goes-abi`. The initial product is
 single-channel CONUS Cloud and Moisture Imagery, `ABI-L2-CMIPC`. Files are
 NetCDF4/HDF5 scenes from the anonymous `noaa-goes16`, `noaa-goes17`,
 `noaa-goes18`, and `noaa-goes19` buckets. No AWS credentials or SDK are needed.
@@ -148,7 +148,7 @@ correctly fail restoration if the bytes no longer match the original checksum.
 
 ## Storm Events annual details
 
-Available from source for v0.8 as `noaa:storm-events`. Anonymous NCEI bulk
+Available since v0.8 as `noaa:storm-events`. Anonymous NCEI bulk
 access returns whole annual **details** tables, compressed with gzip. The
 separate fatalities and locations tables are not included. The adapter supports
 schema `v1.0`; it does not guess how to interpret a newer schema.
