@@ -18,9 +18,10 @@ from typing import cast
 
 import httpx
 
-from usdata.models import Asset, BBox, Dataset, Protocol, Query, TimeRange
+from usdata.models import Asset, BBox, Protocol, Query, TimeRange
 from usdata.protocols import erddap, http
-from usdata.providers.base import Provider, QueryError
+from usdata.providers._http import _HttpProvider
+from usdata.providers.base import QueryError
 
 BASE = "https://coastwatch.noaa.gov/erddap"
 DATASET = "noaacwBLENDEDsstDNDaily"
@@ -42,24 +43,8 @@ def _spatial_slice(
     ), length
 
 
-class CoastwatchSst(Provider):
+class CoastwatchSst(_HttpProvider):
     """NOAA's 0.05-degree day/night analysis, including units and grid coordinates."""
-
-    def __init__(self, dataset: Dataset, client: httpx.Client | None = None) -> None:
-        super().__init__(dataset)
-        self._client = client
-        self._owns_client = client is None
-
-    def _http(self) -> httpx.Client:
-        if self._client is None:
-            self._client = http.client()
-        return self._client
-
-    def close(self) -> None:
-        """Release owned connections; injected clients remain the caller's responsibility."""
-        if self._owns_client and self._client is not None:
-            self._client.close()
-            self._client = None
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Resolve a valid grid intersection into one stable, bounded CSV request."""

@@ -73,7 +73,9 @@ Rules:
 - Use `usdata.protocols.http`, `usdata.protocols.s3`, or `usdata.protocols.erddap` for transport. Take an
   optional `httpx.Client` in `__init__` so tests can inject one. Override
   `close()` to release internally owned resources; injected clients remain the
-  caller's responsibility. Core uses adapters as context managers. Use
+  caller's responsibility. HTTP adapters may inherit the internal
+  `providers._http._HttpProvider` lifecycle instead of duplicating it.
+  Core uses adapters as context managers. Use
   `http.get(url, client, params=...)` for metadata and `http.download` for bytes
   so retries cover both listing and downloads.
 - Give assets stable ids: they become cache filenames and lockfile keys.
@@ -89,6 +91,12 @@ Rules:
   can find. These run weekly.
 - Apply the level and dependency rules in [Testing](../testing.md); mark local
   filesystem scenarios `l2` even within an adapter module.
+
+Add a representative scenario to `tests/adapters/test_contracts.py`. Its shared
+checks cover every available dataset: stable assets, dataset identity, explicit
+fetch destinations, exact bytes, no provider cache/sidecars, invalid-input
+rejection before client creation, and owned/injected cleanup. Source-specific
+query and pagination assertions remain in the adapter module.
 
 ## 5. Docs and changelog
 

@@ -182,17 +182,3 @@ sources:
     with respx.mock() as mock, pytest.raises(ChecksumMismatch):
         mock.get(s3.https_url("noaa-goes18", KEY)).respond(200, content=b"revised bytes")
         pull(manifest, root=tmp_path / "cache")
-
-
-def test_client_ownership(monkeypatch):
-    dataset = default_registry().get("noaa:goes-abi")
-    owned = httpx.Client()
-    monkeypatch.setattr("usdata.providers.noaa.goes.http.client", lambda: owned)
-    with GoesAbi(dataset) as adapter, respx.mock() as mock:
-        mock.get(LIST_URL).respond(200, text=listing([]))
-        assert adapter.list_assets(query()) == []
-    assert owned.is_closed
-    with httpx.Client() as injected:
-        with GoesAbi(dataset, client=injected):
-            pass
-        assert not injected.is_closed

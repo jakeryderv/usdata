@@ -18,9 +18,10 @@ from typing import Any
 
 import httpx
 
-from usdata.models import Asset, Dataset, Protocol, Query, TimeRange
+from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
-from usdata.providers.base import Provider, QueryError
+from usdata.providers._http import _HttpProvider
+from usdata.providers.base import QueryError
 
 SEARCH_URL = "https://www.ncei.noaa.gov/access/services/search/v1/data"
 DATA_URL = "https://www.ncei.noaa.gov/access/services/data/v1"
@@ -45,26 +46,10 @@ def _stations_param(raw: Any) -> list[str]:
     return stations
 
 
-class GhcnDaily(Provider):
+class GhcnDaily(_HttpProvider):
     """GHCN-Daily adapter. Params: ``stations`` (list or comma string), ``units``."""
 
     ncei_dataset = NCEI_DATASET
-
-    def __init__(self, dataset: Dataset, client: httpx.Client | None = None) -> None:
-        super().__init__(dataset)
-        self._client = client
-        self._owns_client = client is None
-
-    def close(self) -> None:
-        """Close an internally created HTTP client; injected clients belong to the caller."""
-        if self._owns_client and self._client is not None:
-            self._client.close()
-            self._client = None
-
-    def _http(self) -> httpx.Client:
-        if self._client is None:
-            self._client = http.client()
-        return self._client
 
     def find_stations(self, query: Query) -> list[str]:
         """Station ids with data inside the query's bbox and time range."""

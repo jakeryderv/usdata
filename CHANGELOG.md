@@ -9,6 +9,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Shared adapter conformance scenarios for every available dataset, covering
+  deterministic listing, fetch destinations, byte preservation, and client ownership.
+
 - Documented L0–L4 test levels, responsibility-based suites, and `just test-live`
   selection; existing integration command and marker aliases remain supported.
 
