@@ -226,7 +226,7 @@ def test_missing_interior_end_marker_rejects_shifted_coordinates(tmp_path):
 def test_incomplete_sweep_with_trailing_non_radial_record(tmp_path):
     xr = pytest.importorskip("xarray")
     xradar = pytest.importorskip("xradar")
-    from xradar.io.backends import nexrad_level2 as backend
+    backend = pytest.importorskip("xradar.io.backends.nexrad_level2")
 
     raw = bytearray(bz2.decompress((FIXTURES / "example_nexrad_archive_msg1.bz2").read_bytes()))
     with backend.NEXRADLevel2File(bytes(raw), loaddata=False) as volume:
