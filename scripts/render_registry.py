@@ -198,6 +198,10 @@ def catalog_entries(registry: Registry, root: Path = ROOT) -> dict[str, CatalogE
         raise ValueError(f"unknown catalog IDs: {sorted(unknown)}")
     guides = set()
     for ds in registry:
+        if not all(re.fullmatch(r"[a-z0-9][a-z0-9-]*", part) for part in (ds.provider, ds.name)):
+            raise ValueError(
+                f"{ds.id}: catalog IDs must use lowercase letters, digits, and hyphens"
+            )
         if ds.status is Status.AVAILABLE and ds.id not in entries:
             raise ValueError(f"{ds.id}: implemented datasets require catalog metadata")
     for key, entry in entries.items():
@@ -268,7 +272,7 @@ def render_all(registry: Registry) -> dict[Path, str]:
 
 
 def sync(outputs: dict[Path, str], *, check: bool) -> list[Path]:
-    if any(not path.is_relative_to(CATALOG_DIR) for path in outputs):
+    if any(not path.resolve().is_relative_to(CATALOG_DIR.resolve()) for path in outputs):
         raise ValueError("generated outputs must stay inside docs/generated/catalog")
     obsolete = set(CATALOG_DIR.rglob("*.md")) - outputs.keys()
     stale = [p for p, text in outputs.items() if not p.exists() or p.read_text() != text]

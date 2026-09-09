@@ -353,7 +353,7 @@ def test_catalog_sync_detects_obsolete_outputs_and_preserves_unrecognized_files(
         module.sync({}, check=False)
     assert old.read_text() == "handwritten content"
     with pytest.raises(ValueError, match="inside"):
-        module.sync({tmp_path.parent / "README.md": "bad"}, check=False)
+        module.sync({tmp_path / ".." / "README.md": "bad"}, check=False)
 
 
 def test_composed_guide_links_resolve_from_their_original_directory(monkeypatch):
@@ -373,3 +373,12 @@ def test_composed_guide_links_resolve_from_their_original_directory(monkeypatch)
     assert module.page_links("[daily](noaa-ghcn.md#dates)", Path("docs/providers/noaa.md")) == (
         "[daily](../generated/catalog/noaa/ghcn-daily.md#dates)"
     )
+
+
+def test_catalog_rejects_paths_in_dataset_ids():
+    module = script("render_registry")
+    bundled = Registry.bundled()
+    dataset = bundled.get("noaa:gfs").model_copy(update={"id": "noaa:../../README"})
+    registry = Registry([*bundled, dataset], domains=bundled.domains())
+    with pytest.raises(ValueError, match="catalog IDs"):
+        module.catalog_entries(registry)
