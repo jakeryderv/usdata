@@ -78,6 +78,7 @@ just docs-serve # build and preview the documentation locally, with reload
 just check-docs # validate generated content and build the site strictly
 just build     # build wheel and sdist
 just smoke     # exercise core and pandas wheel installations outside the checkout
+just cleanup 123 # from main: remove PR #123's merged branch and clean worktree
 just run search radar
 ```
 
@@ -95,8 +96,9 @@ live-service suites run on Linux. `just setup` restores a core-only development
 environment; the `check-pandas`, `check-radar`, and `check-netcdf` commands install
 their respective extras.
 
-Releases: `just release minor` opens a version-bump PR; merging it publishes
-to PyPI and creates the tag and GitHub release. See
+Releases: `just release minor` prepares a release branch. Update release notices,
+then `just release-pr` validates and opens a draft for review. Merging the reviewed
+PR publishes to PyPI and creates the tag and GitHub release. See
 [docs/versioning.md](docs/versioning.md).
 
 See [provider access notes](docs/providers/README.md),

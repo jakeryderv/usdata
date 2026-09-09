@@ -47,12 +47,36 @@ Releases are automated from a version bump on `main`. Never hand-write a tag.
 just release minor    # or: patch, major
 ```
 
-The recipe bumps `pyproject.toml`, rolls the `Unreleased` section of
-`CHANGELOG.md` into a dated version heading, opens a release pull request, and
-enables auto-merge. After the PR merges and CI succeeds on that exact main-branch commit, the
+`just release` requires a clean main checkout, including untracked files. It
+updates main, creates `release/vX.Y.Z`, then bumps the version, rolls the handwritten
+changelog, updates the lockfile, and regenerates registry docs. It reports known
+release notices to update. Failures leave the prepared branch/files available for
+inspection; nothing is published or merged.
+
+1. Review the version and changelog; change source-only notices to shipped wording
+   in maintained docs, navigation, and notebook Markdown. Preserve historical
+   notebook code/output snapshots. Run `just docs` if registry metadata changes.
+2. Run `just release-pr`. The complete `just check` gate must pass before committing,
+   pushing, and opening a **draft** release PR. No auto-merge is enabled.
+3. Obtain independent review of the diff and release notes. Commit any corrections,
+   rerun `just check`, and push them to the same branch.
+4. Mark the reviewed PR ready with `gh pr ready`, then wait with `gh pr checks --watch`.
+   Enable squash auto-merge only after review and successful checks:
+   `gh pr merge --auto --squash --match-head-commit "$(git rev-parse HEAD)"`.
+5. After merge, return to the main checkout and run `just cleanup PR_NUMBER`.
+   Verify the publish workflow, GitHub release, and PyPI artifacts.
+
+If preparation stops, inspect `git status` and finish the failed command on the
+release branch; use `just release-pr` once version, changelog, lockfile, and docs
+are ready. Do not rerun `just release` from that branch or bump again. If a PR
+already exists, commit/push corrections normally rather than creating another.
+An empty `Unreleased` section blocks the changelog roll and leaves the version
+change on the release branch for inspection.
+
+After the PR merges and CI succeeds on that exact main-branch commit, the
 `Publish to PyPI` workflow downloads the wheel and sdist from successful CI for
-that commit, validates their package name and version, uploads them via trusted publishing, then creates
-the `vX.Y.Z` tag and GitHub release with notes taken from the changelog.
+that commit, validates their package name and version, uploads them via trusted
+publishing, then creates the `vX.Y.Z` tag and GitHub release with notes from the changelog.
 
 The workflow publishes whatever version `pyproject.toml` declares and tags that
 same version, so tag and package can never disagree. Merging a version bump
@@ -77,6 +101,6 @@ source-only notices and roadmap `Now` headings at or below the declared package
 version. On a release PR, update those handwritten notes to shipped wording;
 generated registry sections still come from `just docs`. Prefer explicit wording
 that names the target minor version for upcoming implemented features so
-the check can detect the transition. It scans README, maintained docs, and example
-READMEs, excluding historical ADRs and the changelog. It does not interpret every
+the check can detect the transition. It scans README, maintained docs, example READMEs, `zensical.toml`, and notebook
+Markdown cells, excluding historical ADRs, the changelog, code cells, and saved outputs. It does not interpret every
 possible phrasing or decide whether future backlog items have shipped.
