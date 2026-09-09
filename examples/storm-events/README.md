@@ -1,6 +1,6 @@
 # Oklahoma Storm Events reports
 
-Available from source for v0.8. Open the [executed notebook](example.ipynb) to
+Available since v0.8. Open the [executed notebook](example.ipynb) to
 fetch the annual 2024 details archive, open its gzip CSV locally, and describe
 Oklahoma tornado, hail, and thunderstorm-wind reports beginning in May. See
 [examples setup](../README.md) to run it.

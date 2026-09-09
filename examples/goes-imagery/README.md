@@ -2,7 +2,7 @@
 
 Open [example.ipynb](example.ipynb) to see an executed GOES-18 channel-13 scene,
 quality-filtered brightness-temperature image in scan coordinates, and pixel
-histogram. Available from source for v0.8.
+histogram. Available since v0.8.
 
 Use [notebook setup](../README.md) from the repository root. The NetCDF reader
 requires `usdata[netcdf]`; the example environment supplies plotting and Jupyter.

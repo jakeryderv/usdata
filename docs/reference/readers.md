@@ -32,7 +32,7 @@ uses the `erddap-csv` reader, which consumes the second CSV record as units.
 Other CSV assets use the ordinary `csv` reader. This assumes ERDDAP's standard
 `.csv` response, not its headerless or units-free variants.
 
-Gzip CSV opening is available from source for v0.8. Gzip media types
+Gzip CSV opening is available since v0.8. Gzip media types
 (`application/gzip`, `application/x-gzip`) are recognized only when the asset ID
 ends with `.csv.gz`; ambiguous compressed files need an explicit `reader="csv"`.
 The reader checks gzip magic in the local file and decompresses through a stream,
@@ -53,8 +53,7 @@ source integrity.
 `monitoring_location_id`, `parameter_code`, `statistic_id`) default to pandas
 string dtype so leading zeros survive. Other columns use pandas type inference
 and default missing-value parsing. Numeric-looking IDs with other column names
-need an explicit string dtype. Pass an explicit dtype to change a default. From source
-for v0.8, `event_id`, `episode_id`, `state_fips`, `cz_fips`, and
+need an explicit string dtype. Pass an explicit dtype to change a default. Since v0.8, `event_id`, `episode_id`, `state_fips`, `cz_fips`, and
 `tor_other_cz_fips` also retain source strings. No padding is added: Storm Events
 zone codes are not automatically converted to Census county identifiers.
 
@@ -76,15 +75,14 @@ accounting for ERDDAP's units record yourself.
 
 ## NEXRAD Level II
 
-Available from source for v0.8; the published v0.7 package does not include the
-radar extra. Use the checkout commands below until v0.8 is published.
+Available since v0.8.
 
 Install `usdata[radar]` (checkout: `uv sync --group dev --extra radar`). Assets
 from `noaa:nexrad-level2` infer the radar reader; use `reader="nexrad-level2"`
 for an archive with ambiguous dataset metadata. Whole-file gzip/bzip2 and
 internal Archive II compression are supported, with offline legacy message-1
-and modern message-31 fixtures. The radar extra is verified on Linux Python
-3.11 and 3.14; core and CSV readers retain their existing platform coverage.
+and modern message-31 fixtures. Reader tests run on Linux Python 3.11 and 3.14;
+installed-wheel checks also verify the radar extra on macOS and Windows.
 
 ```python
 radar = item.open()  # a fetched noaa:nexrad-level2 asset
@@ -136,7 +134,7 @@ CLI, fetch, cache, and lockfile workflows continue to work without pandas.
 
 ## NetCDF4 scenes
 
-Available from source for v0.8. Install `usdata[netcdf]` for xarray plus the
+Available since v0.8. Install `usdata[netcdf]` for xarray plus the
 h5netcdf/h5py backend. `item.open()` recognizes `application/x-netcdf`,
 `application/netcdf`, and `application/x-netcdf4`; use `reader="netcdf"` when
 an archived asset has ambiguous media metadata. No current registry is needed.

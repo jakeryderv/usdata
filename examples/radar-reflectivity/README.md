@@ -1,6 +1,6 @@
 # NEXRAD reflectivity
 
-Available from source for v0.8. Run this notebook from the checkout until v0.8 is published.
+Available since v0.8.
 
 Open the [executed notebook](example.ipynb) to fetch one KTLX volume, inspect
 sweep fields and units, plot reflectivity by azimuth and slant range, and check
