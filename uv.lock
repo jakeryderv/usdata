@@ -3435,7 +3435,7 @@ requires-dist = [
     { name = "pandas", marker = "extra == 'pandas'", specifier = ">=3.0" },
     { name = "pydantic", specifier = ">=2.7" },
     { name = "pyyaml", specifier = ">=6.0" },
-    { name = "typer", specifier = ">=0.12" },
+    { name = "typer", specifier = ">=0.18" },
     { name = "xarray", marker = "extra == 'netcdf'", specifier = ">=2025.1" },
     { name = "xradar", marker = "extra == 'radar'", specifier = ">=0.12.0" },
 ]

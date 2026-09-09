@@ -1,6 +1,5 @@
 """One small GOES-18 ABI CONUS NetCDF scene, with checksum-locked restoration."""
 
-from importlib.util import find_spec
 from pathlib import Path
 
 import pytest
@@ -10,7 +9,7 @@ from usdata.pull import pull, verify
 pytestmark = pytest.mark.live
 
 
-def test_goes18_small_scene_restore(tmp_path: Path) -> None:
+def restored_scene(tmp_path: Path):
     manifest = tmp_path / "dataset.yaml"
     manifest.write_text("""name: small-goes-scene
 sources:
@@ -33,9 +32,20 @@ sources:
     assert restored.lockfile == result.lockfile
     assert verify(manifest, root=tmp_path / "cache") == []
 
-    if all(find_spec(name) is not None for name in ("xarray", "h5netcdf", "h5py")):
-        scene = restored.fetched[0].open()
-        assert scene.CMI.attrs["units"] == "1"  # channel 6 reflectance
-        assert scene.CMI.dims == ("y", "x")
-        assert scene.attrs["usdata"]["provenance"]["checksum"] == item.provenance.checksum
-        assert verify(manifest, root=tmp_path / "cache") == []
+    return restored.fetched[0]
+
+
+def test_goes18_small_scene_restore(tmp_path: Path) -> None:
+    restored_scene(tmp_path)
+
+
+@pytest.mark.netcdf
+def test_goes18_scene_decodes_with_netcdf_reader(tmp_path: Path) -> None:
+    for dependency in ("xarray", "h5netcdf", "h5py"):
+        pytest.importorskip(dependency)
+    item = restored_scene(tmp_path)
+    scene = item.open()
+    assert scene.CMI.attrs["units"] == "1"  # channel 6 reflectance
+    assert scene.CMI.dims == ("y", "x")
+    assert scene.attrs["usdata"]["provenance"]["checksum"] == item.provenance.checksum
+    assert verify(tmp_path / "dataset.yaml", root=tmp_path / "cache") == []

@@ -10,8 +10,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.14"
+          enable-cache: true
+      - uses: extractions/setup-just@v4
+      - run: uv lock --check
+      - run: just setup
+      - run: just check-static
+
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -24,8 +39,6 @@ jobs:
           python-version: ${{ matrix.python }}
           enable-cache: true
       - uses: extractions/setup-just@v4
-      - name: Lockfile is in sync with pyproject
-        run: uv lock --check
       - if: matrix.readers == 'core'
         run: just setup
       - if: matrix.readers == 'pandas'
@@ -42,9 +55,18 @@ jobs:
         run: >-
           uv run --no-sync python -c
           "import importlib.util, os; assert (importlib.util.find_spec('pandas') is not None) == (os.environ['EXPECT_PANDAS'] == '1'); assert (importlib.util.find_spec('xradar') is not None) == (os.environ['EXPECT_RADAR'] == '1'); assert (importlib.util.find_spec('xarray') is not None) == (os.environ['EXPECT_XARRAY'] == '1')"
-      - run: just check
+      - run: >-
+          just check-tests --junitxml=reports/junit.xml
+          --cov-report=xml:reports/coverage.xml --cov-report=json:reports/coverage.json
+          --durations=15
         env:
           UV_NO_SYNC: '1'
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: tests-${{ matrix.python }}-${{ matrix.readers }}
+          path: reports/
+          retention-days: 14
 
   build:
     runs-on: ubuntu-latest
@@ -86,12 +108,13 @@ jobs:
 
   # Single required status check for branch protection.
   ci:
-    needs: [check, build, smoke]
+    needs: [static, check, build, smoke]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: All jobs succeeded
         run: |
+          test "${{ needs.static.result }}" = "success"
           test "${{ needs.check.result }}" = "success"
           test "${{ needs.build.result }}" = "success"
           test "${{ needs.smoke.result }}" = "success"

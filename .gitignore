@@ -9,3 +9,4 @@ __pycache__/
 .coverage
 examples/**/*.lock.json
 .ipynb_checkpoints/
+reports/

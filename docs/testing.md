@@ -64,3 +64,33 @@ parameter tables for equivalent cases. Test count is not a target. Measure
 runtime and investigate failures; high line coverage does not establish correct
 pagination, resource ownership, or scientific semantics. Keep `just check`
 useful as providers grow instead of duplicating the entire core suite per adapter.
+
+## CI reports and live isolation
+
+CI runs repository-wide static/document checks once, then types and all offline
+behavior tests in each supported Python/dependency profile. Core-only and each
+optional extra remain separate environments. Built-wheel checks on Linux,
+macOS, and Windows remain required; publishing still promotes the artifact
+from successful CI for the exact commit.
+
+`just check-static` and `just check-tests` expose those same parts locally.
+`just check-tests --junitxml=reports/junit.xml --cov-report=json:reports/coverage.json`
+retains machine-readable results. Coverage includes branches; it is diagnostic,
+not a target for adding superficial tests. CI retains JUnit, coverage, and timing
+reports for 14 days under uniquely named artifacts for each profile.
+
+The scheduled/manual Integration workflow discovers jobs from live test modules
+and example notebooks. Each dataset and example runs independently with fail-fast
+disabled and a job timeout. GOES live decoding explicitly uses the NetCDF extra;
+a core-only run reports that decoder test as skipped rather than silently omitting
+its assertions. The workflow also tests minimum direct runtime dependencies on
+Python 3.11 in a fresh environment, retaining the resolved versions. This probes
+core lower bounds with current compatible transitive dependencies; it does not
+claim minimum-version coverage for optional scientific stacks.
+
+`just run-notebooks --notebook examples/goes-imagery/example.ipynb` selects one
+example (repeat the flag for more). Executions retain partial notebooks, error
+traces, timings, and `summary.json` in ignored `reports/notebooks/`; use
+`--output-dir` to choose another report directory. A failed example does not
+prevent later selected examples from running. `--write` refreshes the selected
+committed notebooks only if every selected example succeeds.

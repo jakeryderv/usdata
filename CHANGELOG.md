@@ -9,6 +9,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Per-dataset live checks, independent example jobs, retained test/coverage and
+  failed-notebook diagnostics, and scheduled minimum-core-dependency validation.
+
 - Shared adapter conformance scenarios for every available dataset, covering
   deterministic listing, fetch destinations, byte preservation, and client ownership.
 
@@ -21,6 +24,9 @@ All notable changes to this project are documented here. The format follows
   and an executed Storm Events / NEXRAD / GOES event-context notebook.
 
 ### Fixed
+
+- Require Typer 0.18 or newer; the old declared minimum failed to construct the
+  CLI with modern union annotations and lacked current Click compatibility.
 
 - Reject truncated S3 listings with missing or cycling continuation tokens instead
   of returning incomplete assets or requesting pages indefinitely.
