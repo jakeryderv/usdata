@@ -6,7 +6,7 @@ Status: **available** has a tested adapter, **stub** has an adapter class that i
 
 | Provider | Available | Stub | Planned | Next up (unassigned) | Datasets |
 |---|---:|---:|---:|---|---|
-| [NOAA](noaa.md) | 5 | 0 | 24 | — | `ghcn-daily`, `gsom`, `nexrad-level2`, `goes-abi`, `coastwatch-sst`, +24 planned |
+| [NOAA](noaa.md) | 6 | 0 | 23 | — | `ghcn-daily`, `gsom`, `storm-events`, `nexrad-level2`, `goes-abi`, `coastwatch-sst`, +23 planned |
 | [USGS](usgs.md) | 1 | 0 | 2 | — | `water-daily`, +2 planned |
 | [Census Bureau](census.md) | 0 | 0 | 1 | — | +1 planned |
 | [EPA](epa.md) | 0 | 0 | 1 | — | +1 planned |

@@ -140,21 +140,24 @@ datasets:
 
   - id: noaa:storm-events
     provider: noaa
-    status: planned
+    status: available
     domain: severe-weather
-    target: later
+    since: "0.8"
     title: Storm Events Database
     description: >-
-      NCEI's record of significant weather events since 1950 (tornadoes, hail,
-      wind, floods, and more) with locations, damage, and narratives. Published
-      as per-year gzipped CSV files (details, fatalities, locations) in a plain
-      HTTPS directory; the first NCEI bulk-directory dataset.
+      NCEI's significant-weather event details since 1950, with locations,
+      impacts, and narratives. Anonymous whole-year gzipped CSV archives;
+      select the latest creation-date revision for each requested year.
+      No server-side row, location, or variable subsetting. Historical event
+      coverage and reporting practices vary; fatalities and locations tables
+      are separate products not included by this adapter.
     keywords: [storms, tornado, hail, wind, flood, damage, severe weather, events]
     protocol: http
-    homepage: https://www.ncdc.noaa.gov/stormevents/
+    homepage: https://www.ncei.noaa.gov/access/storm-events-database/
     license: US Government Work (public domain)
     temporal_extent: { start: "1950-01-01T00:00:00Z" }
-    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+    capabilities: { spatial_subset: false, temporal_subset: false, variable_subset: false }
+    adapter: usdata.providers.noaa.storm_events:StormEvents
 
   - id: noaa:hurdat2
     provider: noaa

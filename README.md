@@ -14,7 +14,7 @@ provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 <!-- registry:start -->
 | Provider | Available | Stub | Planned | Next up (unassigned) | Datasets |
 |---|---:|---:|---:|---|---|
-| [NOAA](docs/providers/noaa.md) | 5 | 0 | 24 | — | `ghcn-daily`, `gsom`, `nexrad-level2`, `goes-abi`, `coastwatch-sst`, +24 planned |
+| [NOAA](docs/providers/noaa.md) | 6 | 0 | 23 | — | `ghcn-daily`, `gsom`, `storm-events`, `nexrad-level2`, `goes-abi`, `coastwatch-sst`, +23 planned |
 | [USGS](docs/providers/usgs.md) | 1 | 0 | 2 | — | `water-daily`, +2 planned |
 | [Census Bureau](docs/providers/census.md) | 0 | 0 | 1 | — | +1 planned |
 | [EPA](docs/providers/epa.md) | 0 | 0 | 1 | — | +1 planned |
@@ -70,6 +70,17 @@ usdata fetch noaa:coastwatch-sst --bbox=-80.08,30.02,-80.02,30.08 \
 usdata pull dataset.yaml            # resolve, fetch, write dataset.lock.json
 usdata verify dataset.yaml          # exit 1 if any cached input drifted
 ```
+
+Storm Events bulk access is available from source for v0.8. Dates select complete
+annual details archives; filter rows locally after opening the gzip CSV. For example:
+
+```sh
+usdata fetch noaa:storm-events --start 2024-05-01 --end 2024-05-31 --dry-run
+```
+
+This lists the entire 2024 archive. Location and variable filters are rejected;
+see the [executed Storm Events notebook](examples/storm-events/example.ipynb)
+for local filtering and reporting limitations.
 
 Fetched files land in `~/.cache/usdata/<provider>/<dataset>/` (override with
 `USDATA_CACHE_DIR` or `--cache-dir`), each with a `.provenance.json` sidecar

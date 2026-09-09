@@ -146,6 +146,62 @@ The small channel-6 filename was
 then restores through a lockfile without relisting. Archive revisions still
 correctly fail restoration if the bytes no longer match the original checksum.
 
+## Storm Events annual details
+
+Available from source for v0.8 as `noaa:storm-events`. Anonymous NCEI bulk
+access returns whole annual **details** tables, compressed with gzip. The
+separate fatalities and locations tables are not included. The adapter supports
+schema `v1.0`; it does not guess how to interpret a newer schema.
+
+Both dates are required and interpreted in UTC for annual file selection.
+Every calendar year touched is returned in full: May 1–31 selects the complete
+year; December 31–January 1 selects both years. Asset time bounds label those
+whole file years, not precise coverage of local event timestamps. Dates before
+1950 and a missing requested year are errors, so a multi-year request cannot
+silently succeed with only some years. Location/bbox, variables, text, and all
+provider-specific params are rejected. `capabilities` are false because selecting
+an annual object does not perform server-side row subsetting.
+
+The directory lists filenames such as
+`StormEvents_details-ftp_v1.0_d2024_c20260728.csv.gz`: `d` identifies the data year
+and `c` the creation date. Resolution chooses the greatest valid creation date
+per year. The complete filename is the stable asset ID; URL, original compressed
+bytes, size, and checksum are preserved. Exact integer directory sizes are used
+when present; approximate sizes are left unknown. A lockfile restores its pinned
+URL without listing current revisions. If an old file disappears or its bytes
+change, restoration fails; preserve your cache for long-term reproducibility.
+Use `pull(..., force=True)` only when intentionally refreshing the revision.
+
+`FetchedAsset.open()` uses the pandas extra and a local gzip stream. It preserves
+raw identifier strings and records source provenance in DataFrame attributes;
+it does not decompress into the cache. `EVENT_ID` identifies event records,
+while `EPISODE_ID` can group several events. `CZ_TYPE` distinguishes county,
+forecast-zone, and marine records; `CZ_FIPS` is not always a county code.
+Dates/times in rows are local, with `CZ_TIMEZONE` needed for instant conversion.
+The [executed notebook](../../examples/storm-events/example.ipynb) filters on
+reported calendar dates and keeps timezone labels visible.
+
+Reported events, impacts, and damage ratings require care when aggregating:
+physical storms can span several records, historical reporting varies, and
+missing reports do not establish an absence of hazards. Source field meanings
+are documented in the [NCEI bulk format reference](https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/Storm-Data-Bulk-csv-Format.pdf).
+The [archive README](https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/README)
+describes filenames and revisions; [dataset metadata](https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc%3AC00510/html)
+describes historical coverage.
+
+Bounded live probes verified on 2026-09-09 UTC (1950 archive: 10,508 bytes):
+
+```sh
+curl --fail 'https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/'
+curl --fail --output /tmp/storm-1950.csv.gz \
+  'https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/StormEvents_details-ftp_v1.0_d1950_c20260323.csv.gz'
+```
+
+The filename is a probe snapshot; the adapter discovers current filenames instead
+of hard-coding it. The [design decision](../adr/0010-storm-events-annual-archives.md)
+records the annual-file and compression contract. The notebook downloads one 2024 archive (~13 MB compressed),
+then filters locally; neither the test nor example downloads all archive years.
+
 ## Global Summary of the Month
 
 Available since v0.7 as `noaa:gsom`. The NCEI dataset is
@@ -274,7 +330,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | [`noaa:ghcn-hourly`](#noaaghcn-hourly) | Surface weather | planned | target later | Global hourly and sub-hourly surface observations, the successor to ISD. | http |
 | [`noaa:gsoy`](#noaagsoy) | Surface weather | planned | target later | Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. | http |
 | [`noaa:lcd`](#noaalcd) | Surface weather | planned | target later | Hourly, daily, and monthly observations from airport and first-order stations via the NCEI Access Data Service dataset local-climatological-data, addressed by WBAN-based station ids. | http |
-| [`noaa:storm-events`](#noaastorm-events) | Severe weather | planned | target later | NCEI's record of significant weather events since 1950 (tornadoes, hail, wind, floods, and more) with locations, damage, and narratives. | http |
+| [`noaa:storm-events`](#noaastorm-events) | Severe weather | available | unreleased; planned 0.8 | NCEI's significant-weather event details since 1950, with locations, impacts, and narratives. | http |
 | [`noaa:nexrad-level2`](#noaanexrad-level2) | Weather radar | available | since 0.2 | Raw volume scans from the WSR-88D weather radar network, archived in the public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). | s3 |
 | [`noaa:mrms`](#noaamrms) | Weather radar | planned | target later | Gridded CONUS products merged from all radars plus other sensors (reflectivity, precipitation rate and accumulation, severe weather diagnostics), as two-minute gzipped GRIB2 files in the public noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/. | s3 |
 | [`noaa:nexrad-level3`](#noaanexrad-level3) | Weather radar | planned | target later | Derived single-radar products (base reflectivity, velocity, storm totals, and others) in the public unidata-nexrad-level3 S3 bucket, with flat keys SITE_PRODUCT_YYYY_MM_DD_HH_MM_SS where the site id drops its leading K. | s3 |
@@ -371,17 +427,17 @@ Hourly, daily, and monthly observations from airport and first-order stations vi
 
 ### noaa:storm-events
 
-**Storm Events Database** · planned · target later
+**Storm Events Database** · available · unreleased; planned 0.8
 
-NCEI's record of significant weather events since 1950 (tornadoes, hail, wind, floods, and more) with locations, damage, and narratives. Published as per-year gzipped CSV files (details, fatalities, locations) in a plain HTTPS directory; the first NCEI bulk-directory dataset.
+NCEI's significant-weather event details since 1950, with locations, impacts, and narratives. Anonymous whole-year gzipped CSV archives; select the latest creation-date revision for each requested year. No server-side row, location, or variable subsetting. Historical event coverage and reporting practices vary; fatalities and locations tables are separate products not included by this adapter.
 
 - Domain: Severe weather
-- Server-side subsetting: temporal
-- Homepage: https://www.ncdc.noaa.gov/stormevents/
+- Server-side subsetting: none
+- Homepage: https://www.ncei.noaa.gov/access/storm-events-database/
 - License: US Government Work (public domain)
 - Extent: 1950-01-01 to present
 - Keywords: storms, tornado, hail, wind, flood, damage, severe weather, events
-- Adapter: none yet
+- Adapter: `usdata.providers.noaa.storm_events:StormEvents`
 
 ### noaa:nexrad-level2
 

@@ -83,13 +83,16 @@ terminal fetch/cache check pass; redirected output retains its existing format.
 **In progress (v0.8 / source)**:
 
 - [x] GOES ABI CONUS single-channel scenes with explicit satellite/time selection
+- [x] Storm Events annual details archives, pinned revisions, local gzip CSV reading,
+  and an [executed report-analysis notebook](../examples/storm-events/example.ipynb)
+  (available from source for v0.8)
 
 **Following v0.7 (remaining work not yet assigned a release)**:
 
 - NetCDF, radar, and geospatial readers behind extras, driven by concrete
   supported datasets and format fixtures
 - Further NCEI Access Data Service datasets (GSOY, climate normals)
-- Bulk directories and archives (Storm Events, HURDAT2, IBTrACS)
+- Bulk directories and archives (HURDAT2, IBTrACS)
 - Further GOES products/sectors and MRMS
 - CO-OPS tides and currents
 
@@ -137,7 +140,6 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`noaa:oisst`](providers/noaa.md#noaaoisst) OISST Daily Sea Surface Temperature · planned
 - [`noaa:paleo-search`](providers/noaa.md#noaapaleo-search) World Data Service for Paleoclimatology · planned
 - [`noaa:sea-ice-index`](providers/noaa.md#noaasea-ice-index) Sea Ice Index · planned
-- [`noaa:storm-events`](providers/noaa.md#noaastorm-events) Storm Events Database · planned
 - [`noaa:swpc-realtime`](providers/noaa.md#noaaswpc-realtime) SWPC Real-Time Space Weather Products · planned
 - [`noaa:tsunami-events`](providers/noaa.md#noaatsunami-events) Global Historical Tsunami Database · planned
 - [`usda:cropland-data-layer`](providers/usda.md#usdacropland-data-layer) Cropland Data Layer · planned
@@ -147,6 +149,7 @@ Move a dataset between phases by editing its `target` in the registry.
 **Implemented, unreleased (planned 0.8)**
 
 - [`noaa:goes-abi`](providers/noaa.md#noaagoes-abi) GOES-R ABI CONUS Cloud and Moisture Imagery · available
+- [`noaa:storm-events`](providers/noaa.md#noaastorm-events) Storm Events Database · available
 
 **Included since 0.7**
 

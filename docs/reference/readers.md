@@ -32,6 +32,15 @@ uses the `erddap-csv` reader, which consumes the second CSV record as units.
 Other CSV assets use the ordinary `csv` reader. This assumes ERDDAP's standard
 `.csv` response, not its headerless or units-free variants.
 
+Gzip CSV opening is available from source for v0.8. Gzip media types
+(`application/gzip`, `application/x-gzip`) are recognized only when the asset ID
+ends with `.csv.gz`; ambiguous compressed files need an explicit `reader="csv"`.
+The reader checks gzip magic in the local file and decompresses through a stream,
+without rewriting the archive, downloading anything, or changing its provenance.
+Corrupt gzip/CSV errors propagate. `nrows` limits parsed rows and does not verify
+the entire compressed archive; use the ordinary cache/lockfile verification for
+source integrity.
+
 | Option | Behavior |
 |---|---|
 | `reader` | Defaults to inference. Explicit `"csv"` or `"erddap-csv"` handles missing or ambiguous media metadata. |
@@ -44,7 +53,10 @@ Other CSV assets use the ordinary `csv` reader. This assumes ERDDAP's standard
 `monitoring_location_id`, `parameter_code`, `statistic_id`) default to pandas
 string dtype so leading zeros survive. Other columns use pandas type inference
 and default missing-value parsing. Numeric-looking IDs with other column names
-need an explicit string dtype. Pass an explicit dtype to change a default.
+need an explicit string dtype. Pass an explicit dtype to change a default. From source
+for v0.8, `event_id`, `episode_id`, `state_fips`, `cz_fips`, and
+`tor_other_cz_fips` also retain source strings. No padding is added: Storm Events
+zone codes are not automatically converted to Census county identifiers.
 
 ```python
 frame = items[0].open(usecols=["time", "analysed_sst"], nrows=100)

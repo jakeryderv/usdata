@@ -11,6 +11,11 @@ All notable changes to this project are documented here. The format follows
 
 - `noaa:goes-abi` CONUS Cloud and Moisture Imagery with explicit satellite/channel
   selection, precise scan times and sizes, and checksum-verified NetCDF downloads.
+- Storm Events annual event-details gzip CSVs, selecting current creation-date
+  revisions with exact source-byte provenance and locked restoration; local
+  compressed CSV opening preserves event and geographic identifier strings.
+- Executed Storm Events notebook with local Oklahoma/date filters, event-record
+  and damage-rating plots, and source/reporting caveats.
 
 ### Changed
 
