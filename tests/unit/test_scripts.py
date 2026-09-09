@@ -1,5 +1,6 @@
 import importlib.util
 import io
+import json
 import tarfile
 import zipfile
 from pathlib import Path
@@ -15,6 +16,32 @@ def script(name):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+@pytest.mark.parametrize("fault", [None, "cleared", "error", "order", "large", "malformed"])
+def test_notebook_saved_execution_checks(tmp_path, fault) -> None:
+    module = script("check_notebooks")
+    output = {"output_type": "stream", "name": "stdout", "text": ["Small saved result\n"]}
+    cell = {
+        "cell_type": "code",
+        "metadata": {},
+        "source": ["print('Small saved result')"],
+        "execution_count": 1,
+        "outputs": [output],
+    }
+    notebook = {"nbformat": 4, "nbformat_minor": 5, "metadata": {}, "cells": [cell]}
+    if fault == "cleared":
+        cell.update(execution_count=None, outputs=[])
+    elif fault == "error":
+        cell["outputs"] = [{"output_type": "error", "ename": "RuntimeError"}]
+    elif fault == "order":
+        cell["execution_count"] = 3
+    elif fault == "large":
+        output["text"] = ["x" * (module.MAX_OUTPUT_BYTES + 1)]
+    path = tmp_path / "example.ipynb"
+    path.write_text("{" if fault == "malformed" else json.dumps(notebook), encoding="utf-8")
+    errors = module.check_notebook(path)
+    assert bool(errors) == (fault is not None)
 
 
 CHANGELOG = """# Changelog

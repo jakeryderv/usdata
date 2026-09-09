@@ -128,6 +128,11 @@ preserves identifier strings, and keeps CoastWatch units as metadata.
 See the [reader reference](docs/reference/readers.md)
 and [fetch → open → analyze example](examples/sst-analysis/README.md).
 
+The [examples directory](examples/README.md) contains executed Jupyter notebooks
+with saved data previews, small plots, and source provenance. Start with weather
+and streamflow for manifest workflows, SST for gridded CSV reading, or monthly
+climate for GSOM observations.
+
 ## Development
 
 Requires [uv](https://docs.astral.sh/uv/) and [just](https://just.systems/).
@@ -138,6 +143,8 @@ just setup     # install toolchain and dependencies
 just test      # unit tests
 just check     # format, lint, typecheck, offline tests, generated docs, release notices
 just check-pandas  # install the CSV extra and run the same checks
+just notebooks    # launch the optional Jupyter examples environment
+just run-notebooks # execute notebooks live in fresh kernels and temporary caches
 just build     # build wheel and sdist
 just smoke     # exercise core and pandas wheel installations outside the checkout
 just run search radar

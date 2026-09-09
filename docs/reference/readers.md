@@ -3,7 +3,7 @@
 Available since v0.6. Install the optional pandas extra with
 `pip install "usdata[pandas]"` or `uv add "usdata[pandas]"`.
 For a source checkout, follow [development setup](../../README.md#development)
-and run `uv sync --all-groups --extra pandas`.
+and run `uv sync --group dev --extra pandas`.
 
 ```python
 from usdata import build_query, get
