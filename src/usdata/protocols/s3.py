@@ -57,11 +57,24 @@ def list_objects(
     own = client is None
     client = client or http.client()
     params: dict[str, str | int] = {"list-type": 2, "prefix": prefix, "max-keys": page_size}
+    seen_tokens: set[str] = set()
     try:
         while True:
             resp = http.get(https_url(bucket), client, params=params)
             resp.raise_for_status()
             root = ET.fromstring(resp.text)
+            truncated = _text(root, "IsTruncated") == "true"
+            token = _text(root, "NextContinuationToken")
+            if truncated:
+                if not token or not token.strip():
+                    raise httpx.RemoteProtocolError(
+                        "Truncated S3 listing has no continuation token", request=resp.request
+                    )
+                if token in seen_tokens:
+                    raise httpx.RemoteProtocolError(
+                        "S3 listing repeated a continuation token", request=resp.request
+                    )
+                seen_tokens.add(token)
             for contents in root.iter(NS + "Contents"):
                 key = _text(contents, "Key")
                 if key is None:
@@ -74,9 +87,9 @@ def list_objects(
                     etag=etag.strip('"') if etag else None,
                     last_modified=datetime.fromisoformat(modified) if modified else None,
                 )
-            token = _text(root, "NextContinuationToken")
-            if _text(root, "IsTruncated") != "true" or not token:
+            if not truncated:
                 return
+            assert token is not None
             params["continuation-token"] = token
     finally:
         if own:
