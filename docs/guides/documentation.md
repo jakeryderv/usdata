@@ -19,11 +19,13 @@ job, once per run rather than once per reader profile.
 
 | Content | Maintained source | Generated output |
 |---|---|---|
-| Overview and development setup | Root `README.md` | Site home |
+| First-use walkthrough | `docs/index.md` | Site home (`index.md`) |
+| Overview and development setup | Root `README.md` | Project page (`project.md`) |
 | Guides, architecture, provider access notes | Markdown under `docs/` | Site pages |
 | Dataset status and capabilities | `src/usdata/data/registry.yaml` | `docs/generated/catalog/`, provider index, README summary |
 | CLI commands and options | Typer app in `src/usdata/cli/` | CLI reference during the build |
 | Public Python signatures and docstrings | `src/usdata/`, selected by `docs/reference/api.md` | API reference during the build |
+| Manifest recipes | `examples/*/README.md` and `dataset.yaml` | Example pages and downloadable manifests |
 | Examples, plots and provenance snapshots | `examples/*/example.ipynb` | Notebook pages and images during the build |
 | Release notes | Root `CHANGELOG.md` | Site changelog |
 
@@ -36,7 +38,9 @@ an agency, and link its catalog.
 CLI and notebook previews are assembled into ignored `.build/docs/`. Zensical
 renders that tree into ignored `site/`, including API documentation through
 `mkdocstrings`. These directories are disposable build outputs. Root files and
-examples retain their repository paths in staging, so relative links keep working.
+examples retain their repository paths in staging, except `docs/index.md` becomes
+the home page and the root README becomes `project.md`. The builder adjusts their
+relative Markdown links; source links still work on GitHub.
 Local links to notebooks become links to rendered pages, with a separate download
 link to the original notebook. Notebook cells are never executed during a build.
 

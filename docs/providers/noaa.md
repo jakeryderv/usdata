@@ -1,411 +1,65 @@
-# NOAA
+# NOAA datasets
 
-Provider id `noaa`. Homepage: https://www.noaa.gov/
+NOAA datasets use several independent services. Choose a dataset below for its
+query requirements, file format, and scientific limits. All currently supported
+NOAA access is anonymous.
 
-## Access notes
+| Dataset | Read this guide | Download granularity |
+|---|---|---|
+| `ghcn-daily` | [Daily station observations](noaa-ghcn.md) | Station CSV for inclusive dates |
+| `gsom` | [Monthly station summaries](noaa-gsom.md) | Complete UTC months |
+| `gsoy` | [Annual station summaries](noaa-gsoy.md) (v0.10 / source) | Complete UTC years |
+| `nexrad-level2` | [Radar scans](noaa-nexrad.md) | Whole Level II scans |
+| `goes-abi` | [GOES imagery](noaa-goes.md) | Whole single-channel CONUS scenes |
+| `storm-events` | [Storm Events](noaa-storm-events.md) | Whole annual details archives |
+| `coastwatch-sst` | [Sea-surface temperature](noaa-coastwatch.md) | Spatial and temporal CSV subsets |
+| `coops-water-levels` | [Observed coastal water levels](noaa-coops.md) (v0.10 / source) | One station and datum, at most 28 days |
 
-NOAA publishes through several unrelated systems. The ones usdata touches:
+See the [generated catalog](../generated/catalog/noaa.md) for status,
+capabilities, endpoints, and versions. Historical endpoint probes and candidate
+sources are in [service research notes](noaa-services.md).
 
-- **NOAA Open Data Dissemination (NODD)**: bulk archives in public S3 buckets
-  (also mirrored to Google Cloud and Azure). Anonymous; no account needed.
-  Reached via `usdata.protocols.s3` using plain HTTPS, no AWS SDK (ADR 0002).
-  The NEXRAD Level II archive moved from `noaa-nexrad-level2` to
-  `unidata-nexrad-level2` with the old bucket deprecated September 2025; the
-  old name now returns Access Denied. Check the
-  [AWS Open Data registry](https://registry.opendata.aws/) page for a dataset
-  before assuming a bucket name.
-- **NCEI Access Data Service** (`ncei.noaa.gov/access/services/data/v1`):
-  REST endpoint returning CSV or JSON for station datasets such as GHCN-Daily.
-  Anonymous. It filters by explicit station ids and date range; it rejects
-  spatial filters for daily-summaries, so a bbox query first goes to the
-  companion **search service** (`/access/services/search/v1/data`) to find
-  stations. In search responses `count` is the number of matches and
-  `totalCount` is dataset-wide; paginate on `count`.
-  Enable Python DEBUG logging for `usdata.providers.noaa.ghcnd` to inspect each
-  search page's request URL, HTTP status, content type, match/result counts,
-  new station count, and up to five station IDs. Pages yielding no new stations
-  include at most 512 response characters. Live tests capture these diagnostics
-  on failure and check geographic discovery separately from explicit-station
-  downloads, so a search outage does not obscure data-service health.
-- **ERDDAP** servers (CoastWatch, PolarWatch, and others): griddap and
-  tabledap URLs with true server-side subsetting. Anonymous. CoastWatch SST
-  uses griddap CSV for `noaacwBLENDEDsstDNDaily`; see the details below.
-  Use the shared HTTP client: live probes found that the service can reject
-  the default httpx User-Agent with HTTP 403.
-- **Other NCEI Access Data Service datasets** (GSOM, GSOY, LCD, normals)
-  share the GHCN-Daily client. All require `startDate` and `endDate`; the
-  daily normals dataset expects them inside a placeholder year such as 2010.
-  LCD stations use WBAN-based ids (for example `72530094846`), not GHCN ids.
-- **CO-OPS Data API** (`api.tidesandcurrents.noaa.gov/api/prod/`): water
-  levels, predictions, and currents by station id, product, datum, and
-  date range; station metadata from `/mdapi/prod/webapi/stations.json`.
-  Anonymous.
-- **More NODD buckets** verified anonymous: `noaa-goes16/18/19` (ABI and GLM,
-  keys `PRODUCT/YYYY/DDD/HH/`), `noaa-mrms-pds` (`CONUS/PRODUCT/YYYYMMDD/`),
-  `noaa-hrrr-bdp-pds`, `noaa-gfs-bdp-pds`, `noaa-nbm-grib2-pds` (GRIB2 model
-  output by cycle and forecast hour), `noaa-cdr-*-pds` (climate data records
-  as daily NetCDF), and `unidata-nexrad-level3` (flat keys
-  `SITE_PRODUCT_YYYY_MM_DD_HH_MM_SS`, site id without the leading K).
-- **NCEI HTTPS directories**: plain Apache-style listings for bulk archives
-  (Storm Events, IBTrACS, ERSST, OISST mirror, OCADS). The nClimDiv path
-  under `/pub/data/cirs/climdiv/` redirects to
-  `/monitoring-content/data/us/climdiv/monthly/current/`.
-- **THREDDS** at `ngdc.noaa.gov/thredds/` serves ETOPO 2022 with OPeNDAP;
-  the direct `mgg/global/relief/` file paths I tried return 404.
-- **Not yet located**: the bulk access path for GHCN-Hourly. The product page
-  exists; the data directory guesses under `/oa/` and `/data/` return 404.
-- **OneStop** catalog search and **NCEI archive services**: not used yet;
-  candidates for a future `discover` command.
-
-Radar site metadata comes from the NCEI HOMR station list, bundled as
-`src/usdata/data/nexrad_sites.csv` and regenerated by
-`scripts/build_nexrad_sites.py`. HOMR lists the Norman test and research
-radars (KCRI, KOUN) as NEXRAD; they are absent from the archive and are
-marked type `TEST` so default site selection skips them.
-
-Licensing: NOAA data is a U.S. Government work in the public domain unless a
-dataset page says otherwise.
-
-## Query validation
-
-GHCN, GSOM, and GSOY accept only `stations` and `units` (`metric` or `standard`, following the
-[NCEI API](https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation)).
-NEXRAD accepts only `site`, `sites`, and `nearest`. Explicit identifier lists
-must be non-empty strings. `site` and `sites` are mutually exclusive, and
-`nearest` must be a positive integer used with a geographic query instead of
-explicit IDs. Unknown options are rejected before requests are sent.
-
-Geographic lookup uses rectangles, which can include stations outside a state's
-actual boundary. Bundled boxes use generalized 2025 Census boundaries;
-[place lookup](../reference/places.md) documents their limits. For NEXRAD,
-selection falls back to the nearest radar if none lies inside the rectangle.
-Use explicit IDs when exact site selection is required.
+Geographic queries use bounding rectangles, which can include stations outside
+a state's actual boundary. See [place lookup](../reference/places.md). Use
+explicit station IDs when exact selection matters. NOAA data is generally a
+U.S. Government work in the public domain; check each source's license.
 
 ## GOES ABI CONUS imagery
 
-Available since v0.8 as `noaa:goes-abi`. The initial product is
-single-channel CONUS Cloud and Moisture Imagery, `ABI-L2-CMIPC`. Files are
-NetCDF4/HDF5 scenes from the anonymous `noaa-goes16`, `noaa-goes17`,
-`noaa-goes18`, and `noaa-goes19` buckets. No AWS credentials or SDK are needed.
-Other ABI products and scan sectors remain unsupported.
-
-Require `satellite` (16, 17, 18, or 19), `channel` (1–16, also `C01`–`C16`),
-and both timestamps. `product` defaults to `ABI-L2-CMIPC` and rejects any other
-value. Unknown parameters, text/geographic constraints, and `variables` are rejected:
-channels select distinct whole files; the server cannot crop these scenes or
-select variables within them. `temporal_subset` means selecting archived scans.
-
-The adapter lists hourly `ABI-L2-CMIPC/YYYY/DDD/HH/` prefixes, follows S3
-continuation tokens, and selects scans whose **start times** fall in the inclusive
-UTC query interval. It does not select a scan that started before the interval
-merely because the scan overlaps it. Filename start/end stamps have tenths-of-a-
-second precision; asset metadata retains both bounds and the listed byte size.
-Naive dates/times mean UTC; a date-only end is midnight at the start of that day.
-Use a short interval to limit the number of whole-scene downloads.
-
-For example, fetch one small shortwave-infrared scene (~255 kB):
-
-```sh
-uv run usdata fetch noaa:goes-abi \
-  --start 2024-05-06T12:01:18.1Z --end 2024-05-06T12:01:18.1Z \
-  -p satellite=18 -p channel=6
-```
-
-Channel 6 is reflected solar imagery and this example is mostly dark; it is
-chosen to keep the live fetch/restore check small. For thermal imagery, channel
-13 scenes are roughly 4 MB in the verified sample. CMI represents reflectance
-for reflective bands or brightness temperature for infrared bands; consult the
-file's units and data-quality flags before analysis. The adapter preserves raw
-bytes and does not project, mask, or reinterpret imagery.
-
-[NOAA's product documentation](https://www.ncei.noaa.gov/products/goes-terrestrial-weather-abi-glm)
-identifies CMIP channels, scan modes, and satellite coverage. The
-[NODD registry](https://registry.opendata.aws/noaa-goes/) documents public cloud
-access. Satellite availability varies by date and outages; no East/West alias
-is inferred from a historical query. The catalog's start is the initial public
-GOES-16 date, not a claim that every satellite was operating then. Listing
-`ABI-L2-CMIPC/2017/` with `max-keys=1` confirmed the first scene at
-2017-02-28T00:02:50.4Z. The bucket also has placeholder year-2000 test scenes;
-the adapter excludes these by limiting selection to the public observation era
-and rejecting intervals entirely before 2017-02-28.
-
-Bounded probes on 2026-09-08 listed 192 CMIPC files in one hour for each of
-GOES-16/18 (2024 day 127), GOES-17 (2022 day 127), and GOES-19 (2025 day 127).
-A reproducible listing probe is:
-
-```sh
-curl --get 'https://noaa-goes18.s3.amazonaws.com/' \
-  --data-urlencode 'list-type=2' \
-  --data-urlencode 'prefix=ABI-L2-CMIPC/2024/127/12/' \
-  --data-urlencode 'max-keys=1000'
-```
-
-The small channel-6 filename was
-`OR_ABI-L2-CMIPC-M6C06_G18_s20241271201181_e20241271203560_c20241271204021.nc`
-(255,384 bytes). The live test downloads it, checks the NetCDF4/HDF5 signature,
-then restores through a lockfile without relisting. Archive revisions still
-correctly fail restoration if the bytes no longer match the original checksum.
+See [GOES ABI CONUS imagery](noaa-goes.md).
 
 ## Storm Events annual details
 
-Available since v0.8 as `noaa:storm-events`. Anonymous NCEI bulk
-access returns whole annual **details** tables, compressed with gzip. The
-separate fatalities and locations tables are not included. The adapter supports
-schema `v1.0`; it does not guess how to interpret a newer schema.
-
-Both dates are required and interpreted in UTC for annual file selection.
-Every calendar year touched is returned in full: May 1–31 selects the complete
-year; December 31–January 1 selects both years. Asset time bounds label those
-whole file years, not precise coverage of local event timestamps. Dates before
-1950 and a missing requested year are errors, so a multi-year request cannot
-silently succeed with only some years. Location/bbox, variables, text, and all
-provider-specific params are rejected. `capabilities` are false because selecting
-an annual object does not perform server-side row subsetting.
-
-The directory lists filenames such as
-`StormEvents_details-ftp_v1.0_d2024_c20260728.csv.gz`: `d` identifies the data year
-and `c` the creation date. Resolution chooses the greatest valid creation date
-per year. The complete filename is the stable asset ID; URL, original compressed
-bytes, size, and checksum are preserved. Exact integer directory sizes are used
-when present; approximate sizes are left unknown. A lockfile restores its pinned
-URL without listing current revisions. If an old file disappears or its bytes
-change, restoration fails; preserve your cache for long-term reproducibility.
-Use `pull(..., force=True)` only when intentionally refreshing the revision.
-
-`FetchedAsset.open()` uses the pandas extra and a local gzip stream. It preserves
-raw identifier strings and records source provenance in DataFrame attributes;
-it does not decompress into the cache. `EVENT_ID` identifies event records,
-while `EPISODE_ID` can group several events. `CZ_TYPE` distinguishes county,
-forecast-zone, and marine records; `CZ_FIPS` is not always a county code.
-Dates/times in rows are local, with `CZ_TIMEZONE` needed for instant conversion.
-The [executed notebook](../../examples/storm-events/example.ipynb) filters on
-reported calendar dates and keeps timezone labels visible.
-
-Reported events, impacts, and damage ratings require care when aggregating:
-physical storms can span several records, historical reporting varies, and
-missing reports do not establish an absence of hazards. Source field meanings
-are documented in the [NCEI bulk format reference](https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/Storm-Data-Bulk-csv-Format.pdf).
-The [archive README](https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/README)
-describes filenames and revisions; [dataset metadata](https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc%3AC00510/html)
-describes historical coverage.
-
-Bounded live probes verified on 2026-09-09 UTC (1950 archive: 10,508 bytes):
-
-```sh
-curl --fail 'https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/'
-curl --fail --output /tmp/storm-1950.csv.gz \
-  'https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/StormEvents_details-ftp_v1.0_d1950_c20260323.csv.gz'
-```
-
-The filename is a probe snapshot; the adapter discovers current filenames instead
-of hard-coding it. The [design decision](../adr/0010-storm-events-annual-archives.md)
-records the annual-file and compression contract. The notebook downloads one 2024 archive (~13 MB compressed),
-then filters locally; neither the test nor example downloads all archive years.
+See [Storm Events annual details](noaa-storm-events.md).
 
 ## Global Summary of the Month
 
-Available since v0.7 as `noaa:gsom`. The NCEI dataset is
-`global-summary-of-the-month`, with anonymous CSV access and the same station
-search/50-station chunking as GHCN-Daily. Geographic selection discovers station
-IDs through the search endpoint; data requests use those explicit IDs. A data
-request with only a bbox returns HTTP 400 (a station is required).
-Use either `stations` or a location/bbox, not both. `units` is `metric` (default)
-or `standard`; unknown parameters are rejected.
-
-Both start and end dates are required. Every UTC calendar month touched by the
-interval is returned in full: May 6–7 selects May; May 31–June 1 selects both
-months. The adapter expands search and data bounds to those whole months, so
-requests for the same months have identical asset URLs and IDs. Asset time bounds
-cover full months; provenance pins the normalized source URL, while the manifest
-retains the original query. CSV `DATE` is `YYYY-MM`.
-
-Common variables include `PRCP` (monthly precipitation total) and `TAVG` (monthly
-mean temperature). With metric output these are millimeters and degrees Celsius.
-Variable availability depends on the station; unrecognized codes are rejected by
-NCEI. The API CSV has no units row, so `open()` retains the URL's `units` setting
-in provenance without adding a DataFrame units map. See the
-[NCEI API documentation](https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation)
-and [monthly example](../../examples/monthly-climate/README.md).
-
-Bounded live probes verified on 2026-09-08 (one airport, one month):
-
-```sh
-curl --get 'https://www.ncei.noaa.gov/access/services/data/v1' \
-  --data-urlencode 'dataset=global-summary-of-the-month' \
-  --data-urlencode 'stations=USW00013967' \
-  --data-urlencode 'startDate=2024-05-06' --data-urlencode 'endDate=2024-05-07' \
-  --data-urlencode 'dataTypes=PRCP,TAVG' --data-urlencode 'units=metric' \
-  --data-urlencode 'format=csv' --data-urlencode 'includeStationLocation=1'
-
-curl --get 'https://www.ncei.noaa.gov/access/services/search/v1/data' \
-  --data-urlencode 'dataset=global-summary-of-the-month' \
-  --data-urlencode 'bbox=35.40,-97.62,35.38,-97.58' \
-  --data-urlencode 'startDate=2024-05-01' --data-urlencode 'endDate=2024-05-31' \
-  --data-urlencode 'dataTypes=PRCP,TAVG' \
-  --data-urlencode 'limit=1' --data-urlencode 'offset=0'
-```
-
-The data probe returned one `2024-05` row (91.8 mm, 21.7 °C); these are observed
-values, not permanent test expectations. Search returned `USW00013967`, `count=1`,
-and dataset-wide `totalCount=127947`; repeating with `offset=1` returned no results.
-Integration tests independently check geographic discovery and a manifest's
-explicit-station download/locked restoration. Upstream revisions can still
-change CSV bytes and correctly fail a locked restore.
+See [Global Summary of the Month](noaa-gsom.md).
 
 ## Global Summary of the Year
 
-Available from source for the unreleased v0.10 as `noaa:gsoy`. GSOY uses the
-anonymous NCEI Access Data Service dataset `global-summary-of-the-year`, reusing
-GHCN/GSOM station discovery, pagination, and 50-station CSV chunks. Require both
-dates and either `stations` or a location/bbox, not both. `units` is `metric`
-(default) or `standard`; unknown parameters and text queries are rejected.
-
-Every UTC calendar year touched by the interval is selected in full: May 6–7
-selects the whole year; December 31–January 1 selects both years. Search and data
-requests use January 1 through December 31, giving equivalent year selections
-identical URLs and asset IDs. Asset coverage labels complete years; the original
-query remains in the manifest. A timezone offset can change the selected UTC year.
-
-CSV `DATE` is a four-digit year. Use `item.open(dtype={"DATE": "string"})` to
-preserve it as text with the existing pandas reader. Common variables are `PRCP`
-(annual precipitation total, metric millimeters) and `TAVG` (annual mean
-temperature, metric degrees Celsius). CSV contains no units row; provenance
-retains the requested unit system. Variable availability depends on the station.
-
-Some elements, including degree-day summaries, have hemisphere-dependent
-accumulation seasons. Annual record labels do not mean every element represents
-January–December observations. Consult the [GSOY field documentation](https://www.ncei.noaa.gov/pub/data/cdo/documentation/GSOY_documentation.pdf).
-[Dataset metadata](https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc%3AC00947/html)
-describes global GHCN-Daily-derived summaries and weekly updates. Revisions can
-change CSV bytes; retain the cache as well as the manifest and lockfile.
-
-Bounded hosted probes verified one airport/year and geographic discovery on
-2026-09-09. Both a full-year request and a May 6–7 request returned the 2024
-annual record. A reproducible direct probe is:
-
-```sh
-curl --get 'https://www.ncei.noaa.gov/access/services/data/v1' \
-  --data-urlencode 'dataset=global-summary-of-the-year' \
-  --data-urlencode 'stations=USW00013967' \
-  --data-urlencode 'startDate=2024-01-01' --data-urlencode 'endDate=2024-12-31' \
-  --data-urlencode 'dataTypes=PRCP,TAVG' --data-urlencode 'units=metric' \
-  --data-urlencode 'format=csv' --data-urlencode 'includeStationLocation=1'
-```
-
-The search probe used the same annual bounds, `dataTypes=PRCP,TAVG`,
-`bbox=35.40,-97.62,35.38,-97.58`, `limit=1`, and `offset=0`; it found
-`USW00013967`. The [annual climate example](../../examples/annual-climate/README.md)
-provides a small manifest and local CSV analysis. Live checks independently
-exercise discovery and checksum-verified restoration.
+See [Global Summary of the Year](noaa-gsoy.md).
 
 ## CoastWatch SST
 
-Available since v0.5. The verified dataset is
-[`noaacwBLENDEDsstDNDaily`](https://coastwatch.noaa.gov/erddap/info/noaacwBLENDEDsstDNDaily/index.html),
-a daily blended day/night SST analysis on `(time, latitude, longitude)`.
-Latitude has 3,600 centers from -89.975 to 89.975; longitude has 7,200 from
--179.975 to 179.975, both spaced 0.05 degrees. The time axis starts at
-2019-07-22T12:00:00Z and has gaps; the adapter reads actual available timestamps.
-Its metadata describes data use as free and open under the GHRSST protocol.
-
-| Variable | Meaning | Units |
-|---|---|---|
-| `analysed_sst` (default) | Sea surface temperature | degree_C |
-| `analysis_error` | Estimated analysis error | degree_C |
-| `sea_ice_fraction` | Sea ice fraction | 1 |
-| `mask` | Source mask flags | Byte codes; consult source metadata |
-
-Require a bbox/location and both timestamps. Bounds include only grid centers
-and timestamps inside the requested interval; an interval with no matching
-coordinates returns no assets. UTC bounds are inclusive. A date-only end means
-midnight at the start of that date, before the noon analysis. `params.stride`
-(or `-p stride=2`) subsamples both spatial axes with a positive integer. Reduce
-the area/time window or increase stride when a query exceeds 1,000,000 rows.
-Unknown parameters and variables fail explicitly.
-
-The asset is raw CSV with coordinate columns, a header, and a second row of
-units. This avoids the volatile per-request `history` timestamps observed in
-NetCDF responses; see [ADR 0004](../adr/0004-erddap-csv-and-coordinate-subsets.md).
-Upstream revisions still cause checksum mismatches during locked restoration.
-
-A minimal direct probe, also covered by the live integration test:
-
-```sh
-curl --fail --globoff -A 'usdata (+https://github.com/jakeryderv/usdata)' \
-  'https://coastwatch.noaa.gov/erddap/griddap/noaacwBLENDEDsstDNDaily.csv?analysed_sst[(2024-05-06T12:00:00Z)][(30.025):(30.075)][(-80.075):(-80.025)]'
-```
+See [CoastWatch SST](noaa-coastwatch.md).
 
 ## CO-OPS observed water levels
 
-Available from source for v0.10 as `noaa:coops-water-levels`. The initial adapter
-fetches six-minute observed water levels for one explicit station. NOAA returns
-preliminary or verified observations according to availability. Predictions,
-currents, station discovery, and automatic request chunking are not included.
+See [CO-OPS observed water levels](noaa-coops.md).
 
-Require a seven-digit string `station`, an explicit uppercase `datum`, and both
-timestamps. `units` is `metric` (default, meters) or `english` (feet). Supported
-datum codes follow the [Data API documentation](https://api.tidesandcurrents.noaa.gov/api/dev/):
-CRD, IGLD, LWD, MHHW, MHW, MTL, MSL, MLW, MLLW, NAVD, and STND. Availability of a
-datum depends on the station; the service rejects unsupported combinations.
-Unknown parameters, geographic/text selectors, and `variables` are rejected.
+## Access notes
 
-Offsets are normalized to UTC and the API request fixes `time_zone=gmt`. Bounds
-are inclusive, must have zero seconds/microseconds, and span at most 28 days,
-conservatively within NOAA's one-month limit. Date-only bounds remain midnight.
-The adapter constructs one stable CSV request; it checks availability on fetch.
+See [service notes](noaa-services.md#access-notes).
 
-```sh
-usdata fetch noaa:coops-water-levels \
-  --start 2024-05-06T00:00Z --end 2024-05-06T00:12Z \
-  -p station=8518750 -p datum=MLLW -p units=metric
-```
+## Query validation
 
-The raw CSV retains original header spacing, observations, and quality flags.
-Use the ordinary CSV reader and rename columns locally if desired; station,
-datum, units, and timezone remain explicit in the provenance source URL. The
-[small manifest example](../../examples/coastal-water-levels/README.md) shows this.
-Quality `p` and `v` mean preliminary and verified; preserve the quality field
-alongside the flags because their interpretation changes. See the
-[response definitions](https://api.tidesandcurrents.noaa.gov/api/prod/responseHelp.html).
-
-Hosted probes on 2026-09-09 verified three records for station 8518750 over the
-interval above, changed values for English units and MSL datum, and HTTP 400 for
-invalid stations/datums. Missing historical data or intervals between observations
-returned HTTP 200 with the normal CSV header followed by an error message.
-The adapter validates the CSV in a temporary file before replacing the destination.
-Malformed, empty, and semantic-error responses raise `httpx.DecodingError`
-(CLI exit 4); HTTP failures retain their status. `allow_empty` does not suppress
-these fetch errors. Source revisions may invalidate exact locked restoration.
+Use the dataset guides above for supported query options.
 
 ## Data landscape
 
-What NOAA publishes, by domain, and which registry entries cover it. Domains
-with no entry yet are recorded here so they are not forgotten; an entry is
-added once a concrete, anonymously accessible dataset has been verified.
-
-| Domain | What NOAA provides | Example products | Registry entries |
-|---|---|---|---|
-| Surface weather | Temperature, precipitation, wind, humidity, pressure, snowfall, station observations | GHCN-Daily, GHCN-Hourly, Local Climatological Data, GSOM/GSOY | `ghcn-daily`, `gsom`, `gsoy`, `lcd`, `ghcn-hourly` |
-| Severe weather | Tornadoes, hail, damaging wind, storm events, damage reports | Storm Events Database, Storm Data | `storm-events` |
-| Weather radar | Reflectivity, radial velocity, dual-pol variables, derived products | NEXRAD Level II, NEXRAD Level III, MRMS | `nexrad-level2`, `nexrad-level3`, `mrms` |
-| Weather satellites | Visible/IR imagery, clouds, lightning, fire, volcanic ash | GOES-R ABI, GOES GLM, POES, JPSS | `goes-abi`, `goes-glm` |
-| Tropical cyclones | Best tracks, intensity, pressure, wind radii | HURDAT2, IBTrACS, HURSAT | `hurdat2`, `ibtracs` |
-| Weather models | Forecasts, analyses, reanalyses | GFS, HRRR, RAP, NAM, GEFS, National Blend of Models | `hrrr`, `gfs`, `nbm` |
-| Climate | Normals, long-term records, divisional averages, indices | Climate Normals, nClimDiv, Climate Data Records | `climate-normals`, `nclimdiv` |
-| Snow and ice | Snow cover and depth, sea ice concentration and extent | Sea Ice Index (NOAA@NSIDC), IMS snow cover | `sea-ice-index` |
-| Ocean physics | SST, salinity, currents, waves, profiles | OISST, ERSST, World Ocean Database | `oisst`, `ersst` |
-| Sea level and tides | Water levels, tides, currents, sea-level trends | CO-OPS NWLON, PORTS | `coops-water-levels` |
-| Ocean chemistry | Carbon, oxygen, nutrients, pH | OCADS, SOCAT | `ocads` |
-| Marine life and fisheries | Surveys, stock assessments, habitats, telemetry | NOAA Fisheries surveys, InPort | none yet: access is per-science-center, mostly ERDDAP and InPort |
-| Satellite oceanography | SST, ocean color, winds, sea-surface height | CoastWatch, Coral Reef Watch, AVHRR Pathfinder | `coastwatch-sst` |
-| Bathymetry and hydrography | Seafloor elevation, soundings, coastal relief | ETOPO 2022, Coastal Relief Model, hydrographic surveys | `etopo` |
-| Coastal | Shorelines, coastal land cover, elevation, flooding | Digital Coast, C-CAP | none yet: Digital Coast is ArcGIS-served |
-| Geophysics | Geomagnetism, marine geophysics | INTERMAGNET, World Magnetic Model | none yet |
-| Natural hazards | Tsunamis, volcanic events, significant earthquakes | NCEI Global Historical Tsunami Database (HazEL) | `tsunami-events` |
-| Paleoclimate | Tree rings, ice cores, sediments, corals | World Data Service for Paleoclimatology | `paleo-search` |
-| Space weather | Solar activity, solar wind, geomagnetic indices | SWPC real-time products, DSCOVR, GOES SUVI | `swpc-realtime` |
-| Land and environment | Vegetation, surface temperature, fire | Terrestrial Climate Data Records (NDVI, LAI) | `cdr-ndvi` |
+See the [research inventory](noaa-services.md#data-landscape).
 
 ## Datasets
 
-See the [generated dataset catalog](../generated/catalog/noaa.md) for status, capabilities, endpoints, and versions.
+See the [generated catalog](../generated/catalog/noaa.md).

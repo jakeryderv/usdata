@@ -4,14 +4,15 @@ Available from source for v0.10. This small manifest requests three historical
 six-minute observations at The Battery, New York, relative to mean lower low
 water (MLLW), in meters and UTC. It does not request tide predictions.
 
-From this directory:
+Complete the [source installation](../../README.md#source-installation), then
+from this directory:
 
 ```sh
-usdata pull dataset.yaml
-usdata verify dataset.yaml
+uv run usdata pull dataset.yaml
+uv run usdata verify dataset.yaml
 ```
 
-With the pandas extra installed:
+Run the following with `uv run python` from this directory:
 
 ```python
 import pandas as pd
@@ -44,5 +45,5 @@ an upstream error during fetching, including NOAA's HTTP-200 no-data message;
 
 Preserve the manifest, lockfile, and cache together. Locked restoration checks
 exact bytes; upstream revisions require an explicit refresh rather than silently
-changing the analysis inputs. See [NOAA access notes](../../docs/providers/noaa.md#co-ops-observed-water-levels)
+changing the analysis inputs. See [NOAA access notes](../../docs/providers/noaa-coops.md)
 for supported parameters and limits.

@@ -7,6 +7,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Documentation
+
+- Make the first-use walkthrough the site home, separate NOAA dataset guides
+  from service research, and clarify source installation and reproducibility.
+
 ### Development
 
 - Add optional fast commit hooks, workflow linting, and PR-title validation; pin

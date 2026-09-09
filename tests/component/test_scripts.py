@@ -246,3 +246,28 @@ def test_conventional_pr_titles(title):
 @pytest.mark.parametrize("title", ["", "Add dataset", "fix:", "feat: \nrun", "fix: x\nci: y"])
 def test_invalid_pr_titles(title):
     assert not script("check_pr_title").valid_title(title)
+
+
+def test_site_links_follow_home_project_and_notebook_paths(monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
+    module = script("docs_site")
+    assert (
+        module.page_links(
+            "[setup](../README.md#development) [reader](reference/readers.md)",
+            Path("docs/index.md"),
+        )
+        == "[setup](project.md#development) [reader](docs/reference/readers.md)"
+    )
+    assert (
+        module.page_links(
+            "[start](../index.md) [book](../../examples/sst-analysis/example.ipynb#plot)",
+            Path("docs/guides/example.md"),
+        )
+        == "[start](../../index.md) [book](../../examples/sst-analysis/example.md#plot)"
+    )
+    assert (
+        module.page_links(
+            "[anchor](#install) [web](https://example.org/README.md)", Path("docs/index.md")
+        )
+        == "[anchor](#install) [web](https://example.org/README.md)"
+    )

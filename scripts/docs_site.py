@@ -1,18 +1,20 @@
 """Assemble canonical docs and saved notebooks for Zensical, without live execution.
 
-The staging tree mirrors repository paths, so ordinary relative Markdown links
-work both on GitHub and in the site. Only notebook links change to rendered pages.
+The staging tree keeps repository paths except for the home and project pages.
+Relative links are adjusted for those pages and rendered notebook previews.
 """
 
 from __future__ import annotations
 
 import argparse
 import importlib
+import posixpath
 import re
 import subprocess
 import sys
 import time
 from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit
 
 import render_registry
 
@@ -26,6 +28,27 @@ NOTEBOOK_LINK = re.compile(r"(\]\()((?![a-zA-Z][\w+.-]*:)[^\s()]+)\.ipynb([#?][^
 
 def notebook_links(text: str) -> str:
     return NOTEBOOK_LINK.sub(r"\1\2.md\3\4", text)
+
+
+PAGE_PATHS = {Path("docs/index.md"): Path("index.md"), Path("README.md"): Path("project.md")}
+LOCAL_LINK = re.compile(r"(\]\()([^\s()]+)(\))")
+
+
+def site_path(path: Path) -> Path:
+    return PAGE_PATHS.get(path, path)
+
+
+def page_links(text: str, source: Path) -> str:
+    def replace(match: re.Match[str]) -> str:
+        url = urlsplit(match[2])
+        if url.scheme or url.netloc or not url.path or url.path.startswith("/"):
+            return match[0]
+        target = Path(posixpath.normpath((source.parent / url.path).as_posix()))
+        destination = site_path(target)
+        relative = posixpath.relpath(destination.as_posix(), site_path(source).parent.as_posix())
+        return match[1] + urlunsplit(("", "", relative, url.query, url.fragment)) + match[3]
+
+    return LOCAL_LINK.sub(replace, notebook_links(text))
 
 
 def source_paths() -> list[Path]:
@@ -57,7 +80,7 @@ def prepare() -> None:
                 nbformat.read(path, as_version=4),
                 resources={"unique_key": path.stem, "output_files_dir": f"{path.stem}_files"},
             )
-            body = notebook_links(body)
+            body = page_links(body, relative)
             body = (
                 f"> Saved notebook output; this documentation build does not execute cells. "
                 f"[Download the notebook]({path.name}).\n\n" + body
@@ -67,11 +90,12 @@ def prepare() -> None:
                 outputs[relative.parent / name] = data
             outputs[relative] = path.read_bytes()
         elif path.suffix == ".md":
-            outputs[relative] = notebook_links(path.read_text()).encode()
+            outputs[site_path(relative)] = page_links(path.read_text(), relative).encode()
         else:
             outputs[relative] = path.read_bytes()
     for path, content in importlib.reload(render_registry).render_all(Registry.bundled()).items():
-        outputs[path.relative_to(ROOT)] = content.encode()
+        relative = path.relative_to(ROOT)
+        outputs[site_path(relative)] = page_links(content, relative).encode()
     cli = subprocess.run(
         [sys.executable, "-m", "typer", "usdata.cli.app", "utils", "docs", "--name", "usdata"],
         cwd=ROOT,

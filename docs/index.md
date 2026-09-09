@@ -5,12 +5,14 @@ The registry tells you which datasets are supported; adapters translate your
 query to an upstream service; optional readers decode the downloaded format.
 
 These docs describe this checkout, including features marked **Unreleased**.
-Use the [changelog](../CHANGELOG.md) to check release availability.
+Use the [changelog](../CHANGELOG.md) to check release availability. The walkthrough
+below works with the published package. For upcoming features, follow the
+[source installation](../README.md#source-installation).
 
 ## Install and discover
 
 ```sh
-pip install usdata
+pip install "usdata[pandas]"
 usdata search precipitation --location Oklahoma
 usdata info noaa:ghcn-daily
 ```
@@ -30,7 +32,8 @@ default, with source URLs, retrieval timestamps and checksums in provenance side
 
 ## Open the local result
 
-Install `usdata[pandas]` for CSV reading, then use the same workflow in Python:
+The pandas extra installed above opens CSV files. Run this in a Python script
+or interpreter in the same environment:
 
 ```python
 from usdata import build_query, get
@@ -51,6 +54,31 @@ print(frame.head())
 
 Reading is local. CSV, radar, and NetCDF4 have separate optional extras; see
 [readers and their limits](reference/readers.md).
+
+## Preserve the inputs
+
+Save this as `dataset.yaml` to repeat the same station query:
+
+```yaml
+name: first-station
+sources:
+  - dataset: noaa:ghcn-daily
+    start: 2024-05-06
+    end: 2024-05-07
+    variables: [PRCP, TMAX]
+    params:
+      stations: USW00013967
+```
+
+```sh
+usdata pull dataset.yaml
+usdata verify dataset.yaml
+```
+
+The first pull writes `dataset.lock.json`; later pulls restore its pinned assets.
+Commit the manifest and lockfile and back up the cached bytes. Lockfiles detect
+changed data but cannot recover an upstream version that is no longer available.
+See [manifest behavior](reference/manifests.md) before intentionally refreshing inputs.
 
 ## Choose the next step
 
