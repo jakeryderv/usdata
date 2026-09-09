@@ -29,7 +29,7 @@ open the resulting local files. Provenance and manifests connect those steps.
 <!-- registry:start -->
 | Provider | Available | Stub | Planned | Next up (unassigned) | Datasets |
 |---|---:|---:|---:|---|---|
-| [NOAA](docs/providers/noaa.md) | 6 | 0 | 23 | — | `ghcn-daily`, `gsom`, `storm-events`, `nexrad-level2`, `goes-abi`, `coastwatch-sst`, +23 planned |
+| [NOAA](docs/providers/noaa.md) | 7 | 0 | 22 | — | `ghcn-daily`, `gsom`, `gsoy`, `storm-events`, `nexrad-level2`, `goes-abi`, `coastwatch-sst`, +22 planned |
 | [USGS](docs/providers/usgs.md) | 1 | 0 | 2 | — | `water-daily`, +2 planned |
 | [Census Bureau](docs/providers/census.md) | 0 | 0 | 1 | — | +1 planned |
 | [EPA](docs/providers/epa.md) | 0 | 0 | 1 | — | +1 planned |

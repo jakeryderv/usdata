@@ -7,6 +7,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `noaa:gsoy` annual station CSVs with complete UTC year selection, shared NCEI
+  geographic discovery, reproducible restoration, and a small manifest example.
+
 ## [0.9.0] - 2026-09-09
 
 ### Documentation

@@ -18,7 +18,6 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`noaa:gfs`](noaa.md#noaagfs) GFS Forecast Model Output · planned
 - [`noaa:ghcn-hourly`](noaa.md#noaaghcn-hourly) GHCN-Hourly Station Observations · planned
 - [`noaa:goes-glm`](noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · planned
-- [`noaa:gsoy`](noaa.md#noaagsoy) Global Summary of the Year · planned
 - [`noaa:hrrr`](noaa.md#noaahrrr) HRRR Forecast Model Output · planned
 - [`noaa:hurdat2`](noaa.md#noaahurdat2) HURDAT2 Atlantic and Pacific Best Tracks · planned
 - [`noaa:ibtracs`](noaa.md#noaaibtracs) IBTrACS Global Tropical Cyclone Tracks · planned
@@ -36,6 +35,10 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usda:cropland-data-layer`](usda.md#usdacropland-data-layer) Cropland Data Layer · planned
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · planned
 - [`usgs:earthquakes`](usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · planned
+
+**Implemented, unreleased (planned 0.10)**
+
+- [`noaa:gsoy`](noaa.md#noaagsoy) Global Summary of the Year · available
 
 **Included since 0.8**
 

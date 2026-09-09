@@ -26,7 +26,7 @@ an issue with a verified endpoint, bounded example, and acceptance criteria befo
 implementation. Prefer additions that exercise a useful new access pattern or
 reuse an existing one:
 
-- Further NCEI Access Data Service datasets, such as GSOY and climate normals.
+- Further NCEI Access Data Service datasets, such as climate normals.
 - Bulk directories and archives, such as HURDAT2 and IBTrACS.
 - Additional GOES products/sectors, MRMS, and CO-OPS tides/currents.
 - Geospatial readers when a supported dataset and representative fixtures justify them.

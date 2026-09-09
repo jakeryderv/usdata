@@ -1,0 +1,9 @@
+name: okc-annual-climate
+sources:
+  - dataset: noaa:gsoy
+    start: 2024-01-01
+    end: 2024-12-31
+    variables: [PRCP, TAVG]
+    params:
+      stations: USW00013967
+      units: metric
