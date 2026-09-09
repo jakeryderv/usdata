@@ -7,8 +7,16 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Explicit zero-based radar sweep selection with `FetchedAsset.open(sweep=...)`
+  and an executed Storm Events / NEXRAD / GOES event-context notebook.
+
 ### Fixed
 
+- Reject NEXRAD decoder tables that misalign moment and coordinate records,
+  including equal-length sweeps following a missing interior end marker; valid
+  explicitly selected sweeps remain readable without silently dropping others.
 - Reject out-of-range or non-finite point coordinates and negative/non-finite
   radii before bounding-box clipping; complete the manifest provider options for
   GSOM, GOES ABI, and Storm Events.

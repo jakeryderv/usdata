@@ -48,6 +48,7 @@ source integrity.
 | `parse_dates` | List of columns to parse as dates/timestamps. Dates stay strings by default. |
 | `usecols` | List of columns to read. Ordering follows pandas behavior. |
 | `nrows` | Maximum number of observation rows to read, excluding headers and units. |
+| `sweep` | NEXRAD only (Unreleased): zero-based integer or non-empty list of distinct nonnegative integers. `None` opens all sweeps. |
 
 `STATION` and other case-insensitive identifier names (`station_id`, `site_no`,
 `monitoring_location_id`, `parameter_code`, `statistic_id`) default to pandas
@@ -85,7 +86,7 @@ and modern message-31 fixtures. Reader tests run on Linux Python 3.11 and 3.14;
 installed-wheel checks also verify the radar extra on macOS and Windows.
 
 ```python
-radar = item.open()  # a fetched noaa:nexrad-level2 asset
+radar = item.open(sweep=0)  # selected sweep of a fetched noaa:nexrad-level2 asset
 sweep = radar["sweep_0"].to_dataset()
 print(sweep["DBZH"].attrs["units"])  # dBZ
 print(radar.attrs["usdata"]["provenance"]["checksum"])
@@ -98,12 +99,26 @@ closed before returning. A compressed volume can expand to hundreds of MB;
 select a bounded time/site query before fetching. CSV options raise `ValueError`
 for radar rather than being ignored.
 
+Since Unreleased, `sweep=0` or `sweep=[0, 2]` limits decoding and eager loading;
+the entire archived file is still downloaded and inspected. Names retain their
+original zero-based indices, and `radar.attrs["usdata"]["sweeps"]` records the
+returned groups. Invalid or out-of-range indices raise `ValueError`.
+
+The reader checks moment/coordinate record alignment before decoding. An interior
+sweep missing its end marker can shift xradar 0.12's coordinate table, causing
+shape errors or pairing equal-length observations with the wrong coordinates.
+Such a request raises `RadarDecodeError` from `usdata.readers`, before any partial
+result is returned. Select an unaffected sweep explicitly or investigate another
+decoder; this guard does not reconstruct the missing metadata or certify a file's
+scientific quality. Full-volume decoding of the affected KTLX
+`KTLX20240507_044053_V06` remains unsupported; its first sweep is readable.
+
 Units and native moment scaling are retained. Reserved codes become NaN:
 0–1 for DBZH (reflectivity), VRADH (radial velocity), WRADH (spectrum width), ZDR,
 PHIDP, and RHOHV; 0–7 for CCORH (clutter-filter power removed). Coordinates and
 unknown fields are unchanged. These are parsing conventions, not quality
 control; no rainfall conversion, clutter removal, or velocity unfolding is
-performed. Incomplete sweeps are padded with NaN so received rays remain
+performed. Incomplete sweeps with aligned metadata are padded with NaN so received rays remain
 available. Xradar warnings about angle reconstruction are preserved; do not
 interpret those sweeps as complete observations. Legacy files may lack location
 metadata, which the reader does not replace with guessed coordinates.
@@ -111,7 +126,10 @@ metadata, which the reader does not replace with guessed coordinates.
 Root `radar.attrs["usdata"]` carries the asset ID and copied source provenance;
 it is not an export format or a record of analysis steps. Keep the input files
 and sidecars. See the [executed radar notebook](../../examples/radar-reflectivity/example.ipynb)
-and [ADR 0008](../adr/0008-local-radar-readers.md). Advanced decoder options
+and [ADR 0008](../adr/0008-local-radar-readers.md). The
+[event-context notebook](../../examples/event-context/example.ipynb) demonstrates
+explicit selection; [ADR 0011](../adr/0011-radar-sweep-alignment.md) records the guard's
+scope and upstream dependency. Advanced decoder options
 remain available by calling xradar directly with `item.path`.
 
 ## Boundaries and errors

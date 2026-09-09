@@ -11,6 +11,7 @@ the saved outputs, or run them locally to change queries and inspect the results
 | [Storm Events](storm-events/example.ipynb) | Annual gzip CSV, local Oklahoma/date filtering, report counts, damage ratings, and source verification (available since v0.8) |
 | [Radar reflectivity](radar-reflectivity/example.ipynb) | One NEXRAD volume, xradar sweeps, field units, reflectivity plot, and provenance |
 | [GOES infrared imagery](goes-imagery/example.ipynb) | NetCDF4 opening, CF decoding, quality flags, scan coordinates and brightness-temperature imagery |
+| [Event context](event-context/example.ipynb) | One Storm Events report matched to NEXRAD and GOES, explicit UTC conversion, safe radar sweep selection, projected context, and locked restoration (Unreleased) |
 
 ## Run interactively
 

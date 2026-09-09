@@ -39,6 +39,10 @@ class UnsupportedFormat(ValueError):
     """No reader is implemented for this asset's format."""
 
 
+class RadarDecodeError(ValueError):
+    """Radar sweep metadata cannot safely pair observations with coordinates."""
+
+
 def open_asset(
     fetched: FetchedAsset,
     *,
@@ -47,6 +51,7 @@ def open_asset(
     parse_dates: list[str] | None = None,
     usecols: list[str] | None = None,
     nrows: int | None = None,
+    sweep: int | list[int] | None = None,
 ) -> Any:
     """Open local CSV, NetCDF4, or NEXRAD data, retaining units and provenance.
 
@@ -55,6 +60,8 @@ def open_asset(
     explicit reader for ambiguous metadata. Identifier columns default to pandas
     strings; explicit dtype entries override those defaults. Dates remain strings
     unless named in parse_dates. No checksum verification or downloading occurs.
+    Radar accepts zero-based ``sweep`` indices (one integer or a non-empty list);
+    the default opens the whole volume after checking sweep record alignment.
     """
     if reader is None:
         media_type = (fetched.asset.media_type or "").split(";", 1)[0].strip().lower()
@@ -73,6 +80,8 @@ def open_asset(
                 "pass reader='csv' "
                 "or reader='erddap-csv'; otherwise use fetched.path with a format-specific reader"
             )
+    if sweep is not None and reader != "nexrad-level2":
+        raise ValueError("sweep applies only to the NEXRAD reader")
     if reader == "netcdf":
         if any(value is not None for value in (dtype, parse_dates, usecols, nrows)):
             raise ValueError(
@@ -86,7 +95,13 @@ def open_asset(
             raise ValueError("dtype, parse_dates, usecols, and nrows apply only to CSV readers")
         from usdata._radar import open_nexrad
 
-        return open_nexrad(fetched)
+        if sweep is not None:
+            values = sweep if isinstance(sweep, list) else [sweep]
+            if not values or any(type(value) is not int or value < 0 for value in values):
+                raise ValueError("sweep must be a nonnegative integer or non-empty list of them")
+            if len(set(values)) != len(values):
+                raise ValueError("sweep indices must be unique")
+        return open_nexrad(fetched, sweep=sweep)
     if reader not in {"csv", "erddap-csv"}:
         raise UnsupportedFormat(
             f"unsupported reader {reader!r}; use 'csv', 'erddap-csv', 'netcdf', or 'nexrad-level2'"
