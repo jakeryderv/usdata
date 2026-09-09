@@ -271,3 +271,22 @@ def test_site_links_follow_home_project_and_notebook_paths(monkeypatch):
         )
         == "[anchor](#install) [web](https://example.org/README.md)"
     )
+
+
+def test_ci_summary_reports_failures_skips_and_timings(tmp_path):
+    module = script("ci_summary")
+    path = tmp_path / "junit.xml"
+    path.write_text("""<testsuites><testsuite>
+      <testcase name="ok" time="1.25"/>
+      <testcase name="failed" time="0.5"><failure message="bad | &lt;data&gt;"/></testcase>
+      <testcase name="setup" time="0"><error message="setup failed"/></testcase>
+      <testcase name="skip" time="0"><skipped message="optional dependency"/></testcase>
+    </testsuite></testsuites>""")
+    report = module.junit_summary(path)
+    assert "| 4 | 1 | 2 | 1 | 1.75 |" in report
+    assert "bad &#124; &lt;data&gt;" in report
+    assert "optional dependency" in report and "setup failed" in report
+    path.write_text(
+        json.dumps([{"path": "examples/a/example.ipynb", "status": "failed", "seconds": 2}])
+    )
+    assert "a/example.ipynb | failed | 2.00" in module.notebook_summary(path)

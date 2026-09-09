@@ -99,3 +99,23 @@ def test_live_inventory_discovers_new_examples_and_excludes_checkpoints(monkeypa
         {"id": "test_new_live", "path": "tests/live/test_new_live.py", "extra": "core"}
     ]
     assert data["notebooks"] == [{"id": "example-0", "path": "examples/new/example.ipynb"}]
+
+
+def test_inventory_focus_rejects_unknown_and_ambiguous_targets(monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
+    module = importlib.import_module("ci_inventory")
+    select_inventory = module.select_inventory
+    data = module.inventory()
+    focused = select_inventory(data, "live", "coops")
+    assert [entry["id"] for entry in focused["live"]] == ["test_coops_live"]
+    assert focused["notebooks"] == []
+    assert select_inventory(data, "all") == data
+    assert select_inventory(data, "minimum") == {"live": [], "notebooks": []}
+    notebook = select_inventory(data, "notebooks", "sst-analysis")
+    assert len(notebook["notebooks"]) == 1 and not notebook["live"]
+    for scope, target in [("all", "coops"), ("minimum", "coops"), ("live", "$(echo x)")]:
+        with pytest.raises(ValueError):
+            select_inventory(data, scope, target)
+    duplicates = {"live": data["live"] * 2, "notebooks": data["notebooks"]}
+    with pytest.raises(ValueError, match="exactly one"):
+        select_inventory(duplicates, "live", "coops")

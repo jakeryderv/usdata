@@ -98,3 +98,24 @@ committed notebooks only if every selected example succeeds.
 Documentation is checked once in the static job: `just check-docs` checks generated
 catalogs and saved notebooks, then builds the site with strict internal link and
 anchor validation. See [maintaining documentation](guides/documentation.md).
+
+## Focused hosted checks
+
+Weekly Integration runs retain the full live, notebook, and minimum-dependency
+suites. Manual runs can select a scope and one target; an empty target runs the
+whole selected scope. Examples from a checkout with the GitHub CLI:
+
+```sh
+gh workflow run integration.yml -f scope=live -f target=coops
+gh workflow run integration.yml -f scope=notebooks -f target=sst-analysis
+gh workflow run integration.yml -f scope=minimum
+gh workflow run integration.yml -f scope=all
+```
+
+A live target is the test module stem without `test_` and `_live`; a notebook
+target is its example folder name. Full repository-relative paths also work.
+Unknown or ambiguous targets fail before starting jobs. The `all` and `minimum`
+scopes reject a target. Use `--ref BRANCH` to test a workflow change before merging.
+Each test job writes counts, failures, skips, and execution time to the Actions
+run summary; notebook jobs report status and duration. Reports missing after a
+setup failure are identified explicitly, and full diagnostics remain in artifacts.
