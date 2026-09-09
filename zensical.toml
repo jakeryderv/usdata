@@ -18,7 +18,7 @@ nav = [
     { "Storm Events" = "examples/storm-events/example.md" },
     { "Radar reflectivity" = "examples/radar-reflectivity/example.md" },
     { "GOES imagery" = "examples/goes-imagery/example.md" },
-    { "Event context (Unreleased)" = "examples/event-context/example.md" },
+    { "Event context" = "examples/event-context/example.md" },
   ] },
   { "Datasets" = [
     { "Providers" = "docs/providers/README.md" },

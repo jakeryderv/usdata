@@ -54,7 +54,7 @@ source integrity.
 | `parse_dates` | List of columns to parse as dates/timestamps. Dates stay strings by default. |
 | `usecols` | List of columns to read. Ordering follows pandas behavior. |
 | `nrows` | Maximum number of observation rows to read, excluding headers and units. |
-| `sweep` | NEXRAD only (Unreleased): zero-based integer or non-empty list of distinct nonnegative integers. `None` opens all sweeps. |
+| `sweep` | NEXRAD only (since v0.9): zero-based integer or non-empty list of distinct nonnegative integers. `None` opens all sweeps. |
 
 `STATION` and other case-insensitive identifier names (`station_id`, `site_no`,
 `monitoring_location_id`, `parameter_code`, `statistic_id`) default to pandas
@@ -105,7 +105,7 @@ closed before returning. A compressed volume can expand to hundreds of MB;
 select a bounded time/site query before fetching. CSV options raise `ValueError`
 for radar rather than being ignored.
 
-Since Unreleased, `sweep=0` or `sweep=[0, 2]` limits decoding and eager loading;
+Since v0.9, `sweep=0` or `sweep=[0, 2]` limits decoding and eager loading;
 the entire archived file is still downloaded and inspected. Names retain their
 original zero-based indices, and `radar.attrs["usdata"]["sweeps"]` records the
 returned groups. Invalid or out-of-range indices raise `ValueError`.
