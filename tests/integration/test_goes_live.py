@@ -1,5 +1,6 @@
 """One small GOES-18 ABI CONUS NetCDF scene, with checksum-locked restoration."""
 
+from importlib.util import find_spec
 from pathlib import Path
 
 import pytest
@@ -31,3 +32,10 @@ sources:
     assert restored.from_lockfile and not restored.fetched[0].from_cache
     assert restored.lockfile == result.lockfile
     assert verify(manifest, root=tmp_path / "cache") == []
+
+    if all(find_spec(name) is not None for name in ("xarray", "h5netcdf", "h5py")):
+        scene = restored.fetched[0].open()
+        assert scene.CMI.attrs["units"] == "1"  # channel 6 reflectance
+        assert scene.CMI.dims == ("y", "x")
+        assert scene.attrs["usdata"]["provenance"]["checksum"] == item.provenance.checksum
+        assert verify(manifest, root=tmp_path / "cache") == []

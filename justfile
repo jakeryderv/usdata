@@ -50,7 +50,7 @@ check-radar:
 
 # Open the interactive examples in JupyterLab
 notebooks:
-    uv run --group examples --extra radar jupyter lab examples
+    uv run --group examples --extra radar --extra netcdf jupyter lab examples
 
 # Validate committed notebook structure and saved outputs without fetching data
 check-notebooks:
@@ -58,7 +58,12 @@ check-notebooks:
 
 # Execute all notebooks against live services; --write refreshes committed outputs
 run-notebooks *args:
-    uv run --group examples --extra radar python scripts/run_notebooks.py {{args}}
+    uv run --group examples --extra radar --extra netcdf python scripts/run_notebooks.py {{args}}
+
+# Run checks with the optional NetCDF4 reader installed
+check-netcdf:
+    uv sync --group dev --extra netcdf
+    UV_NO_SYNC=1 just check
 
 # Build sdist and wheel into dist/
 build:

@@ -64,7 +64,7 @@ def test_broken_pandas_dependency_is_not_misreported(fetched) -> None:
     assert error.value.name == "numpy"
 
 
-@pytest.mark.parametrize("media_type", [None, "application/octet-stream", "application/x-netcdf"])
+@pytest.mark.parametrize("media_type", [None, "application/octet-stream", "application/x-grib"])
 def test_unsupported_formats_do_not_load_pandas(fetched, media_type) -> None:
     item = fetched("not CSV", media_type=media_type)
     with (

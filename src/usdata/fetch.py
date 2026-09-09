@@ -35,11 +35,12 @@ class FetchedAsset(BaseModel):
         usecols: list[str] | None = None,
         nrows: int | None = None,
     ) -> Any:
-        """Open local data with an optional reader (``pandas`` or ``radar`` extra).
+        """Open local data with an optional ``pandas``, ``radar``, or ``netcdf`` reader.
 
         ERDDAP units are kept in ``frame.attrs["units"]`` and source provenance
         in ``frame.attrs["usdata"]``. NEXRAD returns a xarray DataTree with provenance
-        in ``radar.attrs["usdata"]``. See ``usdata.readers.open_asset`` for options.
+        in ``radar.attrs["usdata"]``. NetCDF4 returns a loaded xarray Dataset with
+        matching provenance in its attributes. See ``usdata.readers.open_asset`` for options.
         Cached files and provenance sidecars are never changed.
         """
         from usdata.readers import open_asset

@@ -9,8 +9,8 @@ the saved outputs, or run them locally to change queries and inspect the results
 | [Sea-surface temperature](sst-analysis/example.ipynb) | A four-cell CoastWatch subset, pandas opening, ERDDAP units, and a spatial plot |
 | [Monthly climate](monthly-climate/example.ipynb) | GSOM monthly observations, whole-month selection, a two-panel plot, and manifest verification |
 | [Storm Events](storm-events/example.ipynb) | Annual gzip CSV, local Oklahoma/date filtering, report counts, damage ratings, and source verification (available from source for v0.8) |
-
 | [Radar reflectivity](radar-reflectivity/example.ipynb) | One NEXRAD volume, xradar sweeps, field units, reflectivity plot, and provenance |
+| [GOES infrared imagery](goes-imagery/example.ipynb) | NetCDF4 opening, CF decoding, quality flags, scan coordinates and brightness-temperature imagery |
 
 ## Run interactively
 
@@ -21,9 +21,9 @@ just notebooks
 ```
 
 This launches JupyterLab with the optional `examples` dependency group, which
-includes pandas, plotting, and notebook tools. The command also installs the
-optional `radar` extra for xradar; scientific reader dependencies remain optional. These are development dependencies;
-installing `usdata` does not install them. Select a notebook and use the Python 3
+includes pandas, plotting, and notebook tools. The commands also install the
+optional `radar` and `netcdf` extras. Notebook tools are development dependencies;
+installing base `usdata` does not install them or the scientific reader extras. Select a notebook and use the Python 3
 kernel. In an IDE, select this checkout's `.venv` interpreter after the environment
 has been installed. Use **Restart Kernel and Run All Cells** to check that a notebook
 works without hidden state. Each notebook works from its own folder or the repo root.

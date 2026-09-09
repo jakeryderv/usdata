@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         python: ["3.11", "3.14"]
-        readers: [core, pandas, radar]
+        readers: [core, pandas, radar, netcdf]
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
@@ -32,13 +32,16 @@ jobs:
         run: uv sync --group dev --extra pandas
       - if: matrix.readers == 'radar'
         run: uv sync --group dev --extra radar
+      - if: matrix.readers == 'netcdf'
+        run: uv sync --group dev --extra netcdf
       - name: Check dependency profile
         env:
           EXPECT_PANDAS: ${{ matrix.readers != 'core' && '1' || '0' }}
+          EXPECT_XARRAY: ${{ (matrix.readers == 'radar' || matrix.readers == 'netcdf') && '1' || '0' }}
           EXPECT_RADAR: ${{ matrix.readers == 'radar' && '1' || '0' }}
         run: >-
           uv run --no-sync python -c
-          "import importlib.util, os; assert (importlib.util.find_spec('pandas') is not None) == (os.environ['EXPECT_PANDAS'] == '1'); assert (importlib.util.find_spec('xradar') is not None) == (os.environ['EXPECT_RADAR'] == '1')"
+          "import importlib.util, os; assert (importlib.util.find_spec('pandas') is not None) == (os.environ['EXPECT_PANDAS'] == '1'); assert (importlib.util.find_spec('xradar') is not None) == (os.environ['EXPECT_RADAR'] == '1'); assert (importlib.util.find_spec('xarray') is not None) == (os.environ['EXPECT_XARRAY'] == '1')"
       - run: just check
         env:
           UV_NO_SYNC: '1'
@@ -79,7 +82,7 @@ jobs:
         with:
           name: dist
           path: dist
-      - run: uv run --no-project python scripts/smoke_wheel.py --radar
+      - run: uv run --no-project python scripts/smoke_wheel.py --radar --netcdf
 
   # Single required status check for branch protection.
   ci:

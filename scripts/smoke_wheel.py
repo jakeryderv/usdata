@@ -30,6 +30,9 @@ from usdata.query import resolve_place
 assert usdata.__version__ == os.environ["USDATA_EXPECTED_VERSION"]
 assert find_spec("pandas") is None
 assert find_spec("xradar") is None
+assert find_spec("xarray") is None
+assert find_spec("h5netcdf") is None
+assert find_spec("h5py") is None
 assert "xradar" not in sys.modules
 assert "pandas" not in sys.modules
 assert Path(usdata.__file__).resolve().is_relative_to(Path.cwd().resolve())
@@ -120,11 +123,43 @@ print("installed-wheel radar smoke passed")
 """
 
 
+SMOKE_NETCDF = """
+import sys
+from pathlib import Path
+from importlib.util import find_spec
+import usdata
+from usdata.fetch import FetchedAsset
+from usdata.models import Asset, Protocol
+from usdata.provenance import record
+assert "xarray" not in sys.modules
+assert "h5netcdf" not in sys.modules
+assert find_spec("xradar") is None
+path = Path("packed-grid.nc")
+asset = Asset(id=path.name, dataset_id="noaa:goes-abi",
+              href="https://example.test/packed-grid.nc", protocol=Protocol.HTTP,
+              media_type="application/x-netcdf")
+item = FetchedAsset(asset=asset, path=path,
+                    provenance=record(usdata.get(asset.dataset_id), asset, path), from_cache=True)
+before = path.read_bytes()
+scene = item.open()
+assert scene.CMI.attrs["units"] == "K"
+assert float(scene.CMI.mean()) == 260
+assert scene.unsigned_count.values[1] == 32768
+assert bool(scene.CMI.isnull()[0, 2])
+assert scene.attrs["usdata"]["provenance"]["checksum"] == item.provenance.checksum
+assert path.read_bytes() == before
+path.unlink()
+assert float(scene.CMI.mean()) == 260
+print("installed-wheel NetCDF4 smoke passed")
+"""
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--radar", action="store_true", help="also exercise the optional radar extra"
     )
+    parser.add_argument("--netcdf", action="store_true", help="exercise the NetCDF4 extra")
     args = parser.parse_args()
     version = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
     wheel = check_dist(ROOT / "dist", version).resolve()
@@ -165,6 +200,15 @@ def main() -> None:
             cwd=work,
         )
         subprocess.run([str(python), "-I", "-c", SMOKE_READERS], check=True, cwd=work, env=env)
+        if args.netcdf:
+            shutil.copy2(ROOT / "tests/fixtures/netcdf/packed-grid.nc", work / "packed-grid.nc")
+            subprocess.run(
+                ["uv", "pip", "install", "--python", str(python), f"{wheel}[netcdf]"],
+                check=True,
+                env=env,
+                cwd=work,
+            )
+            subprocess.run([str(python), "-I", "-c", SMOKE_NETCDF], check=True, cwd=work, env=env)
         if args.radar:
             shutil.copy2(
                 ROOT / "tests/fixtures/radar/example_nexrad_archive_msg1.bz2", work / "radar.bz2"

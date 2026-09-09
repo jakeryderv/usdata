@@ -130,6 +130,34 @@ CSV provider-specific missing-data sentinels are not normalized beyond pandas de
 files and pandas parsing/conversion failures propagate normally. CSV headers
 must have unique, non-empty names, and ERDDAP units must match the header width.
 
-NetCDF, GRIB, and geospatial readers are not implemented. Use the
+GRIB and geospatial readers are not implemented. Use the
 fetched path with a suitable external reader for those formats. The core SDK,
 CLI, fetch, cache, and lockfile workflows continue to work without pandas.
+
+## NetCDF4 scenes
+
+Available from source for v0.8. Install `usdata[netcdf]` for xarray plus the
+h5netcdf/h5py backend. `item.open()` recognizes `application/x-netcdf`,
+`application/netcdf`, and `application/x-netcdf4`; use `reader="netcdf"` when
+an archived asset has ambiguous media metadata. No current registry is needed.
+
+The result is an xarray Dataset of the file's root group. CF packed values,
+unsigned storage, fill values and time coordinates are decoded; dimensions,
+coordinate units, variable units, projection metadata and data-quality flags
+are retained. Quality filtering and projection are the caller's responsibility.
+`dataset.attrs["usdata"]` contains the same copied source provenance convention
+as CSV readers. CSV options (`dtype`, `parse_dates`, `usecols`, `nrows`) are
+rejected, including empty values, for NetCDF opening.
+
+The source is opened as a local binary file with a fixed engine. All variables
+are loaded into memory and both dataset/backend and file are closed before
+returning; callers need not manage a file handle. Memory must fit the decoded
+scene, which can be much larger than its compressed download size. The initial
+scope is NetCDF4/HDF5; classic NetCDF3, arbitrary HDF5, groups and lazy/dask
+opening are not supported. Use a format-specific library on `item.path` for
+those cases. Backend parsing errors propagate; missing optional modules name
+the `usdata[netcdf]` extra.
+
+See the executed [GOES example](../../examples/goes-imagery/example.ipynb),
+[xarray's decoding options](https://docs.xarray.dev/en/stable/generated/xarray.open_dataset.html),
+and [ADR 0009](../adr/0009-eager-local-netcdf4-reader.md).
