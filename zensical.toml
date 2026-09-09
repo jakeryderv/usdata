@@ -55,6 +55,17 @@ nav = [
 [project.theme]
 features = ["navigation.tabs", "navigation.sections", "navigation.top", "content.code.copy"]
 
+# Dark mode is the default; readers can choose light mode from the header.
+[[project.theme.palette]]
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
 [project.theme.font]
 text = "Inter"
 code = "JetBrains Mono"
