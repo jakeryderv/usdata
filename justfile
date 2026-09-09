@@ -3,9 +3,9 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 default:
     @just --list
 
-# Install the toolchain and all dependencies
+# Install the core development toolchain
 setup:
-    uv sync --all-groups
+    uv sync --group dev
 
 # Run unit tests
 test *args:
@@ -36,11 +36,24 @@ check:
     uv run pytest --cov=usdata --cov-report=term-missing:skip-covered
     uv run python scripts/render_registry.py --check
     uv run python scripts/check_release_docs.py
+    just check-notebooks
 
 # Run the full checks with optional CSV readers installed
 check-pandas:
-    uv sync --all-groups --extra pandas
+    uv sync --group dev --extra pandas
     UV_NO_SYNC=1 just check
+
+# Open the interactive examples in JupyterLab
+notebooks:
+    uv run --group examples jupyter lab examples
+
+# Validate committed notebook structure and saved outputs without fetching data
+check-notebooks:
+    uv run python scripts/check_notebooks.py
+
+# Execute all notebooks against live services; --write refreshes committed outputs
+run-notebooks *args:
+    uv run --group examples python scripts/run_notebooks.py {{args}}
 
 # Build sdist and wheel into dist/
 build:

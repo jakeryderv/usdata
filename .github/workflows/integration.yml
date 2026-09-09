@@ -18,3 +18,14 @@ jobs:
       - uses: extractions/setup-just@v4
       - run: just setup
       - run: just test-integration
+
+  notebooks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - uses: extractions/setup-just@v4
+      - run: just run-notebooks

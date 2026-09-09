@@ -7,6 +7,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Replace example analysis scripts with executed Jupyter notebooks containing
+  compact data previews, plots, and source provenance. Add an optional examples
+  environment, offline notebook checks, and isolated live execution/refresh commands.
+
 ## [0.7.0] - 2026-09-08
 
 ### Added

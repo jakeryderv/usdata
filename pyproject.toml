@@ -40,6 +40,13 @@ dev = [
     "respx>=0.23.1",
     "ruff>=0.6",
 ]
+examples = [
+    "ipykernel>=6.29",
+    "jupyterlab>=4.3",
+    "matplotlib>=3.9",
+    "nbclient>=0.10",
+    "pandas>=3.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]

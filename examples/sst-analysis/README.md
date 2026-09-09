@@ -1,19 +1,14 @@
 # Fetch, open, and summarize SST
 
-Available since v0.6. Follow [development setup](../../README.md#development),
-then run from the repository root:
+Open the [executed notebook](example.ipynb) to inspect four CoastWatch ocean grid
+centers, their units and provenance, a small spatial plot, and cache reuse.
+See [examples setup](../README.md) to run it interactively or refresh its outputs.
 
-```sh
-uv run --extra pandas python examples/sst-analysis/analyze.py
-```
+Requires usdata v0.6 or newer. The sample is at 2024-05-06T12:00Z. Its mean is an
+unweighted average of four nearby grid centers, not a regional climate statistic.
+ERDDAP's units row becomes metadata rather than an observation; raw bytes and
+provenance remain intact when the DataFrame is edited.
 
-This downloads a tiny CoastWatch SST subset: four nearby ocean grid centers at
-2024-05-06T12:00Z. It opens the CSV as a DataFrame, parses timestamps, and prints
-the mean temperature in the units supplied by the source, plus its checksum.
-It needs live NOAA access for the first fetch; valid cached bytes are reused.
-
-The ERDDAP units row becomes metadata, not an observation. The example computes
-an unweighted mean of these four grid centers, not a regional climate statistic.
-Downloaded bytes and provenance stay intact when the DataFrame is opened or edited.
-The [reader reference](../../docs/reference/readers.md) documents other options
-and the limits of in-memory metadata.
+Saved results include execution and retrieval times plus checksums; NOAA can revise
+the underlying data. The [reader reference](../../docs/reference/readers.md)
+explains opening options and the limits of in-memory metadata.
