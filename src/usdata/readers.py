@@ -13,6 +13,7 @@ from usdata.models import Protocol
 if TYPE_CHECKING:
     from usdata.fetch import FetchedAsset
 
+NETCDF_MEDIA_TYPES = {"application/x-netcdf", "application/netcdf", "application/x-netcdf4"}
 CSV_MEDIA_TYPES = {"text/csv", "application/csv"}
 GZIP_MEDIA_TYPES = {"application/gzip", "application/x-gzip"}
 IDENTIFIER_COLUMNS = {
@@ -47,7 +48,7 @@ def open_asset(
     usecols: list[str] | None = None,
     nrows: int | None = None,
 ) -> Any:
-    """Open local CSV or NEXRAD Level II data, retaining units and provenance.
+    """Open local CSV, NetCDF4, or NEXRAD data, retaining units and provenance.
 
     Gzip CSVs are decompressed locally without changing cached bytes.
     Infer ``csv`` or ``erddap-csv`` from media type and protocol, or use an
@@ -60,15 +61,26 @@ def open_asset(
         gzip_csv = media_type in GZIP_MEDIA_TYPES and fetched.asset.id.lower().endswith(".csv.gz")
         if fetched.asset.dataset_id == "noaa:nexrad-level2":
             reader = "nexrad-level2"
+        elif media_type in NETCDF_MEDIA_TYPES:
+            reader = "netcdf"
         elif media_type in CSV_MEDIA_TYPES or gzip_csv:
             reader = "erddap-csv" if fetched.asset.protocol is Protocol.ERDDAP else "csv"
         else:
             raise UnsupportedFormat(
                 f"no reader for {fetched.asset.media_type!r}; supported formats are CSV, "
-                "ERDDAP CSV, and NEXRAD Level II. For a known CSV with ambiguous metadata, "
+                "ERDDAP CSV, NetCDF4, and NEXRAD Level II. "
+                "For a known CSV with ambiguous metadata, "
                 "pass reader='csv' "
                 "or reader='erddap-csv'; otherwise use fetched.path with a format-specific reader"
             )
+    if reader == "netcdf":
+        if any(value is not None for value in (dtype, parse_dates, usecols, nrows)):
+            raise ValueError(
+                "CSV options dtype, parse_dates, usecols and nrows do not apply to NetCDF"
+            )
+        from usdata._netcdf import open_netcdf
+
+        return open_netcdf(fetched)
     if reader == "nexrad-level2":
         if any(value is not None for value in (dtype, parse_dates, usecols, nrows)):
             raise ValueError("dtype, parse_dates, usecols, and nrows apply only to CSV readers")
@@ -77,7 +89,7 @@ def open_asset(
         return open_nexrad(fetched)
     if reader not in {"csv", "erddap-csv"}:
         raise UnsupportedFormat(
-            f"unsupported reader {reader!r}; use 'csv', 'erddap-csv', or 'nexrad-level2'"
+            f"unsupported reader {reader!r}; use 'csv', 'erddap-csv', 'netcdf', or 'nexrad-level2'"
         )
     try:
         pandas = import_module("pandas")

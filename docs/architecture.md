@@ -26,7 +26,7 @@ user arguments ─► build_query ─► Query
 | `providers` | One `Provider` subclass per dataset, loaded by dotted path from the registry entry. Translates `Query` to agency-specific listing and download. |
 | `protocols` | Transport clients with no dataset knowledge. `http.download` streams to disk atomically; `s3.list_objects` paginates ListObjectsV2 anonymously. |
 | `fetch` | Core loop: adapter resolves assets, cache is checked, bytes fetched, provenance written. |
-| `readers` | Local CSV/radar opening behind optional extras; media/protocol dispatch, units and source metadata, no fetching or cache writes. |
+| `readers` | Local CSV, radar, and NetCDF4 opening behind optional extras; format dispatch, units and source metadata, no fetching or cache writes. |
 | `cache` | Cache directory resolution and content hashing. |
 | `provenance` | Builds and persists a `Provenance` record beside each fetched file. |
 | `manifest` | `Manifest` (declared inputs) and `Lockfile` (what was actually fetched, with checksums). |

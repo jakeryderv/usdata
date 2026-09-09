@@ -25,6 +25,7 @@ dependencies = [
 [project.optional-dependencies]
 pandas = ["pandas>=3.0"]
 radar = ["xradar>=0.12.0"]
+netcdf = ["xarray>=2025.1", "h5netcdf[h5py]>=1.8.1"]
 
 [project.urls]
 Homepage = "https://github.com/jakeryderv/usdata"

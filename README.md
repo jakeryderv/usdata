@@ -153,9 +153,16 @@ with saved data previews, small plots, and source provenance. Start with weather
 and streamflow for manifest workflows, SST for gridded CSV reading, or monthly
 climate for GSOM observations.
 
+NetCDF4 scene opening is available from source for v0.8 with `usdata[netcdf]`.
+See the executed [GOES infrared notebook](examples/goes-imagery/example.ipynb).
+
 ## Development
 
 Requires [uv](https://docs.astral.sh/uv/) and [just](https://just.systems/).
+
+`just setup` uses the tested Python 3.14.7 pin in `.python-version`. Older Linux
+uv Python 3.14 builds can crash during NumPy array operations; see
+[the upstream fix](https://github.com/astral-sh/python-build-standalone/issues/991).
 
 ```sh
 git clone https://github.com/jakeryderv/usdata && cd usdata

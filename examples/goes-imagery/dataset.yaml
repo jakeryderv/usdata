@@ -1,0 +1,9 @@
+name: goes18-infrared-scene
+sources:
+  - dataset: noaa:goes-abi
+    start: 2024-05-06T12:01:18.1Z
+    end: 2024-05-06T12:01:18.1Z
+    params:
+      satellite: 18
+      channel: 13
+      product: ABI-L2-CMIPC

@@ -9,6 +9,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Optional local NetCDF4 opening with eager xarray loading, CF decoding,
+  closed file resources, source metadata, and an executed GOES infrared notebook.
+
 - `noaa:goes-abi` CONUS Cloud and Moisture Imagery with explicit satellite/channel
   selection, precise scan times and sizes, and checksum-verified NetCDF downloads.
 - Storm Events annual event-details gzip CSVs, selecting current creation-date

@@ -83,6 +83,7 @@ terminal fetch/cache check pass; redirected output retains its existing format.
 **In progress (v0.8 / source)**:
 
 - [x] GOES ABI CONUS single-channel scenes with explicit satellite/time selection
+- [x] NetCDF4 reader and executed GOES brightness-temperature notebook
 - [x] Storm Events annual details archives, pinned revisions, local gzip CSV reading,
   and an [executed report-analysis notebook](../examples/storm-events/example.ipynb)
   (available from source for v0.8)
