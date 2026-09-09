@@ -27,7 +27,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | [`noaa:sea-ice-index`](#noaasea-ice-index) | Snow and ice | planned | target later | Daily and monthly Arctic and Antarctic sea ice extent and concentration (NOAA@NSIDC G02135) as CSV, GeoTIFF, and shapefiles in an HTTPS directory hosted by NSIDC. | http |
 | [`noaa:ersst`](#noaaersst) | Ocean physics | planned | target later | Extended Reconstructed SST v5: monthly global 2 degree analysis since 1854, one NetCDF per month in an NCEI HTTPS directory. | http |
 | [`noaa:oisst`](#noaaoisst) | Ocean physics | planned | target later | Optimum Interpolation SST v2.1: daily global 0.25 degree analysis since September 1981 as one NetCDF per day, from the NOAA CDR S3 bucket (data/v2.1/avhrr/YYYYMM/) or the NCEI HTTPS mirror. | s3 |
-| [`noaa:coops-water-levels`](#noaacoops-water-levels) | Sea level and tides | planned | target later | Observed and predicted water levels, tide predictions, and related products for NWLON tide stations from the CO-OPS Data API, with a companion metadata API for station lookup. | http |
+| [`noaa:coops-water-levels`](#noaacoops-water-levels) | Sea level and tides | available | unreleased; planned 0.10 | Preliminary or verified six-minute observed water levels from the anonymous CO-OPS Data API. | http |
 | [`noaa:ocads`](#noaaocads) | Ocean chemistry | planned | target later | Archived ocean carbon, pH, and related chemistry datasets (cruises, moorings, syntheses such as SOCAT and GLODAP) in an NCEI HTTPS directory organized by accession. | http |
 | [`noaa:coastwatch-sst`](#noaacoastwatch-sst) | Satellite oceanography | available | since 0.5 | NOAA geo-polar blended daily SST analysis (day and night) on a global 5 km grid, ERDDAP dataset noaacwBLENDEDsstDNDaily on the CoastWatch server, with server-side spatial, temporal, and variable subsetting. | erddap |
 | [`noaa:etopo`](#noaaetopo) | Bathymetry and hydrography | planned | target later | Global topography and bathymetry at 15, 30, and 60 arc-seconds as NetCDF and GeoTIFF tiles, served through the NCEI THREDDS catalog with OPeNDAP access; the THREDDS pattern. | thredds |
@@ -332,17 +332,17 @@ Optimum Interpolation SST v2.1: daily global 0.25 degree analysis since Septembe
 
 ### noaa:coops-water-levels
 
-**CO-OPS Water Levels and Tides** · planned · target later
+**CO-OPS Observed Water Levels** · available · unreleased; planned 0.10
 
-Observed and predicted water levels, tide predictions, and related products for NWLON tide stations from the CO-OPS Data API, with a companion metadata API for station lookup. Anonymous REST with station, product, datum, and date-range parameters.
+Preliminary or verified six-minute observed water levels from the anonymous CO-OPS Data API. Select one station, an explicit vertical datum, units, and a UTC interval of at most 28 days. Raw CSV retains quality flags; predictions and station discovery are not included.
 
 - Domain: Sea level and tides
-- Server-side subsetting: temporal, variable
+- Server-side subsetting: temporal
 - Homepage: https://api.tidesandcurrents.noaa.gov/api/prod/
 - License: US Government Work (public domain)
 - Extent: not stated
 - Keywords: tides, water level, sea level, coastal, coops, nwlon, stations
-- Adapter: none yet
+- Adapter: `usdata.providers.noaa.coops:CoopsWaterLevels`
 
 ### noaa:ocads
 

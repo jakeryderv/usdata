@@ -7,6 +7,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- CO-OPS observed water levels for one station, explicit datum and UTC interval, with raw CSV quality fields, response validation, and a reproducible manifest example.
+
 ## [0.9.0] - 2026-09-09
 
 ### Documentation

@@ -60,3 +60,5 @@ provenance. The runner removes execution timing and widget metadata while keepin
 the visible outputs. Review the notebook diff before committing a refresh;
 upstream revisions can change both observations and checksums. The notebooks are
 the tutorial source; equivalent analysis scripts are not maintained alongside them.
+
+A small [coastal water-level manifest](coastal-water-levels/README.md) demonstrates CO-OPS datum, units, quality flags, and local CSV reading (available from source for v0.10).

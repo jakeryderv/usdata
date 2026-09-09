@@ -22,6 +22,7 @@ pytestmark = pytest.mark.l2
 DATA = b"source bytes\n"
 CASES = {
     "noaa:ghcn-daily": {"stations": "USW00013967"},
+    "noaa:coops-water-levels": {"station": "8518750", "datum": "MLLW"},
     "noaa:gsom": {"stations": "USW00013967"},
     "noaa:nexrad-level2": {"site": "KTLX"},
     "noaa:goes-abi": {"satellite": 18, "channel": 6},
@@ -50,6 +51,12 @@ def test_every_available_adapter_has_a_contract_scenario() -> None:
 @pytest.mark.parametrize("injected", [False, True], ids=["owned", "injected"])
 @pytest.mark.parametrize("fail", [False, True], ids=["success", "fetch-error"])
 def test_adapter_contract(dataset_id, injected, fail, tmp_path, monkeypatch) -> None:
+    data = (
+        b"Date Time, Water Level, Sigma, O or I (for verified), F, R, L, Quality \n"
+        b"2024-05-06 12:00,1.765,0.06,0,0,0,0,v\n"
+        if dataset_id == "noaa:coops-water-levels"
+        else DATA
+    )
     downloads: set[str] = set()
     requests: list[httpx.Request] = []
     clients: list[httpx.Client] = []
@@ -58,20 +65,20 @@ def test_adapter_contract(dataset_id, injected, fail, tmp_path, monkeypatch) -> 
         requests.append(request)
         assert request.method == "GET"
         if str(request.url) in downloads:
-            return httpx.Response(503 if fail else 200, content=DATA)
+            return httpx.Response(503 if fail else 200, content=data)
         if dataset_id in S3_KEYS and request.url.params.get("list-type") == "2":
             key = S3_KEYS[dataset_id]
             return httpx.Response(
                 200,
                 text='<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">'
                 f"<IsTruncated>false</IsTruncated><Contents><Key>{key}</Key>"
-                f"<Size>{len(DATA)}</Size></Contents></ListBucketResult>",
+                f"<Size>{len(data)}</Size></Contents></ListBucketResult>",
             )
         if str(request.url) == DIRECTORY_URL:
             return httpx.Response(
                 200,
                 text=f'<table><tr><td><a href="{STORM_NAME}">{STORM_NAME}</a></td>'
-                f'<td>2026-03-23</td><td align="right">{len(DATA)}</td></tr></table>',
+                f'<td>2026-03-23</td><td align="right">{len(data)}</td></tr></table>',
             )
         if str(request.url).startswith(ITEMS_URL) and request.url.params.get("f") == "json":
             return httpx.Response(200, json={"features": [{"id": "a"}], "links": []})
@@ -104,7 +111,7 @@ def test_adapter_contract(dataset_id, injected, fail, tmp_path, monkeypatch) -> 
             assert {a.dataset_id for a in first} == {dataset_id}
             assert len({a.id for a in first}) == len(first)
             assert all(a.id and a.href and a.time and a.time.start for a in first)
-            assert all(a.size is None or a.size == len(DATA) for a in first)
+            assert all(a.size is None or a.size == len(data) for a in first)
             assert list(tmp_path.iterdir()) == []  # Listing never writes cache/provenance.
             asset = first[0]
             downloads.add(
@@ -118,7 +125,7 @@ def test_adapter_contract(dataset_id, injected, fail, tmp_path, monkeypatch) -> 
             )
             dest = tmp_path / "chosen-output"
             assert adapter.fetch(asset, dest) == dest
-            assert dest.read_bytes() == DATA
+            assert dest.read_bytes() == data
             assert list(tmp_path.iterdir()) == [dest]  # No provider-owned sidecars.
             assert len(clients) == 1
         if fail:

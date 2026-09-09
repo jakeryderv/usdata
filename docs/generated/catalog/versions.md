@@ -12,7 +12,6 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`nasa:gpm-imerg`](nasa.md#nasagpm-imerg) GPM IMERG Precipitation · planned
 - [`noaa:cdr-ndvi`](noaa.md#noaacdr-ndvi) NDVI Climate Data Record · planned
 - [`noaa:climate-normals`](noaa.md#noaaclimate-normals) U.S. Climate Normals 1991-2020 · planned
-- [`noaa:coops-water-levels`](noaa.md#noaacoops-water-levels) CO-OPS Water Levels and Tides · planned
 - [`noaa:ersst`](noaa.md#noaaersst) ERSST Monthly Sea Surface Temperature · planned
 - [`noaa:etopo`](noaa.md#noaaetopo) ETOPO 2022 Global Relief · planned
 - [`noaa:gfs`](noaa.md#noaagfs) GFS Forecast Model Output · planned
@@ -36,6 +35,10 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usda:cropland-data-layer`](usda.md#usdacropland-data-layer) Cropland Data Layer · planned
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · planned
 - [`usgs:earthquakes`](usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · planned
+
+**Implemented, unreleased (planned 0.10)**
+
+- [`noaa:coops-water-levels`](noaa.md#noaacoops-water-levels) CO-OPS Observed Water Levels · available
 
 **Included since 0.8**
 

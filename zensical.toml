@@ -18,6 +18,7 @@ nav = [
     { "Storm Events" = "examples/storm-events/example.md" },
     { "Radar reflectivity" = "examples/radar-reflectivity/example.md" },
     { "GOES imagery" = "examples/goes-imagery/example.md" },
+    { "Coastal water levels (Unreleased)" = "examples/coastal-water-levels/README.md" },
     { "Event context" = "examples/event-context/example.md" },
   ] },
   { "Datasets" = [
