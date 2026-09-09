@@ -17,5 +17,5 @@ the exact source URL/retrieval time/checksum. Saved outputs are one revision's
 snapshot; current values can differ. The raw gzip file and its provenance stay
 unchanged after opening, plotting, and cache verification.
 
-See [NOAA access notes](../../docs/providers/noaa.md#storm-events-annual-details)
+See [NOAA access notes](../../docs/providers/noaa-storm-events.md)
 for revision selection, missing-year errors, and preservation limits.

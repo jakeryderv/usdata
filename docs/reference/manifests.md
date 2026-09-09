@@ -56,7 +56,7 @@ prefer explicit station IDs or a local bbox there. See the
 |---|---|---|
 | `noaa:ghcn-daily` | `stations`: non-empty comma-separated string or list; otherwise requires a geographic query. `units`: `metric` (default) or `standard`. Explicit stations take precedence over geographic selection. | Names such as `PRCP`, `TMAX`; inclusive calendar dates, time of day ignored. |
 | `noaa:gsom` | `stations`: non-empty comma-separated string or list, or a geographic query; do not combine them. `units`: `metric` (default) or `standard`. | Names such as `PRCP`, `TAVG`; every UTC calendar month touched by the interval is selected in full. |
-| `noaa:gsoy` | `stations`: non-empty comma-separated string or list, or a geographic query; do not combine them. `units`: `metric` (default) or `standard`. | Names such as `PRCP`, `TAVG`; every UTC calendar year touched is selected in full. Annual labels do not imply identical accumulation seasons for all elements. |
+| `noaa:gsoy` (v0.10 / source) | `stations`: non-empty comma-separated string or list, or a geographic query; do not combine them. `units`: `metric` (default) or `standard`. | Names such as `PRCP`, `TAVG`; every UTC calendar year touched is selected in full. Annual labels do not imply identical accumulation seasons for all elements. |
 | `noaa:nexrad-level2` | `site` or `sites`: radar IDs, mutually exclusive. Alternatively `nearest`: positive integer with a geographic query. Do not combine `nearest` with explicit IDs. | Whole scans, without variable subsetting. UTC timestamps; both interval bounds included. A date-only end means midnight at the start of that day. |
 | `noaa:goes-abi` | Required `satellite`: 16, 17, 18, or 19, and `channel`: 1–16 or `C01`–`C16`. Optional `product`: only `ABI-L2-CMIPC` (default). Geographic selection is rejected. | Complete single-channel CONUS scenes selected by inclusive UTC scan-start time; both timestamps required. Date-only values mean midnight. Variable subsetting is rejected; select a channel instead. |
 | `noaa:coops-water-levels` | Required string `station` and `datum`; optional `units=metric` or `english`. | Available from source for v0.10. Six-minute observations only. Both bounds required, UTC, minute precision, inclusive, at most 28 days. No geographic/text/variable selection. No-data API responses fail on fetch; `allow_empty` cannot suppress them. |
@@ -64,7 +64,9 @@ prefer explicit station IDs or a local bbox there. See the
 | `noaa:coastwatch-sst` | Requires a bbox or location. `stride`: positive integer, default 1, subsamples both spatial axes. At most 1,000,000 grid rows per request. | `analysed_sst` (default), `analysis_error`, `sea_ice_fraction`, `mask`. Inclusive UTC timestamps; date-only values mean midnight. CSV retains coordinate columns and the units row. |
 | `usgs:water-daily` | `site` or `sites`: quoted monitoring IDs, mutually exclusive. Alternatively a geographic query. `statistic_id`: quoted five-digit code, default `"00003"` (daily mean). Explicit sites and a geographic filter both apply when present. | Quoted parameter codes such as `"00060"`; inclusive local calendar dates, time of day ignored. |
 
-Station/site options accept strings or lists of strings. NOAA radar IDs are
+Plural `stations`/`sites` options accept strings or lists of strings; see each
+row for singular aliases. CO-OPS `station` requires one seven-digit string and
+does not accept a list. NOAA radar IDs are
 case-insensitive. USGS IDs may include the `USGS-` prefix. Empty explicit lists
 are invalid even with `allow_empty: true`; that flag permits an empty result
 from a valid query.

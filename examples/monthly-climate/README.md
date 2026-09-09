@@ -11,5 +11,5 @@ reader preserves identifiers and source provenance.
 
 Every UTC calendar month touched by the query is selected in full. May 6–7 selects
 May; May 31–June 1 selects both months. The notebook records retrieval times and
-checksums and shows lockfile/cache reuse. See [NOAA access notes](../../docs/providers/noaa.md#global-summary-of-the-month)
+checksums and shows lockfile/cache reuse. See [NOAA access notes](../../docs/providers/noaa-gsom.md)
 for geographic queries and the bounded probes used to validate the adapter.

@@ -24,12 +24,21 @@ open the resulting local files. Provenance and manifests connect those steps.
 - [Runnable examples with saved outputs](examples/README.md)
 - [Readers](docs/reference/readers.md) and [reproducible manifests](docs/reference/manifests.md)
 
-CO-OPS water levels (available from source for v0.10) require an explicit datum:
+## Source installation
+
+For features marked **Unreleased**, install this checkout with
+[uv](https://docs.astral.sh/uv/):
 
 ```sh
-usdata fetch noaa:coops-water-levels -p station=8518750 -p datum=MLLW \
-  --start 2024-05-06T00:00Z --end 2024-05-06T00:12Z
+git clone https://github.com/jakeryderv/usdata && cd usdata
+uv sync --extra pandas
+uv run usdata info noaa:coops-water-levels
 ```
+
+Run source examples from this checkout with `uv run usdata` (CLI) or
+`uv run python` (Python). The pandas extra enables CSV reading; use `--extra radar`
+or `--extra netcdf` for those formats. For contribution checks, continue with
+[development setup](#development).
 
 ## Providers
 
@@ -49,14 +58,13 @@ Available datasets are in `code`, stubs in _italics_; planned ones are counted. 
 
 ## Development
 
-Requires [uv](https://docs.astral.sh/uv/) and [just](https://just.systems/).
+From a [source checkout](#source-installation), requires [uv](https://docs.astral.sh/uv/) and [just](https://just.systems/).
 
 `just setup` uses the tested Python 3.14.7 pin in `.python-version`. Older Linux
 uv Python 3.14 builds can crash during NumPy array operations; see
 [the upstream fix](https://github.com/astral-sh/python-build-standalone/issues/991).
 
 ```sh
-git clone https://github.com/jakeryderv/usdata && cd usdata
 just setup     # install toolchain and dependencies
 just hooks-install # optional: install fast staged-file checks
 just test      # all offline tests
