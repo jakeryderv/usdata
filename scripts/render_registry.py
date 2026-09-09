@@ -17,7 +17,7 @@ from collections import Counter
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from usdata.models import LATER, Dataset, ProviderInfo, Status
 from usdata.registry import Registry, version_key
@@ -31,29 +31,22 @@ GENERATED_NOTE = (
 )
 
 
-def _caps(ds: Dataset) -> str:
-    on = [k.replace("_subset", "") for k, v in ds.capabilities.model_dump().items() if v]
-    return ", ".join(on) or "none"
-
-
-def _extent(ds: Dataset) -> str:
+def _extent(ds: Dataset) -> list[str]:
     parts = []
     if ds.spatial_extent:
-        w, s, e, n = ds.spatial_extent.as_tuple()
-        parts.append(f"{w:g}, {s:g}, {e:g}, {n:g}")
+        w, south, e, n = ds.spatial_extent.as_tuple()
+        parts.append(
+            f"- Geographic bounds (WGS84): west {w:g}°, south {south:g}°, east {e:g}°, north {n:g}°"
+        )
     if ds.temporal_extent:
-        start = ds.temporal_extent.start.date() if ds.temporal_extent.start else "…"
-        end = ds.temporal_extent.end.date() if ds.temporal_extent.end else "present"
-        parts.append(f"{start} to {end}")
-    return "; ".join(parts) or "not stated"
+        start = ds.temporal_extent.start.date() if ds.temporal_extent.start else "not specified"
+        end = ds.temporal_extent.end.date() if ds.temporal_extent.end else "open-ended"
+        parts.append(f"- Catalog date range: {start} to {end}")
+    return parts or ["- Coverage: not specified in the catalog"]
 
 
 def _anchor(text: str) -> str:
     return re.sub(r"[^a-z0-9-]", "", text.lower().replace(" ", "-"))
-
-
-def _first_sentence(text: str) -> str:
-    return text.strip().split(". ")[0].rstrip(".") + "."
 
 
 def by_provider(registry: Registry) -> list[tuple[ProviderInfo, list[Dataset]]]:
@@ -70,8 +63,8 @@ def by_provider(registry: Registry) -> list[tuple[ProviderInfo, list[Dataset]]]:
 
     def dataset_key(d: Dataset) -> tuple[int, int, tuple[int, ...], str]:
         return (
-            domain_order.index(d.domain),
             STATUS_ORDER.index(d.status),
+            domain_order.index(d.domain),
             version_key(d.target or d.since or LATER),
             d.id,
         )
@@ -82,74 +75,70 @@ def by_provider(registry: Registry) -> list[tuple[ProviderInfo, list[Dataset]]]:
     ]
 
 
-def summary_table(registry: Registry, link_prefix: str) -> str:
-    """Per-provider counts; ``link_prefix`` is the relative path to docs/providers/."""
-    nxt = registry.next_target()
-    lines = [
-        f"| Provider | Available | Stub | Planned | Next up ({nxt or 'unassigned'}) | Datasets |",
-        "|---|---:|---:|---:|---|---|",
-    ]
-    for info, datasets in by_provider(registry):
-        counts = Counter(d.status for d in datasets)
-        names = ", ".join(
-            f"`{d.name}`" if d.status is Status.AVAILABLE else f"_{d.name}_"
-            for d in datasets
-            if d.status is not Status.PLANNED
-        )
-        if counts[Status.PLANNED]:
-            names = f"{names}, " if names else ""
-            names += f"+{counts[Status.PLANNED]} planned"
-        next_up = (
-            ", ".join(f"`{d.name}`" for d in datasets if nxt is not None and d.target == nxt) or "—"
-        )
-        lines.append(
-            f"| [{info.name}]({link_prefix}{info.id}.md) "
-            f"| {counts[Status.AVAILABLE]} | {counts[Status.STUB]} | {counts[Status.PLANNED]} "
-            f"| {next_up} | {names} |"
-        )
-    return "\n".join(lines) + "\n"
+def availability(ds: Dataset) -> str:
+    if ds.status is not Status.AVAILABLE:
+        return "Planned"
+    if not ds.since or version_key(ds.since) > version_key(PACKAGE_VERSION):
+        return "Source only"
+    return "Released"
 
 
 def implementation_version(ds: Dataset) -> str:
-    """Distinguish upcoming implementations from the declared package version."""
-    if ds.since and version_key(ds.since) > version_key(PACKAGE_VERSION):
-        return f"unreleased; planned {ds.since}"
+    if availability(ds) == "Source only":
+        return f"Source only · intended for {ds.since or 'a future release'}"
     return ds.version_label
 
 
-def render_datasets_block(registry: Registry, datasets: list[Dataset]) -> str:
-    """Generated block for one provider page: table, then details."""
+def summary_table(registry: Registry, link_prefix: str) -> str:
+    lines = ["| Provider | Released | Source only | Planned |", "|---|---:|---:|---:|"]
+    for info, datasets in by_provider(registry):
+        counts = Counter(availability(ds) for ds in datasets)
+        lines.append(
+            f"| [{info.name}]({link_prefix}{info.id}.md) | {counts['Released']} "
+            f"| {counts['Source only']} | {counts['Planned']} |"
+        )
+    return "\n".join(lines) + "\n"
+
+
+def cell(text: str) -> str:
+    return text.replace("|", "&#124;").replace("\n", " ")
+
+
+def dataset_table(datasets: list[Dataset], entries: dict[str, CatalogEntry]) -> str:
     lines = [
-        GENERATED_NOTE,
-        "",
-        "| Dataset | Domain | Status | Version | Description | Protocol |",
-        "|---|---|---|---|---|---|",
+        "| Dataset | Availability | Files | What gets selected |",
+        "|---|---|---|---|",
     ]
     for ds in datasets:
-        link = f"[`{ds.id}`](#{_anchor(ds.id.replace(':', ''))})"
+        entry = entries[ds.id]
+        anchor = _anchor(ds.id.replace(":", ""))
         lines.append(
-            f"| {link} | {registry.domain(ds.domain).name} | {ds.status.value} "
-            f"| {implementation_version(ds)} | {_first_sentence(ds.description)} "
-            f"| {ds.protocol.value} |"
+            f'| <span id="{anchor}"></span>[{cell(entry.summary)}]({ds.provider}/{ds.name}.md) '
+            f"| {availability(ds)} | {cell(', '.join(entry.formats))} | {cell(entry.selection)} |"
         )
+    return "\n".join(lines) + "\n"
+
+
+def planned_block(registry: Registry, datasets: list[Dataset]) -> str:
+    if not datasets:
+        return "No planned datasets for this provider.\n"
+    lines = ["These entries are not implemented; they cannot fetch data.", ""]
     for ds in datasets:
         lines += [
-            "",
             f"### {ds.id}",
             "",
-            f"**{ds.title}** · {ds.status.value} · {implementation_version(ds)}",
+            f"**{ds.title}** · Planned · {ds.version_label}",
             "",
             ds.description.strip(),
             "",
-            f"- Domain: {registry.domain(ds.domain).name}",
-            f"- Server-side subsetting: {_caps(ds)}",
-            f"- Homepage: {ds.homepage or 'not stated'}",
-            f"- License: {ds.license or 'not stated'}",
-            f"- Extent: {_extent(ds)}",
-            f"- Keywords: {', '.join(ds.keywords) or 'none'}",
-            f"- Adapter: `{ds.adapter}`" if ds.adapter else "- Adapter: none yet",
+            f"[Upstream information]({ds.homepage})" if ds.homepage else "",
+            f"Domain: {registry.domain(ds.domain).name}.",
+            "Adapter scaffold exists; fetching is not implemented."
+            if ds.status is Status.STUB
+            else "",
+            "",
         ]
-    return "\n".join(lines) + "\n"
+    return "\n".join(lines).rstrip() + "\n"
 
 
 def render_roadmap_block(registry: Registry) -> str:
@@ -166,7 +155,7 @@ def render_roadmap_block(registry: Registry) -> str:
         out = ["", f"**{title}**", ""]
         for ds in sorted(datasets, key=lambda d: (d.provider, d.id)):
             page = f"{ds.provider}.md#{_anchor(ds.id.replace(':', ''))}"
-            out.append(f"- [`{ds.id}`]({page}) {ds.title} · {ds.status.value}")
+            out.append(f"- [`{ds.id}`]({page}) {ds.title} · {availability(ds)}")
         return out
 
     lines = [GENERATED_NOTE, ""]
@@ -188,6 +177,12 @@ class CatalogEntry(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
     guide: str
+    summary: str = Field(min_length=1, max_length=80)
+    formats: list[str] = Field(min_length=1)
+    selection: str = Field(min_length=1, max_length=160)
+    inputs: str = Field(min_length=1, max_length=200)
+    reader_extra: str | None
+    examples: list[str] = Field(min_length=1)
 
 
 def catalog_entries(registry: Registry, root: Path = ROOT) -> dict[str, CatalogEntry]:
@@ -196,6 +191,9 @@ def catalog_entries(registry: Registry, root: Path = ROOT) -> dict[str, CatalogE
     known = {ds.id for ds in registry}
     if unknown := entries.keys() - known:
         raise ValueError(f"unknown catalog IDs: {sorted(unknown)}")
+    extras = tomllib.loads((root / "pyproject.toml").read_text())["project"][
+        "optional-dependencies"
+    ]
     guides = set()
     for ds in registry:
         if not all(re.fullmatch(r"[a-z0-9][a-z0-9-]*", part) for part in (ds.provider, ds.name)):
@@ -205,6 +203,26 @@ def catalog_entries(registry: Registry, root: Path = ROOT) -> dict[str, CatalogE
         if ds.status is Status.AVAILABLE and ds.id not in entries:
             raise ValueError(f"{ds.id}: implemented datasets require catalog metadata")
     for key, entry in entries.items():
+        if registry.get(key).status is not Status.AVAILABLE:
+            raise ValueError(f"{key}: usage metadata is only for implemented datasets")
+        if entry.reader_extra is not None and entry.reader_extra not in extras:
+            raise ValueError(f"{key}: unknown reader extra {entry.reader_extra!r}")
+        for example in entry.examples:
+            path = Path(example)
+            if (
+                path.is_absolute()
+                or ".." in path.parts
+                or not path.is_relative_to("examples")
+                or path.suffix not in {".md", ".ipynb"}
+                or not (root / path).resolve().is_relative_to(root.resolve())
+                or not (root / path).is_file()
+            ):
+                raise ValueError(f"{key}: example must be an existing document in examples")
+        if any(
+            not value.strip() or "\n" in value
+            for value in [entry.summary, entry.selection, entry.inputs, *entry.formats]
+        ):
+            raise ValueError(f"{key}: catalog summaries and formats must be nonempty single lines")
         path = Path(entry.guide)
         if (
             path.is_absolute()
@@ -231,40 +249,102 @@ def usage_link(ds: Dataset, entry: CatalogEntry) -> str:
 
 
 def render_dataset(registry: Registry, ds: Dataset, entry: CatalogEntry) -> str:
-    details = render_datasets_block(registry, [ds]).split(f"### {ds.id}\n", 1)[1]
-    return (
-        f"# {ds.title}\n\n{GENERATED_NOTE}\n\n"
-        + usage_link(ds, entry)
-        + "\n\n## Catalog reference\n"
-        + details
+    examples = ", ".join(
+        f"[{Path(path).parent.name.replace('-', ' ')}]"
+        f"({posixpath.relpath(path, dataset_path(ds).parent.as_posix())})"
+        for path in entry.examples
     )
+    reader = (
+        f"`usdata[{entry.reader_extra}]` · [Reader guide](../../../reference/readers.md)"
+        if entry.reader_extra
+        else "Local files; no bundled reader for this format"
+    )
+    notice = (
+        "Install from [source](../../../../README.md#source-installation) to use this dataset."
+        if availability(ds) == "Source only"
+        else f"Included since usdata {ds.since}."
+    )
+    lines = [
+        f"# {entry.summary}",
+        "",
+        GENERATED_NOTE,
+        "",
+        f"`{ds.id}` · **{availability(ds)}** · {notice}",
+        "",
+        f"{ds.title}.",
+        "",
+        "## At a glance",
+        "",
+        f"- Files: {', '.join(entry.formats)}",
+        f"- Selection: {entry.selection}",
+        f"- Required inputs: {entry.inputs}",
+        f"- Open locally: {reader}",
+        f"- Examples: {examples}",
+        "",
+        "## Usage and limitations",
+        "",
+        usage_link(ds, entry),
+        "",
+        "## Catalog reference",
+        "",
+        f"- Availability: {implementation_version(ds)}",
+        f"- Domain: {registry.domain(ds.domain).name}",
+        *_extent(ds),
+        "- Coverage varies by station, product, and date; "
+        "the range above does not guarantee observations.",
+        f"- [Upstream documentation]({ds.homepage})" if ds.homepage else "",
+        f"- License: {ds.license or 'not stated'}",
+        f"- Transport: `{ds.protocol.value}`",
+        f"- Adapter: `{ds.adapter}`",
+        "",
+        f"[All {registry.provider(ds.provider).name} datasets](../{ds.provider}.md).",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+AVAILABILITY_NOTE = (
+    f"**Released** is included in usdata {PACKAGE_VERSION}. **Source only** is implemented "
+    "in this checkout and requires a source installation. **Planned** cannot fetch data yet."
+    "\n"
+)
 
 
 def render_all(registry: Registry) -> dict[Path, str]:
     """Generate only inside the owned catalog directory; never rewrite prose."""
     entries = catalog_entries(registry)
+    implemented = [
+        ds
+        for _, datasets in by_provider(registry)
+        for ds in datasets
+        if ds.status is Status.AVAILABLE
+    ]
     outputs = {
-        CATALOG_DIR / "index.md": "# Dataset catalog\n\n"
+        CATALOG_DIR / "index.md": "# Find a dataset\n\n"
         + GENERATED_NOTE
         + "\n\n"
-        + summary_table(registry, "../../providers/")
+        + AVAILABILITY_NOTE
+        + "\n## Implemented datasets\n\n"
+        + dataset_table(implemented, entries)
+        + "\n## Browse by provider\n\n"
+        + summary_table(registry, "")
+        + "\nPlanned entries are listed separately on each provider page. "
+        "See [versions and targets](versions.md) for future work.\n"
     }
     for info, datasets in by_provider(registry):
+        available = [ds for ds in datasets if ds.status is Status.AVAILABLE]
+        planned = [ds for ds in datasets if ds.status is not Status.AVAILABLE]
         outputs[CATALOG_DIR / f"{info.id}.md"] = (
-            f"# {info.name} dataset catalog\n\n"
-            f"[Provider access notes](../../providers/{info.id}.md). "
-            "Status describes this source checkout; see version labels for release support.\n\n"
-            + render_datasets_block(registry, datasets)
+            f"# {info.name} datasets\n\n{GENERATED_NOTE}\n\n"
+            f"[Provider access notes](../../providers/{info.id}.md).\n\n"
+            + AVAILABILITY_NOTE
+            + "\n## Implemented datasets\n\n"
+            + (dataset_table(available, entries) if available else "None implemented yet.\n")
+            + "\n## Planned datasets\n\n"
+            + planned_block(registry, planned)
         )
-        for ds in datasets:
-            if ds.id in entries:
-                outputs[ROOT / dataset_path(ds)] = render_dataset(registry, ds, entries[ds.id])
-                # Preserve existing provider-page anchors while linking to the complete page.
-                target = f"{ds.provider}/{ds.name}.md"
-                heading = f"### {ds.id}\n"
-                outputs[CATALOG_DIR / f"{info.id}.md"] = outputs[
-                    CATALOG_DIR / f"{info.id}.md"
-                ].replace(heading, heading + f"\n[Dataset and usage guide]({target}).\n")
+        for ds in available:
+            outputs[ROOT / dataset_path(ds)] = render_dataset(registry, ds, entries[ds.id])
     outputs[CATALOG_DIR / "versions.md"] = (
         "# Dataset versions and targets\n\n" + render_roadmap_block(registry)
     )

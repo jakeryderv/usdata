@@ -36,7 +36,12 @@ indexes are handwritten. Never add prose to generated pages.
 
 The registry's `catalog` mapping connects each implemented dataset ID to a unique
 handwritten usage guide in `docs/providers/`. The site combines that guide and
-its generated catalog reference into one dataset page. Links to the guide are
+its generated catalog reference into one dataset page. Required `summary`,
+`formats`, `selection`, `inputs`, `reader_extra`, and `examples` describe the
+implemented fetch behavior. Keep file formats and selection explicit: a transport
+or capability flag cannot tell readers whether they receive whole files or subsets.
+Use `reader_extra: null` when fetching is supported but no bundled reader opens
+the format; adding a dataset does not require adding a reader. Links to the guide are
 redirected during assembly; GitHub readers use ordinary links between the two
 source files. Edit usage and scientific caveats in the guide, and facts in the
 registry. The generator checks missing guides, unknown IDs, and obsolete outputs.
@@ -60,7 +65,9 @@ the preview renders current data without changing committed generated files.
 
 ## Navigation, links, and diagrams
 
-Edit `zensical.toml` to change navigation. Organize by reader task, and link
+Edit `zensical.toml` to change navigation outside the Datasets section. Dataset
+navigation is generated from stable IDs and validated catalog metadata into
+ignored `.zensical.generated.toml`; the empty Datasets section is its insertion point. Organize by reader task, and link
 additional provider catalogs and decisions from their indexes. Use relative
 Markdown links with explicit filenames so GitHub and the site can resolve them.
 Strict builds reject broken internal links and anchors. External URLs are not

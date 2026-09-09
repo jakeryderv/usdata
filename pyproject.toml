@@ -45,6 +45,7 @@ dev = [
     "towncrier>=26.9",
 ]
 docs = [
+    "tomli-w>=1.2.0",
     "mkdocstrings-python>=2.0.8",
     "nbconvert>=7.17.1",
     "towncrier>=26.9",

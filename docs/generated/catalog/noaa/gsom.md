@@ -1,20 +1,33 @@
-# Global Summary of the Month
+# Monthly station climate
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+
+`noaa:gsom` · **Released** · Included since usdata 0.7.
+
+Global Summary of the Month.
+
+## At a glance
+
+- Files: CSV
+- Selection: Complete UTC calendar months touched by the query; station and element filters
+- Required inputs: Both dates; station IDs or a geographic query
+- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Examples: [monthly climate](../../../../examples/monthly-climate/example.ipynb)
+
+## Usage and limitations
 
 <!-- dataset-usage -->
 [Usage guide](../../../providers/noaa-gsom.md).
 
 ## Catalog reference
 
-**Global Summary of the Month** · available · since 0.7
-
-Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. Selects whole calendar months and explicit stations, or discovers stations through the companion search service.
-
+- Availability: since 0.7
 - Domain: Surface weather
-- Server-side subsetting: temporal, variable
-- Homepage: https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-month
+- Geographic bounds (WGS84): west -180°, south -90°, east 180°, north 90°
+- Coverage varies by station, product, and date; the range above does not guarantee observations.
+- [Upstream documentation](https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-month)
 - License: US Government Work (public domain)
-- Extent: -180, -90, 180, 90
-- Keywords: climate, monthly, stations, temperature, precipitation, gsom, ncei
+- Transport: `http`
 - Adapter: `usdata.providers.noaa.gsom:GlobalSummaryMonthly`
+
+[All NOAA datasets](../noaa.md).

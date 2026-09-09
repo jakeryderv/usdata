@@ -107,7 +107,7 @@ def test_generated_docs_distinguish_unreleased_implementations(monkeypatch) -> N
     monkeypatch.setattr(module, "PACKAGE_VERSION", "0.4.0")
     reg = default_registry()
     water = reg.get("usgs:water-daily")
-    assert module.implementation_version(water) == "unreleased; planned 0.5"
+    assert module.implementation_version(water) == "Source only · intended for 0.5"
     assert "Implemented, unreleased (planned 0.5)" in module.render_roadmap_block(reg)
     monkeypatch.setattr(module, "PACKAGE_VERSION", "0.5.0")
     assert module.implementation_version(water) == "since 0.5"
@@ -174,23 +174,17 @@ def test_release_check_keeps_future_plans_and_excludes_history(tmp_path) -> None
     assert len(errors) == 1 and errors[0].startswith("examples/weather/README.md:1:")
 
 
-def test_registry_summary_does_not_schedule_available_datasets_without_a_target() -> None:
-    from usdata.registry import Registry, default_registry
-
+def test_catalog_summary_separates_source_only_and_planned(monkeypatch):
     module = script("render_registry")
-    bundled = default_registry()
-    available = bundled.get("noaa:ghcn-daily")
-    planned = bundled.get("noaa:gfs").model_copy(update={"target": "later"})
-    unscheduled = Registry([available, planned], domains=bundled.domains())
-    summary = module.summary_table(unscheduled, "")
-    assert "Next up (unassigned)" in summary
-    row = summary.splitlines()[2].split("|")
-    assert row[5].strip() == "—"
-    planned = planned.model_copy(update={"target": "0.9"})
-    scheduled = Registry([available, planned], domains=bundled.domains())
-    summary = module.summary_table(scheduled, "")
-    assert "Next up (0.9)" in summary
-    assert summary.splitlines()[2].split("|")[5].strip() == "`gfs`"
+    monkeypatch.setattr(module, "PACKAGE_VERSION", "0.9.0")
+    bundled = Registry.bundled()
+    registry = Registry(
+        [bundled.get(key) for key in ("noaa:ghcn-daily", "noaa:gsoy", "noaa:gfs")],
+        domains=bundled.domains(),
+    )
+    assert module.summary_table(registry, "").splitlines()[2].endswith("| 1 | 1 | 1 |")
+    monkeypatch.setattr(module, "PACKAGE_VERSION", "0.10.0")
+    assert module.summary_table(registry, "").splitlines()[2].endswith("| 2 | 0 | 1 |")
 
 
 def test_radar_generator_writes_lf(tmp_path, monkeypatch):
@@ -309,11 +303,19 @@ def test_catalog_generator_owns_only_generated_directory():
     assert module.ROOT / "docs/providers/README.md" not in outputs
 
 
-@pytest.mark.parametrize("fault", ["missing", "unknown", "duplicate", "alias", "outside", "typo"])
+@pytest.mark.parametrize(
+    "fault",
+    ["missing", "unknown", "duplicate", "alias", "outside", "typo", "extra", "example", "format"],
+)
 def test_catalog_rejects_invalid_guide_metadata(tmp_path, fault):
     module = script("render_registry")
     raw = yaml.safe_load((ROOT / "src/usdata/data/registry.yaml").read_text())
+    (tmp_path / "pyproject.toml").write_text((ROOT / "pyproject.toml").read_text())
     for entry in raw["catalog"].values():
+        for example in entry["examples"]:
+            file = tmp_path / example
+            file.parent.mkdir(parents=True, exist_ok=True)
+            file.write_text("example")
         path = tmp_path / entry["guide"]
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("# Usage\n")
@@ -326,6 +328,12 @@ def test_catalog_rejects_invalid_guide_metadata(tmp_path, fault):
         raw["catalog"]["noaa:gsom"]["guide"] = entry["guide"]
     elif fault == "alias":
         raw["catalog"]["noaa:gsom"]["guide"] = entry["guide"].replace("providers/", "providers/./")
+    elif fault == "extra":
+        entry["reader_extra"] = "nonexistent"
+    elif fault == "example":
+        entry["examples"] = ["examples/missing.md"]
+    elif fault == "format":
+        entry["formats"] = [""]
     elif fault == "outside":
         entry["guide"] = "../outside.md"
     else:
@@ -382,3 +390,27 @@ def test_catalog_rejects_paths_in_dataset_ids():
     registry = Registry([*bundled, dataset], domains=bundled.domains())
     with pytest.raises(ValueError, match="catalog IDs"):
         module.catalog_entries(registry)
+
+
+def test_dataset_navigation_covers_implementations_without_manual_entries(monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
+    module = script("docs_site")
+    renderer = script("render_registry")
+    registry = Registry.bundled()
+    entries = renderer.catalog_entries(registry)
+    navigation = json.dumps(module.dataset_navigation(registry, entries))
+    for ds in registry:
+        path = renderer.dataset_path(ds).as_posix()
+        assert (path in navigation) == (ds.status.value == "available")
+
+
+def test_catalog_uses_explicit_file_selection_and_supports_datasets_without_readers():
+    module = script("render_registry")
+    registry = Registry.bundled()
+    entries = module.catalog_entries(registry)
+    goes = registry.get("noaa:goes-abi")
+    content = module.render_dataset(registry, goes, entries[goes.id])
+    assert "Files: NetCDF4" in content and "Whole single-channel CONUS scenes" in content
+    assert "Server-side subsetting" not in content
+    no_reader = entries[goes.id].model_copy(update={"reader_extra": None})
+    assert "no bundled reader" in module.render_dataset(registry, goes, no_reader)

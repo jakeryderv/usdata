@@ -15,3 +15,6 @@ reports/
 site/
 .cache/zensical/
 .venv-docs/
+
+# Site configuration assembled from the registry
+.zensical.generated.toml

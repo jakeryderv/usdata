@@ -1,23 +1,24 @@
-# USDA dataset catalog
-
-[Provider access notes](../../providers/usda.md). Status describes this source checkout; see version labels for release support.
+# USDA datasets
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-| Dataset | Domain | Status | Version | Description | Protocol |
-|---|---|---|---|---|---|
-| [`usda:cropland-data-layer`](#usdacropland-data-layer) | Agriculture | planned | target later | Annual 30 m raster of crop type across the contiguous United States from NASS, served through CropScape with bbox extraction. | http |
+[Provider access notes](../../providers/usda.md).
+
+**Released** is included in usdata 0.9.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
+
+## Implemented datasets
+
+None implemented yet.
+
+## Planned datasets
+
+These entries are not implemented; they cannot fetch data.
 
 ### usda:cropland-data-layer
 
-**Cropland Data Layer** · planned · target later
+**Cropland Data Layer** · Planned · target later
 
 Annual 30 m raster of crop type across the contiguous United States from NASS, served through CropScape with bbox extraction.
 
-- Domain: Agriculture
-- Server-side subsetting: spatial, temporal
-- Homepage: https://www.nass.usda.gov/Research_and_Science/Cropland/SARS1a.php
-- License: US Government Work (public domain)
-- Extent: not stated
-- Keywords: agriculture, crops, land cover, raster, nass, cdl
-- Adapter: none yet
+[Upstream information](https://www.nass.usda.gov/Research_and_Science/Cropland/SARS1a.php)
+Domain: Agriculture.

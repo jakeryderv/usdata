@@ -46,10 +46,13 @@ to `stub` when the class exists and `available` when the live test passes,
 replacing `target` with `since`. Planned datasets are hidden from `usdata search`
 unless `--planned` is passed; `info` always works. Moving a dataset to a different
 phase is a one-line change to `target`; the generated versions and catalog pages follow.
-Run `just docs` after editing: the README summary, provider index, and
-`docs/generated/catalog/` are generated. For every implemented dataset, add a
+Run `just docs` after editing to refresh `docs/generated/catalog/`. The README
+and provider index remain handwritten. For every implemented dataset, add a
 unique usage guide under `docs/providers/` and register its path in the registry
-`catalog` mapping; the docs site combines it with the generated reference. For a new agency, write access notes in
+`catalog` mapping, including a short summary, explicit output formats, selection
+behavior, required inputs, reader extra, and example paths. The site generates
+navigation and combines the guide with the reference; no manual dataset nav entry
+is needed. For a new agency, write access notes in
 `docs/providers/<provider>.md` and link its generated catalog. See the
 [documentation workflow](documentation.md) for source ownership and preview commands.
 

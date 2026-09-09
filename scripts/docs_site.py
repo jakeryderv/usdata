@@ -13,6 +13,7 @@ import re
 import subprocess
 import sys
 import time
+import tomllib
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
@@ -116,6 +117,9 @@ def prepare() -> None:
             outputs[relative] = path.read_bytes()
     for path, content in generated.items():
         relative = path.relative_to(ROOT)
+        content = content.replace(
+            renderer.GENERATED_NOTE, "<!-- Registry facts; edit the source catalog. -->"
+        )
         outputs[site_path(relative)] = page_links(content, relative).encode()
     for key, entry in entries.items():
         ds = registry.get(key)
@@ -129,6 +133,7 @@ def prepare() -> None:
         body = page_links(body, guide, destination)
         marker = page_links(renderer.usage_link(ds, entry), destination)
         outputs[destination] = outputs[destination].decode().replace(marker, body).encode()
+    write_config(registry, entries)
     pending = preview(ROOT)
     outputs[Path("docs/generated/changes.md")] = (
         "# Upcoming changes\n\nGenerated from release-note fragments. "
@@ -159,10 +164,46 @@ def prepare() -> None:
     print(f"Prepared {len(outputs)} documentation files from canonical sources", flush=True)
 
 
+def dataset_navigation(registry: Registry, entries: dict) -> list[dict]:
+    items = [{"Find a dataset": "docs/generated/catalog/index.md"}]
+    for info, datasets in render_registry.by_provider(registry):
+        pages = [{"Overview": f"docs/generated/catalog/{info.id}.md"}]
+        pages += [
+            {entries[ds.id].summary: render_registry.dataset_path(ds).as_posix()}
+            for ds in datasets
+            if ds.status.value == "available"
+        ]
+        pages += [{"Access notes": f"docs/providers/{info.id}.md"}]
+        items.append({info.name: pages})
+    items.append({"Versions and targets": "docs/generated/catalog/versions.md"})
+    return items
+
+
+def write_config(registry: Registry, entries: dict) -> None:
+    import tomli_w
+
+    config = tomllib.loads((ROOT / "zensical.toml").read_text())
+    project = config["project"]
+    sections = [section for section in project["nav"] if "Datasets" in section]
+    if len(sections) != 1:
+        raise ValueError("zensical.toml must have exactly one Datasets navigation section")
+    sections[0]["Datasets"] = dataset_navigation(registry, entries)
+    # Keep the generated config beside its source so Zensical retains the project root.
+    path = ROOT / ".zensical.generated.toml"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    content = tomli_w.dumps(config)
+    if not path.exists() or path.read_text() != content:
+        path.write_text(content)
+
+
 def fingerprint() -> list[tuple[str, int]]:
     paths = source_paths() + list((ROOT / "src").rglob("*.py"))
     paths += list((ROOT / "changes").glob("*.md"))
-    paths += [ROOT / "src/usdata/data/registry.yaml", ROOT / "pyproject.toml"]
+    paths += [
+        ROOT / "src/usdata/data/registry.yaml",
+        ROOT / "pyproject.toml",
+        ROOT / "zensical.toml",
+    ]
     paths += list((ROOT / "scripts").glob("*.py")) + list((ROOT / "scripts/templates").glob("*"))
     return [(str(path), path.stat().st_mtime_ns) for path in sorted(paths)]
 
@@ -176,12 +217,33 @@ def main() -> None:
         return
     if args.command == "build":
         subprocess.run(
-            [sys.executable, "-m", "zensical", "build", "--clean", "--strict"], cwd=ROOT, check=True
+            [
+                sys.executable,
+                "-m",
+                "zensical",
+                "build",
+                "-f",
+                ".zensical.generated.toml",
+                "--clean",
+                "--strict",
+            ],
+            cwd=ROOT,
+            check=True,
         )
         return
     before = fingerprint()
     server = subprocess.Popen(
-        [sys.executable, "-m", "zensical", "serve", "--dev-addr", "127.0.0.1:8000"], cwd=ROOT
+        [
+            sys.executable,
+            "-m",
+            "zensical",
+            "serve",
+            "-f",
+            ".zensical.generated.toml",
+            "--dev-addr",
+            "127.0.0.1:8000",
+        ],
+        cwd=ROOT,
     )
     try:
         while server.poll() is None:

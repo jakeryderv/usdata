@@ -1,20 +1,33 @@
-# Global Summary of the Year
+# Annual station climate
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+
+`noaa:gsoy` · **Source only** · Install from [source](../../../../README.md#source-installation) to use this dataset.
+
+Global Summary of the Year.
+
+## At a glance
+
+- Files: CSV
+- Selection: Complete UTC calendar years touched by the query; station and element filters
+- Required inputs: Both dates; station IDs or a geographic query
+- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Examples: [annual climate](../../../../examples/annual-climate/README.md)
+
+## Usage and limitations
 
 <!-- dataset-usage -->
 [Usage guide](../../../providers/noaa-gsoy.md).
 
 ## Catalog reference
 
-**Global Summary of the Year** · available · unreleased; planned 0.10
-
-Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. Selects complete UTC calendar years and explicit stations, or discovers stations through the search service.
-
+- Availability: Source only · intended for 0.10
 - Domain: Surface weather
-- Server-side subsetting: temporal, variable
-- Homepage: https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-year
+- Geographic bounds (WGS84): west -180°, south -90°, east 180°, north 90°
+- Coverage varies by station, product, and date; the range above does not guarantee observations.
+- [Upstream documentation](https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-year)
 - License: US Government Work (public domain)
-- Extent: -180, -90, 180, 90
-- Keywords: climate, annual, stations, temperature, precipitation, gsoy, ncei
+- Transport: `http`
 - Adapter: `usdata.providers.noaa.gsoy:GlobalSummaryYearly`
+
+[All NOAA datasets](../noaa.md).
