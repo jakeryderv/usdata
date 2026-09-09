@@ -1,0 +1,6 @@
+name: oklahoma-storm-reports-may-2024
+sources:
+  - dataset: noaa:storm-events
+    # Bulk access returns the entire 2024 details archive. Filter rows locally.
+    start: 2024-05-01
+    end: 2024-05-31

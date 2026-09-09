@@ -8,6 +8,7 @@ the saved outputs, or run them locally to change queries and inspect the results
 | [Weather and streamflow](weather-and-streamflow/example.ipynb) | NOAA/USGS inputs, manifests, provenance, cache reuse, verification, and locked restoration |
 | [Sea-surface temperature](sst-analysis/example.ipynb) | A four-cell CoastWatch subset, pandas opening, ERDDAP units, and a spatial plot |
 | [Monthly climate](monthly-climate/example.ipynb) | GSOM monthly observations, whole-month selection, a two-panel plot, and manifest verification |
+| [Storm Events](storm-events/example.ipynb) | Annual gzip CSV, local Oklahoma/date filtering, report counts, damage ratings, and source verification (available from source for v0.8) |
 
 ## Run interactively
 
@@ -25,7 +26,7 @@ has been installed. Use **Restart Kernel and Run All Cells** to check that a not
 works without hidden state. Each notebook works from its own folder or the repo root.
 
 The first run needs access to NOAA and/or USGS. Interactive runs use the normal
-usdata cache (`USDATA_CACHE_DIR` overrides it). The two manifest examples retain
+usdata cache (`USDATA_CACHE_DIR` overrides it). The manifest examples retain
 their `dataset.yaml` files; a first pull creates an ignored `dataset.lock.json`
 beside the manifest. When changing a locked manifest deliberately, use
 `pull(manifest, force=True)` to resolve and lock the new inputs.
