@@ -30,8 +30,9 @@ def listing(keys: list[tuple[str, int]], token: str | None = None) -> str:
 
 
 @pytest.fixture
-def adapter() -> NexradLevel2:
-    return NexradLevel2(default_registry().get("noaa:nexrad-level2"), client=httpx.Client())
+def adapter():
+    with httpx.Client() as client:
+        yield NexradLevel2(default_registry().get("noaa:nexrad-level2"), client=client)
 
 
 def test_scan_time_parses_all_key_generations() -> None:

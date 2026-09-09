@@ -12,11 +12,10 @@ from datetime import UTC, datetime
 from html.parser import HTMLParser
 from pathlib import Path
 
-import httpx
-
-from usdata.models import Asset, Dataset, Protocol, Query, TimeRange
+from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
-from usdata.providers.base import Provider, QueryError
+from usdata.providers._http import _HttpProvider
+from usdata.providers.base import QueryError
 
 DIRECTORY_URL = "https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/"
 DETAILS_NAME = re.compile(r"StormEvents_details-ftp_v1\.0_d(\d{4})_c(\d{8})\.csv\.gz", re.ASCII)
@@ -58,24 +57,8 @@ class _Directory(HTMLParser):
             )
 
 
-class StormEvents(Provider):
+class StormEvents(_HttpProvider):
     """Resolve whole-year details archives; preserve the original gzip bytes."""
-
-    def __init__(self, dataset: Dataset, *, client: httpx.Client | None = None) -> None:
-        super().__init__(dataset)
-        self._client = client
-        self._owns_client = client is None
-
-    def _http(self) -> httpx.Client:
-        if self._client is None:
-            self._client = http.client()
-        return self._client
-
-    def close(self) -> None:
-        """Close an internally created HTTP client; injected clients stay open."""
-        if self._owns_client and self._client is not None:
-            self._client.close()
-            self._client = None
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Select the latest supported details revision for every requested year."""

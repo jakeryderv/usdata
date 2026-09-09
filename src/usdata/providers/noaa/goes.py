@@ -12,11 +12,10 @@ import re
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-import httpx
-
-from usdata.models import Asset, Dataset, Protocol, Query, TimeRange
-from usdata.protocols import http, s3
-from usdata.providers.base import Provider, QueryError
+from usdata.models import Asset, Protocol, Query, TimeRange
+from usdata.protocols import s3
+from usdata.providers._http import _HttpProvider
+from usdata.providers.base import QueryError
 
 PRODUCT = "ABI-L2-CMIPC"
 PUBLIC_START = datetime(2017, 2, 28, tzinfo=UTC)
@@ -45,24 +44,8 @@ def _number(raw: object, label: str, low: int, high: int) -> int:
     return int(text)
 
 
-class GoesAbi(Provider):
+class GoesAbi(_HttpProvider):
     """Single-channel CONUS ABI imagery; params: satellite, channel, product."""
-
-    def __init__(self, dataset: Dataset, client: httpx.Client | None = None) -> None:
-        super().__init__(dataset)
-        self._client = client
-        self._owns_client = client is None
-
-    def close(self) -> None:
-        """Close the owned HTTP client, leaving injected clients to their caller."""
-        if self._owns_client and self._client is not None:
-            self._client.close()
-            self._client = None
-
-    def _http(self) -> httpx.Client:
-        if self._client is None:
-            self._client = http.client()
-        return self._client
 
     def list_assets(self, query: Query) -> list[Asset]:
         """List complete scenes whose scan starts fall inside the inclusive UTC interval."""

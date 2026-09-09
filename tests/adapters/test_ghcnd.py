@@ -16,8 +16,9 @@ CSV = b'"DATE","STATION","TMAX"\n"2024-05-06","USW00013967","27.2"\n'
 
 
 @pytest.fixture
-def adapter() -> GhcnDaily:
-    return GhcnDaily(default_registry().get("noaa:ghcn-daily"), client=httpx.Client())
+def adapter():
+    with httpx.Client() as client:
+        yield GhcnDaily(default_registry().get("noaa:ghcn-daily"), client=client)
 
 
 def _search_page(stations: list[str], total: int) -> dict:
@@ -142,8 +143,27 @@ def test_rejects_invalid_provider_params(adapter: GhcnDaily, params: dict) -> No
         adapter.list_assets(build_query(start="2024-05-06", end="2024-05-07", **params))
 
 
-def test_injected_client_remains_open() -> None:
-    with httpx.Client() as client:
-        with GhcnDaily(default_registry().get("noaa:ghcn-daily"), client=client):
-            pass
-        assert not client.is_closed
+@pytest.mark.parametrize("fail", [False, True])
+@pytest.mark.l2
+def test_fetch_reuses_and_closes_owned_client(tmp_path: Path, monkeypatch, fail: bool) -> None:
+    clients: list[httpx.Client] = []
+    requests: list[httpx.Request] = []
+
+    def respond(request):
+        requests.append(request)
+        return httpx.Response(500 if fail else 200, content=b"data")
+
+    def make_client():
+        client = httpx.Client(transport=httpx.MockTransport(respond))
+        clients.append(client)
+        return client
+
+    monkeypatch.setattr("usdata.protocols.http.client", make_client)
+    query = build_query(start="2024-01-01", end="2024-01-02", stations=[f"S{i}" for i in range(51)])
+    if fail:
+        with pytest.raises(httpx.HTTPStatusError):
+            fetch(default_registry().get("noaa:ghcn-daily"), query, root=tmp_path)
+    else:
+        assert len(fetch(default_registry().get("noaa:ghcn-daily"), query, root=tmp_path)) == 2
+    assert len(requests) == (3 if fail else 2)
+    assert len(clients) == 1 and clients[0].is_closed

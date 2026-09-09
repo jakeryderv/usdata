@@ -81,3 +81,8 @@ CLI progress uses private, synchronous events scoped by a context variable. Core
 reports resolved batches and verified assets; HTTP reports bytes per attempt.
 Providers and public SDK signatures are unchanged. Rendering is confined to the
 CLI and disabled for redirected streams. See [ADR 0007](adr/0007-scoped-cli-progress.md).
+
+HTTP-backed adapters share a small internal `_HttpProvider` lifecycle: clients
+are created lazily, owned clients are closed on context exit, and injected clients
+remain caller-owned. This helper carries no query, pagination, or dataset logic;
+the public `Provider` interface remains transport-independent.

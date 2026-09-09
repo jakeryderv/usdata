@@ -19,9 +19,10 @@ from pathlib import Path
 
 import httpx
 
-from usdata.models import Asset, Dataset, Protocol, Query
+from usdata.models import Asset, Protocol, Query
 from usdata.protocols import http
-from usdata.providers.base import Provider, QueryError
+from usdata.providers._http import _HttpProvider
+from usdata.providers.base import QueryError
 
 ITEMS_URL = "https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily/items"
 PAGE_SIZE = 10000
@@ -40,24 +41,8 @@ def _values(raw: object, name: str) -> list[str]:
     return cleaned
 
 
-class WaterDaily(Provider):
+class WaterDaily(_HttpProvider):
     """USGS daily statistics as paginated CSV assets, with anonymous access."""
-
-    def __init__(self, dataset: Dataset, client: httpx.Client | None = None) -> None:
-        super().__init__(dataset)
-        self._client = client
-        self._owns_client = client is None
-
-    def _http(self) -> httpx.Client:
-        if self._client is None:
-            self._client = http.client()
-        return self._client
-
-    def close(self) -> None:
-        """Close owned connections, leaving injected clients to their caller."""
-        if self._owns_client and self._client is not None:
-            self._client.close()
-            self._client = None
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Resolve site or bbox queries to paginated CSV requests."""
