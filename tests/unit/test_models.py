@@ -28,6 +28,30 @@ def test_bbox_from_point_is_centered() -> None:
     assert box.west < -97.0 < box.east
 
 
+@pytest.mark.parametrize("lat", [-91, 91, float("nan"), float("inf"), -float("inf")])
+def test_bbox_from_point_rejects_invalid_latitude_before_clipping(lat: float) -> None:
+    with pytest.raises(ValueError, match="lat must be finite and between"):
+        BBox.from_point(lat, 0, radius_km=200)
+
+
+@pytest.mark.parametrize("lon", [-181, 181, float("nan"), float("inf"), -float("inf")])
+def test_bbox_from_point_rejects_invalid_longitude_before_clipping(lon: float) -> None:
+    with pytest.raises(ValueError, match="lon must be finite and between"):
+        BBox.from_point(0, lon, radius_km=200)
+
+
+@pytest.mark.parametrize("radius", [-1, float("nan"), float("inf"), -float("inf")])
+def test_bbox_from_point_rejects_invalid_radius(radius: float) -> None:
+    with pytest.raises(ValueError, match="radius_km must be finite and nonnegative"):
+        BBox.from_point(35, -97, radius_km=radius)
+
+
+@pytest.mark.parametrize("lat, lon", [(-90, -180), (90, 180), (35, -97)])
+def test_bbox_from_point_accepts_boundaries_and_zero_radius(lat: float, lon: float) -> None:
+    assert BBox.from_point(lat, lon).as_tuple() == (lon, lat, lon, lat)
+    assert BBox.from_point(lat, lon, radius_km=200).contains_point(lat, lon)
+
+
 def test_time_range_overlap_with_open_bounds() -> None:
     t = lambda y: datetime(y, 1, 1, tzinfo=UTC)  # noqa: E731
     open_start = TimeRange(start=t(1991))

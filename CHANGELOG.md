@@ -7,6 +7,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Reject out-of-range or non-finite point coordinates and negative/non-finite
+  radii before bounding-box clipping; complete the manifest provider options for
+  GSOM, GOES ABI, and Storm Events.
+
 ## [0.8.0] - 2026-09-09
 
 ### Added

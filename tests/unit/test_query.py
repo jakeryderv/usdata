@@ -41,6 +41,11 @@ def test_build_query_rejects_conflicting_spatial_args() -> None:
         build_query(lat=1)
 
 
+def test_build_query_rejects_invalid_point_before_clipping() -> None:
+    with pytest.raises(ValueError, match="lat must be finite and between"):
+        build_query(lat=91, lon=0, radius_km=200)
+
+
 def test_counties_fips_and_qualified_names() -> None:
     assert resolve_place("40") == resolve_place("Oklahoma")
     county = resolve_place("Cleveland County, OK")

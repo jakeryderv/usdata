@@ -76,6 +76,28 @@ def test_fetch_dry_run_lists_assets() -> None:
     assert "ncei.noaa.gov" in result.stdout
 
 
+def test_fetch_rejects_invalid_point_without_contacting_provider() -> None:
+    result = runner.invoke(
+        app,
+        [
+            "fetch",
+            "noaa:ghcn-daily",
+            "--lat",
+            "91",
+            "--lon",
+            "0",
+            "--radius-km",
+            "200",
+            "--start",
+            "2024-05-06",
+            "--end",
+            "2024-05-07",
+        ],
+    )
+    assert result.exit_code == 2
+    assert "lat must be finite and between -90 and 90" in result.output
+
+
 def test_pull_rejects_unknown_dataset_and_planned(tmp_path: Path) -> None:
     m = tmp_path / "dataset.yaml"
     m.write_text("name: t\nsources:\n  - dataset: nope:x\n")
