@@ -9,6 +9,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Documentation
 
+- Default the documentation site to dark mode, with a light-mode toggle.
+
 - Add a local documentation site with navigation, Mermaid diagrams, generated API/CLI references, saved notebook previews, and strict CI link checks. Separate generated dataset catalogs from provider access notes.
 
 ### Added
