@@ -79,6 +79,12 @@ class BBox(BaseModel):
     @classmethod
     def from_point(cls, lat: float, lon: float, radius_km: float = 0.0) -> BBox:
         """Box around a point. Uses a flat-earth approximation, fine for small radii."""
+        if not math.isfinite(lat) or not -90 <= lat <= 90:
+            raise ValueError("lat must be finite and between -90 and 90")
+        if not math.isfinite(lon) or not -180 <= lon <= 180:
+            raise ValueError("lon must be finite and between -180 and 180")
+        if not math.isfinite(radius_km) or radius_km < 0:
+            raise ValueError("radius_km must be finite and nonnegative")
         dlat = radius_km / 111.0
         dlon = radius_km / (111.0 * max(math.cos(math.radians(lat)), 1e-6))
         return cls(
