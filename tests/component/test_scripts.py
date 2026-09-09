@@ -309,7 +309,7 @@ def test_catalog_generator_owns_only_generated_directory():
     assert module.ROOT / "docs/providers/README.md" not in outputs
 
 
-@pytest.mark.parametrize("fault", ["missing", "unknown", "duplicate", "outside", "typo"])
+@pytest.mark.parametrize("fault", ["missing", "unknown", "duplicate", "alias", "outside", "typo"])
 def test_catalog_rejects_invalid_guide_metadata(tmp_path, fault):
     module = script("render_registry")
     raw = yaml.safe_load((ROOT / "src/usdata/data/registry.yaml").read_text())
@@ -324,6 +324,8 @@ def test_catalog_rejects_invalid_guide_metadata(tmp_path, fault):
         raw["catalog"]["noaa:typo"] = entry
     elif fault == "duplicate":
         raw["catalog"]["noaa:gsom"]["guide"] = entry["guide"]
+    elif fault == "alias":
+        raw["catalog"]["noaa:gsom"]["guide"] = entry["guide"].replace("providers/", "providers/./")
     elif fault == "outside":
         entry["guide"] = "../outside.md"
     else:

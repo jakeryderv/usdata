@@ -211,9 +211,9 @@ def catalog_entries(registry: Registry, root: Path = ROOT) -> dict[str, CatalogE
             or not (root / path).is_file()
         ):
             raise ValueError(f"{key}: guide must be an existing Markdown file in docs/providers")
-        if entry.guide in guides:
+        if (root / path).resolve() in guides:
             raise ValueError(f"{key}: each dataset needs its own usage guide")
-        guides.add(entry.guide)
+        guides.add((root / path).resolve())
     return entries
 
 
