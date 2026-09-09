@@ -38,6 +38,8 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 ### noaa:ghcn-daily
 
+[Dataset and usage guide](noaa/ghcn-daily.md).
+
 **GHCN-Daily Station Observations** · available · since 0.2
 
 Global Historical Climatology Network daily summaries: temperature, precipitation, snow, and other elements from land surface stations, served by the NCEI Access Data Service with station and date filtering.
@@ -52,6 +54,8 @@ Global Historical Climatology Network daily summaries: temperature, precipitatio
 
 ### noaa:gsom
 
+[Dataset and usage guide](noaa/gsom.md).
+
 **Global Summary of the Month** · available · since 0.7
 
 Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. Selects whole calendar months and explicit stations, or discovers stations through the companion search service.
@@ -65,6 +69,8 @@ Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via 
 - Adapter: `usdata.providers.noaa.gsom:GlobalSummaryMonthly`
 
 ### noaa:gsoy
+
+[Dataset and usage guide](noaa/gsoy.md).
 
 **Global Summary of the Year** · available · unreleased; planned 0.10
 
@@ -108,6 +114,8 @@ Hourly, daily, and monthly observations from airport and first-order stations vi
 
 ### noaa:storm-events
 
+[Dataset and usage guide](noaa/storm-events.md).
+
 **Storm Events Database** · available · since 0.8
 
 NCEI's significant-weather event details since 1950, with locations, impacts, and narratives. Anonymous whole-year gzipped CSV archives; select the latest creation-date revision for each requested year. No server-side row, location, or variable subsetting. Historical event coverage and reporting practices vary; fatalities and locations tables are separate products not included by this adapter.
@@ -121,6 +129,8 @@ NCEI's significant-weather event details since 1950, with locations, impacts, an
 - Adapter: `usdata.providers.noaa.storm_events:StormEvents`
 
 ### noaa:nexrad-level2
+
+[Dataset and usage guide](noaa/nexrad-level2.md).
 
 **NEXRAD Level II Radar** · available · since 0.2
 
@@ -163,6 +173,8 @@ Derived single-radar products (base reflectivity, velocity, storm totals, and ot
 - Adapter: none yet
 
 ### noaa:goes-abi
+
+[Dataset and usage guide](noaa/goes-abi.md).
 
 **GOES-R ABI CONUS Cloud and Moisture Imagery** · available · since 0.8
 
@@ -332,6 +344,8 @@ Optimum Interpolation SST v2.1: daily global 0.25 degree analysis since Septembe
 
 ### noaa:coops-water-levels
 
+[Dataset and usage guide](noaa/coops-water-levels.md).
+
 **CO-OPS Observed Water Levels** · available · unreleased; planned 0.10
 
 Preliminary or verified six-minute observed water levels from the anonymous CO-OPS Data API. Select one station, an explicit vertical datum, units, and a UTC interval of at most 28 days. Raw CSV retains quality flags; predictions and station discovery are not included.
@@ -359,6 +373,8 @@ Archived ocean carbon, pH, and related chemistry datasets (cruises, moorings, sy
 - Adapter: none yet
 
 ### noaa:coastwatch-sst
+
+[Dataset and usage guide](noaa/coastwatch-sst.md).
 
 **CoastWatch Blended Sea Surface Temperature** · available · since 0.5
 

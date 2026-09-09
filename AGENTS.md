@@ -21,7 +21,7 @@ data, with provenance and reproducible manifests. Read
   Read [docs/testing.md](docs/testing.md) for levels, selection, and offline rules.
 - `docs/adr/`: decisions already made. Read before proposing to reverse one.
 - `docs/guides/adding-a-dataset.md`: the procedure for new datasets. Follow it exactly.
-- `docs/providers/<id>.md`: handwritten access notes per agency, linked to `docs/generated/catalog/`. Read before touching an adapter.
+- `docs/providers/<id>.md`: handwritten access notes per agency, linked to `docs/generated/catalog/`. Dataset guides are mapped by registry `catalog` metadata and combined with generated reference only during site builds. Read before touching an adapter.
 
 ## Constraints
 

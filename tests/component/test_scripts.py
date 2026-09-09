@@ -6,6 +6,9 @@ import zipfile
 from pathlib import Path
 
 import pytest
+import yaml
+
+from usdata.registry import Registry
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -190,13 +193,6 @@ def test_registry_summary_does_not_schedule_available_datasets_without_a_target(
     assert summary.splitlines()[2].split("|")[5].strip() == "`gfs`"
 
 
-@pytest.mark.parametrize("body", ["", "START", "END START", "START END END"])
-def test_registry_generation_rejects_ambiguous_markers(body) -> None:
-    module = script("render_registry")
-    with pytest.raises(ValueError):
-        module.splice(body, ("START", "END"), "replacement")
-
-
 def test_radar_generator_writes_lf(tmp_path, monkeypatch):
     module = script("build_nexrad_sites")
     source = tmp_path / "stations.txt"
@@ -303,3 +299,86 @@ def test_release_notices_include_navigation_and_notebook_markdown_only(tmp_path)
     assert len(errors) == 2
     assert any("zensical.toml:1" in error for error in errors)
     assert any("example.ipynb:cell 1:1" in error for error in errors)
+
+
+def test_catalog_generator_owns_only_generated_directory():
+    module = script("render_registry")
+    outputs = module.render_all(Registry.bundled())
+    assert outputs and all(path.is_relative_to(module.CATALOG_DIR) for path in outputs)
+    assert module.ROOT / "README.md" not in outputs
+    assert module.ROOT / "docs/providers/README.md" not in outputs
+
+
+@pytest.mark.parametrize("fault", ["missing", "unknown", "duplicate", "alias", "outside", "typo"])
+def test_catalog_rejects_invalid_guide_metadata(tmp_path, fault):
+    module = script("render_registry")
+    raw = yaml.safe_load((ROOT / "src/usdata/data/registry.yaml").read_text())
+    for entry in raw["catalog"].values():
+        path = tmp_path / entry["guide"]
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("# Usage\n")
+    entry = raw["catalog"]["noaa:ghcn-daily"]
+    if fault == "missing":
+        del raw["catalog"]["noaa:ghcn-daily"]
+    elif fault == "unknown":
+        raw["catalog"]["noaa:typo"] = entry
+    elif fault == "duplicate":
+        raw["catalog"]["noaa:gsom"]["guide"] = entry["guide"]
+    elif fault == "alias":
+        raw["catalog"]["noaa:gsom"]["guide"] = entry["guide"].replace("providers/", "providers/./")
+    elif fault == "outside":
+        entry["guide"] = "../outside.md"
+    else:
+        entry["gudie"] = entry["guide"]
+    path = tmp_path / "src/usdata/data/registry.yaml"
+    path.parent.mkdir(parents=True)
+    path.write_text(yaml.safe_dump(raw))
+    with pytest.raises(ValueError):
+        module.catalog_entries(Registry.bundled(), tmp_path)
+
+
+def test_catalog_sync_detects_obsolete_outputs_and_preserves_unrecognized_files(
+    tmp_path, monkeypatch
+):
+    module = script("render_registry")
+    monkeypatch.setattr(module, "CATALOG_DIR", tmp_path)
+    old = tmp_path / "old.md"
+    old.write_text(module.GENERATED_NOTE)
+    assert module.sync({}, check=True) == [old]
+    assert old.exists()
+    module.sync({}, check=False)
+    assert not old.exists()
+    old.write_text("handwritten content")
+    with pytest.raises(ValueError, match="unrecognized"):
+        module.sync({}, check=False)
+    assert old.read_text() == "handwritten content"
+    with pytest.raises(ValueError, match="inside"):
+        module.sync({tmp_path / ".." / "README.md": "bad"}, check=False)
+
+
+def test_composed_guide_links_resolve_from_their_original_directory(monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
+    module = script("docs_site")
+    destination = Path("docs/generated/catalog/noaa/ghcn-daily.md")
+    monkeypatch.setattr(module, "PAGE_PATHS", {Path("docs/providers/noaa-ghcn.md"): destination})
+    assert module.page_links(
+        "[reader](../reference/readers.md) [NOAA](noaa.md) "
+        "[example](../../examples/weather-and-streamflow/example.ipynb)",
+        Path("docs/providers/noaa-ghcn.md"),
+        destination,
+    ) == (
+        "[reader](../../../reference/readers.md) [NOAA](../../../providers/noaa.md) "
+        "[example](../../../../examples/weather-and-streamflow/example.md)"
+    )
+    assert module.page_links("[daily](noaa-ghcn.md#dates)", Path("docs/providers/noaa.md")) == (
+        "[daily](../generated/catalog/noaa/ghcn-daily.md#dates)"
+    )
+
+
+def test_catalog_rejects_paths_in_dataset_ids():
+    module = script("render_registry")
+    bundled = Registry.bundled()
+    dataset = bundled.get("noaa:gfs").model_copy(update={"id": "noaa:../../README"})
+    registry = Registry([*bundled, dataset], domains=bundled.domains())
+    with pytest.raises(ValueError, match="catalog IDs"):
+        module.catalog_entries(registry)

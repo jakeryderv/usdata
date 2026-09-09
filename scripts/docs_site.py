@@ -39,14 +39,16 @@ def site_path(path: Path) -> Path:
     return PAGE_PATHS.get(path, path)
 
 
-def page_links(text: str, source: Path) -> str:
+def page_links(text: str, source: Path, destination_page: Path | None = None) -> str:
     def replace(match: re.Match[str]) -> str:
         url = urlsplit(match[2])
         if url.scheme or url.netloc or not url.path or url.path.startswith("/"):
             return match[0]
         target = Path(posixpath.normpath((source.parent / url.path).as_posix()))
         destination = site_path(target)
-        relative = posixpath.relpath(destination.as_posix(), site_path(source).parent.as_posix())
+        relative = posixpath.relpath(
+            destination.as_posix(), (destination_page or site_path(source)).parent.as_posix()
+        )
         return match[1] + urlunsplit(("", "", relative, url.query, url.fragment)) + match[3]
 
     return LOCAL_LINK.sub(replace, notebook_links(text))
@@ -73,10 +75,27 @@ def prepare() -> None:
     import nbformat
     from nbconvert import MarkdownExporter
 
+    registry = Registry.bundled()
+    renderer = importlib.reload(render_registry)
+    entries = renderer.catalog_entries(registry)
+    PAGE_PATHS.clear()
+    PAGE_PATHS.update(
+        {Path("docs/index.md"): Path("index.md"), Path("README.md"): Path("project.md")}
+    )
+    PAGE_PATHS.update(
+        {
+            Path(entry.guide): renderer.dataset_path(registry.get(key))
+            for key, entry in entries.items()
+        }
+    )
+    guides = {Path(entry.guide) for entry in entries.values()}
+    generated = renderer.render_all(registry)
     outputs: dict[Path, bytes] = {}
     exporter = MarkdownExporter()
     for path in source_paths():
         relative = path.relative_to(ROOT)
+        if relative in guides or path.is_relative_to(renderer.CATALOG_DIR):
+            continue
         if path.suffix == ".ipynb":
             body, resources = exporter.from_notebook_node(
                 nbformat.read(path, as_version=4),
@@ -95,9 +114,21 @@ def prepare() -> None:
             outputs[site_path(relative)] = page_links(path.read_text(), relative).encode()
         else:
             outputs[relative] = path.read_bytes()
-    for path, content in importlib.reload(render_registry).render_all(Registry.bundled()).items():
+    for path, content in generated.items():
         relative = path.relative_to(ROOT)
         outputs[site_path(relative)] = page_links(content, relative).encode()
+    for key, entry in entries.items():
+        ds = registry.get(key)
+        destination = renderer.dataset_path(ds)
+        guide = Path(entry.guide)
+        text = (ROOT / guide).read_text()
+        if not text.startswith("# "):
+            raise ValueError(f"{guide}: usage guide needs a level-one title")
+        body = text.split("\n", 1)[1].strip()
+        # Each source resolves links in its own directory before insertion.
+        body = page_links(body, guide, destination)
+        marker = page_links(renderer.usage_link(ds, entry), destination)
+        outputs[destination] = outputs[destination].decode().replace(marker, body).encode()
     pending = preview(ROOT)
     outputs[Path("docs/generated/changes.md")] = (
         "# Upcoming changes\n\nGenerated from release-note fragments. "

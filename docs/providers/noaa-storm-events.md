@@ -45,3 +45,5 @@ describes historical coverage.
 See the [service research notes](noaa-services.md#storm-events-annual-details) for dated upstream probes.
 
 [All NOAA datasets](noaa.md).
+
+[Catalog reference](../generated/catalog/noaa/storm-events.md#catalog-reference).

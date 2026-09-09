@@ -50,3 +50,5 @@ and rejecting intervals entirely before 2017-02-28.
 See the [service research notes](noaa-services.md#goes-abi-conus-imagery) for dated upstream probes.
 
 [All NOAA datasets](noaa.md).
+
+[Catalog reference](../generated/catalog/noaa/goes-abi.md#catalog-reference).

@@ -31,3 +31,5 @@ change CSV bytes; retain the cache as well as the manifest and lockfile.
 See the [service research notes](noaa-services.md#global-summary-of-the-year) for dated upstream probes.
 
 [All NOAA datasets](noaa.md).
+
+[Catalog reference](../generated/catalog/noaa/gsoy.md#catalog-reference).

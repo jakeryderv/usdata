@@ -47,7 +47,9 @@ replacing `target` with `since`. Planned datasets are hidden from `usdata search
 unless `--planned` is passed; `info` always works. Moving a dataset to a different
 phase is a one-line change to `target`; the generated versions and catalog pages follow.
 Run `just docs` after editing: the README summary, provider index, and
-`docs/generated/catalog/` are generated. For a new agency, write access notes in
+`docs/generated/catalog/` are generated. For every implemented dataset, add a
+unique usage guide under `docs/providers/` and register its path in the registry
+`catalog` mapping; the docs site combines it with the generated reference. For a new agency, write access notes in
 `docs/providers/<provider>.md` and link its generated catalog. See the
 [documentation workflow](documentation.md) for source ownership and preview commands.
 
