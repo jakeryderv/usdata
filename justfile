@@ -7,6 +7,14 @@ default:
 setup:
     uv sync --group dev
 
+# Install fast checks for staged files (optional, once per clone)
+hooks-install:
+    uv run --locked pre-commit install
+
+# Validate repository config and workflows without rewriting files
+check-hooks:
+    uv run --locked pre-commit run --all-files --hook-stage manual
+
 # Run all offline tests (pass pytest selectors as arguments)
 [positional-arguments]
 test *args:
@@ -22,8 +30,8 @@ test-integration: test-live
 
 # Format code in place
 fmt:
-    uv run ruff format
     uv run ruff check --fix
+    uv run ruff format
 
 # Regenerate documentation derived from code and data
 docs:
@@ -56,6 +64,7 @@ check-static:
     uv lock --check
     uv run ruff format --check
     uv run ruff check
+    just check-hooks
     just check-docs
 
 # Type and behavior checks for the active dependency profile

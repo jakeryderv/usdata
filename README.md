@@ -58,6 +58,7 @@ uv Python 3.14 builds can crash during NumPy array operations; see
 ```sh
 git clone https://github.com/jakeryderv/usdata && cd usdata
 just setup     # install toolchain and dependencies
+just hooks-install # optional: install fast staged-file checks
 just test      # all offline tests
 just check     # format, lint, typecheck, offline tests, generated docs, release notices
 just check-pandas  # install the CSV extra and run the same checks
@@ -71,6 +72,12 @@ just build     # build wheel and sdist
 just smoke     # exercise core and pandas wheel installations outside the checkout
 just run search radar
 ```
+
+Commit hooks fix and format staged Python files using the locked Ruff version,
+and check configuration, merge conflicts, and GitHub Actions workflows. Full
+validation remains `just check`; `just check-hooks` runs the non-mutating config
+and workflow checks alone. Hooks do not rewrite notebooks or raw data fixtures.
+The first hook run downloads its isolated tools and requires network access.
 
 Offline tests mechanically block network connections. Tests that hit
 live services run with `just test-live`; see [testing levels and organization](docs/testing.md). CI checks Python 3.11 and 3.14 on

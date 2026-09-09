@@ -7,6 +7,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Development
+
+- Add optional fast commit hooks, workflow linting, and PR-title validation; pin
+  GitHub Actions to reviewed commits while retaining Dependabot updates.
+- Generate the radar-site CSV with LF line endings so fresh worktrees stay clean,
+  and apply lint fixes before formatting.
+
 ### Added
 
 - `noaa:gsoy` annual station CSVs with complete UTC year selection, shared NCEI

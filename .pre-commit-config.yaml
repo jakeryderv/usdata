@@ -1,0 +1,31 @@
+# Ruff uses uv.lock; data fixtures and notebook outputs are never rewritten.
+default_stages: [pre-commit, manual]
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff fixes (locked)
+        entry: uv run --locked ruff check --fix
+        language: system
+        types_or: [python, pyi]
+        stages: [pre-commit]
+      - id: ruff-format
+        name: Ruff format (locked)
+        entry: uv run --locked ruff format
+        language: system
+        types_or: [python, pyi]
+        stages: [pre-commit]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # v6.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+        files: ^(\.github/|\.pre-commit-config\.yaml$|src/usdata/data/registry\.yaml$|examples/)
+        exclude: ^examples/.*/.*\.ipynb$
+      - id: check-json
+        files: ^(src/usdata/data/|\.github/)
+  - repo: https://github.com/rhysd/actionlint
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # v1.7.12
+    hooks:
+      - id: actionlint
