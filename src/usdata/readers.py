@@ -47,7 +47,7 @@ def open_asset(
     usecols: list[str] | None = None,
     nrows: int | None = None,
 ) -> Any:
-    """Read a local CSV into a pandas DataFrame, retaining units and provenance.
+    """Open local CSV or NEXRAD Level II data, retaining units and provenance.
 
     Gzip CSVs are decompressed locally without changing cached bytes.
     Infer ``csv`` or ``erddap-csv`` from media type and protocol, or use an
@@ -58,15 +58,27 @@ def open_asset(
     if reader is None:
         media_type = (fetched.asset.media_type or "").split(";", 1)[0].strip().lower()
         gzip_csv = media_type in GZIP_MEDIA_TYPES and fetched.asset.id.lower().endswith(".csv.gz")
-        if media_type not in CSV_MEDIA_TYPES and not gzip_csv:
+        if fetched.asset.dataset_id == "noaa:nexrad-level2":
+            reader = "nexrad-level2"
+        elif media_type in CSV_MEDIA_TYPES or gzip_csv:
+            reader = "erddap-csv" if fetched.asset.protocol is Protocol.ERDDAP else "csv"
+        else:
             raise UnsupportedFormat(
-                f"no reader for {fetched.asset.media_type!r}; supported formats are CSV and "
-                "ERDDAP CSV. For a known CSV with ambiguous metadata, pass reader='csv' "
+                f"no reader for {fetched.asset.media_type!r}; supported formats are CSV, "
+                "ERDDAP CSV, and NEXRAD Level II. For a known CSV with ambiguous metadata, "
+                "pass reader='csv' "
                 "or reader='erddap-csv'; otherwise use fetched.path with a format-specific reader"
             )
-        reader = "erddap-csv" if fetched.asset.protocol is Protocol.ERDDAP else "csv"
+    if reader == "nexrad-level2":
+        if any(value is not None for value in (dtype, parse_dates, usecols, nrows)):
+            raise ValueError("dtype, parse_dates, usecols, and nrows apply only to CSV readers")
+        from usdata._radar import open_nexrad
+
+        return open_nexrad(fetched)
     if reader not in {"csv", "erddap-csv"}:
-        raise UnsupportedFormat(f"unsupported reader {reader!r}; use 'csv' or 'erddap-csv'")
+        raise UnsupportedFormat(
+            f"unsupported reader {reader!r}; use 'csv', 'erddap-csv', or 'nexrad-level2'"
+        )
     try:
         pandas = import_module("pandas")
     except ModuleNotFoundError as error:

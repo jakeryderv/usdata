@@ -10,6 +10,8 @@ the saved outputs, or run them locally to change queries and inspect the results
 | [Monthly climate](monthly-climate/example.ipynb) | GSOM monthly observations, whole-month selection, a two-panel plot, and manifest verification |
 | [Storm Events](storm-events/example.ipynb) | Annual gzip CSV, local Oklahoma/date filtering, report counts, damage ratings, and source verification (available from source for v0.8) |
 
+| [Radar reflectivity](radar-reflectivity/example.ipynb) | One NEXRAD volume, xradar sweeps, field units, reflectivity plot, and provenance |
+
 ## Run interactively
 
 From the repository root, with [uv and just installed](../README.md#development):
@@ -19,7 +21,8 @@ just notebooks
 ```
 
 This launches JupyterLab with the optional `examples` dependency group, which
-includes pandas, plotting, and notebook tools. These are development dependencies;
+includes pandas, plotting, and notebook tools. The command also installs the
+optional `radar` extra for xradar; scientific reader dependencies remain optional. These are development dependencies;
 installing `usdata` does not install them. Select a notebook and use the Python 3
 kernel. In an IDE, select this checkout's `.venv` interpreter after the environment
 has been installed. Use **Restart Kernel and Run All Cells** to check that a notebook
