@@ -16,6 +16,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- Reject truncated S3 listings with missing or cycling continuation tokens instead
+  of returning incomplete assets or requesting pages indefinitely.
+
 - Reject NEXRAD decoder tables that misalign moment and coordinate records,
   including equal-length sweeps following a missing interior end marker; valid
   explicitly selected sweeps remain readable without silently dropping others.
