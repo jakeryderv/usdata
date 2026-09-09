@@ -46,6 +46,7 @@ def cleanup(root: Path, number: str) -> None:
     tip = run(root, "git", "rev-parse", f"refs/heads/{branch}")
     if tip != pr["headRefOid"]:
         raise ValueError("local branch has changed since the merged PR; retain it for review")
+    run(root, "git", "merge", "--ff-only", "origin/main")
     worktree = None
     for field in run(root, "git", "worktree", "list", "--porcelain", "-z").split("\0"):
         if field.startswith("worktree "):
@@ -55,7 +56,6 @@ def cleanup(root: Path, number: str) -> None:
                 raise ValueError(f"topic worktree has changes: {worktree}")
             # No --force: Git also refuses locked or otherwise unsafe worktree removal.
             run(root, "git", "worktree", "remove", str(worktree))
-    run(root, "git", "merge", "--ff-only", "origin/main")
     # Squash merges do not preserve ancestry. The exact PR head comparison above is required.
     run(root, "git", "branch", "-D", "--", branch)
     print(f"Removed merged local branch {branch} and its clean worktree, if present.")

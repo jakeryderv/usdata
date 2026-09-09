@@ -31,6 +31,9 @@ def repository(tmp_path):
     git(tmp_path, "config", "core.hooksPath", "/dev/null")
     (tmp_path / "pyproject.toml").write_text('[project]\nversion="0.9.0"\n')
     (tmp_path / "README.md").write_text("Available from source for v0.10.")
+    (tmp_path / "CHANGELOG.md").write_text(
+        "# Changelog\n\n## [Unreleased]\n\n## [0.9.0] - 2026-09-09\n\n- Feature\n"
+    )
     git(tmp_path, "add", ".")
     git(tmp_path, "commit", "-m", "initial")
     return tmp_path
@@ -133,3 +136,41 @@ def test_cleanup_requires_exact_merged_tip_and_clean_worktree(repository, monkey
             module.cleanup(repository, "123")
         assert worktree.exists()
         assert "feat/example" in git(repository, "branch", "--list")
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        "## [Unreleased]\n- Pending\n## [0.9.0] - 2026-09-09\n- Old",
+        "## [Unreleased]\n## [0.8.0] - 2026-09-09\n- Wrong version",
+        "## [Unreleased]\n## [0.9.0]\n- Undated",
+    ],
+)
+def test_release_pr_refuses_incomplete_changelog_roll(repository, monkeypatch, body):
+    module = script("release", monkeypatch)
+    git(repository, "switch", "-c", "release/v0.9.0")
+    (repository / "CHANGELOG.md").write_text(body)
+    with pytest.raises(ValueError, match="roll the changelog"):
+        module.open_pr(repository)
+
+
+def test_validated_release_opens_draft_without_enabling_merge(repository, monkeypatch):
+    module = script("release", monkeypatch)
+    git(repository, "switch", "-c", "release/v0.9.0")
+    calls = []
+    original = subprocess.run
+
+    def commands(command, **kwargs):
+        calls.append(tuple(command))
+        if command[0] == "gh" or "push" in command or command == ["just", "check"]:
+            return subprocess.CompletedProcess(
+                command, 0, stdout="https://example.invalid/pr", stderr=""
+            )
+        return original(command, **kwargs)
+
+    monkeypatch.setattr(module.subprocess, "run", commands)
+    module.open_pr(repository)
+    create = next(command for command in calls if command[:3] == ("gh", "pr", "create"))
+    assert "--draft" in create
+    assert calls.index(("just", "check")) < calls.index(create)
+    assert not any("merge" in command or "--auto" in command for command in calls)

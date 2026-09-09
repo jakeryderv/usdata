@@ -9,6 +9,7 @@ import tempfile
 import tomllib
 from pathlib import Path
 
+from changelog import parse
 from check_release_docs import check
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,6 +60,18 @@ def open_pr(root: Path) -> None:
         raise ValueError(f"run from {branch}")
     if run(root, "git", "ls-files", "--others", "--exclude-standard"):
         raise ValueError("review and commit untracked files before opening the release PR")
+    _, sections = parse((root / "CHANGELOG.md").read_text())
+    if (
+        len(sections) < 2
+        or sections[0][0] != "Unreleased"
+        or re.search(r"^- ", sections[0][2], re.MULTILINE)
+        or sections[1][0] != target
+        or not re.search(r"^- ", sections[1][2], re.MULTILINE)
+        or sections[1][1] is None
+    ):
+        raise ValueError(
+            f"roll the changelog into a dated [{target}] section before opening the PR"
+        )
     # Stream the full gate so failures stay visible; nothing is pushed before it succeeds.
     subprocess.run(["just", "check"], cwd=root, check=True)
     run(root, "git", "add", "--update")
