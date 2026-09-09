@@ -14,7 +14,7 @@ provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 <!-- registry:start -->
 | Provider | Available | Stub | Planned | Next up (unassigned) | Datasets |
 |---|---:|---:|---:|---|---|
-| [NOAA](docs/providers/noaa.md) | 4 | 0 | 25 | — | `ghcn-daily`, `gsom`, `nexrad-level2`, `coastwatch-sst`, +25 planned |
+| [NOAA](docs/providers/noaa.md) | 5 | 0 | 24 | — | `ghcn-daily`, `gsom`, `nexrad-level2`, `goes-abi`, `coastwatch-sst`, +24 planned |
 | [USGS](docs/providers/usgs.md) | 1 | 0 | 2 | — | `water-daily`, +2 planned |
 | [Census Bureau](docs/providers/census.md) | 0 | 0 | 1 | — | +1 planned |
 | [EPA](docs/providers/epa.md) | 0 | 0 | 1 | — | +1 planned |
@@ -119,6 +119,15 @@ from a failed HTTP attempt reset on retry; encoded responses have unknown decode
 size. Adapters that assemble files from metadata requests show asset-level progress.
 Use `--no-progress` to disable it. Progress is automatically disabled when either
 stdout or stderr is redirected; existing output lines and exit codes are unchanged.
+
+For single-channel GOES CONUS imagery (available from source for v0.8):
+
+```sh
+usdata fetch noaa:goes-abi --start 2024-05-06T12:01:18.1Z --end 2024-05-06T12:01:18.1Z -p satellite=18 -p channel=6
+```
+
+The download is a whole NetCDF scene. See [GOES access notes](docs/providers/noaa.md#goes-abi-conus-imagery)
+for supported selectors and scan-start time semantics.
 
 ## Opening CSV data
 

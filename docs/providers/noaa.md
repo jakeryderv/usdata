@@ -81,6 +81,71 @@ actual boundary. Bundled boxes use generalized 2025 Census boundaries;
 selection falls back to the nearest radar if none lies inside the rectangle.
 Use explicit IDs when exact site selection is required.
 
+## GOES ABI CONUS imagery
+
+Available from source for v0.8 as `noaa:goes-abi`. The initial product is
+single-channel CONUS Cloud and Moisture Imagery, `ABI-L2-CMIPC`. Files are
+NetCDF4/HDF5 scenes from the anonymous `noaa-goes16`, `noaa-goes17`,
+`noaa-goes18`, and `noaa-goes19` buckets. No AWS credentials or SDK are needed.
+Other ABI products and scan sectors remain unsupported.
+
+Require `satellite` (16, 17, 18, or 19), `channel` (1–16, also `C01`–`C16`),
+and both timestamps. `product` defaults to `ABI-L2-CMIPC` and rejects any other
+value. Unknown parameters, text/geographic constraints, and `variables` are rejected:
+channels select distinct whole files; the server cannot crop these scenes or
+select variables within them. `temporal_subset` means selecting archived scans.
+
+The adapter lists hourly `ABI-L2-CMIPC/YYYY/DDD/HH/` prefixes, follows S3
+continuation tokens, and selects scans whose **start times** fall in the inclusive
+UTC query interval. It does not select a scan that started before the interval
+merely because the scan overlaps it. Filename start/end stamps have tenths-of-a-
+second precision; asset metadata retains both bounds and the listed byte size.
+Naive dates/times mean UTC; a date-only end is midnight at the start of that day.
+Use a short interval to limit the number of whole-scene downloads.
+
+For example, fetch one small shortwave-infrared scene (~255 kB):
+
+```sh
+uv run usdata fetch noaa:goes-abi \
+  --start 2024-05-06T12:01:18.1Z --end 2024-05-06T12:01:18.1Z \
+  -p satellite=18 -p channel=6
+```
+
+Channel 6 is reflected solar imagery and this example is mostly dark; it is
+chosen to keep the live fetch/restore check small. For thermal imagery, channel
+13 scenes are roughly 4 MB in the verified sample. CMI represents reflectance
+for reflective bands or brightness temperature for infrared bands; consult the
+file's units and data-quality flags before analysis. The adapter preserves raw
+bytes and does not project, mask, or reinterpret imagery.
+
+[NOAA's product documentation](https://www.ncei.noaa.gov/products/goes-terrestrial-weather-abi-glm)
+identifies CMIP channels, scan modes, and satellite coverage. The
+[NODD registry](https://registry.opendata.aws/noaa-goes/) documents public cloud
+access. Satellite availability varies by date and outages; no East/West alias
+is inferred from a historical query. The catalog's start is the initial public
+GOES-16 date, not a claim that every satellite was operating then. Listing
+`ABI-L2-CMIPC/2017/` with `max-keys=1` confirmed the first scene at
+2017-02-28T00:02:50.4Z. The bucket also has placeholder year-2000 test scenes;
+the adapter excludes these by limiting selection to the public observation era
+and rejecting intervals entirely before 2017-02-28.
+
+Bounded probes on 2026-09-08 listed 192 CMIPC files in one hour for each of
+GOES-16/18 (2024 day 127), GOES-17 (2022 day 127), and GOES-19 (2025 day 127).
+A reproducible listing probe is:
+
+```sh
+curl --get 'https://noaa-goes18.s3.amazonaws.com/' \
+  --data-urlencode 'list-type=2' \
+  --data-urlencode 'prefix=ABI-L2-CMIPC/2024/127/12/' \
+  --data-urlencode 'max-keys=1000'
+```
+
+The small channel-6 filename was
+`OR_ABI-L2-CMIPC-M6C06_G18_s20241271201181_e20241271203560_c20241271204021.nc`
+(255,384 bytes). The live test downloads it, checks the NetCDF4/HDF5 signature,
+then restores through a lockfile without relisting. Archive revisions still
+correctly fail restoration if the bytes no longer match the original checksum.
+
 ## Global Summary of the Month
 
 Available since v0.7 as `noaa:gsom`. The NCEI dataset is
@@ -213,7 +278,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | [`noaa:nexrad-level2`](#noaanexrad-level2) | Weather radar | available | since 0.2 | Raw volume scans from the WSR-88D weather radar network, archived in the public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). | s3 |
 | [`noaa:mrms`](#noaamrms) | Weather radar | planned | target later | Gridded CONUS products merged from all radars plus other sensors (reflectivity, precipitation rate and accumulation, severe weather diagnostics), as two-minute gzipped GRIB2 files in the public noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/. | s3 |
 | [`noaa:nexrad-level3`](#noaanexrad-level3) | Weather radar | planned | target later | Derived single-radar products (base reflectivity, velocity, storm totals, and others) in the public unidata-nexrad-level3 S3 bucket, with flat keys SITE_PRODUCT_YYYY_MM_DD_HH_MM_SS where the site id drops its leading K. | s3 |
-| [`noaa:goes-abi`](#noaagoes-abi) | Weather satellites | planned | target later | Advanced Baseline Imager products from GOES-16, 18, and 19 in the public noaa-goes16/18/19 S3 buckets, laid out as PRODUCT/YYYY/DDD/HH/ with one NetCDF per scan (for example ABI-L2-CMIPC). | s3 |
+| [`noaa:goes-abi`](#noaagoes-abi) | Weather satellites | available | unreleased; planned 0.8 | Single-channel CONUS Cloud and Moisture Imagery (ABI-L2-CMIPC) from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. | s3 |
 | [`noaa:goes-glm`](#noaagoes-glm) | Weather satellites | planned | target later | Lightning flash, group, and event detections (GLM-L2-LCFA) in 20-second NetCDF files under the same GOES S3 buckets and layout as ABI. | s3 |
 | [`noaa:hurdat2`](#noaahurdat2) | Tropical cyclones | planned | target later | National Hurricane Center best-track database: six-hourly position, intensity, pressure, and wind radii for Atlantic (since 1851) and eastern North Pacific (since 1949) tropical cyclones. | http |
 | [`noaa:ibtracs`](#noaaibtracs) | Tropical cyclones | planned | target later | International Best Track Archive for Climate Stewardship: merged best tracks from all agencies worldwide since 1842. | http |
@@ -362,17 +427,17 @@ Derived single-radar products (base reflectivity, velocity, storm totals, and ot
 
 ### noaa:goes-abi
 
-**GOES-R ABI Satellite Imagery** · planned · target later
+**GOES-R ABI CONUS Cloud and Moisture Imagery** · available · unreleased; planned 0.8
 
-Advanced Baseline Imager products from GOES-16, 18, and 19 in the public noaa-goes16/18/19 S3 buckets, laid out as PRODUCT/YYYY/DDD/HH/ with one NetCDF per scan (for example ABI-L2-CMIPC). Same anonymous S3 pattern as NEXRAD, plus product, satellite, and channel selection.
+Single-channel CONUS Cloud and Moisture Imagery (ABI-L2-CMIPC) from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit satellite, channel, and scan-start interval; each asset is a complete NetCDF scene with no geographic or variable subsetting.
 
 - Domain: Weather satellites
-- Server-side subsetting: temporal, variable
+- Server-side subsetting: temporal
 - Homepage: https://registry.opendata.aws/noaa-goes/
 - License: US Government Work (public domain)
-- Extent: 2017-01-01 to present
-- Keywords: satellite, imagery, goes, abi, clouds, fire, radiance, netcdf
-- Adapter: none yet
+- Extent: 2017-02-28 to present
+- Keywords: satellite, imagery, goes, abi, clouds, infrared, reflectance, netcdf, conus
+- Adapter: `usdata.providers.noaa.goes:GoesAbi`
 
 ### noaa:goes-glm
 

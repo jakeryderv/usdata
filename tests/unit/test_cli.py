@@ -44,7 +44,7 @@ def test_info() -> None:
 
 
 def test_fetch_reports_unimplemented_adapter() -> None:
-    result = runner.invoke(app, ["fetch", "noaa:goes-abi", "--state", "OK"])
+    result = runner.invoke(app, ["fetch", "noaa:goes-glm", "--state", "OK"])
     assert result.exit_code == 3
 
 
@@ -80,7 +80,7 @@ def test_pull_rejects_unknown_dataset_and_planned(tmp_path: Path) -> None:
     m = tmp_path / "dataset.yaml"
     m.write_text("name: t\nsources:\n  - dataset: nope:x\n")
     assert runner.invoke(app, ["pull", str(m)]).exit_code == 2
-    m.write_text("name: t\nsources:\n  - dataset: noaa:goes-abi\n")
+    m.write_text("name: t\nsources:\n  - dataset: noaa:goes-glm\n")
     assert runner.invoke(app, ["pull", str(m), "--cache-dir", str(tmp_path)]).exit_code == 3
 
 
