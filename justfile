@@ -33,15 +33,23 @@ docs:
 places *args:
     uv run python scripts/build_places.py {{args}}
 
-# Everything CI runs: format check, lint, typecheck, tests, generated docs current
-check:
+# Complete offline pre-PR gate, also used in separate CI jobs
+check: check-static check-tests
+
+# Repository-wide checks that do not vary across dependency profiles
+check-static:
+    uv lock --check
     uv run ruff format --check
     uv run ruff check
-    uv run pyright
-    uv run pytest --cov=usdata --cov-report=term-missing:skip-covered
     uv run python scripts/render_registry.py --check
     uv run python scripts/check_release_docs.py
     just check-notebooks
+
+# Type and behavior checks for the active dependency profile
+[positional-arguments]
+check-tests *args:
+    uv run pyright
+    uv run pytest --cov=usdata --cov-branch --cov-report=term-missing:skip-covered "$@"
 
 # Run the full checks with optional CSV readers installed
 check-pandas:
@@ -62,8 +70,9 @@ check-notebooks:
     uv run python scripts/check_notebooks.py
 
 # Execute all notebooks against live services; --write refreshes committed outputs
+[positional-arguments]
 run-notebooks *args:
-    uv run --group examples --extra radar --extra netcdf python scripts/run_notebooks.py {{args}}
+    uv run --group examples --extra radar --extra netcdf python scripts/run_notebooks.py "$@"
 
 # Run checks with the optional NetCDF4 reader installed
 check-netcdf:

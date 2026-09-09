@@ -1,31 +1,104 @@
 name: Integration
 
-# Live-service tests, run on a schedule so upstream changes surface without
-# blocking pull requests. Trigger manually from the Actions tab as needed.
+# External availability must not block normal pull requests.
 on:
   schedule:
-    - cron: "0 6 * * 1"  # Mondays 06:00 UTC
+    - cron: "0 6 * * 1"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  live:
+  inventory:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      live: ${{ steps.discover.outputs.live }}
+      notebooks: ${{ steps.discover.outputs.notebooks }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: discover
+        run: python scripts/ci_inventory.py >> "$GITHUB_OUTPUT"
+
+  live:
+    needs: inventory
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.inventory.outputs.live) }}
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
         with:
+          python-version: "3.14"
           enable-cache: true
       - uses: extractions/setup-just@v4
-      - run: just setup
-      - run: just test-integration
+      - if: matrix.extra == 'core'
+        run: just setup
+      - if: matrix.extra != 'core'
+        env:
+          READER_EXTRA: ${{ matrix.extra }}
+        run: uv sync --group dev --extra "$READER_EXTRA"
+      - env:
+          LIVE_TEST: ${{ matrix.path }}
+          UV_NO_SYNC: '1'
+        run: just test-live "$LIVE_TEST" --junitxml=reports/live.xml --durations=15
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: live-${{ matrix.id }}
+          path: reports/
+          retention-days: 14
 
   notebooks:
+    needs: inventory
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.inventory.outputs.notebooks) }}
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
         with:
+          python-version: "3.14"
           enable-cache: true
       - uses: extractions/setup-just@v4
-      - run: just run-notebooks
+      - env:
+          NOTEBOOK: ${{ matrix.path }}
+        run: just run-notebooks --notebook "$NOTEBOOK" --output-dir reports/notebooks
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: notebook-${{ matrix.id }}
+          path: reports/
+          retention-days: 14
+
+  minimum-dependencies:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.11"
+          enable-cache: true
+      - name: Resolve minimum direct runtime dependencies
+        run: |
+          uv venv --python 3.11 .venv
+          uv pip install pytest pytest-cov respx
+          uv pip install --upgrade --resolution lowest-direct -e .
+          mkdir -p reports
+          uv pip freeze > reports/minimum-requirements.txt
+      - name: Run offline suite without resynchronizing the lockfile
+        run: .venv/bin/python -m pytest --cov=usdata --cov-branch --cov-report=xml:reports/coverage.xml --junitxml=reports/minimum.xml --durations=15
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: minimum-dependencies
+          path: reports/
+          retention-days: 14
