@@ -62,7 +62,7 @@ Manifest and source fields are validated strictly; unknown fields are errors.
 Provider-specific options belong under `params`.
 
 For already-listed assets, `select_by_time` selects a scan start using an explicit
-tolerance and nearest/prior direction (Unreleased). It returns the chosen asset,
+tolerance and nearest/prior direction (since v0.9). It returns the chosen asset,
 signed offset, and candidate counts, including an explicit no-match result. See
 [temporal selection](../reference/selection.md) and the
 [event-context notebook](../../examples/event-context/example.ipynb).

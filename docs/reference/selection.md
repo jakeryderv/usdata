@@ -1,6 +1,6 @@
 # Selecting assets by time
 
-Available in Unreleased. `select_by_time` is a pure core helper: pass a finite
+Available since v0.9. `select_by_time` is a pure core helper: pass a finite
 iterable of already-listed `Asset` objects. It performs no listing, downloading,
 cache writes, or decoding, and requires no scientific extras.
 
