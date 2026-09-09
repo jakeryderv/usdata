@@ -196,20 +196,21 @@ datasets:
 
   - id: noaa:coops-water-levels
     provider: noaa
-    status: planned
+    status: available
     domain: sea-level-tides
-    target: later
-    title: CO-OPS Water Levels and Tides
+    since: "0.10"
+    title: CO-OPS Observed Water Levels
     description: >-
-      Observed and predicted water levels, tide predictions, and related
-      products for NWLON tide stations from the CO-OPS Data API, with a
-      companion metadata API for station lookup. Anonymous REST with
-      station, product, datum, and date-range parameters.
+      Preliminary or verified six-minute observed water levels from the
+      anonymous CO-OPS Data API. Select one station, an explicit vertical datum,
+      units, and a UTC interval of at most 28 days. Raw CSV retains quality flags;
+      predictions and station discovery are not included.
     keywords: [tides, water level, sea level, coastal, coops, nwlon, stations]
     protocol: http
     homepage: https://api.tidesandcurrents.noaa.gov/api/prod/
     license: US Government Work (public domain)
-    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+    adapter: usdata.providers.noaa.coops:CoopsWaterLevels
 
   - id: noaa:gsom
     provider: noaa

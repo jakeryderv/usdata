@@ -335,6 +335,48 @@ curl --fail --globoff -A 'usdata (+https://github.com/jakeryderv/usdata)' \
   'https://coastwatch.noaa.gov/erddap/griddap/noaacwBLENDEDsstDNDaily.csv?analysed_sst[(2024-05-06T12:00:00Z)][(30.025):(30.075)][(-80.075):(-80.025)]'
 ```
 
+## CO-OPS observed water levels
+
+Available from source for v0.10 as `noaa:coops-water-levels`. The initial adapter
+fetches six-minute observed water levels for one explicit station. NOAA returns
+preliminary or verified observations according to availability. Predictions,
+currents, station discovery, and automatic request chunking are not included.
+
+Require a seven-digit string `station`, an explicit uppercase `datum`, and both
+timestamps. `units` is `metric` (default, meters) or `english` (feet). Supported
+datum codes follow the [Data API documentation](https://api.tidesandcurrents.noaa.gov/api/dev/):
+CRD, IGLD, LWD, MHHW, MHW, MTL, MSL, MLW, MLLW, NAVD, and STND. Availability of a
+datum depends on the station; the service rejects unsupported combinations.
+Unknown parameters, geographic/text selectors, and `variables` are rejected.
+
+Offsets are normalized to UTC and the API request fixes `time_zone=gmt`. Bounds
+are inclusive, must have zero seconds/microseconds, and span at most 28 days,
+conservatively within NOAA's one-month limit. Date-only bounds remain midnight.
+The adapter constructs one stable CSV request; it checks availability on fetch.
+
+```sh
+usdata fetch noaa:coops-water-levels \
+  --start 2024-05-06T00:00Z --end 2024-05-06T00:12Z \
+  -p station=8518750 -p datum=MLLW -p units=metric
+```
+
+The raw CSV retains original header spacing, observations, and quality flags.
+Use the ordinary CSV reader and rename columns locally if desired; station,
+datum, units, and timezone remain explicit in the provenance source URL. The
+[small manifest example](../../examples/coastal-water-levels/README.md) shows this.
+Quality `p` and `v` mean preliminary and verified; preserve the quality field
+alongside the flags because their interpretation changes. See the
+[response definitions](https://api.tidesandcurrents.noaa.gov/api/prod/responseHelp.html).
+
+Hosted probes on 2026-09-09 verified three records for station 8518750 over the
+interval above, changed values for English units and MSL datum, and HTTP 400 for
+invalid stations/datums. Missing historical data or intervals between observations
+returned HTTP 200 with the normal CSV header followed by an error message.
+The adapter validates the CSV in a temporary file before replacing the destination.
+Malformed, empty, and semantic-error responses raise `httpx.DecodingError`
+(CLI exit 4); HTTP failures retain their status. `allow_empty` does not suppress
+these fetch errors. Source revisions may invalidate exact locked restoration.
+
 ## Data landscape
 
 What NOAA publishes, by domain, and which registry entries cover it. Domains

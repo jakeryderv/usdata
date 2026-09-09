@@ -24,12 +24,19 @@ open the resulting local files. Provenance and manifests connect those steps.
 - [Runnable examples with saved outputs](examples/README.md)
 - [Readers](docs/reference/readers.md) and [reproducible manifests](docs/reference/manifests.md)
 
+CO-OPS water levels (available from source for v0.10) require an explicit datum:
+
+```sh
+usdata fetch noaa:coops-water-levels -p station=8518750 -p datum=MLLW \
+  --start 2024-05-06T00:00Z --end 2024-05-06T00:12Z
+```
+
 ## Providers
 
 <!-- registry:start -->
 | Provider | Available | Stub | Planned | Next up (unassigned) | Datasets |
 |---|---:|---:|---:|---|---|
-| [NOAA](docs/providers/noaa.md) | 7 | 0 | 22 | — | `ghcn-daily`, `gsom`, `gsoy`, `storm-events`, `nexrad-level2`, `goes-abi`, `coastwatch-sst`, +22 planned |
+| [NOAA](docs/providers/noaa.md) | 8 | 0 | 21 | — | `ghcn-daily`, `gsom`, `gsoy`, `storm-events`, `nexrad-level2`, `goes-abi`, `coops-water-levels`, `coastwatch-sst`, +21 planned |
 | [USGS](docs/providers/usgs.md) | 1 | 0 | 2 | — | `water-daily`, +2 planned |
 | [Census Bureau](docs/providers/census.md) | 0 | 0 | 1 | — | +1 planned |
 | [EPA](docs/providers/epa.md) | 0 | 0 | 1 | — | +1 planned |

@@ -11,6 +11,8 @@ All notable changes to this project are documented here. The format follows
 
 - `noaa:gsoy` annual station CSVs with complete UTC year selection, shared NCEI
   geographic discovery, reproducible restoration, and a small manifest example.
+- CO-OPS observed water levels for one station, explicit datum and UTC interval,
+  with raw CSV quality fields, response validation, and a reproducible manifest example.
 
 ## [0.9.0] - 2026-09-09
 

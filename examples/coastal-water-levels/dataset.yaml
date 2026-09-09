@@ -1,0 +1,9 @@
+name: coastal-water-levels
+sources:
+  - dataset: noaa:coops-water-levels
+    start: 2024-05-06T00:00:00Z
+    end: 2024-05-06T00:12:00Z
+    params:
+      station: "8518750"
+      datum: MLLW
+      units: metric
