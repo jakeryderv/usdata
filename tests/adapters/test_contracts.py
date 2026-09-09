@@ -1,15 +1,16 @@
 """Shared behavioral contracts; dataset-specific wire semantics stay in adapter tests."""
 
+from collections.abc import Callable
 from contextlib import nullcontext
 from pathlib import Path
+from typing import cast
 
 import httpx
 import pytest
 
 from usdata.models import Query, Status
 from usdata.protocols import s3
-from usdata.providers import load_adapter
-from usdata.providers._http import _HttpProvider
+from usdata.providers import Provider, load_adapter
 from usdata.providers.base import QueryError
 from usdata.providers.noaa.coastwatch import BASE, DATASET
 from usdata.providers.noaa.storm_events import DIRECTORY_URL
@@ -90,11 +91,11 @@ def test_adapter_contract(dataset_id, injected, fail, tmp_path, monkeypatch) -> 
     monkeypatch.setenv("USDATA_CACHE_DIR", str(tmp_path / "forbidden-cache"))
     dataset = default_registry().get(dataset_id)
     adapter = load_adapter(dataset)
-    assert isinstance(adapter, _HttpProvider)
     assert clients == []  # Construction is lazy.
     supplied = make_client() if injected else None
     if supplied is not None:
-        adapter = type(adapter)(dataset, client=supplied)
+        constructor = cast(Callable[..., Provider], type(adapter))
+        adapter = constructor(dataset, client=supplied)
     try:
         with pytest.raises(httpx.HTTPStatusError) if fail else nullcontext(), adapter:
             first = adapter.list_assets(query(dataset_id))
