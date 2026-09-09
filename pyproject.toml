@@ -42,10 +42,12 @@ dev = [
     "pytest-cov>=7.1.0",
     "respx>=0.23.1",
     "ruff>=0.6",
+    "towncrier>=26.9",
 ]
 docs = [
     "mkdocstrings-python>=2.0.8",
     "nbconvert>=7.17.1",
+    "towncrier>=26.9",
     "zensical>=0.0.60",
 ]
 examples = [
@@ -99,3 +101,58 @@ markers = [
     "netcdf: optional NetCDF reader coverage",
 ]
 addopts = "-ra --strict-markers"
+
+[tool.towncrier]
+directory = "changes"
+filename = "CHANGELOG.md"
+start_string = "<!-- towncrier release notes start -->\n"
+underlines = ["", "", ""]
+title_format = "## [{version}](https://github.com/jakeryderv/usdata/releases/tag/v{version}) - {project_date}"
+issue_format = "[#{issue}](https://github.com/jakeryderv/usdata/issues/{issue})"
+template = "scripts/templates/changelog.md.jinja"
+wrap = false
+
+[[tool.towncrier.type]]
+directory = "breaking"
+name = "Breaking"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "security"
+name = "Security"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "removed"
+name = "Removed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "added"
+name = "Added"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "changed"
+name = "Changed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "fixed"
+name = "Fixed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "documentation"
+name = "Documentation"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "development"
+name = "Development"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "internal"
+name = "Internal"
+showcontent = true

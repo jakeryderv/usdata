@@ -7,34 +7,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-### Documentation
+Upcoming notes are maintained as [individual fragments](changes/README.md).
+The documentation site assembles their preview automatically.
 
-- Make the first-use walkthrough the site home, separate NOAA dataset guides
-  from service research, and clarify source installation and reproducibility.
-
-### Development
-
-
-- Allow focused manual live-test and notebook CI runs while retaining complete
-  weekly coverage; summarize test failures, skips, and timings in Actions.
-
-
-- Prepare releases on a branch before editing files, validate draft release PRs
-  before review/merge, check navigation and notebook release notices, and provide
-  guarded cleanup for merged local branches and worktrees.
-
-
-- Add optional fast commit hooks, workflow linting, and PR-title validation; pin
-  GitHub Actions to reviewed commits while retaining Dependabot updates.
-- Generate the radar-site CSV with LF line endings so fresh worktrees stay clean,
-  and apply lint fixes before formatting.
-
-### Added
-
-- `noaa:gsoy` annual station CSVs with complete UTC year selection, shared NCEI
-  geographic discovery, reproducible restoration, and a small manifest example.
-- CO-OPS observed water levels for one station, explicit datum and UTC interval,
-  with raw CSV quality fields, response validation, and a reproducible manifest example.
+<!-- towncrier release notes start -->
 
 ## [0.9.0] - 2026-09-09
 
@@ -238,7 +214,7 @@ First usable release.
 
 - Placeholder release reserving the package name. No functionality.
 
-[Unreleased]: https://github.com/jakeryderv/usdata/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/jakeryderv/usdata/tree/main/changes
 [0.9.0]: https://github.com/jakeryderv/usdata/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/jakeryderv/usdata/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/jakeryderv/usdata/compare/v0.6.0...v0.7.0

@@ -41,6 +41,10 @@ def repository(tmp_path):
 
 def test_release_failure_preserves_main_and_prepared_work(repository, monkeypatch):
     module = script("release", monkeypatch)
+    (repository / "changes").mkdir()
+    (repository / "changes/+feature.added.md").write_text("Feature")
+    git(repository, "add", ".")
+    git(repository, "commit", "-m", "pending note")
     original = module.run
 
     def commands(root, *command):

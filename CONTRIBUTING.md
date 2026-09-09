@@ -9,7 +9,7 @@ conventions.
 1. Open or pick an issue. Dataset requests use the "Dataset request" template.
 2. Branch from `main` with a type prefix: `feat/`, `fix/`, `docs/`, `refactor/`, `chore/`.
 3. Make the change. Add or update tests. Run `just check`.
-4. If the change is user-visible, add a line under `Unreleased` in `CHANGELOG.md`.
+4. Add a [release-note fragment](changes/README.md); use `internal` with a reason when there is no user-facing change.
 5. Open a pull request. The template has the checklist. CI must pass; `main`
    only accepts squash merges, so the PR title becomes the commit message and
    should be a [Conventional Commit](https://www.conventionalcommits.org/):
@@ -58,7 +58,7 @@ This is the main way the project grows. The full walkthrough is in
 - Acceptance criteria in the issue are met.
 - Tests added or updated; `just check` passes.
 - Docs updated: README, guides, registry entry, or ADR as appropriate.
-- `CHANGELOG.md` updated for user-visible changes.
+- Release-note fragment added; generated changelog history is not edited by hand.
 - Security implications considered (see [SECURITY.md](SECURITY.md)).
 
 For documentation changes, see [maintaining the docs](docs/guides/documentation.md).

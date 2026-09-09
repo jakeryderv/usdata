@@ -57,6 +57,7 @@ nav = [
   { "Project" = [
     { "Project overview and setup" = "project.md" },
     { "Roadmap" = "docs/roadmap.md" },
+    { "Upcoming changes" = "docs/generated/changes.md" },
     { "Changelog" = "CHANGELOG.md" },
     { "Versioning and releases" = "docs/versioning.md" },
     { "Security" = "SECURITY.md" },

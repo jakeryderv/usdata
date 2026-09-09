@@ -48,7 +48,7 @@ just release minor    # or: patch, major
 ```
 
 `just release` requires a clean main checkout, including untracked files. It
-updates main, creates `release/vX.Y.Z`, then bumps the version, rolls the handwritten
+updates main, creates `release/vX.Y.Z`, then bumps the version, uses Towncrier to assemble release-note fragments into the
 changelog, updates the lockfile, and regenerates registry docs. It reports known
 release notices to update. Failures leave the prepared branch/files available for
 inspection; nothing is published or merged.
@@ -70,8 +70,10 @@ If preparation stops, inspect `git status` and finish the failed command on the
 release branch; use `just release-pr` once version, changelog, lockfile, and docs
 are ready. Do not rerun `just release` from that branch or bump again. If a PR
 already exists, commit/push corrections normally rather than creating another.
-An empty `Unreleased` section blocks the changelog roll and leaves the version
-change on the release branch for inspection.
+Preparation requires at least one public release-note fragment. Towncrier
+consumes fragments when building a dated release entry. Internal-only notes do
+not trigger a release; their explanations remain in Git history. If assembly
+stops, inspect the changelog and remaining fragments before resuming.
 
 After the PR merges and CI succeeds on that exact main-branch commit, the
 `Publish to PyPI` workflow downloads the wheel and sdist from successful CI for
@@ -82,9 +84,10 @@ The workflow publishes whatever version `pyproject.toml` declares and tags that
 same version, so tag and package can never disagree. Merging a version bump
 that is already on PyPI is a no-op.
 
-Every pull request that changes user-visible behavior adds a line under
-`Unreleased` in `CHANGELOG.md`. The release recipe refuses to run if that
-section is empty.
+Every pull request adds a [release-note fragment](../changes/README.md).
+`just changes` previews them; the docs site also renders an upcoming-changes page.
+The released changelog remains readable on GitHub. Its existing published history
+is preserved; new release headings link directly to the corresponding release.
 
 The `pypi` environment accepts only `main`. Manual publishing also requires a
 successful main-branch CI run for the selected commit.

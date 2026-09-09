@@ -27,7 +27,8 @@ job, once per run rather than once per reader profile.
 | Public Python signatures and docstrings | `src/usdata/`, selected by `docs/reference/api.md` | API reference during the build |
 | Manifest recipes | `examples/*/README.md` and `dataset.yaml` | Example pages and downloadable manifests |
 | Examples, plots and provenance snapshots | `examples/*/example.ipynb` | Notebook pages and images during the build |
-| Release notes | Root `CHANGELOG.md` | Site changelog |
+| Upcoming release notes | `changes/*.md` | Build-only upcoming changes page |
+| Published release notes | Towncrier assembles fragments into root `CHANGELOG.md` | Site changelog |
 
 Run `just docs` after changing the registry, and commit its generated Markdown.
 These small text artifacts keep the catalog usable on GitHub too. Access notes
@@ -70,8 +71,8 @@ Saved results describe their recorded executions, not current upstream health.
 
 The site currently describes the source checkout. Mark source-only features
 **Unreleased** and retain the changelog as the release history. Write user-facing
-release notes under `Unreleased`; `just release` continues to roll those notes
-and regenerate registry documentation. The website does not own release policy.
+[release-note fragments](../../changes/README.md); `just release` assembles them
+with Towncrier and regenerates registry documentation. The website does not own release policy.
 
 Public hosting and the `usdata.dev` domain are deferred in
 [issue #56](https://github.com/jakeryderv/usdata/issues/56), without a target date.

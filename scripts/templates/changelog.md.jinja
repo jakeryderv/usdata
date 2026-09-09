@@ -1,0 +1,13 @@
+{# title_format supplies the release heading. Internal notes record exemptions. #}
+{{ "\n" -}}
+{% for section, categories in sections.items() -%}
+{% for category, definition in definitions.items() if category in categories and category != "internal" -%}
+### {{ definition.name }}
+
+{% for text, issues in categories[category].items() -%}
+- {{ text }}{% if issues %} ({{ issues | join(", ") }}){% endif %}
+{{ "\n" -}}
+{% endfor %}
+{{ "\n" -}}
+{% endfor -%}
+{% endfor -%}
