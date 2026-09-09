@@ -92,6 +92,7 @@ def test_empty_station_search_has_bounded_diagnostics(
     assert "x" * 513 not in caplog.text
 
 
+@pytest.mark.l2
 def test_fetch_writes_file_and_provenance_then_uses_cache(
     tmp_path: Path, adapter: GhcnDaily, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -111,6 +112,7 @@ def test_fetch_writes_file_and_provenance_then_uses_cache(
     assert f.provenance.size == len(CSV)
 
 
+@pytest.mark.l2
 def test_fetch_http_error_leaves_no_partial_file(tmp_path: Path, adapter: GhcnDaily) -> None:
     q = build_query(start="2024-05-06", end="2024-05-06", stations=["X"])
     (asset,) = adapter.list_assets(q)
@@ -138,3 +140,10 @@ def test_fetch_http_error_leaves_no_partial_file(tmp_path: Path, adapter: GhcnDa
 def test_rejects_invalid_provider_params(adapter: GhcnDaily, params: dict) -> None:
     with pytest.raises(QueryError):
         adapter.list_assets(build_query(start="2024-05-06", end="2024-05-07", **params))
+
+
+def test_injected_client_remains_open() -> None:
+    with httpx.Client() as client:
+        with GhcnDaily(default_registry().get("noaa:ghcn-daily"), client=client):
+            pass
+        assert not client.is_closed

@@ -11,6 +11,8 @@ from usdata.fetch import FetchedAsset, fetch
 from usdata.models import Asset, Protocol, Provenance
 from usdata.readers import MissingReaderDependency, UnsupportedFormat
 
+pytestmark = pytest.mark.pandas
+
 
 @pytest.fixture
 def pd():

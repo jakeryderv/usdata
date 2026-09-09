@@ -13,6 +13,8 @@ from usdata.fetch import FetchedAsset
 from usdata.models import Asset, Protocol, Provenance
 from usdata.readers import MissingReaderDependency, RadarDecodeError
 
+pytestmark = pytest.mark.radar
+
 FIXTURES = Path(__file__).parents[1] / "fixtures" / "radar"
 
 

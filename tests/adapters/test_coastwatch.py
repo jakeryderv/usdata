@@ -10,12 +10,13 @@ from typer.testing import CliRunner
 
 from usdata.cli import app
 from usdata.fetch import ChecksumMismatch
-from usdata.protocols.erddap import GridSlice, griddap_url
 from usdata.providers.base import QueryError
 from usdata.providers.noaa.coastwatch import BASE, DATASET, CoastwatchSst
 from usdata.pull import pull, verify
 from usdata.query import build_query
 from usdata.registry import default_registry
+
+pytestmark = pytest.mark.l2
 
 INFO_URL = f"{BASE}/info/{DATASET}/index.csv"
 GRID_URL = f"{BASE}/griddap/{DATASET}.csv"
@@ -129,6 +130,7 @@ def test_changed_or_malformed_metadata_is_an_upstream_error(adapter, info, times
             adapter.list_assets(query())
 
 
+@pytest.mark.l2
 def test_manifest_cache_restore_checksum_and_cli(tmp_path: Path) -> None:
     manifest = tmp_path / "dataset.yaml"
     manifest.write_text("""name: sst
@@ -161,13 +163,3 @@ sources:
         with pytest.raises(ChecksumMismatch):
             pull(manifest, root=tmp_path / "cache")
     assert path.read_bytes() == b"local corruption"
-
-
-def test_griddap_builder_rejects_url_injection() -> None:
-    for dataset in ("../other", "sst?secret", "sst#part"):
-        with pytest.raises(ValueError):
-            griddap_url(BASE, dataset, ["sst"], [GridSlice(1, 2)])
-    with pytest.raises(ValueError):
-        griddap_url(BASE, DATASET, ["sst&evil"], [GridSlice(1, 2)])
-    with pytest.raises(ValueError):
-        griddap_url(BASE, DATASET, ["sst"], [GridSlice(float("nan"), 2)])

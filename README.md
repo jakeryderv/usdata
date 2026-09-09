@@ -206,3 +206,6 @@ a dataset.
 ## License
 
 Apache-2.0
+
+Testing levels, suite organization, and selection are documented in
+[Testing](docs/testing.md).

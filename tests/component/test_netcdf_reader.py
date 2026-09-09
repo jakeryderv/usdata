@@ -9,6 +9,8 @@ from usdata.fetch import FetchedAsset
 from usdata.models import Asset, Protocol, Provenance
 from usdata.readers import MissingReaderDependency
 
+pytestmark = pytest.mark.netcdf
+
 FIXTURE = Path(__file__).parents[1] / "fixtures/netcdf/packed-grid.nc"
 
 

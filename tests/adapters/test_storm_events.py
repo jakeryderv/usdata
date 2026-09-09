@@ -21,6 +21,8 @@ from usdata.query import build_query
 from usdata.readers import UnsupportedFormat
 from usdata.registry import default_registry
 
+pytestmark = pytest.mark.l2
+
 FIXTURE = Path(__file__).parents[1] / "fixtures" / "storm-details-1950.csv"
 CSV = FIXTURE.read_bytes()
 GZIP = gzip.compress(CSV, mtime=0)
@@ -137,6 +139,7 @@ def test_listing_http_errors_surface(adapter) -> None:
             adapter.list_assets(build_query(start="1950-01-01", end="1950-12-31"))
 
 
+@pytest.mark.l2
 def test_fetch_preserves_gzip_bytes_and_cache_provenance(tmp_path: Path) -> None:
     dataset = default_registry().get("noaa:storm-events")
     with respx.mock() as mock:
@@ -151,6 +154,7 @@ def test_fetch_preserves_gzip_bytes_and_cache_provenance(tmp_path: Path) -> None
     assert cached.from_cache and data.call_count == 1
 
 
+@pytest.mark.l2
 def test_locked_restore_pins_revision_and_rejects_changed_bytes(tmp_path: Path) -> None:
     manifest = tmp_path / "dataset.yaml"
     manifest.write_text(MANIFEST)
@@ -183,6 +187,7 @@ def test_locked_restore_pins_revision_and_rejects_changed_bytes(tmp_path: Path) 
     assert updated.fetched[0].path != path
 
 
+@pytest.mark.l2
 def test_gzip_csv_reader_is_local_preserves_ids_options_and_source(tmp_path: Path) -> None:
     pytest.importorskip("pandas")
     dataset = default_registry().get("noaa:storm-events")
@@ -248,6 +253,7 @@ def test_cli_dry_run_and_rejected_geographic_filter() -> None:
     assert bad.exit_code == 2 and "Filter locally" in bad.output and not mock.calls
 
 
+@pytest.mark.l2
 def test_corrupt_gzip_propagates_failure_and_closes_local_file(tmp_path: Path, monkeypatch) -> None:
     pytest.importorskip("pandas")
     dataset = default_registry().get("noaa:storm-events")

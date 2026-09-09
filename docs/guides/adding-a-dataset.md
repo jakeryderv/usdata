@@ -82,11 +82,13 @@ Rules:
 
 ## 4. Tests
 
-- `tests/unit/test_<name>.py`: mock every HTTP call with `respx`. Cover query
+- `tests/adapters/test_<name>.py`: mock every HTTP call with `respx`. Cover query
   validation, pagination, and the fetch path. These run on every PR; real network connections are blocked automatically.
-- `tests/integration/test_<name>_live.py`: mark the module
-  `pytestmark = pytest.mark.integration`. Fetch the smallest real object you
+- `tests/live/test_<name>_live.py`: mark the module
+  `pytestmark = pytest.mark.live`. Fetch the smallest real object you
   can find. These run weekly.
+- Apply the level and dependency rules in [Testing](../testing.md); mark local
+  filesystem scenarios `l2` even within an adapter module.
 
 ## 5. Docs and changelog
 

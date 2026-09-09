@@ -3,6 +3,7 @@ from xml.sax.saxutils import escape
 import httpx
 import pytest
 
+from usdata.protocols import s3
 from usdata.protocols.s3 import list_objects
 
 
@@ -49,3 +50,10 @@ def test_pagination_preserves_opaque_tokens_and_stops_at_final_page() -> None:
     assert requests[1].url.params["continuation-token"] == token
     assert requests[1].url.params["prefix"] == "prefix/"
     assert requests[1].url.params["max-keys"] == "1"
+
+
+def test_s3_url_helpers() -> None:
+    assert s3.parse_s3_url("s3://b/a/b c") == ("b", "a/b c")
+    assert s3.https_url("b", "a/b c") == "https://b.s3.amazonaws.com/a/b%20c"
+    with pytest.raises(ValueError):
+        s3.parse_s3_url("https://x")

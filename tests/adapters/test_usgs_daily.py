@@ -84,6 +84,7 @@ def test_bbox_variables_and_sites_normalize_deterministically() -> None:
     assert route.calls[0].request.url.params["bbox"] == "-96.01,36.13,-96.0,36.15"
 
 
+@pytest.mark.l2
 def test_empty_results_and_upstream_failure(tmp_path: Path) -> None:
     q = build_query(start="2024-05-06", end="2024-05-07", location="OK")
     with respx.mock() as mock:
@@ -97,6 +98,7 @@ def test_empty_results_and_upstream_failure(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize("include_noaa", [False, True])
+@pytest.mark.l2
 def test_manifest_restores_csv_without_listing(tmp_path: Path, include_noaa: bool) -> None:
     m = tmp_path / "dataset.yaml"
     m.write_text("""name: streamflow

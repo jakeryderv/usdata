@@ -10,7 +10,7 @@ from usdata.providers.noaa.ghcnd import GhcnDaily
 from usdata.query import build_query
 from usdata.registry import default_registry
 
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.live
 
 
 def test_oklahoma_city_station_discovery(caplog: pytest.LogCaptureFixture) -> None:
