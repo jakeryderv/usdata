@@ -88,9 +88,15 @@ def test_failed_release_gate_never_pushes_or_creates_pr(repository, monkeypatch)
     assert not any("push" in command or "gh" in command or "commit" in command for command in calls)
 
 
-@pytest.mark.parametrize("changed", ["clean", "dirty", "new-commit", "unmerged"])
+@pytest.mark.parametrize(
+    "changed",
+    ["clean", "dirty", "new-commit", "unmerged", "ignored-lock", "ignored-data", "tool-cache"],
+)
 def test_cleanup_requires_exact_merged_tip_and_clean_worktree(repository, monkeypatch, changed):
     module = script("cleanup_pr", monkeypatch)
+    (repository / ".gitignore").write_text("*.lock.json\nlocal-data/\n.venv/\n")
+    git(repository, "add", ".gitignore")
+    git(repository, "commit", "-m", "ignore generated files")
     git(repository, "switch", "-c", "feat/example")
     (repository / "feature.txt").write_text("feature")
     git(repository, "add", ".")
@@ -108,6 +114,12 @@ def test_cleanup_requires_exact_merged_tip_and_clean_worktree(repository, monkey
         if changed == "new-commit":
             git(worktree, "add", ".")
             git(worktree, "commit", "-m", "extra work")
+    if changed == "ignored-lock":
+        (worktree / "dataset.lock.json").write_text("pinned inputs")
+    if changed in {"ignored-data", "tool-cache"}:
+        directory = worktree / ("local-data" if changed == "ignored-data" else ".venv")
+        directory.mkdir()
+        (directory / "file").write_text("bytes")
     original = module.run
 
     def commands(root, *command):
@@ -127,7 +139,7 @@ def test_cleanup_requires_exact_merged_tip_and_clean_worktree(repository, monkey
         return original(root, *command)
 
     monkeypatch.setattr(module, "run", commands)
-    if changed == "clean":
+    if changed in {"clean", "tool-cache"}:
         module.cleanup(repository, "123")
         assert not worktree.exists()
         assert "feat/example" not in git(repository, "branch", "--list")

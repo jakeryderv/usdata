@@ -26,7 +26,9 @@ Return to the main checkout (`git switch main` when working in the primary
 checkout), then run `just cleanup PR_NUMBER`. Cleanup verifies that the PR merged
 into main and that the local branch still matches its exact head. It removes a
 clean associated topic worktree and the local branch, then leaves main current.
-It refuses dirty worktrees, changed branch tips, and fork PRs. GitHub deletes the
+It refuses dirty worktrees, changed branch tips, and fork PRs. Ignored lockfiles,
+downloads, and notebook reports must be preserved elsewhere first; only known
+regenerable tool/build caches are disposable. GitHub deletes the
 remote branch after merge. Keep any branch with additional work for a separate PR.
 
 ## Adding a dataset
