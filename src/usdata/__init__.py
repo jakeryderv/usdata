@@ -10,10 +10,11 @@ try:
 except PackageNotFoundError:  # running from a source tree without an install
     __version__ = "0.0.0"
 
-from usdata.models import Asset, BBox, Dataset, Provenance, Query, TimeRange
+from usdata.models import Asset, BBox, Dataset, Provenance, Query, TemporalSelection, TimeRange
 from usdata.pull import pull, verify
 from usdata.query import build_query
 from usdata.registry import DatasetNotFound, Registry, SearchResult, default_registry
+from usdata.selection import select_by_time
 
 __all__ = [
     "Asset",
@@ -24,6 +25,7 @@ __all__ = [
     "Query",
     "Registry",
     "SearchResult",
+    "TemporalSelection",
     "TimeRange",
     "__version__",
     "build_query",
@@ -31,6 +33,7 @@ __all__ = [
     "get",
     "pull",
     "search",
+    "select_by_time",
     "verify",
 ]
 

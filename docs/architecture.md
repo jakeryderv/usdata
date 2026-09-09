@@ -23,6 +23,7 @@ user arguments ─► build_query ─► Query
 | `models` | Pydantic types shared everywhere: `BBox`, `TimeRange`, `Dataset`, `Query`, `Asset`, `Provenance`. STAC-shaped: Dataset is a Collection, Asset is a file-level Asset. |
 | `registry` | Loads the curated `data/registry.yaml`; keyword-ranked search filtered by provider, space, and time. |
 | `query` | Turns loose user input (state/county names, FIPS, ISO dates, lat/lon) into a normalized `Query`. Place lookup uses `data/places.csv`. |
+| `selection` | Pure start-time selection among supplied assets, with explicit temporal policy and match diagnostics. |
 | `providers` | One `Provider` subclass per dataset, loaded by dotted path from the registry entry. Translates `Query` to agency-specific listing and download. |
 | `protocols` | Transport clients with no dataset knowledge. `http.download` streams to disk atomically; `s3.list_objects` paginates ListObjectsV2 anonymously. |
 | `fetch` | Core loop: adapter resolves assets, cache is checked, bytes fetched, provenance written. |
