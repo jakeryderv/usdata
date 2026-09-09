@@ -65,6 +65,7 @@ check-static:
     uv run ruff format --check
     uv run ruff check
     just check-hooks
+    uv run python scripts/check_changes.py
     just check-docs
 
 # Type and behavior checks for the active dependency profile
@@ -113,6 +114,15 @@ smoke:
 # Run the CLI
 run *args:
     uv run usdata {{args}}
+
+# Preview pending release notes without changing files
+changes:
+    uv run python scripts/check_changes.py --preview
+
+# Create a release note; for example: just change +csv-units.fixed.md
+[positional-arguments]
+change name:
+    uv run towncrier create "$1"
 
 # Prepare a release branch; edit release notices before opening the PR
 release bump="minor":

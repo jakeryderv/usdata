@@ -61,34 +61,17 @@ CHANGELOG = """# Changelog
 """
 
 
-def test_roll_preserves_notes_and_rewrites_version_links(tmp_path, monkeypatch, capsys) -> None:
+def test_changelog_reads_old_and_towncrier_headings(tmp_path, monkeypatch, capsys):
     module = script("changelog")
     path = tmp_path / "CHANGELOG.md"
-    path.write_text(CHANGELOG)
+    path.write_text(
+        CHANGELOG + "\n## [0.5.0](https://example.test/release) - 2026-09-09\n\n- New note.\n"
+    )
     monkeypatch.setattr(module, "PATH", path)
-    module.roll("0.5.0")
-    output = path.read_text()
-    assert "## [Unreleased]\n\n## [0.5.0] - " in output
-    assert "compare/v0.4.0...v0.5.0" in output
-    assert "compare/v0.5.0...HEAD" in output
-    assert "Previous release." in output
-    capsys.readouterr()
+    module.notes("0.4.0")
+    assert capsys.readouterr().out.strip() == "- Previous release."
     module.notes("0.5.0")
-    assert capsys.readouterr().out.strip() == "### Breaking\n\n- Reject incomplete inputs."
-
-
-@pytest.mark.parametrize(
-    "version,body",
-    [("0.4.0", CHANGELOG), ("0.5.0", CHANGELOG.replace("- Reject incomplete inputs.", ""))],
-)
-def test_invalid_release_keeps_changelog_unchanged(tmp_path, monkeypatch, version, body) -> None:
-    module = script("changelog")
-    path = tmp_path / "CHANGELOG.md"
-    path.write_text(body)
-    monkeypatch.setattr(module, "PATH", path)
-    with pytest.raises(SystemExit):
-        module.roll(version)
-    assert path.read_text() == body
+    assert capsys.readouterr().out.strip() == "- New note."
 
 
 @pytest.mark.parametrize("fault", [None, "wheel-version", "sdist-version", "missing-data"])

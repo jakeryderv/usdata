@@ -78,6 +78,7 @@ just docs-serve # build and preview the documentation locally, with reload
 just check-docs # validate generated content and build the site strictly
 just build     # build wheel and sdist
 just smoke     # exercise core and pandas wheel installations outside the checkout
+just changes   # preview upcoming release notes
 just cleanup 123 # from main: remove PR #123's merged branch and clean worktree
 just run search radar
 ```

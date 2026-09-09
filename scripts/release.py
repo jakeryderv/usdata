@@ -10,6 +10,7 @@ import tomllib
 from pathlib import Path
 
 from changelog import parse
+from check_changes import fragment_paths
 from check_release_docs import check
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,6 +34,8 @@ def prepare(root: Path, bump: str) -> None:
     if run(root, "git", "status", "--porcelain"):
         raise ValueError("working tree must be clean, including untracked files")
     run(root, "git", "pull", "--ff-only")
+    if not any(".internal." not in path.name for path in fragment_paths(root)):
+        raise ValueError("no public release notes; add a changes fragment before releasing")
     current = version(root)
     if not re.fullmatch(r"\d+\.\d+\.\d+", current):
         raise ValueError(f"expected a stable semantic version, got {current}")
@@ -44,7 +47,7 @@ def prepare(root: Path, bump: str) -> None:
     # All file mutations happen after branch creation; a failure leaves recoverable work.
     run(root, "git", "switch", "-c", f"release/v{target}")
     run(root, "uv", "version", "--bump", bump)
-    run(root, "uv", "run", "python", "scripts/changelog.py", "roll", target)
+    run(root, "uv", "run", "towncrier", "build", "--yes", "--version", target)
     run(root, "uv", "lock")
     run(root, "just", "docs")
     print(f"Prepared release/v{target}. Review version, changelog, and release-status wording.")
@@ -60,6 +63,8 @@ def open_pr(root: Path) -> None:
         raise ValueError(f"run from {branch}")
     if run(root, "git", "ls-files", "--others", "--exclude-standard"):
         raise ValueError("review and commit untracked files before opening the release PR")
+    if fragment_paths(root):
+        raise ValueError("build and consume pending fragments before opening the release PR")
     _, sections = parse((root / "CHANGELOG.md").read_text())
     if (
         len(sections) < 2

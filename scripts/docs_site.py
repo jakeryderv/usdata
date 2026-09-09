@@ -17,6 +17,7 @@ from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
 import render_registry
+from check_changes import preview
 
 from usdata.registry import Registry
 
@@ -56,6 +57,7 @@ def source_paths() -> list[Path]:
         ROOT / name
         for name in ("README.md", "CONTRIBUTING.md", "CHANGELOG.md", "SECURITY.md", "LICENSE")
     ]
+    paths.append(ROOT / "changes/README.md")
     for directory in ("docs", "examples"):
         paths.extend(
             path
@@ -96,6 +98,13 @@ def prepare() -> None:
     for path, content in importlib.reload(render_registry).render_all(Registry.bundled()).items():
         relative = path.relative_to(ROOT)
         outputs[site_path(relative)] = page_links(content, relative).encode()
+    pending = preview(ROOT)
+    outputs[Path("docs/generated/changes.md")] = (
+        "# Upcoming changes\n\nGenerated from release-note fragments. "
+        "These changes are not yet released.\n\n"
+        + pending
+        + "\n\n[Published releases](../../CHANGELOG.md).\n"
+    ).encode()
     cli = subprocess.run(
         [sys.executable, "-m", "typer", "usdata.cli.app", "utils", "docs", "--name", "usdata"],
         cwd=ROOT,
@@ -121,8 +130,9 @@ def prepare() -> None:
 
 def fingerprint() -> list[tuple[str, int]]:
     paths = source_paths() + list((ROOT / "src").rglob("*.py"))
+    paths += list((ROOT / "changes").glob("*.md"))
     paths += [ROOT / "src/usdata/data/registry.yaml", ROOT / "pyproject.toml"]
-    paths += list((ROOT / "scripts").glob("*.py"))
+    paths += list((ROOT / "scripts").glob("*.py")) + list((ROOT / "scripts/templates").glob("*"))
     return [(str(path), path.stat().st_mtime_ns) for path in sorted(paths)]
 
 

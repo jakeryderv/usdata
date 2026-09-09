@@ -1,0 +1,1 @@
+Prepare releases on a branch before editing files, validate draft release PRs before review/merge, check navigation and notebook release notices, and provide guarded cleanup for merged local branches and worktrees.
