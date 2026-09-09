@@ -26,7 +26,7 @@ restoration. See the runnable [SST example](../../examples/sst-analysis/README.m
 
 ## Selection and options
 
-`FetchedAsset.open()` returns an in-memory pandas DataFrame. It recognizes
+For CSV, `FetchedAsset.open()` returns an in-memory pandas DataFrame. It recognizes
 `text/csv` and `application/csv` (including charset parameters). An ERDDAP asset
 uses the `erddap-csv` reader, which consumes the second CSV record as units.
 Other CSV assets use the ordinary `csv` reader. This assumes ERDDAP's standard
@@ -43,7 +43,7 @@ source integrity.
 
 | Option | Behavior |
 |---|---|
-| `reader` | Defaults to inference. Explicit `"csv"` or `"erddap-csv"` handles missing or ambiguous media metadata. |
+| `reader` | Defaults to inference. Explicit `"csv"`, `"erddap-csv"`, or `"nexrad-level2"` handles missing or ambiguous media metadata. |
 | `dtype` | Mapping of column names to pandas dtype strings; overrides identifier defaults for those columns. |
 | `parse_dates` | List of columns to parse as dates/timestamps. Dates stay strings by default. |
 | `usecols` | List of columns to read. Ordering follows pandas behavior. |
@@ -74,20 +74,62 @@ and [DataFrame attributes](https://pandas.pydata.org/docs/reference/api/pandas.D
 For parser options outside this small API, use pandas directly on `item.path`,
 accounting for ERDDAP's units record yourself.
 
+## NEXRAD Level II
+
+Available from source for v0.8; the published v0.7 package does not include the
+radar extra. Use the checkout commands below until v0.8 is published.
+
+Install `usdata[radar]` (checkout: `uv sync --group dev --extra radar`). Assets
+from `noaa:nexrad-level2` infer the radar reader; use `reader="nexrad-level2"`
+for an archive with ambiguous dataset metadata. Whole-file gzip/bzip2 and
+internal Archive II compression are supported, with offline legacy message-1
+and modern message-31 fixtures. The radar extra is verified on Linux Python
+3.11 and 3.14; core and CSV readers retain their existing platform coverage.
+
+```python
+radar = item.open()  # a fetched noaa:nexrad-level2 asset
+sweep = radar["sweep_0"].to_dataset()
+print(sweep["DBZH"].attrs["units"])  # dBZ
+print(radar.attrs["usdata"]["provenance"]["checksum"])
+```
+
+The result is an eagerly loaded **xarray DataTree**, decoded by
+[xradar](https://docs.openradarscience.org/projects/xradar/en/stable/generated/xradar.io.backends.nexrad_level2.open_nexradlevel2_datatree.html).
+Each `sweep_N` child has native fields and coordinates. Decoder resources are
+closed before returning. A compressed volume can expand to hundreds of MB;
+select a bounded time/site query before fetching. CSV options raise `ValueError`
+for radar rather than being ignored.
+
+Units and native moment scaling are retained. Reserved codes become NaN:
+0–1 for DBZH (reflectivity), VRADH (radial velocity), WRADH (spectrum width), ZDR,
+PHIDP, and RHOHV; 0–7 for CCORH (clutter-filter power removed). Coordinates and
+unknown fields are unchanged. These are parsing conventions, not quality
+control; no rainfall conversion, clutter removal, or velocity unfolding is
+performed. Incomplete sweeps are padded with NaN so received rays remain
+available. Xradar warnings about angle reconstruction are preserved; do not
+interpret those sweeps as complete observations. Legacy files may lack location
+metadata, which the reader does not replace with guessed coordinates.
+
+Root `radar.attrs["usdata"]` carries the asset ID and copied source provenance;
+it is not an export format or a record of analysis steps. Keep the input files
+and sidecars. See the [executed radar notebook](../../examples/radar-reflectivity/example.ipynb)
+and [ADR 0008](../adr/0008-local-radar-readers.md). Advanced decoder options
+remain available by calling xradar directly with `item.path`.
+
 ## Boundaries and errors
 
 Opening is local and does not re-fetch, verify checksums, alter cached files,
 update provenance, or write transformed data. Run `verify` when checking locked
 input integrity; call `pull` to restore missing files. Editing the DataFrame
 does not change its source CSV. Scientific units are not converted, and
-provider-specific missing-data sentinels are not normalized beyond pandas defaults.
+CSV provider-specific missing-data sentinels are not normalized beyond pandas defaults.
 
-`MissingReaderDependency` (an `ImportError`) names `usdata[pandas]` when pandas
-is absent. Unsupported formats or reader names raise `UnsupportedFormat`
+`MissingReaderDependency` (an `ImportError`) names `usdata[pandas]` or
+`usdata[radar]` when the required reader dependency is absent. Unsupported formats or reader names raise `UnsupportedFormat`
 (a `ValueError`). Both errors are available from `usdata.readers`. Missing local
 files and pandas parsing/conversion failures propagate normally. CSV headers
 must have unique, non-empty names, and ERDDAP units must match the header width.
 
-NetCDF, NEXRAD binary, GRIB, and geospatial readers are not implemented. Use the
+NetCDF, GRIB, and geospatial readers are not implemented. Use the
 fetched path with a suitable external reader for those formats. The core SDK,
 CLI, fetch, cache, and lockfile workflows continue to work without pandas.

@@ -43,9 +43,14 @@ check-pandas:
     uv sync --group dev --extra pandas
     UV_NO_SYNC=1 just check
 
+# Run the full checks with the optional NEXRAD reader installed
+check-radar:
+    uv sync --group dev --extra radar
+    UV_NO_SYNC=1 just check
+
 # Open the interactive examples in JupyterLab
 notebooks:
-    uv run --group examples jupyter lab examples
+    uv run --group examples --extra radar jupyter lab examples
 
 # Validate committed notebook structure and saved outputs without fetching data
 check-notebooks:
@@ -53,7 +58,7 @@ check-notebooks:
 
 # Execute all notebooks against live services; --write refreshes committed outputs
 run-notebooks *args:
-    uv run --group examples python scripts/run_notebooks.py {{args}}
+    uv run --group examples --extra radar python scripts/run_notebooks.py {{args}}
 
 # Build sdist and wheel into dist/
 build:

@@ -87,9 +87,13 @@ terminal fetch/cache check pass; redirected output retains its existing format.
   and an [executed report-analysis notebook](../examples/storm-events/example.ipynb)
   (available from source for v0.8)
 
+- [x] Optional NEXRAD Level II reader with xradar sweep DataTrees, flag masking,
+  attributed format fixtures, and an [executed reflectivity notebook](../examples/radar-reflectivity/example.ipynb)
+  (available from source for v0.8)
+
 **Following v0.7 (remaining work not yet assigned a release)**:
 
-- NetCDF, radar, and geospatial readers behind extras, driven by concrete
+- NetCDF and geospatial readers behind extras, driven by concrete
   supported datasets and format fixtures
 - Further NCEI Access Data Service datasets (GSOY, climate normals)
 - Bulk directories and archives (HURDAT2, IBTrACS)

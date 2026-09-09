@@ -16,6 +16,8 @@ All notable changes to this project are documented here. The format follows
   compressed CSV opening preserves event and geographic identifier strings.
 - Executed Storm Events notebook with local Oklahoma/date filters, event-record
   and damage-rating plots, and source/reporting caveats.
+- Optional NEXRAD Level II opening with xradar sweep DataTrees, native units and
+  flag masking, source provenance, and an executed reflectivity notebook.
 
 ### Changed
 

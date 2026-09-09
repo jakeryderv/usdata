@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         python: ["3.11", "3.14"]
-        readers: [core, pandas]
+        readers: [core, pandas, radar]
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
@@ -30,12 +30,15 @@ jobs:
         run: just setup
       - if: matrix.readers == 'pandas'
         run: uv sync --group dev --extra pandas
+      - if: matrix.readers == 'radar'
+        run: uv sync --group dev --extra radar
       - name: Check dependency profile
         env:
-          EXPECT_PANDAS: ${{ matrix.readers == 'pandas' && '1' || '0' }}
+          EXPECT_PANDAS: ${{ matrix.readers != 'core' && '1' || '0' }}
+          EXPECT_RADAR: ${{ matrix.readers == 'radar' && '1' || '0' }}
         run: >-
           uv run --no-sync python -c
-          "import importlib.util, os; assert (importlib.util.find_spec('pandas') is not None) == (os.environ['EXPECT_PANDAS'] == '1')"
+          "import importlib.util, os; assert (importlib.util.find_spec('pandas') is not None) == (os.environ['EXPECT_PANDAS'] == '1'); assert (importlib.util.find_spec('xradar') is not None) == (os.environ['EXPECT_RADAR'] == '1')"
       - run: just check
         env:
           UV_NO_SYNC: '1'
@@ -76,7 +79,7 @@ jobs:
         with:
           name: dist
           path: dist
-      - run: uv run --no-project python scripts/smoke_wheel.py
+      - run: uv run --no-project python scripts/smoke_wheel.py --radar
 
   # Single required status check for branch protection.
   ci:

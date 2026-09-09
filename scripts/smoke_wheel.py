@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import argparse
 import os
+import shutil
 import subprocess
 import sys
 import tomllib
@@ -27,6 +29,8 @@ from usdata.query import resolve_place
 
 assert usdata.__version__ == os.environ["USDATA_EXPECTED_VERSION"]
 assert find_spec("pandas") is None
+assert find_spec("xradar") is None
+assert "xradar" not in sys.modules
 assert "pandas" not in sys.modules
 assert Path(usdata.__file__).resolve().is_relative_to(Path.cwd().resolve())
 assert (resources.files("usdata") / "py.typed").is_file()
@@ -84,7 +88,44 @@ print("installed-wheel pandas smoke passed")
 """
 
 
+SMOKE_RADAR = """
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+from usdata.cache import sha256_file
+from usdata.fetch import FetchedAsset
+from usdata.models import Asset, Provenance
+assert "xradar" not in sys.modules
+path = Path("radar.bz2")
+asset = Asset(
+    id="radar", dataset_id="noaa:nexrad-level2", href="https://example.test/radar",
+    protocol="s3", media_type="application/octet-stream",
+)
+provenance = Provenance(
+    dataset_id=asset.dataset_id, provider="noaa", source_url=asset.href,
+    retrieved_at=datetime.now(UTC), checksum=sha256_file(path),
+    size=path.stat().st_size, usdata_version="wheel-smoke",
+)
+item = FetchedAsset(asset=asset, path=path, provenance=provenance, from_cache=True)
+radar = item.open()
+field = radar["sweep_0"]["DBZH"]
+assert field.shape == (367, 460)
+assert field.attrs["units"] == "dBZ"
+assert field.min() == -32 and field.max() == 57.5
+assert int(field.isnull().sum()) > 0
+assert radar.attrs["usdata"]["provenance"]["checksum"] == sha256_file(path)
+path.unlink()
+assert field.max() == 57.5
+print("installed-wheel radar smoke passed")
+"""
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--radar", action="store_true", help="also exercise the optional radar extra"
+    )
+    args = parser.parse_args()
     version = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
     wheel = check_dist(ROOT / "dist", version).resolve()
     with TemporaryDirectory(prefix="usdata-wheel-") as directory:
@@ -124,6 +165,17 @@ def main() -> None:
             cwd=work,
         )
         subprocess.run([str(python), "-I", "-c", SMOKE_READERS], check=True, cwd=work, env=env)
+        if args.radar:
+            shutil.copy2(
+                ROOT / "tests/fixtures/radar/example_nexrad_archive_msg1.bz2", work / "radar.bz2"
+            )
+            subprocess.run(
+                ["uv", "pip", "install", "--python", str(python), f"{wheel}[radar]"],
+                check=True,
+                env=env,
+                cwd=work,
+            )
+            subprocess.run([str(python), "-I", "-c", SMOKE_RADAR], check=True, cwd=work, env=env)
 
 
 if __name__ == "__main__":
