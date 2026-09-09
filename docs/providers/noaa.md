@@ -68,7 +68,7 @@ dataset page says otherwise.
 
 ## Query validation
 
-GHCN and GSOM accept only `stations` and `units` (`metric` or `standard`, following the
+GHCN, GSOM, and GSOY accept only `stations` and `units` (`metric` or `standard`, following the
 [NCEI API](https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation)).
 NEXRAD accepts only `site`, `sites`, and `nearest`. Explicit identifier lists
 must be non-empty strings. `site` and `sites` are mutually exclusive, and
@@ -251,6 +251,52 @@ and dataset-wide `totalCount=127947`; repeating with `offset=1` returned no resu
 Integration tests independently check geographic discovery and a manifest's
 explicit-station download/locked restoration. Upstream revisions can still
 change CSV bytes and correctly fail a locked restore.
+
+## Global Summary of the Year
+
+Available from source for the unreleased v0.10 as `noaa:gsoy`. GSOY uses the
+anonymous NCEI Access Data Service dataset `global-summary-of-the-year`, reusing
+GHCN/GSOM station discovery, pagination, and 50-station CSV chunks. Require both
+dates and either `stations` or a location/bbox, not both. `units` is `metric`
+(default) or `standard`; unknown parameters and text queries are rejected.
+
+Every UTC calendar year touched by the interval is selected in full: May 6–7
+selects the whole year; December 31–January 1 selects both years. Search and data
+requests use January 1 through December 31, giving equivalent year selections
+identical URLs and asset IDs. Asset coverage labels complete years; the original
+query remains in the manifest. A timezone offset can change the selected UTC year.
+
+CSV `DATE` is a four-digit year. Use `item.open(dtype={"DATE": "string"})` to
+preserve it as text with the existing pandas reader. Common variables are `PRCP`
+(annual precipitation total, metric millimeters) and `TAVG` (annual mean
+temperature, metric degrees Celsius). CSV contains no units row; provenance
+retains the requested unit system. Variable availability depends on the station.
+
+Some elements, including degree-day summaries, have hemisphere-dependent
+accumulation seasons. Annual record labels do not mean every element represents
+January–December observations. Consult the [GSOY field documentation](https://www.ncei.noaa.gov/pub/data/cdo/documentation/GSOY_documentation.pdf).
+[Dataset metadata](https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc%3AC00947/html)
+describes global GHCN-Daily-derived summaries and weekly updates. Revisions can
+change CSV bytes; retain the cache as well as the manifest and lockfile.
+
+Bounded hosted probes verified one airport/year and geographic discovery on
+2026-09-09. Both a full-year request and a May 6–7 request returned the 2024
+annual record. A reproducible direct probe is:
+
+```sh
+curl --get 'https://www.ncei.noaa.gov/access/services/data/v1' \
+  --data-urlencode 'dataset=global-summary-of-the-year' \
+  --data-urlencode 'stations=USW00013967' \
+  --data-urlencode 'startDate=2024-01-01' --data-urlencode 'endDate=2024-12-31' \
+  --data-urlencode 'dataTypes=PRCP,TAVG' --data-urlencode 'units=metric' \
+  --data-urlencode 'format=csv' --data-urlencode 'includeStationLocation=1'
+```
+
+The search probe used the same annual bounds, `dataTypes=PRCP,TAVG`,
+`bbox=35.40,-97.62,35.38,-97.58`, `limit=1`, and `offset=0`; it found
+`USW00013967`. The [annual climate example](../../examples/annual-climate/README.md)
+provides a small manifest and local CSV analysis. Live checks independently
+exercise discovery and checksum-verified restoration.
 
 ## CoastWatch SST
 

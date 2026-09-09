@@ -58,8 +58,9 @@ def open_asset(
     Gzip CSVs are decompressed locally without changing cached bytes.
     Infer ``csv`` or ``erddap-csv`` from media type and protocol, or use an
     explicit reader for ambiguous metadata. Identifier columns default to pandas
-    strings; explicit dtype entries override those defaults. Dates remain strings
-    unless named in parse_dates. No checksum verification or downloading occurs.
+    strings; explicit dtype entries override those defaults. Dates are not parsed
+    unless named in parse_dates; use dtype to preserve numeric-looking date labels
+    as strings. No checksum verification or downloading occurs.
     Radar accepts zero-based ``sweep`` indices (one integer or a non-empty list);
     the default opens the whole volume after checking sweep record alignment.
     """
