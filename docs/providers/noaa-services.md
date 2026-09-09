@@ -191,7 +191,7 @@ curl --fail --globoff -A 'usdata (+https://github.com/jakeryderv/usdata)' \
 ## CO-OPS observed water levels
 
 Hosted probes on 2026-09-09 verified three records for station 8518750 over the
-interval above, changed values for English units and MSL datum, and HTTP 400 for
+2024-05-06T00:00Z–00:12Z interval, changed values for English units and MSL datum, and HTTP 400 for
 invalid stations/datums. Missing historical data or intervals between observations
 returned HTTP 200 with the normal CSV header followed by an error message.
 The adapter validates the CSV in a temporary file before replacing the destination.
