@@ -23,8 +23,10 @@ names and record returned groups alongside unchanged source provenance.
 
 Before decoding, inspect xradar's parsed metadata without loading moment arrays.
 For every requested sweep (all moment headers by default), compare the moment
-header and data start record with the first coordinate record, and compare the
-data end record with the last coordinate record. Reject missing or mismatched
+header with the data start record, then compare the coordinate record sequence
+with the data record range excluding non-radial messages. These messages may
+occur within a sweep or after the last received ray of an incomplete final
+sweep; they must not cause a false alignment failure. Reject missing or mismatched
 entries with `RadarDecodeError`. Close the metadata reader on success or failure.
 Decode and eagerly load only after the complete requested selection passes.
 

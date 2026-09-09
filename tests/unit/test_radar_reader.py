@@ -221,3 +221,35 @@ def test_missing_interior_end_marker_rejects_shifted_coordinates(tmp_path):
     assert selected["sweep_0"].DBZH.shape == (367, 460)
     assert selected.attrs["usdata"]["sweeps"] == ["sweep_0"]
     assert selected.attrs["usdata"]["provenance"]["checksum"] == checksum == sha256_file(path)
+
+
+def test_incomplete_sweep_with_trailing_non_radial_record(tmp_path):
+    xr = pytest.importorskip("xarray")
+    xradar = pytest.importorskip("xradar")
+    from xradar.io.backends import nexrad_level2 as backend
+
+    raw = bytearray(bz2.decompress((FIXTURES / "example_nexrad_archive_msg1.bz2").read_bytes()))
+    with backend.NEXRADLevel2File(bytes(raw), loaddata=False) as volume:
+        _ = volume.incomplete_sweeps
+        last_record = volume.msg_31_header[0][170]["filepos"]
+        stop = volume.msg_31_header[0][171]["filepos"]
+    raw = raw[:stop]
+    # Change the last received record's message type to non-radial (2).
+    # The partial sweep now ends with metadata, not its last coordinate ray.
+    assert raw[last_record + 12 + 3] == 1
+    raw[last_record + 12 + 3] = 2
+    path = tmp_path / "trailing-metadata.ar2v"
+    path.write_bytes(raw)
+    native = xradar.io.open_nexradlevel2_datatree(bytes(raw), sweep=0, incomplete_sweep="pad")
+    try:
+        native.load()
+    finally:
+        native.close()
+    opened = radar_asset(path).open(sweep=0)
+    assert opened["sweep_0"].DBZH.shape == native["sweep_0"].DBZH.shape
+    # The SDK masks reserved moment flags; coordinates and valid samples agree.
+    xr.testing.assert_equal(opened["sweep_0"].time, native["sweep_0"].time)
+    xr.testing.assert_equal(opened["sweep_0"].azimuth, native["sweep_0"].azimuth)
+    xr.testing.assert_equal(
+        opened["sweep_0"].DBZH, native["sweep_0"].DBZH.where(native["sweep_0"].DBZH >= -32)
+    )

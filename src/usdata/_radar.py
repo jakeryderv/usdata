@@ -48,12 +48,22 @@ def _check_sweeps(content: bytes, sweep: int | list[int] | None) -> None:
                 raise ValueError(f"sweep {index} is outside this volume's {len(moments)} sweeps")
             data = volume.data.get(index)
             rays = coordinates[index] if index < len(coordinates) else []
+            # Non-radial messages may occur within a sweep or after its last
+            # received ray. Follow the decoder's traversal, excluding those
+            # records, instead of requiring record_end to be a radial message.
+            expected_records = []
+            if data is not None:
+                intermediate = {record["record_number"] for record in data["intermediate_records"]}
+                expected_records = [
+                    record
+                    for record in range(data["record_number"], data["record_end"] + 1)
+                    if record not in intermediate
+                ]
             if (
                 data is None
                 or not rays
                 or moments[index]["record_number"] != data["record_number"]
-                or rays[0]["record_number"] != data["record_number"]
-                or rays[-1]["record_number"] != data["record_end"]
+                or [ray["record_number"] for ray in rays] != expected_records
             ):
                 raise RadarDecodeError(
                     f"cannot safely decode sweep {index}: NEXRAD moment and coordinate records "
