@@ -29,6 +29,21 @@ fmt:
 docs:
     uv run python scripts/render_registry.py
 
+# Preview the documentation locally, watching maintained sources
+docs-serve:
+    UV_NO_SYNC=0 UV_PROJECT_ENVIRONMENT=.venv-docs uv run --group docs --no-default-groups python scripts/docs_site.py serve
+
+# Build static documentation without publishing
+docs-build:
+    UV_NO_SYNC=0 UV_PROJECT_ENVIRONMENT=.venv-docs uv run --group docs --no-default-groups python scripts/docs_site.py build
+
+# Check documentation ownership, saved outputs, links and anchors
+check-docs:
+    uv run python scripts/render_registry.py --check
+    uv run python scripts/check_release_docs.py
+    just check-notebooks
+    just docs-build
+
 # Regenerate Census state/county boxes (downloads source archives unless --source-dir is set)
 places *args:
     uv run python scripts/build_places.py {{args}}
@@ -41,9 +56,7 @@ check-static:
     uv lock --check
     uv run ruff format --check
     uv run ruff check
-    uv run python scripts/render_registry.py --check
-    uv run python scripts/check_release_docs.py
-    just check-notebooks
+    just check-docs
 
 # Type and behavior checks for the active dependency profile
 [positional-arguments]

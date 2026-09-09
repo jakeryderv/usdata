@@ -205,3 +205,10 @@ def test_registry_summary_does_not_schedule_available_datasets_without_a_target(
     summary = module.summary_table(scheduled, "")
     assert "Next up (0.9)" in summary
     assert summary.splitlines()[2].split("|")[5].strip() == "`gfs`"
+
+
+@pytest.mark.parametrize("body", ["", "START", "END START", "START END END"])
+def test_registry_generation_rejects_ambiguous_markers(body) -> None:
+    module = script("render_registry")
+    with pytest.raises(ValueError):
+        module.splice(body, ("START", "END"), "replacement")

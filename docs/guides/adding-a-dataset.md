@@ -45,9 +45,11 @@ with just this entry, which puts it in search results and the docs; flip it
 to `stub` when the class exists and `available` when the live test passes,
 replacing `target` with `since`. Planned datasets are hidden from `usdata search`
 unless `--planned` is passed; `info` always works. Moving a dataset to a different
-phase is a one-line change to `target`; the roadmap and provider tables follow.
-Run `just docs` after editing: the README summary and `docs/providers/` tables are
-generated. A new provider gets a page created from a template; fill in its access notes.
+phase is a one-line change to `target`; the generated versions and catalog pages follow.
+Run `just docs` after editing: the README summary, provider index, and
+`docs/generated/catalog/` are generated. For a new agency, write access notes in
+`docs/providers/<provider>.md` and link its generated catalog. See the
+[documentation workflow](documentation.md) for source ownership and preview commands.
 
 ## 3. Adapter
 

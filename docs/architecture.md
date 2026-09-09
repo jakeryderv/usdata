@@ -2,19 +2,25 @@
 
 ## Data flow
 
-```text
-user arguments ─► build_query ─► Query
-                                   │
-        Registry.search(Query) ◄───┤   ranks curated Dataset entries
-                                   │
-   load_adapter(Dataset) ─► Provider.list_assets(Query) ─► [Asset]
-                                   │
-                Provider.fetch(Asset, dest) ─► local file
-                                   │
-             provenance.record ─► Provenance sidecar (.provenance.json)
-                                   │
-                  Manifest ─► pull ─► Lockfile (assets + provenance)
+```mermaid
+flowchart TD
+    Input[User arguments] --> Query[Normalized query]
+    Query --> Registry[Curated registry search]
+    Registry --> Dataset[Dataset and adapter]
+    Dataset --> Core[Core fetch orchestration]
+    Query --> Core
+    Core --> Provider[Provider resolves assets and fetches bytes]
+    Provider --> Transport[HTTP, S3, or ERDDAP transport]
+    Transport --> Upstream[Upstream service]
+    Core --> Cache[Verified local cache and provenance]
+    Cache --> Reader[Optional format reader]
+    Reader --> Result[DataFrame, DataTree, or Dataset]
 ```
+
+The core coordinates fetching and records provenance; providers supply dataset
+knowledge, and protocols supply transport. Readers operate on local assets after
+fetching. They are selected by format, independently of the transport used.
+
 
 ## Components
 

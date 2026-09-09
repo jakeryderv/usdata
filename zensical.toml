@@ -1,0 +1,88 @@
+[project]
+site_name = "usdata"
+site_description = "U.S. scientific data, with provenance and reproducible inputs"
+docs_dir = ".build/docs"
+site_dir = "site"
+repo_url = "https://github.com/jakeryderv/usdata"
+repo_name = "jakeryderv/usdata"
+# Publication and canonical URL are deferred to issue #56.
+nav = [
+  { "Home" = "README.md" },
+  { "Start here" = "docs/index.md" },
+  { "Guides & examples" = [
+    { "Fetch and analyze" = "docs/guides/fetch-and-analyze.md" },
+    { "Examples" = "examples/README.md" },
+    { "Weather and streamflow" = "examples/weather-and-streamflow/example.md" },
+    { "Sea-surface temperature" = "examples/sst-analysis/example.md" },
+    { "Monthly climate" = "examples/monthly-climate/example.md" },
+    { "Storm Events" = "examples/storm-events/example.md" },
+    { "Radar reflectivity" = "examples/radar-reflectivity/example.md" },
+    { "GOES imagery" = "examples/goes-imagery/example.md" },
+    { "Event context (Unreleased)" = "examples/event-context/example.md" },
+  ] },
+  { "Datasets" = [
+    { "Providers" = "docs/providers/README.md" },
+    { "NOAA access notes" = "docs/providers/noaa.md" },
+    { "NOAA catalog" = "docs/generated/catalog/noaa.md" },
+    { "USGS access notes" = "docs/providers/usgs.md" },
+    { "USGS catalog" = "docs/generated/catalog/usgs.md" },
+    { "Versions and targets" = "docs/generated/catalog/versions.md" },
+  ] },
+  { "Reference" = [
+    { "Python API" = "docs/reference/api.md" },
+    { "CLI" = "docs/generated/cli.md" },
+    { "Readers" = "docs/reference/readers.md" },
+    { "Manifests" = "docs/reference/manifests.md" },
+    { "Places" = "docs/reference/places.md" },
+    { "Temporal selection" = "docs/reference/selection.md" },
+  ] },
+  { "Development" = [
+    { "Contributing" = "CONTRIBUTING.md" },
+    { "Architecture" = "docs/architecture.md" },
+    { "Testing" = "docs/testing.md" },
+    { "Adding a dataset" = "docs/guides/adding-a-dataset.md" },
+    { "Maintaining documentation" = "docs/guides/documentation.md" },
+    { "Decisions" = "docs/adr/README.md" },
+  ] },
+  { "Project" = [
+    { "Roadmap" = "docs/roadmap.md" },
+    { "Changelog" = "CHANGELOG.md" },
+    { "Versioning and releases" = "docs/versioning.md" },
+    { "Security" = "SECURITY.md" },
+  ] },
+]
+
+[project.theme]
+features = ["navigation.tabs", "navigation.sections", "navigation.top", "content.code.copy"]
+
+[project.theme.font]
+text = "Inter"
+code = "JetBrains Mono"
+
+[project.markdown_extensions]
+admonition = {}
+attr_list = {}
+md_in_html = {}
+pymdownx.details = {}
+pymdownx.highlight = { anchor_linenums = true }
+pymdownx.superfences.custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]
+
+[project.plugins.mkdocstrings.handlers.python]
+paths = ["src"]
+
+[project.plugins.mkdocstrings.handlers.python.options]
+docstring_style = "google"
+show_source = false
+show_root_heading = true
+show_signature_annotations = true
+separate_signature = true
+show_if_no_docstring = true
+heading_level = 3
+filters = ["!^_", "!^model_config$"]
+members_order = "source"
+
+[project.validation]
+invalid_links = true
+invalid_link_anchors = true

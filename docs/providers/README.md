@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-Status: **available** has a tested adapter, **stub** has an adapter class that is not implemented yet, **planned** is a registry entry only. These describe this source checkout; unreleased implementations are labeled below on the provider pages.
+Status: **available** has a tested adapter, **stub** has an adapter class that is not implemented yet, **planned** is a registry entry only. These describe this source checkout; unreleased implementations are labeled below in the linked catalog pages.
 
 | Provider | Available | Stub | Planned | Next up (unassigned) | Datasets |
 |---|---:|---:|---:|---|---|

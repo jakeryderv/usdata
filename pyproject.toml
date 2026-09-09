@@ -42,6 +42,11 @@ dev = [
     "respx>=0.23.1",
     "ruff>=0.6",
 ]
+docs = [
+    "mkdocstrings-python>=2.0.8",
+    "nbconvert>=7.17.1",
+    "zensical>=0.0.60",
+]
 examples = [
     "ipykernel>=6.29",
     "jupyterlab>=4.3",

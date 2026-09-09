@@ -94,3 +94,7 @@ traces, timings, and `summary.json` in ignored `reports/notebooks/`; use
 `--output-dir` to choose another report directory. A failed example does not
 prevent later selected examples from running. `--write` refreshes the selected
 committed notebooks only if every selected example succeeds.
+
+Documentation is checked once in the static job: `just check-docs` checks generated
+catalogs and saved notebooks, then builds the site with strict internal link and
+anchor validation. See [maintaining documentation](guides/documentation.md).
