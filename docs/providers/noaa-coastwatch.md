@@ -32,3 +32,5 @@ Upstream revisions still cause checksum mismatches during locked restoration.
 See the [service research notes](noaa-services.md#coastwatch-sst) for dated upstream probes.
 
 [All NOAA datasets](noaa.md).
+
+[Catalog reference](../generated/catalog/noaa/coastwatch-sst.md#catalog-reference).

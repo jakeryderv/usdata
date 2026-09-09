@@ -42,19 +42,9 @@ or `--extra netcdf` for those formats. For contribution checks, continue with
 
 ## Providers
 
-<!-- registry:start -->
-| Provider | Available | Stub | Planned | Next up (unassigned) | Datasets |
-|---|---:|---:|---:|---|---|
-| [NOAA](docs/providers/noaa.md) | 8 | 0 | 21 | — | `ghcn-daily`, `gsom`, `gsoy`, `storm-events`, `nexrad-level2`, `goes-abi`, `coops-water-levels`, `coastwatch-sst`, +21 planned |
-| [USGS](docs/providers/usgs.md) | 1 | 0 | 2 | — | `water-daily`, +2 planned |
-| [Census Bureau](docs/providers/census.md) | 0 | 0 | 1 | — | +1 planned |
-| [EPA](docs/providers/epa.md) | 0 | 0 | 1 | — | +1 planned |
-| [FEMA](docs/providers/fema.md) | 0 | 0 | 1 | — | +1 planned |
-| [NASA](docs/providers/nasa.md) | 0 | 0 | 1 | — | +1 planned |
-| [USDA](docs/providers/usda.md) | 0 | 0 | 1 | — | +1 planned |
-
-Available datasets are in `code`, stubs in _italics_; planned ones are counted. Available means implemented in this source checkout; consult the [releases](https://github.com/jakeryderv/usdata/releases) for published support. Provider pages link access notes to the generated dataset catalog; [the roadmap](docs/roadmap.md) explains future priorities.
-<!-- registry:end -->
+Browse the [dataset catalog](docs/generated/catalog/index.md) for current support,
+release availability, and dataset details. [Provider access notes](docs/providers/README.md)
+explain agency-specific services; the [roadmap](docs/roadmap.md) describes priorities.
 
 ## Development
 

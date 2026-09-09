@@ -1,15 +1,11 @@
 # Providers
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+Start with the [dataset catalog](../generated/catalog/index.md) to choose data.
+The agency pages below explain access, service behavior, and research notes.
 
-Status: **available** has a tested adapter, **stub** has an adapter class that is not implemented yet, **planned** is a registry entry only. These describe this source checkout; unreleased implementations are labeled below in the linked catalog pages.
+- [NOAA](noaa.md): weather, climate, radar, satellites, and ocean observations.
+- [USGS](usgs.md): water observations.
 
-| Provider | Available | Stub | Planned | Next up (unassigned) | Datasets |
-|---|---:|---:|---:|---|---|
-| [NOAA](noaa.md) | 8 | 0 | 21 | — | `ghcn-daily`, `gsom`, `gsoy`, `storm-events`, `nexrad-level2`, `goes-abi`, `coops-water-levels`, `coastwatch-sst`, +21 planned |
-| [USGS](usgs.md) | 1 | 0 | 2 | — | `water-daily`, +2 planned |
-| [Census Bureau](census.md) | 0 | 0 | 1 | — | +1 planned |
-| [EPA](epa.md) | 0 | 0 | 1 | — | +1 planned |
-| [FEMA](fema.md) | 0 | 0 | 1 | — | +1 planned |
-| [NASA](nasa.md) | 0 | 0 | 1 | — | +1 planned |
-| [USDA](usda.md) | 0 | 0 | 1 | — | +1 planned |
+Other cataloged agencies are planned: [NASA](nasa.md), [EPA](epa.md),
+[FEMA](fema.md), [Census Bureau](census.md), and [USDA](usda.md).
+See [versions and targets](../generated/catalog/versions.md) for their status.

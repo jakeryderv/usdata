@@ -26,6 +26,8 @@ Global earthquake events with location, magnitude, and depth from the ANSS Compr
 
 ### usgs:water-daily
 
+[Dataset and usage guide](usgs/water-daily.md).
+
 **Streamflow and Water Daily Values** · available · since 0.5
 
 Daily statistics (streamflow, gage height, temperature) for USGS monitoring sites via the modern USGS Water Data OGC API. Anonymous, paginated CSV downloads filtered by site or bbox, dates, and parameter codes; daily mean by default, with units and quality metadata preserved.

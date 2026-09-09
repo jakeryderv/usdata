@@ -22,7 +22,7 @@ job, once per run rather than once per reader profile.
 | First-use walkthrough | `docs/index.md` | Site home (`index.md`) |
 | Overview and development setup | Root `README.md` | Project page (`project.md`) |
 | Guides, architecture, provider access notes | Markdown under `docs/` | Site pages |
-| Dataset status and capabilities | `src/usdata/data/registry.yaml` | `docs/generated/catalog/`, provider index, README summary |
+| Dataset status and capabilities | `src/usdata/data/registry.yaml` | `docs/generated/catalog/` only |
 | CLI commands and options | Typer app in `src/usdata/cli/` | CLI reference during the build |
 | Public Python signatures and docstrings | `src/usdata/`, selected by `docs/reference/api.md` | API reference during the build |
 | Manifest recipes | `examples/*/README.md` and `dataset.yaml` | Example pages and downloadable manifests |
@@ -31,8 +31,15 @@ job, once per run rather than once per reader profile.
 | Published release notes | Towncrier assembles fragments into root `CHANGELOG.md` | Site changelog |
 
 Run `just docs` after changing the registry, and commit its generated Markdown.
-These small text artifacts keep the catalog usable on GitHub too. Access notes
-stay handwritten and link to the catalog; never add prose to generated pages.
+These text artifacts keep the catalog usable on GitHub too. README and provider
+indexes are handwritten. Never add prose to generated pages.
+
+The registry's `catalog` mapping connects each implemented dataset ID to a unique
+handwritten usage guide in `docs/providers/`. The site combines that guide and
+its generated catalog reference into one dataset page. Links to the guide are
+redirected during assembly; GitHub readers use ordinary links between the two
+source files. Edit usage and scientific caveats in the guide, and facts in the
+registry. The generator checks missing guides, unknown IDs, and obsolete outputs.
 The generator does not create provider access notes: add those when introducing
 an agency, and link its catalog.
 

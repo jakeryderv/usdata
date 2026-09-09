@@ -37,3 +37,5 @@ alongside the flags because their interpretation changes. See the
 See the [service research notes](noaa-services.md#co-ops-observed-water-levels) for dated upstream probes.
 
 [All NOAA datasets](noaa.md).
+
+[Catalog reference](../generated/catalog/noaa/coops-water-levels.md#catalog-reference).

@@ -27,3 +27,5 @@ and [monthly example](../../examples/monthly-climate/README.md).
 See the [service research notes](noaa-services.md#global-summary-of-the-month) for dated upstream probes.
 
 [All NOAA datasets](noaa.md).
+
+[Catalog reference](../generated/catalog/noaa/gsom.md#catalog-reference).

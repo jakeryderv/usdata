@@ -1,7 +1,7 @@
 """Render the dataset registry into the docs.
 
-Outputs: the README summary, provider index, and dedicated generated catalog pages.
-Provider access notes and the roadmap are handwritten.
+Outputs live exclusively under docs/generated/catalog/.
+Provider access notes, usage guides, indexes, and the roadmap are handwritten.
 
 Run via ``just docs``. ``--check`` renders without writing and exits 1 if any
 generated content on disk differs, which is what ``just check`` and CI run.
@@ -9,22 +9,22 @@ generated content on disk differs, which is what ``just check`` and CI run.
 
 from __future__ import annotations
 
+import posixpath
 import re
 import sys
 import tomllib
 from collections import Counter
 from pathlib import Path
 
+import yaml
+from pydantic import BaseModel, ConfigDict
+
 from usdata.models import LATER, Dataset, ProviderInfo, Status
 from usdata.registry import Registry, version_key
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
-README = ROOT / "README.md"
-PROVIDERS_DIR = ROOT / "docs/providers"
-INDEX = PROVIDERS_DIR / "README.md"
 CATALOG_DIR = ROOT / "docs/generated/catalog"
-README_MARKS = ("<!-- registry:start -->", "<!-- registry:end -->")
 STATUS_ORDER = [Status.AVAILABLE, Status.STUB, Status.PLANNED]
 GENERATED_NOTE = (
     "Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand."
@@ -110,30 +110,6 @@ def summary_table(registry: Registry, link_prefix: str) -> str:
     return "\n".join(lines) + "\n"
 
 
-def render_readme_block(registry: Registry) -> str:
-    """Block for the top-level README."""
-    return (
-        summary_table(registry, "docs/providers/")
-        + "\nAvailable datasets are in `code`, stubs in _italics_; planned ones are counted. "
-        "Available means implemented in this source checkout; consult the "
-        "[releases](https://github.com/jakeryderv/usdata/releases) for published support. "
-        "Provider pages link access notes to the generated dataset catalog; "
-        "[the roadmap](docs/roadmap.md) explains future priorities.\n"
-    )
-
-
-def render_index(registry: Registry) -> str:
-    """docs/providers/README.md, fully generated."""
-    return (
-        "# Providers\n\n"
-        + GENERATED_NOTE
-        + "\n\nStatus: **available** has a tested adapter, **stub** has an adapter class "
-        "that is not implemented yet, **planned** is a registry entry only. "
-        "These describe this source checkout; unreleased implementations are labeled below "
-        "in the linked catalog pages.\n\n" + summary_table(registry, "")
-    )
-
-
 def implementation_version(ds: Dataset) -> str:
     """Distinguish upcoming implementations from the declared package version."""
     if ds.since and version_key(ds.since) > version_key(PACKAGE_VERSION):
@@ -207,21 +183,67 @@ def render_roadmap_block(registry: Registry) -> str:
     return "\n".join(lines) + "\n"
 
 
-def splice(text: str, marks: tuple[str, str], block: str) -> str:
-    """Replace the content between two marker comments with ``block``."""
-    if any(text.count(mark) != 1 for mark in marks):
-        raise ValueError("expected exactly one pair of generation markers")
-    start, end = text.index(marks[0]) + len(marks[0]), text.index(marks[1])
-    if start > end:
-        raise ValueError("generation markers are out of order")
-    return text[:start] + "\n" + block + text[end:]
+class CatalogEntry(BaseModel):
+    """Documentation metadata, validated separately from the SDK dataset model."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    guide: str
+
+
+def catalog_entries(registry: Registry, root: Path = ROOT) -> dict[str, CatalogEntry]:
+    raw = yaml.safe_load((root / "src/usdata/data/registry.yaml").read_text())
+    entries = {key: CatalogEntry.model_validate(value) for key, value in raw["catalog"].items()}
+    known = {ds.id for ds in registry}
+    if unknown := entries.keys() - known:
+        raise ValueError(f"unknown catalog IDs: {sorted(unknown)}")
+    guides = set()
+    for ds in registry:
+        if ds.status is Status.AVAILABLE and ds.id not in entries:
+            raise ValueError(f"{ds.id}: implemented datasets require catalog metadata")
+    for key, entry in entries.items():
+        path = Path(entry.guide)
+        if (
+            path.is_absolute()
+            or ".." in path.parts
+            or not path.is_relative_to("docs/providers")
+            or path.suffix != ".md"
+            or not (root / path).resolve().is_relative_to(root.resolve())
+            or not (root / path).is_file()
+        ):
+            raise ValueError(f"{key}: guide must be an existing Markdown file in docs/providers")
+        if entry.guide in guides:
+            raise ValueError(f"{key}: each dataset needs its own usage guide")
+        guides.add(entry.guide)
+    return entries
+
+
+def dataset_path(ds: Dataset) -> Path:
+    return Path("docs/generated/catalog") / ds.provider / f"{ds.name}.md"
+
+
+def usage_link(ds: Dataset, entry: CatalogEntry) -> str:
+    relative = posixpath.relpath(entry.guide, dataset_path(ds).parent.as_posix())
+    return f"<!-- dataset-usage -->\n[Usage guide]({relative})."
+
+
+def render_dataset(registry: Registry, ds: Dataset, entry: CatalogEntry) -> str:
+    details = render_datasets_block(registry, [ds]).split(f"### {ds.id}\n", 1)[1]
+    return (
+        f"# {ds.title}\n\n{GENERATED_NOTE}\n\n"
+        + usage_link(ds, entry)
+        + "\n\n## Catalog reference\n"
+        + details
+    )
 
 
 def render_all(registry: Registry) -> dict[Path, str]:
-    """Every file this script owns (or owns a block of), with its full intended content."""
+    """Generate only inside the owned catalog directory; never rewrite prose."""
+    entries = catalog_entries(registry)
     outputs = {
-        README: splice(README.read_text(), README_MARKS, render_readme_block(registry)),
-        INDEX: render_index(registry),
+        CATALOG_DIR / "index.md": "# Dataset catalog\n\n"
+        + GENERATED_NOTE
+        + "\n\n"
+        + summary_table(registry, "../../providers/")
     }
     for info, datasets in by_provider(registry):
         outputs[CATALOG_DIR / f"{info.id}.md"] = (
@@ -230,23 +252,43 @@ def render_all(registry: Registry) -> dict[Path, str]:
             "Status describes this source checkout; see version labels for release support.\n\n"
             + render_datasets_block(registry, datasets)
         )
+        for ds in datasets:
+            if ds.id in entries:
+                outputs[ROOT / dataset_path(ds)] = render_dataset(registry, ds, entries[ds.id])
+                # Preserve existing provider-page anchors while linking to the complete page.
+                target = f"{ds.provider}/{ds.name}.md"
+                heading = f"### {ds.id}\n"
+                outputs[CATALOG_DIR / f"{info.id}.md"] = outputs[
+                    CATALOG_DIR / f"{info.id}.md"
+                ].replace(heading, heading + f"\n[Dataset and usage guide]({target}).\n")
     outputs[CATALOG_DIR / "versions.md"] = (
         "# Dataset versions and targets\n\n" + render_roadmap_block(registry)
     )
     return outputs
 
 
+def sync(outputs: dict[Path, str], *, check: bool) -> list[Path]:
+    if any(not path.is_relative_to(CATALOG_DIR) for path in outputs):
+        raise ValueError("generated outputs must stay inside docs/generated/catalog")
+    obsolete = set(CATALOG_DIR.rglob("*.md")) - outputs.keys()
+    stale = [p for p, text in outputs.items() if not p.exists() or p.read_text() != text]
+    if not check:
+        for path in obsolete:
+            # Refuse to remove unexpected handwritten content even in the owned directory.
+            if GENERATED_NOTE not in path.read_text():
+                raise ValueError(f"refusing to remove unrecognized file: {path}")
+        for path in obsolete:
+            path.unlink()
+        for path, content in outputs.items():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content)
+    return sorted(set(stale) | obsolete)
+
+
 if __name__ == "__main__":
     outputs = render_all(Registry.bundled())
-    if "--check" in sys.argv:
-        stale = [p for p, text in outputs.items() if not p.exists() or p.read_text() != text]
-        if stale:
-            names = ", ".join(p.relative_to(ROOT).as_posix() for p in stale)
-            sys.exit(f"generated docs are stale ({names}): run 'just docs' and commit")
-        print("generated docs are current")
-    else:
-        PROVIDERS_DIR.mkdir(parents=True, exist_ok=True)
-        for p, text in outputs.items():
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(text)
-        print(f"wrote {len(outputs)} files of generated reference and the README summary")
+    stale = sync(outputs, check="--check" in sys.argv)
+    if "--check" in sys.argv and stale:
+        names = ", ".join(p.relative_to(ROOT).as_posix() for p in stale)
+        sys.exit(f"generated docs are stale ({names}): run 'just docs' and commit")
+    print("generated catalog is current")

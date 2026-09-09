@@ -25,3 +25,5 @@ See the [first-use walkthrough](../index.md) and
 [weather/streamflow example](../../examples/weather-and-streamflow/README.md).
 
 [All NOAA datasets](noaa.md).
+
+[Catalog reference](../generated/catalog/noaa/ghcn-daily.md#catalog-reference).

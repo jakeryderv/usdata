@@ -26,3 +26,5 @@ zero-based `sweep` chooses a sweep. See [reader limits](../reference/readers.md)
 [executed radar example](../../examples/radar-reflectivity/example.ipynb).
 
 [All NOAA datasets](noaa.md).
+
+[Catalog reference](../generated/catalog/noaa/nexrad-level2.md#catalog-reference).

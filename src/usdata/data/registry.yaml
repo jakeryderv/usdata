@@ -1,5 +1,5 @@
 # Curated dataset registry: the single source of truth for what usdata knows about.
-# Rendered to docs/reference/datasets.md and the README by `just docs`.
+# Rendered exclusively to docs/generated/catalog/ by `just docs`.
 #
 # status: available = adapter implemented and tested (since: version it shipped in)
 #         stub      = adapter class exists but raises NotImplementedProvider (target: version or later)
@@ -679,3 +679,15 @@ datasets:
     homepage: https://www.nass.usda.gov/Research_and_Science/Cropland/SARS1a.php
     license: US Government Work (public domain)
     capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: false }
+
+# Documentation composition keyed by stable dataset ID; validated by just docs.
+catalog:
+  noaa:ghcn-daily: { guide: docs/providers/noaa-ghcn.md }
+  noaa:gsom: { guide: docs/providers/noaa-gsom.md }
+  noaa:gsoy: { guide: docs/providers/noaa-gsoy.md }
+  noaa:nexrad-level2: { guide: docs/providers/noaa-nexrad.md }
+  noaa:goes-abi: { guide: docs/providers/noaa-goes.md }
+  noaa:storm-events: { guide: docs/providers/noaa-storm-events.md }
+  noaa:coastwatch-sst: { guide: docs/providers/noaa-coastwatch.md }
+  noaa:coops-water-levels: { guide: docs/providers/noaa-coops.md }
+  usgs:water-daily: { guide: docs/providers/usgs-water-daily.md }
