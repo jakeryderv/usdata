@@ -10,3 +10,8 @@ __pycache__/
 examples/**/*.lock.json
 .ipynb_checkpoints/
 reports/
+
+.build/
+site/
+.cache/zensical/
+.venv-docs/

@@ -7,6 +7,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Documentation
+
+- Add a local documentation site with navigation, Mermaid diagrams, generated API/CLI references, saved notebook previews, and strict CI link checks. Separate generated dataset catalogs from provider access notes.
+
 ### Added
 
 - Per-dataset live checks, independent example jobs, retained test/coverage and

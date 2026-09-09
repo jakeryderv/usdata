@@ -23,6 +23,11 @@ jobs:
       - run: uv lock --check
       - run: just setup
       - run: just check-static
+      - uses: actions/upload-artifact@v7
+        with:
+          name: documentation
+          path: site/
+          retention-days: 7
 
   check:
     runs-on: ubuntu-latest

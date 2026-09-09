@@ -1,15 +1,7 @@
 """Render the dataset registry into the docs.
 
-Outputs:
-
-- ``docs/providers/README.md``: generated index, one row per provider.
-- ``docs/providers/<provider>.md``: hand-written notes with a generated block
-  between ``<!-- datasets:start -->`` and ``<!-- datasets:end -->``. Missing
-  files are created from a template.
-- ``README.md``: the same provider summary between ``<!-- registry:start -->``
-  and ``<!-- registry:end -->``.
-- ``docs/roadmap.md``: datasets grouped by shipped/target version between
-  ``<!-- datasets:start -->`` and ``<!-- datasets:end -->``.
+Outputs: the README summary, provider index, and dedicated generated catalog pages.
+Provider access notes and the roadmap are handwritten.
 
 Run via ``just docs``. ``--check`` renders without writing and exits 1 if any
 generated content on disk differs, which is what ``just check`` and CI run.
@@ -31,9 +23,8 @@ PACKAGE_VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"
 README = ROOT / "README.md"
 PROVIDERS_DIR = ROOT / "docs/providers"
 INDEX = PROVIDERS_DIR / "README.md"
-ROADMAP = ROOT / "docs/roadmap.md"
+CATALOG_DIR = ROOT / "docs/generated/catalog"
 README_MARKS = ("<!-- registry:start -->", "<!-- registry:end -->")
-PAGE_MARKS = ("<!-- datasets:start -->", "<!-- datasets:end -->")
 STATUS_ORDER = [Status.AVAILABLE, Status.STUB, Status.PLANNED]
 GENERATED_NOTE = (
     "Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand."
@@ -126,8 +117,8 @@ def render_readme_block(registry: Registry) -> str:
         + "\nAvailable datasets are in `code`, stubs in _italics_; planned ones are counted. "
         "Available means implemented in this source checkout; consult the "
         "[releases](https://github.com/jakeryderv/usdata/releases) for published support. "
-        "Each provider page has access notes and full dataset details; "
-        "[docs/roadmap.md](docs/roadmap.md) lists datasets by target version.\n"
+        "Provider pages link access notes to the generated dataset catalog; "
+        "[the roadmap](docs/roadmap.md) explains future priorities.\n"
     )
 
 
@@ -139,7 +130,7 @@ def render_index(registry: Registry) -> str:
         + "\n\nStatus: **available** has a tested adapter, **stub** has an adapter class "
         "that is not implemented yet, **planned** is a registry entry only. "
         "These describe this source checkout; unreleased implementations are labeled below "
-        "on the provider pages.\n\n" + summary_table(registry, "")
+        "in the linked catalog pages.\n\n" + summary_table(registry, "")
     )
 
 
@@ -198,7 +189,7 @@ def render_roadmap_block(registry: Registry) -> str:
     def group(title: str, datasets: list[Dataset]) -> list[str]:
         out = ["", f"**{title}**", ""]
         for ds in sorted(datasets, key=lambda d: (d.provider, d.id)):
-            page = f"providers/{ds.provider}.md#{_anchor(ds.id.replace(':', ''))}"
+            page = f"{ds.provider}.md#{_anchor(ds.id.replace(':', ''))}"
             out.append(f"- [`{ds.id}`]({page}) {ds.title} · {ds.status.value}")
         return out
 
@@ -216,23 +207,13 @@ def render_roadmap_block(registry: Registry) -> str:
     return "\n".join(lines) + "\n"
 
 
-def page_template(info: ProviderInfo) -> str:
-    """Starting content for a provider page that does not exist yet."""
-    home = f"Homepage: {info.homepage}\n\n" if info.homepage else ""
-    return (
-        f"# {info.name}\n\n"
-        f"Provider id `{info.id}`. {home}"
-        "## Access notes\n\n"
-        "No notes yet. Add how this agency publishes data, authentication requirements, "
-        "quirks, and links to its own documentation as adapters get built.\n\n"
-        "## Datasets\n\n"
-        f"{PAGE_MARKS[0]}\n{PAGE_MARKS[1]}\n"
-    )
-
-
 def splice(text: str, marks: tuple[str, str], block: str) -> str:
     """Replace the content between two marker comments with ``block``."""
+    if any(text.count(mark) != 1 for mark in marks):
+        raise ValueError("expected exactly one pair of generation markers")
     start, end = text.index(marks[0]) + len(marks[0]), text.index(marks[1])
+    if start > end:
+        raise ValueError("generation markers are out of order")
     return text[:start] + "\n" + block + text[end:]
 
 
@@ -243,10 +224,15 @@ def render_all(registry: Registry) -> dict[Path, str]:
         INDEX: render_index(registry),
     }
     for info, datasets in by_provider(registry):
-        page = PROVIDERS_DIR / f"{info.id}.md"
-        current = page.read_text() if page.exists() else page_template(info)
-        outputs[page] = splice(current, PAGE_MARKS, render_datasets_block(registry, datasets))
-    outputs[ROADMAP] = splice(ROADMAP.read_text(), PAGE_MARKS, render_roadmap_block(registry))
+        outputs[CATALOG_DIR / f"{info.id}.md"] = (
+            f"# {info.name} dataset catalog\n\n"
+            f"[Provider access notes](../../providers/{info.id}.md). "
+            "Status describes this source checkout; see version labels for release support.\n\n"
+            + render_datasets_block(registry, datasets)
+        )
+    outputs[CATALOG_DIR / "versions.md"] = (
+        "# Dataset versions and targets\n\n" + render_roadmap_block(registry)
+    )
     return outputs
 
 
@@ -261,5 +247,6 @@ if __name__ == "__main__":
     else:
         PROVIDERS_DIR.mkdir(parents=True, exist_ok=True)
         for p, text in outputs.items():
+            p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(text)
-        print(f"wrote {len(outputs)} files under docs/providers and the README summary")
+        print(f"wrote {len(outputs)} files of generated reference and the README summary")

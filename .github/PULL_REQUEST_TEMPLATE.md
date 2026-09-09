@@ -5,7 +5,7 @@
 ## Checklist
 
 - [ ] `just check` passes
-- [ ] Tests added or updated (unit tests mock the network; live tests are marked `integration`)
+- [ ] Tests added or updated (offline tests mock the network; live tests are marked `live`)
 - [ ] `CHANGELOG.md` updated under `Unreleased` if user-visible
 - [ ] Docs updated (README, guides, registry entry, ADR) if behavior or design changed
 - [ ] PR title is a Conventional Commit (`feat:`, `fix:`, `docs:`, ...)

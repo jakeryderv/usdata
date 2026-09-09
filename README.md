@@ -1,14 +1,28 @@
 # usdata
 
-Unified Python SDK and CLI for discovering, fetching, and tracking the
-provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
+Discover U.S. scientific datasets, fetch their files, and keep a reproducible
+record of where every input came from. Use the same Python SDK or CLI across
+supported NOAA and USGS datasets.
 
-> Status: pre-alpha. v0.8 supports GHCN-Daily, GSOM monthly summaries,
-> NEXRAD Level II, GOES ABI CONUS imagery, Storm Events annual archives,
-> USGS daily values, and CoastWatch SST subsets with provenance. It includes
-> optional CSV, radar, and NetCDF4 readers, six executed notebooks, Census
-> state/county lookup, and terminal download progress. Other datasets are planned.
-> See [docs/roadmap.md](docs/roadmap.md).
+**Pre-alpha.** These docs describe the current source checkout. Features marked
+**Unreleased** require a source installation; consult the
+[changelog](CHANGELOG.md) for published versions. Other providers are planned.
+
+## Start here
+
+```sh
+pip install usdata
+usdata search precipitation --location Oklahoma
+usdata info noaa:ghcn-daily
+```
+
+Search uses a curated registry. Fetching contacts the upstream service; readers
+open the resulting local files. Provenance and manifests connect those steps.
+
+- [Quick start and documentation](docs/index.md)
+- [Fetch and analyze data](docs/guides/fetch-and-analyze.md)
+- [Runnable examples with saved outputs](examples/README.md)
+- [Readers](docs/reference/readers.md) and [reproducible manifests](docs/reference/manifests.md)
 
 ## Providers
 
@@ -23,145 +37,8 @@ provenance of U.S. public scientific data (NOAA, USGS, NASA, and more).
 | [NASA](docs/providers/nasa.md) | 0 | 0 | 1 | — | +1 planned |
 | [USDA](docs/providers/usda.md) | 0 | 0 | 1 | — | +1 planned |
 
-Available datasets are in `code`, stubs in _italics_; planned ones are counted. Available means implemented in this source checkout; consult the [releases](https://github.com/jakeryderv/usdata/releases) for published support. Each provider page has access notes and full dataset details; [docs/roadmap.md](docs/roadmap.md) lists datasets by target version.
+Available datasets are in `code`, stubs in _italics_; planned ones are counted. Available means implemented in this source checkout; consult the [releases](https://github.com/jakeryderv/usdata/releases) for published support. Provider pages link access notes to the generated dataset catalog; [the roadmap](docs/roadmap.md) explains future priorities.
 <!-- registry:end -->
-
-## Install
-
-```sh
-pip install usdata        # or: uv add usdata
-```
-
-## Usage
-
-```python
-from usdata import build_query, get, search
-from usdata.fetch import fetch
-
-for r in search("precipitation", location="Oklahoma"):
-    print(r.dataset.id, r.dataset.title)
-
-ds = get("noaa:ghcn-daily")
-query = build_query(
-    lat=35.39,
-    lon=-97.60,
-    radius_km=15,
-    start="2024-05-06",
-    end="2024-05-07",
-    variables=["PRCP", "TMAX"],
-)
-for item in fetch(ds, query):
-    print(item.path, item.provenance.checksum)
-```
-
-```sh
-usdata search "tornado radar" --state OK
-usdata search precipitation --location "Cleveland County, OK"
-usdata info noaa:ghcn-daily
-usdata fetch noaa:ghcn-daily --lat 35.39 --lon -97.60 --radius-km 15 \
-    --start 2024-05-06 --end 2024-05-07 --vars PRCP,TMAX
-usdata fetch noaa:ghcn-daily -p stations=USW00013967 --start 2024-01-01 --end 2024-12-31
-usdata fetch noaa:nexrad-level2 --lat 35.47 --lon -97.52 \
-    --start 2024-05-06T20:00 --end 2024-05-06T23:00        # nearest radar (KTLX)
-usdata fetch noaa:nexrad-level2 -p site=KTLX --start 2024-05-06T20:00 --end 2024-05-06T20:30 --dry-run
-usdata fetch usgs:water-daily -p sites=07164500 --vars 00060 \
-    --start 2024-05-06 --end 2024-05-07
-usdata fetch noaa:coastwatch-sst --bbox=-80.08,30.02,-80.02,30.08 \
-    --start 2024-05-06T12:00Z --end 2024-05-06T12:00Z    # four grid cells
-usdata pull dataset.yaml            # resolve, fetch, write dataset.lock.json
-usdata verify dataset.yaml          # exit 1 if any cached input drifted
-```
-
-Storm Events bulk access is available since v0.8. Dates select complete
-annual details archives; filter rows locally after opening the gzip CSV. For example:
-
-```sh
-usdata fetch noaa:storm-events --start 2024-05-01 --end 2024-05-31 --dry-run
-```
-
-This lists the entire 2024 archive. Location and variable filters are rejected;
-see the [executed Storm Events notebook](examples/storm-events/example.ipynb)
-for local filtering and reporting limitations.
-
-Fetched files land in `~/.cache/usdata/<provider>/<dataset>/` (override with
-`USDATA_CACHE_DIR` or `--cache-dir`), each with a `.provenance.json` sidecar
-recording source URL, retrieval time, checksum, size, and license.
-
-Locations accept state names/postal codes, county/state names, and quoted FIPS
-codes. These select bounding rectangles; see [place lookup](docs/reference/places.md)
-for coverage, ambiguity, and antimeridian limits. CoastWatch CSV includes a
-second header row containing units; see its [access notes](docs/providers/noaa.md#coastwatch-sst).
-
-Manifest and source fields are validated strictly; unknown fields are errors.
-Provider-specific options belong under `params`.
-
-For already-listed assets, `select_by_time` selects a scan start using an explicit
-tolerance and nearest/prior direction (Unreleased). It returns the chosen asset,
-signed offset, and candidate counts, including an explicit no-match result. See
-[temporal selection](docs/reference/selection.md) and the
-[event-context notebook](examples/event-context/example.ipynb).
-
-A manifest declares every input a project needs. `pull` resolves each source,
-fetches it, and writes `dataset.lock.json` pinning every asset with its checksum
-and provenance. A second `pull` restores exactly what the lockfile pins without
-re-querying upstream, so the inputs stay reproducible even if the source
-changes. `verify` checks the manifest checksum and re-hashes cached files
-against the lockfile. Editing the manifest after locking requires `pull --force`
-to re-resolve. A required source matching no assets fails the pull; set
-`allow_empty: true` on a source only when an empty result is intentional.
-
-Checksums detect upstream changes; they cannot recover historical bytes that
-are no longer available. Preserve the cache for long-lived reproducibility.
-See the [manifest reference](docs/reference/manifests.md) and the small
-[NOAA/USGS example](examples/weather-and-streamflow/README.md).
-
-```yaml
-name: tornado-environment
-sources:
-  - dataset: noaa:nexrad-level2
-    location: oklahoma
-    start: 2024-05-06
-    end: 2024-05-07
-  - dataset: noaa:ghcn-daily
-    location: oklahoma
-    start: 2024-05-01
-    end: 2024-05-31
-```
-
-Terminal progress is available since v0.7. On a terminal, `fetch` and
-`pull` show progress on stderr: resolved asset counts,
-known bytes and unknown sizes, HTTP download bytes for the current attempt, and
-validated cache hits. `fetch --dry-run` also summarizes known sizes. Asset totals
-include possible cache hits; each manifest source is resolved separately. Bytes
-from a failed HTTP attempt reset on retry; encoded responses have unknown decoded
-size. Adapters that assemble files from metadata requests show asset-level progress.
-Use `--no-progress` to disable it. Progress is automatically disabled when either
-stdout or stderr is redirected; existing output lines and exit codes are unchanged.
-
-For single-channel GOES CONUS imagery (available since v0.8):
-
-```sh
-usdata fetch noaa:goes-abi --start 2024-05-06T12:01:18.1Z --end 2024-05-06T12:01:18.1Z -p satellite=18 -p channel=6
-```
-
-The download is a whole NetCDF scene. See [GOES access notes](docs/providers/noaa.md#goes-abi-conus-imagery)
-for supported selectors and scan-start time semantics.
-
-## Opening CSV data
-
-`FetchedAsset.open()` is available since v0.6 with the optional pandas
-extra (`pip install "usdata[pandas]"`). It reads cached CSV into a DataFrame,
-preserves identifier strings, and keeps CoastWatch units as metadata.
-See the [reader reference](docs/reference/readers.md)
-and [fetch → open → analyze example](examples/sst-analysis/README.md).
-
-The [examples directory](examples/README.md) contains executed Jupyter notebooks
-with saved data previews, small plots, and source provenance. Start with weather
-and streamflow for manifest workflows, SST for gridded CSV reading, or monthly
-climate for GSOM observations.
-
-NetCDF4 scene opening is available since v0.8 with `usdata[netcdf]`.
-See the executed [GOES infrared notebook](examples/goes-imagery/example.ipynb).
 
 ## Development
 
@@ -174,22 +51,24 @@ uv Python 3.14 builds can crash during NumPy array operations; see
 ```sh
 git clone https://github.com/jakeryderv/usdata && cd usdata
 just setup     # install toolchain and dependencies
-just test      # unit tests
+just test      # all offline tests
 just check     # format, lint, typecheck, offline tests, generated docs, release notices
 just check-pandas  # install the CSV extra and run the same checks
 just check-radar   # install the radar extra and run the same checks
 just check-netcdf  # install the NetCDF4 extra and run the same checks
 just notebooks    # launch the optional Jupyter examples environment
 just run-notebooks # execute notebooks live in fresh kernels and temporary caches
+just docs-serve # build and preview the documentation locally, with reload
+just check-docs # validate generated content and build the site strictly
 just build     # build wheel and sdist
 just smoke     # exercise core and pandas wheel installations outside the checkout
 just run search radar
 ```
 
-Unit tests mechanically block network connections. Integration tests that hit
-live services run with `just test-integration`. CI checks Python 3.11 and 3.14 on
+Offline tests mechanically block network connections. Tests that hit
+live services run with `just test-live`; see [testing levels and organization](docs/testing.md). CI checks Python 3.11 and 3.14 on
 Linux with core-only, pandas, radar, and NetCDF dependency profiles. Installed-wheel
-checks cover all four profiles on Linux, macOS, and Windows. The full unit and
+checks cover all four profiles on Linux, macOS, and Windows. The full offline and
 live-service suites run on Linux. `just setup` restores a core-only development
 environment; the `check-pandas`, `check-radar`, and `check-netcdf` commands install
 their respective extras.
@@ -198,14 +77,11 @@ Releases: `just release minor` opens a version-bump PR; merging it publishes
 to PyPI and creates the tag and GitHub release. See
 [docs/versioning.md](docs/versioning.md).
 
-See [docs/providers/](docs/providers/) for per-provider access notes,
+See [provider access notes](docs/providers/README.md),
 [docs/architecture.md](docs/architecture.md) for how the pieces fit,
-[docs/adr/](docs/adr/) for why, and [CONTRIBUTING.md](CONTRIBUTING.md) to add
+[architecture decisions](docs/adr/README.md) for why, and [CONTRIBUTING.md](CONTRIBUTING.md) to add
 a dataset.
 
 ## License
 
-Apache-2.0
-
-Testing levels, suite organization, and selection are documented in
-[Testing](docs/testing.md).
+[Apache-2.0](LICENSE).

@@ -1,5 +1,11 @@
 # Opening fetched data
 
+Readers operate on fetched local files and are selected by format. CSV returns a
+pandas DataFrame, NEXRAD returns an xarray DataTree, and NetCDF4 returns an xarray
+Dataset. Each reader has an optional dependency extra.
+
+## CSV and ERDDAP CSV
+
 Available since v0.6. Install the optional pandas extra with
 `pip install "usdata[pandas]"` or `uv add "usdata[pandas]"`.
 For a source checkout, follow [development setup](../../README.md#development)
@@ -43,7 +49,7 @@ source integrity.
 
 | Option | Behavior |
 |---|---|
-| `reader` | Defaults to inference. Explicit `"csv"`, `"erddap-csv"`, or `"nexrad-level2"` handles missing or ambiguous media metadata. |
+| `reader` | Defaults to inference. Explicit `"csv"`, `"erddap-csv"`, `"nexrad-level2"`, or `"netcdf"` handles missing or ambiguous media metadata. |
 | `dtype` | Mapping of column names to pandas dtype strings; overrides identifier defaults for those columns. |
 | `parse_dates` | List of columns to parse as dates/timestamps. Dates stay strings by default. |
 | `usecols` | List of columns to read. Ordering follows pandas behavior. |
@@ -140,8 +146,8 @@ input integrity; call `pull` to restore missing files. Editing the DataFrame
 does not change its source CSV. Scientific units are not converted, and
 CSV provider-specific missing-data sentinels are not normalized beyond pandas defaults.
 
-`MissingReaderDependency` (an `ImportError`) names `usdata[pandas]` or
-`usdata[radar]` when the required reader dependency is absent. Unsupported formats or reader names raise `UnsupportedFormat`
+`MissingReaderDependency` (an `ImportError`) names `usdata[pandas]`,
+`usdata[radar]`, or `usdata[netcdf]` when the required reader dependency is absent. Unsupported formats or reader names raise `UnsupportedFormat`
 (a `ValueError`). Both errors are available from `usdata.readers`. Missing local
 files and pandas parsing/conversion failures propagate normally. CSV headers
 must have unique, non-empty names, and ERDDAP units must match the header width.

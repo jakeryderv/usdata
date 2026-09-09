@@ -135,5 +135,27 @@ Interrupted downloads restart from the beginning in a temporary file. Permanent
 HTTP errors, local filesystem failures, and checksum mismatches are not retried.
 
 CLI exit codes: 0 success; 1 no assets or verification drift; 2 invalid input;
-3 unimplemented dataset; 4 upstream or checksum failure. Unit tests prohibit
-network connections; integration tests exercise the live services separately.
+3 unimplemented dataset; 4 upstream or checksum failure. Offline tests prohibit
+network connections; live tests exercise upstream services separately.
+
+## Resolve, restore, and verify
+
+```mermaid
+flowchart TD
+    Manifest[Manifest] --> Pull[pull]
+    Pull --> Locked{Lockfile exists and force not requested?}
+    Locked -->|No| Resolve[Resolve sources through adapters]
+    Resolve --> Fetch[Fetch assets and record provenance]
+    Fetch --> Lock[Write checksummed lockfile]
+    Locked -->|Yes| Match{Manifest checksum matches?}
+    Match -->|No| Error[Error: use force to resolve changed inputs]
+    Match -->|Yes| Restore[Restore the pinned assets]
+    Restore --> Cache[Verify cache hits or download pinned URLs]
+    Lock --> Verify[verify]
+    Cache --> Verify
+    Verify --> Report[Check manifest checksum and cached bytes]
+```
+
+Locked restoration avoids repeating discovery. Verification checks local
+integrity; neither operation can recreate upstream bytes that are no longer
+available. Preserve cached inputs for long-lived reproducibility.
