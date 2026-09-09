@@ -9,6 +9,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Pure `select_by_time` asset selection with explicit tolerance and nearest/prior
+  direction, signed offsets, candidate counts, and an explicit no-match result.
 - Explicit zero-based radar sweep selection with `FetchedAsset.open(sweep=...)`
   and an executed Storm Events / NEXRAD / GOES event-context notebook.
 

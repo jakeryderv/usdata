@@ -95,6 +95,12 @@ second header row containing units; see its [access notes](docs/providers/noaa.m
 Manifest and source fields are validated strictly; unknown fields are errors.
 Provider-specific options belong under `params`.
 
+For already-listed assets, `select_by_time` selects a scan start using an explicit
+tolerance and nearest/prior direction (Unreleased). It returns the chosen asset,
+signed offset, and candidate counts, including an explicit no-match result. See
+[temporal selection](docs/reference/selection.md) and the
+[event-context notebook](examples/event-context/example.ipynb).
+
 A manifest declares every input a project needs. `pull` resolves each source,
 fetches it, and writes `dataset.lock.json` pinning every asset with its checksum
 and provenance. A second `pull` restores exactly what the lockfile pins without

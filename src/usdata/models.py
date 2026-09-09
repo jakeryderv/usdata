@@ -9,9 +9,9 @@ from __future__ import annotations
 
 import math
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import StrEnum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -227,6 +227,22 @@ class Asset(BaseModel):
     checksum: str | None = Field(default=None, description="'<algo>:<hex>', e.g. 'sha256:ab12...'")
     time: TimeRange | None = None
     bbox: BBox | None = None
+
+
+class TemporalSelection(BaseModel):
+    """A start-time selection and its explicit policy; not source provenance.
+
+    No match has ``asset=None``, ``offset_seconds=None``, and zero eligible
+    candidates. Counts refer to the supplied candidates, not a remote catalog.
+    """
+
+    target: datetime
+    tolerance: timedelta
+    direction: Literal["nearest", "at_or_before"]
+    asset: Asset | None
+    offset_seconds: float | None
+    candidate_count: int = Field(ge=0)
+    eligible_count: int = Field(ge=0)
 
 
 class Provenance(BaseModel):
