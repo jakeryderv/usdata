@@ -1,20 +1,33 @@
-# GOES-R ABI CONUS Cloud and Moisture Imagery
+# GOES CONUS imagery
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+
+`noaa:goes-abi` · **Released** · Included since usdata 0.8.
+
+GOES-R ABI CONUS Cloud and Moisture Imagery.
+
+## At a glance
+
+- Files: NetCDF4
+- Selection: Whole single-channel CONUS scenes by inclusive UTC scan-start time
+- Required inputs: Satellite, channel, and both timestamps
+- Open locally: `usdata[netcdf]` · [Reader guide](../../../reference/readers.md)
+- Examples: [goes imagery](../../../../examples/goes-imagery/example.ipynb)
+
+## Usage and limitations
 
 <!-- dataset-usage -->
 [Usage guide](../../../providers/noaa-goes.md).
 
 ## Catalog reference
 
-**GOES-R ABI CONUS Cloud and Moisture Imagery** · available · since 0.8
-
-Single-channel CONUS Cloud and Moisture Imagery (ABI-L2-CMIPC) from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit satellite, channel, and scan-start interval; each asset is a complete NetCDF scene with no geographic or variable subsetting.
-
+- Availability: since 0.8
 - Domain: Weather satellites
-- Server-side subsetting: temporal
-- Homepage: https://registry.opendata.aws/noaa-goes/
+- Catalog date range: 2017-02-28 to open-ended
+- Coverage varies by station, product, and date; the range above does not guarantee observations.
+- [Upstream documentation](https://registry.opendata.aws/noaa-goes/)
 - License: US Government Work (public domain)
-- Extent: 2017-02-28 to present
-- Keywords: satellite, imagery, goes, abi, clouds, infrared, reflectance, netcdf, conus
+- Transport: `s3`
 - Adapter: `usdata.providers.noaa.goes:GoesAbi`
+
+[All NOAA datasets](../noaa.md).

@@ -1,20 +1,33 @@
-# Storm Events Database
+# Storm Events details
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+
+`noaa:storm-events` · **Released** · Included since usdata 0.8.
+
+Storm Events Database.
+
+## At a glance
+
+- Files: gzip CSV
+- Selection: Whole annual archives; filter rows locally after downloading
+- Required inputs: Both dates (selects the containing years)
+- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Examples: [storm events](../../../../examples/storm-events/example.ipynb)
+
+## Usage and limitations
 
 <!-- dataset-usage -->
 [Usage guide](../../../providers/noaa-storm-events.md).
 
 ## Catalog reference
 
-**Storm Events Database** · available · since 0.8
-
-NCEI's significant-weather event details since 1950, with locations, impacts, and narratives. Anonymous whole-year gzipped CSV archives; select the latest creation-date revision for each requested year. No server-side row, location, or variable subsetting. Historical event coverage and reporting practices vary; fatalities and locations tables are separate products not included by this adapter.
-
+- Availability: since 0.8
 - Domain: Severe weather
-- Server-side subsetting: none
-- Homepage: https://www.ncei.noaa.gov/access/storm-events-database/
+- Catalog date range: 1950-01-01 to open-ended
+- Coverage varies by station, product, and date; the range above does not guarantee observations.
+- [Upstream documentation](https://www.ncei.noaa.gov/access/storm-events-database/)
 - License: US Government Work (public domain)
-- Extent: 1950-01-01 to present
-- Keywords: storms, tornado, hail, wind, flood, damage, severe weather, events
+- Transport: `http`
 - Adapter: `usdata.providers.noaa.storm_events:StormEvents`
+
+[All NOAA datasets](../noaa.md).

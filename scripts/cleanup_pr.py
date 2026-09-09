@@ -38,7 +38,7 @@ def preserved_ignored(root: Path) -> list[str]:
         for name in names.split("\0")
         if name
         and not name.startswith(DISPOSABLE)
-        and name != ".coverage"
+        and name not in {".coverage", ".zensical.generated.toml"}
         and "__pycache__" not in Path(name).parts
         and not any(part.endswith(".egg-info") for part in Path(name).parts[:-1])
     ]
