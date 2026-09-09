@@ -151,7 +151,7 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usgs:3dep-elevation`](providers/usgs.md#usgs3dep-elevation) 3DEP Elevation · planned
 - [`usgs:earthquakes`](providers/usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · planned
 
-**Implemented, unreleased (planned 0.8)**
+**Included since 0.8**
 
 - [`noaa:goes-abi`](providers/noaa.md#noaagoes-abi) GOES-R ABI CONUS Cloud and Moisture Imagery · available
 - [`noaa:storm-events`](providers/noaa.md#noaastorm-events) Storm Events Database · available

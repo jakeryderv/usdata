@@ -330,11 +330,11 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | [`noaa:ghcn-hourly`](#noaaghcn-hourly) | Surface weather | planned | target later | Global hourly and sub-hourly surface observations, the successor to ISD. | http |
 | [`noaa:gsoy`](#noaagsoy) | Surface weather | planned | target later | Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. | http |
 | [`noaa:lcd`](#noaalcd) | Surface weather | planned | target later | Hourly, daily, and monthly observations from airport and first-order stations via the NCEI Access Data Service dataset local-climatological-data, addressed by WBAN-based station ids. | http |
-| [`noaa:storm-events`](#noaastorm-events) | Severe weather | available | unreleased; planned 0.8 | NCEI's significant-weather event details since 1950, with locations, impacts, and narratives. | http |
+| [`noaa:storm-events`](#noaastorm-events) | Severe weather | available | since 0.8 | NCEI's significant-weather event details since 1950, with locations, impacts, and narratives. | http |
 | [`noaa:nexrad-level2`](#noaanexrad-level2) | Weather radar | available | since 0.2 | Raw volume scans from the WSR-88D weather radar network, archived in the public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). | s3 |
 | [`noaa:mrms`](#noaamrms) | Weather radar | planned | target later | Gridded CONUS products merged from all radars plus other sensors (reflectivity, precipitation rate and accumulation, severe weather diagnostics), as two-minute gzipped GRIB2 files in the public noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/. | s3 |
 | [`noaa:nexrad-level3`](#noaanexrad-level3) | Weather radar | planned | target later | Derived single-radar products (base reflectivity, velocity, storm totals, and others) in the public unidata-nexrad-level3 S3 bucket, with flat keys SITE_PRODUCT_YYYY_MM_DD_HH_MM_SS where the site id drops its leading K. | s3 |
-| [`noaa:goes-abi`](#noaagoes-abi) | Weather satellites | available | unreleased; planned 0.8 | Single-channel CONUS Cloud and Moisture Imagery (ABI-L2-CMIPC) from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. | s3 |
+| [`noaa:goes-abi`](#noaagoes-abi) | Weather satellites | available | since 0.8 | Single-channel CONUS Cloud and Moisture Imagery (ABI-L2-CMIPC) from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. | s3 |
 | [`noaa:goes-glm`](#noaagoes-glm) | Weather satellites | planned | target later | Lightning flash, group, and event detections (GLM-L2-LCFA) in 20-second NetCDF files under the same GOES S3 buckets and layout as ABI. | s3 |
 | [`noaa:hurdat2`](#noaahurdat2) | Tropical cyclones | planned | target later | National Hurricane Center best-track database: six-hourly position, intensity, pressure, and wind radii for Atlantic (since 1851) and eastern North Pacific (since 1949) tropical cyclones. | http |
 | [`noaa:ibtracs`](#noaaibtracs) | Tropical cyclones | planned | target later | International Best Track Archive for Climate Stewardship: merged best tracks from all agencies worldwide since 1842. | http |
@@ -427,7 +427,7 @@ Hourly, daily, and monthly observations from airport and first-order stations vi
 
 ### noaa:storm-events
 
-**Storm Events Database** · available · unreleased; planned 0.8
+**Storm Events Database** · available · since 0.8
 
 NCEI's significant-weather event details since 1950, with locations, impacts, and narratives. Anonymous whole-year gzipped CSV archives; select the latest creation-date revision for each requested year. No server-side row, location, or variable subsetting. Historical event coverage and reporting practices vary; fatalities and locations tables are separate products not included by this adapter.
 
@@ -483,7 +483,7 @@ Derived single-radar products (base reflectivity, velocity, storm totals, and ot
 
 ### noaa:goes-abi
 
-**GOES-R ABI CONUS Cloud and Moisture Imagery** · available · unreleased; planned 0.8
+**GOES-R ABI CONUS Cloud and Moisture Imagery** · available · since 0.8
 
 Single-channel CONUS Cloud and Moisture Imagery (ABI-L2-CMIPC) from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit satellite, channel, and scan-start interval; each asset is a complete NetCDF scene with no geographic or variable subsetting.
 
