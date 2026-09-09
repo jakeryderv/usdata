@@ -51,7 +51,7 @@ source integrity.
 |---|---|
 | `reader` | Defaults to inference. Explicit `"csv"`, `"erddap-csv"`, `"nexrad-level2"`, or `"netcdf"` handles missing or ambiguous media metadata. |
 | `dtype` | Mapping of column names to pandas dtype strings; overrides identifier defaults for those columns. |
-| `parse_dates` | List of columns to parse as dates/timestamps. Dates stay strings by default. |
+| `parse_dates` | List of columns to parse as dates/timestamps; dates are not parsed by default. Use `dtype={"DATE": "string"}` to retain numeric-looking year labels as text. |
 | `usecols` | List of columns to read. Ordering follows pandas behavior. |
 | `nrows` | Maximum number of observation rows to read, excluding headers and units. |
 | `sweep` | NEXRAD only (since v0.9): zero-based integer or non-empty list of distinct nonnegative integers. `None` opens all sweeps. |

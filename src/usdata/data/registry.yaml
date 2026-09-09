@@ -233,18 +233,21 @@ datasets:
 
   - id: noaa:gsoy
     provider: noaa
-    status: planned
+    status: available
     domain: surface-weather
-    target: later
+    since: "0.10"
     title: Global Summary of the Year
     description: >-
       Annual station summaries derived from GHCN-Daily via the NCEI Access Data
-      Service dataset global-summary-of-the-year. Shares the GHCN-Daily client.
+      Service dataset global-summary-of-the-year. Selects complete UTC calendar
+      years and explicit stations, or discovers stations through the search service.
     keywords: [climate, annual, stations, temperature, precipitation, gsoy, ncei]
     protocol: http
     homepage: https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-year
     license: US Government Work (public domain)
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+    spatial_extent: { west: -180.0, south: -90.0, east: 180.0, north: 90.0 }
+    adapter: usdata.providers.noaa.gsoy:GlobalSummaryYearly
 
   - id: noaa:climate-normals
     provider: noaa

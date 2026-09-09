@@ -178,3 +178,22 @@ def test_fetch_open_does_not_change_sidecars_or_cached_results(pd, tmp_path: Pat
         (cached,) = fetch(dataset, query, root=tmp_path)
         assert cached.from_cache and cached.open().STATION.iloc[0] == "00123"
     assert before == {path: path.read_bytes() for path in before}
+
+
+def test_coops_fixture_uses_generic_csv_workflow(pd, fetched) -> None:
+    source = (Path(__file__).parents[1] / "fixtures/coops-water-levels.csv").read_text()
+    item = fetched(source, dataset="noaa:coops-water-levels")
+    original = item.path.read_bytes()
+    raw = item.open()
+    assert " Quality " in raw.columns and " Water Level" in raw.columns
+    frame = raw.rename(columns=str.strip)
+    frame["Date Time"] = pd.to_datetime(frame["Date Time"], utc=True)
+    assert frame["Date Time"].tolist() == list(
+        pd.date_range("2024-05-06", periods=3, freq="6min", tz="UTC")
+    )
+    assert frame["Water Level"].tolist() == [1.765, 1.73, 1.702]
+    assert frame["Quality"].tolist() == ["v", "v", "v"]
+    assert {"O or I (for verified)", "F", "R", "L"}.issubset(frame.columns)
+    assert frame.attrs["usdata"]["provenance"] == item.provenance.model_dump(mode="json")
+    assert "units" not in frame.attrs
+    assert item.path.read_bytes() == original

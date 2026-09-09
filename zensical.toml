@@ -15,6 +15,7 @@ nav = [
     { "Weather and streamflow" = "examples/weather-and-streamflow/example.md" },
     { "Sea-surface temperature" = "examples/sst-analysis/example.md" },
     { "Monthly climate" = "examples/monthly-climate/example.md" },
+    { "Annual climate" = "examples/annual-climate/README.md" },
     { "Storm Events" = "examples/storm-events/example.md" },
     { "Radar reflectivity" = "examples/radar-reflectivity/example.md" },
     { "GOES imagery" = "examples/goes-imagery/example.md" },

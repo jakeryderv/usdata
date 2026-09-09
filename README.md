@@ -36,7 +36,7 @@ usdata fetch noaa:coops-water-levels -p station=8518750 -p datum=MLLW \
 <!-- registry:start -->
 | Provider | Available | Stub | Planned | Next up (unassigned) | Datasets |
 |---|---:|---:|---:|---|---|
-| [NOAA](docs/providers/noaa.md) | 7 | 0 | 22 | — | `ghcn-daily`, `gsom`, `storm-events`, `nexrad-level2`, `goes-abi`, `coops-water-levels`, `coastwatch-sst`, +22 planned |
+| [NOAA](docs/providers/noaa.md) | 8 | 0 | 21 | — | `ghcn-daily`, `gsom`, `gsoy`, `storm-events`, `nexrad-level2`, `goes-abi`, `coops-water-levels`, `coastwatch-sst`, +21 planned |
 | [USGS](docs/providers/usgs.md) | 1 | 0 | 2 | — | `water-daily`, +2 planned |
 | [Census Bureau](docs/providers/census.md) | 0 | 0 | 1 | — | +1 planned |
 | [EPA](docs/providers/epa.md) | 0 | 0 | 1 | — | +1 planned |

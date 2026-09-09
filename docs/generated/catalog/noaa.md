@@ -8,8 +8,8 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 |---|---|---|---|---|---|
 | [`noaa:ghcn-daily`](#noaaghcn-daily) | Surface weather | available | since 0.2 | Global Historical Climatology Network daily summaries: temperature, precipitation, snow, and other elements from land surface stations, served by the NCEI Access Data Service with station and date filtering. | http |
 | [`noaa:gsom`](#noaagsom) | Surface weather | available | since 0.7 | Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. | http |
+| [`noaa:gsoy`](#noaagsoy) | Surface weather | available | unreleased; planned 0.10 | Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. | http |
 | [`noaa:ghcn-hourly`](#noaaghcn-hourly) | Surface weather | planned | target later | Global hourly and sub-hourly surface observations, the successor to ISD. | http |
-| [`noaa:gsoy`](#noaagsoy) | Surface weather | planned | target later | Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. | http |
 | [`noaa:lcd`](#noaalcd) | Surface weather | planned | target later | Hourly, daily, and monthly observations from airport and first-order stations via the NCEI Access Data Service dataset local-climatological-data, addressed by WBAN-based station ids. | http |
 | [`noaa:storm-events`](#noaastorm-events) | Severe weather | available | since 0.8 | NCEI's significant-weather event details since 1950, with locations, impacts, and narratives. | http |
 | [`noaa:nexrad-level2`](#noaanexrad-level2) | Weather radar | available | since 0.2 | Raw volume scans from the WSR-88D weather radar network, archived in the public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). | s3 |
@@ -64,6 +64,20 @@ Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via 
 - Keywords: climate, monthly, stations, temperature, precipitation, gsom, ncei
 - Adapter: `usdata.providers.noaa.gsom:GlobalSummaryMonthly`
 
+### noaa:gsoy
+
+**Global Summary of the Year** · available · unreleased; planned 0.10
+
+Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. Selects complete UTC calendar years and explicit stations, or discovers stations through the search service.
+
+- Domain: Surface weather
+- Server-side subsetting: temporal, variable
+- Homepage: https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-year
+- License: US Government Work (public domain)
+- Extent: -180, -90, 180, 90
+- Keywords: climate, annual, stations, temperature, precipitation, gsoy, ncei
+- Adapter: `usdata.providers.noaa.gsoy:GlobalSummaryYearly`
+
 ### noaa:ghcn-hourly
 
 **GHCN-Hourly Station Observations** · planned · target later
@@ -76,20 +90,6 @@ Global hourly and sub-hourly surface observations, the successor to ISD. Publish
 - License: US Government Work (public domain)
 - Extent: not stated
 - Keywords: weather, hourly, stations, global, ghcnh, ncei
-- Adapter: none yet
-
-### noaa:gsoy
-
-**Global Summary of the Year** · planned · target later
-
-Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. Shares the GHCN-Daily client.
-
-- Domain: Surface weather
-- Server-side subsetting: temporal, variable
-- Homepage: https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-year
-- License: US Government Work (public domain)
-- Extent: not stated
-- Keywords: climate, annual, stations, temperature, precipitation, gsoy, ncei
 - Adapter: none yet
 
 ### noaa:lcd

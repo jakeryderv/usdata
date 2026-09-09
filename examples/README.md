@@ -13,6 +13,11 @@ the saved outputs, or run them locally to change queries and inspect the results
 | [GOES infrared imagery](goes-imagery/example.ipynb) | NetCDF4 opening, CF decoding, quality flags, scan coordinates and brightness-temperature imagery |
 | [Event context](event-context/example.ipynb) | One Storm Events report matched to NEXRAD and GOES, explicit UTC conversion, safe radar sweep selection, projected context, and locked restoration (available since v0.9) |
 
+## Manifest examples
+
+[Annual airport climate](annual-climate/README.md) demonstrates GSOY annual
+selection and local CSV opening with a small manifest (unreleased v0.10).
+
 ## Run interactively
 
 From the repository root, with [uv and just installed](../README.md#development):
