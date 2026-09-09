@@ -7,7 +7,7 @@ import pytest
 
 from usdata.pull import pull, verify
 
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.live
 
 
 def test_goes18_small_scene_restore(tmp_path: Path) -> None:

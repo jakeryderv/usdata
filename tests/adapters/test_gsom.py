@@ -127,6 +127,7 @@ def test_no_matching_stations_is_empty(adapter) -> None:
         )
 
 
+@pytest.mark.l2
 def test_fetch_cache_retains_bytes_and_provenance(tmp_path: Path) -> None:
     dataset = default_registry().get("noaa:gsom")
     query = build_query(start="2024-05-06", end="2024-05-07", stations="USW00013967")
@@ -142,6 +143,7 @@ def test_fetch_cache_retains_bytes_and_provenance(tmp_path: Path) -> None:
     assert item.provenance.source_url == item.asset.href
 
 
+@pytest.mark.l2
 def test_locked_restore_reuses_url_and_rejects_revised_bytes(tmp_path: Path) -> None:
     manifest = tmp_path / "dataset.yaml"
     manifest.write_text(MANIFEST)
@@ -160,6 +162,7 @@ def test_locked_restore_reuses_url_and_rejects_revised_bytes(tmp_path: Path) -> 
         pull(manifest, root=tmp_path / "cache")
 
 
+@pytest.mark.l2
 def test_open_monthly_csv_preserves_identifiers_and_metadata(tmp_path: Path) -> None:
     pytest.importorskip("pandas")
     manifest = tmp_path / "dataset.yaml"

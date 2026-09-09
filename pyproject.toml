@@ -81,6 +81,15 @@ venv = ".venv"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = [
-    "integration: hits live services; skipped unless --run-integration is passed",
+    "l0: pure in-memory logic",
+    "l1: in-process components with controlled transport",
+    "l2: local functional tests with filesystem or real decoders",
+    "l3: controlled service deployment (currently unused)",
+    "l4: production or upstream-live compatibility",
+    "live: hits upstream services; requires --run-live",
+    "integration: compatibility alias for live",
+    "pandas: optional CSV reader coverage",
+    "radar: optional radar reader coverage",
+    "netcdf: optional NetCDF reader coverage",
 ]
-addopts = "-ra"
+addopts = "-ra --strict-markers"

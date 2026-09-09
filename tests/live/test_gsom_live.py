@@ -12,7 +12,7 @@ from usdata.pull import pull, verify
 from usdata.query import build_query
 from usdata.registry import default_registry
 
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.live
 
 
 def test_gsom_station_discovery(caplog: pytest.LogCaptureFixture) -> None:

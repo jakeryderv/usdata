@@ -7,7 +7,7 @@ import pytest
 
 from usdata.pull import pull, verify
 
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.live
 
 
 def test_coastwatch_subset_and_locked_restoration(tmp_path: Path) -> None:

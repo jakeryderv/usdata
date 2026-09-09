@@ -11,7 +11,7 @@ from usdata.fetch import fetch
 from usdata.query import build_query
 from usdata.registry import default_registry
 
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.live
 
 
 def test_annual_details_download_retains_gzip_and_original_schema(tmp_path: Path) -> None:

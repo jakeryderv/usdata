@@ -155,6 +155,7 @@ def test_reject_non_leap_day_366(adapter):
         assert adapter.list_assets(query(start="2023-12-31T12:00", end="2023-12-31T12:05")) == []
 
 
+@pytest.mark.l2
 def test_manifest_restore_does_not_relist_and_checks_bytes(tmp_path: Path):
     manifest = tmp_path / "dataset.yaml"
     manifest.write_text("""name: goes-scene

@@ -17,7 +17,8 @@ data, with provenance and reproducible manifests. Read
 - `src/usdata/protocols/`: transport only (`http`, `s3`, `erddap`). No dataset knowledge here.
 - `scripts/`: generators for bundled data files. Regenerate, don't hand-edit `data/*.csv`.
 - `src/usdata/cli/app.py`: Typer app. Keep it thin; logic lives in the library.
-- `tests/unit/`: fast, offline. `tests/integration/` (when present): live services, marked `integration`.
+- Tests are organized by responsibility in `tests/{unit,adapters,protocols,component,live}/`.
+  Read [docs/testing.md](docs/testing.md) for levels, selection, and offline rules.
 - `docs/adr/`: decisions already made. Read before proposing to reverse one.
 - `docs/guides/adding-a-dataset.md`: the procedure for new datasets. Follow it exactly.
 - `docs/providers/<id>.md`: access notes per agency (hand-written) plus generated dataset tables. Read before touching an adapter.

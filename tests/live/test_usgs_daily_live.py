@@ -7,7 +7,7 @@ import pytest
 
 from usdata.pull import pull, verify
 
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.live
 
 
 def test_tulsa_daily_streamflow(tmp_path: Path, monkeypatch) -> None:

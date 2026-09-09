@@ -6,7 +6,6 @@ import pytest
 import respx
 
 from usdata.models import BBox
-from usdata.protocols import s3
 from usdata.providers.base import QueryError
 from usdata.providers.noaa import sites
 from usdata.providers.noaa.nexrad import BUCKET, NexradLevel2, scan_time
@@ -105,6 +104,7 @@ def test_requires_time_window(adapter: NexradLevel2) -> None:
         adapter.list_assets(build_query(site="KTLX", start="2024-05-06"))
 
 
+@pytest.mark.l2
 def test_fetch_downloads_via_https(tmp_path: Path, adapter: NexradLevel2) -> None:
     from usdata.models import Asset, Protocol
 
@@ -120,13 +120,6 @@ def test_fetch_downloads_via_https(tmp_path: Path, adapter: NexradLevel2) -> Non
         )
         out = adapter.fetch(asset, tmp_path / "scan")
     assert obj.called and out.read_bytes() == b"AR2V0006."
-
-
-def test_s3_url_helpers() -> None:
-    assert s3.parse_s3_url("s3://b/a/b c") == ("b", "a/b c")
-    assert s3.https_url("b", "a/b c") == "https://b.s3.amazonaws.com/a/b%20c"
-    with pytest.raises(ValueError):
-        s3.parse_s3_url("https://x")
 
 
 @pytest.mark.parametrize(

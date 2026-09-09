@@ -7,13 +7,18 @@ default:
 setup:
     uv sync --group dev
 
-# Run unit tests
+# Run all offline tests (pass pytest selectors as arguments)
+[positional-arguments]
 test *args:
-    uv run pytest {{args}}
+    uv run pytest "$@"
 
 # Run tests that hit live services
-test-integration:
-    uv run pytest --run-integration -m integration
+[positional-arguments]
+test-live *args:
+    uv run pytest --run-live -m live "$@"
+
+# Compatibility alias for existing callers
+test-integration: test-live
 
 # Format code in place
 fmt:

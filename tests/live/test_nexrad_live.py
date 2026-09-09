@@ -9,7 +9,7 @@ from usdata.providers import load_adapter
 from usdata.query import build_query
 from usdata.registry import default_registry
 
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.live
 
 
 def test_list_and_fetch_one_legacy_scan(tmp_path: Path) -> None:

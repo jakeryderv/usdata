@@ -32,6 +32,7 @@ def test_metadata_does_not_retry_permanent_status(status: int) -> None:
     assert route.call_count == 1
 
 
+@pytest.mark.l2
 def test_retries_exhausted_preserve_existing_file(tmp_path: Path, monkeypatch) -> None:
     dest = tmp_path / "data"
     dest.write_bytes(b"original")
@@ -76,6 +77,7 @@ class InterruptedStream(httpx.SyncByteStream):
         raise httpx.ReadError("connection lost")
 
 
+@pytest.mark.l2
 def test_interrupted_download_restarts_without_partial_bytes(tmp_path: Path) -> None:
     dest = tmp_path / "data"
     with respx.mock() as mock, http.client() as client:
