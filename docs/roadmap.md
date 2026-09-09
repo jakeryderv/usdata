@@ -80,13 +80,17 @@ Validated on 2026-09-08: 219 core-only tests and 231 tests with pandas pass,
 along with all nine live tests. Cross-platform installed-wheel CI and a real
 terminal fetch/cache check pass; redirected output retains its existing format.
 
+**In progress (v0.8 / source)**:
+
+- [x] GOES ABI CONUS single-channel scenes with explicit satellite/time selection
+
 **Following v0.7 (remaining work not yet assigned a release)**:
 
 - NetCDF, radar, and geospatial readers behind extras, driven by concrete
   supported datasets and format fixtures
 - Further NCEI Access Data Service datasets (GSOY, climate normals)
 - Bulk directories and archives (Storm Events, HURDAT2, IBTrACS)
-- A second S3 dataset with product selection (GOES ABI), then MRMS
+- Further GOES products/sectors and MRMS
 - CO-OPS tides and currents
 
 Refine each access pattern into an issue with acceptance criteria when it becomes
@@ -119,7 +123,6 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`noaa:etopo`](providers/noaa.md#noaaetopo) ETOPO 2022 Global Relief · planned
 - [`noaa:gfs`](providers/noaa.md#noaagfs) GFS Forecast Model Output · planned
 - [`noaa:ghcn-hourly`](providers/noaa.md#noaaghcn-hourly) GHCN-Hourly Station Observations · planned
-- [`noaa:goes-abi`](providers/noaa.md#noaagoes-abi) GOES-R ABI Satellite Imagery · planned
 - [`noaa:goes-glm`](providers/noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · planned
 - [`noaa:gsoy`](providers/noaa.md#noaagsoy) Global Summary of the Year · planned
 - [`noaa:hrrr`](providers/noaa.md#noaahrrr) HRRR Forecast Model Output · planned
@@ -140,6 +143,10 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usda:cropland-data-layer`](providers/usda.md#usdacropland-data-layer) Cropland Data Layer · planned
 - [`usgs:3dep-elevation`](providers/usgs.md#usgs3dep-elevation) 3DEP Elevation · planned
 - [`usgs:earthquakes`](providers/usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · planned
+
+**Implemented, unreleased (planned 0.8)**
+
+- [`noaa:goes-abi`](providers/noaa.md#noaagoes-abi) GOES-R ABI CONUS Cloud and Moisture Imagery · available
 
 **Included since 0.7**
 

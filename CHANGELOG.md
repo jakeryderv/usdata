@@ -7,6 +7,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `noaa:goes-abi` CONUS Cloud and Moisture Imagery with explicit satellite/channel
+  selection, precise scan times and sizes, and checksum-verified NetCDF downloads.
+
 ### Changed
 
 - Replace example analysis scripts with executed Jupyter notebooks containing

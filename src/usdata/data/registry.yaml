@@ -105,21 +105,22 @@ datasets:
 
   - id: noaa:goes-abi
     provider: noaa
-    status: planned
+    status: available
     domain: weather-satellites
-    target: later
-    title: GOES-R ABI Satellite Imagery
+    since: "0.8"
+    title: GOES-R ABI CONUS Cloud and Moisture Imagery
     description: >-
-      Advanced Baseline Imager products from GOES-16, 18, and 19 in the public
-      noaa-goes16/18/19 S3 buckets, laid out as PRODUCT/YYYY/DDD/HH/ with one
-      NetCDF per scan (for example ABI-L2-CMIPC). Same anonymous S3 pattern as
-      NEXRAD, plus product, satellite, and channel selection.
-    keywords: [satellite, imagery, goes, abi, clouds, fire, radiance, netcdf]
+      Single-channel CONUS Cloud and Moisture Imagery (ABI-L2-CMIPC) from
+      GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit
+      satellite, channel, and scan-start interval; each asset is a complete
+      NetCDF scene with no geographic or variable subsetting.
+    keywords: [satellite, imagery, goes, abi, clouds, infrared, reflectance, netcdf, conus]
     protocol: s3
     homepage: https://registry.opendata.aws/noaa-goes/
     license: US Government Work (public domain)
-    temporal_extent: { start: "2017-01-01T00:00:00Z" }
-    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+    temporal_extent: { start: "2017-02-28T00:00:00Z" }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+    adapter: usdata.providers.noaa.goes:GoesAbi
 
   - id: noaa:goes-glm
     provider: noaa
