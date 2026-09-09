@@ -5,6 +5,16 @@ on:
   schedule:
     - cron: "0 6 * * 1"
   workflow_dispatch:
+    inputs:
+      scope:
+        description: Checks to run (weekly runs always use all)
+        type: choice
+        options: [all, live, notebooks, minimum]
+        default: all
+      target:
+        description: Optional live module (coops) or notebook folder (sst-analysis); blank runs the scope
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -14,15 +24,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
+      minimum: ${{ steps.discover.outputs.minimum }}
       live: ${{ steps.discover.outputs.live }}
       notebooks: ${{ steps.discover.outputs.notebooks }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - id: discover
-        run: python scripts/ci_inventory.py >> "$GITHUB_OUTPUT"
+        env:
+          SCOPE: ${{ inputs.scope || 'all' }}
+          TARGET: ${{ inputs.target || '' }}
+        run: python scripts/ci_inventory.py --scope "$SCOPE" --target "$TARGET" >> "$GITHUB_OUTPUT"
 
   live:
     needs: inventory
+    if: needs.inventory.outputs.live != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -46,6 +61,11 @@ jobs:
           LIVE_TEST: ${{ matrix.path }}
           UV_NO_SYNC: '1'
         run: just test-live "$LIVE_TEST" --junitxml=reports/live.xml --durations=15
+      - name: Summarize live results
+        if: always()
+        env:
+          LABEL: ${{ matrix.id }}
+        run: python scripts/ci_summary.py --label "$LABEL" --junit reports/live.xml >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:
@@ -55,6 +75,7 @@ jobs:
 
   notebooks:
     needs: inventory
+    if: needs.inventory.outputs.notebooks != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -71,6 +92,11 @@ jobs:
       - env:
           NOTEBOOK: ${{ matrix.path }}
         run: just run-notebooks --notebook "$NOTEBOOK" --output-dir reports/notebooks
+      - name: Summarize notebook results
+        if: always()
+        env:
+          LABEL: ${{ matrix.path }}
+        run: python scripts/ci_summary.py --label "$LABEL" --notebooks reports/notebooks/summary.json >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:
@@ -79,6 +105,8 @@ jobs:
           retention-days: 14
 
   minimum-dependencies:
+    needs: inventory
+    if: needs.inventory.outputs.minimum == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -96,6 +124,9 @@ jobs:
           uv pip freeze > reports/minimum-requirements.txt
       - name: Run offline suite without resynchronizing the lockfile
         run: .venv/bin/python -m pytest --cov=usdata --cov-branch --cov-report=xml:reports/coverage.xml --junitxml=reports/minimum.xml --durations=15
+      - name: Summarize minimum-dependency results
+        if: always()
+        run: python scripts/ci_summary.py --label minimum-dependencies --junit reports/minimum.xml >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:

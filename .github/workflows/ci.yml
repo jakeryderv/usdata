@@ -79,6 +79,11 @@ jobs:
           --durations=15
         env:
           UV_NO_SYNC: '1'
+      - name: Summarize offline results
+        if: always()
+        env:
+          LABEL: Python ${{ matrix.python }} / ${{ matrix.readers }}
+        run: python scripts/ci_summary.py --label "$LABEL" --junit reports/junit.xml >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:

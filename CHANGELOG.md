@@ -14,6 +14,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Development
 
+- Allow focused manual live-test and notebook CI runs while retaining complete
+  weekly coverage; summarize test failures, skips, and timings in Actions.
+
 - Add optional fast commit hooks, workflow linting, and PR-title validation; pin
   GitHub Actions to reviewed commits while retaining Dependabot updates.
 - Generate the radar-site CSV with LF line endings so fresh worktrees stay clean,
