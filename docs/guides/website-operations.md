@@ -34,6 +34,15 @@ unreviewed branches. Custom domains are configured after preview verification.
 The website has no Cloudflare credentials in GitHub. Worker code uses the native
 R2 binding; Workers Builds manages deployment authorization.
 
+The production account is `d4e3fe7d69a3ac8f446d4c3de2ca051b`; the `usdata.dev`
+zone is `12c05b7627e36c9f2ca88ce04ccb8647`. Both Workers share the repository
+connection and existing `usdata-workers-builds` managed token. Their independent
+build triggers deploy only `main`. Custom domains are declared in the respective
+Wrangler configurations so future deployments preserve them. The stable
+`usdata.jakervanslyke.workers.dev` and `usdata-home.jakervanslyke.workers.dev`
+addresses remain available for deployment checks; per-version preview URLs are
+disabled. Do not change the unrelated `jvs-sh` Worker or `pkgs` bucket.
+
 ## Documentation publishing
 
 Regular package releases attach the validated `release-documentation` CI artifact
