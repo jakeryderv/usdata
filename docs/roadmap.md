@@ -47,17 +47,20 @@ dataset expansion:
   introduces the project, installation, and links, leaving room for later additions.
 
 The docs entry point opens the latest published package's documentation. Preserve
-versioned builds at paths such as `docs.usdata.dev/0.10.0/`, with a version selector
+versioned builds starting at `docs.usdata.dev/0.10.0/`; do not backfill earlier
+releases. Show a version selector once two documentation versions are published,
 and a notice on older versions. Generate API, CLI, and dataset references from the
 corresponding release; do not substitute unreleased code from main. Allow reviewed
 documentation-only corrections for a release, recording the documentation revision
 while keeping references tied to that package version.
 
-Automate publication from validated builds and retain release documentation beyond
-temporary CI artifact retention. Archive versions going forward; backfill older
-versions only when useful. Resolve deployment credentials and the build/archive
-workflow before connecting the custom domains. Detailed setup and completion
-criteria belong in #56; selecting this design does not mean the sites are live.
+Launch with the reviewed v0.10.0 documentation, then archive each future release's
+validated built docs as a downloadable GitHub release asset and deploy that same
+build at its versioned URL. Keep the website out of the Python distributions.
+Retaining old documentation does not promise ongoing maintenance of old package
+versions. Resolve deployment credentials and the build/archive workflow before
+connecting the custom domains. Detailed setup and completion criteria belong in
+#56; selecting this design does not mean the sites are live.
 
 The completed [v0.10.0 first-use review](reviews/first-use-v0.10.0.md) provides
 the verified workflow baseline and corrected examples for publication.
