@@ -82,11 +82,11 @@ publishing, then creates the `vX.Y.Z` tag and GitHub release with notes from the
 
 CI also builds portable documentation archives from the selected package and docs
 commits. The publish workflow attaches those validated CI artifacts to the GitHub
-release. The documentation Worker imports completed archives into R2 and serves
-them at versioned URLs; website assets remain separate from Python distributions.
+release, then calls the shared publisher to upload the complete snapshot to R2.
+The documentation Worker serves those objects at versioned URLs; website assets remain separate from Python distributions.
 The archive starts with reviewed v0.10.0 docs, without earlier-release backfills.
 See [website operations](guides/website-operations.md) for the initial publication,
-reviewed documentation-only corrections, scheduled import, and rollback.
+reviewed documentation-only corrections, publication retries, and rollback.
 
 The workflow publishes whatever version `pyproject.toml` declares and tags that
 same version, so tag and package can never disagree. Merging a version bump

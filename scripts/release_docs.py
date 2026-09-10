@@ -66,7 +66,7 @@ def package_site(site: Path, output: Path, version: str, package_sha: str, docs_
             )
     raw = ("\n".join(lines) + "\n").encode()
     if len(raw) > MAX_BYTES:
-        raise ValueError("site exceeds the bounded importer size")
+        raise ValueError("site exceeds the bounded publication size")
     bundle = output / f"{stem}.ndjson.gz"
     bundle.write_bytes(gzip.compress(raw, mtime=0))
     descriptor = {

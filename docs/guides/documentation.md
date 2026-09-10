@@ -107,6 +107,6 @@ roadmap. Retention does not imply ongoing maintenance of old package versions.
 The ordinary local build still describes its checkout. Release archive builds
 isolate the tagged package source from the reviewed documentation revision.
 [Website operations](website-operations.md) describes the independent home/docs
-Workers Builds projects, R2 binding, scheduled imports, validation, and rollback.
+Workers Builds projects, R2 binding, Actions publication, validation, and rollback.
 Cloudflare manages authorization; no Cloudflare or R2 secret is required in GitHub.
 R2 dataset archives and website catalog browsing remain separate candidate work.

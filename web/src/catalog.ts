@@ -1,7 +1,4 @@
-export const REPO = "jakeryderv/usdata";
 export const KEY = "docs/catalog.json";
-export const VERSION = /^\d+\.\d+\.\d+$/;
-export const SHA = /^[a-f0-9]{64}$/;
 export interface Snapshot {
   version: string;
   revision: string;
@@ -27,12 +24,6 @@ export function safePath(path: string): boolean {
     !/[\\\x00-\x1f?#%]/.test(path) &&
     path.split("/").every((p) => p !== "." && p !== ".." && p !== "")
   );
-}
-export async function digest(bytes: Uint8Array): Promise<string> {
-  return Array.from(
-    new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)),
-    (b) => b.toString(16).padStart(2, "0"),
-  ).join("");
 }
 export async function readCatalog(
   bucket: R2Bucket,
