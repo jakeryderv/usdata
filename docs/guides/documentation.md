@@ -88,9 +88,18 @@ The site currently describes the source checkout. Mark source-only features
 [release-note fragments](../../changes/README.md); `just release` assembles them
 with Towncrier and regenerates registry documentation. The website does not own release policy.
 
-Public hosting at `usdata.dev` is selected work in the
+Public hosting is selected work in the
 [Now / Next / Later roadmap](../roadmap.md#how-we-plan), tracked in
 [issue #56](https://github.com/jakeryderv/usdata/issues/56) without a deadline or
-release assignment. The build currently has no deployment or DNS steps. Resolve
-hosting access, the hosting service, canonical URL, and publication policy before
-implementing deployment.
+release assignment. The selected design uses Cloudflare Workers Static Assets:
+a small home page at `usdata.dev` and versioned docs at `docs.usdata.dev`, defaulting
+to the latest published package. Release references come from that release's code
+and registry; documentation-only corrections must retain that reference version
+and record their own revision. Preserve release builds and provide a version
+selector as described in the roadmap.
+
+The current local build still describes its checkout and has no deployment or DNS
+steps. Implement release-specific builds, durable archives, CI deployment access,
+and custom-domain configuration before publishing. The home page and documentation
+should deploy independently. R2 dataset archives and website catalog browsing are
+separate candidate work, not prerequisites for publication.

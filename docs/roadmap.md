@@ -41,14 +41,43 @@ belong in [CI](https://github.com/jakeryderv/usdata/actions/workflows/ci.yml) an
 Make the existing workflows easy to learn and reproduce before choosing the next
 dataset expansion:
 
-- [Publish the documentation at usdata.dev (#56)](https://github.com/jakeryderv/usdata/issues/56):
-  make the existing guides, examples, and references accessible without a checkout.
-  Resolve hosting access, URL layout, and publication policy before deployment.
+- [Publish the home page and versioned documentation (#56)](https://github.com/jakeryderv/usdata/issues/56):
+  use Cloudflare Workers Static Assets for a small project home at `usdata.dev`
+  and independently deployed documentation at `docs.usdata.dev`. The home page
+  introduces the project, installation, and links, leaving room for later additions.
+
+The docs entry point opens the latest published package's documentation. Preserve
+versioned builds at paths such as `docs.usdata.dev/0.10.0/`, with a version selector
+and a notice on older versions. Generate API, CLI, and dataset references from the
+corresponding release; do not substitute unreleased code from main. Allow reviewed
+documentation-only corrections for a release, recording the documentation revision
+while keeping references tied to that package version.
+
+Automate publication from validated builds and retain release documentation beyond
+temporary CI artifact retention. Archive versions going forward; backfill older
+versions only when useful. Resolve deployment credentials and the build/archive
+workflow before connecting the custom domains. Detailed setup and completion
+criteria belong in #56; selecting this design does not mean the sites are live.
 
 The completed [v0.10.0 first-use review](reviews/first-use-v0.10.0.md) provides
 the verified workflow baseline and corrected examples for publication.
 
 ## Next
+
+After publication, investigate these bounded website additions before selecting
+implementation work:
+
+- A searchable dataset browser generated from the curated registry, showing
+  support, formats, selection rules, and examples. It can start with a static
+  metadata index and does not require mirroring upstream datasets.
+- An R2 archive of the exact inputs used by selected release examples. Record
+  dataset IDs, queries/source assets, retrieval times, upstream revisions where
+  available, checksums, and provenance. Manifests link releases or examples to
+  those snapshots; the package version alone does not identify data bytes. Reuse
+  identical objects across releases instead of duplicating their contents.
+
+These are candidates without deadlines or release assignments. The archive is
+separate from general SDK remote caching in #11 and from mirroring entire sources.
 
 Scope one dataset expansion around a concrete analysis use case. These are
 candidates to investigate, not selected implementations. Refine a candidate into
@@ -71,6 +100,9 @@ and optional-reader boundaries:
 - GRIB2 model output with cycle/forecast-hour selection, NetCDF CDRs, and static grids.
 - Further agencies, live catalog discovery, and third-party registry extensions.
 - Format normalization and place-name lookup beyond states and counties.
+- A hosted data API or substantial ingestion/analysis jobs when a concrete use
+  case requires them. Reassess Railway for a conventional Python/container
+  backend at that point; Cloudflare can continue hosting the sites, DNS, and R2.
 
 Deferred issues have no assigned release or date. A registry dataset target of
 `later` carries no release commitment; moving a candidate into Now does not
