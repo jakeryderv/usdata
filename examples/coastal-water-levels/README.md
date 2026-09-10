@@ -4,27 +4,34 @@ Available since v0.10.0. This small manifest requests three historical
 six-minute observations at The Battery, New York, relative to mean lower low
 water (MLLW), in meters and UTC. It does not request tide predictions.
 
-Complete the [source installation](../../README.md#source-installation), then
-from this directory:
+In an activated Python 3.11+ virtual environment, install the published package
+and save the [manifest](dataset.yaml) as `dataset.yaml` in a working directory.
+Run the commands from that directory:
 
 ```sh
-uv run usdata pull dataset.yaml
-uv run usdata verify dataset.yaml
+python -m pip install "usdata[pandas]"
+usdata pull dataset.yaml
+usdata verify dataset.yaml
 ```
 
-Run the following with `uv run python` from this directory:
+Run the following with `python` in the same directory and environment:
 
 ```python
+from pathlib import Path
+
 import pandas as pd
 from usdata import pull
 
-result = pull("dataset.yaml")
+result = pull(Path("dataset.yaml"))
 item = result.fetched[0]
 frame = item.open().rename(columns=str.strip)
 frame["Date Time"] = pd.to_datetime(frame["Date Time"], utc=True)
 print(frame[["Date Time", "Water Level", "Quality"]])
 print(item.provenance.source_url)
 ```
+
+For a [source installation](../../README.md#source-installation), run from
+`examples/coastal-water-levels/` and use `uv run usdata` and `uv run python`.
 
 The CSV reader preserves original column names, including NOAA's spaces. The
 local rename above makes them easier to use; it does not modify cached bytes.

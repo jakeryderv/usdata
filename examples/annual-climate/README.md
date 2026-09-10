@@ -6,27 +6,34 @@ Airport through `noaa:gsoy`. GSOY selects every UTC calendar year touched by the
 query in full; May 6–7 selects all of 2024, while December 31–January 1 selects
 both years.
 
-Complete the [source installation](../../README.md#source-installation), then
-from the repository root:
+In an activated Python 3.11+ virtual environment, install the published package
+and save the [manifest](dataset.yaml) as `dataset.yaml` in a working directory.
+Run the commands from that directory:
 
 ```sh
-uv run usdata pull examples/annual-climate/dataset.yaml
-uv run usdata verify examples/annual-climate/dataset.yaml
+python -m pip install "usdata[pandas]"
+usdata pull dataset.yaml
+usdata verify dataset.yaml
 ```
 
 Open the downloaded CSV locally with the same generic reader used by other
-station datasets. Run this with `uv run python`:
+station datasets. Run this with `python` in the same directory and environment:
 
 ```python
+from pathlib import Path
+
 from usdata import pull, verify
 
-manifest = "examples/annual-climate/dataset.yaml"
+manifest = Path("dataset.yaml")
 result = pull(manifest)
 (item,) = result.fetched
 frame = item.open(dtype={"DATE": "string"})
 print(frame[["STATION", "DATE", "PRCP", "TAVG"]])
 assert verify(manifest) == []
 ```
+
+For a [source installation](../../README.md#source-installation), run from
+`examples/annual-climate/` and use `uv run usdata` and `uv run python`.
 
 `DATE` is a four-digit year label. Explicit `dtype` keeps numeric-looking labels
 as text; no datetime parsing or provider-specific reader is needed. The request

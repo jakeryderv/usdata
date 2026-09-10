@@ -76,6 +76,10 @@ behavior, units, limitations, and endpoint details.
 
 ## Pull, refresh, and restore
 
+In Python, pass `pathlib.Path` objects to `pull()` and `verify()`, for example
+`pull(Path("dataset.yaml"))` after `from pathlib import Path`. Their manifest-path
+arguments do not accept strings. CLI paths are ordinary command-line arguments.
+
 ```sh
 usdata pull dataset.yaml --cache-dir .data
 usdata verify dataset.yaml --cache-dir .data

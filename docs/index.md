@@ -11,8 +11,10 @@ below works with the published package. For upcoming features, follow the
 
 ## Install and discover
 
+Use an activated Python 3.11+ virtual environment:
+
 ```sh
-pip install "usdata[pandas]"
+python -m pip install "usdata[pandas]"
 usdata search precipitation --location Oklahoma
 usdata info noaa:ghcn-daily
 ```
@@ -76,6 +78,18 @@ usdata verify dataset.yaml
 ```
 
 The first pull writes `dataset.lock.json`; later pulls restore its pinned assets.
+To try restoration into a new cache, choose an empty directory:
+
+```sh
+usdata pull dataset.yaml --cache-dir restored-data
+usdata verify dataset.yaml --cache-dir restored-data
+```
+
+Keep the same manifest and lockfile. Pull downloads missing pinned files;
+verification checks local bytes without network access. Use the same cache
+directory for both commands. An upstream revision can cause restoration to fail
+with a checksum mismatch.
+
 Commit the manifest and lockfile and back up the cached bytes. Lockfiles detect
 changed data but cannot recover an upstream version that is no longer available.
 See [manifest behavior](reference/manifests.md) before intentionally refreshing inputs.

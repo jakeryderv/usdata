@@ -44,11 +44,9 @@ dataset expansion:
 - [Publish the documentation at usdata.dev (#56)](https://github.com/jakeryderv/usdata/issues/56):
   make the existing guides, examples, and references accessible without a checkout.
   Resolve hosting access, URL layout, and publication policy before deployment.
-- [Review the first-use workflow (#72)](https://github.com/jakeryderv/usdata/issues/72):
-  verify discovery, fetching, reading, and manifest restoration from a fresh
-  published-package installation. Use the findings to fix onboarding friction
-  and inform the next dataset choice. This review can start while hosting
-  decisions are being resolved.
+
+The completed [v0.10.0 first-use review](reviews/first-use-v0.10.0.md) provides
+the verified workflow baseline and corrected examples for publication.
 
 ## Next
 

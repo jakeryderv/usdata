@@ -99,6 +99,10 @@ Documentation is checked once in the static job: `just check-docs` checks genera
 catalogs and saved notebooks, then builds the site with strict internal link and
 anchor validation. See [maintaining documentation](guides/documentation.md).
 
+The [v0.10.0 first-use review](reviews/first-use-v0.10.0.md) records a bounded
+live walkthrough from a fresh PyPI installation, its documentation fixes, and
+its limits. It is historical review evidence, not a current upstream-health check.
+
 ## Focused hosted checks
 
 Weekly Integration runs retain the full live, notebook, and minimum-dependency
