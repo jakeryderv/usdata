@@ -1,0 +1,95 @@
+# Website operations
+
+The homepage and documentation use separate Cloudflare Workers from `web/`.
+[ADR 0012](../adr/0012-cloudflare-release-documentation.md) records storage and
+release ownership. The Python package does not depend on website tooling.
+
+## Connect and deploy
+
+Install Node.js 22 or newer, then `npm ci --prefix web`. Run
+`npm run check --prefix web`; this generates binding types and runs TypeScript and
+offline workerd tests. From `web/`, run `npx wrangler deploy --dry-run` and
+`npx wrangler deploy --config wrangler.home.jsonc --dry-run` before deployment.
+The pinned workerd override keeps the test pool on the same runtime as Wrangler;
+the sharp override supplies the patched development dependency. Review both when
+updating tooling.
+
+Create a private Standard R2 bucket named `usdata` in the account managing
+`usdata.dev`. Do not enable a public R2 URL. The docs Worker accesses only `docs/`
+through its `DOCS` binding; no dataset objects are managed here.
+
+Connect `jakeryderv/usdata` through Workers & Pages, with production branch `main`:
+
+| Setting | Documentation | Homepage |
+| --- | --- | --- |
+| Worker name | `usdata` | `usdata-home` |
+| Root directory | `web` | `web` |
+| Build command | `npm run check` | `npm run check` |
+| Deploy command | `npm run deploy` | `npm run deploy:home` |
+| Production domain | `docs.usdata.dev` | `usdata.dev` |
+
+Use Cloudflare's managed build token. Disable non-production branch builds initially;
+PR CI provides isolated runtime tests. Production R2 must not receive writes from
+unreviewed branches. Custom domains are configured after preview verification.
+The website has no Cloudflare credentials in GitHub. Worker code uses the native
+R2 binding; Workers Builds manages deployment authorization.
+
+## Documentation publishing
+
+Regular package releases attach the validated `release-documentation` CI artifact
+from the exact successful main commit. It contains a portable ZIP, an import bundle,
+and a JSON descriptor with version, package/docs commit IDs, file count, and digest.
+The importer discovers only descriptors attached to public stable GitHub releases.
+
+To publish the initial v0.10.0 docs or a reviewed correction, merge the documentation
+changes, wait for successful main CI, then run:
+
+```sh
+gh workflow run docs-release.yml -f version=0.10.0
+```
+
+This workflow uses the chosen version's tagged `src/` tree, the main commit's docs
+and locked documentation tooling, and a temporary checkout. It builds strict links
+and references; it never runs notebooks live. The descriptor is attached after both
+archives. The package remains unchanged. Inspect the built archive before publishing
+corrections whose guides may mention newer features; only references are mechanically
+pinned to the old package. Normal releases continue to use `just release`.
+
+The docs Worker checks every fifteen minutes. It imports at most one version per
+invocation, oldest pending first, retaining existing versions. `/versions.json`
+shows the current version and available versions. `/` and `/latest/` redirect to
+the current package's docs. A selector appears when two versions are available;
+missing pages during a switch return to the chosen version's start page with a notice.
+
+CI's documentation artifacts remain temporary. GitHub release attachments and R2
+snapshots provide persistent retention from v0.10.0 onward. Unreleased main changes
+do not advance the current docs version.
+
+## Verification and logs
+
+Check both preview and canonical domains: HTTPS, root/latest redirects, navigation,
+search, API/CLI references, all released dataset pages, notebooks and manifest
+links, Mermaid diagrams, 404 responses, and version switching. Test two versions
+using isolated fixtures, never synthetic releases on the public site.
+
+Workers Logs records `docs-published`, `docs-current`, `docs-import-failed`, and
+`docs-request-failed` events. The Workers Builds dashboard records deployed source
+commits and build output. `npx wrangler tail` from `web/` also streams runtime logs.
+A successful site deploy does not prove that a release archive has been imported;
+verify `/versions.json` and actual documentation pages separately.
+
+## Recovery
+
+A failed import leaves the catalog unchanged and retries at the next schedule.
+Inspect the failure, correct the archive through the reviewed workflow, and verify
+that the resulting descriptor references the complete bundle. Keep old snapshots.
+
+Before a manual content rollback, set `IMPORT_ENABLED` to `false` in the maintained
+Worker configuration and deploy it. Save the existing `docs/catalog.json`, then
+restore a previously verified catalog pointing to retained snapshots using the R2
+dashboard or authenticated Wrangler. Re-enable imports only after correcting the
+release archive that caused the problem. Do not delete old objects as part of rollback.
+
+For Worker code, redeploy a previously verified configuration/code revision through
+Workers Builds. Code rollback does not roll back R2 contents. Record the restored
+source revision and catalog separately.

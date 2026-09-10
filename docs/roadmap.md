@@ -43,7 +43,7 @@ dataset expansion:
 
 - [Publish the home page and versioned documentation (#56)](https://github.com/jakeryderv/usdata/issues/56):
   use Cloudflare Workers Static Assets for a small project home at `usdata.dev`
-  and independently deployed documentation at `docs.usdata.dev`. The home page
+  and a separate Worker serving R2 documentation at `docs.usdata.dev`. The home page
   introduces the project, installation, and links, leaving room for later additions.
 
 The docs entry point opens the latest published package's documentation. Preserve
@@ -55,11 +55,12 @@ documentation-only corrections for a release, recording the documentation revisi
 while keeping references tied to that package version.
 
 Launch with the reviewed v0.10.0 documentation, then archive each future release's
-validated built docs as a downloadable GitHub release asset and deploy that same
-build at its versioned URL. Keep the website out of the Python distributions.
+validated built docs as downloadable GitHub release assets. A scheduled Cloudflare
+Worker imports those builds into private R2 storage and serves their versioned URLs. Keep the website out of the Python distributions.
 Retaining old documentation does not promise ongoing maintenance of old package
-versions. Resolve deployment credentials and the build/archive workflow before
-connecting the custom domains. Detailed setup and completion criteria belong in
+versions. Cloudflare manages deployment credentials and runtime R2 bindings; GitHub needs
+no Cloudflare secret. Validate the build/import workflow before connecting the
+custom domains. See [website operations](guides/website-operations.md). Detailed setup and completion criteria belong in
 #56; selecting this design does not mean the sites are live.
 
 The completed [v0.10.0 first-use review](reviews/first-use-v0.10.0.md) provides

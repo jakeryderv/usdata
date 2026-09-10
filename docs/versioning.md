@@ -80,14 +80,13 @@ After the PR merges and CI succeeds on that exact main-branch commit, the
 that commit, validates their package name and version, uploads them via trusted
 publishing, then creates the `vX.Y.Z` tag and GitHub release with notes from the changelog.
 
-Built website documentation is currently a separate CI artifact retained for
-seven days; the publish workflow does not attach it to GitHub releases. The
-planned [publication work](https://github.com/jakeryderv/usdata/issues/56) starts
-with reviewed v0.10.0 docs and skips earlier releases. For future releases, it
-will attach a validated built-docs archive to the GitHub release and deploy the
-same build to the versioned site, separately from Python distributions. See the
-[documentation policy](guides/documentation.md#releases-and-publication) for
-reference versions, corrections, and retention.
+CI also builds portable documentation archives from the selected package and docs
+commits. The publish workflow attaches those validated CI artifacts to the GitHub
+release. The documentation Worker imports completed archives into R2 and serves
+them at versioned URLs; website assets remain separate from Python distributions.
+The archive starts with reviewed v0.10.0 docs, without earlier-release backfills.
+See [website operations](guides/website-operations.md) for the initial publication,
+reviewed documentation-only corrections, scheduled import, and rollback.
 
 The workflow publishes whatever version `pyproject.toml` declares and tags that
 same version, so tag and package can never disagree. Merging a version bump

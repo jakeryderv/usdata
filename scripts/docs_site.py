@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import importlib
+import os
 import posixpath
 import re
 import subprocess
@@ -154,6 +155,20 @@ def prepare() -> None:
         "See the [fetch guide](../guides/fetch-and-analyze.md) for workflows.\n\n" + cli
     ).encode()
     for relative, data in outputs.items():
+        if os.environ.get("USDATA_DOCS_VERSION") and relative == Path("index.md"):
+            text = data.decode()
+            start = text.index("These docs describe")
+            end = text.index("## Install and discover", start)
+            text = (
+                text[:start]
+                + (
+                    f"These docs describe **usdata {os.environ['USDATA_DOCS_VERSION']}**. "
+                    "Generated references match that published package; guides may include "
+                    "reviewed documentation corrections.\n\n"
+                )
+                + text[end:]
+            )
+            data = text.encode()
         target = STAGE / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         if not target.exists() or target.read_bytes() != data:
@@ -184,6 +199,10 @@ def write_config(registry: Registry, entries: dict) -> None:
 
     config = tomllib.loads((ROOT / "zensical.toml").read_text())
     project = config["project"]
+    if version := os.environ.get("USDATA_DOCS_VERSION"):
+        if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+            raise ValueError("invalid documentation release version")
+        project["site_url"] = f"https://docs.usdata.dev/{version}/"
     sections = [section for section in project["nav"] if "Datasets" in section]
     if len(sections) != 1:
         raise ValueError("zensical.toml must have exactly one Datasets navigation section")

@@ -18,3 +18,9 @@ site/
 
 # Site configuration assembled from the registry
 .zensical.generated.toml
+
+# Cloudflare tooling and local state
+web/node_modules/
+web/.wrangler/
+web/.dev.vars*
+web/worker-configuration.d.ts

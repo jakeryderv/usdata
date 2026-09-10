@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "usdata",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-09-09",
+  "r2_buckets": [{ "binding": "DOCS", "bucket_name": "usdata" }],
+  "triggers": { "crons": ["*/15 * * * *"] },
+  "observability": { "enabled": true, "traces": { "enabled": true } },
+  "vars": { "IMPORT_ENABLED": "true" },
+}

@@ -58,6 +58,13 @@ jobs:
           github-token: ${{ github.token }}
           run-id: ${{ steps.ci.outputs.run_id }}
       - if: steps.version.outputs.tagged != 'true'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: release-documentation
+          path: release-docs
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.ci.outputs.run_id }}
+      - if: steps.version.outputs.tagged != 'true'
         name: Validate the CI distributions against the release version
         env:
           V: ${{ steps.version.outputs.version }}
@@ -71,4 +78,4 @@ jobs:
           V: ${{ steps.version.outputs.version }}
         run: |
           uv run --no-project python scripts/changelog.py notes "$V" > notes.md
-          gh release create "v$V" --target "$RELEASE_SHA" --title "v$V" --notes-file notes.md
+          gh release create "v$V" release-docs/* --target "$RELEASE_SHA" --title "v$V" --notes-file notes.md
