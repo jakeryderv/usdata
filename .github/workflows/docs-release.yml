@@ -48,3 +48,12 @@ jobs:
           # The descriptor is the ready marker; attach it after both data archives.
           gh release upload "v$VERSION" .build/release-docs/*.zip .build/release-docs/*.gz --clobber
           gh release upload "v$VERSION" .build/release-docs/*.json --clobber
+  upload:
+    needs: docs
+    uses: ./.github/workflows/docs-publish.yml
+    with:
+      version: ${{ inputs.version }}
+      docs_commit: ${{ github.sha }}
+    secrets:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}

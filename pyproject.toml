@@ -35,7 +35,9 @@ Repository = "https://github.com/jakeryderv/usdata"
 usdata = "usdata.cli:app"
 
 [dependency-groups]
+docs-publish = ["boto3>=1.40"]
 dev = [
+    { include-group = "docs-publish" },
     "pre-commit>=4.6.0",
     "pyright>=1.1.380",
     "pytest>=8.0",

@@ -20,6 +20,9 @@ jobs:
        github.event.workflow_run.event == 'push' &&
        github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
+    outputs:
+      docs_version: ${{ steps.docs.outputs.version }}
+      docs_commit: ${{ env.RELEASE_SHA }}
     environment: pypi
     permissions:
       id-token: write
@@ -79,3 +82,24 @@ jobs:
         run: |
           uv run --no-project python scripts/changelog.py notes "$V" > notes.md
           gh release create "v$V" release-docs/* --target "$RELEASE_SHA" --title "v$V" --notes-file notes.md
+      - name: Select documentation for this released commit (including retries)
+        id: docs
+        env:
+          V: ${{ steps.version.outputs.version }}
+          ALREADY_TAGGED: ${{ steps.version.outputs.tagged }}
+        run: |
+          if [[ "$ALREADY_TAGGED" != "true" ]] || [[ "$(git rev-parse "v$V^{commit}")" == "$RELEASE_SHA" ]]; then
+            echo "version=$V" >> "$GITHUB_OUTPUT"
+          fi
+  docs:
+    needs: publish
+    if: needs.publish.outputs.docs_version != ''
+    permissions:
+      contents: read
+    uses: ./.github/workflows/docs-publish.yml
+    with:
+      version: ${{ needs.publish.outputs.docs_version }}
+      docs_commit: ${{ needs.publish.outputs.docs_commit }}
+    secrets:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
