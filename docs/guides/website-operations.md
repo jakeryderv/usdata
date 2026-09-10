@@ -37,8 +37,12 @@ Connect `jakeryderv/usdata` through Workers & Pages, with production branch `mai
 Use Cloudflare's managed build token. Disable non-production branch builds initially;
 PR CI provides isolated runtime tests. Production R2 must not receive writes from
 unreviewed branches. Custom domains are configured after preview verification.
-The website has no Cloudflare credentials in GitHub. Worker code uses the native
-R2 binding; Workers Builds manages deployment authorization.
+Worker code uses the native R2 binding; Workers Builds manages deployment
+authorization. GitHub Actions publishes docs using a separate R2 Account API token
+with Object Read & Write scoped to the `usdata` bucket. Store its credentials as
+repository Actions secrets `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` using
+`gh secret set NAME` (interactive hidden input); no `.env` or general Cloudflare
+API token is needed.
 
 The production account is `d4e3fe7d69a3ac8f446d4c3de2ca051b`; the `usdata.dev`
 zone is `12c05b7627e36c9f2ca88ce04ccb8647`. Both Workers share the repository
@@ -54,7 +58,12 @@ disabled. Do not change the unrelated `jvs-sh` Worker or `pkgs` bucket.
 Regular package releases attach the validated `release-documentation` CI artifact
 from the exact successful main commit. It contains a portable ZIP, an import bundle,
 and a JSON descriptor with version, package/docs commit IDs, file count, and digest.
-The importer discovers only descriptors attached to public stable GitHub releases.
+The shared `docs-publish.yml` workflow downloads the exact descriptor and bundle
+from a public stable GitHub release using GitHub authentication, confirms the
+package exists on PyPI, validates every file, uploads the snapshot, then updates
+the catalog conditionally. Normal releases and docs corrections invoke it.
+The scheduled importer temporarily remains enabled until direct publication is
+verified in production.
 
 To publish the initial v0.10.0 docs or a reviewed correction, merge the documentation
 changes, wait for successful main CI, then run:
