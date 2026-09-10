@@ -38,37 +38,21 @@ belong in [CI](https://github.com/jakeryderv/usdata/actions/workflows/ci.yml) an
 
 ## Now
 
-Make the existing workflows easy to learn and reproduce before choosing the next
-dataset expansion:
+No new implementation workstream is selected. The project home at
+[usdata.dev](https://usdata.dev/) and versioned documentation at
+[docs.usdata.dev](https://docs.usdata.dev/) are published. The completed
+[publication issue (#56)](https://github.com/jakeryderv/usdata/issues/56) records
+verification evidence. Release and retention policy lives in
+[website operations](guides/website-operations.md) and
+[ADR 0012](adr/0012-cloudflare-release-documentation.md).
 
-- [Publish the home page and versioned documentation (#56)](https://github.com/jakeryderv/usdata/issues/56):
-  use Cloudflare Workers Static Assets for a small project home at `usdata.dev`
-  and a separate Worker serving R2 documentation at `docs.usdata.dev`. The home page
-  introduces the project, installation, and links, leaving room for later additions.
-
-The docs entry point opens the latest published package's documentation. Preserve
-versioned builds starting at `docs.usdata.dev/0.10.0/`; do not backfill earlier
-releases. Show a version selector once two documentation versions are published,
-and a notice on older versions. Generate API, CLI, and dataset references from the
-corresponding release; do not substitute unreleased code from main. Allow reviewed
-documentation-only corrections for a release, recording the documentation revision
-while keeping references tied to that package version.
-
-Launch with the reviewed v0.10.0 documentation, then archive each future release's
-validated built docs as downloadable GitHub release assets. A scheduled Cloudflare
-Worker imports those builds into private R2 storage and serves their versioned URLs. Keep the website out of the Python distributions.
-Retaining old documentation does not promise ongoing maintenance of old package
-versions. Cloudflare manages deployment credentials and runtime R2 bindings; GitHub needs
-no Cloudflare secret. Validate the build/import workflow before connecting the
-custom domains. See [website operations](guides/website-operations.md). Detailed setup and completion criteria belong in
-#56; selecting this design does not mean the sites are live.
-
-The completed [v0.10.0 first-use review](reviews/first-use-v0.10.0.md) provides
-the verified workflow baseline and corrected examples for publication.
+Choose a bounded candidate from Next when its user benefit, scope, exclusions,
+and acceptance criteria are ready. The completed
+[v0.10.0 first-use review](reviews/first-use-v0.10.0.md) remains the workflow baseline.
 
 ## Next
 
-After publication, investigate these bounded website additions before selecting
+Investigate these bounded website additions before selecting
 implementation work:
 
 - A searchable dataset browser generated from the curated registry, showing
