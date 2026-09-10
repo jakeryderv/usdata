@@ -44,7 +44,9 @@ No new implementation workstream is selected. The project home at
 [publication issue (#56)](https://github.com/jakeryderv/usdata/issues/56) records
 verification evidence. Release and retention policy lives in
 [website operations](guides/website-operations.md) and
-[ADR 0012](adr/0012-cloudflare-release-documentation.md).
+[ADR 0012](adr/0012-cloudflare-release-documentation.md) and
+[ADR 0013](adr/0013-actions-documentation-publication.md). Release documentation
+publishes directly from GitHub Actions to R2; the docs Worker only serves requests.
 
 Choose a bounded candidate from Next when its user benefit, scope, exclusions,
 and acceptance criteria are ready. The completed

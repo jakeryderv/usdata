@@ -2,7 +2,9 @@
 
 The homepage and documentation use separate Cloudflare Workers from `web/`.
 [ADR 0012](../adr/0012-cloudflare-release-documentation.md) records storage and
-release ownership. The Python package does not depend on website tooling.
+release ownership; [ADR 0013](../adr/0013-actions-documentation-publication.md)
+records direct Actions publication. The Python package does not depend on website
+tooling.
 
 The sites are published at [usdata.dev](https://usdata.dev/) and
 [docs.usdata.dev](https://docs.usdata.dev/). Publication began with v0.10.0;
@@ -62,8 +64,6 @@ The shared `docs-publish.yml` workflow downloads the exact descriptor and bundle
 from a public stable GitHub release using GitHub authentication, confirms the
 package exists on PyPI, validates every file, uploads the snapshot, then updates
 the catalog conditionally. Normal releases and docs corrections invoke it.
-The scheduled importer temporarily remains enabled until direct publication is
-verified in production.
 
 To publish the initial v0.10.0 docs or a reviewed correction, merge the documentation
 changes, wait for successful main CI, then run:
@@ -79,9 +79,9 @@ archives. The package remains unchanged. Inspect the built archive before publis
 corrections whose guides may mention newer features; only references are mechanically
 pinned to the old package. Normal releases continue to use `just release`.
 
-The docs Worker checks every fifteen minutes. It imports at most one version per
-invocation, oldest pending first, retaining existing versions. `/versions.json`
-shows the current version and available versions. `/` and `/latest/` redirect to
+The docs Worker serves requests only; there is no polling or scheduled import.
+Publication completes in the Actions workflow without redeploying the Worker.
+`/versions.json` shows the current version and available versions. `/` and `/latest/` redirect to
 the current package's docs. A selector appears when two versions are available;
 missing pages during a switch return to the chosen version's start page with a notice.
 
@@ -96,23 +96,31 @@ search, API/CLI references, all released dataset pages, notebooks and manifest
 links, Mermaid diagrams, 404 responses, and version switching. Test two versions
 using isolated fixtures, never synthetic releases on the public site.
 
-Workers Logs records `docs-published`, `docs-current`, `docs-import-failed`, and
-`docs-request-failed` events. The Workers Builds dashboard records deployed source
-commits and build output. `npx wrangler tail` from `web/` also streams runtime logs.
-A successful site deploy does not prove that a release archive has been imported;
+GitHub Actions records archive validation, upload, and catalog promotion results.
+Workers Logs records serving errors as `docs-request-failed` events. The Workers
+Builds dashboard records deployed source commits and build output. `npx wrangler tail` from `web/` also streams runtime logs.
+A successful site deploy does not prove that a release archive has been published;
 verify `/versions.json` and actual documentation pages separately.
 
 ## Recovery
 
-A failed import leaves the catalog unchanged and retries at the next schedule.
-Inspect the failure, correct the archive through the reviewed workflow, and verify
-that the resulting descriptor references the complete bundle. Keep old snapshots.
+A failed upload leaves the catalog unchanged. Inspect the Actions failure, resolve
+credential or artifact problems, then rerun the failed job. To retry the exact
+archived bytes independently, run the main-only publisher with the full docs commit
+from that release's descriptor:
 
-Before a manual content rollback, set `IMPORT_ENABLED` to `false` in the maintained
-Worker configuration and deploy it. Save the existing `docs/catalog.json`, then
-restore a previously verified catalog pointing to retained snapshots using the R2
-dashboard or authenticated Wrangler. Re-enable imports only after correcting the
-release archive that caused the problem. Do not delete old objects as part of rollback.
+```sh
+gh workflow run docs-publish.yml -f version=0.10.0 -f docs_commit=FULL_DOCS_COMMIT
+```
+
+This also supports a deliberate content rollback by selecting a previously verified
+archived docs commit for the same version. Save the existing `docs/catalog.json`
+before a rollback and record the restored revision. A same-version rollback changes
+the active docs revision; it does not move the current package version backward.
+Review any newer queued publication before restoring an older revision. Repeating
+the active revision is a no-op; old snapshots are retained. A conditional catalog
+conflict fails without overwriting the winning publication: inspect that revision
+before retrying. Never delete old objects as part of rollback.
 
 For Worker code, redeploy a previously verified configuration/code revision through
 Workers Builds. Code rollback does not roll back R2 contents. Record the restored

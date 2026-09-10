@@ -7,7 +7,7 @@
     "check": "wrangler types && tsc --noEmit && vitest run",
     "deploy": "wrangler deploy",
     "deploy:home": "wrangler deploy --config wrangler.home.jsonc",
-    "dev": "wrangler dev --test-scheduled"
+    "dev": "wrangler dev"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "0.22.0",

@@ -1,5 +1,4 @@
 import { compare, readCatalog, safePath, type Catalog } from "./catalog";
-import { synchronize } from "./import";
 const selector = `document.addEventListener('change', e => {if(e.target.id !== 'docs-version') return; const parts = location.pathname.split('/'); const previous=parts[1]; parts[1]=e.target.value; location.href=parts.join('/')+'?from='+encodeURIComponent(previous);});`;
 function redirect(url: string): Response {
   return new Response(null, {
@@ -150,16 +149,6 @@ export default {
         status: 503,
         headers: { "Cache-Control": "no-store" },
       });
-    }
-  },
-  async scheduled(_controller, env) {
-    try {
-      await synchronize(env);
-    } catch (error) {
-      console.error(
-        JSON.stringify({ event: "docs-import-failed", error: String(error) }),
-      );
-      throw error;
     }
   },
 } satisfies ExportedHandler<Env>;

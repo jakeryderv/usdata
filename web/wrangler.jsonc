@@ -7,7 +7,6 @@
   "preview_urls": false,
   "routes": [{ "pattern": "docs.usdata.dev", "custom_domain": true }],
   "r2_buckets": [{ "binding": "DOCS", "bucket_name": "usdata" }],
-  "triggers": { "crons": ["*/15 * * * *"] },
+  "triggers": { "crons": [] },
   "observability": { "enabled": true, "traces": { "enabled": true } },
-  "vars": { "IMPORT_ENABLED": "true" },
 }

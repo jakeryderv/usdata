@@ -15,3 +15,4 @@ is described in the guides and reference pages.
 - [0010: Storm Events annual archives and local gzip CSV reading](0010-storm-events-annual-archives.md)
 - [0011: Explicit radar selection and record alignment checks](0011-radar-sweep-alignment.md)
 - [0012: Release documentation in R2, served by a Worker](0012-cloudflare-release-documentation.md)
+- [0013: Publish documentation directly from GitHub Actions](0013-actions-documentation-publication.md)
