@@ -4,6 +4,12 @@ The homepage and documentation use separate Cloudflare Workers from `web/`.
 [ADR 0012](../adr/0012-cloudflare-release-documentation.md) records storage and
 release ownership. The Python package does not depend on website tooling.
 
+The sites are published at [usdata.dev](https://usdata.dev/) and
+[docs.usdata.dev](https://docs.usdata.dev/). Publication began with v0.10.0;
+`/versions.json` on the documentation host reports the current catalog. The
+[publication issue](https://github.com/jakeryderv/usdata/issues/56) records the
+initial deployed source revisions and verification evidence.
+
 ## Connect and deploy
 
 Install Node.js 22 or newer, then `npm ci --prefix web`. Run
