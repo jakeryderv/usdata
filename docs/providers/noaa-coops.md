@@ -1,8 +1,6 @@
 # CO-OPS observed water levels
 
-**Unreleased:** use the [source installation](../../README.md#source-installation) before running these examples.
-
-Available from source for v0.10 as `noaa:coops-water-levels`. The initial adapter
+Available since v0.10.0 as `noaa:coops-water-levels`. The initial adapter
 fetches six-minute observed water levels for one explicit station. NOAA returns
 preliminary or verified observations according to availability. Predictions,
 currents, station discovery, and automatic request chunking are not included.

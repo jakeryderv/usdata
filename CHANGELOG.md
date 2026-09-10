@@ -12,6 +12,28 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.10.0](https://github.com/jakeryderv/usdata/releases/tag/v0.10.0) - 2026-09-09
+
+
+### Added
+
+- CO-OPS observed water levels for one station, explicit datum and UTC interval, with raw CSV quality fields, response validation, and a reproducible manifest example.
+- `noaa:gsoy` annual station CSVs with complete UTC year selection, shared NCEI geographic discovery, reproducible restoration, and a small manifest example.
+
+### Documentation
+
+- Keep generated catalog files separate from handwritten documentation and combine dataset reference facts with usage guides in the local docs site.
+- Make the dataset catalog easier to browse with Released, Source only, and Planned labels; explicit file formats and selection behavior; and automatic dataset navigation.
+- Make the first-use walkthrough the site home, separate NOAA dataset guides from service research, and clarify source installation and reproducibility.
+
+### Development
+
+- Add optional fast commit hooks, workflow linting, and PR-title validation; pin GitHub Actions to reviewed commits while retaining Dependabot updates.
+- Allow focused manual live-test and notebook CI runs while retaining complete weekly coverage; summarize test failures, skips, and timings in Actions.
+- Assemble release notes with Towncrier fragments, validate notes in PRs, and preview upcoming changes in the documentation.
+- Generate the radar-site CSV with LF line endings so fresh worktrees stay clean, and apply lint fixes before formatting.
+- Prepare releases on a branch before editing files, validate draft release PRs before review/merge, check navigation and notebook release notices, and provide guarded cleanup for merged local branches and worktrees.
+
 ## [0.9.0] - 2026-09-09
 
 ### Documentation

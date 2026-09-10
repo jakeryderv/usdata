@@ -1,8 +1,6 @@
 # Global Summary of the Year
 
-**Unreleased:** use the [source installation](../../README.md#source-installation) before running these examples.
-
-Available from source for v0.10 as `noaa:gsoy`. GSOY uses the
+Available since v0.10.0 as `noaa:gsoy`. GSOY uses the
 anonymous NCEI Access Data Service dataset `global-summary-of-the-year`, reusing
 GHCN/GSOM station discovery, pagination, and 50-station CSV chunks. Require both
 dates and either `stations` or a location/bbox, not both. `units` is `metric`

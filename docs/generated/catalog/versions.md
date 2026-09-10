@@ -35,10 +35,10 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
 - [`usgs:earthquakes`](usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · Planned
 
-**Implemented, unreleased (planned 0.10)**
+**Included since 0.10**
 
-- [`noaa:coops-water-levels`](noaa.md#noaacoops-water-levels) CO-OPS Observed Water Levels · Source only
-- [`noaa:gsoy`](noaa.md#noaagsoy) Global Summary of the Year · Source only
+- [`noaa:coops-water-levels`](noaa.md#noaacoops-water-levels) CO-OPS Observed Water Levels · Released
+- [`noaa:gsoy`](noaa.md#noaagsoy) Global Summary of the Year · Released
 
 **Included since 0.8**
 

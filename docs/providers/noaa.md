@@ -8,12 +8,12 @@ NOAA access is anonymous.
 |---|---|---|
 | `ghcn-daily` | [Daily station observations](noaa-ghcn.md) | Station CSV for inclusive dates |
 | `gsom` | [Monthly station summaries](noaa-gsom.md) | Complete UTC months |
-| `gsoy` | [Annual station summaries](noaa-gsoy.md) (v0.10 / source) | Complete UTC years |
+| `gsoy` | [Annual station summaries](noaa-gsoy.md) (v0.10.0) | Complete UTC years |
 | `nexrad-level2` | [Radar scans](noaa-nexrad.md) | Whole Level II scans |
 | `goes-abi` | [GOES imagery](noaa-goes.md) | Whole single-channel CONUS scenes |
 | `storm-events` | [Storm Events](noaa-storm-events.md) | Whole annual details archives |
 | `coastwatch-sst` | [Sea-surface temperature](noaa-coastwatch.md) | Spatial and temporal CSV subsets |
-| `coops-water-levels` | [Observed coastal water levels](noaa-coops.md) (v0.10 / source) | One station and datum, at most 28 days |
+| `coops-water-levels` | [Observed coastal water levels](noaa-coops.md) (v0.10.0) | One station and datum, at most 28 days |
 
 See the [generated catalog](../generated/catalog/noaa.md) for status,
 capabilities, endpoints, and versions. Historical endpoint probes and candidate

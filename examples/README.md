@@ -16,7 +16,7 @@ the saved outputs, or run them locally to change queries and inspect the results
 ## Manifest examples
 
 [Annual airport climate](annual-climate/README.md) demonstrates GSOY annual
-selection and local CSV opening with a small manifest (unreleased v0.10).
+selection and local CSV opening with a small manifest (available since v0.10.0).
 
 ## Run interactively
 
@@ -66,4 +66,4 @@ the visible outputs. Review the notebook diff before committing a refresh;
 upstream revisions can change both observations and checksums. The notebooks are
 the tutorial source; equivalent analysis scripts are not maintained alongside them.
 
-A small [coastal water-level manifest](coastal-water-levels/README.md) demonstrates CO-OPS datum, units, quality flags, and local CSV reading (available from source for v0.10).
+A small [coastal water-level manifest](coastal-water-levels/README.md) demonstrates CO-OPS datum, units, quality flags, and local CSV reading (available since v0.10.0).

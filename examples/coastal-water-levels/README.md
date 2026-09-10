@@ -1,6 +1,6 @@
 # Coastal water levels
 
-Available from source for v0.10. This small manifest requests three historical
+Available since v0.10.0. This small manifest requests three historical
 six-minute observations at The Battery, New York, relative to mean lower low
 water (MLLW), in meters and UTC. It does not request tide predictions.
 

@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`noaa:gsoy` · **Source only** · Install from [source](../../../../README.md#source-installation) to use this dataset.
+`noaa:gsoy` · **Released** · Included since usdata 0.10.
 
 Global Summary of the Year.
 
@@ -21,7 +21,7 @@ Global Summary of the Year.
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.10
+- Availability: since 0.10
 - Domain: Surface weather
 - Geographic bounds (WGS84): west -180°, south -90°, east 180°, north 90°
 - Coverage varies by station, product, and date; the range above does not guarantee observations.

@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`noaa:coops-water-levels` · **Source only** · Install from [source](../../../../README.md#source-installation) to use this dataset.
+`noaa:coops-water-levels` · **Released** · Included since usdata 0.10.
 
 CO-OPS Observed Water Levels.
 
@@ -21,7 +21,7 @@ CO-OPS Observed Water Levels.
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.10
+- Availability: since 0.10
 - Domain: Sea level and tides
 - Coverage: not specified in the catalog
 - Coverage varies by station, product, and date; the range above does not guarantee observations.
