@@ -92,18 +92,21 @@ Public hosting is selected work in the
 [Now / Next / Later roadmap](../roadmap.md#how-we-plan), tracked in
 [issue #56](https://github.com/jakeryderv/usdata/issues/56) without a deadline or
 release assignment. The selected design uses Cloudflare Workers Static Assets:
-a small home page at `usdata.dev` and versioned docs at `docs.usdata.dev`, defaulting
+a small home page at `usdata.dev` and a Worker serving versioned docs from R2 at
+`docs.usdata.dev`, defaulting
 to the latest published package. Release references come from that release's code
 and registry; documentation-only corrections must retain that reference version
 and record their own revision. Start with the reviewed v0.10.0 documentation;
 earlier releases are outside the archive scope. For future releases, attach the
-validated built-docs archive to the GitHub release and deploy that same build.
+validated built-docs archive to the GitHub release. The scheduled docs Worker
+imports that same build into R2 and advances the version catalog after verification.
 These website assets are separate from Python distributions. Preserve published
 versions and show the selector once two versions exist, as described in the
 roadmap. Retention does not imply ongoing maintenance of old package versions.
 
-The current local build still describes its checkout and has no deployment or DNS
-steps. Implement release-specific builds, durable archives, CI deployment access,
-and custom-domain configuration before publishing. The home page and documentation
-should deploy independently. R2 dataset archives and website catalog browsing are
-separate candidate work, not prerequisites for publication.
+The ordinary local build still describes its checkout. Release archive builds
+isolate the tagged package source from the reviewed documentation revision.
+[Website operations](website-operations.md) describes the independent home/docs
+Workers Builds projects, R2 binding, scheduled imports, validation, and rollback.
+Cloudflare manages authorization; no Cloudflare or R2 secret is required in GitHub.
+R2 dataset archives and website catalog browsing remain separate candidate work.

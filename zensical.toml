@@ -5,7 +5,7 @@ docs_dir = ".build/docs"
 site_dir = "site"
 repo_url = "https://github.com/jakeryderv/usdata"
 repo_name = "jakeryderv/usdata"
-# Publication and canonical URL are deferred to issue #56.
+# Release builds supply their version-specific canonical URL.
 nav = [
   { "Start here" = "index.md" },
   { "Guides & examples" = [
@@ -37,6 +37,7 @@ nav = [
     { "Testing" = "docs/testing.md" },
     { "Adding a dataset" = "docs/guides/adding-a-dataset.md" },
     { "Maintaining documentation" = "docs/guides/documentation.md" },
+    { "Website operations" = "docs/guides/website-operations.md" },
     { "Decisions" = "docs/adr/README.md" },
   ] },
   { "Project" = [
