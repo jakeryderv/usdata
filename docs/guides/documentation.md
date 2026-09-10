@@ -88,7 +88,9 @@ The site currently describes the source checkout. Mark source-only features
 [release-note fragments](../../changes/README.md); `just release` assembles them
 with Towncrier and regenerates registry documentation. The website does not own release policy.
 
-Public hosting and the `usdata.dev` domain are deferred in
-[issue #56](https://github.com/jakeryderv/usdata/issues/56), without a target date.
-The build has no deployment or DNS steps. Choose the hosting service and canonical
-URL when that issue is scheduled.
+Public hosting at `usdata.dev` is selected work in the
+[Now / Next / Later roadmap](../roadmap.md#how-we-plan), tracked in
+[issue #56](https://github.com/jakeryderv/usdata/issues/56) without a deadline or
+release assignment. The build currently has no deployment or DNS steps. Resolve
+hosting access, the hosting service, canonical URL, and publication policy before
+implementing deployment.
