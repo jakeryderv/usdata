@@ -4,7 +4,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 [Provider access notes](../../providers/noaa.md).
 
-**Released** is included in usdata 0.9.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
+**Released** is included in usdata 0.10.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
 
 ## Implemented datasets
 
@@ -12,11 +12,11 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 |---|---|---|---|
 | <span id="noaaghcn-daily"></span>[Daily station weather](noaa/ghcn-daily.md) | Released | CSV | Station observations within inclusive calendar dates; selected elements |
 | <span id="noaagsom"></span>[Monthly station climate](noaa/gsom.md) | Released | CSV | Complete UTC calendar months touched by the query; station and element filters |
-| <span id="noaagsoy"></span>[Annual station climate](noaa/gsoy.md) | Source only | CSV | Complete UTC calendar years touched by the query; station and element filters |
+| <span id="noaagsoy"></span>[Annual station climate](noaa/gsoy.md) | Released | CSV | Complete UTC calendar years touched by the query; station and element filters |
 | <span id="noaastorm-events"></span>[Storm Events details](noaa/storm-events.md) | Released | gzip CSV | Whole annual archives; filter rows locally after downloading |
 | <span id="noaanexrad-level2"></span>[NEXRAD radar scans](noaa/nexrad-level2.md) | Released | NEXRAD Level II | Whole radar scans by site and inclusive UTC scan-start time |
 | <span id="noaagoes-abi"></span>[GOES CONUS imagery](noaa/goes-abi.md) | Released | NetCDF4 | Whole single-channel CONUS scenes by inclusive UTC scan-start time |
-| <span id="noaacoops-water-levels"></span>[Coastal water levels](noaa/coops-water-levels.md) | Source only | CSV | Six-minute observations for one station and datum; at most 28 days |
+| <span id="noaacoops-water-levels"></span>[Coastal water levels](noaa/coops-water-levels.md) | Released | CSV | Six-minute observations for one station and datum; at most 28 days |
 | <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](noaa/coastwatch-sst.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
 
 ## Planned datasets

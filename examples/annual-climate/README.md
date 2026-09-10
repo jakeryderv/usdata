@@ -1,6 +1,6 @@
 # Annual airport climate
 
-Available from source for v0.10. The [manifest](dataset.yaml)
+Available since v0.10.0. The [manifest](dataset.yaml)
 requests one year of precipitation and mean temperature at Will Rogers World
 Airport through `noaa:gsoy`. GSOY selects every UTC calendar year touched by the
 query in full; May 6–7 selects all of 2024, while December 31–January 1 selects
