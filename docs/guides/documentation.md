@@ -95,8 +95,12 @@ release assignment. The selected design uses Cloudflare Workers Static Assets:
 a small home page at `usdata.dev` and versioned docs at `docs.usdata.dev`, defaulting
 to the latest published package. Release references come from that release's code
 and registry; documentation-only corrections must retain that reference version
-and record their own revision. Preserve release builds and provide a version
-selector as described in the roadmap.
+and record their own revision. Start with the reviewed v0.10.0 documentation;
+earlier releases are outside the archive scope. For future releases, attach the
+validated built-docs archive to the GitHub release and deploy that same build.
+These website assets are separate from Python distributions. Preserve published
+versions and show the selector once two versions exist, as described in the
+roadmap. Retention does not imply ongoing maintenance of old package versions.
 
 The current local build still describes its checkout and has no deployment or DNS
 steps. Implement release-specific builds, durable archives, CI deployment access,
