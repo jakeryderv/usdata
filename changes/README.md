@@ -24,4 +24,4 @@ but excluded from rendered release notes.
 `just check` validates all filenames and nonempty content. PR CI also checks
 for a new fragment; release PRs that update the assembled changelog are exempt.
 The site builds an upcoming-changes preview directly from these files. Releases
-use `just release` and `just release-pr`; see [the release workflow](../docs/versioning.md).
+use `just release` and `just release-pr`; see [the release workflow](../docs/content/versioning.md).

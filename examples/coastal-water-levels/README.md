@@ -52,5 +52,5 @@ an upstream error during fetching, including NOAA's HTTP-200 no-data message;
 
 Preserve the manifest, lockfile, and cache together. Locked restoration checks
 exact bytes; upstream revisions require an explicit refresh rather than silently
-changing the analysis inputs. See [NOAA access notes](../../docs/providers/noaa-coops.md)
+changing the analysis inputs. See [NOAA access notes](../../docs/content/providers/noaa-coops.md)
 for supported parameters and limits.

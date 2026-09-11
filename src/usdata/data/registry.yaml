@@ -1,5 +1,5 @@
 # Curated dataset registry: the single source of truth for what usdata knows about.
-# Rendered exclusively to docs/generated/catalog/ by `just docs`.
+# Rendered exclusively to docs/content/generated/catalog/ by `just docs`.
 #
 # status: available = adapter implemented and tested (since: version it shipped in)
 #         stub      = adapter class exists but raises NotImplementedProvider (target: version or later)
@@ -683,7 +683,7 @@ datasets:
 # Documentation composition keyed by stable dataset ID; validated by just docs.
 catalog:
   noaa:ghcn-daily:
-    guide: docs/providers/noaa-ghcn.md
+    guide: docs/content/providers/noaa-ghcn.md
     summary: Daily station weather
     formats:
     - CSV
@@ -693,7 +693,7 @@ catalog:
     examples:
     - examples/weather-and-streamflow/example.ipynb
   noaa:gsom:
-    guide: docs/providers/noaa-gsom.md
+    guide: docs/content/providers/noaa-gsom.md
     summary: Monthly station climate
     formats:
     - CSV
@@ -703,7 +703,7 @@ catalog:
     examples:
     - examples/monthly-climate/example.ipynb
   noaa:gsoy:
-    guide: docs/providers/noaa-gsoy.md
+    guide: docs/content/providers/noaa-gsoy.md
     summary: Annual station climate
     formats:
     - CSV
@@ -713,7 +713,7 @@ catalog:
     examples:
     - examples/annual-climate/README.md
   noaa:nexrad-level2:
-    guide: docs/providers/noaa-nexrad.md
+    guide: docs/content/providers/noaa-nexrad.md
     summary: NEXRAD radar scans
     formats:
     - NEXRAD Level II
@@ -723,7 +723,7 @@ catalog:
     examples:
     - examples/radar-reflectivity/example.ipynb
   noaa:goes-abi:
-    guide: docs/providers/noaa-goes.md
+    guide: docs/content/providers/noaa-goes.md
     summary: GOES CONUS imagery
     formats:
     - NetCDF4
@@ -733,7 +733,7 @@ catalog:
     examples:
     - examples/goes-imagery/example.ipynb
   noaa:storm-events:
-    guide: docs/providers/noaa-storm-events.md
+    guide: docs/content/providers/noaa-storm-events.md
     summary: Storm Events details
     formats:
     - gzip CSV
@@ -743,7 +743,7 @@ catalog:
     examples:
     - examples/storm-events/example.ipynb
   noaa:coastwatch-sst:
-    guide: docs/providers/noaa-coastwatch.md
+    guide: docs/content/providers/noaa-coastwatch.md
     summary: Sea-surface temperature
     formats:
     - CSV with units row
@@ -753,7 +753,7 @@ catalog:
     examples:
     - examples/sst-analysis/example.ipynb
   noaa:coops-water-levels:
-    guide: docs/providers/noaa-coops.md
+    guide: docs/content/providers/noaa-coops.md
     summary: Coastal water levels
     formats:
     - CSV
@@ -763,7 +763,7 @@ catalog:
     examples:
     - examples/coastal-water-levels/README.md
   usgs:water-daily:
-    guide: docs/providers/usgs-water-daily.md
+    guide: docs/content/providers/usgs-water-daily.md
     summary: Daily water observations
     formats:
     - CSV

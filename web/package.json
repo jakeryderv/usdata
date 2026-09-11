@@ -1,18 +1,13 @@
 {
-  "name": "usdata-site",
+  "name": "usdata-home",
   "private": true,
   "type": "module",
   "scripts": {
     "types": "wrangler types",
-    "check": "npm run check:home && npm run check:docs",
+    "check": "wrangler types && tsc --noEmit && vitest run",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
-    "build": "node build.mjs",
-    "build:docs": "cd .. && UV_PROJECT_ENVIRONMENT=.venv-docs uv run --locked --group docs --no-default-groups python scripts/docs_site.py build",
-    "check:home": "wrangler types && tsc --noEmit && vitest run --config vitest.config.ts",
-    "check:docs": "wrangler types --config ../docs/hosting/wrangler.jsonc ../docs/hosting/worker-configuration.d.ts --env-interface DocsEnv && tsc --project ../docs/hosting/tsconfig.json && vitest run --config vitest.docs.config.ts",
-    "deploy:docs": "wrangler deploy --config ../docs/hosting/wrangler.jsonc",
-    "dev:docs": "wrangler dev --config ../docs/hosting/wrangler.jsonc --port 8788"
+    "build": "node build.mjs"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "0.22.0",

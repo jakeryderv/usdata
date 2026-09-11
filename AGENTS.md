@@ -1,13 +1,13 @@
 # AGENTS.md
 
 Context for coding agents working in this repo. Setup and commands are in
-[README.md](README.md); do not duplicate them here.
+[the development guide](docs/content/project.md#development); do not duplicate them here.
 
 ## What this is
 
 A Python SDK + CLI (`usdata`) giving one interface to U.S. public scientific
 data, with provenance and reproducible manifests. Read
-[docs/architecture.md](docs/architecture.md) before touching more than one module.
+[docs/content/architecture.md](docs/content/architecture.md) before touching more than one module.
 
 ## Layout
 
@@ -18,10 +18,10 @@ data, with provenance and reproducible manifests. Read
 - `scripts/`: generators for bundled data files. Regenerate, don't hand-edit `data/*.csv`.
 - `src/usdata/cli/app.py`: Typer app. Keep it thin; logic lives in the library.
 - Tests are organized by responsibility in `tests/{unit,adapters,protocols,component,live}/`.
-  Read [docs/testing.md](docs/testing.md) for levels, selection, and offline rules.
-- `docs/adr/`: decisions already made. Read before proposing to reverse one.
-- `docs/guides/adding-a-dataset.md`: the procedure for new datasets. Follow it exactly.
-- `docs/providers/<id>.md`: handwritten access notes per agency, linked to `docs/generated/catalog/`. Dataset guides are mapped by registry `catalog` metadata and combined with generated reference only during site builds. Read before touching an adapter.
+  Read [docs/content/testing.md](docs/content/testing.md) for levels, selection, and offline rules.
+- `docs/content/adr/`: decisions already made. Read before proposing to reverse one.
+- `docs/content/guides/adding-a-dataset.md`: the procedure for new datasets. Follow it exactly.
+- `docs/content/providers/<id>.md`: handwritten access notes per agency, linked to `docs/content/generated/catalog/`. Dataset guides are mapped by registry `catalog` metadata and combined with generated reference only during site builds. Read before touching an adapter.
 
 ## Constraints
 
@@ -37,5 +37,5 @@ data, with provenance and reproducible manifests. Read
 - Conventional commits (`feat:`, `fix:`, `docs:`, ...). No Co-Authored-By trailers.
 - Trunk-based: short branch → PR → squash merge to main. `main` is protected; never push to it directly.
 - Every PR adds a release-note fragment under `changes/`; see [fragment rules](changes/README.md).
-- Releases: `just release <bump>`. Never create tags or GitHub releases by hand. See `docs/versioning.md`.
-- A design choice that gets argued about becomes an ADR in `docs/adr/`.
+- Releases: `just release <bump>`. Never create tags or GitHub releases by hand. See `docs/content/versioning.md`.
+- A design choice that gets argued about becomes an ADR in `docs/content/adr/`.

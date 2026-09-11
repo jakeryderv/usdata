@@ -33,3 +33,6 @@ web/worker-configuration.d.ts
 docs/hosting/.wrangler/
 docs/hosting/worker-configuration.d.ts
 docs/hosting/.dev.vars*
+
+# Independent documentation build dependencies
+docs/node_modules/

@@ -126,7 +126,9 @@ jobs:
       - run: npm run build --prefix web
       - run: npm run check --prefix web
       - run: cd web && npx wrangler deploy --dry-run
-      - run: cd web && npx wrangler deploy --config ../docs/hosting/wrangler.jsonc --dry-run
+      - run: npm ci --prefix docs
+      - run: npm run check --prefix docs
+      - run: npm run deploy --prefix docs -- --dry-run
 
   smoke:
     needs: build

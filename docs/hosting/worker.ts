@@ -15,6 +15,25 @@ export default {
       path === "/index.html"
         ? "/"
         : path;
+    const repositoryFiles: Record<string, string> = {
+      CONTRIBUTING: "CONTRIBUTING.md",
+      SECURITY: "SECURITY.md",
+      LICENSE: "LICENSE",
+      changes: "changes/README.md",
+    };
+    const policy = url.pathname.match(
+      /^\/(CONTRIBUTING|SECURITY|LICENSE|changes)(?:\/|\/index\.html|\.html)?$/,
+    );
+    if (policy) {
+      const target = new URL(
+        `https://github.com/jakeryderv/usdata/blob/main/${repositoryFiles[policy[1]]}`,
+      );
+      target.search = url.search;
+      return new Response(null, {
+        status: 302,
+        headers: { Location: target.href, "Cache-Control": "no-store" },
+      });
+    }
     if (url.pathname !== new URL(request.url).pathname) {
       return new Response(null, {
         status: 302,
