@@ -1,7 +1,7 @@
 """Curated dataset registry bundled with the package.
 
 v0.1 search runs over this registry, not over live agency catalogs. See
-docs/adr/0001-curated-registry-over-federated-search.md.
+docs/content/adr/0001-curated-registry-over-federated-search.md.
 """
 
 from __future__ import annotations

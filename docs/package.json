@@ -1,0 +1,25 @@
+{
+  "name": "usdata-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "UV_PROJECT_ENVIRONMENT=.venv-docs uv run --locked --group docs --no-default-groups python build.py build",
+    "serve": "UV_PROJECT_ENVIRONMENT=.venv-docs uv run --locked --group docs --no-default-groups python build.py serve",
+    "types": "wrangler types --config hosting/wrangler.jsonc hosting/worker-configuration.d.ts --env-interface DocsEnv",
+    "check": "npm run types && tsc --project hosting/tsconfig.json && vitest run",
+    "deploy": "wrangler deploy --config hosting/wrangler.jsonc",
+    "dev": "wrangler dev --config hosting/wrangler.jsonc --port 8788"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "0.22.0",
+    "@types/node": "22.20.2",
+    "prettier": "3.9.6",
+    "typescript": "7.0.2",
+    "vitest": "4.1.11",
+    "wrangler": "4.130.0"
+  },
+  "overrides": {
+    "workerd": "1.20260908.1",
+    "sharp": "0.35.4"
+  }
+}

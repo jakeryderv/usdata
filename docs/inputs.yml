@@ -1,0 +1,27 @@
+# Repository-relative files published alongside docs/content/. No globs.
+files:
+  - CHANGELOG.md
+  - examples/README.md
+  - examples/annual-climate/README.md
+  - examples/annual-climate/dataset.yaml
+  - examples/coastal-water-levels/README.md
+  - examples/coastal-water-levels/dataset.yaml
+  - examples/event-context/README.md
+  - examples/event-context/dataset.yaml
+  - examples/event-context/example.ipynb
+  - examples/goes-imagery/README.md
+  - examples/goes-imagery/dataset.yaml
+  - examples/goes-imagery/example.ipynb
+  - examples/monthly-climate/README.md
+  - examples/monthly-climate/dataset.yaml
+  - examples/monthly-climate/example.ipynb
+  - examples/radar-reflectivity/README.md
+  - examples/radar-reflectivity/example.ipynb
+  - examples/sst-analysis/README.md
+  - examples/sst-analysis/example.ipynb
+  - examples/storm-events/README.md
+  - examples/storm-events/dataset.yaml
+  - examples/storm-events/example.ipynb
+  - examples/weather-and-streamflow/README.md
+  - examples/weather-and-streamflow/dataset.yaml
+  - examples/weather-and-streamflow/example.ipynb

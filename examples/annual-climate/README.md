@@ -45,5 +45,5 @@ A repeat pull uses the lockfile and checksummed cache. Keep the manifest,
 lockfile, and cached bytes for reproducibility: NCEI revises records, and an old
 checksum cannot recreate data that is no longer available upstream. Annual
 labels do not imply identical accumulation seasons for every element; consult
-[NOAA access notes](../../docs/providers/noaa-gsoy.md)
+[NOAA access notes](../../docs/content/providers/noaa-gsoy.md)
 when choosing other variables.

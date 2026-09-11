@@ -12,5 +12,5 @@ requires usdata v0.5 or newer; the notebook's pandas opening requires v0.6 or ne
 The restoration demonstration uses a disposable cache, leaving the earlier
 downloads intact. Generated example lockfiles are ignored in this SDK checkout;
 keep the manifest and lockfile together in your own analysis project and preserve
-cached bytes when you need a durable archive. The [manifest reference](../../docs/reference/manifests.md)
+cached bytes when you need a durable archive. The [manifest reference](../../docs/content/reference/manifests.md)
 describes empty sources, query semantics, `--force`, and failure codes.

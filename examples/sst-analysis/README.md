@@ -10,5 +10,5 @@ ERDDAP's units row becomes metadata rather than an observation; raw bytes and
 provenance remain intact when the DataFrame is edited.
 
 Saved results include execution and retrieval times plus checksums; NOAA can revise
-the underlying data. The [reader reference](../../docs/reference/readers.md)
+the underlying data. The [reader reference](../../docs/content/reference/readers.md)
 explains opening options and the limits of in-memory metadata.
