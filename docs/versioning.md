@@ -82,8 +82,8 @@ publishing, then creates the `vX.Y.Z` tag and GitHub release with notes from the
 
 The website follows main and deploys independently of package releases. It does
 not create new per-release documentation archives. Existing v0.10.0 downloads
-and its frozen website snapshot remain available. Mark source-only features
-**Unreleased** until their package release. See
+remain on GitHub; old website version paths redirect to current documentation.
+Mark source-only features **Unreleased** until their package release. See
 [website operations](guides/website-operations.md).
 
 The workflow publishes whatever version `pyproject.toml` declares and tags that

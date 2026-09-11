@@ -1,9 +1,19 @@
-# Website operations
+# Website and data storage operations
 
-The homepage and current documentation are one MkDocs + Material static site at
-[usdata.dev](https://usdata.dev/), served by the `usdata-home` Cloudflare Worker.
-[ADR 0014](../adr/0014-unified-current-documentation.md) records the scope and archive
-policy. Website tooling is not a Python runtime dependency.
+The application, documentation, and dataset files have separate responsibilities.
+[ADR 0015](../adr/0015-separate-sites-and-data-storage.md) records the decision.
+
+| Address | Source | Build output | Cloudflare resource |
+| --- | --- | --- | --- |
+| `usdata.dev` | `web/public/`, `web/src/` | `web/dist/` | `usdata-home` Worker + Static Assets |
+| `docs.usdata.dev` | `docs/`, Python references, saved examples | `.build/docs-site/` | `usdata-docs` Worker + Static Assets |
+| `data.usdata.dev` | Future published datasets/cache objects | Uploaded objects | `usdata` R2 bucket |
+
+Both build outputs are ignored and disposable. `.build/docs/` is intermediate
+MkDocs staging. `site/` was the previous combined build output and is no longer
+used. Neither website reads R2 or packages its HTML in the Python wheel.
+Documentation styles and hosting configuration live in `docs/theme/` and
+`docs/hosting/`. `web/` supplies the shared npm/Wrangler toolchain.
 
 ## Build and preview
 
@@ -12,75 +22,85 @@ Follow the [development setup](../../README.md#development), then run:
 ```sh
 just check-docs
 npm ci --prefix web
+npm run build --prefix web
 npm run check --prefix web
-cd web
-npx wrangler deploy --dry-run
-npx wrangler dev
 ```
 
-`just docs-serve` previews current content with reload. The local Worker preview
-also exercises the frozen archive and redirects. Build the site before running
-Worker checks: they use the real static assets, including the search index and
-archived docs. No live datasets, R2, or GitHub release downloads are used by builds.
-The pinned archive ZIP is already in the repository.
+Preview the homepage with `npm run dev --prefix web` (port 8787), and documentation
+with `npm run dev:docs --prefix web` (port 8788). The Worker previews exercise
+redirects. Links between sites use the production hostnames; inspect each local
+preview directly when validating an unmerged change. `just docs-serve` previews
+current documentation with reload on port 8000. Builds do not execute notebooks,
+fetch scientific data, or require R2 credentials.
 
 ## Automatic deployment
 
-The existing Cloudflare Workers Builds connection to `jakeryderv/usdata` deploys
-only main, using these settings:
+Two Workers Builds triggers connect to `jakeryderv/usdata`, include only `main`,
+and use root directory `web`. All repository paths trigger a build, so changes to
+Python signatures, examples, docs, or shared tooling cannot leave stale output.
 
-| Setting | Value |
-| --- | --- |
-| Worker | `usdata-home` |
-| Root directory | `web` |
-| Build command | `python3 -m pip install uv==0.12.5 && npm run build && npm run check` |
-| Deploy command | `npm run deploy` |
-| Production branch | `main` |
-| Branch includes | `main` |
-| Non-production builds | Disabled |
-| Domains | `usdata.dev`, `docs.usdata.dev` |
+| Worker | Build command | Deploy command |
+| --- | --- | --- |
+| `usdata-home` | `npm run build && npm run check:home` | `npm run deploy` |
+| `usdata-docs` | `python3 -m pip install uv==0.12.5 && npm run build:docs && npm run check:docs` | `npm run deploy:docs` |
 
-The build explicitly installs uv because Cloudflare's build image does not
-guarantee it is preinstalled. It uses the locked Python docs environment, assembles current content,
-checks links and anchors, verifies the archive, then checks Worker types and
-runtime behavior. A failed build does not deploy. Repository branch protection
-requires full PR CI before merging; Workers Builds runs website validation again
-and does not wait for the separate GitHub Actions main run.
+The docs build explicitly bootstraps uv, then uses the locked Python environment.
+Each site deploys only after its own checks pass. Required PR CI validates both
+sites and the SDK before merge; Workers Builds does not wait for a separate main
+GitHub Actions run. Cloudflare's managed build token deploys the Workers. R2
+credentials are not passed to either site build. Package releases remain independent.
 
-Cloudflare's managed build token supplies deployment credentials. No R2 binding,
-R2 upload credentials, or separate documentation-publishing workflow is needed.
-The Python package release workflow publishes only package artifacts and release
-notes. Future package releases do not create new documentation snapshots.
+For a dry run, use `npm exec --prefix web -- wrangler deploy --config
+web/wrangler.jsonc --dry-run`, or select `docs/hosting/wrangler.jsonc` instead.
 
-## URLs and the existing archive
+## Compatibility URLs
 
-- `/` introduces the project; `/start/` is the first-use walkthrough.
-- `docs.usdata.dev/` redirects to `usdata.dev/start/`.
-- Other paths on the old docs hostname redirect to the same path on `usdata.dev`,
-  preserving query parameters and browser fragments.
-- `/latest/` redirects to `/start/`; deeper paths under `/latest/` resolve to the
-  corresponding current documentation path.
-- `/0.10.0/` preserves the frozen published documentation and has a visible archive
-  notice. It is not regenerated from current Python code or indexed by current search.
-- `/versions.json` is an archive compatibility endpoint, not a list of current
-  supported package versions.
+Former documentation paths on `usdata.dev` redirect to `docs.usdata.dev`.
+The docs Worker maps `/start/`, `/latest/`, and `/0.10.0/` to current docs. Deeper
+latest/version paths preserve their suffixes. Query strings and browser fragments
+survive redirects. These URLs no longer select release-specific documentation.
+There is no hosted archive or `versions.json`; missing paths return 404.
 
-`web/archive/README.md` identifies the retained ZIP, original source commits, and
-checksum. GitHub release downloads and old R2 snapshots remain retained; the site
-no longer reads R2. The retired `usdata` Worker's build trigger is disabled and its
-custom domain moves to `usdata-home`. Keep the old deployment available for recovery.
+Migration redirects use 302 with `Cache-Control: no-store`. A browser that cached
+the earlier permanent docs-to-home redirects may need its site cache cleared.
+Existing GitHub release attachments and Git history remain historical records;
+they are not downloaded by site builds. The retired `usdata` Worker and R2 `docs/`
+objects are removed after successful cutover.
+
+## R2 dataset storage
+
+`infra/r2-data.json` records the intended bucket domain and CORS configuration.
+`data.usdata.dev` exposes objects for public reads, with GET/HEAD CORS for
+`https://usdata.dev` and `https://docs.usdata.dev`. CORS does not restrict access
+outside browsers. All objects placed in this bucket must be suitable for public
+access. No browser receives upload credentials. Keep the managed `r2.dev` endpoint
+disabled; the custom domain is the public interface.
+
+GitHub retains `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY`. Authenticated uploads
+use the account's R2 S3 endpoint and require Object Read & Write access to `usdata`.
+Do not rotate or remove these credentials merely because the former docs workflow
+is gone. Reassess their scope when a future uploader needs different access.
+
+Run the manual **Check R2 data storage** GitHub Actions workflow from main to
+verify the stored credentials, an authenticated upload/download, public delivery,
+and CORS. It uses a unique `checks/github-<run>-<attempt>.txt` object and always
+attempts to delete that exact object. It does not upload any dataset or alter
+other objects. A failed cleanup must be resolved using the key shown in the run.
+
+The bucket is ready for data; SDK remote caching is not implemented. Before a
+first dataset upload, define stable object identities, provenance, checksums,
+upload ownership, and retention. Published example inputs must survive disposable
+cache eviction. The [roadmap](../roadmap.md) keeps exploration in Next and general
+remote caching in Later without dates or release commitments.
 
 ## Verification and recovery
 
-After deployment, check the homepage, start page, navigation, search, API/CLI
-references, representative datasets and notebook plots, light/dark modes, and
-mobile layout. Check old-host and latest redirects, archive pages/assets, unknown
-paths returning 404, and HEAD responses. Inspect the Workers Builds deployment
-commit and logs; a local build alone does not prove successful production deployment.
+Verify both custom domains, homepage links, docs navigation/search, references,
+notebook plots, mobile layout, legacy redirects, and 404/HEAD behavior. Check each
+Workers Builds run against the merged commit. Verify R2 using the manual workflow.
 
-For routine rollback within this architecture, redeploy the prior verified
-Worker/assets version, or revert the faulty change through a PR and let main
-redeploy. Initial migration rollback additionally requires restoring the old
-`docs.usdata.dev` domain association and build settings; prior configuration and
-publication procedures remain in Git history. Preserve R2 objects and release
-attachments. Never alter the unrelated `jvs-sh` Worker or `pkgs` bucket.
+For a site rollback, redeploy a compatible Worker/assets version or revert through
+a PR. A site rollback does not restore deleted R2 objects. Versions from before
+this split may contain incompatible domain routing; avoid rolling back only one
+side of that migration. Do not restore a dependency on the retired R2 docs objects.
+Unrelated Cloudflare resources are outside this setup.

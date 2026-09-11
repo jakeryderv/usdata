@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Discover U.S. scientific datasets, fetch their files, and preserve reproducible inputs with the usdata Python SDK and CLI."
+    />
+    <meta name="color-scheme" content="dark light" />
+    <title>usdata — Public science. Reproducible inputs.</title>
+    <link rel="canonical" href="https://usdata.dev/" />
+    <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="header wrap">
+      <a class="brand" href="/" aria-label="usdata home"
+        ><img src="/logo.svg" alt="" width="30" height="30" /> usdata</a
+      >
+      <nav aria-label="Main navigation">
+        <a href="https://docs.usdata.dev/docs/generated/catalog/">Datasets</a>
+        <a href="https://docs.usdata.dev/">Docs</a>
+        <a href="https://github.com/jakeryderv/usdata">GitHub</a>
+      </nav>
+    </header>
+    <main id="main" class="wrap">
+      <section class="hero" aria-labelledby="title">
+        <p class="eyebrow">OPEN DATA · PYTHON SDK + CLI</p>
+        <h1 id="title">Public science.<br />Reproducible inputs.</h1>
+        <p class="intro">
+          Discover U.S. scientific datasets, fetch their files, and keep the
+          evidence behind your analysis. One Python SDK and CLI for supported
+          NOAA and USGS data.
+        </p>
+        <div class="actions">
+          <a class="button primary" href="https://docs.usdata.dev/"
+            >Start with one dataset <span aria-hidden="true">↗</span></a
+          >
+          <a
+            class="button"
+            href="https://docs.usdata.dev/docs/generated/catalog/"
+            >Explore the catalog</a
+          >
+        </div>
+        <div class="terminal">
+          <span class="terminal-label">YOUR TERMINAL</span>
+          <pre><code>python -m pip install usdata
+usdata search precipitation --location Oklahoma
+usdata info noaa:ghcn-daily</code></pre>
+        </div>
+      </section>
+      <section class="cards" aria-label="Workflows">
+        <article>
+          <span class="number">01</span>
+          <h2>Find your source</h2>
+          <p>
+            Browse supported datasets with explicit formats, selection rules,
+            and practical examples.
+          </p>
+          <a href="https://docs.usdata.dev/docs/generated/catalog/"
+            >Browse datasets <span aria-hidden="true">→</span></a
+          >
+        </article>
+        <article>
+          <span class="number">02</span>
+          <h2>Fetch and analyze</h2>
+          <p>
+            Download source files and open them locally with optional CSV,
+            radar, and NetCDF readers.
+          </p>
+          <a href="https://docs.usdata.dev/docs/guides/fetch-and-analyze/"
+            >Follow the guide <span aria-hidden="true">→</span></a
+          >
+        </article>
+        <article>
+          <span class="number">03</span>
+          <h2>Keep the evidence</h2>
+          <p>
+            Record queries, provenance, and checksums. Lock, restore, and verify
+            your analysis inputs.
+          </p>
+          <a href="https://docs.usdata.dev/docs/reference/manifests/"
+            >Use a manifest <span aria-hidden="true">→</span></a
+          >
+        </article>
+      </section>
+      <section class="examples" aria-labelledby="examples-title">
+        <div>
+          <p class="eyebrow">FROM SOURCE TO ANALYSIS</p>
+          <h2 id="examples-title">See it in practice</h2>
+          <p>
+            Saved outputs and runnable notebooks, with the inputs behind them.
+          </p>
+        </div>
+        <ul>
+          <li>
+            <a
+              href="https://docs.usdata.dev/examples/weather-and-streamflow/example/"
+              >Weather and streamflow <span aria-hidden="true">↗</span></a
+            >
+          </li>
+          <li>
+            <a href="https://docs.usdata.dev/examples/goes-imagery/example/"
+              >Satellite imagery <span aria-hidden="true">↗</span></a
+            >
+          </li>
+          <li>
+            <a href="https://docs.usdata.dev/examples/coastal-water-levels/"
+              >Coastal water levels <span aria-hidden="true">↗</span></a
+            >
+          </li>
+        </ul>
+      </section>
+      <p class="status">
+        <strong>Pre-alpha.</strong> Documentation follows the current source
+        checkout. Features marked <strong>Unreleased</strong> require a source
+        installation. See the
+        <a href="https://docs.usdata.dev/CHANGELOG/">changelog</a> for published
+        versions.
+      </p>
+    </main>
+    <footer class="wrap">
+      <span>usdata · Public scientific data, with provenance.</span
+      ><a href="https://docs.usdata.dev/">Read the documentation</a>
+    </footer>
+  </body>
+</html>

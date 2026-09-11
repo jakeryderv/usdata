@@ -236,7 +236,7 @@ def test_site_links_follow_home_project_and_notebook_paths(monkeypatch):
             "[start](../index.md) [book](../../examples/sst-analysis/example.ipynb#plot)",
             Path("docs/guides/example.md"),
         )
-        == "[start](../../start.md) [book](../../examples/sst-analysis/example.md#plot)"
+        == "[start](../../index.md) [book](../../examples/sst-analysis/example.md#plot)"
     )
     assert (
         module.page_links(

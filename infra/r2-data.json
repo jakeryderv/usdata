@@ -1,0 +1,28 @@
+{
+  "bucket": "usdata",
+  "custom_domain": {
+    "domain": "data.usdata.dev",
+    "zoneId": "12c05b7627e36c9f2ca88ce04ccb8647",
+    "enabled": true,
+    "minTLS": "1.2"
+  },
+  "cors": {
+    "rules": [
+      {
+        "id": "usdata-sites-read",
+        "allowed": {
+          "origins": ["https://usdata.dev", "https://docs.usdata.dev"],
+          "methods": ["GET", "HEAD"],
+          "headers": ["Range"]
+        },
+        "exposeHeaders": [
+          "ETag",
+          "Content-Length",
+          "Content-Range",
+          "Accept-Ranges"
+        ],
+        "maxAgeSeconds": 3600
+      }
+    ]
+  }
+}

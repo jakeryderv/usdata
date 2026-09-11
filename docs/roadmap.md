@@ -38,12 +38,12 @@ belong in [CI](https://github.com/jakeryderv/usdata/actions/workflows/ci.yml) an
 
 ## Now
 
-The homepage and documentation are integrated at [usdata.dev](https://usdata.dev/).
-One MkDocs + Material site follows main and updates automatically after website
-validation. The v0.10.0 snapshot remains a frozen archive; ongoing multi-version
-publication is deferred until users need it. See
+The homepage at [usdata.dev](https://usdata.dev/) and current documentation at
+[docs.usdata.dev](https://docs.usdata.dev/) have separate automatic deployments.
+The R2 bucket is reserved for dataset storage at `data.usdata.dev`; connecting it
+does not implement an SDK remote cache. See
 [website operations](guides/website-operations.md) and
-[ADR 0014](adr/0014-unified-current-documentation.md).
+[ADR 0015](adr/0015-separate-sites-and-data-storage.md).
 
 Choose a bounded candidate from Next when its user benefit, scope, exclusions,
 and acceptance criteria are ready. The completed
@@ -57,14 +57,16 @@ implementation work:
 - A searchable dataset browser generated from the curated registry, showing
   support, formats, selection rules, and examples. It can start with a static
   metadata index and does not require mirroring upstream datasets.
-- An R2 archive of the exact inputs used by selected release examples. Record
-  dataset IDs, queries/source assets, retrieval times, upstream revisions where
-  available, checksums, and provenance. Manifests link releases or examples to
-  those snapshots; the package version alone does not identify data bytes. Reuse
-  identical objects across releases instead of duplicating their contents.
+- One bounded exploration workflow backed by R2: publish an example's exact
+  inputs, manifest, provenance, checksums, and lightweight preview files. Show the
+  previews in the website and link to downloads and SDK instructions. Define
+  stable object identities and retention before publishing; reuse identical bytes
+  rather than duplicating files for every package release.
 
-These are candidates without deadlines or release assignments. The archive is
-separate from general SDK remote caching in #11 and from mirroring entire sources.
+These are unscheduled candidates without deadlines or release assignments.
+Published example inputs have stable retention and remain separate from disposable
+SDK cache entries and from mirroring entire sources. General remote caching stays
+in Later until lookup, freshness, upload ownership, and eviction are defined.
 
 Scope one dataset expansion around a concrete analysis use case. These are
 candidates to investigate, not selected implementations. Refine a candidate into
@@ -83,7 +85,8 @@ and optional-reader boundaries:
 - [NASA access through earthaccess](https://github.com/jakeryderv/usdata/issues/9):
   establish credential ownership and authentication behavior first.
 - [Remote cache backends](https://github.com/jakeryderv/usdata/issues/11):
-  preserve checksum, provenance, and restoration contracts.
+  define lookup, freshness, trusted upload ownership, and eviction while preserving
+  checksum, provenance, restoration, and published-file retention contracts.
 - GRIB2 model output with cycle/forecast-hour selection, NetCDF CDRs, and static grids.
 - Further agencies, live catalog discovery, and third-party registry extensions.
 - Format normalization and place-name lookup beyond states and counties.

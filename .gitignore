@@ -28,3 +28,8 @@ web/worker-configuration.d.ts
 # Local browser and Worker previews
 .playwright-cli/
 .wrangler/
+
+# Documentation Worker tooling
+docs/hosting/.wrangler/
+docs/hosting/worker-configuration.d.ts
+docs/hosting/.dev.vars*

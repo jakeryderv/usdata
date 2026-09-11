@@ -1,13 +1,12 @@
 site_name: usdata
 site_description: U.S. scientific data, with provenance and reproducible inputs
-site_url: https://usdata.dev/
+site_url: https://docs.usdata.dev/
 docs_dir: .build/docs
-site_dir: site
+site_dir: .build/docs-site
 repo_url: https://github.com/jakeryderv/usdata
 repo_name: jakeryderv/usdata
 theme:
   name: material
-  custom_dir: web/overrides
   logo: assets/logo.svg
   favicon: assets/logo.svg
   features:
@@ -33,8 +32,8 @@ theme:
     text: Inter
     code: JetBrains Mono
 nav:
-- Home: index.md
-- Start here: start.md
+- Website: https://usdata.dev/
+- Start here: index.md
 - Guides & examples:
   - Fetch and analyze: docs/guides/fetch-and-analyze.md
   - Examples: examples/README.md

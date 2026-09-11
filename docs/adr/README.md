@@ -18,3 +18,4 @@ is described in the guides and reference pages.
 - [0013: Publish documentation directly from GitHub Actions](0013-actions-documentation-publication.md)
 
 - [0014: One current MkDocs site](0014-unified-current-documentation.md)
+- [0015: Separate application, documentation, and data storage](0015-separate-sites-and-data-storage.md)

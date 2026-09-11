@@ -1,6 +1,6 @@
 # 0014: One current MkDocs site
 
-Status: Accepted
+Status: Superseded by [ADR 0015](0015-separate-sites-and-data-storage.md)
 
 ## Context
 
