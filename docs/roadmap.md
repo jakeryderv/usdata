@@ -38,15 +38,12 @@ belong in [CI](https://github.com/jakeryderv/usdata/actions/workflows/ci.yml) an
 
 ## Now
 
-No new implementation workstream is selected. The project home at
-[usdata.dev](https://usdata.dev/) and versioned documentation at
-[docs.usdata.dev](https://docs.usdata.dev/) are published. The completed
-[publication issue (#56)](https://github.com/jakeryderv/usdata/issues/56) records
-verification evidence. Release and retention policy lives in
+The homepage and documentation are integrated at [usdata.dev](https://usdata.dev/).
+One MkDocs + Material site follows main and updates automatically after website
+validation. The v0.10.0 snapshot remains a frozen archive; ongoing multi-version
+publication is deferred until users need it. See
 [website operations](guides/website-operations.md) and
-[ADR 0012](adr/0012-cloudflare-release-documentation.md) and
-[ADR 0013](adr/0013-actions-documentation-publication.md). Release documentation
-publishes directly from GitHub Actions to R2; the docs Worker only serves requests.
+[ADR 0014](adr/0014-unified-current-documentation.md).
 
 Choose a bounded candidate from Next when its user benefit, scope, exclusions,
 and acceptance criteria are ready. The completed

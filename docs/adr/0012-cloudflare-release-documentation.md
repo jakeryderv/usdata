@@ -1,6 +1,7 @@
 # 0012: Release documentation in R2, served by a Worker
 
-Status: Accepted for hosting and retention. Publication mechanism superseded by
+Status: Superseded by [ADR 0014](0014-unified-current-documentation.md).
+The earlier publication mechanism was superseded by
 [ADR 0013](0013-actions-documentation-publication.md).
 
 ## Context

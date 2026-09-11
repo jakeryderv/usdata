@@ -35,9 +35,7 @@ Repository = "https://github.com/jakeryderv/usdata"
 usdata = "usdata.cli:app"
 
 [dependency-groups]
-docs-publish = ["boto3>=1.40"]
 dev = [
-    { include-group = "docs-publish" },
     "pre-commit>=4.6.0",
     "pyright>=1.1.380",
     "pytest>=8.0",
@@ -47,11 +45,11 @@ dev = [
     "towncrier>=26.9",
 ]
 docs = [
-    "tomli-w>=1.2.0",
     "mkdocstrings-python>=2.0.8",
     "nbconvert>=7.17.1",
     "towncrier>=26.9",
-    "zensical>=0.0.60",
+    "mkdocs>=1.6.1,<2",
+    "mkdocs-material>=9.7.7,<10",
 ]
 examples = [
     "ipykernel>=6.29",

@@ -19,7 +19,8 @@ job, once per run rather than once per reader profile.
 
 | Content | Maintained source | Generated output |
 |---|---|---|
-| First-use walkthrough | `docs/index.md` | Site home (`index.md`) |
+| Project homepage | `docs/home.md` | Site home (`index.md`) |
+| First-use walkthrough | `docs/index.md` | Start here (`start.md`) |
 | Overview and development setup | Root `README.md` | Project page (`project.md`) |
 | Guides, architecture, provider access notes | Markdown under `docs/` | Site pages |
 | Dataset status and capabilities | `src/usdata/data/registry.yaml` | `docs/generated/catalog/` only |
@@ -48,26 +49,26 @@ registry. The generator checks missing guides, unknown IDs, and obsolete outputs
 The generator does not create provider access notes: add those when introducing
 an agency, and link its catalog.
 
-CLI and notebook previews are assembled into ignored `.build/docs/`. Zensical
+CLI and notebook previews are assembled into ignored `.build/docs/`. MkDocs + Material
 renders that tree into ignored `site/`, including API documentation through
 `mkdocstrings`. These directories are disposable build outputs. Root files and
-examples retain their repository paths in staging, except `docs/index.md` becomes
-the home page and the root README becomes `project.md`. The builder adjusts their
+examples retain their repository paths in staging, except `docs/home.md` becomes
+the home page, `docs/index.md` becomes `start.md`, and the root README becomes `project.md`. The builder adjusts their
 relative Markdown links; source links still work on GitHub.
 Local links to notebooks become links to rendered pages, with a separate download
 link to the original notebook. Notebook cells are never executed during a build.
 
 `just docs-serve` watches the maintained documents, notebooks, Python source,
 registry, and generation scripts. It refreshes staged files only when they change;
-Zensical rebuilds the preview. After editing generation scripts, restart the server
+MkDocs + Material rebuilds the preview. After editing generation scripts, restart the server
 so changed Python code is loaded. Run `just docs` before committing registry edits:
 the preview renders current data without changing committed generated files.
 
 ## Navigation, links, and diagrams
 
-Edit `zensical.toml` to change navigation outside the Datasets section. Dataset
+Edit `mkdocs.yml` to change navigation outside the Datasets section. Dataset
 navigation is generated from stable IDs and validated catalog metadata into
-ignored `.zensical.generated.toml`; the empty Datasets section is its insertion point. Organize by reader task, and link
+ignored `.mkdocs.generated.yml`; the empty Datasets section is its insertion point. Organize by reader task, and link
 additional provider catalogs and decisions from their indexes. Use relative
 Markdown links with explicit filenames so GitHub and the site can resolve them.
 Strict builds reject broken internal links and anchors. External URLs are not
@@ -88,25 +89,23 @@ The site currently describes the source checkout. Mark source-only features
 [release-note fragments](../../changes/README.md); `just release` assembles them
 with Towncrier and regenerates registry documentation. The website does not own release policy.
 
-Public hosting is selected work in the
-[Now / Next / Later roadmap](../roadmap.md#how-we-plan), tracked in
-[issue #56](https://github.com/jakeryderv/usdata/issues/56) without a deadline or
-release assignment. The selected design uses Cloudflare Workers Static Assets:
-a small home page at `usdata.dev` and a Worker serving versioned docs from R2 at
-`docs.usdata.dev`, defaulting
-to the latest published package. Release references come from that release's code
-and registry; documentation-only corrections must retain that reference version
-and record their own revision. Start with the reviewed v0.10.0 documentation;
-earlier releases are outside the archive scope. For future releases, attach the
-validated built-docs archive to the GitHub release. The scheduled docs Worker
-imports that same build into R2 and advances the version catalog after verification.
-These website assets are separate from Python distributions. Preserve published
-versions and show the selector once two versions exist, as described in the
-roadmap. Retention does not imply ongoing maintenance of old package versions.
+The homepage and documentation form one MkDocs + Material site at
+[usdata.dev](https://usdata.dev/). Main-branch merges automatically build and validate
+the site through Cloudflare Workers Builds, then deploy its static files. No package
+release or separate documentation-publishing command is required.
 
-The ordinary local build still describes its checkout. Release archive builds
-isolate the tagged package source from the reviewed documentation revision.
-[Website operations](website-operations.md) describes the independent home/docs
-Workers Builds projects, R2 binding, Actions publication, validation, and rollback.
-Cloudflare manages authorization; no Cloudflare or R2 secret is required in GitHub.
-R2 dataset archives and website catalog browsing remain separate candidate work.
+Edit `web/assets/usdata.css` for shared branding and `web/overrides/home.html` for
+the homepage layout. The homepage keeps the same header, navigation, search, and
+color controls as the documentation. The docs environment pins MkDocs 1.x and
+Material 9.x; major generator changes require a reviewed migration.
+
+The existing v0.10.0 release documentation is a frozen archive. Its original ZIP
+is retained in `web/archive/` and on the GitHub release. The build verifies its
+checksum, adds an archive notice, and copies it under `/0.10.0/` after generating
+current pages. This keeps old links working without generating more documentation
+versions or maintaining an R2 catalog. Archives stay outside current-site search.
+The preview command serves current pages; `just docs-build` followed by the local
+Worker preview includes archive and redirect behavior.
+
+See [website operations](website-operations.md) for deployment, redirects, and
+recovery. Python distributions remain separate from website assets.

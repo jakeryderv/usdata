@@ -43,13 +43,6 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: uv run towncrier check --compare-with "$BASE_SHA"
       - run: just check-static
-      - name: Build portable release documentation
-        run: uv run --no-project python scripts/release_docs.py
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: release-documentation
-          path: .build/release-docs/
-          retention-days: 14
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: documentation
@@ -121,12 +114,17 @@ jobs:
           path: dist/
 
   website:
+    needs: static
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: documentation
+          path: site
       - run: npm ci --prefix web
       - run: npm run check --prefix web
-      - run: cd web && npx wrangler deploy --dry-run && npx wrangler deploy --config wrangler.home.jsonc --dry-run
+      - run: cd web && npx wrangler deploy --dry-run
 
   smoke:
     needs: build

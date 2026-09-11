@@ -6,8 +6,8 @@
     "types": "wrangler types",
     "check": "wrangler types && tsc --noEmit && vitest run",
     "deploy": "wrangler deploy",
-    "deploy:home": "wrangler deploy --config wrangler.home.jsonc",
-    "dev": "wrangler dev"
+    "dev": "wrangler dev",
+    "build": "cd .. && UV_PROJECT_ENVIRONMENT=.venv-docs uv run --locked --group docs --no-default-groups python scripts/docs_site.py build"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "0.22.0",

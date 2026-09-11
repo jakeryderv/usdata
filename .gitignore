@@ -13,14 +13,18 @@ reports/
 
 .build/
 site/
-.cache/zensical/
+.cache/plugin/
 .venv-docs/
 
 # Site configuration assembled from the registry
-.zensical.generated.toml
+.mkdocs.generated.yml
 
 # Cloudflare tooling and local state
 web/node_modules/
 web/.wrangler/
 web/.dev.vars*
 web/worker-configuration.d.ts
+
+# Local browser and Worker previews
+.playwright-cli/
+.wrangler/

@@ -1,4 +1,4 @@
-"""Assemble canonical docs and saved notebooks for Zensical, without live execution.
+"""Assemble canonical docs and saved notebooks for MkDocs, without live execution.
 
 The staging tree keeps repository paths except for the home and project pages.
 Relative links are adjusted for those pages and rendered notebook previews.
@@ -8,17 +8,16 @@ from __future__ import annotations
 
 import argparse
 import importlib
-import os
 import posixpath
 import re
 import subprocess
 import sys
 import time
-import tomllib
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
 import render_registry
+import yaml
 from check_changes import preview
 
 from usdata.registry import Registry
@@ -33,7 +32,11 @@ def notebook_links(text: str) -> str:
     return NOTEBOOK_LINK.sub(r"\1\2.md\3\4", text)
 
 
-PAGE_PATHS = {Path("docs/index.md"): Path("index.md"), Path("README.md"): Path("project.md")}
+PAGE_PATHS = {
+    Path("docs/home.md"): Path("index.md"),
+    Path("docs/index.md"): Path("start.md"),
+    Path("README.md"): Path("project.md"),
+}
 LOCAL_LINK = re.compile(r"(\]\()([^\s()]+)(\))")
 
 
@@ -82,7 +85,11 @@ def prepare() -> None:
     entries = renderer.catalog_entries(registry)
     PAGE_PATHS.clear()
     PAGE_PATHS.update(
-        {Path("docs/index.md"): Path("index.md"), Path("README.md"): Path("project.md")}
+        {
+            Path("docs/home.md"): Path("index.md"),
+            Path("docs/index.md"): Path("start.md"),
+            Path("README.md"): Path("project.md"),
+        }
     )
     PAGE_PATHS.update(
         {
@@ -134,6 +141,10 @@ def prepare() -> None:
         body = page_links(body, guide, destination)
         marker = page_links(renderer.usage_link(ds, entry), destination)
         outputs[destination] = outputs[destination].decode().replace(marker, body).encode()
+    for path in (ROOT / "web/assets").rglob("*"):
+        if path.is_file():
+            outputs[Path("assets") / path.relative_to(ROOT / "web/assets")] = path.read_bytes()
+    outputs[Path("_headers")] = (ROOT / "web/_headers").read_bytes()
     write_config(registry, entries)
     pending = preview(ROOT)
     outputs[Path("docs/generated/changes.md")] = (
@@ -155,20 +166,6 @@ def prepare() -> None:
         "See the [fetch guide](../guides/fetch-and-analyze.md) for workflows.\n\n" + cli
     ).encode()
     for relative, data in outputs.items():
-        if os.environ.get("USDATA_DOCS_VERSION") and relative == Path("index.md"):
-            text = data.decode()
-            start = text.index("These docs describe")
-            end = text.index("## Install and discover", start)
-            text = (
-                text[:start]
-                + (
-                    f"These docs describe **usdata {os.environ['USDATA_DOCS_VERSION']}**. "
-                    "Generated references match that published package; guides may include "
-                    "reviewed documentation corrections.\n\n"
-                )
-                + text[end:]
-            )
-            data = text.encode()
         target = STAGE / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         if not target.exists() or target.read_bytes() != data:
@@ -195,22 +192,15 @@ def dataset_navigation(registry: Registry, entries: dict) -> list[dict]:
 
 
 def write_config(registry: Registry, entries: dict) -> None:
-    import tomli_w
-
-    config = tomllib.loads((ROOT / "zensical.toml").read_text())
-    project = config["project"]
-    if version := os.environ.get("USDATA_DOCS_VERSION"):
-        if not re.fullmatch(r"\d+\.\d+\.\d+", version):
-            raise ValueError("invalid documentation release version")
-        project["site_url"] = f"https://docs.usdata.dev/{version}/"
-    sections = [section for section in project["nav"] if "Datasets" in section]
-    if len(sections) != 1:
-        raise ValueError("zensical.toml must have exactly one Datasets navigation section")
-    sections[0]["Datasets"] = dataset_navigation(registry, entries)
-    # Keep the generated config beside its source so Zensical retains the project root.
-    path = ROOT / ".zensical.generated.toml"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    content = tomli_w.dumps(config)
+    text = (ROOT / "mkdocs.yml").read_text()
+    marker = "- Datasets: []"
+    if text.count(marker) != 1:
+        raise ValueError("mkdocs.yml must have exactly one empty Datasets section")
+    navigation = yaml.safe_dump(
+        [{"Datasets": dataset_navigation(registry, entries)}], sort_keys=False
+    ).rstrip()
+    path = ROOT / ".mkdocs.generated.yml"
+    content = text.replace(marker, navigation)
     if not path.exists() or path.read_text() != content:
         path.write_text(content)
 
@@ -221,7 +211,14 @@ def fingerprint() -> list[tuple[str, int]]:
     paths += [
         ROOT / "src/usdata/data/registry.yaml",
         ROOT / "pyproject.toml",
-        ROOT / "zensical.toml",
+        ROOT / "mkdocs.yml",
+        ROOT / "web/_headers",
+    ]
+    paths += [
+        path
+        for directory in (ROOT / "web/assets", ROOT / "web/overrides")
+        for path in directory.rglob("*")
+        if path.is_file()
     ]
     paths += list((ROOT / "scripts").glob("*.py")) + list((ROOT / "scripts/templates").glob("*"))
     return [(str(path), path.stat().st_mtime_ns) for path in sorted(paths)]
@@ -239,26 +236,29 @@ def main() -> None:
             [
                 sys.executable,
                 "-m",
-                "zensical",
+                "mkdocs",
                 "build",
                 "-f",
-                ".zensical.generated.toml",
+                ".mkdocs.generated.yml",
                 "--clean",
                 "--strict",
             ],
             cwd=ROOT,
             check=True,
         )
+        from site_archive import install_archive
+
+        install_archive(ROOT / "site")
         return
     before = fingerprint()
     server = subprocess.Popen(
         [
             sys.executable,
             "-m",
-            "zensical",
+            "mkdocs",
             "serve",
             "-f",
-            ".zensical.generated.toml",
+            ".mkdocs.generated.yml",
             "--dev-addr",
             "127.0.0.1:8000",
         ],
