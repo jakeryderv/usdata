@@ -33,14 +33,15 @@ only main, using these settings:
 | --- | --- |
 | Worker | `usdata-home` |
 | Root directory | `web` |
-| Build command | `npm run build && npm run check` |
+| Build command | `python3 -m pip install uv==0.12.5 && npm run build && npm run check` |
 | Deploy command | `npm run deploy` |
 | Production branch | `main` |
 | Branch includes | `main` |
 | Non-production builds | Disabled |
 | Domains | `usdata.dev`, `docs.usdata.dev` |
 
-The build uses the locked Python docs environment, assembles current content,
+The build explicitly installs uv because Cloudflare's build image does not
+guarantee it is preinstalled. It uses the locked Python docs environment, assembles current content,
 checks links and anchors, verifies the archive, then checks Worker types and
 runtime behavior. A failed build does not deploy. Repository branch protection
 requires full PR CI before merging; Workers Builds runs website validation again
