@@ -80,13 +80,11 @@ After the PR merges and CI succeeds on that exact main-branch commit, the
 that commit, validates their package name and version, uploads them via trusted
 publishing, then creates the `vX.Y.Z` tag and GitHub release with notes from the changelog.
 
-CI also builds portable documentation archives from the selected package and docs
-commits. The publish workflow attaches those validated CI artifacts to the GitHub
-release, then calls the shared publisher to upload the complete snapshot to R2.
-The documentation Worker serves those objects at versioned URLs; website assets remain separate from Python distributions.
-The archive starts with reviewed v0.10.0 docs, without earlier-release backfills.
-See [website operations](guides/website-operations.md) for the initial publication,
-reviewed documentation-only corrections, publication retries, and rollback.
+The website follows main and deploys independently of package releases. It does
+not create new per-release documentation archives. Existing v0.10.0 downloads
+and its frozen website snapshot remain available. Mark source-only features
+**Unreleased** until their package release. See
+[website operations](guides/website-operations.md).
 
 The workflow publishes whatever version `pyproject.toml` declares and tags that
 same version, so tag and package can never disagree. Merging a version bump
@@ -112,6 +110,6 @@ source-only notices and roadmap `Now` headings at or below the declared package
 version. On a release PR, update those handwritten notes to shipped wording;
 generated registry sections still come from `just docs`. Prefer explicit wording
 that names the target minor version for upcoming implemented features so
-the check can detect the transition. It scans README, maintained docs, example READMEs, `zensical.toml`, and notebook
+the check can detect the transition. It scans README, maintained docs, example READMEs, `mkdocs.yml`, and notebook
 Markdown cells, excluding historical ADRs, the changelog, code cells, and saved outputs. It does not interpret every
 possible phrasing or decide whether future backlog items have shipped.

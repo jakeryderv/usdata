@@ -1,12 +1,19 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "usdata",
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "usdata-home",
   "main": "src/worker.ts",
   "compatibility_date": "2026-09-09",
   "workers_dev": true,
   "preview_urls": false,
-  "routes": [{ "pattern": "docs.usdata.dev", "custom_domain": true }],
-  "r2_buckets": [{ "binding": "DOCS", "bucket_name": "usdata" }],
-  "triggers": { "crons": [] },
+  "routes": [
+    { "pattern": "usdata.dev", "custom_domain": true },
+    { "pattern": "docs.usdata.dev", "custom_domain": true },
+  ],
+  "assets": {
+    "directory": "../site",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": true,
+  },
   "observability": { "enabled": true, "traces": { "enabled": true } },
 }

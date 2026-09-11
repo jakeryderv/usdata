@@ -1,6 +1,6 @@
 # 0013: Publish documentation directly from GitHub Actions
 
-Status: Accepted
+Status: Superseded by [ADR 0014](0014-unified-current-documentation.md).
 
 ## Context
 

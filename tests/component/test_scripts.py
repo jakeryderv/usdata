@@ -236,7 +236,7 @@ def test_site_links_follow_home_project_and_notebook_paths(monkeypatch):
             "[start](../index.md) [book](../../examples/sst-analysis/example.ipynb#plot)",
             Path("docs/guides/example.md"),
         )
-        == "[start](../../index.md) [book](../../examples/sst-analysis/example.md#plot)"
+        == "[start](../../start.md) [book](../../examples/sst-analysis/example.md#plot)"
     )
     assert (
         module.page_links(
@@ -269,7 +269,7 @@ def test_release_notices_include_navigation_and_notebook_markdown_only(tmp_path)
     module = script("check_release_docs")
     (tmp_path / "pyproject.toml").write_text('[project]\nversion="0.10.0"\n')
     (tmp_path / "README.md").write_text("Available since v0.10")
-    (tmp_path / "zensical.toml").write_text('nav = [{"Annual (v0.10 / source)" = "annual.md"}]')
+    (tmp_path / "mkdocs.yml").write_text('nav = [{"Annual (v0.10 / source)" = "annual.md"}]')
     examples = tmp_path / "examples"
     examples.mkdir()
     (examples / "example.ipynb").write_text(
@@ -291,7 +291,7 @@ def test_release_notices_include_navigation_and_notebook_markdown_only(tmp_path)
     )
     errors = module.check(tmp_path)
     assert len(errors) == 2
-    assert any("zensical.toml:1" in error for error in errors)
+    assert any("mkdocs.yml:1" in error for error in errors)
     assert any("example.ipynb:cell 1:1" in error for error in errors)
 
 

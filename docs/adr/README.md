@@ -16,3 +16,5 @@ is described in the guides and reference pages.
 - [0011: Explicit radar selection and record alignment checks](0011-radar-sweep-alignment.md)
 - [0012: Release documentation in R2, served by a Worker](0012-cloudflare-release-documentation.md)
 - [0013: Publish documentation directly from GitHub Actions](0013-actions-documentation-publication.md)
+
+- [0014: One current MkDocs site](0014-unified-current-documentation.md)
