@@ -33,8 +33,7 @@ def notebook_links(text: str) -> str:
 
 
 PAGE_PATHS = {
-    Path("docs/home.md"): Path("index.md"),
-    Path("docs/index.md"): Path("start.md"),
+    Path("docs/index.md"): Path("index.md"),
     Path("README.md"): Path("project.md"),
 }
 LOCAL_LINK = re.compile(r"(\]\()([^\s()]+)(\))")
@@ -72,6 +71,8 @@ def source_paths() -> list[Path]:
             if path.is_file()
             and path.suffix in {".md", ".ipynb", ".yaml", ".png", ".svg", ".css"}
             and ".ipynb_checkpoints" not in path.parts
+            and not path.is_relative_to(ROOT / "docs/theme")
+            and not path.is_relative_to(ROOT / "docs/hosting")
         )
     return sorted(paths)
 
@@ -86,8 +87,7 @@ def prepare() -> None:
     PAGE_PATHS.clear()
     PAGE_PATHS.update(
         {
-            Path("docs/home.md"): Path("index.md"),
-            Path("docs/index.md"): Path("start.md"),
+            Path("docs/index.md"): Path("index.md"),
             Path("README.md"): Path("project.md"),
         }
     )
@@ -141,10 +141,12 @@ def prepare() -> None:
         body = page_links(body, guide, destination)
         marker = page_links(renderer.usage_link(ds, entry), destination)
         outputs[destination] = outputs[destination].decode().replace(marker, body).encode()
-    for path in (ROOT / "web/assets").rglob("*"):
+    for path in (ROOT / "docs/theme/assets").rglob("*"):
         if path.is_file():
-            outputs[Path("assets") / path.relative_to(ROOT / "web/assets")] = path.read_bytes()
-    outputs[Path("_headers")] = (ROOT / "web/_headers").read_bytes()
+            outputs[Path("assets") / path.relative_to(ROOT / "docs/theme/assets")] = (
+                path.read_bytes()
+            )
+    outputs[Path("_headers")] = (ROOT / "docs/hosting/_headers").read_bytes()
     write_config(registry, entries)
     pending = preview(ROOT)
     outputs[Path("docs/generated/changes.md")] = (
@@ -212,11 +214,11 @@ def fingerprint() -> list[tuple[str, int]]:
         ROOT / "src/usdata/data/registry.yaml",
         ROOT / "pyproject.toml",
         ROOT / "mkdocs.yml",
-        ROOT / "web/_headers",
+        ROOT / "docs/hosting/_headers",
     ]
     paths += [
         path
-        for directory in (ROOT / "web/assets", ROOT / "web/overrides")
+        for directory in (ROOT / "docs/theme/assets",)
         for path in directory.rglob("*")
         if path.is_file()
     ]
@@ -246,9 +248,6 @@ def main() -> None:
             cwd=ROOT,
             check=True,
         )
-        from site_archive import install_archive
-
-        install_archive(ROOT / "site")
         return
     before = fingerprint()
     server = subprocess.Popen(

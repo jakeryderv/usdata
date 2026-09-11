@@ -4,7 +4,7 @@ Follow the [development setup](../../README.md#development), then run:
 
 ```sh
 just docs-serve  # preview at http://127.0.0.1:8000; Ctrl-C stops the server
-just docs-build  # strict static build into site/
+just docs-build  # strict static build into .build/docs-site/
 just check-docs  # check committed generated files, release notices, notebooks, and build
 ```
 
@@ -19,8 +19,8 @@ job, once per run rather than once per reader profile.
 
 | Content | Maintained source | Generated output |
 |---|---|---|
-| Project homepage | `docs/home.md` | Site home (`index.md`) |
-| First-use walkthrough | `docs/index.md` | Start here (`start.md`) |
+| Project homepage | `web/public/` | Separate site in `web/dist/` |
+| First-use walkthrough | `docs/index.md` | Docs home (`index.md`) |
 | Overview and development setup | Root `README.md` | Project page (`project.md`) |
 | Guides, architecture, provider access notes | Markdown under `docs/` | Site pages |
 | Dataset status and capabilities | `src/usdata/data/registry.yaml` | `docs/generated/catalog/` only |
@@ -50,10 +50,10 @@ The generator does not create provider access notes: add those when introducing
 an agency, and link its catalog.
 
 CLI and notebook previews are assembled into ignored `.build/docs/`. MkDocs + Material
-renders that tree into ignored `site/`, including API documentation through
+renders that tree into ignored `.build/docs-site/`, including API documentation through
 `mkdocstrings`. These directories are disposable build outputs. Root files and
-examples retain their repository paths in staging, except `docs/home.md` becomes
-the home page, `docs/index.md` becomes `start.md`, and the root README becomes `project.md`. The builder adjusts their
+examples retain their repository paths in staging, except `docs/index.md` becomes the documentation home (`index.md`),
+and the root README becomes `project.md`. The builder adjusts their
 relative Markdown links; source links still work on GitHub.
 Local links to notebooks become links to rendered pages, with a separate download
 link to the original notebook. Notebook cells are never executed during a build.
@@ -89,23 +89,19 @@ The site currently describes the source checkout. Mark source-only features
 [release-note fragments](../../changes/README.md); `just release` assembles them
 with Towncrier and regenerates registry documentation. The website does not own release policy.
 
-The homepage and documentation form one MkDocs + Material site at
-[usdata.dev](https://usdata.dev/). Main-branch merges automatically build and validate
-the site through Cloudflare Workers Builds, then deploy its static files. No package
-release or separate documentation-publishing command is required.
+The documentation is a MkDocs + Material site at
+[docs.usdata.dev](https://docs.usdata.dev/), separate from the application at
+[usdata.dev](https://usdata.dev/). Both build and deploy automatically from main
+through Workers Builds. No package release or separate publication command is required.
 
-Edit `web/assets/usdata.css` for shared branding and `web/overrides/home.html` for
-the homepage layout. The homepage keeps the same header, navigation, search, and
-color controls as the documentation. The docs environment pins MkDocs 1.x and
-Material 9.x; major generator changes require a reviewed migration.
+Edit `docs/theme/assets/usdata.css` for documentation branding. The homepage has
+its own source and styles in `web/public/`. Keep their colors, logo, and typography
+consistent. The docs environment pins MkDocs 1.x and Material 9.x; major generator
+changes require a reviewed migration.
 
-The existing v0.10.0 release documentation is a frozen archive. Its original ZIP
-is retained in `web/archive/` and on the GitHub release. The build verifies its
-checksum, adds an archive notice, and copies it under `/0.10.0/` after generating
-current pages. This keeps old links working without generating more documentation
-versions or maintaining an R2 catalog. Archives stay outside current-site search.
-The preview command serves current pages; `just docs-build` followed by the local
-Worker preview includes archive and redirect behavior.
+Only current docs are built. Old v0.10.0 and latest URLs redirect to current pages;
+there is no archive ZIP or version catalog in the build. Worker previews exercise
+these redirects, while `just docs-serve` previews content directly.
 
 See [website operations](website-operations.md) for deployment, redirects, and
 recovery. Python distributions remain separate from website assets.

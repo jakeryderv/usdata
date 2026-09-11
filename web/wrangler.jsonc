@@ -7,10 +7,9 @@
   "preview_urls": false,
   "routes": [
     { "pattern": "usdata.dev", "custom_domain": true },
-    { "pattern": "docs.usdata.dev", "custom_domain": true },
   ],
   "assets": {
-    "directory": "../site",
+    "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
     "run_worker_first": true,

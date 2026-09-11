@@ -1,0 +1,53 @@
+name: Check R2 data storage
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r2-data-storage-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+      AWS_ENDPOINT_URL: https://d4e3fe7d69a3ac8f446d4c3de2ca051b.r2.cloudflarestorage.com
+      AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
+      AWS_RESPONSE_CHECKSUM_VALIDATION: WHEN_REQUIRED
+      PROBE_KEY: checks/github-${{ github.run_id }}-${{ github.run_attempt }}.txt
+    steps:
+      - name: Verify bucket access and object round trip
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$AWS_ACCESS_KEY_ID"
+          test -n "$AWS_SECRET_ACCESS_KEY"
+          aws s3api list-objects-v2 --bucket usdata --max-keys 1 --query KeyCount
+          printf 'usdata R2 storage check\n' > "$RUNNER_TEMP/r2-input.txt"
+          aws s3api put-object --bucket usdata --key "$PROBE_KEY" \
+            --body "$RUNNER_TEMP/r2-input.txt" --content-type text/plain --cache-control no-store
+          aws s3api get-object --bucket usdata --key "$PROBE_KEY" "$RUNNER_TEMP/r2-output.txt"
+          cmp "$RUNNER_TEMP/r2-input.txt" "$RUNNER_TEMP/r2-output.txt"
+      - name: Verify public download and site CORS
+        shell: bash
+        run: |
+          set -euo pipefail
+          for origin in https://usdata.dev https://docs.usdata.dev; do
+            curl --fail --silent --show-error --retry 3 \
+              -H "Origin: $origin" -D "$RUNNER_TEMP/r2-headers.txt" \
+              "https://data.usdata.dev/$PROBE_KEY" -o "$RUNNER_TEMP/r2-public.txt"
+            cmp "$RUNNER_TEMP/r2-input.txt" "$RUNNER_TEMP/r2-public.txt"
+            tr -d '\r' < "$RUNNER_TEMP/r2-headers.txt" | grep -iFx "access-control-allow-origin: $origin"
+          done
+      - name: Remove only this run's temporary object
+        if: always()
+        shell: bash
+        run: aws s3api delete-object --bucket usdata --key "$PROBE_KEY"

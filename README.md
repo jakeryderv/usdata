@@ -8,8 +8,8 @@ supported NOAA and USGS datasets.
 **Unreleased** require a source installation; consult the
 [changelog](CHANGELOG.md) for published versions. Other providers are planned.
 
-Project home and current documentation: [usdata.dev](https://usdata.dev/).
-[Start with one dataset](https://usdata.dev/start/).
+Project home: [usdata.dev](https://usdata.dev/).
+[Documentation and getting started](https://docs.usdata.dev/).
 
 ## Start here
 

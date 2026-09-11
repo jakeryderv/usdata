@@ -1,4 +1,7 @@
-// One static site; redirect the old docs hostname without changing versioned links.
+// The application owns the apex; documentation paths keep working after the split.
+const docsPaths =
+  /^\/(?:docs|examples|start|latest|0\.10\.0|project|CONTRIBUTING|CHANGELOG|SECURITY|changes)(?:\/|$|\.html$)/;
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method !== "GET" && request.method !== "HEAD") {
@@ -8,22 +11,16 @@ export default {
       });
     }
     const url = new URL(request.url);
-    let redirect = url.hostname === "docs.usdata.dev";
-    if (redirect) {
-      url.hostname = "usdata.dev";
+    if (docsPaths.test(url.pathname) || url.pathname === "/LICENSE") {
+      url.hostname = "docs.usdata.dev";
       url.protocol = "https:";
       url.port = "";
-      if (url.pathname === "/") url.pathname = "/start/";
+      // Do not persist a second set of opposite permanent redirects during migration.
+      return new Response(null, {
+        status: 302,
+        headers: { Location: url.href, "Cache-Control": "no-store" },
+      });
     }
-    if (url.pathname === "/latest" || url.pathname.startsWith("/latest/")) {
-      const suffix = url.pathname.slice("/latest".length);
-      url.pathname =
-        suffix === "" || suffix === "/" || suffix === "/index.html"
-          ? "/start/"
-          : suffix;
-      redirect = true;
-    }
-    if (redirect) return Response.redirect(url.href, 301);
     return env.ASSETS.fetch(request);
   },
 } satisfies ExportedHandler<Env>;

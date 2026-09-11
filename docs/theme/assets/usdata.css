@@ -23,29 +23,6 @@
   border-radius: 0.25rem;
   margin: 0.2rem 0.4rem 0.2rem 0;
 }
-.usdata-home {
-  max-width: 52rem;
-  margin: 1.5rem auto;
-}
-.usdata-home h1 {
-  font-size: clamp(2rem, 4.2vw, 3.5rem);
-  font-weight: 750;
-  letter-spacing: -0.045em;
-  line-height: 1.1;
-  max-width: 15ch;
-  color: var(--md-default-fg-color);
-  margin-bottom: 0.75em;
-}
-.usdata-eyebrow {
-  color: var(--md-typeset-a-color);
-  font-size: 0.65rem;
-  letter-spacing: 0.12em;
-  font-weight: 600;
-}
-.usdata-home .grid.cards {
-  margin-top: 2rem;
-}
-
 .md-typeset .md-button:not(.md-button--primary) {
   color: var(--md-typeset-a-color);
   border-color: currentColor;
