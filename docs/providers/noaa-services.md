@@ -187,9 +187,22 @@ for 1991-2020, 2006-2020, and 1981-2010. Monthly and annual/seasonal requests
 succeed without dates; daily requests return HTTP 400 without `startDate` and
 `endDate`. The year in those dates is ignored: `2020-02-27` to `2020-03-01`
 returned `02-27` through `03-01` including `02-29`, and a window from
-`2010-12-30` to `2011-01-02` returned only the header. `units=metric` converts
-values; the default is standard units with leading spaces. An unknown `dataTypes`
-code returned an empty column rather than an error. Station search with
+`2010-12-30` to `2011-01-02` returned only the header. The default is
+standard units with leading spaces. `units=metric` converts `MLY-TMAX-NORMAL`,
+`MLY-TMIN-NORMAL`, `MLY-PRCP-NORMAL`, `DLY-TAVG-NORMAL`, and `ANN-TAVG-NORMAL`,
+but a 2026-09-11 probe of `USW00013967` and `USW00014739` found two data types
+it handles wrongly, so the conversion cannot be assumed for an unprobed code.
+`MLY-TAVG-NORMAL` is not converted: it returned the same space-padded
+Fahrenheit value under both `units=metric` and `units=standard` (`    38.2` for
+`USW00013967` January). Derived temperature quantities are converted as if they
+were absolute temperatures, applying the full `(F - 32) x 5/9` offset to a
+difference: `USW00013967` January returned `MLY-DUTR-NORMAL` -5.3,
+`MLY-TAVG-STDDEV` -16.2, and `MLY-TMAX-STDDEV` -15.8 under `units=metric`
+against 22.4, 2.8, and 3.6 under `units=standard`, and `USW00014739` returned
+`MLY-DUTR-NORMAL` -10.2 and `MLY-TAVG-STDDEV` -15.5 against 13.7 and 4.1. The
+true January diurnal range at `USW00013967` is 22.4 F = 12.4 C, matching the
+metric `MLY-TMAX-NORMAL` 9.6 minus `MLY-TMIN-NORMAL` -2.8. An unknown
+`dataTypes` code returned an empty column rather than an error. Station search with
 `dataset=normals-monthly-1991-2020` found `USW00013967` with or without dates.
 
 ```sh

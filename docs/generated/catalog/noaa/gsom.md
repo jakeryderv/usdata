@@ -12,7 +12,7 @@ Global Summary of the Month.
 - Selection: Complete UTC calendar months touched by the query; station and element filters
 - Required inputs: Both dates; station IDs or a geographic query
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [monthly climate](../../../examples/monthly-climate/example.md)
+- Examples: [monthly climate](../../../examples/monthly-climate/example.md), [climate anomalies](../../../examples/climate-anomalies/example.md)
 
 ## Parameters
 

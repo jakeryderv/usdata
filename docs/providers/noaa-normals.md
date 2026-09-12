@@ -31,10 +31,31 @@ such as `MLY-TMAX-NORMAL`, `DLY-PRCP-NORMAL`, or `ANN-TAVG-NORMAL`; see the
 [NCEI normals documentation](https://www.ncei.noaa.gov/data/normals-monthly/1991-2020/doc/Normals_MLY_Documentation_1991-2020.pdf)
 for the full list. **The service does not reject unknown data types**: an
 unknown code yields an empty column, so check spelling against that list.
-Metric temperatures are degrees Celsius and precipitation is millimeters; the
-service default is standard units, which usdata overrides with `units=metric`.
-Standard-unit values retain the source's leading spaces. Station columns are
-included with `includeStationLocation=1`.
+The service default is standard units, which usdata overrides with
+`units=metric`; standard-unit values retain the source's leading spaces.
+**`units=metric` is not uniformly correct**, and `variables` reaches the whole
+NCEI data-type list, so verify any code you have not probed rather than assuming
+Celsius. Two failures were reproduced on 2026-09-11 at `USW00013967` and
+`USW00014739`:
+
+- **`MLY-TAVG-NORMAL` is not converted at all.** It returns the same
+  space-padded degrees-Fahrenheit value under both `units=metric` and
+  `units=standard`. Convert it yourself before comparing it with Celsius
+  observations, as the [anomalies notebook](../examples/climate-anomalies/example.md)
+  does.
+- **Derived temperature quantities are converted as absolute temperatures.**
+  The diurnal range `*-DUTR-*` and the `*-STDDEV` codes are differences in
+  degrees, but `units=metric` applies the full absolute-temperature formula
+  `(F - 32) x 5/9`, so they come back negative and wrong. `USW00013967` January
+  returned `MLY-DUTR-NORMAL` -5.3, `MLY-TAVG-STDDEV` -16.2, and `MLY-TMAX-STDDEV` -15.8
+  under `units=metric` against 22.4, 2.8, and 3.6 under `units=standard`. Read
+  these from `units=standard` and scale by `5/9` with no offset: 22.4 F is
+  12.4 C, matching the metric `MLY-TMAX-NORMAL` minus `MLY-TMIN-NORMAL` spread.
+
+In the same probe `MLY-TMAX-NORMAL`, `MLY-TMIN-NORMAL`, `MLY-PRCP-NORMAL`,
+`DLY-TAVG-NORMAL`, and `ANN-TAVG-NORMAL` did convert: metric temperatures are
+degrees Celsius and precipitation is millimeters. Station columns are included
+with `includeStationLocation=1`.
 
 Normals are republished about once a decade; the 1991-2020 files can still be
 corrected. Retain the cache as well as the manifest and lockfile. See the

@@ -12,7 +12,7 @@ U.S. Climate Normals 1991-2020.
 - Selection: Monthly, daily, or annual/seasonal normals per station; optional month-day window for daily and monthly
 - Required inputs: Station IDs or a geographic query; dates optional
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [climate normals](../../../examples/climate-normals/README.md)
+- Examples: [climate normals](../../../examples/climate-normals/README.md), [climate anomalies](../../../examples/climate-anomalies/example.md)
 
 ## Parameters
 

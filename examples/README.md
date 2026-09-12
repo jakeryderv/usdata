@@ -8,6 +8,7 @@ the saved outputs, or run them locally to change queries and inspect the results
 | [Weather and streamflow](weather-and-streamflow/example.ipynb) | NOAA/USGS inputs, manifests, provenance, cache reuse, verification, and locked restoration |
 | [Sea-surface temperature](sst-analysis/example.ipynb) | A four-cell CoastWatch subset, pandas opening, ERDDAP units, and a spatial plot |
 | [Monthly climate](monthly-climate/example.ipynb) | GSOM monthly observations, whole-month selection, a two-panel plot, and manifest verification |
+| [Climate anomalies](climate-anomalies/example.ipynb) | GSOM observations against 1991-2020 normals, month alignment, an upstream unit exception, anomaly plots, and stale-lockfile guidance |
 | [Storm Events](storm-events/example.ipynb) | Annual gzip CSV, local Oklahoma/date filtering, report counts, damage ratings, and source verification (available since v0.8) |
 | [Radar reflectivity](radar-reflectivity/example.ipynb) | One NEXRAD volume, xradar sweeps, field units, reflectivity plot, and provenance |
 | [GOES infrared imagery](goes-imagery/example.ipynb) | NetCDF4 opening, CF decoding, quality flags, scan coordinates and brightness-temperature imagery |
