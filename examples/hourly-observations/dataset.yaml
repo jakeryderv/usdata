@@ -1,0 +1,14 @@
+name: okc-hourly-observations
+sources:
+  - dataset: noaa:lcd
+    start: 2024-05-06
+    end: 2024-05-08
+    variables:
+      - HourlyDryBulbTemperature
+      - HourlyPrecipitation
+      - DailyMaximumDryBulbTemperature
+      - DailyMinimumDryBulbTemperature
+      - DailyPrecipitation
+    params:
+      stations: "72353013967"
+      units: metric

@@ -18,7 +18,6 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`noaa:goes-glm`](noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · Planned
 - [`noaa:hrrr`](noaa.md#noaahrrr) HRRR Forecast Model Output · Planned
 - [`noaa:ibtracs`](noaa.md#noaaibtracs) IBTrACS Global Tropical Cyclone Tracks · Planned
-- [`noaa:lcd`](noaa.md#noaalcd) Local Climatological Data · Planned
 - [`noaa:mrms`](noaa.md#noaamrms) Multi-Radar Multi-Sensor (MRMS) · Planned
 - [`noaa:nbm`](noaa.md#noaanbm) National Blend of Models · Planned
 - [`noaa:nclimdiv`](noaa.md#noaanclimdiv) nClimDiv Climate Divisional Data · Planned
@@ -36,6 +35,7 @@ Move a dataset between phases by editing its `target` in the registry.
 **Implemented, unreleased (planned 0.14)**
 
 - [`noaa:coops-tide-predictions`](noaa.md#noaacoops-tide-predictions) CO-OPS Tide Predictions · Source only
+- [`noaa:lcd`](noaa.md#noaalcd) Local Climatological Data · Source only
 
 **Included since 0.12**
 

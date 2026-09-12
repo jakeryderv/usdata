@@ -296,3 +296,15 @@ NOAA's documented one-year limit for prediction intervals other than high/low.
 An invalid station returned HTTP 400 with a plain-text message and no CSV
 header. Observed and predicted six-minute rows for the same request bounds
 carried identical timestamps, so the two series subtract without alignment.
+
+## Local Climatological Data
+
+Hosted probes on 2026-09-12 verified the Access Data Service dataset
+`local-climatological-data`. The search service accepted a bbox and returned
+eleven-digit station ids such as `72353013967` with per-year file names. One
+day at that station returned 61 rows of 125 columns: 24 `FM-15` hourly, 27
+`FM-16` special, 8 `FM-12` synoptic, and 1 `SOD` daily-summary report, each
+`DATE` in local standard time without an offset. `dataTypes` narrowed the
+columns to the named fields plus station, date, report type, and source.
+`units=metric` returned Celsius temperatures. The ids `13967` and
+`USW00013967` returned HTTP 200 with a header and no rows.

@@ -110,6 +110,10 @@ class GhcnDaily(_HttpProvider):
                 break
         return found
 
+    def _chunk_size(self) -> int:
+        """Stations per CSV asset; subclasses with wide rows lower it."""
+        return STATIONS_PER_ASSET
+
     def _units(self, query: Query) -> str:
         units = query.params.get("units", "metric")
         if units not in ("metric", "standard"):
@@ -140,8 +144,9 @@ class GhcnDaily(_HttpProvider):
 
         start, end = _date(window.start), _date(window.end)
         assets: list[Asset] = []
-        for i in range(0, len(stations), STATIONS_PER_ASSET):
-            chunk = stations[i : i + STATIONS_PER_ASSET]
+        size = self._chunk_size()
+        for i in range(0, len(stations), size):
+            chunk = stations[i : i + size]
             params: dict[str, Any] = {
                 "dataset": self.ncei_dataset,
                 "stations": ",".join(chunk),
