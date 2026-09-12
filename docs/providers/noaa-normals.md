@@ -33,8 +33,13 @@ for the full list. **The service does not reject unknown data types**: an
 unknown code yields an empty column, so check spelling against that list.
 Metric temperatures are degrees Celsius and precipitation is millimeters; the
 service default is standard units, which usdata overrides with `units=metric`.
-Standard-unit values retain the source's leading spaces. Station columns are
-included with `includeStationLocation=1`.
+Standard-unit values retain the source's leading spaces. **`MLY-TAVG-NORMAL` is
+an upstream exception**: it comes back in degrees Fahrenheit with those leading
+spaces even under `units=metric` (probed 2026-09-11, when `MLY-TMAX-NORMAL`,
+`MLY-TMIN-NORMAL`, `MLY-PRCP-NORMAL`, `DLY-TAVG-NORMAL`, and `ANN-TAVG-NORMAL`
+all converted). Convert it yourself before comparing it with Celsius
+observations, as the [anomalies notebook](../examples/climate-anomalies/example.md)
+does. Station columns are included with `includeStationLocation=1`.
 
 Normals are republished about once a decade; the 1991-2020 files can still be
 corrected. Retain the cache as well as the manifest and lockfile. See the

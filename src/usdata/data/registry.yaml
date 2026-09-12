@@ -707,6 +707,7 @@ catalog:
     reader_extra: pandas
     examples:
     - examples/monthly-climate/example.ipynb
+    - examples/climate-anomalies/example.ipynb
   noaa:gsoy:
     guide: docs/providers/noaa-gsoy.md
     summary: Annual station climate
@@ -727,6 +728,7 @@ catalog:
     reader_extra: pandas
     examples:
     - examples/climate-normals/README.md
+    - examples/climate-anomalies/example.ipynb
   noaa:nexrad-level2:
     guide: docs/providers/noaa-nexrad.md
     summary: NEXRAD radar scans

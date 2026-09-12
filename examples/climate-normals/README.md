@@ -43,7 +43,10 @@ For a [source installation](https://docs.usdata.dev/project/#source-installation
 give degrees Celsius and millimeters. To compare with observations, pull the
 same station and month through `noaa:gsom` as in the
 [monthly climate notebook](../monthly-climate/example.ipynb) and subtract the
-normal from the observed value to get the monthly anomaly.
+normal from the observed value to get the monthly anomaly. The
+[climate anomalies notebook](../climate-anomalies/example.ipynb) does this for a
+full year and handles `MLY-TAVG-NORMAL`, which NCEI returns in degrees
+Fahrenheit even under `units: metric`.
 
 For daily normals, set `period: daily` and optionally `start` and `end` to keep
 a month-day window; the year is ignored. See the

@@ -1,0 +1,15 @@
+name: okc-climate-anomalies
+sources:
+  - dataset: noaa:gsom
+    start: 2024-01-01
+    end: 2024-12-31
+    variables: [TAVG, PRCP]
+    params:
+      stations: USW00013967
+      units: metric
+  - dataset: noaa:climate-normals
+    variables: [MLY-TAVG-NORMAL, MLY-PRCP-NORMAL]
+    params:
+      period: monthly
+      stations: USW00013967
+      units: metric

@@ -188,8 +188,12 @@ succeed without dates; daily requests return HTTP 400 without `startDate` and
 `endDate`. The year in those dates is ignored: `2020-02-27` to `2020-03-01`
 returned `02-27` through `03-01` including `02-29`, and a window from
 `2010-12-30` to `2011-01-02` returned only the header. `units=metric` converts
-values; the default is standard units with leading spaces. An unknown `dataTypes`
-code returned an empty column rather than an error. Station search with
+values; the default is standard units with leading spaces. A 2026-09-11 probe of
+`USW00013967` found one exception: `MLY-TAVG-NORMAL` returned the same
+space-padded Fahrenheit value under both `units=metric` and `units=standard`,
+while `MLY-TMAX-NORMAL`, `MLY-TMIN-NORMAL`, `MLY-PRCP-NORMAL`,
+`DLY-TAVG-NORMAL`, and `ANN-TAVG-NORMAL` converted as documented. An unknown
+`dataTypes` code returned an empty column rather than an error. Station search with
 `dataset=normals-monthly-1991-2020` found `USW00013967` with or without dates.
 
 ```sh
