@@ -17,12 +17,12 @@ from __future__ import annotations
 import re
 from collections.abc import Mapping
 from datetime import UTC, date, datetime
-from html.parser import HTMLParser
 from pathlib import Path
 from typing import ClassVar
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
+from usdata.protocols.listing import directory_entries
 from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
 
@@ -31,20 +31,6 @@ DIRECTORY_URL = "https://www.nhc.noaa.gov/data/hurdat/"
 # basin token is usually omitted. Revisions are MMDDYY or MMDDYYYY, never YYYYMMDD.
 FILE_NAME = re.compile(r"hurdat2-(?:(atl|nepac)-)?(\d{4})-(\d{4})-(\d{6}|\d{8})([a-z]?)\.txt")
 BASIN_TOKENS = {"atlantic": frozenset({"", "atl"}), "pacific": frozenset({"nepac"})}
-
-
-class _Directory(HTMLParser):
-    """Collect HURDAT2 filenames from the NHC Apache directory listing."""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.names: list[str] = []
-
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        href = dict(attrs).get("href", "") or "" if tag == "a" else ""
-        # Only literal local filenames; never follow arbitrary links from a listing.
-        if FILE_NAME.fullmatch(href):
-            self.names.append(href)
 
 
 def _revision(value: str) -> date | None:
@@ -85,20 +71,19 @@ class Hurdat2(_HttpProvider):
             hint="every revision holds the complete basin record, so a date range would not "
             "change the download; remove start/end and filter the parsed 'time' column locally",
         )
-        listing = _Directory()
-        listing.feed(http.get(DIRECTORY_URL, self._http()).text)
+        page = http.get(DIRECTORY_URL, self._http()).text
         candidates = []
-        for name in listing.names:
+        for name, size in directory_entries(page, FILE_NAME):
             match = FILE_NAME.fullmatch(name)
             assert match is not None
             first, last, revised = int(match[2]), int(match[3]), _revision(match[4])
             if (match[1] or "") not in BASIN_TOKENS[basin] or revised is None or first > last:
                 continue
             # Prefer the latest season covered, then the newest revision of that span.
-            candidates.append(((last, revised, name), first, last))
+            candidates.append(((last, revised, name), first, last, size))
         if not candidates:
             raise QueryError(f"no HURDAT2 {basin} best-track file in the NHC directory listing")
-        (_, _, name), first, last = max(candidates)
+        (_, _, name), first, last, size = max(candidates)
         return [
             Asset(
                 id=name,
@@ -106,6 +91,7 @@ class Hurdat2(_HttpProvider):
                 href=DIRECTORY_URL + name,
                 protocol=Protocol.HTTP,
                 media_type="text/plain",
+                size=size,
                 time=TimeRange(
                     start=datetime(first, 1, 1, tzinfo=UTC),
                     end=datetime(last, 12, 31, 23, 59, 59, 999999, tzinfo=UTC),

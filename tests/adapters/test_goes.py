@@ -140,6 +140,7 @@ def test_hours_cross_year_and_all_scan_modes(adapter):
         {"variables": ["CMI"]},
         {"text": "clouds"},
         {"start": "2000-01-01T12:00", "end": "2000-01-01T12:05"},
+        {"start": "2024-05-01T00:00", "end": "2024-05-08T00:01"},
     ],
 )
 def test_bad_queries_fail_before_network(adapter, params):

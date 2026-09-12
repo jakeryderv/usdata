@@ -23,6 +23,12 @@ def page(ids: list[str], next_url: str | None = None) -> dict:
     }
 
 
+def first_page_only(request: httpx.Request) -> httpx.Response:
+    """Answer the one-row page probes: a row at offset 0, nothing beyond it."""
+    first = request.url.params.get("offset") == "0"
+    return httpx.Response(200, json=page(["a"] if first else []))
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -45,6 +51,25 @@ def test_bad_queries_fail_before_network(kwargs: dict) -> None:
         adapter.list_assets(query)
 
 
+def test_listing_probes_one_row_per_page_and_pins_whole_csv_pages() -> None:
+    q = build_query(start="2024-05-06", end="2024-05-07", sites="07164500")
+    with respx.mock() as mock, WaterDaily(get("usgs:water-daily")) as adapter:
+        route = mock.get(ITEMS_URL).mock(
+            side_effect=[
+                httpx.Response(200, json=page(["a"], ITEMS_URL + "?cursor=a")),
+                httpx.Response(200, json=page([])),
+            ]
+        )
+        (asset,) = adapter.list_assets(q)
+    probes = [c.request.url.params for c in route.calls]
+    assert [(p["limit"], p["offset"], p["f"]) for p in probes] == [
+        ("1", "0", "json"),
+        ("1", "10000", "json"),
+    ]
+    pinned = httpx.URL(asset.href).params
+    assert (pinned["limit"], pinned["offset"], pinned["f"]) == ("10000", "0", "csv")
+
+
 def test_pagination_keeps_filters_and_avoids_cursor_fallback_duplicates(monkeypatch) -> None:
     monkeypatch.setattr("usdata.providers.usgs.daily.PAGE_SIZE", 1)
     q = build_query(start="2024-05-06", end="2024-05-07", sites="07164500", variables=["00060"])
@@ -61,6 +86,7 @@ def test_pagination_keeps_filters_and_avoids_cursor_fallback_duplicates(monkeypa
     assert [c.request.url.params["offset"] for c in route.calls] == ["0", "1", "2"]
     for call in route.calls:
         params = call.request.url.params
+        assert params["limit"] == "1"
         assert params["time"] == "2024-05-06/2024-05-07"
         assert params["monitoring_location_id"] == "USGS-07164500"
         assert params["parameter_code"] == "00060"
@@ -73,7 +99,7 @@ def test_pagination_keeps_filters_and_avoids_cursor_fallback_duplicates(monkeypa
 def test_bbox_variables_and_sites_normalize_deterministically() -> None:
     kwargs: dict = dict(start="2024-05-06", end="2024-05-07", bbox=(-96.01, 36.13, -96, 36.15))
     with respx.mock() as mock, WaterDaily(get("usgs:water-daily")) as adapter:
-        route = mock.get(ITEMS_URL).respond(200, json=page(["a"]))
+        route = mock.get(ITEMS_URL).mock(side_effect=first_page_only)
         a = adapter.list_assets(
             build_query(**kwargs, sites="USGS-07164500,07164500", variables=["00060", "00065"])
         )
@@ -81,7 +107,7 @@ def test_bbox_variables_and_sites_normalize_deterministically() -> None:
             build_query(**kwargs, sites=["07164500"], variables=["00065", "00060"])
         )
     assert [x.id for x in a] == [x.id for x in b]
-    assert route.call_count == 4
+    assert route.call_count == 8  # two probes per site/variable combination
     assert route.calls[0].request.url.params["bbox"] == "-96.01,36.13,-96.0,36.15"
 
 
@@ -120,13 +146,13 @@ sources:
 """
         )
     with respx.mock() as mock:
-        listing = mock.get(ITEMS_URL, params={"f": "json"}).respond(200, json=page(["a"]))
+        listing = mock.get(ITEMS_URL, params={"f": "json"}).mock(side_effect=first_page_only)
         data = mock.get(ITEMS_URL, params={"f": "csv"}).respond(200, content=CSV)
         if include_noaa:
             mock.get(NOAA_DATA_URL).respond(200, content=b"NOAA observations")
         result = pull(m, root=tmp_path / "cache")
         assert len(result.fetched) == (2 if include_noaa else 1)
-        assert listing.call_count == data.call_count == 1
+        assert listing.call_count == 2 and data.call_count == 1
     item = result.fetched[0]
     assert item.path.read_bytes() == CSV
     assert item.provenance.source_url == item.asset.href
@@ -140,7 +166,7 @@ sources:
 
 def test_cli_dry_run_and_borrowed_client() -> None:
     with respx.mock() as mock:
-        mock.get(ITEMS_URL).respond(200, json=page(["a"]))
+        mock.get(ITEMS_URL).mock(side_effect=first_page_only)
         result = CliRunner().invoke(
             app,
             [

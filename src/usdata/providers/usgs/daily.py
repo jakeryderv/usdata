@@ -5,8 +5,10 @@ prefix), and ``statistic_id`` (default 00003: daily mean). Variables are
 five-digit parameter codes, such as 00060 for streamflow. Dates select inclusive
 local calendar days; time-of-day information is discarded for daily values.
 
-Each result page is fetched as the service's CSV representation, preserving
-units, qualifiers, and approval status without the volatile GeoJSON timeStamp.
+Listing probes one row at each page offset to learn how many pages exist without
+downloading them. Each page is then fetched as the service's CSV representation,
+preserving units, qualifiers, and approval status without the volatile GeoJSON
+timeStamp.
 """
 
 from __future__ import annotations
@@ -97,20 +99,18 @@ class WaterDaily(_HttpProvider):
         assets: list[Asset] = []
         offset = 0
         while True:
-            url = httpx.URL(ITEMS_URL, params={**params, "offset": str(offset)})
-            response = http.get(url, self._http())
-            response.raise_for_status()
+            # A one-row probe says whether a page starts here; the CSV asset is the page.
+            probe = httpx.URL(ITEMS_URL, params={**params, "limit": "1", "offset": str(offset)})
+            response = http.get(probe, self._http())
             try:
-                body = response.json()
-                features = body["features"]
+                features = response.json()["features"]
                 if not isinstance(features, list):
                     raise ValueError("features must be a list")
-                links = body.get("links", [])
-                next_url = next((link["href"] for link in links if link.get("rel") == "next"), None)
             except (ValueError, KeyError, TypeError, AttributeError) as e:
                 raise httpx.DecodingError("invalid USGS page", request=response.request) from e
             if not features:
                 break
+            url = httpx.URL(ITEMS_URL, params={**params, "offset": str(offset)})
             href = str(url.copy_set_param("f", "csv"))
             digest = hashlib.sha256(href.encode()).hexdigest()[:20]
             assets.append(
@@ -124,12 +124,10 @@ class WaterDaily(_HttpProvider):
                     bbox=query.bbox,
                 )
             )
-            if next_url is None:
-                break
             # The live service can fall back from a cursor link to offset=1 at the
             # end of a page, repeating records. Absolute offsets preserve the original
             # filters and avoid mixing pagination modes; sortby is not supported here.
-            offset += len(features)
+            offset += PAGE_SIZE
         return assets
 
     def fetch(self, asset: Asset, dest: Path) -> Path:
