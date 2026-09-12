@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import importlib
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from pathlib import Path
 from types import TracebackType
-from typing import Self
+from typing import ClassVar, Self
 
 from usdata.models import Asset, Dataset, Query
 
@@ -21,6 +22,14 @@ class QueryError(ValueError):
 
 class Provider(ABC):
     """One adapter per dataset. Translates a normalized query into concrete assets."""
+
+    params: ClassVar[Mapping[str, str]] = {}
+    """Accepted ``query.params`` keys, each mapped to a one-line description.
+
+    This is the adapter's single statement of what it accepts: ``list_assets``
+    rejects every key outside it, and ``usdata info`` prints it. Subclasses that
+    extend a parent's set spread it, as ``{**Parent.params, "extra": "..."}``.
+    """
 
     def __init__(self, dataset: Dataset) -> None:
         self.dataset = dataset

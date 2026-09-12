@@ -14,6 +14,14 @@ CoastWatch Blended Sea Surface Temperature.
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
 - Examples: [sst analysis](../../../examples/sst-analysis/example.md)
 
+## Parameters
+
+Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
+
+| Parameter | Meaning |
+|---|---|
+| `stride` | Positive integer subsampling both spatial axes; default 1. |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-coastwatch.md).

@@ -1,5 +1,6 @@
 """Shared behavioral contracts; dataset-specific wire semantics stay in adapter tests."""
 
+import re
 from collections.abc import Callable
 from contextlib import nullcontext
 from pathlib import Path
@@ -139,6 +140,29 @@ def test_adapter_contract(dataset_id, injected, fail, tmp_path, monkeypatch) -> 
     finally:
         if supplied is not None:
             supplied.close()
+
+
+@pytest.mark.parametrize("dataset_id", CASES)
+def test_declared_params_are_exactly_the_accepted_params(dataset_id, monkeypatch) -> None:
+    """Every declared key is accepted and every undeclared key is named as unsupported."""
+
+    def unexpected_client():
+        raise AssertionError("parameter validation must precede any transport")
+
+    monkeypatch.setattr("usdata.protocols.http.client", unexpected_client)
+    with load_adapter(default_registry().get(dataset_id)) as adapter:
+        declared = dict(adapter.params)
+        assert all(
+            description.strip() and "\n" not in description for description in declared.values()
+        )
+        probe = query(dataset_id).model_copy(
+            update={"params": {**dict.fromkeys(declared, "probe"), "unknown-key": "probe"}}
+        )
+        with pytest.raises(QueryError) as error:
+            adapter.list_assets(probe)
+    reported = re.search(r"unsupported .*params: (.+)$", str(error.value))
+    assert reported is not None, f"{dataset_id} rejected a declared parameter: {error.value}"
+    assert reported[1] == "unknown-key"
 
 
 @pytest.mark.parametrize("dataset_id", CASES)

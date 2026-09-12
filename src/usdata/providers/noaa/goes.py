@@ -9,8 +9,10 @@ Geographic and variable subsetting are not available for these archived files.
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import ClassVar
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import s3
@@ -47,9 +49,15 @@ def _number(raw: object, label: str, low: int, high: int) -> int:
 class GoesAbi(_HttpProvider):
     """Single-channel CONUS ABI imagery; params: satellite, channel, product."""
 
+    params: ClassVar[Mapping[str, str]] = {
+        "satellite": "Required GOES satellite number: 16, 17, 18, or 19.",
+        "channel": "Required ABI channel, 1 to 16 or C01 to C16.",
+        "product": f"ABI product; only {PRODUCT} is supported.",
+    }
+
     def list_assets(self, query: Query) -> list[Asset]:
         """List complete scenes whose scan starts fall inside the inclusive UTC interval."""
-        if unknown := set(query.params) - {"satellite", "channel", "product"}:
+        if unknown := set(query.params) - set(self.params):
             raise QueryError(f"unsupported GOES params: {', '.join(sorted(unknown))}")
         if query.params.get("product", PRODUCT) != PRODUCT:
             raise QueryError(f"only product={PRODUCT} is supported")

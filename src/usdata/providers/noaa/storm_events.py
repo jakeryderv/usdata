@@ -62,8 +62,8 @@ class StormEvents(_HttpProvider):
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Select the latest supported details revision for every requested year."""
-        if query.params:
-            raise QueryError(f"unsupported Storm Events params: {', '.join(sorted(query.params))}")
+        if unknown := set(query.params) - set(self.params):
+            raise QueryError(f"unsupported Storm Events params: {', '.join(sorted(unknown))}")
         if query.bbox is not None or query.variables or query.text:
             raise QueryError(
                 "Storm Events downloads whole annual details files; location/bbox, variables, "

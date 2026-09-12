@@ -20,6 +20,7 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field
 
 from usdata.models import LATER, Dataset, ProviderInfo, Status
+from usdata.providers import load_adapter
 from usdata.registry import Registry, version_key
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -239,6 +240,22 @@ def catalog_entries(registry: Registry, root: Path = ROOT) -> dict[str, CatalogE
     return entries
 
 
+def parameter_block(ds: Dataset) -> list[str]:
+    """The adapter's declared ``--param`` keys, read from the class that implements them."""
+    with load_adapter(ds) as adapter:
+        declared = dict(adapter.params)
+    if not declared:
+        return ["This dataset accepts no provider-specific parameters."]
+    return [
+        "Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, "
+        "or as keyword arguments to `build_query`.",
+        "",
+        "| Parameter | Meaning |",
+        "|---|---|",
+        *(f"| `{name}` | {cell(declared[name])} |" for name in sorted(declared)),
+    ]
+
+
 def dataset_path(ds: Dataset) -> Path:
     return Path("docs/generated/catalog") / ds.provider / f"{ds.name}.md"
 
@@ -281,6 +298,10 @@ def render_dataset(registry: Registry, ds: Dataset, entry: CatalogEntry) -> str:
         f"- Required inputs: {entry.inputs}",
         f"- Open locally: {reader}",
         f"- Examples: {examples}",
+        "",
+        "## Parameters",
+        "",
+        *parameter_block(ds),
         "",
         "## Usage and limitations",
         "",

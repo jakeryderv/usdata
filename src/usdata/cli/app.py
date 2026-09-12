@@ -118,6 +118,17 @@ def info(
         typer.echo(
             f"  time:      {ds.temporal_extent.start} .. {ds.temporal_extent.end or 'present'}"
         )
+    if ds.adapter is None:
+        return
+    with load_adapter(ds) as adapter:
+        declared = dict(adapter.params)
+    if not declared:
+        typer.echo("  params:    none")
+        return
+    typer.echo("  params:")
+    width = max(len(name) for name in declared)
+    for name, description in sorted(declared.items()):
+        typer.echo(f"    {name:<{width}}  {description}")
 
 
 @app.command()

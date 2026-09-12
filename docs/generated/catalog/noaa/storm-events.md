@@ -14,6 +14,10 @@ Storm Events Database.
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
 - Examples: [storm events](../../../examples/storm-events/example.md)
 
+## Parameters
+
+This dataset accepts no provider-specific parameters.
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-storm-events.md).

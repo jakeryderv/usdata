@@ -43,6 +43,24 @@ def test_info() -> None:
     assert runner.invoke(app, ["info", "nope:x"]).exit_code == 2
 
 
+def test_info_lists_adapter_parameters() -> None:
+    result = runner.invoke(app, ["info", "noaa:climate-normals"])
+    assert result.exit_code == 0
+    listed = [line.strip() for line in result.stdout.splitlines() if line.startswith("    ")]
+    assert [line.split("  ", 1)[0] for line in listed] == ["period", "stations", "units"]
+    assert all(len(line.split("  ", 1)) == 2 and line.split("  ", 1)[1].strip() for line in listed)
+
+
+def test_info_says_none_when_an_adapter_takes_no_parameters() -> None:
+    result = runner.invoke(app, ["info", "noaa:storm-events"])
+    assert result.exit_code == 0 and "params:    none" in result.stdout
+
+
+def test_info_omits_parameters_for_planned_datasets() -> None:
+    result = runner.invoke(app, ["info", "usgs:earthquakes"])
+    assert result.exit_code == 0 and "params:" not in result.stdout
+
+
 def test_fetch_reports_unimplemented_adapter() -> None:
     result = runner.invoke(app, ["fetch", "noaa:goes-glm", "--state", "OK"])
     assert result.exit_code == 3

@@ -72,10 +72,16 @@ Rules:
 
 - Raise `QueryError` with a helpful message when the query lacks something the
   source needs (a time window, a station list). The CLI turns it into exit code 2.
-- Accept provider-specific inputs through `query.params` (`stations=`, `site=`)
-  and document them in the module docstring and provider access notes. Reject
-  unknown parameters, empty explicit identifiers, and conflicting selectors with
-  `QueryError`; do not silently fall back after a typo.
+- Accept provider-specific inputs through `query.params` (`stations=`, `site=`).
+  Declare every accepted key in the class-level `params` mapping with a one-line
+  description, and reject the rest with
+  `if unknown := set(query.params) - set(self.params)`. That declaration is the
+  only statement of the accepted set: `usdata info` and the generated catalog
+  page print it, and `tests/adapters/test_contracts.py` fails if an adapter
+  accepts anything else. A subclass extending its parent spreads the parent's
+  mapping. Keep the longer prose in the module docstring and the provider access
+  notes. Reject empty explicit identifiers and conflicting selectors with
+  `QueryError` too; do not silently fall back after a typo.
 - Use `usdata.protocols.http`, `usdata.protocols.s3`, or `usdata.protocols.erddap` for transport. Take an
   optional `httpx.Client` in `__init__` so tests can inject one. Override
   `close()` to release internally owned resources; injected clients remain the

@@ -14,6 +14,16 @@ Streamflow and Water Daily Values.
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
 - Examples: [weather and streamflow](../../../examples/weather-and-streamflow/example.md)
 
+## Parameters
+
+Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
+
+| Parameter | Meaning |
+|---|---|
+| `site` | One quoted USGS monitoring ID, with or without the USGS- prefix. |
+| `sites` | Several quoted monitoring IDs, comma-separated or a list. |
+| `statistic_id` | Quoted five-digit statistic code; default 00003 (daily mean). |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/usgs-water-daily.md).

@@ -13,8 +13,10 @@ inside the query bbox, then the single radar nearest the bbox centre.
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import ClassVar
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import s3
@@ -48,9 +50,15 @@ def scan_time(key: str) -> datetime | None:
 class NexradLevel2(_HttpProvider):
     """NEXRAD Level II adapter. Params: ``site``/``sites`` (ICAO ids), ``nearest`` (int)."""
 
+    params: ClassVar[Mapping[str, str]] = {
+        "site": "One radar ICAO id, for example KTLX.",
+        "sites": "Several radar ICAO ids, comma-separated or a list.",
+        "nearest": "Take the N radars nearest the query centre instead of naming sites.",
+    }
+
     def select_sites(self, query: Query) -> list[str]:
         """Radar site ids the query refers to; see the module docstring for the rules."""
-        if unknown := set(query.params) - {"site", "sites", "nearest"}:
+        if unknown := set(query.params) - set(self.params):
             raise QueryError(f"unsupported NEXRAD params: {', '.join(sorted(unknown))}")
         if "site" in query.params and "sites" in query.params:
             raise QueryError("pass only one of site or sites")

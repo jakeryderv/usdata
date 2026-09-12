@@ -3727,7 +3727,7 @@ examples = [
 requires-dist = [
     { name = "h5netcdf", extras = ["h5py"], marker = "extra == 'netcdf'", specifier = ">=1.8.1" },
     { name = "httpx", specifier = ">=0.28.1" },
-    { name = "pandas", marker = "extra == 'pandas'", specifier = ">=3.0" },
+    { name = "pandas", marker = "extra == 'pandas'", specifier = ">=2.2" },
     { name = "pydantic", specifier = ">=2.7" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "typer", specifier = ">=0.18" },
@@ -3758,7 +3758,7 @@ examples = [
     { name = "jupyterlab", specifier = ">=4.3" },
     { name = "matplotlib", specifier = ">=3.9" },
     { name = "nbclient", specifier = ">=0.10" },
-    { name = "pandas", specifier = ">=3.0" },
+    { name = "pandas", specifier = ">=2.2" },
 ]
 
 [[package]]
