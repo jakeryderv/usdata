@@ -14,6 +14,14 @@ HURDAT2 Atlantic and Pacific Best Tracks.
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
 - Examples: [hurdat2](../../../examples/hurdat2/README.md)
 
+## Parameters
+
+Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
+
+| Parameter | Meaning |
+|---|---|
+| `basin` | Best-track basin: 'atlantic' (default) or 'pacific'. |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-hurdat2.md).

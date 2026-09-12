@@ -145,7 +145,7 @@ curl --fail --output /tmp/hurdat2-nepac.txt \
 ```
 
 The listing serves `text/plain; charset=UTF-8` and keeps past revisions: 41
-files on 2026-09-13, the oldest `hurdat2-nepac-1949-2016-041317.txt`, a revision
+files on 2026-09-12, the oldest `hurdat2-nepac-1949-2016-041317.txt`, a revision
 of 2017-04-13 covering data through the 2016 season. The current Atlantic file
 was 7,082,381 bytes (2,004 storms, 55,605 track points) and the northeast
 Pacific file 4,083,231 bytes (1,262 storms, 32,026 track points). Filenames are
@@ -162,8 +162,8 @@ left unknown. Every data line in both current files has 21 fields; revisions
 published before the 2021 season omit the trailing radius of maximum wind.
 
 Archived revisions vary more than the current pair suggests, which is worth
-knowing because a lockfile pins one. Parsing all 41 listed files on 2026-09-13:
-8 of them, all Atlantic, write at least one position east of Greenwich as an
+knowing because a lockfile pins one. Parsing all 41 listed files on 2026-09-12:
+10 of them, all Atlantic, write at least one position east of Greenwich as an
 unwrapped 0-360 west longitude (`358.0W` for 2.0E, down to `299.0W` for 61.0E),
 a form the current files no longer use: `hurdat2-1851-2024-040425.txt` rewrote
 those same points with `E` suffixes. Two files carry an upstream typo and cannot

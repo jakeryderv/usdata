@@ -78,8 +78,8 @@ def _coordinate(text: str, axis: str, positive: str, negative: str, line: int) -
     return signed - math.copysign(360.0, signed) if abs(signed) > 180.0 else signed
 
 
-def _track_point(fields: list[str], line: int) -> tuple[Any, ...]:
-    """One data line as its timestamp, record codes, and numeric measurements."""
+def _track_point(fields: list[str], line: int) -> dict[str, Any]:
+    """One data line as its own columns: timestamp, record codes, and measurements."""
     if fields and not fields[-1]:
         fields = fields[:-1]  # Some revisions terminate data lines with a comma.
     if len(fields) not in (TRACK_FIELDS - 1, TRACK_FIELDS):
@@ -105,7 +105,12 @@ def _track_point(fields: list[str], line: int) -> tuple[Any, ...]:
     ]
     if len(values) < len(NUMERIC_COLUMNS):
         values.append(math.nan)  # Radius of maximum wind predates the 2021 format.
-    return when, fields[2] or None, fields[3] or None, values
+    return {
+        "time": when,
+        "record_identifier": fields[2] or None,
+        "status": fields[3] or None,
+        **dict(zip(NUMERIC_COLUMNS, values, strict=True)),
+    }
 
 
 def parse(text: str) -> dict[str, list[Any]]:
@@ -135,13 +140,9 @@ def parse(text: str) -> dict[str, list[Any]]:
             )
         for offset in range(count):
             body = [field.strip() for field in lines[index + offset].split(",")]
-            when, identifier, status, values = _track_point(body, index + offset + 1)
             columns["storm_id"].append(header[0])
             columns["name"].append(header[1])
-            columns["time"].append(when)
-            columns["record_identifier"].append(identifier)
-            columns["status"].append(status)
-            for name, value in zip(NUMERIC_COLUMNS, values, strict=True):
+            for name, value in _track_point(body, index + offset + 1).items():
                 columns[name].append(value)
         index += count
     return columns

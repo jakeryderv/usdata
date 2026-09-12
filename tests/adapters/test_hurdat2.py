@@ -81,6 +81,22 @@ def test_selects_newest_span_and_revision_ignoring_other_names(adapter) -> None:
     assert asset.time.end.isoformat() == "2025-12-31T23:59:59.999999+00:00"
 
 
+def test_newest_revision_of_a_span_wins_even_when_its_name_sorts_lowest(adapter) -> None:
+    """Revision order comes from the parsed date, not from the filename's text order.
+
+    Both names are real siblings from the NHC listing. Within the 1851-2020 span,
+    `020922` is 2022-02-09 and `052921` is 2021-05-29, so the ``MMDDYY`` form puts
+    the newer revision lexically *below* the older one. Sorting names as text --
+    or any selection that ignores the parsed date -- picks `052921` instead.
+    """
+    superseded = "hurdat2-1851-2020-052921.txt"
+    assert superseded > LEGACY  # The trap: text order inverts the two revision dates.
+    with respx.mock() as mock:
+        mock.get(DIRECTORY_URL).respond(200, text=listing(superseded, LEGACY))
+        (asset,) = adapter.list_assets(build_query())
+    assert asset.id == LEGACY and asset.href == DIRECTORY_URL + LEGACY
+
+
 def test_basin_selects_a_different_file_and_span(adapter) -> None:
     with respx.mock() as mock:
         mock.get(DIRECTORY_URL).respond(200, text=listing(ATLANTIC, PACIFIC))

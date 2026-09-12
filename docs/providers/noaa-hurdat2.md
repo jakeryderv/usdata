@@ -25,17 +25,19 @@ Pacific). Filter the parsed `time` column locally. `capabilities` are all false.
 ## Revisions and filenames
 
 The [data directory](https://www.nhc.noaa.gov/data/hurdat/) keeps past
-revisions, not only the current pair: it listed 41 files on 2026-09-13, the
+revisions, not only the current pair: it listed 41 files on 2026-09-12, the
 oldest a Pacific file revised 2017-04-13. How far back it reaches is the NHC's
 choice, so treat it as an archive that happens to be deep rather than a complete
 history. Filenames embed the data span and a revision date, such as
 `hurdat2-1851-2025-02272026.txt` and `hurdat2-nepac-1949-2025-02272026.txt`.
 The basin token is `nepac` for the Pacific and either `atl` or absent for the
-Atlantic. Revision dates are `MMDDYY` or `MMDDYYYY` — never `YYYYMMDD` — and a
-few names carry a trailing disambiguating letter, so resolution parses the date
-rather than sorting filenames as text. The newest data span wins first, then the
-newest revision of that span; names that are not real dates, files for the other
-basin, and non-local links are ignored.
+Atlantic. Revision dates are `MMDDYY` or `MMDDYYYY` — never `YYYYMMDD` — and one
+Pacific name carries a trailing disambiguating letter, so resolution parses the
+date rather than sorting filenames as text. Text order genuinely disagrees with
+revision order: within the 1851-2020 span, `020922` is 2022-02-09 and `052921` is
+2021-05-29, so the newer file sorts below the one it supersedes. The newest data
+span wins first, then the newest revision of that span; names that are not real
+dates, files for the other basin, and non-local links are ignored.
 
 The complete filename is the stable asset ID, and the URL, original bytes,
 size, and checksum are preserved. The directory reports approximate sizes
@@ -90,7 +92,7 @@ the 2021 season carry 20 values and a terminating comma instead of 21, so
 Greenwich in the unwrapped 0-360 west convention, continuing a track from `3.3W`
 to `358.0W`; the reader normalizes that to `2.0`, the value the NHC itself
 published for the same point in a later revision. Of the 41 files listed on
-2026-09-13, 39 parse; two carry an upstream typo (a missing comma between
+2026-09-12, 39 parse; two carry an upstream typo (a missing comma between
 latitude and longitude, and a date written `C0091018`) that the next revision of
 the same span corrects, and those raise rather than parse silently.
 

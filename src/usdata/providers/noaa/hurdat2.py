@@ -15,9 +15,11 @@ Filter the parsed track table locally with the ``hurdat2`` reader.
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from datetime import UTC, date, datetime
 from html.parser import HTMLParser
 from pathlib import Path
+from typing import ClassVar
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
@@ -56,9 +58,13 @@ def _revision(value: str) -> date | None:
 class Hurdat2(_HttpProvider):
     """Resolve one whole-basin best-track file; preserve the original text bytes."""
 
+    accepted_params: ClassVar[Mapping[str, str]] = {
+        "basin": "Best-track basin: 'atlantic' (default) or 'pacific'.",
+    }
+
     def list_assets(self, query: Query) -> list[Asset]:
         """Select the newest revision of the requested basin's complete database."""
-        if unknown := set(query.params) - {"basin"}:
+        if unknown := set(query.params) - set(self.accepted_params):
             raise QueryError(f"unsupported HURDAT2 params: {', '.join(sorted(unknown))}")
         requested = query.params.get("basin", "atlantic")
         basin = requested.strip().casefold() if isinstance(requested, str) else ""

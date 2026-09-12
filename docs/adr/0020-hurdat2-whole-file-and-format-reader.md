@@ -6,9 +6,12 @@ Status: accepted. Date: 2026-09-12.
 
 The National Hurricane Center publishes the HURDAT2 best-track database as two
 plain-text files, Atlantic and northeast/north-central Pacific, in one Apache
-directory that also keeps every past revision. Filenames embed the data span and
-a revision date in `MMDDYY` or `MMDDYYYY` form, occasionally with a trailing
-letter, and the Atlantic basin token is sometimes absent. There is no records
+directory that also keeps past revisions — 41 files on 2026-09-12, the oldest
+revised 2017-04-13. How deep that archive runs is the NHC's choice and it is not
+a complete history: revisions older than the ones listed are simply gone.
+Filenames embed the data span and a revision date in `MMDDYY` or `MMDDYYYY` form,
+occasionally with a trailing letter, and the Atlantic basin token is sometimes
+absent. There is no records
 API, no per-storm file, and no server-side subsetting of any kind. The format is
 also unlike anything usdata already reads: storm headers declaring a track-point
 count, followed by that many fixed-position lines with hemisphere-suffixed
@@ -72,7 +75,12 @@ Accepting 20- as well as 21-field data lines, and longitudes written in the
 unwrapped 0-360 west convention, is what keeps archived revisions readable rather
 than merely downloadable: `max_wind_radius_nm` is NaN before 2021, and a point
 written `358.0W` reads as `2.0`, the value the NHC itself later published for it.
-Of the 41 files the directory listed on 2026-09-13, 39 parse; the two that do not
+The cost is a looser format check: with the longitude bound raised from 180 to
+360, a transposition such as `290.2W` for `209.2W` now parses silently as `69.8E`
+where it would once have raised. That is accepted because the unwrapped form is
+real and continuous in the archive — `AL061966` drifts from 305.0W to 299.0W
+without a break — so no bound can separate it from a typo of the same magnitude.
+Of the 41 files the directory listed on 2026-09-12, 39 parse; the two that do not
 carry an upstream typo, a missing comma and a date of `C0091018`, each fixed by
 the next revision of the same span. Refusing those is the point of the format
 error. Column names, not attributes, carry units, so exports keep them.
