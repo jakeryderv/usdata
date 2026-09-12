@@ -26,6 +26,7 @@ DATA = b"source bytes\n"
 CASES = {
     "noaa:ghcn-daily": {"stations": "USW00013967"},
     "noaa:coops-water-levels": {"station": "8518750", "datum": "MLLW"},
+    "noaa:coops-tide-predictions": {"station": "8518750", "datum": "MLLW"},
     "noaa:gsom": {"stations": "USW00013967"},
     "noaa:gsoy": {"stations": "USW00013967"},
     "noaa:climate-normals": {"stations": "USW00013967"},
@@ -55,6 +56,8 @@ def query(dataset_id: str) -> Query:
 
 
 def contract_data(dataset_id: str) -> bytes:
+    if dataset_id == "noaa:coops-tide-predictions":
+        return b"Date Time, Prediction\n2024-05-06 12:00,0.719\n"
     if dataset_id == "noaa:coops-water-levels":
         return (
             b"Date Time, Water Level, Sigma, O or I (for verified), F, R, L, Quality \n"

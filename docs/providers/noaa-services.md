@@ -284,3 +284,15 @@ The adapter validates the CSV in a temporary file before replacing the destinati
 Malformed, empty, and semantic-error responses raise `httpx.DecodingError`
 (CLI exit 4); HTTP failures retain their status. `allow_empty` does not suppress
 these fetch errors. Source revisions may invalidate exact locked restoration.
+
+## CO-OPS tide predictions
+
+Hosted probes on 2026-09-12 verified the `predictions` product for station
+8727520 (Cedar Key) over 2024-09-25T00:00Z–2024-09-28T00:00Z: 721 six-minute
+rows with a `Date Time, Prediction` header, 26 hourly rows for `interval=h`,
+and a `Date Time, Prediction, Type` header with `H`/`L` rows for
+`interval=hilo`. A year of six-minute predictions returned 87,601 rows, matching
+NOAA's documented one-year limit for prediction intervals other than high/low.
+An invalid station returned HTTP 400 with a plain-text message and no CSV
+header. Observed and predicted six-minute rows for the same request bounds
+carried identical timestamps, so the two series subtract without alignment.

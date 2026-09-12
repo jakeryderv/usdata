@@ -16,6 +16,7 @@ NOAA access is anonymous.
 | `hurdat2` | [Tropical cyclone best tracks](noaa-hurdat2.md) (v0.12.0) | One whole basin file per revision |
 | `coastwatch-sst` | [Sea-surface temperature](noaa-coastwatch.md) | Spatial and temporal CSV subsets |
 | `coops-water-levels` | [Observed coastal water levels](noaa-coops.md) (v0.10.0) | One station and datum, at most 28 days |
+| `coops-tide-predictions` | [Tide predictions](noaa-coops-predictions.md) (v0.14.0) | One station, datum, and interval, at most a year |
 
 See the [generated catalog](../generated/catalog/noaa.md) for status,
 capabilities, endpoints, and versions. Historical endpoint probes and candidate
@@ -57,6 +58,10 @@ See [CoastWatch SST](noaa-coastwatch.md).
 ## CO-OPS observed water levels
 
 See [CO-OPS observed water levels](noaa-coops.md).
+
+## CO-OPS tide predictions
+
+See [CO-OPS tide predictions](noaa-coops-predictions.md).
 
 ## Access notes
 

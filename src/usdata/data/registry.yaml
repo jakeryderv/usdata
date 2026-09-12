@@ -215,6 +215,25 @@ datasets:
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
     adapter: usdata.providers.noaa.coops:CoopsWaterLevels
 
+  - id: noaa:coops-tide-predictions
+    provider: noaa
+    status: available
+    domain: sea-level-tides
+    since: "0.14"
+    title: CO-OPS Tide Predictions
+    description: >-
+      Astronomical tide predictions from the anonymous CO-OPS Data API for one
+      station, an explicit vertical datum, and units, on a six-minute, other
+      minute, hourly, or high/low interval spanning at most a year. Subtracting
+      predictions from observed water levels isolates the non-tidal residual,
+      such as storm surge.
+    keywords: [tides, tide predictions, water level, sea level, coastal, coops, storm surge, stations]
+    protocol: http
+    homepage: https://api.tidesandcurrents.noaa.gov/api/prod/
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+    adapter: usdata.providers.noaa.coops:CoopsTidePredictions
+
   - id: noaa:gsom
     provider: noaa
     status: available
@@ -775,6 +794,7 @@ catalog:
     reader_extra: pandas
     examples:
     - examples/hurdat2/README.md
+    - examples/storm-surge/example.ipynb
   noaa:coastwatch-sst:
     guide: docs/providers/noaa-coastwatch.md
     summary: Sea-surface temperature
@@ -795,6 +815,17 @@ catalog:
     reader_extra: pandas
     examples:
     - examples/coastal-water-levels/README.md
+    - examples/storm-surge/example.ipynb
+  noaa:coops-tide-predictions:
+    guide: docs/providers/noaa-coops-predictions.md
+    summary: Coastal tide predictions
+    formats:
+    - CSV
+    selection: Predictions for one station and datum on a chosen interval; at most a year
+    inputs: Station, datum, and both minute-aligned timestamps; optional interval
+    reader_extra: pandas
+    examples:
+    - examples/storm-surge/example.ipynb
   usgs:water-daily:
     guide: docs/providers/usgs-water-daily.md
     summary: Daily water observations
