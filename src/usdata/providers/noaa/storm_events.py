@@ -9,52 +9,16 @@ from __future__ import annotations
 
 import re
 from datetime import UTC, datetime
-from html.parser import HTMLParser
 from pathlib import Path
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
+from usdata.protocols.listing import directory_entries
 from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
 
 DIRECTORY_URL = "https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/"
 DETAILS_NAME = re.compile(r"StormEvents_details-ftp_v1\.0_d(\d{4})_c(\d{8})\.csv\.gz", re.ASCII)
-
-
-class _Directory(HTMLParser):
-    """Read filenames and exact byte sizes from NCEI's HTML directory table."""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.files: list[tuple[str, int | None]] = []
-        self._cells: list[str] = []
-        self._name: str | None = None
-        self._in_cell = False
-
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag == "tr":
-            self._cells, self._name = [], None
-        elif tag == "td":
-            self._cells.append("")
-            self._in_cell = True
-        elif tag == "a":
-            href = dict(attrs).get("href", "") or ""
-            # Only literal local filenames; never follow arbitrary links from a listing.
-            if DETAILS_NAME.fullmatch(href):
-                self._name = href
-
-    def handle_data(self, data: str) -> None:
-        if self._in_cell:
-            self._cells[-1] += data
-
-    def handle_endtag(self, tag: str) -> None:
-        if tag == "td":
-            self._in_cell = False
-        elif tag == "tr" and self._name is not None:
-            size = self._cells[2].strip() if len(self._cells) > 2 else ""
-            self.files.append(
-                (self._name, int(size) if size.isascii() and size.isdigit() else None)
-            )
 
 
 class StormEvents(_HttpProvider):
@@ -75,10 +39,9 @@ class StormEvents(_HttpProvider):
         if start.year < 1950:
             raise QueryError("Storm Events annual details files start in 1950")
         years = range(start.year, end.year + 1)
-        listing = _Directory()
-        listing.feed(http.get(DIRECTORY_URL, self._http()).text)
+        page = http.get(DIRECTORY_URL, self._http()).text
         selected: dict[int, tuple[str, int | None]] = {}
-        for name, size in listing.files:
+        for name, size in directory_entries(page, DETAILS_NAME):
             match = DETAILS_NAME.fullmatch(name)
             assert match is not None
             year = int(match[1])

@@ -79,7 +79,6 @@ class GhcnDaily(_HttpProvider):
         seen: set[str] = set()
         while True:
             resp = http.get(SEARCH_URL, self._http(), params=params)
-            resp.raise_for_status()
             body = resp.json()
             results = body.get("results", [])
             before = len(found)

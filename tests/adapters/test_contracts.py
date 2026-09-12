@@ -92,7 +92,8 @@ def contract_transport(
                 f'<td>2026-03-23</td><td align="right">{len(data)}</td></tr></table>',
             )
         if str(request.url).startswith(ITEMS_URL) and request.url.params.get("f") == "json":
-            return httpx.Response(200, json={"features": [{"id": "a"}], "links": []})
+            first = request.url.params.get("offset") == "0"
+            return httpx.Response(200, json={"features": [{"id": "a"}] if first else []})
         if str(request.url) == f"{BASE}/info/{DATASET}/index.csv":
             info = (Path(__file__).parents[1] / "fixtures/coastwatch-info.csv").read_text()
             return httpx.Response(200, text=info)

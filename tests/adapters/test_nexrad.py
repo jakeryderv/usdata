@@ -106,6 +106,13 @@ def test_requires_time_window(adapter: NexradLevel2) -> None:
         adapter.list_assets(build_query(site="KTLX", start="2024-05-06"))
 
 
+def test_windows_over_31_days_are_rejected_before_listing(adapter: NexradLevel2) -> None:
+    q = build_query(site="KTLX", start="2024-05-01", end="2024-06-01T00:01")
+    with respx.mock(assert_all_called=False) as mock, pytest.raises(QueryError, match="31 days"):
+        adapter.list_assets(q)
+    assert not mock.calls
+
+
 @pytest.mark.parametrize("extra", [{"text": "reflectivity"}, {"variables": ["REF"]}])
 def test_unsupported_query_fields_are_rejected_before_listing(adapter, extra) -> None:
     q = build_query(site="KTLX", start="2024-05-06T12:00", end="2024-05-06T12:01", **extra)

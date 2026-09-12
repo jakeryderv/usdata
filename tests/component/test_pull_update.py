@@ -41,8 +41,10 @@ def serve(mock: respx.MockRouter, ghcn: dict[str, bytes], usgs: bytes) -> None:
         return httpx.Response(200, content=ghcn[request.url.params["stations"]])
 
     mock.get(DATA_URL).mock(side_effect=by_station)
-    mock.get(ITEMS_URL, params={"f": "json"}).respond(
-        200, json={"features": [{"id": "a"}], "links": []}
+    mock.get(ITEMS_URL, params={"f": "json"}).mock(
+        side_effect=lambda request: httpx.Response(
+            200, json={"features": [{"id": "a"}] if request.url.params["offset"] == "0" else []}
+        )
     )
     mock.get(ITEMS_URL, params={"f": "csv"}).respond(200, content=usgs)
 

@@ -1,8 +1,9 @@
 """GOES ABI CONUS Cloud and Moisture Imagery from anonymous NOAA S3 buckets.
 
 Require ``satellite`` (16, 17, 18, or 19), ``channel`` (1--16 or C01--C16), and
-both timestamps. The optional ``product`` must be ``ABI-L2-CMIPC``. Select whole
-single-channel NetCDF files by inclusive scan-start time, never by scan overlap.
+both timestamps at most seven days apart. The optional ``product`` must be
+``ABI-L2-CMIPC``. Select whole single-channel NetCDF files by inclusive
+scan-start time, never by scan overlap.
 Geographic and variable subsetting are not available for these archived files.
 """
 
@@ -21,6 +22,7 @@ from usdata.providers.base import QueryError
 
 PRODUCT = "ABI-L2-CMIPC"
 PUBLIC_START = datetime(2017, 2, 28, tzinfo=UTC)
+MAX_WINDOW = timedelta(days=7)
 KEY_RE = re.compile(
     r"OR_ABI-L2-CMIPC-M[346]C(?P<channel>0[1-9]|1[0-6])_G(?P<satellite>1[6-9])"
     r"_s(?P<start>\d{14})_e(?P<end>\d{14})_c\d{14}\.nc"
@@ -68,6 +70,8 @@ class GoesAbi(_HttpProvider):
             hint="archived GOES scenes are whole files; select satellite and channel",
         )
         start, end = self.utc_window(query)
+        if end - start > MAX_WINDOW:
+            raise QueryError("GOES requests must span at most 7 days; split longer intervals")
         satellite = _number(query.params.get("satellite"), "satellite", 16, 19)
         channel = _number(query.params.get("channel"), "channel", 1, 16)
         if end < PUBLIC_START:
