@@ -161,21 +161,25 @@ datasets:
 
   - id: noaa:hurdat2
     provider: noaa
-    status: planned
+    status: available
     domain: tropical-cyclones
-    target: later
+    since: "0.12"
     title: HURDAT2 Atlantic and Pacific Best Tracks
     description: >-
       National Hurricane Center best-track database: six-hourly position,
       intensity, pressure, and wind radii for Atlantic (since 1851) and
-      eastern North Pacific (since 1949) tropical cyclones. One fixed-format
-      text file per basin, refreshed each season; the single-file pattern.
+      northeast/north-central Pacific (since 1949) tropical cyclones. One
+      fixed-format text file per basin, revised after each season; a basin
+      parameter picks the file and the newest revision wins. There is no
+      query interface, so dates and geographic filters are rejected and the
+      local reader turns the whole file into one row per track point.
     keywords: [hurricane, tropical cyclone, best track, nhc, atlantic, pacific]
     protocol: http
     homepage: https://www.nhc.noaa.gov/data/#hurdat
     license: US Government Work (public domain)
     temporal_extent: { start: "1851-01-01T00:00:00Z" }
     capabilities: { spatial_subset: false, temporal_subset: false, variable_subset: false }
+    adapter: usdata.providers.noaa.hurdat2:Hurdat2
 
   - id: noaa:ibtracs
     provider: noaa
@@ -759,6 +763,16 @@ catalog:
     reader_extra: pandas
     examples:
     - examples/storm-events/example.ipynb
+  noaa:hurdat2:
+    guide: docs/providers/noaa-hurdat2.md
+    summary: Tropical cyclone best tracks
+    formats:
+    - HURDAT2 fixed-format text
+    selection: The newest revision of one whole basin file; filter track points locally
+    inputs: Optional basin (atlantic or pacific); no dates or geographic filters
+    reader_extra: pandas
+    examples:
+    - examples/hurdat2/README.md
   noaa:coastwatch-sst:
     guide: docs/providers/noaa-coastwatch.md
     summary: Sea-surface temperature

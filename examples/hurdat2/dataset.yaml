@@ -1,0 +1,7 @@
+name: atlantic-best-tracks
+sources:
+  - dataset: noaa:hurdat2
+    # One whole basin file. HURDAT2 has no query interface, so dates and
+    # geographic filters are rejected; filter the parsed track table locally.
+    params:
+      basin: atlantic

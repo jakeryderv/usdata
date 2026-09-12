@@ -17,7 +17,6 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`noaa:ghcn-hourly`](noaa.md#noaaghcn-hourly) GHCN-Hourly Station Observations · Planned
 - [`noaa:goes-glm`](noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · Planned
 - [`noaa:hrrr`](noaa.md#noaahrrr) HRRR Forecast Model Output · Planned
-- [`noaa:hurdat2`](noaa.md#noaahurdat2) HURDAT2 Atlantic and Pacific Best Tracks · Planned
 - [`noaa:ibtracs`](noaa.md#noaaibtracs) IBTrACS Global Tropical Cyclone Tracks · Planned
 - [`noaa:lcd`](noaa.md#noaalcd) Local Climatological Data · Planned
 - [`noaa:mrms`](noaa.md#noaamrms) Multi-Radar Multi-Sensor (MRMS) · Planned
@@ -33,6 +32,10 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usda:cropland-data-layer`](usda.md#usdacropland-data-layer) Cropland Data Layer · Planned
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
 - [`usgs:earthquakes`](usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · Planned
+
+**Implemented, unreleased (planned 0.12)**
+
+- [`noaa:hurdat2`](noaa.md#noaahurdat2) HURDAT2 Atlantic and Pacific Best Tracks · Source only
 
 **Included since 0.11**
 

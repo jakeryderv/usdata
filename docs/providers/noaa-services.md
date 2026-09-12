@@ -80,7 +80,7 @@ added once a concrete, anonymously accessible dataset has been verified.
 | Severe weather | Tornadoes, hail, damaging wind, storm events, damage reports | Storm Events Database, Storm Data | `storm-events` |
 | Weather radar | Reflectivity, radial velocity, dual-pol variables, derived products | NEXRAD Level II, NEXRAD Level III, MRMS | `nexrad-level2`, `nexrad-level3`, `mrms` |
 | Weather satellites | Visible/IR imagery, clouds, lightning, fire, volcanic ash | GOES-R ABI, GOES GLM, POES, JPSS | `goes-abi`, `goes-glm` |
-| Tropical cyclones | Best tracks, intensity, pressure, wind radii | HURDAT2, IBTrACS, HURSAT | `hurdat2`, `ibtracs` |
+| Tropical cyclones | Best tracks, intensity, pressure, wind radii | HURDAT2, IBTrACS, HURSAT | `hurdat2` (available from source), `ibtracs` |
 | Weather models | Forecasts, analyses, reanalyses | GFS, HRRR, RAP, NAM, GEFS, National Blend of Models | `hrrr`, `gfs`, `nbm` |
 | Climate | Normals, long-term records, divisional averages, indices | Climate Normals, nClimDiv, Climate Data Records | `climate-normals` (available from source), `nclimdiv` |
 | Snow and ice | Snow cover and depth, sea ice concentration and extent | Sea Ice Index (NOAA@NSIDC), IMS snow cover | `sea-ice-index` |
@@ -130,6 +130,52 @@ The filename is a probe snapshot; the adapter discovers current filenames instea
 of hard-coding it. The [design decision](../adr/0010-storm-events-annual-archives.md)
 records the annual-file and compression contract. The notebook downloads one 2024 archive (~13 MB compressed),
 then filters locally; neither the test nor example downloads all archive years.
+
+## HURDAT2 best tracks
+
+Probes on 2026-09-12 UTC listed the NHC data directory and fetched both current
+whole-basin files:
+
+```sh
+curl --fail 'https://www.nhc.noaa.gov/data/hurdat/'
+curl --fail --output /tmp/hurdat2-atl.txt \
+  'https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2025-02272026.txt'
+curl --fail --output /tmp/hurdat2-nepac.txt \
+  'https://www.nhc.noaa.gov/data/hurdat/hurdat2-nepac-1949-2025-02272026.txt'
+```
+
+The data files are served as `text/plain; charset=UTF-8` (the directory index
+itself is HTML) and the listing keeps past revisions: 41
+files on 2026-09-12, the oldest `hurdat2-nepac-1949-2016-041317.txt`, a revision
+of 2017-04-13 covering data through the 2016 season. The current Atlantic file
+was 7,082,381 bytes (2,004 storms, 55,605 track points) and the northeast
+Pacific file 4,083,231 bytes (1,262 storms, 32,026 track points). Filenames are
+the probe snapshot; the adapter discovers current names instead of hard-coding
+them.
+
+Naming is inconsistent in ways worth recording. The Atlantic basin token is
+usually omitted (`hurdat2-1851-2025-02272026.txt`) but appears as `atl` in a few
+names; the Pacific token is always `nepac`. Revision dates are `MMDDYY` in older
+names and `MMDDYYYY` in newer ones, never `YYYYMMDD`, so filenames do not sort
+chronologically as text; one Pacific name ends in a disambiguating `a`. Directory
+sizes are approximate (`6.8M`), unlike NCEI's exact byte counts, so asset size is
+left unknown. Every data line in both current files has 21 fields; revisions
+published before the 2021 season omit the trailing radius of maximum wind.
+
+Archived revisions vary more than the current pair suggests, which is worth
+knowing because a lockfile pins one. Parsing all 41 listed files on 2026-09-12:
+10 of them, all Atlantic, write at least one position east of Greenwich as an
+unwrapped 0-360 west longitude (`358.0W` for 2.0E, down to `299.0W` for 61.0E),
+a form the current files no longer use: `hurdat2-1851-2024-040425.txt` rewrote
+those same points with `E` suffixes. Two files carry an upstream typo and cannot
+be parsed at all: `hurdat2-1851-2024-040225.txt` line 30687 drops the comma
+between latitude and longitude, and `hurdat2-nepac-1949-2022-042723.txt` line
+23724 dates a track point `C0091018`. Each is fixed by the next revision of the
+same span, which is also the one the adapter selects. The `-99` maximum-wind
+sentinel is documented as a 1967 convention but appears 57 times in the current
+Atlantic file, all on `TD` records from 1971 through 1987, and never in the
+Pacific file. The [design decision](../adr/0020-hurdat2-whole-file-and-format-reader.md)
+records the whole-file and reader contract.
 
 ## Global Summary of the Month
 

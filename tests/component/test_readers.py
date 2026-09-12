@@ -56,6 +56,25 @@ def test_missing_pandas_names_the_extra(fetched) -> None:
         item.open()
 
 
+def test_missing_pandas_names_the_extra_for_hurdat2(fetched) -> None:
+    item = fetched("AL011851, UNNAMED, 0,\n", media_type="text/plain", dataset="noaa:hurdat2")
+    with (
+        patch("usdata._hurdat2.import_module", side_effect=ModuleNotFoundError(name="pandas")),
+        pytest.raises(MissingReaderDependency, match=r"usdata\[pandas\]"),
+    ):
+        item.open()
+
+
+def test_broken_hurdat2_dependency_is_not_misreported(fetched) -> None:
+    item = fetched("AL011851, UNNAMED, 0,\n", media_type="text/plain", dataset="noaa:hurdat2")
+    with (
+        patch("usdata._hurdat2.import_module", side_effect=ModuleNotFoundError(name="numpy")),
+        pytest.raises(ModuleNotFoundError) as error,
+    ):
+        item.open()
+    assert error.value.name == "numpy"
+
+
 def test_broken_pandas_dependency_is_not_misreported(fetched) -> None:
     item = fetched("STATION,TMAX\n00123,25\n")
     with (

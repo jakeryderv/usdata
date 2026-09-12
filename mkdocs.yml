@@ -44,6 +44,7 @@ nav:
   - Climate normals (v0.11.0): examples/climate-normals/README.md
   - Climate anomalies: examples/climate-anomalies/example.md
   - Storm Events: examples/storm-events/example.md
+  - Hurricane best tracks (v0.12.0): examples/hurdat2/README.md
   - Radar reflectivity: examples/radar-reflectivity/example.md
   - GOES imagery: examples/goes-imagery/example.md
   - Coastal water levels (v0.10.0): examples/coastal-water-levels/README.md

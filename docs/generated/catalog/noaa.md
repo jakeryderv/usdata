@@ -16,6 +16,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | <span id="noaastorm-events"></span>[Storm Events details](noaa/storm-events.md) | Released | gzip CSV | Whole annual archives; filter rows locally after downloading |
 | <span id="noaanexrad-level2"></span>[NEXRAD radar scans](noaa/nexrad-level2.md) | Released | NEXRAD Level II | Whole radar scans by site and inclusive UTC scan-start time |
 | <span id="noaagoes-abi"></span>[GOES CONUS imagery](noaa/goes-abi.md) | Released | NetCDF4 | Whole single-channel CONUS scenes by inclusive UTC scan-start time |
+| <span id="noaahurdat2"></span>[Tropical cyclone best tracks](noaa/hurdat2.md) | Source only | HURDAT2 fixed-format text | The newest revision of one whole basin file; filter track points locally |
 | <span id="noaaclimate-normals"></span>[30-year station climate normals](noaa/climate-normals.md) | Released | CSV | Monthly, daily, or annual/seasonal normals per station; optional month-day window for daily and monthly |
 | <span id="noaacoops-water-levels"></span>[Coastal water levels](noaa/coops-water-levels.md) | Released | CSV | Six-minute observations for one station and datum; at most 28 days |
 | <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](noaa/coastwatch-sst.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
@@ -72,16 +73,6 @@ Lightning flash, group, and event detections (GLM-L2-LCFA) in 20-second NetCDF f
 
 [Upstream information](https://registry.opendata.aws/noaa-goes/)
 Domain: Weather satellites.
-
-
-### noaa:hurdat2
-
-**HURDAT2 Atlantic and Pacific Best Tracks** · Planned · target later
-
-National Hurricane Center best-track database: six-hourly position, intensity, pressure, and wind radii for Atlantic (since 1851) and eastern North Pacific (since 1949) tropical cyclones. One fixed-format text file per basin, refreshed each season; the single-file pattern.
-
-[Upstream information](https://www.nhc.noaa.gov/data/#hurdat)
-Domain: Tropical cyclones.
 
 
 ### noaa:ibtracs

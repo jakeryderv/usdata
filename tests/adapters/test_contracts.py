@@ -14,6 +14,7 @@ from usdata.protocols import s3
 from usdata.providers import Provider, load_adapter
 from usdata.providers.base import QueryError
 from usdata.providers.noaa.coastwatch import BASE, DATASET
+from usdata.providers.noaa.hurdat2 import DIRECTORY_URL as HURDAT_URL
 from usdata.providers.noaa.storm_events import DIRECTORY_URL
 from usdata.providers.usgs.daily import ITEMS_URL
 from usdata.query import build_query
@@ -31,6 +32,7 @@ CASES = {
     "noaa:goes-abi": {"satellite": 18, "channel": 6},
     "noaa:coastwatch-sst": {"bbox": (-80.08, 30.02, -80.02, 30.08)},
     "noaa:storm-events": {},
+    "noaa:hurdat2": {"basin": "pacific"},
     "usgs:water-daily": {"sites": "07164500"},
 }
 S3_KEYS = {
@@ -39,10 +41,16 @@ S3_KEYS = {
     "OR_ABI-L2-CMIPC-M6C06_G18_s20241271201181_e20241271203560_c20241271204021.nc",
 }
 STORM_NAME = "StormEvents_details-ftp_v1.0_d2024_c20260323.csv.gz"
+HURDAT_NAME = "hurdat2-nepac-1949-2025-02272026.txt"
+# HURDAT2 publishes the complete record per basin, so it rejects a time filter.
+UNTIMED = {"noaa:hurdat2"}
 
 
 def query(dataset_id: str) -> Query:
-    return build_query(start="2024-05-06T12:00Z", end="2024-05-06T12:05Z", **CASES[dataset_id])
+    window = (
+        {} if dataset_id in UNTIMED else {"start": "2024-05-06T12:00Z", "end": "2024-05-06T12:05Z"}
+    )
+    return build_query(**window, **CASES[dataset_id])
 
 
 def test_every_available_adapter_has_a_contract_scenario() -> None:
@@ -76,6 +84,10 @@ def test_adapter_contract(dataset_id, injected, fail, tmp_path, monkeypatch) -> 
                 text='<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">'
                 f"<IsTruncated>false</IsTruncated><Contents><Key>{key}</Key>"
                 f"<Size>{len(data)}</Size></Contents></ListBucketResult>",
+            )
+        if str(request.url) == HURDAT_URL:
+            return httpx.Response(
+                200, text=f'<table><tr><td><a href="{HURDAT_NAME}">x</a></td></tr></table>'
             )
         if str(request.url) == DIRECTORY_URL:
             return httpx.Response(
