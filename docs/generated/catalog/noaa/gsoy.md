@@ -14,6 +14,15 @@ Global Summary of the Year.
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
 - Examples: [annual climate](../../../examples/annual-climate/README.md)
 
+## Parameters
+
+Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
+
+| Parameter | Meaning |
+|---|---|
+| `stations` | Station ids, comma-separated or a list; otherwise a location selects them. |
+| `units` | metric (default) or standard. |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-gsoy.md).

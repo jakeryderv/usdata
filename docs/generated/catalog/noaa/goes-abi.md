@@ -14,6 +14,16 @@ GOES-R ABI CONUS Cloud and Moisture Imagery.
 - Open locally: `usdata[netcdf]` · [Reader guide](../../../reference/readers.md)
 - Examples: [goes imagery](../../../examples/goes-imagery/example.md)
 
+## Parameters
+
+Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
+
+| Parameter | Meaning |
+|---|---|
+| `channel` | Required ABI channel, 1 to 16 or C01 to C16. |
+| `product` | ABI product; only ABI-L2-CMIPC is supported. |
+| `satellite` | Required GOES satellite number: 16, 17, 18, or 19. |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-goes.md).

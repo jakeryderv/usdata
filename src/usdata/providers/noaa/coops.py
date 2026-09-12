@@ -9,8 +9,10 @@ from __future__ import annotations
 
 import csv
 import hashlib
+from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import ClassVar
 
 import httpx
 
@@ -79,9 +81,15 @@ def _validate_csv(path: Path, asset: Asset) -> None:
 class CoopsWaterLevels(_HttpProvider):
     """One station's observed water levels, preserving source units and quality fields."""
 
+    accepted_params: ClassVar[Mapping[str, str]] = {
+        "station": "Required seven-digit CO-OPS station id, for example '8518750'.",
+        "datum": f"Required vertical datum: {', '.join(sorted(DATUMS))}.",
+        "units": "metric (default) or english.",
+    }
+
     def list_assets(self, query: Query) -> list[Asset]:
         """Describe one bounded CSV request; availability is checked during fetching."""
-        if unknown := set(query.params) - {"station", "datum", "units"}:
+        if unknown := set(query.params) - set(self.accepted_params):
             raise QueryError(f"unsupported {self.dataset.id} params: {', '.join(sorted(unknown))}")
         if query.bbox is not None or query.text is not None or query.variables:
             raise QueryError(

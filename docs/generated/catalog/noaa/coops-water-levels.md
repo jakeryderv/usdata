@@ -14,6 +14,16 @@ CO-OPS Observed Water Levels.
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
 - Examples: [coastal water levels](../../../examples/coastal-water-levels/README.md)
 
+## Parameters
+
+Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
+
+| Parameter | Meaning |
+|---|---|
+| `datum` | Required vertical datum: CRD, IGLD, LWD, MHHW, MHW, MLLW, MLW, MSL, MTL, NAVD, STND. |
+| `station` | Required seven-digit CO-OPS station id, for example '8518750'. |
+| `units` | metric (default) or english. |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-coops.md).

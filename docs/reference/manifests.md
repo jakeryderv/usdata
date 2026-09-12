@@ -52,6 +52,11 @@ prefer explicit station IDs or a local bbox there. See the
 
 ## Provider options
 
+`usdata info <dataset>` prints the same parameter names with a one-line
+description each, read from the adapter that accepts them, so the accepted set
+is always discoverable from the command line. The table below adds the detail
+that does not fit on one line.
+
 | Dataset | `params` | Variables and time |
 |---|---|---|
 | `noaa:ghcn-daily` | `stations`: non-empty comma-separated string or list; otherwise requires a geographic query. `units`: `metric` (default) or `standard`. Explicit stations take precedence over geographic selection. | Names such as `PRCP`, `TMAX`; inclusive calendar dates, time of day ignored. |

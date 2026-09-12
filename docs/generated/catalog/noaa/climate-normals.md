@@ -14,6 +14,16 @@ U.S. Climate Normals 1991-2020.
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
 - Examples: [climate normals](../../../examples/climate-normals/README.md), [climate anomalies](../../../examples/climate-anomalies/example.md)
 
+## Parameters
+
+Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
+
+| Parameter | Meaning |
+|---|---|
+| `period` | monthly (default), daily, or annualseasonal. |
+| `stations` | Station ids, comma-separated or a list; otherwise a location selects them. |
+| `units` | metric (default) or standard. |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-normals.md).
