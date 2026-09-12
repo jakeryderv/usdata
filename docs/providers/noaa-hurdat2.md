@@ -25,7 +25,7 @@ Pacific). Filter the parsed `time` column locally. `capabilities` are all false.
 ## Revisions and filenames
 
 The [data directory](https://www.nhc.noaa.gov/data/hurdat/) keeps past
-revisions, not only the current pair: it listed 41 files on 2026-09-12, the
+revisions, not only the current pair: it listed 41 HURDAT2 data files on 2026-09-12, the
 oldest a Pacific file revised 2017-04-13. How far back it reaches is the NHC's
 choice, so treat it as an archive that happens to be deep rather than a complete
 history. Filenames embed the data span and a revision date, such as

@@ -6,7 +6,7 @@ Status: accepted. Date: 2026-09-12.
 
 The National Hurricane Center publishes the HURDAT2 best-track database as two
 plain-text files, Atlantic and northeast/north-central Pacific, in one Apache
-directory that also keeps past revisions — 41 files on 2026-09-12, the oldest
+directory that also keeps past revisions — 41 HURDAT2 data files on 2026-09-12, the oldest
 revised 2017-04-13. How deep that archive runs is the NHC's choice and it is not
 a complete history: revisions older than the ones listed are simply gone.
 Filenames embed the data span and a revision date in `MMDDYY` or `MMDDYYYY` form,

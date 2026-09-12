@@ -144,7 +144,8 @@ curl --fail --output /tmp/hurdat2-nepac.txt \
   'https://www.nhc.noaa.gov/data/hurdat/hurdat2-nepac-1949-2025-02272026.txt'
 ```
 
-The listing serves `text/plain; charset=UTF-8` and keeps past revisions: 41
+The data files are served as `text/plain; charset=UTF-8` (the directory index
+itself is HTML) and the listing keeps past revisions: 41
 files on 2026-09-12, the oldest `hurdat2-nepac-1949-2016-041317.txt`, a revision
 of 2017-04-13 covering data through the 2016 season. The current Atlantic file
 was 7,082,381 bytes (2,004 storms, 55,605 track points) and the northeast

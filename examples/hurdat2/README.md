@@ -43,8 +43,10 @@ The reader returns one row per best-track point: `storm_id`, `name`, UTC `time`,
 `record_identifier`, `status`, signed `latitude`/`longitude`, `max_wind_kt`,
 `min_pressure_mb`, twelve wind-radii columns, and `max_wind_radius_nm`. The
 documented missing sentinels become NaN (`-999`, and `-99` where a maximum wind
-was left unassigned on a non-developing depression), so wind radii are absent
-before 2004 and radii of maximum wind before 2021. A landfall row is not one
+was left unassigned on a non-developing depression). Wind radii are absent
+before 2004, and the radius of maximum wind is mostly NaN before 2021: the
+Atlantic file back-fills it for a few hundred earlier points, chiefly reanalyzed
+landfalls, while the Pacific file has none. A landfall row is not one
 landfall event per storm, and a track point is not an observation: HURDAT2 is a
 post-season reanalysis whose early decades undercount storms and underestimate
 intensities. Compare eras with that in mind.
