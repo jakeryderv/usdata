@@ -47,8 +47,8 @@ does not implement an SDK remote cache. See
 
 Choose a bounded candidate from Next when its user benefit, scope, exclusions,
 and acceptance criteria are ready. The completed
-[v0.12.0 first-use review](reviews/first-use-v0.12.0.md) records the refreshed
-walkthrough and newest-dataset live checks. The
+[v0.13.0 first-use review](reviews/first-use-v0.13.0.md) records the published
+walkthrough, the changed adapters' live checks, and the new query validation. The
 [dataset browser](https://usdata.dev/datasets/) provides search, support and
 agency filters, selection rules, and links to examples, including the
 [2024 climate comparison](https://usdata.dev/examples/climate-anomalies/).
