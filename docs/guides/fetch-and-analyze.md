@@ -64,10 +64,13 @@ Subsequent pulls restore those pinned assets without repeating discovery.
 and lockfile; preserve `.data` separately because a checksum cannot recover bytes
 that upstream no longer serves.
 
-Use `usdata pull dataset.yaml --force --cache-dir .data` only when intentionally
-refreshing the source selection or revisions. Editing the manifest requires this
-explicit refresh. Required sources must resolve to assets; `allow_empty: true`
-permits an intentionally empty resolution, not a failed download.
+If an agency revises data behind a pinned URL, pull exits 4 and lists every
+changed asset without touching the lockfile. Accept the new bytes for just those
+entries with `usdata pull dataset.yaml --update noaa:ghcn-daily --cache-dir .data`,
+naming an asset id or dataset id. Use `usdata pull dataset.yaml --force --cache-dir .data`
+only when intentionally refreshing the source selection itself. Editing the
+manifest requires this explicit refresh. Required sources must resolve to assets;
+`allow_empty: true` permits an intentionally empty resolution, not a failed download.
 
 Without an explicit cache directory, files live under `~/.cache/usdata/`; override
 this with `USDATA_CACHE_DIR`. Provenance sidecars record the source URL, retrieval

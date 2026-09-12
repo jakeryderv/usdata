@@ -21,3 +21,4 @@ is described in the guides and reference pages.
 - [0015: Separate application, documentation, and data storage](0015-separate-sites-and-data-storage.md)
 - [0016: Site source boundaries](0016-site-source-boundaries.md)
 - [0017: Direct MkDocs and static hosting](0017-direct-mkdocs-and-static-hosting.md)
+- [0018: Report all upstream drift and update selected lockfile pins](0018-selective-lockfile-updates.md)

@@ -4,17 +4,20 @@
 source through its adapter, fetches, and writes the lockfile. With a lockfile it
 fetches exactly the assets pinned there, verifying checksums, and never
 re-resolves queries, so the inputs are reproducible even if upstream listings
-change. ``verify`` re-hashes cached files against the lockfile without
-fetching anything.
+change. When upstream bytes no longer match a pin, restore reports every such
+asset at once; ``update`` accepts new bytes for selected assets or datasets and
+rewrites only those pins. ``verify`` re-hashes cached files against the lockfile
+without fetching anything.
 """
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from contextlib import ExitStack
 from datetime import UTC, datetime
 from pathlib import Path
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from usdata import __version__, _progress, provenance
 from usdata.cache import asset_path, sha256_file
@@ -36,6 +39,10 @@ class EmptySource(RuntimeError):
     """A required manifest source resolved to no assets."""
 
 
+class UnknownAssets(ValueError):
+    """Update selectors name no asset or dataset in the lockfile."""
+
+
 def _check_manifest(manifest_path: Path, lock: Lockfile) -> None:
     if sha256_file(manifest_path) != lock.manifest_checksum:
         raise ManifestChanged(
@@ -45,12 +52,24 @@ def _check_manifest(manifest_path: Path, lock: Lockfile) -> None:
 
 
 class Drift(BaseModel):
-    """One lockfile entry whose local copy is missing or altered."""
+    """One lockfile entry whose local copy is missing or altered, or whose source moved on."""
 
     asset_id: str
     dataset_id: str
     path: Path
-    problem: str  # "missing" or "checksum mismatch"
+    problem: str  # "missing", "checksum mismatch", or "upstream changed"
+
+
+class UpstreamChanged(ChecksumMismatch):
+    """Pinned URLs returned different bytes than the lockfile recorded; nothing was rewritten."""
+
+    def __init__(self, drift: list[Drift]) -> None:
+        self.drift = drift
+        ids = ", ".join(d.asset_id for d in drift)
+        super().__init__(
+            f"{len(drift)} asset(s) changed upstream: {ids}; "
+            "pull with update to accept new bytes for named assets or datasets"
+        )
 
 
 class PullResult(BaseModel):
@@ -60,6 +79,9 @@ class PullResult(BaseModel):
     lockfile_path: Path
     fetched: list[FetchedAsset]
     from_lockfile: bool
+    updated: list[str] = Field(
+        default_factory=list, description="Ids of assets whose pins were rewritten by update"
+    )
 
 
 def _load(manifest_path: Path, registry: Registry) -> Manifest:
@@ -102,26 +124,53 @@ def resolve(
     return PullResult(lockfile=lock, lockfile_path=out, fetched=fetched, from_lockfile=False)
 
 
+def _selected(lock: Lockfile, update: Iterable[str]) -> set[str]:
+    """Ids of the locked assets that ``update`` selectors (asset or dataset ids) name."""
+    selectors = set(update)
+    known = {e.asset.id for e in lock.assets} | {e.asset.dataset_id for e in lock.assets}
+    if unknown := sorted(selectors - known):
+        raise UnknownAssets(f"update selects nothing in the lockfile: {', '.join(unknown)}")
+    return {
+        e.asset.id
+        for e in lock.assets
+        if e.asset.id in selectors or e.asset.dataset_id in selectors
+    }
+
+
 def restore(
-    manifest_path: Path, *, root: Path | None = None, registry: Registry | None = None
+    manifest_path: Path,
+    *,
+    root: Path | None = None,
+    registry: Registry | None = None,
+    update: Iterable[str] = (),
 ) -> PullResult:
-    """Fetch exactly what the lockfile pins. Re-downloads missing or altered files."""
+    """Fetch exactly what the lockfile pins. Re-downloads missing or altered files.
+
+    ``update`` names assets or datasets whose current upstream bytes replace their
+    pins. Every other entry must still match; if any does not, the whole run raises
+    ``UpstreamChanged`` listing them and the lockfile is left as it was.
+    """
     reg = registry or default_registry()
     lock_path = lockfile_path(manifest_path)
     lock = Lockfile.load(lock_path)
     _check_manifest(manifest_path, lock)
+    selected = _selected(lock, update)
     fetched: list[FetchedAsset] = []
+    entries: list[LockedAsset] = []
+    updated: list[str] = []
+    drift: list[Drift] = []
     _progress.batch([entry.provenance.size for entry in lock.assets])
     adapters: dict[str, Provider] = {}
     with ExitStack() as stack:
         for entry in lock.assets:
             dataset = reg.get(entry.asset.dataset_id)
             path = asset_path(entry.asset, root)
-            if path.is_file():
+            refresh = entry.asset.id in selected
+            if path.is_file() and not refresh:
                 _progress.emit(
                     _progress.AssetProgress(entry.asset.id, "start", entry.provenance.size)
                 )
-            if path.is_file() and sha256_file(path) == entry.provenance.checksum:
+            if path.is_file() and not refresh and sha256_file(path) == entry.provenance.checksum:
                 provenance.write(entry.provenance, path)
                 _progress.emit(
                     _progress.AssetProgress(entry.asset.id, "cached", entry.provenance.size)
@@ -131,14 +180,49 @@ def restore(
                         asset=entry.asset, path=path, provenance=entry.provenance, from_cache=True
                     )
                 )
+                entries.append(entry)
                 continue
             if dataset.id not in adapters:
                 adapters[dataset.id] = stack.enter_context(load_adapter(dataset))
+            adapter = adapters[dataset.id]
+            if refresh:
+                # Fetch unpinned so whatever upstream serves now becomes the new pin.
+                unpinned = entry.asset.model_copy(update={"checksum": None})
+                item = _fetch_asset(dataset, unpinned, adapter, root=root, force=True)
+                if item.provenance.checksum == entry.provenance.checksum:
+                    entries.append(entry)  # Same bytes: keep the original pin and record.
+                else:
+                    pinned = item.asset.model_copy(update={"checksum": item.provenance.checksum})
+                    entries.append(LockedAsset(asset=pinned, provenance=item.provenance))
+                    updated.append(entry.asset.id)
+                fetched.append(item)
+                continue
             pinned = entry.asset.model_copy(update={"checksum": entry.provenance.checksum})
-            fetched.append(
-                _fetch_asset(dataset, pinned, adapters[dataset.id], root=root, force=True)
-            )
-    return PullResult(lockfile=lock, lockfile_path=lock_path, fetched=fetched, from_lockfile=True)
+            try:
+                fetched.append(_fetch_asset(dataset, pinned, adapter, root=root, force=True))
+            except ChecksumMismatch:
+                drift.append(
+                    Drift(
+                        asset_id=entry.asset.id,
+                        dataset_id=entry.asset.dataset_id,
+                        path=path,
+                        problem="upstream changed",
+                    )
+                )
+                continue
+            entries.append(entry)
+    if drift:
+        raise UpstreamChanged(drift)
+    if updated:
+        lock = lock.model_copy(update={"assets": entries})
+        lock.save(lock_path)
+    return PullResult(
+        lockfile=lock,
+        lockfile_path=lock_path,
+        fetched=fetched,
+        from_lockfile=True,
+        updated=updated,
+    )
 
 
 def pull(
@@ -147,11 +231,21 @@ def pull(
     root: Path | None = None,
     force: bool = False,
     registry: Registry | None = None,
+    update: Iterable[str] = (),
 ) -> PullResult:
-    """Restore from the lockfile if one exists, otherwise resolve and create it."""
+    """Restore from the lockfile if one exists, otherwise resolve and create it.
+
+    ``update`` names assets or datasets whose pins should follow current upstream
+    bytes; it needs an existing lockfile and is exclusive with ``force``.
+    """
+    update = list(update)
+    if update and force:
+        raise ValueError("update and force are exclusive; force re-resolves every source")
     if force or not lockfile_path(manifest_path).exists():
+        if update:
+            raise ValueError(f"no lockfile at {lockfile_path(manifest_path)}; pull first")
         return resolve(manifest_path, root=root, registry=registry)
-    return restore(manifest_path, root=root, registry=registry)
+    return restore(manifest_path, root=root, registry=registry, update=update)
 
 
 def verify(manifest_path: Path, *, root: Path | None = None) -> list[Drift]:
@@ -184,7 +278,9 @@ __all__ = [
     "EmptySource",
     "ManifestChanged",
     "PullResult",
+    "UnknownAssets",
     "UnknownDatasets",
+    "UpstreamChanged",
     "provenance",
     "pull",
     "resolve",
