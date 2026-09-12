@@ -20,7 +20,7 @@ from typing import ClassVar
 
 import httpx
 
-from usdata.models import Asset, Protocol, Query
+from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
 from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
@@ -53,10 +53,10 @@ class WaterDaily(_HttpProvider):
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Resolve site or bbox queries to paginated CSV requests."""
-        if query.time is None or query.time.start is None or query.time.end is None:
-            raise QueryError(f"{self.dataset.id} requires both start and end dates")
-        if unknown := set(query.params) - set(self.accepted_params):
-            raise QueryError(f"unsupported USGS params: {', '.join(sorted(unknown))}")
+        self.check_params(query)
+        self.reject(query, "text", hint="select sites, a location, or parameter codes")
+        start, end = self.utc_window(query)
+        query = query.model_copy(update={"time": TimeRange(start=start, end=end)})
         if "site" in query.params and "sites" in query.params:
             raise QueryError("pass only one of site or sites")
         raw_sites = query.params.get("sites", query.params.get("site"))
@@ -77,7 +77,7 @@ class WaterDaily(_HttpProvider):
             raise QueryError("variables must be five-digit USGS parameter codes, for example 00060")
         params = {
             "f": "json",
-            "time": f"{query.time.start.date().isoformat()}/{query.time.end.date().isoformat()}",
+            "time": f"{start.date().isoformat()}/{end.date().isoformat()}",
             "statistic_id": statistic,
             "limit": str(PAGE_SIZE),
         }

@@ -250,7 +250,7 @@ def test_cli_dry_run_and_rejected_geographic_filter() -> None:
     assert result.exit_code == 0 and result.stdout == f"{NAME}\t{URL}\n"
     with respx.mock() as mock:
         bad = runner.invoke(app, [*args, "--location", "OK"])
-    assert bad.exit_code == 2 and "Filter locally" in bad.output and not mock.calls
+    assert bad.exit_code == 2 and "filter locally" in bad.output and not mock.calls
 
 
 @pytest.mark.l2

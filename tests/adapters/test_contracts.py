@@ -3,13 +3,14 @@
 import re
 from collections.abc import Callable
 from contextlib import nullcontext
+from datetime import timedelta, timezone
 from pathlib import Path
 from typing import cast
 
 import httpx
 import pytest
 
-from usdata.models import Query, Status
+from usdata.models import Query, Status, TimeRange
 from usdata.protocols import s3
 from usdata.providers import Provider, load_adapter
 from usdata.providers.base import QueryError
@@ -53,27 +54,22 @@ def query(dataset_id: str) -> Query:
     return build_query(**window, **CASES[dataset_id])
 
 
-def test_every_available_adapter_has_a_contract_scenario() -> None:
-    available = {ds.id for ds in default_registry() if ds.status is Status.AVAILABLE}
-    assert set(CASES) == available
+def contract_data(dataset_id: str) -> bytes:
+    if dataset_id == "noaa:coops-water-levels":
+        return (
+            b"Date Time, Water Level, Sigma, O or I (for verified), F, R, L, Quality \n"
+            b"2024-05-06 12:00,1.765,0.06,0,0,0,0,v\n"
+        )
+    return DATA
 
 
-@pytest.mark.parametrize("dataset_id", CASES)
-@pytest.mark.parametrize("injected", [False, True], ids=["owned", "injected"])
-@pytest.mark.parametrize("fail", [False, True], ids=["success", "fetch-error"])
-def test_adapter_contract(dataset_id, injected, fail, tmp_path, monkeypatch) -> None:
-    data = (
-        b"Date Time, Water Level, Sigma, O or I (for verified), F, R, L, Quality \n"
-        b"2024-05-06 12:00,1.765,0.06,0,0,0,0,v\n"
-        if dataset_id == "noaa:coops-water-levels"
-        else DATA
-    )
-    downloads: set[str] = set()
-    requests: list[httpx.Request] = []
-    clients: list[httpx.Client] = []
+def contract_transport(
+    dataset_id: str, downloads: set[str], *, fail: bool = False
+) -> httpx.MockTransport:
+    """Answer the listing requests each adapter makes for ``query(dataset_id)``."""
+    data = contract_data(dataset_id)
 
     def respond(request: httpx.Request) -> httpx.Response:
-        requests.append(request)
         assert request.method == "GET"
         if str(request.url) in downloads:
             return httpx.Response(503 if fail else 200, content=data)
@@ -104,8 +100,24 @@ def test_adapter_contract(dataset_id, injected, fail, tmp_path, monkeypatch) -> 
             return httpx.Response(200, text="time\nUTC\n2024-05-06T12:00:00Z\n")
         raise AssertionError(f"unconfigured contract request: {request.url}")
 
+    return httpx.MockTransport(respond)
+
+
+def test_every_available_adapter_has_a_contract_scenario() -> None:
+    available = {ds.id for ds in default_registry() if ds.status is Status.AVAILABLE}
+    assert set(CASES) == available
+
+
+@pytest.mark.parametrize("dataset_id", CASES)
+@pytest.mark.parametrize("injected", [False, True], ids=["owned", "injected"])
+@pytest.mark.parametrize("fail", [False, True], ids=["success", "fetch-error"])
+def test_adapter_contract(dataset_id, injected, fail, tmp_path, monkeypatch) -> None:
+    data = contract_data(dataset_id)
+    downloads: set[str] = set()
+    clients: list[httpx.Client] = []
+
     def make_client():
-        client = httpx.Client(transport=httpx.MockTransport(respond))
+        client = httpx.Client(transport=contract_transport(dataset_id, downloads, fail=fail))
         clients.append(client)
         return client
 
@@ -180,6 +192,52 @@ def test_declared_params_accepted_and_an_undeclared_one_rejected(dataset_id, mon
     reported = re.search(r"unsupported .*params: (.+)$", str(error.value))
     assert reported is not None, f"{dataset_id} rejected a declared parameter: {error.value}"
     assert reported[1] == "unknown-key"
+
+
+@pytest.mark.parametrize("dataset_id", CASES)
+def test_text_rejected_by_every_adapter_without_creating_client(dataset_id, monkeypatch) -> None:
+    """Free text searches the registry; no adapter can honour it, so none may ignore it."""
+
+    def unexpected_client():
+        raise AssertionError("an unsupported query field must fail before any transport")
+
+    monkeypatch.setattr("usdata.protocols.http.client", unexpected_client)
+    probe = query(dataset_id).model_copy(update={"text": "precipitation"})
+    with load_adapter(default_registry().get(dataset_id)) as adapter, pytest.raises(QueryError):
+        adapter.list_assets(probe)
+
+
+@pytest.mark.parametrize("dataset_id", sorted(set(CASES) - UNTIMED))
+def test_naive_and_offset_bounds_resolve_like_utc(dataset_id, monkeypatch) -> None:
+    """Naive bounds mean UTC and aware ones convert, whatever the adapter's own time logic."""
+    monkeypatch.setattr(
+        "usdata.protocols.http.client",
+        lambda: httpx.Client(transport=contract_transport(dataset_id, set())),
+    )
+    aware = query(dataset_id)
+    assert aware.time and aware.time.start and aware.time.end
+    naive = aware.model_copy(
+        update={
+            "time": TimeRange(
+                start=aware.time.start.replace(tzinfo=None),
+                end=aware.time.end.replace(tzinfo=None),
+            )
+        }
+    )
+    eastern = timezone(timedelta(hours=-5))
+    shifted = aware.model_copy(
+        update={
+            "time": TimeRange(
+                start=aware.time.start.astimezone(eastern), end=aware.time.end.astimezone(eastern)
+            )
+        }
+    )
+    with load_adapter(default_registry().get(dataset_id)) as adapter:
+        expected = adapter.list_assets(aware)
+        assert len(expected) == 1
+        assert adapter.list_assets(naive) == expected
+        assert adapter.list_assets(shifted) == expected
+    assert all(a.time and a.time.start and a.time.start.utcoffset() is not None for a in expected)
 
 
 @pytest.mark.parametrize("dataset_id", CASES)

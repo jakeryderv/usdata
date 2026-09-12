@@ -89,12 +89,8 @@ class CoopsWaterLevels(_HttpProvider):
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Describe one bounded CSV request; availability is checked during fetching."""
-        if unknown := set(query.params) - set(self.accepted_params):
-            raise QueryError(f"unsupported {self.dataset.id} params: {', '.join(sorted(unknown))}")
-        if query.bbox is not None or query.text is not None or query.variables:
-            raise QueryError(
-                "CO-OPS requires an explicit station; location, text and variables are unsupported"
-            )
+        self.check_params(query)
+        self.reject(query, "bbox", "text", "variables", hint="CO-OPS requires an explicit station")
         station = query.params.get("station")
         if (
             not isinstance(station, str)
@@ -109,10 +105,7 @@ class CoopsWaterLevels(_HttpProvider):
         units = query.params.get("units", "metric")
         if units not in ("metric", "english"):
             raise QueryError("units must be metric or english")
-        if query.time is None or query.time.start is None or query.time.end is None:
-            raise QueryError(f"{self.dataset.id} requires both start and end timestamps")
-        start = query.time.start.replace(tzinfo=query.time.start.tzinfo or UTC).astimezone(UTC)
-        end = query.time.end.replace(tzinfo=query.time.end.tzinfo or UTC).astimezone(UTC)
+        start, end = self.utc_window(query)
         if any(value.second or value.microsecond for value in (start, end)):
             raise QueryError("CO-OPS timestamps must have minute precision (zero seconds)")
         if end - start > MAX_INTERVAL:

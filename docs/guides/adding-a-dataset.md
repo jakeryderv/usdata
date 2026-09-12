@@ -70,22 +70,28 @@ class GhcnDaily(Provider):
 
 Rules:
 
-- Raise `QueryError` with a helpful message when the query lacks something the
-  source needs (a time window, a station list). The CLI turns it into exit code 2.
-- Accept provider-specific inputs through `query.params` (`stations=`, `site=`).
-  Declare every accepted key in the class-level `accepted_params` mapping with a
-  one-line description, and reject the rest with exactly
-  `if unknown := set(query.params) - set(self.accepted_params)`. `usdata info`
-  and the generated catalog page print that mapping, so a rejection written
-  against any other set makes them lie; deriving the rejection from
-  `accepted_params` is what keeps them honest.
-  `tests/adapters/test_contracts.py` checks the halves it can reach from
-  outside — every declared key is accepted, and an undeclared key is rejected by
-  name — which catches a narrowed check but not a hand-rolled set that accepts
-  more than it declares. A subclass extending its parent spreads the parent's
-  mapping. Keep the longer prose in the module docstring and the provider access
-  notes. Reject empty explicit identifiers and conflicting selectors with
-  `QueryError` too; do not silently fall back after a typo.
+- Validate before any transport, using the `Provider` helpers so every adapter
+  reports the same mistakes the same way:
+  - `self.check_params(query)` rejects every `query.params` key outside the
+    class-level `accepted_params` mapping. Declare each accepted key there with a
+    one-line description; `usdata info` and the generated catalog page print that
+    mapping, so deriving the rejection from it is what keeps them honest.
+    `tests/adapters/test_contracts.py` checks that every declared key is accepted
+    and an undeclared one is rejected by name.
+  - `self.reject(query, "text", ...)` names the query fields (`text`, `bbox`,
+    `variables`, `time`) the source cannot honour, with a `hint` saying what to
+    do instead. No adapter supports free text, and a contract test checks that
+    none ignores it; a source that cannot filter by location or variable must
+    reject those fields rather than return unfiltered data.
+  - `self.utc_window(query)` returns the required start and end in UTC, reading
+    naive bounds as UTC. Use `usdata.providers.base.to_utc` for optional bounds.
+    A contract test checks that naive and offset bounds resolve like UTC ones.
+- Raise `QueryError` with a helpful message when the query lacks something else
+  the source needs (a station list, an explicit datum). The CLI turns it into
+  exit code 2. Reject empty explicit identifiers and conflicting selectors too;
+  do not silently fall back after a typo. A subclass extending its parent's
+  `accepted_params` spreads the parent's mapping. Keep the longer prose in the
+  module docstring and the provider access notes.
 - Use `usdata.protocols.http`, `usdata.protocols.s3`, or `usdata.protocols.erddap` for transport. Take an
   optional `httpx.Client` in `__init__` so tests can inject one. Override
   `close()` to release internally owned resources; injected clients remain the

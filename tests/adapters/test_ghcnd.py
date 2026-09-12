@@ -36,6 +36,13 @@ def test_requires_dates_and_a_spatial_constraint(adapter: GhcnDaily) -> None:
         adapter.list_assets(build_query(start="2024-05-06", end="2024-05-07"))
 
 
+def test_stations_and_location_together_are_rejected(adapter: GhcnDaily) -> None:
+    q = build_query(location="ok", start="2024-05-06", end="2024-05-07", stations="USW00013967")
+    with respx.mock(assert_all_called=False) as mock, pytest.raises(QueryError, match="not both"):
+        adapter.list_assets(q)
+    assert not mock.calls
+
+
 def test_explicit_stations_skip_search(adapter: GhcnDaily) -> None:
     q = build_query(start="2024-05-06", end="2024-05-07", stations="USW00013967, USW00003954")
     with respx.mock(assert_all_called=False) as mock:

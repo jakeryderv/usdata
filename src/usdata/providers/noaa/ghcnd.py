@@ -111,24 +111,35 @@ class GhcnDaily(_HttpProvider):
                 break
         return found
 
+    def _units(self, query: Query) -> str:
+        units = query.params.get("units", "metric")
+        if units not in ("metric", "standard"):
+            raise QueryError("units must be metric or standard")
+        return units
+
+    def _stations(self, query: Query) -> list[str]:
+        """Explicit ``stations`` or the ones found inside the bbox, never a mix of both."""
+        if "stations" in query.params and query.bbox is not None:
+            raise QueryError("pass stations or a location/bbox, not both")
+        if "stations" in query.params:
+            return _stations_param(query.params["stations"])
+        if query.bbox is not None:
+            return self.find_stations(query)
+        raise QueryError(f"{self.dataset.id} needs a location, bbox, or stations=...")
+
     def list_assets(self, query: Query) -> list[Asset]:
         """One CSV asset per chunk of up to STATIONS_PER_ASSET stations for the query window."""
-        if query.time is None or query.time.start is None or query.time.end is None:
-            raise QueryError(f"{self.dataset.id} requires both start and end dates")
-        if unknown := set(query.params) - set(self.accepted_params):
-            raise QueryError(f"unsupported {self.dataset.id} params: {', '.join(sorted(unknown))}")
-        if query.params.get("units", "metric") not in ("metric", "standard"):
-            raise QueryError("units must be metric or standard")
-        if "stations" in query.params:
-            stations = _stations_param(query.params["stations"])
-        elif query.bbox is not None:
-            stations = self.find_stations(query)
-        else:
-            raise QueryError(f"{self.dataset.id} needs a location, bbox, or stations=...")
+        self.check_params(query)
+        self.reject(query, "text", hint="search the registry instead")
+        start_at, end_at = self.utc_window(query)
+        window = TimeRange(start=start_at, end=end_at)
+        query = query.model_copy(update={"time": window})
+        units = self._units(query)
+        stations = self._stations(query)
         if not stations:
             return []
 
-        start, end = _date(query.time.start), _date(query.time.end)
+        start, end = _date(window.start), _date(window.end)
         assets: list[Asset] = []
         for i in range(0, len(stations), STATIONS_PER_ASSET):
             chunk = stations[i : i + STATIONS_PER_ASSET]
@@ -138,7 +149,7 @@ class GhcnDaily(_HttpProvider):
                 "startDate": start,
                 "endDate": end,
                 "format": "csv",
-                "units": query.params.get("units", "metric"),
+                "units": units,
                 "includeStationLocation": "1",
             }
             if query.variables:
@@ -152,7 +163,7 @@ class GhcnDaily(_HttpProvider):
                     href=url,
                     protocol=Protocol.HTTP,
                     media_type="text/csv",
-                    time=TimeRange(start=query.time.start, end=query.time.end),
+                    time=window,
                     bbox=query.bbox,
                 )
             )

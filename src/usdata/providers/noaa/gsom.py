@@ -6,10 +6,8 @@ selected in full. Geographic discovery uses the same normalized month bounds.
 """
 
 from calendar import monthrange
-from datetime import UTC
 
 from usdata.models import Asset, Query, TimeRange
-from usdata.providers.base import QueryError
 from usdata.providers.noaa.ghcnd import GhcnDaily
 
 
@@ -19,10 +17,7 @@ class GlobalSummaryMonthly(GhcnDaily):
     ncei_dataset = "global-summary-of-the-month"
 
     def _monthly_query(self, query: Query) -> Query:
-        if query.time is None or query.time.start is None or query.time.end is None:
-            raise QueryError(f"{self.dataset.id} requires both start and end dates")
-        start = query.time.start.replace(tzinfo=query.time.start.tzinfo or UTC).astimezone(UTC)
-        end = query.time.end.replace(tzinfo=query.time.end.tzinfo or UTC).astimezone(UTC)
+        start, end = self.utc_window(query)
         return query.model_copy(
             update={
                 "time": TimeRange(
@@ -44,6 +39,4 @@ class GlobalSummaryMonthly(GhcnDaily):
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Resolve monthly CSVs with stable URLs and complete-month asset bounds."""
-        if "stations" in query.params and query.bbox is not None:
-            raise QueryError("pass stations or a location/bbox, not both")
         return super().list_assets(self._monthly_query(query))

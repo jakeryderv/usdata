@@ -47,6 +47,7 @@ def adapter():
         {"bbox": None},
         {"start": None},
         {"end": None},
+        {"text": "sst"},
         {"variables": ["typo"]},
         {"format": "nc"},
         {"stride": 0},

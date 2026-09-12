@@ -57,24 +57,19 @@ class GoesAbi(_HttpProvider):
 
     def list_assets(self, query: Query) -> list[Asset]:
         """List complete scenes whose scan starts fall inside the inclusive UTC interval."""
-        if unknown := set(query.params) - set(self.accepted_params):
-            raise QueryError(f"unsupported GOES params: {', '.join(sorted(unknown))}")
+        self.check_params(query)
         if query.params.get("product", PRODUCT) != PRODUCT:
             raise QueryError(f"only product={PRODUCT} is supported")
-        if query.bbox is not None:
-            raise QueryError(
-                "GOES imagery has no geographic subsetting; omit location/bbox/lat/lon"
-            )
-        if query.text:
-            raise QueryError("GOES imagery has no text filtering; select satellite and channel")
-        if query.variables:
-            raise QueryError("GOES imagery has no variable subsetting; select a channel instead")
-        if query.time is None or query.time.start is None or query.time.end is None:
-            raise QueryError(f"{self.dataset.id} requires both start and end times")
+        self.reject(
+            query,
+            "bbox",
+            "text",
+            "variables",
+            hint="archived GOES scenes are whole files; select satellite and channel",
+        )
+        start, end = self.utc_window(query)
         satellite = _number(query.params.get("satellite"), "satellite", 16, 19)
         channel = _number(query.params.get("channel"), "channel", 1, 16)
-        start = query.time.start.replace(tzinfo=query.time.start.tzinfo or UTC).astimezone(UTC)
-        end = query.time.end.replace(tzinfo=query.time.end.tzinfo or UTC).astimezone(UTC)
         if end < PUBLIC_START:
             raise QueryError("GOES CMIPC public observations begin on 2017-02-28")
         start = max(start, PUBLIC_START)
