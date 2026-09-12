@@ -1,1 +1,0 @@
-Add a searchable dataset browser at https://usdata.dev/datasets/ with agency and support filters, download selection rules, required inputs, example links, and copyable inspection commands. Extend the climate-anomalies notebook with a calculated summary of warmer months and annual precipitation relative to the station normals.
