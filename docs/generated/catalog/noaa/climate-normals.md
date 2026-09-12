@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`noaa:climate-normals` · **Source only** · Install from [source](../../../project.md#source-installation) to use this dataset.
+`noaa:climate-normals` · **Released** · Included since usdata 0.11.
 
 U.S. Climate Normals 1991-2020.
 
@@ -20,7 +20,7 @@ U.S. Climate Normals 1991-2020.
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.11
+- Availability: since 0.11
 - Domain: Climate
 - Geographic bounds (WGS84): west -180°, south -90°, east 180°, north 90°
 - Catalog date range: 1991-01-01 to 2020-12-31

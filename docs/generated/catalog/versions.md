@@ -34,9 +34,9 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
 - [`usgs:earthquakes`](usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · Planned
 
-**Implemented, unreleased (planned 0.11)**
+**Included since 0.11**
 
-- [`noaa:climate-normals`](noaa.md#noaaclimate-normals) U.S. Climate Normals 1991-2020 · Source only
+- [`noaa:climate-normals`](noaa.md#noaaclimate-normals) U.S. Climate Normals 1991-2020 · Released
 
 **Included since 0.10**
 

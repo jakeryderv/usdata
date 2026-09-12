@@ -12,6 +12,34 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.11.0](https://github.com/jakeryderv/usdata/releases/tag/v0.11.0) - 2026-09-11
+
+
+### Added
+
+- Add `noaa:climate-normals`: 1991-2020 monthly, daily, or annual/seasonal station normals from the NCEI Access Data Service, selected with a `period` parameter, optional month-day windows, and station discovery.
+- Add the project homepage at https://usdata.dev and current documentation at https://docs.usdata.dev, with separate automatic static-site deployments from main.
+- Restoring a lockfile now reports every asset whose upstream bytes changed in one run and leaves the lockfile untouched; `usdata pull --update <asset or dataset id>` (or `pull(update=[...])`) accepts the new bytes and rewrites only those pins.
+
+### Fixed
+
+- Reject reserved query names passed through fetch --param with a clear input error and the appropriate dedicated flag, instead of crashing or bypassing provider-parameter validation.
+- Treat timezone-free timestamps in direct NEXRAD SDK queries as UTC, matching build_query and the CLI regardless of the machine timezone.
+
+### Documentation
+
+- Build documentation directly from `docs/` with standard MkDocs commands and
+  serve both websites as static assets. Remove custom staging, link rewriting,
+  Worker scripts, and obsolete URL redirects. Documentation now uses clean
+  `/guides/`, `/reference/`, and `/examples/` paths; retired URLs return 404.
+- Define Now, Next, and Later planning by scope and readiness, with bounded acceptance criteria and no deadlines or promised releases.
+- Fix GSOY and CO-OPS Python manifest examples to use pathlib.Path, support running them from a published installation, and demonstrate fresh-cache restoration in the first-use walkthrough.
+- Reserve R2 at https://data.usdata.dev for dataset storage, with a manual credential, public-access, and CORS check. SDK remote caching remains future work.
+
+### Development
+
+- Check both hosting toolchains for weekly npm dependency updates, and point package homepage and documentation metadata to the public sites. Consolidate pending website notes around the current deployment setup.
+
 ## [0.10.0](https://github.com/jakeryderv/usdata/releases/tag/v0.10.0) - 2026-09-09
 
 

@@ -1,6 +1,6 @@
 # U.S. Climate Normals 1991-2020
 
-Available from source for the unreleased v0.11.0 as `noaa:climate-normals`.
+Available since v0.11.0 as `noaa:climate-normals`.
 Normals are 30-year averages of daily, monthly, and annual/seasonal station
 statistics, served by the anonymous NCEI Access Data Service datasets
 `normals-monthly-1991-2020`, `normals-daily-1991-2020`, and

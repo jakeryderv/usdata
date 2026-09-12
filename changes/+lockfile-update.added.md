@@ -1,1 +1,0 @@
-Restoring a lockfile now reports every asset whose upstream bytes changed in one run and leaves the lockfile untouched; `usdata pull --update <asset or dataset id>` (or `pull(update=[...])`) accepts the new bytes and rewrites only those pins.

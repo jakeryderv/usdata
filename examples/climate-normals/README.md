@@ -1,21 +1,23 @@
 # Monthly climate normals
 
-Available from source for the unreleased v0.11.0. The [manifest](dataset.yaml)
+Available since v0.11.0. The [manifest](dataset.yaml)
 requests 1991-2020 monthly normals of maximum temperature, minimum temperature,
 and precipitation at Will Rogers World Airport through `noaa:climate-normals`.
 Normals are 30-year averages, so the source needs no dates; `period: monthly`
 selects the monthly dataset and the whole year is requested.
 
-From a [source installation](https://docs.usdata.dev/project/#source-installation),
-run these from `examples/climate-normals/`:
+In an activated Python 3.11+ virtual environment, install the published package
+and save the [manifest](dataset.yaml) as `dataset.yaml` in a working directory.
+Run the commands from that directory:
 
 ```sh
-uv run usdata pull dataset.yaml
-uv run usdata verify dataset.yaml
+python -m pip install "usdata[pandas]"
+usdata pull dataset.yaml
+usdata verify dataset.yaml
 ```
 
 Open the downloaded CSV with the generic pandas reader and compare an observed
-month against its normal. Run this with `uv run python` in the same directory:
+month against its normal. Run this with `python` in the same directory and environment:
 
 ```python
 from pathlib import Path
@@ -33,6 +35,9 @@ print(
 )
 assert verify(manifest) == []
 ```
+
+For a [source installation](https://docs.usdata.dev/project/#source-installation), run from
+`examples/climate-normals/` and use `uv run usdata` and `uv run python`.
 
 `DATE` is the two-digit month; explicit `dtype` keeps it as text. Metric units
 give degrees Celsius and millimeters. To compare with observations, pull the

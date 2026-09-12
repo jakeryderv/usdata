@@ -41,7 +41,7 @@ nav:
   - Sea-surface temperature: examples/sst-analysis/example.md
   - Monthly climate: examples/monthly-climate/example.md
   - Annual climate (v0.10.0): examples/annual-climate/README.md
-  - Climate normals (source only): examples/climate-normals/README.md
+  - Climate normals (v0.11.0): examples/climate-normals/README.md
   - Storm Events: examples/storm-events/example.md
   - Radar reflectivity: examples/radar-reflectivity/example.md
   - GOES imagery: examples/goes-imagery/example.md
