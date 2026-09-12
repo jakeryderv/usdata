@@ -243,7 +243,7 @@ def catalog_entries(registry: Registry, root: Path = ROOT) -> dict[str, CatalogE
 def parameter_block(ds: Dataset) -> list[str]:
     """The adapter's declared ``--param`` keys, read from the class that implements them."""
     with load_adapter(ds) as adapter:
-        declared = dict(adapter.params)
+        declared = dict(adapter.accepted_params)
     if not declared:
         return ["This dataset accepts no provider-specific parameters."]
     return [

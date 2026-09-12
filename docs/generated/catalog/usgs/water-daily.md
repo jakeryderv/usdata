@@ -20,9 +20,9 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 | Parameter | Meaning |
 |---|---|
-| `site` | One quoted USGS monitoring ID, with or without the USGS- prefix. |
-| `sites` | Several quoted monitoring IDs, comma-separated or a list. |
-| `statistic_id` | Quoted five-digit statistic code; default 00003 (daily mean). |
+| `site` | One USGS monitoring ID, with or without the USGS- prefix. |
+| `sites` | Several monitoring IDs, comma-separated or a list. |
+| `statistic_id` | Five-digit statistic code; default 00003 (daily mean). |
 
 ## Usage and limitations
 

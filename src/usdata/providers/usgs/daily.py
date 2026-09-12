@@ -45,17 +45,17 @@ def _values(raw: object, name: str) -> list[str]:
 class WaterDaily(_HttpProvider):
     """USGS daily statistics as paginated CSV assets, with anonymous access."""
 
-    params: ClassVar[Mapping[str, str]] = {
-        "site": "One quoted USGS monitoring ID, with or without the USGS- prefix.",
-        "sites": "Several quoted monitoring IDs, comma-separated or a list.",
-        "statistic_id": "Quoted five-digit statistic code; default 00003 (daily mean).",
+    accepted_params: ClassVar[Mapping[str, str]] = {
+        "site": "One USGS monitoring ID, with or without the USGS- prefix.",
+        "sites": "Several monitoring IDs, comma-separated or a list.",
+        "statistic_id": "Five-digit statistic code; default 00003 (daily mean).",
     }
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Resolve site or bbox queries to paginated CSV requests."""
         if query.time is None or query.time.start is None or query.time.end is None:
             raise QueryError(f"{self.dataset.id} requires both start and end dates")
-        if unknown := set(query.params) - set(self.params):
+        if unknown := set(query.params) - set(self.accepted_params):
             raise QueryError(f"unsupported USGS params: {', '.join(sorted(unknown))}")
         if "site" in query.params and "sites" in query.params:
             raise QueryError("pass only one of site or sites")

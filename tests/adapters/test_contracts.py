@@ -143,15 +143,20 @@ def test_adapter_contract(dataset_id, injected, fail, tmp_path, monkeypatch) -> 
 
 
 @pytest.mark.parametrize("dataset_id", CASES)
-def test_declared_params_are_exactly_the_accepted_params(dataset_id, monkeypatch) -> None:
-    """Every declared key is accepted and every undeclared key is named as unsupported."""
+def test_declared_params_accepted_and_an_undeclared_one_rejected(dataset_id, monkeypatch) -> None:
+    """Every declared key is accepted; a key outside the declaration is named as unsupported.
+
+    This probes one undeclared key, so it catches an adapter that narrowed its
+    check below the declaration, not one that quietly widened it to keys nobody
+    declared. Only reading ``accepted_params`` in the rejection gives that.
+    """
 
     def unexpected_client():
         raise AssertionError("parameter validation must precede any transport")
 
     monkeypatch.setattr("usdata.protocols.http.client", unexpected_client)
     with load_adapter(default_registry().get(dataset_id)) as adapter:
-        declared = dict(adapter.params)
+        declared = dict(adapter.accepted_params)
         assert all(
             description.strip() and "\n" not in description for description in declared.values()
         )

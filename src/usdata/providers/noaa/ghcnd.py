@@ -50,7 +50,7 @@ def _stations_param(raw: Any) -> list[str]:
 class GhcnDaily(_HttpProvider):
     """GHCN-Daily adapter. Params: ``stations`` (list or comma string), ``units``."""
 
-    params: ClassVar[Mapping[str, str]] = {
+    accepted_params: ClassVar[Mapping[str, str]] = {
         "stations": "Station ids, comma-separated or a list; otherwise a location selects them.",
         "units": "metric (default) or standard.",
     }
@@ -115,7 +115,7 @@ class GhcnDaily(_HttpProvider):
         """One CSV asset per chunk of up to STATIONS_PER_ASSET stations for the query window."""
         if query.time is None or query.time.start is None or query.time.end is None:
             raise QueryError(f"{self.dataset.id} requires both start and end dates")
-        if unknown := set(query.params) - set(self.params):
+        if unknown := set(query.params) - set(self.accepted_params):
             raise QueryError(f"unsupported {self.dataset.id} params: {', '.join(sorted(unknown))}")
         if query.params.get("units", "metric") not in ("metric", "standard"):
             raise QueryError("units must be metric or standard")

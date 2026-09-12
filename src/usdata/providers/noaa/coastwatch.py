@@ -47,7 +47,7 @@ def _spatial_slice(
 class CoastwatchSst(_HttpProvider):
     """NOAA's 0.05-degree day/night analysis, including units and grid coordinates."""
 
-    params: ClassVar[Mapping[str, str]] = {
+    accepted_params: ClassVar[Mapping[str, str]] = {
         "stride": "Positive integer subsampling both spatial axes; default 1.",
     }
 
@@ -62,7 +62,7 @@ class CoastwatchSst(_HttpProvider):
             raise QueryError(
                 f"{self.dataset.id} requires a bbox/location and both start and end times"
             )
-        if unknown := set(query.params) - set(self.params):
+        if unknown := set(query.params) - set(self.accepted_params):
             raise QueryError(f"unsupported CoastWatch params: {', '.join(sorted(unknown))}")
         stride = query.params.get("stride", 1)
         if isinstance(stride, str) and stride.isascii() and stride.isdigit():

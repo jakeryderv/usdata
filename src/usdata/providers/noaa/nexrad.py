@@ -50,7 +50,7 @@ def scan_time(key: str) -> datetime | None:
 class NexradLevel2(_HttpProvider):
     """NEXRAD Level II adapter. Params: ``site``/``sites`` (ICAO ids), ``nearest`` (int)."""
 
-    params: ClassVar[Mapping[str, str]] = {
+    accepted_params: ClassVar[Mapping[str, str]] = {
         "site": "One radar ICAO id, for example KTLX.",
         "sites": "Several radar ICAO ids, comma-separated or a list.",
         "nearest": "Take the N radars nearest the query centre instead of naming sites.",
@@ -58,7 +58,7 @@ class NexradLevel2(_HttpProvider):
 
     def select_sites(self, query: Query) -> list[str]:
         """Radar site ids the query refers to; see the module docstring for the rules."""
-        if unknown := set(query.params) - set(self.params):
+        if unknown := set(query.params) - set(self.accepted_params):
             raise QueryError(f"unsupported NEXRAD params: {', '.join(sorted(unknown))}")
         if "site" in query.params and "sites" in query.params:
             raise QueryError("pass only one of site or sites")

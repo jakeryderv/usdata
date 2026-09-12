@@ -68,8 +68,8 @@ def _window(query: Query, period: str) -> tuple[str, str] | None:
 class ClimateNormals(GhcnDaily):
     """1991-2020 normals as CSV subsets, reusing NCEI station discovery and transport."""
 
-    params: ClassVar[Mapping[str, str]] = {
-        **GhcnDaily.params,
+    accepted_params: ClassVar[Mapping[str, str]] = {
+        **GhcnDaily.accepted_params,
         "period": "monthly (default), daily, or annualseasonal.",
     }
 
@@ -82,7 +82,7 @@ class ClimateNormals(GhcnDaily):
         """One CSV asset per chunk of stations for the selected period and window."""
         if query.text is not None:
             raise QueryError(f"{self.dataset.id} does not support text queries")
-        if unknown := set(query.params) - set(self.params):
+        if unknown := set(query.params) - set(self.accepted_params):
             raise QueryError(f"unsupported {self.dataset.id} params: {', '.join(sorted(unknown))}")
         period = _period(query)
         units = query.params.get("units", "metric")

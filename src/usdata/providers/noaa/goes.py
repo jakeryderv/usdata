@@ -49,7 +49,7 @@ def _number(raw: object, label: str, low: int, high: int) -> int:
 class GoesAbi(_HttpProvider):
     """Single-channel CONUS ABI imagery; params: satellite, channel, product."""
 
-    params: ClassVar[Mapping[str, str]] = {
+    accepted_params: ClassVar[Mapping[str, str]] = {
         "satellite": "Required GOES satellite number: 16, 17, 18, or 19.",
         "channel": "Required ABI channel, 1 to 16 or C01 to C16.",
         "product": f"ABI product; only {PRODUCT} is supported.",
@@ -57,7 +57,7 @@ class GoesAbi(_HttpProvider):
 
     def list_assets(self, query: Query) -> list[Asset]:
         """List complete scenes whose scan starts fall inside the inclusive UTC interval."""
-        if unknown := set(query.params) - set(self.params):
+        if unknown := set(query.params) - set(self.accepted_params):
             raise QueryError(f"unsupported GOES params: {', '.join(sorted(unknown))}")
         if query.params.get("product", PRODUCT) != PRODUCT:
             raise QueryError(f"only product={PRODUCT} is supported")

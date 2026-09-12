@@ -14,6 +14,7 @@ from usdata.cli.progress import progress
 from usdata.fetch import ChecksumMismatch
 from usdata.fetch import fetch as fetch_query
 from usdata.manifest import lockfile_path
+from usdata.models import Status
 from usdata.providers import load_adapter
 from usdata.providers.base import NotImplementedProvider
 from usdata.pull import EmptySource, ManifestChanged, UnknownDatasets, UpstreamChanged
@@ -118,10 +119,10 @@ def info(
         typer.echo(
             f"  time:      {ds.temporal_extent.start} .. {ds.temporal_extent.end or 'present'}"
         )
-    if ds.adapter is None:
-        return
+    if ds.status is not Status.AVAILABLE:
+        return  # Planned entries have no adapter; a stub's would raise or declare nothing.
     with load_adapter(ds) as adapter:
-        declared = dict(adapter.params)
+        declared = dict(adapter.accepted_params)
     if not declared:
         typer.echo("  params:    none")
         return

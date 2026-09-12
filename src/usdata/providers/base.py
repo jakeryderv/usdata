@@ -6,7 +6,7 @@ import importlib
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from pathlib import Path
-from types import TracebackType
+from types import MappingProxyType, TracebackType
 from typing import ClassVar, Self
 
 from usdata.models import Asset, Dataset, Query
@@ -23,12 +23,12 @@ class QueryError(ValueError):
 class Provider(ABC):
     """One adapter per dataset. Translates a normalized query into concrete assets."""
 
-    params: ClassVar[Mapping[str, str]] = {}
+    accepted_params: ClassVar[Mapping[str, str]] = MappingProxyType({})
     """Accepted ``query.params`` keys, each mapped to a one-line description.
 
-    This is the adapter's single statement of what it accepts: ``list_assets``
-    rejects every key outside it, and ``usdata info`` prints it. Subclasses that
-    extend a parent's set spread it, as ``{**Parent.params, "extra": "..."}``.
+    This is the adapter's statement of what it accepts: ``list_assets`` rejects
+    every key outside it, and ``usdata info`` prints it. Subclasses that extend a
+    parent's set spread it, as ``{**Parent.accepted_params, "extra": "..."}``.
     """
 
     def __init__(self, dataset: Dataset) -> None:

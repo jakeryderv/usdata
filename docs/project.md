@@ -84,7 +84,10 @@ The first hook run downloads its isolated tools and requires network access.
 
 Offline tests mechanically block network connections. Tests that hit
 live services run with `just test-live`; see [testing levels and organization](testing.md). CI checks Python 3.11 and 3.14 on
-Linux with core-only, pandas, radar, and NetCDF dependency profiles. Installed-wheel
+Linux with core-only, pandas, radar, and NetCDF dependency profiles. A further
+Python 3.11 profile replaces the locked pandas with the oldest release the
+project declares, so the `>=` floor is executed rather than assumed; the number
+comes from `pyproject.toml` through `scripts/lowest_version.py`. Installed-wheel
 checks cover all four profiles on Linux, macOS, and Windows. The full offline and
 live-service suites run on Linux. `just setup` restores a core-only development
 environment; the `check-pandas`, `check-radar`, and `check-netcdf` commands install
