@@ -1,1 +1,1 @@
-Connect the project homepage at https://usdata.dev and versioned documentation at https://docs.usdata.dev through independently deployed Cloudflare Workers.
+Add the project homepage at https://usdata.dev and current documentation at https://docs.usdata.dev, with separate automatic static-site deployments from main.

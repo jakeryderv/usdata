@@ -16,7 +16,9 @@ usdata fetch noaa:ghcn-daily --lat 35.39 --lon -97.60 --radius-km 15 \
 Search ranks the local curated catalog. `info` shows capabilities and status;
 `fetch --dry-run` contacts the provider to list assets without downloading them.
 Remove `--dry-run` to fetch. For exact stations, use the dataset's station ID
-option instead of geographic discovery.
+option instead of geographic discovery. Use `--param` only for provider-specific
+selectors such as `-p stations=USW00013967`; pass shared query options through
+their flags, such as `--start`, `--location`, and `--vars`.
 
 Place names and FIPS codes select bounding rectangles, not precise administrative
 boundaries. See [place lookup](../reference/places.md) for ambiguity and limits.

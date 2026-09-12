@@ -1,0 +1,1 @@
+Check both hosting toolchains for weekly npm dependency updates, and point package homepage and documentation metadata to the public sites. Consolidate pending website notes around the current deployment setup.

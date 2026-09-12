@@ -89,8 +89,8 @@ class NexradLevel2(_HttpProvider):
         """Every volume scan for the selected sites inside the query's UTC time window."""
         if query.time is None or query.time.start is None or query.time.end is None:
             raise QueryError(f"{self.dataset.id} requires both start and end times")
-        start = query.time.start.astimezone(UTC)
-        end = query.time.end.astimezone(UTC)
+        start = query.time.start.replace(tzinfo=query.time.start.tzinfo or UTC).astimezone(UTC)
+        end = query.time.end.replace(tzinfo=query.time.end.tzinfo or UTC).astimezone(UTC)
         assets: list[Asset] = []
         for site in self.select_sites(query):
             day = start.date()

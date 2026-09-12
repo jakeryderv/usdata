@@ -1,11 +1,12 @@
-from datetime import UTC, datetime
+import time
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
 
 import httpx
 import pytest
 import respx
 
-from usdata.models import BBox
+from usdata.models import BBox, Query, TimeRange
 from usdata.providers.base import QueryError
 from usdata.providers.noaa import sites
 from usdata.providers.noaa.nexrad import BUCKET, NexradLevel2, scan_time
@@ -143,3 +144,34 @@ def test_fetch_downloads_via_https(tmp_path: Path, adapter: NexradLevel2) -> Non
 def test_rejects_invalid_provider_params(adapter: NexradLevel2, params: dict) -> None:
     with pytest.raises(QueryError):
         adapter.select_sites(build_query(location="ok", **params))
+
+
+@pytest.mark.skipif(not hasattr(time, "tzset"), reason="requires process timezone control")
+@pytest.mark.parametrize("offset", [None, -5])
+def test_direct_query_uses_utc_independently_of_local_timezone(adapter, monkeypatch, offset):
+    start = datetime(
+        2024,
+        5,
+        6,
+        12 if offset is None else 7,
+        tzinfo=None if offset is None else timezone(timedelta(hours=offset)),
+    )
+    query = Query(
+        time=TimeRange(start=start, end=start + timedelta(minutes=1)), params={"site": "KTLX"}
+    )
+    keys = [(f"2024/05/06/KTLX/KTLX20240506_{hour}0000_V06", 10) for hour in ("12", "17")]
+    try:
+        with monkeypatch.context() as environment:
+            environment.setenv("TZ", "EST5")
+            time.tzset()
+            with respx.mock() as mock:
+                mock.get(LIST_URL).respond(200, text=listing(keys))
+                assets = adapter.list_assets(query)
+                normalized = adapter.list_assets(
+                    build_query(start="2024-05-06T12:00", end="2024-05-06T12:01", site="KTLX")
+                )
+    finally:
+        time.tzset()
+    assert [asset.id for asset in assets] == ["KTLX20240506_120000_V06"]
+    assert assets == normalized
+    assert query.time is not None and query.time.start == start
