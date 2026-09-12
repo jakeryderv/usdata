@@ -5,6 +5,11 @@
     "summary": "Subtract CO-OPS tide predictions from observed water levels to isolate the surge, find its peak, and time it against the HURDAT2 landfall."
   },
   {
+    "slug": "hourly-observations",
+    "title": "Do hourly airport observations reproduce the daily summary?",
+    "summary": "Pull three days of Local Climatological Data for one airport, separate report types, and compare hourly extremes with NCEI's daily summary."
+  },
+  {
     "slug": "climate-anomalies",
     "title": "Was 2024 warmer or wetter than normal?",
     "summary": "Compare twelve months at Oklahoma City's airport with 1991–2020 station normals, including temperature-unit checks and monthly anomaly plots."

@@ -10,6 +10,7 @@ NOAA access is anonymous.
 | `gsom` | [Monthly station summaries](noaa-gsom.md) | Complete UTC months |
 | `gsoy` | [Annual station summaries](noaa-gsoy.md) (v0.10.0) | Complete UTC years |
 | `climate-normals` | [30-year station normals](noaa-normals.md) (v0.11.0) | Whole-year or month-day windows per period |
+| `lcd` | [Hourly airport observations](noaa-lcd.md) (v0.14.0) | Every report on whole days per station chunk |
 | `nexrad-level2` | [Radar scans](noaa-nexrad.md) | Whole Level II scans |
 | `goes-abi` | [GOES imagery](noaa-goes.md) | Whole single-channel CONUS scenes |
 | `storm-events` | [Storm Events](noaa-storm-events.md) | Whole annual details archives |
@@ -50,6 +51,10 @@ See [Global Summary of the Year](noaa-gsoy.md).
 ## U.S. Climate Normals
 
 See [U.S. Climate Normals 1991-2020](noaa-normals.md).
+
+## Local Climatological Data
+
+See [Local Climatological Data](noaa-lcd.md).
 
 ## CoastWatch SST
 

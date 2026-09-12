@@ -26,6 +26,11 @@ selection and local CSV opening with a small manifest (available since v0.10.0).
 temperature and precipitation normals for the same airport and compares one
 observed month against them (available since v0.11.0).
 
+[Hourly airport observations](https://usdata.dev/examples/hourly-observations/) pulls three
+days of Local Climatological Data for one airport and checks the hourly
+readings against NCEI's daily summary (available from source for the
+unreleased v0.14.0).
+
 [Atlantic hurricane best tracks](https://usdata.dev/examples/hurdat2/) fetches the whole HURDAT2
 Atlantic file and reads it into one row per track point (available since v0.12.0).
 

@@ -444,19 +444,22 @@ datasets:
 
   - id: noaa:lcd
     provider: noaa
-    status: planned
+    status: available
     domain: surface-weather
-    target: later
+    since: "0.14"
     title: Local Climatological Data
     description: >-
-      Hourly, daily, and monthly observations from airport and first-order
-      stations via the NCEI Access Data Service dataset
-      local-climatological-data, addressed by WBAN-based station ids.
-    keywords: [weather, hourly, airports, stations, lcd, ncei]
+      Hourly, special, synoptic, and daily-summary reports from airport and
+      first-order stations via the NCEI Access Data Service dataset
+      local-climatological-data, addressed by eleven-digit station ids and
+      timestamped in local standard time. Select whole days, stations or a
+      location, and optional columns.
+    keywords: [weather, hourly, temperature, precipitation, wind, airports, stations, lcd, ncei]
     protocol: http
     homepage: https://www.ncei.noaa.gov/products/land-based-station/local-climatological-data
     license: US Government Work (public domain)
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+    adapter: usdata.providers.noaa.lcd:LocalClimatologicalData
 
   - id: noaa:ghcn-hourly
     provider: noaa
@@ -740,6 +743,16 @@ catalog:
     reader_extra: pandas
     examples:
     - examples/annual-climate/README.md
+  noaa:lcd:
+    guide: docs/providers/noaa-lcd.md
+    summary: Hourly airport observations
+    formats:
+    - CSV
+    selection: Every report on whole calendar days per station; optional column filters
+    inputs: Both dates; eleven-digit station IDs or a geographic query
+    reader_extra: pandas
+    examples:
+    - examples/hourly-observations/README.md
   noaa:climate-normals:
     guide: docs/providers/noaa-normals.md
     summary: 30-year station climate normals

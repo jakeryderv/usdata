@@ -30,6 +30,7 @@ CASES = {
     "noaa:gsom": {"stations": "USW00013967"},
     "noaa:gsoy": {"stations": "USW00013967"},
     "noaa:climate-normals": {"stations": "USW00013967"},
+    "noaa:lcd": {"stations": "72353013967"},
     "noaa:nexrad-level2": {"site": "KTLX"},
     "noaa:goes-abi": {"satellite": 18, "channel": 6},
     "noaa:coastwatch-sst": {"bbox": (-80.08, 30.02, -80.02, 30.08)},

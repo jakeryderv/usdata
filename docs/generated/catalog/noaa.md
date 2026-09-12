@@ -13,6 +13,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | <span id="noaaghcn-daily"></span>[Daily station weather](noaa/ghcn-daily.md) | Released | CSV | Station observations within inclusive calendar dates; selected elements |
 | <span id="noaagsom"></span>[Monthly station climate](noaa/gsom.md) | Released | CSV | Complete UTC calendar months touched by the query; station and element filters |
 | <span id="noaagsoy"></span>[Annual station climate](noaa/gsoy.md) | Released | CSV | Complete UTC calendar years touched by the query; station and element filters |
+| <span id="noaalcd"></span>[Hourly airport observations](noaa/lcd.md) | Source only | CSV | Every report on whole calendar days per station; optional column filters |
 | <span id="noaastorm-events"></span>[Storm Events details](noaa/storm-events.md) | Released | gzip CSV | Whole annual archives; filter rows locally after downloading |
 | <span id="noaanexrad-level2"></span>[NEXRAD radar scans](noaa/nexrad-level2.md) | Released | NEXRAD Level II | Whole radar scans by site and inclusive UTC scan-start time |
 | <span id="noaagoes-abi"></span>[GOES CONUS imagery](noaa/goes-abi.md) | Released | NetCDF4 | Whole single-channel CONUS scenes by inclusive UTC scan-start time |
@@ -33,15 +34,6 @@ These entries are not implemented; they cannot fetch data.
 Global hourly and sub-hourly surface observations, the successor to ISD. Published as per-station and per-year bulk files by NCEI; the exact access path has not been confirmed yet and must be verified before an adapter is built.
 
 [Upstream information](https://www.ncei.noaa.gov/products/global-historical-climatology-network-hourly)
-Domain: Surface weather.
-
-### noaa:lcd
-
-**Local Climatological Data** · Planned · target later
-
-Hourly, daily, and monthly observations from airport and first-order stations via the NCEI Access Data Service dataset local-climatological-data, addressed by WBAN-based station ids.
-
-[Upstream information](https://www.ncei.noaa.gov/products/land-based-station/local-climatological-data)
 Domain: Surface weather.
 
 ### noaa:mrms

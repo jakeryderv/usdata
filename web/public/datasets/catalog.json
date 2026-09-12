@@ -104,6 +104,40 @@
       ]
     },
     {
+      "id": "noaa:lcd",
+      "title": "Hourly airport observations",
+      "description": "Hourly, special, synoptic, and daily-summary reports from airport and first-order stations via the NCEI Access Data Service dataset local-climatological-data, addressed by eleven-digit station ids and timestamped in local standard time. Select whole days, stations or a location, and optional columns.",
+      "provider": "NOAA",
+      "domain": "Surface weather",
+      "availability": "Source only",
+      "since": "0.14",
+      "keywords": [
+        "weather",
+        "hourly",
+        "temperature",
+        "precipitation",
+        "wind",
+        "airports",
+        "stations",
+        "lcd",
+        "ncei"
+      ],
+      "formats": [
+        "CSV"
+      ],
+      "selection": "Every report on whole calendar days per station; optional column filters",
+      "inputs": "Both dates; eleven-digit station IDs or a geographic query",
+      "reader_extra": "pandas",
+      "guide": "https://docs.usdata.dev/providers/noaa-lcd/",
+      "reference": "https://docs.usdata.dev/generated/catalog/noaa/lcd/",
+      "examples": [
+        {
+          "title": "Hourly observations",
+          "url": "https://usdata.dev/examples/hourly-observations/"
+        }
+      ]
+    },
+    {
       "id": "noaa:storm-events",
       "title": "Storm Events details",
       "description": "NCEI's significant-weather event details since 1950, with locations, impacts, and narratives. Anonymous whole-year gzipped CSV archives; select the latest creation-date revision for each requested year. No server-side row, location, or variable subsetting. Historical event coverage and reporting practices vary; fatalities and locations tables are separate products not included by this adapter.",
@@ -402,30 +436,6 @@
         "stations",
         "global",
         "ghcnh",
-        "ncei"
-      ],
-      "formats": [],
-      "selection": null,
-      "inputs": null,
-      "reader_extra": null,
-      "guide": null,
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
-    },
-    {
-      "id": "noaa:lcd",
-      "title": "Local Climatological Data",
-      "description": "Hourly, daily, and monthly observations from airport and first-order stations via the NCEI Access Data Service dataset local-climatological-data, addressed by WBAN-based station ids.",
-      "provider": "NOAA",
-      "domain": "Surface weather",
-      "availability": "Planned",
-      "since": null,
-      "keywords": [
-        "weather",
-        "hourly",
-        "airports",
-        "stations",
-        "lcd",
         "ncei"
       ],
       "formats": [],
