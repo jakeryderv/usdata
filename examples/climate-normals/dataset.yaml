@@ -1,0 +1,8 @@
+name: okc-climate-normals
+sources:
+  - dataset: noaa:climate-normals
+    variables: [MLY-TMAX-NORMAL, MLY-TMIN-NORMAL, MLY-PRCP-NORMAL]
+    params:
+      period: monthly
+      stations: USW00013967
+      units: metric

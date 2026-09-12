@@ -1,0 +1,1 @@
+Add `noaa:climate-normals`: 1991-2020 monthly, daily, or annual/seasonal station normals from the NCEI Access Data Service, selected with a `period` parameter, optional month-day windows, and station discovery.

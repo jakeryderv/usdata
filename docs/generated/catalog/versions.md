@@ -11,7 +11,6 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`fema:nfhl`](fema.md#femanfhl) National Flood Hazard Layer · Planned
 - [`nasa:gpm-imerg`](nasa.md#nasagpm-imerg) GPM IMERG Precipitation · Planned
 - [`noaa:cdr-ndvi`](noaa.md#noaacdr-ndvi) NDVI Climate Data Record · Planned
-- [`noaa:climate-normals`](noaa.md#noaaclimate-normals) U.S. Climate Normals 1991-2020 · Planned
 - [`noaa:ersst`](noaa.md#noaaersst) ERSST Monthly Sea Surface Temperature · Planned
 - [`noaa:etopo`](noaa.md#noaaetopo) ETOPO 2022 Global Relief · Planned
 - [`noaa:gfs`](noaa.md#noaagfs) GFS Forecast Model Output · Planned
@@ -34,6 +33,10 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usda:cropland-data-layer`](usda.md#usdacropland-data-layer) Cropland Data Layer · Planned
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
 - [`usgs:earthquakes`](usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · Planned
+
+**Implemented, unreleased (planned 0.11)**
+
+- [`noaa:climate-normals`](noaa.md#noaaclimate-normals) U.S. Climate Normals 1991-2020 · Source only
 
 **Included since 0.10**
 

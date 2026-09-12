@@ -18,6 +18,10 @@ the saved outputs, or run them locally to change queries and inspect the results
 [Annual airport climate](annual-climate/README.md) demonstrates GSOY annual
 selection and local CSV opening with a small manifest (available since v0.10.0).
 
+[Monthly climate normals](climate-normals/README.md) requests 1991-2020 monthly
+temperature and precipitation normals for the same airport and compares one
+observed month against them (available from source for the unreleased v0.11.0).
+
 ## Run interactively
 
 From the repository root, with [uv and just installed](https://docs.usdata.dev/project/#development):

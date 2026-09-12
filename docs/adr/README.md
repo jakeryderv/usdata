@@ -22,3 +22,4 @@ is described in the guides and reference pages.
 - [0016: Site source boundaries](0016-site-source-boundaries.md)
 - [0017: Direct MkDocs and static hosting](0017-direct-mkdocs-and-static-hosting.md)
 - [0018: Report all upstream drift and update selected lockfile pins](0018-selective-lockfile-updates.md)
+- [0019: Climate normals as one dataset with a period parameter and placeholder-year windows](0019-climate-normals-periods.md)

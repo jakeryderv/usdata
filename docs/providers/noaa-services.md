@@ -82,7 +82,7 @@ added once a concrete, anonymously accessible dataset has been verified.
 | Weather satellites | Visible/IR imagery, clouds, lightning, fire, volcanic ash | GOES-R ABI, GOES GLM, POES, JPSS | `goes-abi`, `goes-glm` |
 | Tropical cyclones | Best tracks, intensity, pressure, wind radii | HURDAT2, IBTrACS, HURSAT | `hurdat2`, `ibtracs` |
 | Weather models | Forecasts, analyses, reanalyses | GFS, HRRR, RAP, NAM, GEFS, National Blend of Models | `hrrr`, `gfs`, `nbm` |
-| Climate | Normals, long-term records, divisional averages, indices | Climate Normals, nClimDiv, Climate Data Records | `climate-normals`, `nclimdiv` |
+| Climate | Normals, long-term records, divisional averages, indices | Climate Normals, nClimDiv, Climate Data Records | `climate-normals` (available from source), `nclimdiv` |
 | Snow and ice | Snow cover and depth, sea ice concentration and extent | Sea Ice Index (NOAA@NSIDC), IMS snow cover | `sea-ice-index` |
 | Ocean physics | SST, salinity, currents, waves, profiles | OISST, ERSST, World Ocean Database | `oisst`, `ersst` |
 | Sea level and tides | Water levels, tides, currents, sea-level trends | CO-OPS NWLON, PORTS | `coops-water-levels` |
@@ -178,6 +178,33 @@ The search probe used the same annual bounds, `dataTypes=PRCP,TAVG`,
 `USW00013967`. The [annual climate example](../examples/annual-climate/README.md)
 provides a small manifest and local CSV analysis. Live checks independently
 exercise discovery and checksum-verified restoration.
+
+## U.S. Climate Normals
+
+Direct probes on 2026-09-11 against the Access Data Service: the search
+`datasets` endpoint lists monthly, daily, annual/seasonal, and hourly normals
+for 1991-2020, 2006-2020, and 1981-2010. Monthly and annual/seasonal requests
+succeed without dates; daily requests return HTTP 400 without `startDate` and
+`endDate`. The year in those dates is ignored: `2020-02-27` to `2020-03-01`
+returned `02-27` through `03-01` including `02-29`, and a window from
+`2010-12-30` to `2011-01-02` returned only the header. `units=metric` converts
+values; the default is standard units with leading spaces. An unknown `dataTypes`
+code returned an empty column rather than an error. Station search with
+`dataset=normals-monthly-1991-2020` found `USW00013967` with or without dates.
+
+```sh
+curl --get 'https://www.ncei.noaa.gov/access/services/data/v1' \
+  --data-urlencode 'dataset=normals-monthly-1991-2020' \
+  --data-urlencode 'stations=USW00013967' \
+  --data-urlencode 'startDate=2020-01-01' --data-urlencode 'endDate=2020-12-31' \
+  --data-urlencode 'dataTypes=MLY-TMAX-NORMAL,MLY-TMIN-NORMAL,MLY-PRCP-NORMAL' \
+  --data-urlencode 'units=metric' --data-urlencode 'format=csv' \
+  --data-urlencode 'includeStationLocation=1'
+```
+
+The [climate normals example](../examples/climate-normals/README.md) provides
+a small manifest and local CSV analysis. Live checks exercise discovery, a
+daily window that spans February 29, and checksum-verified restoration.
 
 ## CoastWatch SST
 
