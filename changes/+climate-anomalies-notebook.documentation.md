@@ -1,1 +1,1 @@
-Add a runnable climate-anomalies notebook that compares a year of NOAA GSOM monthly observations against the 1991-2020 station normals, and document the `MLY-TAVG-NORMAL` metric-unit exception it has to correct.
+Add a runnable climate-anomalies notebook that compares a year of NOAA GSOM monthly observations against the 1991-2020 station normals, and document which NCEI normals data types `units=metric` converts correctly, including the uncorrected `MLY-TAVG-NORMAL` and the mis-converted diurnal-range and standard-deviation codes.
