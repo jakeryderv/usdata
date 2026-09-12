@@ -33,6 +33,10 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
 - [`usgs:earthquakes`](usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · Planned
 
+**Implemented, unreleased (planned 0.14)**
+
+- [`noaa:coops-tide-predictions`](noaa.md#noaacoops-tide-predictions) CO-OPS Tide Predictions · Source only
+
 **Included since 0.12**
 
 - [`noaa:hurdat2`](noaa.md#noaahurdat2) HURDAT2 Atlantic and Pacific Best Tracks · Released

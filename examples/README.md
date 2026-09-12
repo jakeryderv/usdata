@@ -11,6 +11,7 @@ inspect the results. The website renders saved content without running analyses.
 | [Sea-surface temperature](https://usdata.dev/examples/sst-analysis/) | A four-cell CoastWatch subset, pandas opening, ERDDAP units, and a spatial plot |
 | [Monthly climate](https://usdata.dev/examples/monthly-climate/) | GSOM monthly observations, whole-month selection, a two-panel plot, and manifest verification |
 | [Climate anomalies](https://usdata.dev/examples/climate-anomalies/) | GSOM observations against 1991-2020 normals, month alignment, an upstream unit exception, anomaly plots, and stale-lockfile guidance (available since v0.12.0) |
+| [Storm surge](https://usdata.dev/examples/storm-surge/) | CO-OPS observed water levels minus tide predictions across Hurricane Helene's landfall, the peak residual, and its timing against the HURDAT2 track (available from source for the unreleased v0.14.0) |
 | [Storm Events](https://usdata.dev/examples/storm-events/) | Annual gzip CSV, local Oklahoma/date filtering, report counts, damage ratings, and source verification (available since v0.8) |
 | [Radar reflectivity](https://usdata.dev/examples/radar-reflectivity/) | One NEXRAD volume, xradar sweeps, field units, reflectivity plot, and provenance |
 | [GOES infrared imagery](https://usdata.dev/examples/goes-imagery/) | NetCDF4 opening, CF decoding, quality flags, scan coordinates and brightness-temperature imagery |

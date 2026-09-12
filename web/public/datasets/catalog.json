@@ -243,6 +243,10 @@
         {
           "title": "Hurdat2",
           "url": "https://usdata.dev/examples/hurdat2/"
+        },
+        {
+          "title": "Storm surge",
+          "url": "https://usdata.dev/examples/storm-surge/"
         }
       ]
     },
@@ -311,6 +315,43 @@
         {
           "title": "Coastal water levels",
           "url": "https://usdata.dev/examples/coastal-water-levels/"
+        },
+        {
+          "title": "Storm surge",
+          "url": "https://usdata.dev/examples/storm-surge/"
+        }
+      ]
+    },
+    {
+      "id": "noaa:coops-tide-predictions",
+      "title": "Coastal tide predictions",
+      "description": "Astronomical tide predictions from the anonymous CO-OPS Data API for one station, an explicit vertical datum, and units, on a six-minute, other minute, hourly, or high/low interval spanning at most a year. Subtracting predictions from observed water levels isolates the non-tidal residual, such as storm surge.",
+      "provider": "NOAA",
+      "domain": "Sea level and tides",
+      "availability": "Source only",
+      "since": "0.14",
+      "keywords": [
+        "tides",
+        "tide predictions",
+        "water level",
+        "sea level",
+        "coastal",
+        "coops",
+        "storm surge",
+        "stations"
+      ],
+      "formats": [
+        "CSV"
+      ],
+      "selection": "Predictions for one station and datum on a chosen interval; at most a year",
+      "inputs": "Station, datum, and both minute-aligned timestamps; optional interval",
+      "reader_extra": "pandas",
+      "guide": "https://docs.usdata.dev/providers/noaa-coops-predictions/",
+      "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-tide-predictions/",
+      "examples": [
+        {
+          "title": "Storm surge",
+          "url": "https://usdata.dev/examples/storm-surge/"
         }
       ]
     },

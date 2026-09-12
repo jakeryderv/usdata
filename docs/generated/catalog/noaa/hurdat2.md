@@ -12,7 +12,7 @@ HURDAT2 Atlantic and Pacific Best Tracks.
 - Selection: The newest revision of one whole basin file; filter track points locally
 - Required inputs: Optional basin (atlantic or pacific); no dates or geographic filters
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [hurdat2](https://usdata.dev/examples/hurdat2/)
+- Examples: [hurdat2](https://usdata.dev/examples/hurdat2/), [storm surge](https://usdata.dev/examples/storm-surge/)
 
 ## Parameters
 

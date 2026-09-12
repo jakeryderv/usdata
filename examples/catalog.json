@@ -1,5 +1,10 @@
 [
   {
+    "slug": "storm-surge",
+    "title": "How high was Hurricane Helene's storm surge at Cedar Key?",
+    "summary": "Subtract CO-OPS tide predictions from observed water levels to isolate the surge, find its peak, and time it against the HURDAT2 landfall."
+  },
+  {
     "slug": "climate-anomalies",
     "title": "Was 2024 warmer or wetter than normal?",
     "summary": "Compare twelve months at Oklahoma City's airport with 1991–2020 station normals, including temperature-unit checks and monthly anomaly plots."
