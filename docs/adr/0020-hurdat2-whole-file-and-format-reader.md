@@ -1,0 +1,71 @@
+# 0020: HURDAT2 as one whole file per basin with a format reader
+
+Status: accepted. Date: 2026-09-12.
+
+## Context
+
+The National Hurricane Center publishes the HURDAT2 best-track database as two
+plain-text files, Atlantic and northeast/north-central Pacific, in one Apache
+directory that also keeps every past revision. Filenames embed the data span and
+a revision date in `MMDDYY` or `MMDDYYYY` form, occasionally with a trailing
+letter, and the Atlantic basin token is sometimes absent. There is no records
+API, no per-storm file, and no server-side subsetting of any kind. The format is
+also unlike anything usdata already reads: storm headers declaring a track-point
+count, followed by that many fixed-position lines with hemisphere-suffixed
+coordinates and several missing-data sentinels.
+
+Every previous dataset let a query narrow what was downloaded. Here nothing can,
+so the useful work is turning one whole file into an analyzable table.
+
+## Decision
+
+Expose one asset per basin, selected by a `basin` param (`atlantic` by default,
+`pacific`). Resolve the directory listing to the newest data span and then the
+newest revision of that span, parsing revision dates rather than sorting names as
+text. Ignore other basins, unparseable dates, and non-local links. Keep the
+complete filename as the stable asset ID and preserve the original bytes; leave
+asset size unknown because the listing reports approximate sizes. Reuse the
+Storm Events pattern (ADR 0010) for listing, whole-file fetch, and lockfile
+pinning; capabilities stay false.
+
+Reject dates instead of accepting them as informational bounds. Every revision
+holds the complete record for its basin, so a requested window selects nothing,
+and copying it into asset time bounds would misdescribe the cached file in the
+lockfile and provenance sidecar. Asset time bounds report the data span named in
+the filename. Reject geographic filters, variables, text queries, and unknown
+params for the same reason: nothing about the download changes.
+
+Add a `hurdat2` reader behind the existing pandas extra (ADR 0006), in its own
+private module beside the NetCDF and radar readers. Infer it from the dataset id
+or a `hurdat2-*.txt` asset ID, since the service serves `text/plain` and media
+type alone cannot identify the format. Return one row per track point with
+`storm_id`, `name`, UTC `time`, record codes, signed decimal coordinates, wind,
+pressure, the twelve wind radii, and the radius of maximum wind. Convert the
+documented sentinels (`-999`, and `-99` for unassigned 1967 intensities) to NaN,
+use float dtype so the gaps are representable, and encode units in column names
+rather than synthesizing a units map. Validate declared track-point counts, field
+counts, timestamps, coordinates, and measurements, raising `Hurdat2FormatError`
+with the offending line instead of returning a partly parsed table. Reject the
+CSV options, as the NetCDF and radar readers already do.
+
+## Consequences
+
+A caller interested in one storm still downloads about 7 MB (Atlantic) or 4 MB
+(Pacific) and filters locally; the example and guide say so. Two basins cannot be
+combined in one asset, and a manifest wanting both lists two sources. Rejecting
+dates makes HURDAT2 the first adapter where a manifest's shared date range is an
+error, which is deliberate: a silent no-op would be indistinguishable from a
+working filter.
+
+Revision selection depends on NHC filename conventions. A future name that breaks
+the span-and-date pattern is ignored rather than guessed at, which surfaces as a
+clear "no file in the listing" error. When a new season's file appears under a new
+name, existing lockfiles keep restoring the old one until the NHC removes it;
+preserving the cache remains the durable reproducibility answer.
+
+Accepting both 20- and 21-field data lines keeps pre-2021 revisions readable with
+`max_wind_radius_nm` as NaN. Column names, not attributes, carry units, so
+exports keep them. Scientific interpretation is unchanged by this decision:
+the reader does not correct the reanalysis's era-dependent undercounting, does
+not reconstruct a wind field from quadrant radii, and does not merge basins.
+IBTrACS remains a separate planned entry for global merged tracks.

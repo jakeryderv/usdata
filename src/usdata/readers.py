@@ -53,7 +53,7 @@ def open_asset(
     nrows: int | None = None,
     sweep: int | list[int] | None = None,
 ) -> Any:
-    """Open local CSV, NetCDF4, or NEXRAD data, retaining units and provenance.
+    """Open local CSV, NetCDF4, NEXRAD, or HURDAT2 data, retaining units and provenance.
 
     Gzip CSVs are decompressed locally without changing cached bytes.
     Infer ``csv`` or ``erddap-csv`` from media type and protocol, or use an
@@ -63,12 +63,20 @@ def open_asset(
     as strings. No checksum verification or downloading occurs.
     Radar accepts zero-based ``sweep`` indices (one integer or a non-empty list);
     the default opens the whole volume after checking sweep record alignment.
+    HURDAT2 best-track text is recognized by dataset or filename and returns one
+    row per track point; it takes no CSV options.
     """
     if reader is None:
         media_type = (fetched.asset.media_type or "").split(";", 1)[0].strip().lower()
-        gzip_csv = media_type in GZIP_MEDIA_TYPES and fetched.asset.id.lower().endswith(".csv.gz")
+        name = fetched.asset.id.lower()
+        gzip_csv = media_type in GZIP_MEDIA_TYPES and name.endswith(".csv.gz")
+        hurdat2 = fetched.asset.dataset_id == "noaa:hurdat2" or (
+            name.startswith("hurdat2-") and name.endswith(".txt")
+        )
         if fetched.asset.dataset_id == "noaa:nexrad-level2":
             reader = "nexrad-level2"
+        elif hurdat2:
+            reader = "hurdat2"
         elif media_type in NETCDF_MEDIA_TYPES:
             reader = "netcdf"
         elif media_type in CSV_MEDIA_TYPES or gzip_csv:
@@ -76,7 +84,7 @@ def open_asset(
         else:
             raise UnsupportedFormat(
                 f"no reader for {fetched.asset.media_type!r}; supported formats are CSV, "
-                "ERDDAP CSV, NetCDF4, and NEXRAD Level II. "
+                "ERDDAP CSV, NetCDF4, NEXRAD Level II, and HURDAT2 best tracks. "
                 "For a known CSV with ambiguous metadata, "
                 "pass reader='csv' "
                 "or reader='erddap-csv'; otherwise use fetched.path with a format-specific reader"
@@ -103,9 +111,16 @@ def open_asset(
             if len(set(values)) != len(values):
                 raise ValueError("sweep indices must be unique")
         return open_nexrad(fetched, sweep=sweep)
+    if reader == "hurdat2":
+        if any(value is not None for value in (dtype, parse_dates, usecols, nrows)):
+            raise ValueError("dtype, parse_dates, usecols, and nrows apply only to CSV readers")
+        from usdata._hurdat2 import open_hurdat2
+
+        return open_hurdat2(fetched)
     if reader not in {"csv", "erddap-csv"}:
         raise UnsupportedFormat(
-            f"unsupported reader {reader!r}; use 'csv', 'erddap-csv', 'netcdf', or 'nexrad-level2'"
+            f"unsupported reader {reader!r}; use 'csv', 'erddap-csv', 'netcdf', "
+            "'nexrad-level2', or 'hurdat2'"
         )
     try:
         pandas = import_module("pandas")

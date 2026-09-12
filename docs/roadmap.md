@@ -76,7 +76,7 @@ reuse an existing one while preserving the adapter, transport, cache/provenance,
 and optional-reader boundaries:
 
 - Further NCEI Access Data Service datasets, such as hourly normals or Local Climatological Data.
-- Bulk directories and archives, such as HURDAT2 and IBTrACS.
+- Bulk directories and archives, such as IBTrACS.
 - Additional GOES products/sectors, MRMS, and CO-OPS tides/currents.
 - Geospatial readers when a supported dataset and representative fixtures justify them.
 

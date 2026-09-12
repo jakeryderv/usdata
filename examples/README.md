@@ -23,6 +23,10 @@ selection and local CSV opening with a small manifest (available since v0.10.0).
 temperature and precipitation normals for the same airport and compares one
 observed month against them (available since v0.11.0).
 
+[Atlantic hurricane best tracks](hurdat2/README.md) fetches the whole HURDAT2
+Atlantic file and reads it into one row per track point (available from source
+for the unreleased v0.12.0).
+
 ## Run interactively
 
 From the repository root, with [uv and just installed](https://docs.usdata.dev/project/#development):

@@ -35,7 +35,7 @@ Each source accepts:
 | `dataset` | Required registry ID, such as `usgs:water-daily`. |
 | `location` | A bundled place name or alias. Mutually exclusive with `bbox`. |
 | `bbox` | WGS84 box with `west`, `south`, `east`, `north` fields. |
-| `start`, `end` | ISO dates or datetimes. All implemented adapters require both. |
+| `start`, `end` | ISO dates or datetimes. Most adapters require both; climate normals make them optional and HURDAT2 rejects them. |
 | `variables` | List of dataset-specific variable names/codes. Quote numeric codes to retain leading zeros. |
 | `params` | Mapping of provider-specific options, listed below. Unknown adapter options are errors. |
 | `allow_empty` | Default `false`. Set `true` only if this source is intentionally optional when its query resolves to no assets. |
@@ -67,6 +67,7 @@ that does not fit on one line.
 | `noaa:goes-abi` | Required `satellite`: 16, 17, 18, or 19, and `channel`: 1–16 or `C01`–`C16`. Optional `product`: only `ABI-L2-CMIPC` (default). Geographic selection is rejected. | Complete single-channel CONUS scenes selected by inclusive UTC scan-start time; both timestamps required. Date-only values mean midnight. Variable subsetting is rejected; select a channel instead. |
 | `noaa:coops-water-levels` | Required string `station` and `datum`; optional `units=metric` or `english`. | Available since v0.10.0. Six-minute observations only. Both bounds required, UTC, minute precision, inclusive, at most 28 days. No geographic/text/variable selection. No-data API responses fail on fetch; `allow_empty` cannot suppress them. |
 | `noaa:storm-events` | No provider parameters or geographic selection. | Both dates required; every UTC calendar year touched by the interval selects its latest supported annual details archive in full. Variable subsetting is rejected. Filter rows locally after opening the gzip CSV; report times retain their source timezone labels. |
+| `noaa:hurdat2` (v0.12.0) | `basin`: `atlantic` (default) or `pacific`, case-insensitive. No other params and no geographic selection. | Whole-basin best-track text; the newest revision wins. Dates are rejected, not ignored: every revision holds the complete record. Variable and text filters are rejected. Filter the parsed track points locally. |
 | `noaa:coastwatch-sst` | Requires a bbox or location. `stride`: positive integer, default 1, subsamples both spatial axes. At most 1,000,000 grid rows per request. | `analysed_sst` (default), `analysis_error`, `sea_ice_fraction`, `mask`. Inclusive UTC timestamps; date-only values mean midnight. CSV retains coordinate columns and the units row. |
 | `usgs:water-daily` | `site` or `sites`: quoted monitoring IDs, mutually exclusive. Alternatively a geographic query. `statistic_id`: quoted five-digit code, default `"00003"` (daily mean). Explicit sites and a geographic filter both apply when present. | Quoted parameter codes such as `"00060"`; inclusive local calendar dates, time of day ignored. |
 

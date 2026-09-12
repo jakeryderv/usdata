@@ -80,7 +80,7 @@ added once a concrete, anonymously accessible dataset has been verified.
 | Severe weather | Tornadoes, hail, damaging wind, storm events, damage reports | Storm Events Database, Storm Data | `storm-events` |
 | Weather radar | Reflectivity, radial velocity, dual-pol variables, derived products | NEXRAD Level II, NEXRAD Level III, MRMS | `nexrad-level2`, `nexrad-level3`, `mrms` |
 | Weather satellites | Visible/IR imagery, clouds, lightning, fire, volcanic ash | GOES-R ABI, GOES GLM, POES, JPSS | `goes-abi`, `goes-glm` |
-| Tropical cyclones | Best tracks, intensity, pressure, wind radii | HURDAT2, IBTrACS, HURSAT | `hurdat2`, `ibtracs` |
+| Tropical cyclones | Best tracks, intensity, pressure, wind radii | HURDAT2, IBTrACS, HURSAT | `hurdat2` (available from source), `ibtracs` |
 | Weather models | Forecasts, analyses, reanalyses | GFS, HRRR, RAP, NAM, GEFS, National Blend of Models | `hrrr`, `gfs`, `nbm` |
 | Climate | Normals, long-term records, divisional averages, indices | Climate Normals, nClimDiv, Climate Data Records | `climate-normals` (available from source), `nclimdiv` |
 | Snow and ice | Snow cover and depth, sea ice concentration and extent | Sea Ice Index (NOAA@NSIDC), IMS snow cover | `sea-ice-index` |
@@ -130,6 +130,36 @@ The filename is a probe snapshot; the adapter discovers current filenames instea
 of hard-coding it. The [design decision](../adr/0010-storm-events-annual-archives.md)
 records the annual-file and compression contract. The notebook downloads one 2024 archive (~13 MB compressed),
 then filters locally; neither the test nor example downloads all archive years.
+
+## HURDAT2 best tracks
+
+Probes on 2026-09-12 UTC listed the NHC data directory and fetched both current
+whole-basin files:
+
+```sh
+curl --fail 'https://www.nhc.noaa.gov/data/hurdat/'
+curl --fail --output /tmp/hurdat2-atl.txt \
+  'https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2025-02272026.txt'
+curl --fail --output /tmp/hurdat2-nepac.txt \
+  'https://www.nhc.noaa.gov/data/hurdat/hurdat2-nepac-1949-2025-02272026.txt'
+```
+
+The listing keeps every past revision back to 2016 and serves `text/plain;
+charset=UTF-8`. The current Atlantic file was 7,082,381 bytes (2,004 storms,
+55,605 track points) and the northeast Pacific file 3.9 MB (1,262 storms,
+32,026 track points). Filenames are the probe snapshot; the adapter discovers
+current names instead of hard-coding them.
+
+Naming is inconsistent in ways worth recording. The Atlantic basin token is
+usually omitted (`hurdat2-1851-2025-02272026.txt`) but appears as `atl` in a few
+names; the Pacific token is always `nepac`. Revision dates are `MMDDYY` in older
+names and `MMDDYYYY` in newer ones, never `YYYYMMDD`, so filenames do not sort
+chronologically as text; one Pacific name ends in a disambiguating `a`. Directory
+sizes are approximate (`6.8M`), unlike NCEI's exact byte counts, so asset size is
+left unknown. Every data line in both current files has 21 fields; revisions
+published before the 2021 season omit the trailing radius of maximum wind.
+The [design decision](../adr/0020-hurdat2-whole-file-and-format-reader.md)
+records the whole-file and reader contract.
 
 ## Global Summary of the Month
 

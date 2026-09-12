@@ -13,6 +13,7 @@ NOAA access is anonymous.
 | `nexrad-level2` | [Radar scans](noaa-nexrad.md) | Whole Level II scans |
 | `goes-abi` | [GOES imagery](noaa-goes.md) | Whole single-channel CONUS scenes |
 | `storm-events` | [Storm Events](noaa-storm-events.md) | Whole annual details archives |
+| `hurdat2` | [Tropical cyclone best tracks](noaa-hurdat2.md) (v0.12.0) | One whole basin file per revision |
 | `coastwatch-sst` | [Sea-surface temperature](noaa-coastwatch.md) | Spatial and temporal CSV subsets |
 | `coops-water-levels` | [Observed coastal water levels](noaa-coops.md) (v0.10.0) | One station and datum, at most 28 days |
 
@@ -32,6 +33,10 @@ See [GOES ABI CONUS imagery](noaa-goes.md).
 ## Storm Events annual details
 
 See [Storm Events annual details](noaa-storm-events.md).
+
+## HURDAT2 best tracks
+
+See [HURDAT2 best tracks](noaa-hurdat2.md).
 
 ## Global Summary of the Month
 

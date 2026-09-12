@@ -1,8 +1,8 @@
 # Opening fetched data
 
-Readers operate on fetched local files and are selected by format. CSV returns a
-pandas DataFrame, NEXRAD returns an xarray DataTree, and NetCDF4 returns an xarray
-Dataset. Each reader has an optional dependency extra.
+Readers operate on fetched local files and are selected by format. CSV and
+HURDAT2 return a pandas DataFrame, NEXRAD returns an xarray DataTree, and NetCDF4
+returns an xarray Dataset. Each reader has an optional dependency extra.
 
 ## CSV and ERDDAP CSV
 
@@ -49,7 +49,7 @@ source integrity.
 
 | Option | Behavior |
 |---|---|
-| `reader` | Defaults to inference. Explicit `"csv"`, `"erddap-csv"`, `"nexrad-level2"`, or `"netcdf"` handles missing or ambiguous media metadata. |
+| `reader` | Defaults to inference. Explicit `"csv"`, `"erddap-csv"`, `"nexrad-level2"`, `"netcdf"`, or `"hurdat2"` handles missing or ambiguous media metadata. |
 | `dtype` | Mapping of column names to pandas dtype strings; overrides identifier defaults for those columns. |
 | `parse_dates` | List of columns to parse as dates/timestamps; dates are not parsed by default. Use `dtype={"DATE": "string"}` to retain numeric-looking year labels as text. |
 | `usecols` | List of columns to read. Ordering follows pandas behavior. |
@@ -183,3 +183,35 @@ the `usdata[netcdf]` extra.
 See the executed [GOES example](../examples/goes-imagery/example.md),
 [xarray's decoding options](https://docs.xarray.dev/en/stable/generated/xarray.open_dataset.html),
 and [ADR 0009](../adr/0009-eager-local-netcdf4-reader.md).
+
+## HURDAT2 best tracks
+
+Available from source for the unreleased v0.12.0, behind the same pandas extra as
+CSV. `noaa:hurdat2` assets and files named `hurdat2-*.txt` infer the reader, since
+the service serves generic `text/plain`; pass `reader="hurdat2"` for an archived
+copy with ambiguous metadata.
+
+```python
+tracks = item.open()  # a fetched noaa:hurdat2 asset
+landfalls = tracks[tracks.record_identifier == "L"]
+print(tracks.columns.tolist(), len(tracks), len(landfalls))
+```
+
+The result is a pandas DataFrame with one row per best-track point: `storm_id`,
+`name`, UTC `time`, `record_identifier`, `status`, signed `latitude`/`longitude`,
+`max_wind_kt`, `min_pressure_mb`, the twelve wind radii (`r34_ne_nm` through
+`r64_nw_nm`), and `max_wind_radius_nm`. Storm identity and name are repeated on
+every row of a storm, which is what makes the table groupable.
+
+Documented missing sentinels become NaN (`-999`, and `-99` for a few unassigned
+1967 intensities), so numeric columns use float dtype; units live in the column
+names rather than a synthesized units map. Text columns keep source strings, and
+a blank record identifier or status is missing rather than an empty string.
+Revisions published before the 2021 season omit the radius of maximum wind, which
+is then NaN for every row. A declared track-point count that does not match, a
+line with the wrong number of fields, or an unparseable time, coordinate, or
+measurement raises `Hurdat2FormatError` (a `ValueError` from `usdata._hurdat2`)
+naming the line, instead of returning a partly parsed table. CSV options do not
+apply and are rejected. See the [dataset guide](../providers/noaa-hurdat2.md),
+the [manifest example](../examples/hurdat2/README.md), and
+[ADR 0020](../adr/0020-hurdat2-whole-file-and-format-reader.md).
