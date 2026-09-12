@@ -106,6 +106,14 @@ def test_requires_time_window(adapter: NexradLevel2) -> None:
         adapter.list_assets(build_query(site="KTLX", start="2024-05-06"))
 
 
+@pytest.mark.parametrize("extra", [{"text": "reflectivity"}, {"variables": ["REF"]}])
+def test_unsupported_query_fields_are_rejected_before_listing(adapter, extra) -> None:
+    q = build_query(site="KTLX", start="2024-05-06T12:00", end="2024-05-06T12:01", **extra)
+    with respx.mock(assert_all_called=False) as mock, pytest.raises(QueryError, match="support"):
+        adapter.list_assets(q)
+    assert not mock.calls
+
+
 @pytest.mark.l2
 def test_fetch_downloads_via_https(tmp_path: Path, adapter: NexradLevel2) -> None:
     from usdata.models import Asset, Protocol

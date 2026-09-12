@@ -53,17 +53,11 @@ class CoastwatchSst(_HttpProvider):
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Resolve a valid grid intersection into one stable, bounded CSV request."""
-        if (
-            query.bbox is None
-            or query.time is None
-            or query.time.start is None
-            or query.time.end is None
-        ):
-            raise QueryError(
-                f"{self.dataset.id} requires a bbox/location and both start and end times"
-            )
-        if unknown := set(query.params) - set(self.accepted_params):
-            raise QueryError(f"unsupported CoastWatch params: {', '.join(sorted(unknown))}")
+        self.check_params(query)
+        self.reject(query, "text", hint="select a bbox/location, time window, and variables")
+        if query.bbox is None:
+            raise QueryError(f"{self.dataset.id} requires a bbox/location and both start and end")
+        start, end = self.utc_window(query)
         stride = query.params.get("stride", 1)
         if isinstance(stride, str) and stride.isascii() and stride.isdigit():
             stride = int(stride)
@@ -102,8 +96,8 @@ class CoastwatchSst(_HttpProvider):
                 raise ValueError("unexpected time axis")
         except (KeyError, TypeError, ValueError) as error:
             raise httpx.DecodingError("CoastWatch grid metadata changed or is invalid") from error
-        first = bisect_left(times, query.time.start)
-        last = bisect_right(times, query.time.end) - 1
+        first = bisect_left(times, start)
+        last = bisect_right(times, end) - 1
         if first > last:
             return []
         if (last - first + 1) * lat[1] * lon[1] > MAX_ROWS:

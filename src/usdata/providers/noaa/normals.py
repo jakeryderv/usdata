@@ -21,8 +21,8 @@ from typing import Any, ClassVar
 import httpx
 
 from usdata.models import Asset, Protocol, Query, TimeRange
-from usdata.providers.base import QueryError
-from usdata.providers.noaa.ghcnd import DATA_URL, STATIONS_PER_ASSET, GhcnDaily, _stations_param
+from usdata.providers.base import QueryError, to_utc
+from usdata.providers.noaa.ghcnd import DATA_URL, STATIONS_PER_ASSET, GhcnDaily
 
 PERIODS = {
     "monthly": "normals-monthly-1991-2020",
@@ -55,8 +55,7 @@ def _window(query: Query, period: str) -> tuple[str, str] | None:
         return (f"{PLACEHOLDER_YEAR}-01-01", f"{PLACEHOLDER_YEAR}-12-31")
     if start is None or end is None:
         raise QueryError("pass both start and end dates, or neither for the whole year")
-    first = start.replace(tzinfo=start.tzinfo or UTC).astimezone(UTC)
-    last = end.replace(tzinfo=end.tzinfo or UTC).astimezone(UTC)
+    first, last = to_utc(start), to_utc(end)
     if (first.month, first.day) > (last.month, last.day):
         raise QueryError("normals windows cannot cross the new year; split the query")
     return (
@@ -80,23 +79,12 @@ class ClimateNormals(GhcnDaily):
 
     def list_assets(self, query: Query) -> list[Asset]:
         """One CSV asset per chunk of stations for the selected period and window."""
-        if query.text is not None:
-            raise QueryError(f"{self.dataset.id} does not support text queries")
-        if unknown := set(query.params) - set(self.accepted_params):
-            raise QueryError(f"unsupported {self.dataset.id} params: {', '.join(sorted(unknown))}")
+        self.check_params(query)
+        self.reject(query, "text", hint="search the registry instead")
         period = _period(query)
-        units = query.params.get("units", "metric")
-        if units not in ("metric", "standard"):
-            raise QueryError("units must be metric or standard")
-        if "stations" in query.params and query.bbox is not None:
-            raise QueryError("pass stations or a location/bbox, not both")
+        units = self._units(query)
         window = _window(query, period)
-        if "stations" in query.params:
-            stations = _stations_param(query.params["stations"])
-        elif query.bbox is not None:
-            stations = self.find_stations(query)
-        else:
-            raise QueryError(f"{self.dataset.id} needs a location, bbox, or stations=...")
+        stations = self._stations(query)
         if not stations:
             return []
 

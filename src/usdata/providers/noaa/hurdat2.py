@@ -64,25 +64,27 @@ class Hurdat2(_HttpProvider):
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Select the newest revision of the requested basin's complete database."""
-        if unknown := set(query.params) - set(self.accepted_params):
-            raise QueryError(f"unsupported HURDAT2 params: {', '.join(sorted(unknown))}")
+        self.check_params(query)
         requested = query.params.get("basin", "atlantic")
         basin = requested.strip().casefold() if isinstance(requested, str) else ""
         if basin not in BASIN_TOKENS:
             raise QueryError(
                 f"unsupported HURDAT2 basin {requested!r}; use 'atlantic' (default) or 'pacific'"
             )
-        if query.bbox is not None or query.variables or query.text:
-            raise QueryError(
-                "HURDAT2 publishes one whole text file per basin; location/bbox, variables, "
-                "and text filters are unsupported. Filter the parsed track table locally."
-            )
-        if query.time is not None:
-            raise QueryError(
-                "HURDAT2 does not accept dates: every revision holds the complete basin "
-                "record, so a date range would not change the download. Remove start/end "
-                "and filter the parsed 'time' column locally."
-            )
+        self.reject(
+            query,
+            "bbox",
+            "variables",
+            "text",
+            hint="HURDAT2 publishes one whole text file per basin; filter the parsed track "
+            "table locally",
+        )
+        self.reject(
+            query,
+            "time",
+            hint="every revision holds the complete basin record, so a date range would not "
+            "change the download; remove start/end and filter the parsed 'time' column locally",
+        )
         listing = _Directory()
         listing.feed(http.get(DIRECTORY_URL, self._http()).text)
         candidates = []

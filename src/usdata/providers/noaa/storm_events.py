@@ -62,17 +62,16 @@ class StormEvents(_HttpProvider):
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Select the latest supported details revision for every requested year."""
-        if unknown := set(query.params) - set(self.accepted_params):
-            raise QueryError(f"unsupported Storm Events params: {', '.join(sorted(unknown))}")
-        if query.bbox is not None or query.variables or query.text:
-            raise QueryError(
-                "Storm Events downloads whole annual details files; location/bbox, variables, "
-                "and text filters are unsupported. Filter locally after opening the CSV."
-            )
-        if query.time is None or query.time.start is None or query.time.end is None:
-            raise QueryError(f"{self.dataset.id} requires both start and end dates")
-        start = query.time.start.replace(tzinfo=query.time.start.tzinfo or UTC).astimezone(UTC)
-        end = query.time.end.replace(tzinfo=query.time.end.tzinfo or UTC).astimezone(UTC)
+        self.check_params(query)
+        self.reject(
+            query,
+            "bbox",
+            "variables",
+            "text",
+            hint="Storm Events downloads whole annual details files; filter locally after "
+            "opening the CSV",
+        )
+        start, end = self.utc_window(query)
         if start.year < 1950:
             raise QueryError("Storm Events annual details files start in 1950")
         years = range(start.year, end.year + 1)

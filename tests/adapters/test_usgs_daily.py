@@ -35,6 +35,7 @@ def page(ids: list[str], next_url: str | None = None) -> dict:
         {"site": "07164500", "statistic_id": 3},
         {"site": "07164500", "sites": "07164500"},
         {"site": "07164500", "typo": True},
+        {"site": "07164500", "text": "streamflow"},
     ],
 )
 def test_bad_queries_fail_before_network(kwargs: dict) -> None:
