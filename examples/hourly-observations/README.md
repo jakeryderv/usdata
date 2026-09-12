@@ -33,7 +33,7 @@ kind = frame["REPORT_TYPE"].str.strip()
 day = frame["DATE"].dt.date
 temperature = pd.to_numeric(frame["HourlyDryBulbTemperature"], errors="coerce")
 hourly = temperature[kind == "FM-15"].groupby(day).agg(["max", "min", "count"])
-summary = frame.loc[kind == "SOD"].set_index(day[kind == "SOD"])
+summary = frame[kind == "SOD"].set_index(day[kind == "SOD"])
 print(hourly.join(summary[["DailyMaximumDryBulbTemperature", "DailyMinimumDryBulbTemperature"]]))
 assert verify(manifest) == []
 ```
