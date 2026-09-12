@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`noaa:coops-tide-predictions` · **Source only** · Install from [source](../../../project.md#source-installation) to use this dataset.
+`noaa:coops-tide-predictions` · **Released** · Included since usdata 0.14.
 
 CO-OPS Tide Predictions.
 
@@ -31,7 +31,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.14
+- Availability: since 0.14
 - Domain: Sea level and tides
 - Coverage: not specified in the catalog
 - Coverage varies by station, product, and date; the range above does not guarantee observations.

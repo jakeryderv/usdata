@@ -1,5 +1,5 @@
 {
-  "version": "0.13.0",
+  "version": "0.14.0",
   "datasets": [
     {
       "id": "noaa:ghcn-daily",
@@ -109,7 +109,7 @@
       "description": "Hourly, special, synoptic, and daily-summary reports from airport and first-order stations via the NCEI Access Data Service dataset local-climatological-data, addressed by eleven-digit station ids and timestamped in local standard time. Select whole days, stations or a location, and optional columns.",
       "provider": "NOAA",
       "domain": "Surface weather",
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.14",
       "keywords": [
         "weather",
@@ -362,7 +362,7 @@
       "description": "Astronomical tide predictions from the anonymous CO-OPS Data API for one station, an explicit vertical datum, and units, on a six-minute, other minute, hourly, or high/low interval spanning at most a year. Subtracting predictions from observed water levels isolates the non-tidal residual, such as storm surge.",
       "provider": "NOAA",
       "domain": "Sea level and tides",
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.14",
       "keywords": [
         "tides",

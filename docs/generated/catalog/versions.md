@@ -32,10 +32,10 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
 - [`usgs:earthquakes`](usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · Planned
 
-**Implemented, unreleased (planned 0.14)**
+**Included since 0.14**
 
-- [`noaa:coops-tide-predictions`](noaa.md#noaacoops-tide-predictions) CO-OPS Tide Predictions · Source only
-- [`noaa:lcd`](noaa.md#noaalcd) Local Climatological Data · Source only
+- [`noaa:coops-tide-predictions`](noaa.md#noaacoops-tide-predictions) CO-OPS Tide Predictions · Released
+- [`noaa:lcd`](noaa.md#noaalcd) Local Climatological Data · Released
 
 **Included since 0.12**
 

@@ -7,7 +7,7 @@ time it against the HURDAT2 best track. The residual at one gauge is the
 closest routine measurement of storm surge; it is not a regional surge height
 or a return-period estimate. See [examples setup](https://docs.usdata.dev/project/) to run it.
 
-Available from source for the unreleased v0.14.0, which adds
+Available since v0.14.0, which adds
 `noaa:coops-tide-predictions`. The retained [manifest](dataset.yaml) holds three
 sources: observed six-minute water levels and six-minute tide predictions for
 station 8727520 over the same three UTC days, both relative to mean lower low

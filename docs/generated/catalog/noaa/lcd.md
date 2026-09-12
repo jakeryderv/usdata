@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`noaa:lcd` · **Source only** · Install from [source](../../../project.md#source-installation) to use this dataset.
+`noaa:lcd` · **Released** · Included since usdata 0.14.
 
 Local Climatological Data.
 
@@ -29,7 +29,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.14
+- Availability: since 0.14
 - Domain: Surface weather
 - Coverage: not specified in the catalog
 - Coverage varies by station, product, and date; the range above does not guarantee observations.

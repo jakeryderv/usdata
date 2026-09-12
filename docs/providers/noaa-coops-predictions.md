@@ -1,6 +1,6 @@
 # CO-OPS tide predictions
 
-Available from source for the unreleased v0.14.0 as `noaa:coops-tide-predictions`.
+Available since v0.14.0 as `noaa:coops-tide-predictions`.
 The adapter fetches astronomical tide predictions for one explicit station from
 the same anonymous CO-OPS Data API as the
 [observed water levels](noaa-coops.md), with the same station, datum, units,
