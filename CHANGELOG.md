@@ -12,6 +12,22 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.13.0](https://github.com/jakeryderv/usdata/releases/tag/v0.13.0) - 2026-09-12
+
+
+### Added
+
+- Add a searchable dataset browser at https://usdata.dev/datasets/ with agency and support filters, download selection rules, required inputs, example links, and copyable inspection commands. Extend the climate-anomalies notebook with a calculated summary of warmer months and annual precipitation relative to the station normals.
+
+### Changed
+
+- GOES queries span at most 7 days and NEXRAD queries at most 31 days, rejected before any request instead of listing hour by hour or day by day without bound. USGS daily-value listing now probes one row per page instead of downloading every JSON page, so dry runs and manifest resolution no longer transfer the data twice.
+- Move all twelve worked examples to https://usdata.dev/examples/ with a question-based index, source-dataset links, saved results, expandable notebook code, and exact notebook/manifest downloads. Keep their maintained sources in the repository's examples directory and update dataset and documentation links to the single published copy.
+
+### Fixed
+
+- Adapters now share one query-validation step, so every dataset rejects free text, unsupported location, variable, or date filters, and conflicting selectors the same way instead of some ignoring them. This fixes a crash when CoastWatch received timezone-naive datetimes from the SDK, GHCN-Daily silently preferring `stations` over a `location`, and NEXRAD, USGS, and CoastWatch ignoring `text` or `variables`.
+
 ## [0.12.0](https://github.com/jakeryderv/usdata/releases/tag/v0.12.0) - 2026-09-12
 
 
