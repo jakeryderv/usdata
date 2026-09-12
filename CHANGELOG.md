@@ -12,6 +12,26 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.12.0](https://github.com/jakeryderv/usdata/releases/tag/v0.12.0) - 2026-09-12
+
+
+### Added
+
+- Added `noaa:hurdat2`, the NHC HURDAT2 best-track database, with a `basin` parameter, whole-file revision selection, and a local reader that parses the fixed-format text into one pandas row per track point.
+- `usdata info <dataset>` now lists the provider-specific `--param` keys each adapter accepts, with a one-line description each, and the generated catalog pages show the same table.
+
+### Changed
+
+- The optional CSV reader now accepts pandas 2.2 or newer instead of requiring pandas 3.0, so `usdata[pandas]` installs alongside existing pandas 2 environments.
+
+### Documentation
+
+- Add a runnable climate-anomalies notebook that compares a year of NOAA GSOM monthly observations against the 1991-2020 station normals, and document which NCEI normals data types `units=metric` converts correctly, including the uncorrected `MLY-TAVG-NORMAL` and the mis-converted diurnal-range and standard-deviation codes.
+
+### Development
+
+- CI now runs the offline suite against the oldest pandas the project declares, so the supported floor is tested rather than assumed.
+
 ## [0.11.0](https://github.com/jakeryderv/usdata/releases/tag/v0.11.0) - 2026-09-12
 
 

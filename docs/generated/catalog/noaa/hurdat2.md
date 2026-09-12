@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`noaa:hurdat2` · **Source only** · Install from [source](../../../project.md#source-installation) to use this dataset.
+`noaa:hurdat2` · **Released** · Included since usdata 0.12.
 
 HURDAT2 Atlantic and Pacific Best Tracks.
 
@@ -28,7 +28,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.12
+- Availability: since 0.12
 - Domain: Tropical cyclones
 - Catalog date range: 1851-01-01 to open-ended
 - Coverage varies by station, product, and date; the range above does not guarantee observations.

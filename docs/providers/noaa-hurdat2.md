@@ -1,6 +1,6 @@
 # HURDAT2 best tracks
 
-Available from source for the unreleased v0.12.0 as `noaa:hurdat2`. The National
+Available since v0.12.0 as `noaa:hurdat2`. The National
 Hurricane Center publishes its complete best-track database as two anonymous
 plain-text files, one for the Atlantic basin and one for the northeast and
 north-central Pacific. There is no query interface of any kind: no records API,
