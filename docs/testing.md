@@ -97,7 +97,9 @@ committed notebooks only if every selected example succeeds.
 
 Documentation is checked once in the static job: `just check-docs` checks generated
 catalogs and saved notebooks, then builds the site with strict internal link and
-anchor validation. See [maintaining documentation](guides/documentation.md).
+anchor validation. The website job separately renders the examples and checks
+their local links, exact notebook/manifest downloads, dataset relationships,
+and supported saved outputs. See [maintaining documentation](guides/documentation.md).
 
 The [v0.10.0 first-use review](reviews/first-use-v0.10.0.md) records a bounded
 live walkthrough from a fresh PyPI installation, its documentation fixes, and

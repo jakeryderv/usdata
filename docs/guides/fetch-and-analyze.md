@@ -85,7 +85,7 @@ Use `--no-progress` to disable progress; redirection disables it automatically.
 
 ## Pick an analysis example
 
-The [examples index](../examples/README.md) distinguishes executed notebooks
+The [examples index](https://usdata.dev/examples/) distinguishes executed notebooks
 from manifest recipes. Start with weather and streamflow for reproducible inputs,
 SST for a small gridded CSV, or monthly climate for station summaries. Saved
 notebook results are snapshots; running them again contacts live services.

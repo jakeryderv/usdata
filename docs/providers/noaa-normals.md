@@ -41,7 +41,7 @@ Celsius. Two failures were reproduced on 2026-09-11 at `USW00013967` and
 - **`MLY-TAVG-NORMAL` is not converted at all.** It returns the same
   space-padded degrees-Fahrenheit value under both `units=metric` and
   `units=standard`. Convert it yourself before comparing it with Celsius
-  observations, as the [anomalies notebook](../examples/climate-anomalies/example.md)
+  observations, as the [anomalies notebook](https://usdata.dev/examples/climate-anomalies/)
   does.
 - **Derived temperature quantities are converted as absolute temperatures.**
   The diurnal range `*-DUTR-*` and the `*-STDDEV` codes are differences in

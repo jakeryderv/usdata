@@ -10,6 +10,8 @@
     "deploy": "wrangler deploy"
   },
   "devDependencies": {
+    "markdown-it": "15.0.2",
+    "sanitize-html": "2.17.7",
     "wrangler": "4.130.0"
   },
   "overrides": {

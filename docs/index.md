@@ -102,7 +102,7 @@ See [manifest behavior](reference/manifests.md) before intentionally refreshing 
 |---|---|
 | Explore query options and CLI workflows | [Fetch and analyze](guides/fetch-and-analyze.md) |
 | Repeat an analysis with pinned inputs | [Manifests and lockfiles](reference/manifests.md) |
-| Learn through saved data and plots | [Runnable notebooks](examples/README.md) |
+| Learn through saved data and plots | [Runnable notebooks](https://usdata.dev/examples/) |
 | Understand a provider's query limits | [Provider access notes](providers/README.md) |
 | Find an exact Python argument | [Python reference](reference/api.md) |
 | Extend or contribute | [Contributing](https://github.com/jakeryderv/usdata/blob/main/CONTRIBUTING.md) and [architecture](architecture.md) |

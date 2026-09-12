@@ -12,7 +12,7 @@ Storm Events Database.
 - Selection: Whole annual archives; filter rows locally after downloading
 - Required inputs: Both dates (selects the containing years)
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [storm events](../../../examples/storm-events/example.md)
+- Examples: [storm events](https://usdata.dev/examples/storm-events/), [event context](https://usdata.dev/examples/event-context/)
 
 ## Parameters
 

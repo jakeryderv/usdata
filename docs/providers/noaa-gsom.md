@@ -21,7 +21,7 @@ Variable availability depends on the station; unrecognized codes are rejected by
 NCEI. The API CSV has no units row, so `open()` retains the URL's `units` setting
 in provenance without adding a DataFrame units map. See the
 [NCEI API documentation](https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation)
-and [monthly example](../examples/monthly-climate/README.md).
+and [monthly example](https://usdata.dev/examples/monthly-climate/).
 
 
 See the [service research notes](noaa-services.md#global-summary-of-the-month) for dated upstream probes.

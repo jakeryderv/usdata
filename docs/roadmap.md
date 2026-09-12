@@ -51,7 +51,7 @@ and acceptance criteria are ready. The completed
 walkthrough and newest-dataset live checks. The
 [dataset browser](https://usdata.dev/datasets/) provides search, support and
 agency filters, selection rules, and links to examples, including the
-[2024 climate comparison](examples/climate-anomalies/example.md).
+[2024 climate comparison](https://usdata.dev/examples/climate-anomalies/).
 
 ## Next
 

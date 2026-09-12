@@ -265,11 +265,14 @@ def usage_link(ds: Dataset, entry: CatalogEntry) -> str:
     return f"[Usage guide]({relative})."
 
 
+def example_url(path: str) -> str:
+    """Each maintained example folder has one canonical website page."""
+    return f"https://usdata.dev/examples/{Path(path).parent.name}/"
+
+
 def render_dataset(registry: Registry, ds: Dataset, entry: CatalogEntry) -> str:
-    parent = dataset_path(ds).parent.as_posix()
     examples = ", ".join(
-        f"[{Path(path).parent.name.replace('-', ' ')}]"
-        f"({posixpath.relpath(Path('docs') / Path(path).with_suffix('.md'), parent)})"
+        f"[{Path(path).parent.name.replace('-', ' ')}]({example_url(path)})"
         for path in entry.examples
     )
     reader = (

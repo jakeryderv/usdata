@@ -1,0 +1,62 @@
+[
+  {
+    "slug": "climate-anomalies",
+    "title": "Was 2024 warmer or wetter than normal?",
+    "summary": "Compare twelve months at Oklahoma City's airport with 1991–2020 station normals, including temperature-unit checks and monthly anomaly plots."
+  },
+  {
+    "slug": "event-context",
+    "title": "What did radar and satellites show around a reported tornado?",
+    "summary": "Connect one Storm Events report to nearby NEXRAD and GOES observations, with explicit time matching and a plotted event context."
+  },
+  {
+    "slug": "weather-and-streamflow",
+    "title": "How can I preserve weather and streamflow inputs together?",
+    "summary": "Fetch NOAA and USGS observations with one manifest, inspect the tables, and verify and restore the exact inputs."
+  },
+  {
+    "slug": "sst-analysis",
+    "title": "How warm was the sea in a small area?",
+    "summary": "Download four sea-surface-temperature grid cells, inspect their units, and plot the selected area."
+  },
+  {
+    "slug": "monthly-climate",
+    "title": "How did temperature and rainfall vary through the year?",
+    "summary": "Read monthly station observations, compare temperature and precipitation in two plots, and verify the source manifest."
+  },
+  {
+    "slug": "storm-events",
+    "title": "What severe weather was reported in Oklahoma?",
+    "summary": "Filter an annual Storm Events archive locally, plot report counts and damage ratings, and account for reporting limitations."
+  },
+  {
+    "slug": "radar-reflectivity",
+    "title": "What does one weather radar volume show?",
+    "summary": "Open a NEXRAD Level II volume, inspect its sweeps and reflectivity units, and plot a selected sweep."
+  },
+  {
+    "slug": "goes-imagery",
+    "title": "What did a satellite see in infrared?",
+    "summary": "Decode a GOES CONUS scene, inspect quality flags and scan coordinates, and plot brightness temperatures."
+  },
+  {
+    "slug": "annual-climate",
+    "title": "How warm and wet was a year at one airport?",
+    "summary": "Fetch complete-year station summaries and read annual temperature and precipitation with a reproducible manifest."
+  },
+  {
+    "slug": "climate-normals",
+    "title": "What is normal weather for a month at one station?",
+    "summary": "Read 1991–2020 monthly temperature and precipitation normals and select a month for comparison."
+  },
+  {
+    "slug": "coastal-water-levels",
+    "title": "How high was the water at The Battery?",
+    "summary": "Inspect three six-minute coastal observations, their reference datum, quality flags, and source provenance."
+  },
+  {
+    "slug": "hurdat2",
+    "title": "How can I inspect Atlantic hurricane tracks?",
+    "summary": "Read the whole Atlantic best-track file, identify hurricane-intensity landfall records, and inspect peak winds and historical coverage limits."
+  }
+]

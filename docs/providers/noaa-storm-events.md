@@ -30,7 +30,7 @@ it does not decompress into the cache. `EVENT_ID` identifies event records,
 while `EPISODE_ID` can group several events. `CZ_TYPE` distinguishes county,
 forecast-zone, and marine records; `CZ_FIPS` is not always a county code.
 Dates/times in rows are local, with `CZ_TIMEZONE` needed for instant conversion.
-The [executed notebook](../examples/storm-events/example.md) filters on
+The [executed notebook](https://usdata.dev/examples/storm-events/) filters on
 reported calendar dates and keeps timezone labels visible.
 
 Reported events, impacts, and damage ratings require care when aggregating:

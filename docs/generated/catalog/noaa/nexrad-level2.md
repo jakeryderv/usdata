@@ -12,7 +12,7 @@ NEXRAD Level II Radar.
 - Selection: Whole radar scans by site and inclusive UTC scan-start time
 - Required inputs: Both timestamps; radar IDs or a geographic query
 - Open locally: `usdata[radar]` · [Reader guide](../../../reference/readers.md)
-- Examples: [radar reflectivity](../../../examples/radar-reflectivity/example.md)
+- Examples: [radar reflectivity](https://usdata.dev/examples/radar-reflectivity/), [event context](https://usdata.dev/examples/event-context/)
 
 ## Parameters
 

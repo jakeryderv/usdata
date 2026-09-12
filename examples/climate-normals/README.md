@@ -42,9 +42,9 @@ For a [source installation](https://docs.usdata.dev/project/#source-installation
 `DATE` is the two-digit month; explicit `dtype` keeps it as text. Metric units
 give degrees Celsius and millimeters. To compare with observations, pull the
 same station and month through `noaa:gsom` as in the
-[monthly climate notebook](../monthly-climate/example.ipynb) and subtract the
+[monthly climate notebook](https://usdata.dev/examples/monthly-climate/) and subtract the
 normal from the observed value to get the monthly anomaly. The
-[climate anomalies notebook](../climate-anomalies/example.ipynb) does this for a
+[climate anomalies notebook](https://usdata.dev/examples/climate-anomalies/) does this for a
 full year and handles `MLY-TAVG-NORMAL`, which NCEI returns in degrees
 Fahrenheit even under `units: metric`.
 

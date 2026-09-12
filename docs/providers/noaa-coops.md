@@ -26,7 +26,7 @@ uv run usdata fetch noaa:coops-water-levels \
 The raw CSV retains original header spacing, observations, and quality flags.
 Use the ordinary CSV reader and rename columns locally if desired; station,
 datum, units, and timezone remain explicit in the provenance source URL. The
-[small manifest example](../examples/coastal-water-levels/README.md) shows this.
+[small manifest example](https://usdata.dev/examples/coastal-water-levels/) shows this.
 Quality `p` and `v` mean preliminary and verified; preserve the quality field
 alongside the flags because their interpretation changes. See the
 [response definitions](https://api.tidesandcurrents.noaa.gov/api/prod/responseHelp.html).

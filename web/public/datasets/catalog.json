@@ -31,7 +31,7 @@
       "examples": [
         {
           "title": "Weather and streamflow",
-          "url": "https://docs.usdata.dev/examples/weather-and-streamflow/example/"
+          "url": "https://usdata.dev/examples/weather-and-streamflow/"
         }
       ]
     },
@@ -63,11 +63,11 @@
       "examples": [
         {
           "title": "Monthly climate",
-          "url": "https://docs.usdata.dev/examples/monthly-climate/example/"
+          "url": "https://usdata.dev/examples/monthly-climate/"
         },
         {
           "title": "Climate anomalies",
-          "url": "https://docs.usdata.dev/examples/climate-anomalies/example/"
+          "url": "https://usdata.dev/examples/climate-anomalies/"
         }
       ]
     },
@@ -99,7 +99,7 @@
       "examples": [
         {
           "title": "Annual climate",
-          "url": "https://docs.usdata.dev/examples/annual-climate/"
+          "url": "https://usdata.dev/examples/annual-climate/"
         }
       ]
     },
@@ -132,7 +132,11 @@
       "examples": [
         {
           "title": "Storm events",
-          "url": "https://docs.usdata.dev/examples/storm-events/example/"
+          "url": "https://usdata.dev/examples/storm-events/"
+        },
+        {
+          "title": "Event context",
+          "url": "https://usdata.dev/examples/event-context/"
         }
       ]
     },
@@ -165,7 +169,11 @@
       "examples": [
         {
           "title": "Radar reflectivity",
-          "url": "https://docs.usdata.dev/examples/radar-reflectivity/example/"
+          "url": "https://usdata.dev/examples/radar-reflectivity/"
+        },
+        {
+          "title": "Event context",
+          "url": "https://usdata.dev/examples/event-context/"
         }
       ]
     },
@@ -199,7 +207,11 @@
       "examples": [
         {
           "title": "Goes imagery",
-          "url": "https://docs.usdata.dev/examples/goes-imagery/example/"
+          "url": "https://usdata.dev/examples/goes-imagery/"
+        },
+        {
+          "title": "Event context",
+          "url": "https://usdata.dev/examples/event-context/"
         }
       ]
     },
@@ -230,7 +242,7 @@
       "examples": [
         {
           "title": "Hurdat2",
-          "url": "https://docs.usdata.dev/examples/hurdat2/"
+          "url": "https://usdata.dev/examples/hurdat2/"
         }
       ]
     },
@@ -262,11 +274,11 @@
       "examples": [
         {
           "title": "Climate normals",
-          "url": "https://docs.usdata.dev/examples/climate-normals/"
+          "url": "https://usdata.dev/examples/climate-normals/"
         },
         {
           "title": "Climate anomalies",
-          "url": "https://docs.usdata.dev/examples/climate-anomalies/example/"
+          "url": "https://usdata.dev/examples/climate-anomalies/"
         }
       ]
     },
@@ -298,7 +310,7 @@
       "examples": [
         {
           "title": "Coastal water levels",
-          "url": "https://docs.usdata.dev/examples/coastal-water-levels/"
+          "url": "https://usdata.dev/examples/coastal-water-levels/"
         }
       ]
     },
@@ -331,7 +343,7 @@
       "examples": [
         {
           "title": "Sst analysis",
-          "url": "https://docs.usdata.dev/examples/sst-analysis/example/"
+          "url": "https://usdata.dev/examples/sst-analysis/"
         }
       ]
     },
@@ -822,7 +834,7 @@
       "examples": [
         {
           "title": "Weather and streamflow",
-          "url": "https://docs.usdata.dev/examples/weather-and-streamflow/example/"
+          "url": "https://usdata.dev/examples/weather-and-streamflow/"
         }
       ]
     },

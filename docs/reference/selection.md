@@ -23,7 +23,7 @@ else:
 print(selection.model_dump_json(indent=2))
 ```
 
-The [executed event-context notebook](../examples/event-context/example.md)
+The [executed event-context notebook](https://usdata.dev/examples/event-context/)
 shows provider listing, both selection directions, manifest verification, and
 source-time conversion together.
 
