@@ -186,7 +186,7 @@ and [ADR 0009](../adr/0009-eager-local-netcdf4-reader.md).
 
 ## HURDAT2 best tracks
 
-Available from source for the unreleased v0.12.0, behind the same pandas extra as
+Available since v0.12.0, behind the same pandas extra as
 CSV. `noaa:hurdat2` assets and files named `hurdat2-*.txt` infer the reader, since
 the service serves generic `text/plain`; pass `reader="hurdat2"` for an archived
 copy with ambiguous metadata. Archived revisions read the same as current ones:

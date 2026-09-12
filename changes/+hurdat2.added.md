@@ -1,1 +1,0 @@
-Added `noaa:hurdat2`, the NHC HURDAT2 best-track database, with a `basin` parameter, whole-file revision selection, and a local reader that parses the fixed-format text into one pandas row per track point.
