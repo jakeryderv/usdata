@@ -125,10 +125,8 @@ jobs:
       - run: npm ci --prefix web
       - run: npm run build --prefix web
       - run: npm run check --prefix web
-      - run: cd web && npx wrangler deploy --dry-run
-      - run: npm ci --prefix docs
-      - run: npm run check --prefix docs
-      - run: npm run deploy --prefix docs -- --dry-run
+      - run: npm ci --prefix infra
+      - run: npm run check:docs --prefix infra
 
   smoke:
     needs: build

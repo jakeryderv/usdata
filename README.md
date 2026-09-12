@@ -22,10 +22,10 @@ usdata info noaa:ghcn-daily
 Search uses a curated registry. Fetching contacts the upstream service; readers
 open the resulting local files. Provenance and manifests connect those steps.
 
-- [Quick start and documentation](docs/content/index.md)
-- [Fetch and analyze data](docs/content/guides/fetch-and-analyze.md)
+- [Quick start and documentation](docs/index.md)
+- [Fetch and analyze data](docs/guides/fetch-and-analyze.md)
 - [Runnable examples with saved outputs](examples/README.md)
-- [Readers](docs/content/reference/readers.md) and [reproducible manifests](docs/content/reference/manifests.md)
+- [Readers](docs/reference/readers.md) and [reproducible manifests](docs/reference/manifests.md)
 
 ## Source installation
 
@@ -45,9 +45,9 @@ or `--extra netcdf` for those formats. For contribution checks, continue with
 
 ## Providers
 
-Browse the [dataset catalog](docs/content/generated/catalog/index.md) for current support,
-release availability, and dataset details. [Provider access notes](docs/content/providers/README.md)
-explain agency-specific services; the [roadmap](docs/content/roadmap.md) describes priorities.
+Browse the [dataset catalog](docs/generated/catalog/index.md) for current support,
+release availability, and dataset details. [Provider access notes](docs/providers/README.md)
+explain agency-specific services; the [roadmap](docs/roadmap.md) describes priorities.
 
 ## Development
 
@@ -56,8 +56,8 @@ just setup
 just check
 ```
 
-See [development setup and commands](docs/content/project.md#development),
-[contributing](CONTRIBUTING.md), and [architecture](docs/content/architecture.md).
+See [development setup and commands](docs/project.md#development),
+[contributing](CONTRIBUTING.md), and [architecture](docs/architecture.md).
 
 ## License
 

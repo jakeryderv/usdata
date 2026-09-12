@@ -1,0 +1,113 @@
+site_name: usdata
+site_description: U.S. scientific data, with provenance and reproducible inputs
+site_url: https://docs.usdata.dev/
+docs_dir: docs
+site_dir: .build/docs-site
+repo_url: https://github.com/jakeryderv/usdata
+repo_name: jakeryderv/usdata
+theme:
+  name: material
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
+  features:
+  - navigation.tabs
+  - navigation.sections
+  - navigation.top
+  - navigation.footer
+  - content.code.copy
+  palette:
+  - scheme: slate
+    primary: custom
+    accent: custom
+    toggle:
+      icon: material/weather-night
+      name: Switch to light mode
+  - scheme: default
+    primary: custom
+    accent: custom
+    toggle:
+      icon: material/weather-sunny
+      name: Switch to dark mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+nav:
+- Website: https://usdata.dev/
+- Start here: index.md
+- Guides & examples:
+  - Fetch and analyze: guides/fetch-and-analyze.md
+  - Examples: examples/README.md
+  - Weather and streamflow: examples/weather-and-streamflow/example.md
+  - Sea-surface temperature: examples/sst-analysis/example.md
+  - Monthly climate: examples/monthly-climate/example.md
+  - Annual climate (v0.10.0): examples/annual-climate/README.md
+  - Storm Events: examples/storm-events/example.md
+  - Radar reflectivity: examples/radar-reflectivity/example.md
+  - GOES imagery: examples/goes-imagery/example.md
+  - Coastal water levels (v0.10.0): examples/coastal-water-levels/README.md
+  - Event context: examples/event-context/example.md
+- Datasets: generated/catalog/index.md
+- Reference:
+  - Python API: reference/api.md
+  - CLI: generated/cli.md
+  - Readers: reference/readers.md
+  - Manifests: reference/manifests.md
+  - Places: reference/places.md
+  - Temporal selection: reference/selection.md
+- Development:
+  - Architecture: architecture.md
+  - Contributing: https://github.com/jakeryderv/usdata/blob/main/CONTRIBUTING.md
+  - Testing: testing.md
+  - Adding a dataset: guides/adding-a-dataset.md
+  - Maintaining documentation: guides/documentation.md
+  - Website operations: guides/website-operations.md
+  - Decisions: adr/README.md
+- Project:
+  - Project overview and setup: project.md
+  - Roadmap: roadmap.md
+  - Upcoming changes: generated/changes.md
+  - Changelog: https://github.com/jakeryderv/usdata/blob/main/CHANGELOG.md
+  - Versioning and releases: versioning.md
+  - Security: https://github.com/jakeryderv/usdata/blob/main/SECURITY.md
+extra_css:
+- assets/usdata.css
+plugins:
+- search
+- mkdocstrings:
+    handlers:
+      python:
+        paths:
+        - src
+        options:
+          docstring_style: google
+          show_source: false
+          show_root_heading: true
+          show_signature_annotations: true
+          separate_signature: true
+          show_if_no_docstring: true
+          heading_level: 3
+          filters:
+          - '!^_'
+          - '!^model_config$'
+          members_order: source
+markdown_extensions:
+- pymdownx.snippets:
+    check_paths: true
+- admonition
+- attr_list
+- md_in_html
+- pymdownx.details
+- pymdownx.highlight:
+    anchor_linenums: true
+- pymdownx.superfences:
+    custom_fences:
+    - name: mermaid
+      class: mermaid
+      format: !!python/name:pymdownx.superfences.fence_code_format
+validation:
+  nav:
+    not_found: warn
+  links:
+    not_found: warn
+    anchors: warn
+    unrecognized_links: warn

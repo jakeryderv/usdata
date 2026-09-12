@@ -16,23 +16,16 @@ site/
 .cache/plugin/
 .venv-docs/
 
-# Site configuration assembled from the registry
-.mkdocs.generated.yml
+# Generated documentation; never maintain prose here.
+docs/examples/
+docs/generated/cli.md
+docs/generated/changes.md
 
-# Cloudflare tooling and local state
+# Cloudflare deployment dependencies and local state
 web/node_modules/
-web/.wrangler/
-web/.dev.vars*
-web/worker-configuration.d.ts
-
-# Local browser and Worker previews
-.playwright-cli/
+infra/node_modules/
 .wrangler/
+.dev.vars*
 
-# Documentation Worker tooling
-docs/hosting/.wrangler/
-docs/hosting/worker-configuration.d.ts
-docs/hosting/.dev.vars*
-
-# Independent documentation build dependencies
-docs/node_modules/
+# Local browser previews
+.playwright-cli/

@@ -3,18 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "types": "wrangler types",
-    "check": "wrangler types && tsc --noEmit && vitest run",
-    "deploy": "wrangler deploy",
+    "build": "node build.mjs",
+    "check": "wrangler deploy --dry-run",
     "dev": "wrangler dev",
-    "build": "node build.mjs"
+    "deploy": "wrangler deploy"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "0.22.0",
-    "@types/node": "22.20.2",
-    "prettier": "3.9.6",
-    "typescript": "7.0.2",
-    "vitest": "4.1.11",
     "wrangler": "4.130.0"
   },
   "overrides": {

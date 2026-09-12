@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def script(name):
-    path = ROOT / "docs/build.py" if name == "docs_site" else ROOT / "scripts" / f"{name}.py"
+    path = ROOT / "scripts" / f"{name}.py"
     spec = importlib.util.spec_from_file_location(name, path)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
@@ -165,7 +165,7 @@ def test_release_check_keeps_future_plans_and_excludes_history(tmp_path) -> None
     assert not module.stale_notices("Available from source for v0.10.", "0.9.0")
     (tmp_path / "pyproject.toml").write_text('[project]\nversion="0.5.0"\n')
     (tmp_path / "README.md").write_text("Available since v0.5.")
-    adr = tmp_path / "docs/content/adr"
+    adr = tmp_path / "docs/adr"
     adr.mkdir(parents=True)
     (adr / "0001.md").write_text("Available from source for v0.5.")
     example = tmp_path / "examples/weather"
@@ -222,31 +222,6 @@ def test_invalid_pr_titles(title):
     assert not script("check_pr_title").valid_title(title)
 
 
-def test_site_links_follow_home_project_and_notebook_paths(monkeypatch):
-    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
-    module = script("docs_site")
-    assert (
-        module.page_links(
-            "[setup](../../README.md#development) [reader](reference/readers.md)",
-            Path("docs/content/index.md"),
-        )
-        == "[setup](project.md#development) [reader](docs/reference/readers.md)"
-    )
-    assert (
-        module.page_links(
-            "[start](../index.md) [book](../../../examples/sst-analysis/example.ipynb#plot)",
-            Path("docs/content/guides/example.md"),
-        )
-        == "[start](../../index.md) [book](../../examples/sst-analysis/example.md#plot)"
-    )
-    assert (
-        module.page_links(
-            "[anchor](#install) [web](https://example.org/README.md)", Path("docs/content/index.md")
-        )
-        == "[anchor](#install) [web](https://example.org/README.md)"
-    )
-
-
 def test_ci_summary_reports_failures_skips_and_timings(tmp_path):
     module = script("ci_summary")
     path = tmp_path / "junit.xml"
@@ -271,7 +246,7 @@ def test_release_notices_include_navigation_and_notebook_markdown_only(tmp_path)
     (tmp_path / "pyproject.toml").write_text('[project]\nversion="0.10.0"\n')
     (tmp_path / "README.md").write_text("Available since v0.10")
     (tmp_path / "docs").mkdir()
-    (tmp_path / "docs/mkdocs.yml").write_text('nav = [{"Annual (v0.10 / source)" = "annual.md"}]')
+    (tmp_path / "mkdocs.yml").write_text('nav = [{"Annual (v0.10 / source)" = "annual.md"}]')
     examples = tmp_path / "examples"
     examples.mkdir()
     (examples / "example.ipynb").write_text(
@@ -302,7 +277,7 @@ def test_catalog_generator_owns_only_generated_directory():
     outputs = module.render_all(Registry.bundled())
     assert outputs and all(path.is_relative_to(module.CATALOG_DIR) for path in outputs)
     assert module.ROOT / "README.md" not in outputs
-    assert module.ROOT / "docs/content/providers/README.md" not in outputs
+    assert module.ROOT / "docs/providers/README.md" not in outputs
 
 
 @pytest.mark.parametrize(
@@ -366,27 +341,6 @@ def test_catalog_sync_detects_obsolete_outputs_and_preserves_unrecognized_files(
         module.sync({tmp_path / ".." / "README.md": "bad"}, check=False)
 
 
-def test_composed_guide_links_resolve_from_their_original_directory(monkeypatch):
-    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
-    module = script("docs_site")
-    destination = Path("docs/generated/catalog/noaa/ghcn-daily.md")
-    monkeypatch.setattr(
-        module, "PAGE_PATHS", {Path("docs/content/providers/noaa-ghcn.md"): destination}
-    )
-    assert module.page_links(
-        "[reader](../reference/readers.md) [NOAA](noaa.md) "
-        "[example](../../../examples/weather-and-streamflow/example.ipynb)",
-        Path("docs/content/providers/noaa-ghcn.md"),
-        destination,
-    ) == (
-        "[reader](../../../reference/readers.md) [NOAA](../../../providers/noaa.md) "
-        "[example](../../../../examples/weather-and-streamflow/example.md)"
-    )
-    assert module.page_links(
-        "[daily](noaa-ghcn.md#dates)", Path("docs/content/providers/noaa.md")
-    ) == ("[daily](../generated/catalog/noaa/ghcn-daily.md#dates)")
-
-
 def test_catalog_rejects_paths_in_dataset_ids():
     module = script("render_registry")
     bundled = Registry.bundled()
@@ -394,18 +348,6 @@ def test_catalog_rejects_paths_in_dataset_ids():
     registry = Registry([*bundled, dataset], domains=bundled.domains())
     with pytest.raises(ValueError, match="catalog IDs"):
         module.catalog_entries(registry)
-
-
-def test_dataset_navigation_covers_implementations_without_manual_entries(monkeypatch):
-    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
-    module = script("docs_site")
-    renderer = script("render_registry")
-    registry = Registry.bundled()
-    entries = renderer.catalog_entries(registry)
-    navigation = json.dumps(module.dataset_navigation(registry, entries))
-    for ds in registry:
-        path = module.site_path(renderer.dataset_path(ds)).as_posix()
-        assert (path in navigation) == (ds.status.value == "available")
 
 
 def test_catalog_uses_explicit_file_selection_and_supports_datasets_without_readers():
@@ -418,38 +360,3 @@ def test_catalog_uses_explicit_file_selection_and_supports_datasets_without_read
     assert "Server-side subsetting" not in content
     no_reader = entries[goes.id].model_copy(update={"reader_extra": None})
     assert "no bundled reader" in module.render_dataset(registry, goes, no_reader)
-
-
-def test_docs_publish_only_owned_content_and_explicit_inputs(tmp_path, monkeypatch):
-    module = script("docs_site")
-    for name in [
-        "docs/content/index.md",
-        "docs/content/guides/use.md",
-        "docs/hosting/internal.md",
-        "web/public/index.html",
-        "README.md",
-        "examples/selected/README.md",
-        "examples/private/README.md",
-    ]:
-        path = tmp_path / name
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("# Content")
-    manifest = tmp_path / "docs/inputs.yml"
-    manifest.write_text("files: [examples/selected/README.md]\n")
-    monkeypatch.setattr(module, "ROOT", tmp_path)
-    assert {p.relative_to(tmp_path).as_posix() for p in module.source_paths()} == {
-        "docs/content/index.md",
-        "docs/content/guides/use.md",
-        "examples/selected/README.md",
-    }
-    for invalid in ("../outside.md", "web/public/index.html", "examples/missing.md"):
-        manifest.write_text(f"files: [{invalid}]\n")
-        with pytest.raises(ValueError, match="invalid documentation input"):
-            module.source_paths()
-
-
-def test_docs_links_to_canonical_repository_policies():
-    module = script("docs_site")
-    assert module.page_links(
-        "[contribute](../../CONTRIBUTING.md#workflow)", Path("docs/content/index.md")
-    ) == ("[contribute](https://github.com/jakeryderv/usdata/blob/main/CONTRIBUTING.md#workflow)")

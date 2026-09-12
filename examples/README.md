@@ -20,7 +20,7 @@ selection and local CSV opening with a small manifest (available since v0.10.0).
 
 ## Run interactively
 
-From the repository root, with [uv and just installed](../README.md#development):
+From the repository root, with [uv and just installed](https://docs.usdata.dev/project/#development):
 
 ```sh
 just notebooks

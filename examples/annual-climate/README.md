@@ -32,7 +32,7 @@ print(frame[["STATION", "DATE", "PRCP", "TAVG"]])
 assert verify(manifest) == []
 ```
 
-For a [source installation](../../README.md#source-installation), run from
+For a [source installation](https://docs.usdata.dev/project/#source-installation), run from
 `examples/annual-climate/` and use `uv run usdata` and `uv run python`.
 
 `DATE` is a four-digit year label. Explicit `dtype` keeps numeric-looking labels
@@ -45,5 +45,5 @@ A repeat pull uses the lockfile and checksummed cache. Keep the manifest,
 lockfile, and cached bytes for reproducibility: NCEI revises records, and an old
 checksum cannot recreate data that is no longer available upstream. Annual
 labels do not imply identical accumulation seasons for every element; consult
-[NOAA access notes](../../docs/content/providers/noaa-gsoy.md)
+[NOAA access notes](https://docs.usdata.dev/providers/noaa-gsoy/)
 when choosing other variables.

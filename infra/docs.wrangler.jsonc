@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "usdata-docs",
+  "compatibility_date": "2026-09-11",
+  "workers_dev": true,
+  "preview_urls": false,
+  "routes": [{ "pattern": "docs.usdata.dev", "custom_domain": true }],
+  "assets": {
+    "directory": "../.build/docs-site",
+    "not_found_handling": "404-page",
+  },
+  "observability": { "enabled": true, "traces": { "enabled": true } },
+}

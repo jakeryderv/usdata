@@ -48,9 +48,13 @@ def stale_notices(text: str, version: str) -> list[tuple[int, str]]:
 def check(root: Path) -> list[str]:
     version = tomllib.loads((root / "pyproject.toml").read_text())["project"]["version"]
     paths = [root / "README.md"]
-    paths.extend(path for path in (root / "docs/content").rglob("*.md") if "adr" not in path.parts)
+    paths.extend(
+        path
+        for path in (root / "docs").rglob("*.md")
+        if not {"adr", "examples", "generated"}.intersection(path.relative_to(root / "docs").parts)
+    )
     paths.extend((root / "examples").rglob("*.md"))
-    paths.extend(path for path in [root / "docs/mkdocs.yml"] if path.exists())
+    paths.extend(path for path in [root / "mkdocs.yml"] if path.exists())
     errors = [
         f"{path.relative_to(root)}:{line}: stale for {version}: {notice}"
         for path in sorted(paths)

@@ -1,7 +1,7 @@
 # Homepage
 
-This directory owns `usdata.dev`: `public/` is the content and styling,
-`src/` is the routing Worker, and `test/` verifies its behavior.
+`public/` contains the homepage, styling, logo, and 404 page. `build.mjs` copies
+these files into disposable `dist/`; Cloudflare serves them directly.
 
 ```sh
 npm ci
@@ -10,6 +10,7 @@ npm run check
 npm run dev
 ```
 
-`npm run deploy` publishes the homepage. Build output in `dist/` is disposable.
-The homepage needs neither the Python environment nor documentation tooling.
-Documentation has its own commands in `../docs/`.
+`npm run check` validates asset deployment without publishing.
+`npm run deploy` publishes the homepage. No custom Worker script is needed.
+Docs content lives in `../docs/`, with configuration in `../mkdocs.yml` and
+hosting settings in `../infra/docs.wrangler.jsonc`.
