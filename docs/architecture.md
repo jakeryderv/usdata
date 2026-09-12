@@ -70,8 +70,11 @@ cache, and provenance together; the CLI calls it rather than adapters directly.
 A manifest source must resolve to assets unless it sets `allow_empty: true`.
 A failed resolution leaves an existing lockfile untouched, although earlier
 successful downloads remain cached. Restore and verify both check the exact
-manifest checksum before trusting its lockfile. See the
-[manifest reference](reference/manifests.md) for the reproducibility contract.
+manifest checksum before trusting its lockfile. Restore reports every pinned URL
+whose bytes changed upstream in one run and rewrites pins only for entries the
+caller explicitly selects with `update`. See the
+[manifest reference](reference/manifests.md) for the reproducibility contract and
+[ADR 0018](adr/0018-selective-lockfile-updates.md) for the decision.
 
 `protocols.http.get` and `download` share a bounded retry policy for transient
 GET failures. Metadata retries preserve the original request; download retries

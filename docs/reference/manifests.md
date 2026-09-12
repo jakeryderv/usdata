@@ -94,8 +94,27 @@ inside a returned file.
 
 With a lockfile present, pull restores the pinned assets without re-querying
 listings. Cached bytes must match their pinned checksums; missing or altered
-files are downloaded again. If upstream now returns different bytes, restoration
-fails with a checksum mismatch and preserves any existing file at that path.
+files are downloaded again. If upstream now returns different bytes for a pinned
+URL, restoration continues through the remaining entries, then exits 4 listing
+every asset that changed. Assets that still match are restored; changed ones keep
+any existing file at that path, and the lockfile is not rewritten.
+
+To accept what upstream serves now for specific entries, name an asset id from
+that report or a dataset id:
+
+```sh
+usdata pull dataset.yaml --cache-dir .data --update noaa:ghcn-daily
+usdata pull dataset.yaml --cache-dir .data --update daily-summaries_2024-05-06_2024-05-07_719b6aa75cfc.csv
+```
+
+`--update` re-downloads the selected entries from their pinned URLs and rewrites
+only their checksums and provenance. It does not re-run discovery, so listing-based
+sources keep the same files. Entries whose bytes are unchanged keep their existing
+pin, so the lockfile diff shows only real changes. Every unselected entry must
+still match; otherwise the run exits 4 and nothing is rewritten. Selectors that
+match nothing, `--update` with `--force`, and `--update` without a lockfile exit 2.
+In Python, pass `update=["noaa:ghcn-daily"]` to `pull()`; a run with unaccepted
+changes raises `UpstreamChanged`, whose `drift` lists each asset.
 
 If the manifest changes, both pull and verify refuse it with exit code 2:
 
@@ -107,6 +126,8 @@ For **pull**, `--force` re-resolves queries and replaces the lockfile after all
 required sources succeed. Valid cached responses may still be reused. For
 **fetch**, `--force` means re-download even a valid cached file. These flags
 have different purposes; re-locking is not a guarantee of upstream freshness.
+`--update` sits between them: it keeps the resolved asset list and refreshes
+bytes for chosen entries only.
 
 The manifest checksum covers its exact bytes. Editing whitespace or comments
 also requires re-locking. An intentionally empty optional source is pinned as
@@ -159,8 +180,11 @@ flowchart TD
     Match -->|No| Error[Error: use force to resolve changed inputs]
     Match -->|Yes| Restore[Restore the pinned assets]
     Restore --> Cache[Verify cache hits or download pinned URLs]
+    Cache --> Changed{Unselected entry changed upstream?}
+    Changed -->|Yes| Report2[Exit 4 listing every changed asset; lockfile kept]
+    Changed -->|No| Update[Rewrite pins only for --update selections]
     Lock --> Verify[verify]
-    Cache --> Verify
+    Update --> Verify
     Verify --> Report[Check manifest checksum and cached bytes]
 ```
 

@@ -121,7 +121,9 @@ def test_cli_pull_and_verify_roundtrip(manifest: Path, tmp_path: Path) -> None:
         mock.get(DATA_URL).mock(return_value=httpx.Response(200, content=CSV_V2))
         stale = runner.invoke(app, ["pull", str(manifest), "--cache-dir", str(tmp_path)])
     # Restore refetches the altered file; upstream now differs from the lock: exit 4.
-    assert stale.exit_code == 4 and "expected sha256" in stale.output
+    assert (
+        stale.exit_code == 4 and "upstream changed" in stale.stdout and "--update" in stale.output
+    )
 
 
 def test_verify_rejects_changed_manifest(manifest: Path, tmp_path: Path) -> None:

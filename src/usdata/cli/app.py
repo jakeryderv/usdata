@@ -16,7 +16,7 @@ from usdata.fetch import fetch as fetch_query
 from usdata.manifest import lockfile_path
 from usdata.providers import load_adapter
 from usdata.providers.base import NotImplementedProvider
-from usdata.pull import EmptySource, ManifestChanged, UnknownDatasets
+from usdata.pull import EmptySource, ManifestChanged, UnknownDatasets, UpstreamChanged
 from usdata.pull import pull as pull_manifest
 from usdata.pull import verify as verify_manifest
 from usdata.query import UnknownPlace
@@ -225,12 +225,18 @@ def pull(
         bool,
         typer.Option(help="Ignore an existing lockfile: re-resolve every source and rewrite it."),
     ] = False,
+    update: Annotated[
+        list[str] | None,
+        typer.Option(
+            help="Asset or dataset id whose pin should follow current upstream bytes; repeatable."
+        ),
+    ] = None,
     no_progress: Annotated[bool, typer.Option(help="Disable terminal progress.")] = False,
 ) -> None:
     """Fetch every source in a manifest and write (or restore from) its lockfile."""
     try:
         with progress(disabled=no_progress):
-            result = pull_manifest(manifest, root=cache_dir, force=force)
+            result = pull_manifest(manifest, root=cache_dir, force=force, update=update or [])
     except EmptySource as e:
         typer.secho(str(e), err=True, fg="yellow")
         raise typer.Exit(code=1) from None
@@ -240,13 +246,27 @@ def pull(
     except NotImplementedProvider as e:
         typer.secho(str(e), err=True, fg="yellow")
         raise typer.Exit(code=3) from None
+    except UpstreamChanged as e:
+        for d in e.drift:
+            typer.echo(f"{d.asset_id}\t{d.problem}\t{d.path}")
+        typer.secho(
+            f"{len(e.drift)} asset(s) changed upstream; lockfile unchanged. "
+            "Pass --update <asset or dataset id> to accept the new bytes.",
+            err=True,
+            fg="red",
+        )
+        raise typer.Exit(code=4) from None
     except (httpx.HTTPError, ChecksumMismatch) as e:
         typer.secho(f"fetch failed: {e}", err=True, fg="red")
         raise typer.Exit(code=4) from None
+    updated = set(result.updated)
     for f in result.fetched:
-        tag = "cached" if f.from_cache else "fetched"
+        tag = "updated" if f.asset.id in updated else "cached" if f.from_cache else "fetched"
         typer.echo(f"{f.path}\t{tag}\t{f.provenance.size} bytes")
-    mode = "restored from" if result.from_lockfile else "wrote"
+    if result.updated:
+        mode = f"updated {len(result.updated)} pin(s) in"
+    else:
+        mode = "restored from" if result.from_lockfile else "wrote"
     typer.echo(f"{len(result.fetched)} asset(s); {mode} {result.lockfile_path}", err=True)
 
 
