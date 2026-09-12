@@ -1,0 +1,1 @@
+GOES queries span at most 7 days and NEXRAD queries at most 31 days, rejected before any request instead of listing hour by hour or day by day without bound. USGS daily-value listing now probes one row per page instead of downloading every JSON page, so dry runs and manifest resolution no longer transfer the data twice.

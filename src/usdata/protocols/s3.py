@@ -61,7 +61,6 @@ def list_objects(
     try:
         while True:
             resp = http.get(https_url(bucket), client, params=params)
-            resp.raise_for_status()
             root = ET.fromstring(resp.text)
             truncated = _text(root, "IsTruncated") == "true"
             token = _text(root, "NextContinuationToken")

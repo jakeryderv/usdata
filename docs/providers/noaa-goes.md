@@ -18,7 +18,8 @@ UTC query interval. It does not select a scan that started before the interval
 merely because the scan overlaps it. Filename start/end stamps have tenths-of-a-
 second precision; asset metadata retains both bounds and the listed byte size.
 Naive dates/times mean UTC; a date-only end is midnight at the start of that day.
-Use a short interval to limit the number of whole-scene downloads.
+A query spans at most seven days; split longer intervals. Even a week of one
+channel is about 2,000 whole scenes, so keep intervals short.
 
 For example, fetch one small shortwave-infrared scene (~255 kB):
 

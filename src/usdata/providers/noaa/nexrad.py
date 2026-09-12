@@ -2,8 +2,8 @@
 
 Key layout: ``YYYY/MM/DD/SITE/SITEYYYYMMDD_HHMMSS[_V06][.gz]``. One object per
 volume scan. ``_MDM`` objects are metadata sidecars and are skipped. There is
-no server-side subsetting; a query selects sites and a time window and every
-whole scan in that window is an asset.
+no server-side subsetting; a query selects sites and a time window of at most
+31 days, and every whole scan in that window is an asset.
 
 Site selection, in order: ``site=``/``sites=`` params, then radars located
 inside the query bbox, then the single radar nearest the bbox centre.
@@ -25,6 +25,7 @@ from usdata.providers.base import QueryError
 from usdata.providers.noaa import sites
 
 BUCKET = "unidata-nexrad-level2"
+MAX_WINDOW = timedelta(days=31)
 KEY_RE = re.compile(r"^(?P<site>[A-Z]{4})(?P<stamp>\d{8}_\d{6})(?:_V0[36])?(?:\.gz)?$")
 
 
@@ -98,6 +99,8 @@ class NexradLevel2(_HttpProvider):
             query, "text", "variables", hint="whole volume scans are selected by site and time"
         )
         start, end = self.utc_window(query)
+        if end - start > MAX_WINDOW:
+            raise QueryError("NEXRAD requests must span at most 31 days; split longer intervals")
         assets: list[Asset] = []
         for site in self.select_sites(query):
             day = start.date()

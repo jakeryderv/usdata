@@ -15,7 +15,8 @@ modern API.
 - `-p statistic_id=00003` selects daily means (the default). Other five-digit
   statistic codes can select minima or maxima. Start and end are inclusive
   local calendar dates; times of day are ignored for daily values.
-- JSON pages resolve the query; each asset downloads the corresponding raw CSV.
+- A one-row JSON probe at each page offset resolves the query without
+  downloading page contents; each asset downloads the corresponding raw CSV.
   CSV retains coordinates, units, approval status, qualifiers, and modification
   timestamps, while excluding the volatile GeoJSON response `timeStamp`.
 - Live checks on 2026-09-05 found that `sortby` is rejected beyond the first
