@@ -144,11 +144,13 @@ curl --fail --output /tmp/hurdat2-nepac.txt \
   'https://www.nhc.noaa.gov/data/hurdat/hurdat2-nepac-1949-2025-02272026.txt'
 ```
 
-The listing keeps every past revision back to 2016 and serves `text/plain;
-charset=UTF-8`. The current Atlantic file was 7,082,381 bytes (2,004 storms,
-55,605 track points) and the northeast Pacific file 3.9 MB (1,262 storms,
-32,026 track points). Filenames are the probe snapshot; the adapter discovers
-current names instead of hard-coding them.
+The listing serves `text/plain; charset=UTF-8` and keeps past revisions: 41
+files on 2026-09-13, the oldest `hurdat2-nepac-1949-2016-041317.txt`, a revision
+of 2017-04-13 covering data through the 2016 season. The current Atlantic file
+was 7,082,381 bytes (2,004 storms, 55,605 track points) and the northeast
+Pacific file 4,083,231 bytes (1,262 storms, 32,026 track points). Filenames are
+the probe snapshot; the adapter discovers current names instead of hard-coding
+them.
 
 Naming is inconsistent in ways worth recording. The Atlantic basin token is
 usually omitted (`hurdat2-1851-2025-02272026.txt`) but appears as `atl` in a few
@@ -158,7 +160,20 @@ chronologically as text; one Pacific name ends in a disambiguating `a`. Director
 sizes are approximate (`6.8M`), unlike NCEI's exact byte counts, so asset size is
 left unknown. Every data line in both current files has 21 fields; revisions
 published before the 2021 season omit the trailing radius of maximum wind.
-The [design decision](../adr/0020-hurdat2-whole-file-and-format-reader.md)
+
+Archived revisions vary more than the current pair suggests, which is worth
+knowing because a lockfile pins one. Parsing all 41 listed files on 2026-09-13:
+8 of them, all Atlantic, write at least one position east of Greenwich as an
+unwrapped 0-360 west longitude (`358.0W` for 2.0E, down to `299.0W` for 61.0E),
+a form the current files no longer use: `hurdat2-1851-2024-040425.txt` rewrote
+those same points with `E` suffixes. Two files carry an upstream typo and cannot
+be parsed at all: `hurdat2-1851-2024-040225.txt` line 30687 drops the comma
+between latitude and longitude, and `hurdat2-nepac-1949-2022-042723.txt` line
+23724 dates a track point `C0091018`. Each is fixed by the next revision of the
+same span, which is also the one the adapter selects. The `-99` maximum-wind
+sentinel is documented as a 1967 convention but appears 57 times in the current
+Atlantic file, all on `TD` records from 1971 through 1987, and never in the
+Pacific file. The [design decision](../adr/0020-hurdat2-whole-file-and-format-reader.md)
 records the whole-file and reader contract.
 
 ## Global Summary of the Month

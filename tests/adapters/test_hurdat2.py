@@ -23,6 +23,10 @@ pytestmark = pytest.mark.l2
 
 FIXTURE = Path(__file__).parents[1] / "fixtures" / "hurdat2-atlantic-excerpt.txt"
 TEXT = FIXTURE.read_bytes()
+# One storm block from an archived pre-2021 revision; see the fixture's .md file.
+LEGACY_FIXTURE = Path(__file__).parents[1] / "fixtures" / "hurdat2-atlantic-legacy-excerpt.txt"
+LEGACY_TEXT = LEGACY_FIXTURE.read_bytes()
+LEGACY = "hurdat2-1851-2020-020922.txt"
 ATLANTIC = "hurdat2-1851-2025-02272026.txt"
 PACIFIC = "hurdat2-nepac-1949-2025-02272026.txt"
 URL = DIRECTORY_URL + ATLANTIC
@@ -213,7 +217,7 @@ def test_reader_signs_coordinates_and_converts_missing_sentinels(tracks) -> None
         "1851-06-25T21:00",
         "2021-06-28T23:20",
     ]
-    # -99 is the documented unassigned intensity of a 1967-era depression.
+    # -99 is the documented unassigned maximum wind of a non-developing depression.
     unassigned = frame[frame.storm_id == "AL021971"].iloc[-1]
     assert math.isnan(unassigned.max_wind_kt)
     modern = frame[frame.storm_id == "AL042021"].iloc[2]
@@ -226,6 +230,24 @@ def test_reader_is_inferred_from_an_archived_filename_alone(tracks) -> None:
         update={"asset": tracks.asset.model_copy(update={"dataset_id": "noaa:storm-events"})}
     )
     assert len(archived.open()) == 27
+
+
+def test_an_archived_pre_2021_revision_opens_with_longitudes_past_greenwich(
+    tmp_path: Path,
+) -> None:
+    pytest.importorskip("pandas")
+    with respx.mock() as mock:
+        mock.get(DIRECTORY_URL).respond(200, text=listing(LEGACY))
+        mock.get(DIRECTORY_URL + LEGACY).respond(200, content=LEGACY_TEXT)
+        (fetched,) = fetch(default_registry().get("noaa:hurdat2"), build_query(), root=tmp_path)
+    frame = fetched.open()
+    assert fetched.asset.id == LEGACY and len(frame) == 34
+    # Pre-2021 data lines carry 20 values and a terminating comma, with no RMW.
+    assert frame.max_wind_radius_nm.isna().all()
+    # The track crosses the prime meridian as 3.3W, 358.0W, 352.5W: the source
+    # counts degrees west the long way round, so 358.0W is the point 2.0E.
+    assert list(frame.longitude.tail(5)) == [-3.3, 2.0, 7.5, 13.0, 18.0]
+    assert frame.longitude.between(-180.0, 180.0).all()
 
 
 def test_reader_rejects_csv_options(tracks) -> None:

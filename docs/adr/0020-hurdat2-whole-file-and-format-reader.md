@@ -41,8 +41,9 @@ or a `hurdat2-*.txt` asset ID, since the service serves `text/plain` and media
 type alone cannot identify the format. Return one row per track point with
 `storm_id`, `name`, UTC `time`, record codes, signed decimal coordinates, wind,
 pressure, the twelve wind radii, and the radius of maximum wind. Convert the
-documented sentinels (`-999`, and `-99` for unassigned 1967 intensities) to NaN,
-use float dtype so the gaps are representable, and encode units in column names
+documented sentinels (`-999`, and `-99` for a maximum wind left unassigned on a
+non-developing depression) to NaN, normalize longitudes into [-180, 180], use
+float dtype so the gaps are representable, and encode units in column names
 rather than synthesizing a units map. Validate declared track-point counts, field
 counts, timestamps, coordinates, and measurements, raising `Hurdat2FormatError`
 with the offending line instead of returning a partly parsed table. Reject the
@@ -57,15 +58,25 @@ dates makes HURDAT2 the first adapter where a manifest's shared date range is an
 error, which is deliberate: a silent no-op would be indistinguishable from a
 working filter.
 
-Revision selection depends on NHC filename conventions. A future name that breaks
-the span-and-date pattern is ignored rather than guessed at, which surfaces as a
-clear "no file in the listing" error. When a new season's file appears under a new
-name, existing lockfiles keep restoring the old one until the NHC removes it;
-preserving the cache remains the durable reproducibility answer.
+Revision selection depends on NHC filename conventions. A name that breaks the
+span-and-date pattern is ignored rather than guessed at, which is right for the
+names already in the listing: `hurdat2-atl-02052024.txt` carries no data span.
+The cost is that "no file in the listing" only surfaces once no name parses, so a
+convention change affecting only the newest file would leave the adapter serving
+the newest name it can still read. Pinning a revision in a lockfile, not trusting
+the listing, is what makes a run reproducible. When a new season's file appears
+under a new name, existing lockfiles keep restoring the old one until the NHC
+removes it; preserving the cache remains the durable reproducibility answer.
 
-Accepting both 20- and 21-field data lines keeps pre-2021 revisions readable with
-`max_wind_radius_nm` as NaN. Column names, not attributes, carry units, so
-exports keep them. Scientific interpretation is unchanged by this decision:
+Accepting 20- as well as 21-field data lines, and longitudes written in the
+unwrapped 0-360 west convention, is what keeps archived revisions readable rather
+than merely downloadable: `max_wind_radius_nm` is NaN before 2021, and a point
+written `358.0W` reads as `2.0`, the value the NHC itself later published for it.
+Of the 41 files the directory listed on 2026-09-13, 39 parse; the two that do not
+carry an upstream typo, a missing comma and a date of `C0091018`, each fixed by
+the next revision of the same span. Refusing those is the point of the format
+error. Column names, not attributes, carry units, so exports keep them.
+Scientific interpretation is unchanged by this decision:
 the reader does not correct the reanalysis's era-dependent undercounting, does
 not reconstruct a wind field from quadrant radii, and does not merge basins.
 IBTrACS remains a separate planned entry for global merged tracks.

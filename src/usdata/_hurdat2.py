@@ -3,8 +3,8 @@
 The source format is a sequence of storm headers, each followed by the exact
 number of track-point lines it declares. Nothing about that structure is
 queryable upstream, so the value of the dataset is in this reader: it returns one
-row per track point with UTC timestamps, signed coordinates, and documented
-missing-value sentinels converted to NaN.
+row per track point with UTC timestamps, signed coordinates normalized to
+[-180, 180], and documented missing-value sentinels converted to NaN.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from datetime import UTC, datetime
 from importlib import import_module
 from typing import TYPE_CHECKING, Any
 
-from usdata.readers import MissingReaderDependency
+from usdata.readers import Hurdat2FormatError, MissingReaderDependency
 
 if TYPE_CHECKING:
     from usdata.fetch import FetchedAsset
@@ -40,12 +40,15 @@ COLUMNS = ["storm_id", "name", "time", "record_identifier", "status", *NUMERIC_C
 # maximum wind was appended for the 2021 season; older revisions stop one short.
 TRACK_FIELDS = len(NUMERIC_COLUMNS) + 4
 # Documented missing-data sentinels: -999 for pressure, wind radii, and RMW; -99
-# for the unassigned intensities of the 1967 non-developing depressions.
+# for a maximum wind left unassigned on a non-developing depression. The NHC
+# format reference ties -99 to 1967; in the current Atlantic file it appears only
+# on TD records from 1971 through 1987, and never in the Pacific file.
 MISSING = {-999, -99}
-
-
-class Hurdat2FormatError(ValueError):
-    """A fetched file does not follow the documented HURDAT2 layout."""
+# Hemisphere-suffixed longitudes are usually within 180 degrees of Greenwich, but
+# some revisions carry a track past the prime meridian in the unwrapped 0-360 west
+# convention, where '357.0W' is the point 3.0 degrees east. Accept that magnitude
+# and wrap the signed result back into [-180, 180].
+LONGITUDE_LIMIT = 360.0
 
 
 def _measurement(text: str, line: int) -> float:
@@ -60,7 +63,7 @@ def _measurement(text: str, line: int) -> float:
 def _coordinate(text: str, axis: str, positive: str, negative: str, line: int) -> float:
     """A hemisphere-suffixed coordinate as signed decimal degrees."""
     hemisphere, magnitude = text[-1:].upper(), text[:-1]
-    limit = 90.0 if axis == "latitude" else 180.0
+    limit = 90.0 if axis == "latitude" else LONGITUDE_LIMIT
     try:
         degrees = float(magnitude)
     except ValueError:
@@ -69,7 +72,10 @@ def _coordinate(text: str, axis: str, positive: str, negative: str, line: int) -
         raise Hurdat2FormatError(
             f"line {line}: expected a {axis} like '28.0{positive}', got {text!r}"
         )
-    return -degrees if hemisphere == negative else degrees
+    signed = -degrees if hemisphere == negative else degrees
+    # Wrap an unwrapped magnitude back onto the meridian circle, leaving an exact
+    # 180 alone so the antimeridian keeps the sign the source wrote.
+    return signed - math.copysign(360.0, signed) if abs(signed) > 180.0 else signed
 
 
 def _track_point(fields: list[str], line: int) -> tuple[Any, ...]:
@@ -82,6 +88,10 @@ def _track_point(fields: list[str], line: int) -> tuple[Any, ...]:
             f"track fields, got {len(fields)}"
         )
     try:
+        # strptime accepts one- or two-digit components, so the concatenation would
+        # silently absorb a short date; the widths are fixed in the format.
+        if (len(fields[0]), len(fields[1])) != (8, 4):
+            raise ValueError("date and time fields are not 8 and 4 characters")
         when = datetime.strptime(f"{fields[0]}{fields[1]}", "%Y%m%d%H%M").replace(tzinfo=UTC)
     except ValueError as error:
         raise Hurdat2FormatError(

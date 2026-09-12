@@ -189,7 +189,9 @@ and [ADR 0009](../adr/0009-eager-local-netcdf4-reader.md).
 Available from source for the unreleased v0.12.0, behind the same pandas extra as
 CSV. `noaa:hurdat2` assets and files named `hurdat2-*.txt` infer the reader, since
 the service serves generic `text/plain`; pass `reader="hurdat2"` for an archived
-copy with ambiguous metadata.
+copy with ambiguous metadata. Archived revisions read the same as current ones:
+lines without the radius of maximum wind, added for the 2021 season, leave that
+column NaN.
 
 ```python
 tracks = item.open()  # a fetched noaa:hurdat2 asset
@@ -203,15 +205,18 @@ The result is a pandas DataFrame with one row per best-track point: `storm_id`,
 `r64_nw_nm`), and `max_wind_radius_nm`. Storm identity and name are repeated on
 every row of a storm, which is what makes the table groupable.
 
-Documented missing sentinels become NaN (`-999`, and `-99` for a few unassigned
-1967 intensities), so numeric columns use float dtype; units live in the column
-names rather than a synthesized units map. Text columns keep source strings, and
-a blank record identifier or status is missing rather than an empty string.
-Revisions published before the 2021 season omit the radius of maximum wind, which
-is then NaN for every row. A declared track-point count that does not match, a
-line with the wrong number of fields, or an unparseable time, coordinate, or
-measurement raises `Hurdat2FormatError` (a `ValueError` from `usdata._hurdat2`)
-naming the line, instead of returning a partly parsed table. CSV options do not
+Documented missing sentinels become NaN: `-999`, and `-99` where a maximum wind
+was left unassigned on a non-developing depression. Numeric columns therefore use
+float dtype; units live in the column names rather than a synthesized units map.
+Text columns keep source strings, and a blank record identifier or status is
+missing rather than an empty string. Revisions published before the 2021 season
+omit the radius of maximum wind, which is then NaN for every row. Longitudes are
+normalized into [-180, 180]: some revisions carry a track past the prime meridian
+in the unwrapped 0-360 west convention, where `358.0W` is the point 2.0 degrees
+east. A declared track-point count that does not match, a line with the wrong
+number of fields, or an unparseable time, coordinate, or measurement raises
+`Hurdat2FormatError` from `usdata.readers` (a `ValueError`) naming the line,
+instead of returning a partly parsed table. CSV options do not
 apply and are rejected. See the [dataset guide](../providers/noaa-hurdat2.md),
 the [manifest example](../examples/hurdat2/README.md), and
 [ADR 0020](../adr/0020-hurdat2-whole-file-and-format-reader.md).

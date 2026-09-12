@@ -43,6 +43,10 @@ class RadarDecodeError(ValueError):
     """Radar sweep metadata cannot safely pair observations with coordinates."""
 
 
+class Hurdat2FormatError(ValueError):
+    """A fetched file does not follow the documented HURDAT2 layout."""
+
+
 def open_asset(
     fetched: FetchedAsset,
     *,

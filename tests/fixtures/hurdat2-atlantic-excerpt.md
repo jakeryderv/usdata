@@ -14,7 +14,7 @@ The excerpt preserves source spacing, field order, and the declared track-point
 counts; unlike the whole source file, it ends with a terminating LF. The storms
 were chosen to cover the format's variation: AL011851 and AL021851 have no wind radii
 (`-999`) and a landfall record at a synoptic time, AL021971 ends with the `-99`
-unassigned intensity of a 1967-era non-developing depression, and AL042021 has
+maximum wind left unassigned on a non-developing depression, and AL042021 has
 best-tracked radii, a radius of maximum wind, and an asynoptic landfall.
 Directory listings and malformed layouts are synthetic in the tests, so they can
 cover revision selection, unsafe links, and truncated files without mirroring

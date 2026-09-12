@@ -42,12 +42,12 @@ For a [source installation](https://docs.usdata.dev/project/#source-installation
 The reader returns one row per best-track point: `storm_id`, `name`, UTC `time`,
 `record_identifier`, `status`, signed `latitude`/`longitude`, `max_wind_kt`,
 `min_pressure_mb`, twelve wind-radii columns, and `max_wind_radius_nm`. The
-documented missing sentinels (`-999`, and `-99` for a few 1967 intensities)
-become NaN, so wind radii are absent before 2004 and radii of maximum wind
-before 2021. A landfall row is not one landfall event per storm, and a track
-point is not an observation: HURDAT2 is a post-season reanalysis whose early
-decades undercount storms and underestimate intensities. Compare eras with that
-in mind.
+documented missing sentinels become NaN (`-999`, and `-99` where a maximum wind
+was left unassigned on a non-developing depression), so wind radii are absent
+before 2004 and radii of maximum wind before 2021. A landfall row is not one
+landfall event per storm, and a track point is not an observation: HURDAT2 is a
+post-season reanalysis whose early decades undercount storms and underestimate
+intensities. Compare eras with that in mind.
 
 A repeat pull uses the lockfile and checksummed cache. Keep the manifest,
 lockfile, and cached bytes for reproducibility: the NHC replaces this file with

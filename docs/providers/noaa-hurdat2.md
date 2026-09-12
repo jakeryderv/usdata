@@ -24,8 +24,11 @@ Pacific). Filter the parsed `time` column locally. `capabilities` are all false.
 
 ## Revisions and filenames
 
-The [data directory](https://www.nhc.noaa.gov/data/hurdat/) keeps every past
-revision. Filenames embed the data span and a revision date, such as
+The [data directory](https://www.nhc.noaa.gov/data/hurdat/) keeps past
+revisions, not only the current pair: it listed 41 files on 2026-09-13, the
+oldest a Pacific file revised 2017-04-13. How far back it reaches is the NHC's
+choice, so treat it as an archive that happens to be deep rather than a complete
+history. Filenames embed the data span and a revision date, such as
 `hurdat2-1851-2025-02272026.txt` and `hurdat2-nepac-1949-2025-02272026.txt`.
 The basin token is `nepac` for the Pacific and either `atl` or absent for the
 Atlantic. Revision dates are `MMDDYY` or `MMDDYYYY` — never `YYYYMMDD` — and a
@@ -55,16 +58,18 @@ returns one row per best-track point:
 | `time` | Track-point time, UTC |
 | `record_identifier` | `L` landfall, `I` intensity peak, `P` pressure minimum, and the other documented codes; missing on ordinary records |
 | `status` | `TD`, `TS`, `HU`, `EX`, `SD`, `SS`, `LO`, `WV`, or `DB` |
-| `latitude`, `longitude` | Signed decimal degrees; the source hemisphere letters become signs |
+| `latitude`, `longitude` | Signed decimal degrees, longitude in [-180, 180]; the source hemisphere letters become signs |
 | `max_wind_kt` | Maximum sustained 1-minute surface wind, knots |
 | `min_pressure_mb` | Minimum central pressure, millibars |
 | `r34_ne_nm` … `r64_nw_nm` | Twelve wind radii: the 34, 50, and 64 kt maximum extent in each quadrant, nautical miles |
 | `max_wind_radius_nm` | Radius of maximum wind, nautical miles |
 
 The documented missing sentinels become NaN: `-999` anywhere, and the `-99`
-intensities left unassigned for the 1967 non-developing depressions. Wind radii
-were best-tracked only from 2004 and the radius of maximum wind only from 2021,
-so those columns are mostly NaN in earlier decades; revisions published before
+maximum wind left unassigned on a non-developing depression. The NHC format
+reference ties `-99` to 1967; in the current Atlantic file it in fact appears 57
+times, all on `TD` records between 1971 and 1987, and never in the Pacific file.
+Wind radii were best-tracked only from 2004 and the radius of maximum wind only
+from 2021, so those columns are mostly NaN in earlier decades; revisions published before
 2021 omit the radius-of-maximum-wind field entirely and the reader fills it with
 NaN. Numeric columns use float dtype so those gaps are representable; units are
 in the column names rather than a synthesized units map. Text columns keep source
@@ -75,11 +80,23 @@ Parsing follows the file's own structure: a header line such as
 `AL011851, UNNAMED, 14,` is followed by exactly the number of track-point lines
 it declares. A count that does not match, a line with the wrong number of fields,
 an unparseable timestamp or coordinate, or text where a measurement belongs
-raises `Hurdat2FormatError` (a `ValueError`) naming the line, rather than
-returning a partly parsed table. CSV options (`dtype`, `parse_dates`, `usecols`,
-`nrows`) do not apply and are rejected. Opening is local: it never re-fetches,
-decompresses into the cache, or changes provenance, which is copied into
-`frame.attrs["usdata"]`.
+raises `Hurdat2FormatError` from `usdata.readers` (a `ValueError`) naming the
+line, rather than returning a partly parsed table.
+
+Archived revisions read the same way, which is what makes a restored lockfile
+useful. Two differences show up only in older files. Data lines published before
+the 2021 season carry 20 values and a terminating comma instead of 21, so
+`max_wind_radius_nm` is NaN. And some revisions write a position east of
+Greenwich in the unwrapped 0-360 west convention, continuing a track from `3.3W`
+to `358.0W`; the reader normalizes that to `2.0`, the value the NHC itself
+published for the same point in a later revision. Of the 41 files listed on
+2026-09-13, 39 parse; two carry an upstream typo (a missing comma between
+latitude and longitude, and a date written `C0091018`) that the next revision of
+the same span corrects, and those raise rather than parse silently.
+
+CSV options (`dtype`, `parse_dates`, `usecols`, `nrows`) do not apply and are
+rejected. Opening is local: it never re-fetches, decompresses into the cache, or
+changes provenance, which is copied into `frame.attrs["usdata"]`.
 
 ## Scientific limits
 
