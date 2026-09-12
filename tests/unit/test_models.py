@@ -69,9 +69,9 @@ def _dataset(**overrides: object) -> Dataset:
         "title": "x",
         "protocol": Protocol.HTTP,
         "domain": "climate",
-        "status": Status.STUB,
+        "status": Status.PLANNED,
         "target": "later",
-        "adapter": "m:C",
+        "adapter": None,
     }
     return Dataset.model_validate({**base, **overrides})
 
@@ -87,19 +87,19 @@ def test_dataset_id_must_match_provider() -> None:
 
 
 def test_dataset_status_adapter_and_versions_agree() -> None:
-    assert _dataset(status=Status.PLANNED, adapter=None).version_label == "target later"
+    assert _dataset().version_label == "target later"
     assert _dataset(target="0.3").version_label == "target 0.3"
-    shipped = _dataset(status=Status.AVAILABLE, target=None, since="0.2")
+    shipped = _dataset(status=Status.AVAILABLE, target=None, since="0.2", adapter="m:C")
     assert shipped.version_label == "since 0.2"
     with pytest.raises(ValidationError, match="must not name an adapter"):
-        _dataset(status=Status.PLANNED)
+        _dataset(adapter="m:C")
     with pytest.raises(ValidationError, match="need adapter"):
-        _dataset(adapter=None)
+        _dataset(status=Status.AVAILABLE, target=None, since="0.2")
     with pytest.raises(ValidationError, match="need a target"):
         _dataset(target=None)
     with pytest.raises(ValidationError, match="shipped in"):
-        _dataset(status=Status.AVAILABLE, target=None)
+        _dataset(status=Status.AVAILABLE, target=None, adapter="m:C")
     with pytest.raises(ValidationError, match="no target"):
-        _dataset(status=Status.AVAILABLE, since="0.2")
+        _dataset(status=Status.AVAILABLE, since="0.2", adapter="m:C")
     with pytest.raises(ValidationError, match="minor version"):
         _dataset(target="v0.4")

@@ -143,15 +143,14 @@ class Registry:
         return list(self._domains.values())
 
     def next_target(self) -> str | None:
-        """The nearest version any stub or planned dataset is aimed at, or None."""
+        """The nearest version any planned dataset is aimed at, or None."""
         targets = {ds.target for ds in self if ds.target and ds.target != LATER}
         return min(targets, key=version_key) if targets else None
 
     def search(self, query: Query, *, include_planned: bool = False) -> list[SearchResult]:
         """Rank datasets by keyword match, filtered by provider, space, and time.
 
-        Planned datasets are left out unless ``include_planned`` is set; stubs are
-        always included because their adapters are being built.
+        Planned datasets are left out unless ``include_planned`` is set.
         """
         terms = _tokens(query.text or "")
         results: list[SearchResult] = []

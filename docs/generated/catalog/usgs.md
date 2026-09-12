@@ -25,7 +25,6 @@ Global earthquake events with location, magnitude, and depth from the ANSS Compr
 [Upstream information](https://earthquake.usgs.gov/fdsnws/event/1/)
 Domain: Natural hazards.
 
-
 ### usgs:3dep-elevation
 
 **3DEP Elevation** · Planned · target later

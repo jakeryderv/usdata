@@ -26,7 +26,7 @@ from usdata.registry import Registry, version_key
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
 CATALOG_DIR = ROOT / "docs/generated/catalog"
-STATUS_ORDER = [Status.AVAILABLE, Status.STUB, Status.PLANNED]
+STATUS_ORDER = [Status.AVAILABLE, Status.PLANNED]
 GENERATED_NOTE = (
     "Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand."
 )
@@ -58,7 +58,7 @@ def by_provider(registry: Registry) -> list[tuple[ProviderInfo, list[Dataset]]]:
 
     def progress(pid: str) -> tuple[int, int, str]:
         counts = Counter(d.status for d in groups[pid])
-        return (-counts[Status.AVAILABLE], -counts[Status.STUB], registry.provider(pid).name)
+        return (-counts[Status.AVAILABLE], registry.provider(pid).name)
 
     domain_order = [d.id for d in registry.domains()]
 
@@ -134,9 +134,6 @@ def planned_block(registry: Registry, datasets: list[Dataset]) -> str:
             "",
             f"[Upstream information]({ds.homepage})" if ds.homepage else "",
             f"Domain: {registry.domain(ds.domain).name}.",
-            "Adapter scaffold exists; fetching is not implemented."
-            if ds.status is Status.STUB
-            else "",
             "",
         ]
     return "\n".join(lines).rstrip() + "\n"

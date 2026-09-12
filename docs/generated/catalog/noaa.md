@@ -34,7 +34,6 @@ Global hourly and sub-hourly surface observations, the successor to ISD. Publish
 [Upstream information](https://www.ncei.noaa.gov/products/global-historical-climatology-network-hourly)
 Domain: Surface weather.
 
-
 ### noaa:lcd
 
 **Local Climatological Data** · Planned · target later
@@ -43,7 +42,6 @@ Hourly, daily, and monthly observations from airport and first-order stations vi
 
 [Upstream information](https://www.ncei.noaa.gov/products/land-based-station/local-climatological-data)
 Domain: Surface weather.
-
 
 ### noaa:mrms
 
@@ -54,7 +52,6 @@ Gridded CONUS products merged from all radars plus other sensors (reflectivity, 
 [Upstream information](https://registry.opendata.aws/noaa-mrms-pds/)
 Domain: Weather radar.
 
-
 ### noaa:nexrad-level3
 
 **NEXRAD Level III Products** · Planned · target later
@@ -63,7 +60,6 @@ Derived single-radar products (base reflectivity, velocity, storm totals, and ot
 
 [Upstream information](https://registry.opendata.aws/noaa-nexrad/)
 Domain: Weather radar.
-
 
 ### noaa:goes-glm
 
@@ -74,7 +70,6 @@ Lightning flash, group, and event detections (GLM-L2-LCFA) in 20-second NetCDF f
 [Upstream information](https://registry.opendata.aws/noaa-goes/)
 Domain: Weather satellites.
 
-
 ### noaa:ibtracs
 
 **IBTrACS Global Tropical Cyclone Tracks** · Planned · target later
@@ -83,7 +78,6 @@ International Best Track Archive for Climate Stewardship: merged best tracks fro
 
 [Upstream information](https://www.ncei.noaa.gov/products/international-best-track-archive)
 Domain: Tropical cyclones.
-
 
 ### noaa:gfs
 
@@ -94,7 +88,6 @@ Global Forecast System output in GRIB2 from the public noaa-gfs-bdp-pds S3 bucke
 [Upstream information](https://registry.opendata.aws/noaa-gfs-bdp-pds/)
 Domain: Weather models.
 
-
 ### noaa:hrrr
 
 **HRRR Forecast Model Output** · Planned · target later
@@ -103,7 +96,6 @@ High-Resolution Rapid Refresh 3 km hourly forecasts in GRIB2 from the public noa
 
 [Upstream information](https://registry.opendata.aws/noaa-hrrr-pds/)
 Domain: Weather models.
-
 
 ### noaa:nbm
 
@@ -114,7 +106,6 @@ Statistically blended forecast guidance in GRIB2 from the public noaa-nbm-grib2-
 [Upstream information](https://registry.opendata.aws/noaa-nbm/)
 Domain: Weather models.
 
-
 ### noaa:nclimdiv
 
 **nClimDiv Climate Divisional Data** · Planned · target later
@@ -123,7 +114,6 @@ Monthly temperature, precipitation, and drought indices for U.S. climate divisio
 
 [Upstream information](https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/)
 Domain: Climate.
-
 
 ### noaa:sea-ice-index
 
@@ -134,7 +124,6 @@ Daily and monthly Arctic and Antarctic sea ice extent and concentration (NOAA@NS
 [Upstream information](https://nsidc.org/data/g02135)
 Domain: Snow and ice.
 
-
 ### noaa:ersst
 
 **ERSST Monthly Sea Surface Temperature** · Planned · target later
@@ -143,7 +132,6 @@ Extended Reconstructed SST v5: monthly global 2 degree analysis since 1854, one 
 
 [Upstream information](https://www.ncei.noaa.gov/products/extended-reconstructed-sst)
 Domain: Ocean physics.
-
 
 ### noaa:oisst
 
@@ -154,7 +142,6 @@ Optimum Interpolation SST v2.1: daily global 0.25 degree analysis since Septembe
 [Upstream information](https://www.ncei.noaa.gov/products/optimum-interpolation-sst)
 Domain: Ocean physics.
 
-
 ### noaa:ocads
 
 **Ocean Carbon and Acidification Data System** · Planned · target later
@@ -163,7 +150,6 @@ Archived ocean carbon, pH, and related chemistry datasets (cruises, moorings, sy
 
 [Upstream information](https://www.ncei.noaa.gov/products/ocean-carbon-acidification-data-system)
 Domain: Ocean chemistry.
-
 
 ### noaa:etopo
 
@@ -174,7 +160,6 @@ Global topography and bathymetry at 15, 30, and 60 arc-seconds as NetCDF and Geo
 [Upstream information](https://www.ncei.noaa.gov/products/etopo-global-relief-model)
 Domain: Bathymetry and hydrography.
 
-
 ### noaa:tsunami-events
 
 **Global Historical Tsunami Database** · Planned · target later
@@ -183,7 +168,6 @@ Tsunami source events and runup observations since 2100 BCE from NCEI, served as
 
 [Upstream information](https://www.ngdc.noaa.gov/hazel/view/hazards/tsunami/event-search)
 Domain: Natural hazards.
-
 
 ### noaa:paleo-search
 
@@ -194,7 +178,6 @@ Proxy climate records (tree rings, ice cores, sediments, corals) with a JSON stu
 [Upstream information](https://www.ncei.noaa.gov/products/paleoclimatology)
 Domain: Paleoclimate.
 
-
 ### noaa:swpc-realtime
 
 **SWPC Real-Time Space Weather Products** · Planned · target later
@@ -203,7 +186,6 @@ Planetary K index, solar wind, and other real-time indices as small JSON files f
 
 [Upstream information](https://www.swpc.noaa.gov/products-and-data)
 Domain: Space weather.
-
 
 ### noaa:cdr-ndvi
 

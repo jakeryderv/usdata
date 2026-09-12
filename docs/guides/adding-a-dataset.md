@@ -23,9 +23,9 @@ Add to `src/usdata/data/registry.yaml`:
   - id: noaa:ghcn-daily            # <provider>:<name>, stable forever
     provider: noaa                  # must appear under top-level `providers:`
     domain: surface-weather         # one of the ids under top-level `domains:`
-    status: available               # planned (no adapter) | stub | available
+    status: available               # planned (no adapter) | available
     since: "0.2"                    # available: version it shipped in
-    # target: "0.4" | later         # planned/stub: phase it is aimed at
+    # target: "0.4" | later         # planned: phase it is aimed at
     title: GHCN-Daily Station Observations
     description: >-                 # what it is, how it is served, what subsetting exists
       ...
@@ -42,8 +42,7 @@ Add to `src/usdata/data/registry.yaml`:
 Every field must be true. The registry test suite loads all entries and
 imports every non-planned adapter. A dataset can start life as `planned`
 with just this entry, which puts it in search results and the docs; flip it
-to `stub` when the class exists and `available` when the live test passes,
-replacing `target` with `since`. Planned datasets are hidden from `usdata search`
+to `available` when the live test passes, replacing `target` with `since`. Planned datasets are hidden from `usdata search`
 unless `--planned` is passed; `info` always works. Moving a dataset to a different
 phase is a one-line change to `target`; the generated versions and catalog pages follow.
 Run `just docs` after editing to refresh `docs/generated/catalog/`. The README

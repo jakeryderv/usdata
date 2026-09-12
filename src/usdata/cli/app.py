@@ -120,7 +120,7 @@ def info(
             f"  time:      {ds.temporal_extent.start} .. {ds.temporal_extent.end or 'present'}"
         )
     if ds.status is not Status.AVAILABLE:
-        return  # Planned entries have no adapter; a stub's would raise or declare nothing.
+        return  # Planned entries have no adapter to ask.
     with load_adapter(ds) as adapter:
         declared = dict(adapter.accepted_params)
     if not declared:

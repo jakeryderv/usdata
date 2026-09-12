@@ -2,7 +2,6 @@
 # Rendered exclusively to docs/generated/catalog/ by `just docs`.
 #
 # status: available = adapter implemented and tested (since: version it shipped in)
-#         stub      = adapter class exists but raises NotImplementedProvider (target: version or later)
 #         planned   = entry only, no adapter (target: version or later)
 # domain: one of the ids under `domains:`; shared across providers.
 
