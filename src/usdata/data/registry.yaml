@@ -251,20 +251,25 @@ datasets:
 
   - id: noaa:climate-normals
     provider: noaa
-    status: planned
+    status: available
     domain: climate
-    target: later
+    since: "0.11"
     title: U.S. Climate Normals 1991-2020
     description: >-
-      Daily and monthly station normals via the NCEI Access Data Service
-      datasets normals-daily-1991-2020 and normals-monthly-1991-2020. The
-      daily dataset requires start and end dates inside a placeholder year
-      (for example 2010-01-01 to 2010-12-31).
-    keywords: [climate, normals, averages, stations, temperature, precipitation]
+      Daily, monthly, and annual/seasonal 30-year station normals via the NCEI
+      Access Data Service datasets normals-daily-1991-2020,
+      normals-monthly-1991-2020, and normals-annualseasonal-1991-2020, chosen
+      with a period parameter. Dates are optional; daily and monthly normals
+      accept a month-day window inside a placeholder year. Explicit stations
+      or station discovery through the companion search service.
+    keywords: [climate, normals, averages, stations, temperature, precipitation, ncei]
     protocol: http
     homepage: https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals
     license: US Government Work (public domain)
+    spatial_extent: { west: -180.0, south: -90.0, east: 180.0, north: 90.0 }
+    temporal_extent: { start: "1991-01-01T00:00:00Z", end: "2020-12-31T23:59:59Z" }
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+    adapter: usdata.providers.noaa.normals:ClimateNormals
 
   - id: noaa:mrms
     provider: noaa
@@ -712,6 +717,16 @@ catalog:
     reader_extra: pandas
     examples:
     - examples/annual-climate/README.md
+  noaa:climate-normals:
+    guide: docs/providers/noaa-normals.md
+    summary: 30-year station climate normals
+    formats:
+    - CSV
+    selection: Monthly, daily, or annual/seasonal normals per station; optional month-day window for daily and monthly
+    inputs: Station IDs or a geographic query; dates optional
+    reader_extra: pandas
+    examples:
+    - examples/climate-normals/README.md
   noaa:nexrad-level2:
     guide: docs/providers/noaa-nexrad.md
     summary: NEXRAD radar scans

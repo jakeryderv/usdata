@@ -16,6 +16,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | <span id="noaastorm-events"></span>[Storm Events details](noaa/storm-events.md) | Released | gzip CSV | Whole annual archives; filter rows locally after downloading |
 | <span id="noaanexrad-level2"></span>[NEXRAD radar scans](noaa/nexrad-level2.md) | Released | NEXRAD Level II | Whole radar scans by site and inclusive UTC scan-start time |
 | <span id="noaagoes-abi"></span>[GOES CONUS imagery](noaa/goes-abi.md) | Released | NetCDF4 | Whole single-channel CONUS scenes by inclusive UTC scan-start time |
+| <span id="noaaclimate-normals"></span>[30-year station climate normals](noaa/climate-normals.md) | Source only | CSV | Monthly, daily, or annual/seasonal normals per station; optional month-day window for daily and monthly |
 | <span id="noaacoops-water-levels"></span>[Coastal water levels](noaa/coops-water-levels.md) | Released | CSV | Six-minute observations for one station and datum; at most 28 days |
 | <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](noaa/coastwatch-sst.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
 
@@ -121,16 +122,6 @@ Statistically blended forecast guidance in GRIB2 from the public noaa-nbm-grib2-
 
 [Upstream information](https://registry.opendata.aws/noaa-nbm/)
 Domain: Weather models.
-
-
-### noaa:climate-normals
-
-**U.S. Climate Normals 1991-2020** · Planned · target later
-
-Daily and monthly station normals via the NCEI Access Data Service datasets normals-daily-1991-2020 and normals-monthly-1991-2020. The daily dataset requires start and end dates inside a placeholder year (for example 2010-01-01 to 2010-12-31).
-
-[Upstream information](https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals)
-Domain: Climate.
 
 
 ### noaa:nclimdiv

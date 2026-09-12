@@ -53,11 +53,15 @@ class GhcnDaily(_HttpProvider):
 
     def find_stations(self, query: Query) -> list[str]:
         """Station ids with data inside the query's bbox and time range."""
+        return self._search_stations(self.ncei_dataset, query)
+
+    def _search_stations(self, ncei_dataset: str, query: Query) -> list[str]:
+        """Page through the NCEI search service for one dataset's stations."""
         if query.bbox is None or query.time is None:
             raise QueryError("station search needs a bounding box and a time range")
         b = query.bbox
         params: dict[str, Any] = {
-            "dataset": self.ncei_dataset,
+            "dataset": ncei_dataset,
             "bbox": f"{b.north},{b.west},{b.south},{b.east}",
             "startDate": _date(query.time.start),
             "endDate": _date(query.time.end),
