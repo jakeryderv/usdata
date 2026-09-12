@@ -1,1 +1,0 @@
-Add `noaa:lcd`, NCEI Local Climatological Data: hourly, special, synoptic, and daily-summary reports from airport and first-order stations as CSV, with the GHCN family's station discovery, unit selection, and variable subsetting, plus a manifest example comparing hourly readings with the daily summary.

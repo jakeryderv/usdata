@@ -1,6 +1,6 @@
 # Hourly airport observations
 
-Available from source for the unreleased v0.14.0. The [manifest](dataset.yaml)
+Available since v0.14.0. The [manifest](dataset.yaml)
 requests three days of Local Climatological Data at Oklahoma City's Will Rogers
 World Airport through `noaa:lcd`: hourly temperature and precipitation together
 with the daily maximum, minimum, and precipitation summary. Every row is one

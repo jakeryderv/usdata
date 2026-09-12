@@ -12,6 +12,22 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.14.0](https://github.com/jakeryderv/usdata/releases/tag/v0.14.0) - 2026-09-12
+
+
+### Removed
+
+- Remove the never-used `stub` dataset status. Registry entries are either `planned` (no adapter) or `available`; the dataset-authoring guide no longer describes an intermediate scaffold phase.
+
+### Added
+
+- Add `noaa:coops-tide-predictions`, astronomical tide predictions for one CO-OPS station on a six-minute, other minute, hourly, or high/low interval, sharing the station, datum, units, and validation rules of the observed water levels. A new storm-surge example subtracts the predictions from Cedar Key's observations during Hurricane Helene and places the peak against the HURDAT2 track.
+- Add `noaa:lcd`, NCEI Local Climatological Data: hourly, special, synoptic, and daily-summary reports from airport and first-order stations as CSV, with the GHCN family's station discovery, unit selection, and variable subsetting, plus a manifest example comparing hourly readings with the daily summary.
+
+### Documentation
+
+- Record the v0.13.0 first-use review: the published walkthrough, live checks for every adapter the release changed, and the new query-validation behaviour all passed.
+
 ## [0.13.0](https://github.com/jakeryderv/usdata/releases/tag/v0.13.0) - 2026-09-12
 
 

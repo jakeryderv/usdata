@@ -1,6 +1,6 @@
 # Local Climatological Data
 
-Available from source for the unreleased v0.14.0 as `noaa:lcd`. LCD uses the
+Available since v0.14.0 as `noaa:lcd`. LCD uses the
 anonymous NCEI Access Data Service dataset `local-climatological-data`, reusing
 GHCN station discovery, pagination, and CSV chunking, with ten stations per
 asset instead of fifty because hourly rows are wide. Require both dates and
