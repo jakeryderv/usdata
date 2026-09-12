@@ -30,7 +30,7 @@ print(frame[["Date Time", "Water Level", "Quality"]])
 print(item.provenance.source_url)
 ```
 
-For a [source installation](../../README.md#source-installation), run from
+For a [source installation](https://docs.usdata.dev/project/#source-installation), run from
 `examples/coastal-water-levels/` and use `uv run usdata` and `uv run python`.
 
 The CSV reader preserves original column names, including NOAA's spaces. The
@@ -52,5 +52,5 @@ an upstream error during fetching, including NOAA's HTTP-200 no-data message;
 
 Preserve the manifest, lockfile, and cache together. Locked restoration checks
 exact bytes; upstream revisions require an explicit refresh rather than silently
-changing the analysis inputs. See [NOAA access notes](../../docs/content/providers/noaa-coops.md)
+changing the analysis inputs. See [NOAA access notes](https://docs.usdata.dev/providers/noaa-coops/)
 for supported parameters and limits.

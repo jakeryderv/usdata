@@ -4,7 +4,7 @@ Open [example.ipynb](example.ipynb) to see an executed GOES-18 channel-13 scene,
 quality-filtered brightness-temperature image in scan coordinates, and pixel
 histogram. Available since v0.8.
 
-Use [notebook setup](../README.md) from the repository root. The NetCDF reader
+Use [notebook setup](https://docs.usdata.dev/project/) from the repository root. The NetCDF reader
 requires `usdata[netcdf]`; the example environment supplies plotting and Jupyter.
 The repository pins Python 3.14.7 to avoid an upstream crash in older Linux uv
 Python 3.14 builds. Other supported Python versions can also run the notebook.

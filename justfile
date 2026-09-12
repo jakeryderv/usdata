@@ -39,11 +39,13 @@ docs:
 
 # Preview the documentation locally, watching maintained sources
 docs-serve:
-    UV_NO_SYNC=0 UV_PROJECT_ENVIRONMENT=.venv-docs uv run --group docs --no-default-groups python docs/build.py serve
+    UV_NO_SYNC=0 UV_PROJECT_ENVIRONMENT=.venv-docs uv run --group docs --no-default-groups python scripts/generate_docs.py
+    UV_NO_SYNC=0 UV_PROJECT_ENVIRONMENT=.venv-docs uv run --locked --group docs --no-default-groups mkdocs serve
 
 # Build static documentation without publishing
 docs-build:
-    UV_NO_SYNC=0 UV_PROJECT_ENVIRONMENT=.venv-docs uv run --group docs --no-default-groups python docs/build.py build
+    UV_NO_SYNC=0 UV_PROJECT_ENVIRONMENT=.venv-docs uv run --group docs --no-default-groups python scripts/generate_docs.py
+    UV_NO_SYNC=0 UV_PROJECT_ENVIRONMENT=.venv-docs uv run --locked --group docs --no-default-groups mkdocs build --strict
 
 # Check documentation ownership, saved outputs, links and anchors
 check-docs:

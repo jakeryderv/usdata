@@ -1,6 +1,6 @@
 """Render the dataset registry into the docs.
 
-Outputs live exclusively under docs/content/generated/catalog/.
+Outputs live exclusively under docs/generated/catalog/.
 Provider access notes, usage guides, indexes, and the roadmap are handwritten.
 
 Run via ``just docs``. ``--check`` renders without writing and exits 1 if any
@@ -24,7 +24,7 @@ from usdata.registry import Registry, version_key
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
-CATALOG_DIR = ROOT / "docs/content/generated/catalog"
+CATALOG_DIR = ROOT / "docs/generated/catalog"
 STATUS_ORDER = [Status.AVAILABLE, Status.STUB, Status.PLANNED]
 GENERATED_NOTE = (
     "Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand."
@@ -227,14 +227,12 @@ def catalog_entries(registry: Registry, root: Path = ROOT) -> dict[str, CatalogE
         if (
             path.is_absolute()
             or ".." in path.parts
-            or not path.is_relative_to("docs/content/providers")
+            or not path.is_relative_to("docs/providers")
             or path.suffix != ".md"
             or not (root / path).resolve().is_relative_to(root.resolve())
             or not (root / path).is_file()
         ):
-            raise ValueError(
-                f"{key}: guide must be an existing Markdown file in docs/content/providers"
-            )
+            raise ValueError(f"{key}: guide must be an existing Markdown file in docs/providers")
         if (root / path).resolve() in guides:
             raise ValueError(f"{key}: each dataset needs its own usage guide")
         guides.add((root / path).resolve())
@@ -242,18 +240,19 @@ def catalog_entries(registry: Registry, root: Path = ROOT) -> dict[str, CatalogE
 
 
 def dataset_path(ds: Dataset) -> Path:
-    return Path("docs/content/generated/catalog") / ds.provider / f"{ds.name}.md"
+    return Path("docs/generated/catalog") / ds.provider / f"{ds.name}.md"
 
 
 def usage_link(ds: Dataset, entry: CatalogEntry) -> str:
     relative = posixpath.relpath(entry.guide, dataset_path(ds).parent.as_posix())
-    return f"<!-- dataset-usage -->\n[Usage guide]({relative})."
+    return f"[Usage guide]({relative})."
 
 
 def render_dataset(registry: Registry, ds: Dataset, entry: CatalogEntry) -> str:
+    parent = dataset_path(ds).parent.as_posix()
     examples = ", ".join(
         f"[{Path(path).parent.name.replace('-', ' ')}]"
-        f"({posixpath.relpath(path, dataset_path(ds).parent.as_posix())})"
+        f"({posixpath.relpath(Path('docs') / Path(path).with_suffix('.md'), parent)})"
         for path in entry.examples
     )
     reader = (
@@ -355,7 +354,7 @@ def render_all(registry: Registry) -> dict[Path, str]:
 
 def sync(outputs: dict[Path, str], *, check: bool) -> list[Path]:
     if any(not path.resolve().is_relative_to(CATALOG_DIR.resolve()) for path in outputs):
-        raise ValueError("generated outputs must stay inside docs/content/generated/catalog")
+        raise ValueError("generated outputs must stay inside docs/generated/catalog")
     obsolete = set(CATALOG_DIR.rglob("*.md")) - outputs.keys()
     stale = [p for p, text in outputs.items() if not p.exists() or p.read_text() != text]
     if not check:
