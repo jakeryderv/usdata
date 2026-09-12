@@ -9,7 +9,7 @@ NOAA access is anonymous.
 | `ghcn-daily` | [Daily station observations](noaa-ghcn.md) | Station CSV for inclusive dates |
 | `gsom` | [Monthly station summaries](noaa-gsom.md) | Complete UTC months |
 | `gsoy` | [Annual station summaries](noaa-gsoy.md) (v0.10.0) | Complete UTC years |
-| `climate-normals` | [30-year station normals](noaa-normals.md) (source only, v0.11.0) | Whole-year or month-day windows per period |
+| `climate-normals` | [30-year station normals](noaa-normals.md) (v0.11.0) | Whole-year or month-day windows per period |
 | `nexrad-level2` | [Radar scans](noaa-nexrad.md) | Whole Level II scans |
 | `goes-abi` | [GOES imagery](noaa-goes.md) | Whole single-channel CONUS scenes |
 | `storm-events` | [Storm Events](noaa-storm-events.md) | Whole annual details archives |
