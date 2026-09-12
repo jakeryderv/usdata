@@ -12,7 +12,7 @@ CO-OPS Observed Water Levels.
 - Selection: Six-minute observations for one station and datum; at most 28 days
 - Required inputs: Station, datum, and both minute-aligned timestamps
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [coastal water levels](../../../examples/coastal-water-levels/README.md)
+- Examples: [coastal water levels](https://usdata.dev/examples/coastal-water-levels/)
 
 ## Parameters
 

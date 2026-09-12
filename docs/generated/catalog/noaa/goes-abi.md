@@ -12,7 +12,7 @@ GOES-R ABI CONUS Cloud and Moisture Imagery.
 - Selection: Whole single-channel CONUS scenes by inclusive UTC scan-start time
 - Required inputs: Satellite, channel, and both timestamps
 - Open locally: `usdata[netcdf]` · [Reader guide](../../../reference/readers.md)
-- Examples: [goes imagery](../../../examples/goes-imagery/example.md)
+- Examples: [goes imagery](https://usdata.dev/examples/goes-imagery/), [event context](https://usdata.dev/examples/event-context/)
 
 ## Parameters
 

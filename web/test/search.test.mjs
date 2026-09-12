@@ -32,10 +32,13 @@ test("every implemented dataset has usable reference and example destinations", 
   for (const dataset of search({})) {
     assert.ok(dataset.selection && dataset.inputs && dataset.formats.length);
     assert.ok(dataset.examples.length);
-    for (const url of [dataset.reference, dataset.guide, ...dataset.examples.map(example => example.url)]) {
+    for (const url of [dataset.reference, dataset.guide]) {
       assert.equal(new URL(url).origin, "https://docs.usdata.dev");
       assert.ok(url.endsWith("/"));
       assert.ok(!url.endsWith("README/"));
+    }
+    for (const example of dataset.examples) {
+      assert.match(example.url, /^https:\/\/usdata\.dev\/examples\/[a-z0-9-]+\/$/);
     }
   }
 });

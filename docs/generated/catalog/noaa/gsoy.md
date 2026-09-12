@@ -12,7 +12,7 @@ Global Summary of the Year.
 - Selection: Complete UTC calendar years touched by the query; station and element filters
 - Required inputs: Both dates; station IDs or a geographic query
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [annual climate](../../../examples/annual-climate/README.md)
+- Examples: [annual climate](https://usdata.dev/examples/annual-climate/)
 
 ## Parameters
 

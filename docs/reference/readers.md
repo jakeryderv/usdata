@@ -28,7 +28,7 @@ print(frame["analysed_sst"].mean(), frame.attrs["units"]["analysed_sst"])
 ```
 
 The same method works on `pull(...).fetched` results, including locked cache
-restoration. See the runnable [SST example](../examples/sst-analysis/README.md).
+restoration. See the runnable [SST example](https://usdata.dev/examples/sst-analysis/).
 
 ## Selection and options
 
@@ -131,9 +131,9 @@ metadata, which the reader does not replace with guessed coordinates.
 
 Root `radar.attrs["usdata"]` carries the asset ID and copied source provenance;
 it is not an export format or a record of analysis steps. Keep the input files
-and sidecars. See the [executed radar notebook](../examples/radar-reflectivity/example.md)
+and sidecars. See the [executed radar notebook](https://usdata.dev/examples/radar-reflectivity/)
 and [ADR 0008](../adr/0008-local-radar-readers.md). The
-[event-context notebook](../examples/event-context/example.md) demonstrates
+[event-context notebook](https://usdata.dev/examples/event-context/) demonstrates
 explicit selection; [ADR 0011](../adr/0011-radar-sweep-alignment.md) records the guard's
 scope and upstream dependency. Advanced decoder options
 remain available by calling xradar directly with `item.path`.
@@ -180,7 +180,7 @@ opening are not supported. Use a format-specific library on `item.path` for
 those cases. Backend parsing errors propagate; missing optional modules name
 the `usdata[netcdf]` extra.
 
-See the executed [GOES example](../examples/goes-imagery/example.md),
+See the executed [GOES example](https://usdata.dev/examples/goes-imagery/),
 [xarray's decoding options](https://docs.xarray.dev/en/stable/generated/xarray.open_dataset.html),
 and [ADR 0009](../adr/0009-eager-local-netcdf4-reader.md).
 
@@ -218,5 +218,5 @@ number of fields, or an unparseable time, coordinate, or measurement raises
 `Hurdat2FormatError` from `usdata.readers` (a `ValueError`) naming the line,
 instead of returning a partly parsed table. CSV options do not
 apply and are rejected. See the [dataset guide](../providers/noaa-hurdat2.md),
-the [manifest example](../examples/hurdat2/README.md), and
+the [manifest example](https://usdata.dev/examples/hurdat2/), and
 [ADR 0020](../adr/0020-hurdat2-whole-file-and-format-reader.md).

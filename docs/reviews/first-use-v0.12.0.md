@@ -3,7 +3,7 @@
 Observed on 2026-09-12 UTC against the published `usdata[pandas]==0.12.0`
 package and the maintained [getting-started walkthrough](../index.md).
 The walkthrough, five newest-dataset live checks, and refreshed
-[climate-anomalies notebook](../examples/climate-anomalies/example.md) passed.
+[climate-anomalies notebook](https://usdata.dev/examples/climate-anomalies/) passed.
 No SDK or adapter changes were needed.
 
 ## Method and results

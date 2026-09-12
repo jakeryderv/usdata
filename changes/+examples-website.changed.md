@@ -1,0 +1,1 @@
+Move all twelve worked examples to https://usdata.dev/examples/ with a question-based index, source-dataset links, saved results, expandable notebook code, and exact notebook/manifest downloads. Keep their maintained sources in the repository's examples directory and update dataset and documentation links to the single published copy.

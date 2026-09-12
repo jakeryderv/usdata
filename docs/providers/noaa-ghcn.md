@@ -22,7 +22,7 @@ Open the downloaded file with the [pandas reader](../reference/readers.md).
 The CSV has no units row; request provenance retains the unit system. NOAA can
 revise observations, so preserve cached bytes alongside manifests and lockfiles.
 See the [first-use walkthrough](../index.md) and
-[weather/streamflow example](../examples/weather-and-streamflow/README.md).
+[weather/streamflow example](https://usdata.dev/examples/weather-and-streamflow/).
 
 [All NOAA datasets](noaa.md).
 

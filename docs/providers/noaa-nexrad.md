@@ -25,7 +25,7 @@ See [archive and station metadata notes](noaa-services.md#access-notes).
 The optional `usdata[radar]` reader opens local scans with xradar; an explicit
 zero-based `sweep` chooses a sweep. See [reader limits](../reference/readers.md),
 [temporal selection](../reference/selection.md), and the
-[executed radar example](../examples/radar-reflectivity/example.md).
+[executed radar example](https://usdata.dev/examples/radar-reflectivity/).
 
 [All NOAA datasets](noaa.md).
 

@@ -12,7 +12,7 @@ GHCN-Daily Station Observations.
 - Selection: Station observations within inclusive calendar dates; selected elements
 - Required inputs: Both dates; station IDs or a geographic query
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [weather and streamflow](../../../examples/weather-and-streamflow/example.md)
+- Examples: [weather and streamflow](https://usdata.dev/examples/weather-and-streamflow/)
 
 ## Parameters
 

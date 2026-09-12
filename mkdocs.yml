@@ -34,21 +34,9 @@ theme:
 nav:
 - Website: https://usdata.dev/
 - Start here: index.md
-- Guides & examples:
+- Guides:
   - Fetch and analyze: guides/fetch-and-analyze.md
-  - Examples: examples/README.md
-  - Weather and streamflow: examples/weather-and-streamflow/example.md
-  - Sea-surface temperature: examples/sst-analysis/example.md
-  - Monthly climate: examples/monthly-climate/example.md
-  - Annual climate (v0.10.0): examples/annual-climate/README.md
-  - Climate normals (v0.11.0): examples/climate-normals/README.md
-  - Climate anomalies (v0.12.0): examples/climate-anomalies/example.md
-  - Storm Events: examples/storm-events/example.md
-  - Hurricane best tracks (v0.12.0): examples/hurdat2/README.md
-  - Radar reflectivity: examples/radar-reflectivity/example.md
-  - GOES imagery: examples/goes-imagery/example.md
-  - Coastal water levels (v0.10.0): examples/coastal-water-levels/README.md
-  - Event context: examples/event-context/example.md
+- Examples: https://usdata.dev/examples/
 - Datasets: generated/catalog/index.md
 - Reference:
   - Python API: reference/api.md

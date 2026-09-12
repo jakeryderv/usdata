@@ -1,29 +1,31 @@
 # Runnable notebooks
 
-These notebooks are the primary examples for usdata. Open them on GitHub to read
-the saved outputs, or run them locally to change queries and inspect the results.
+Browse [examples by question](https://usdata.dev/examples/) to read the saved
+outputs and inspect the source datasets. The notebooks and manifests in this
+directory are the maintained sources; run them locally to change queries and
+inspect the results. The website renders saved content without running analyses.
 
 | Notebook | Demonstrates |
 |---|---|
-| [Weather and streamflow](weather-and-streamflow/example.ipynb) | NOAA/USGS inputs, manifests, provenance, cache reuse, verification, and locked restoration |
-| [Sea-surface temperature](sst-analysis/example.ipynb) | A four-cell CoastWatch subset, pandas opening, ERDDAP units, and a spatial plot |
-| [Monthly climate](monthly-climate/example.ipynb) | GSOM monthly observations, whole-month selection, a two-panel plot, and manifest verification |
-| [Climate anomalies](climate-anomalies/example.ipynb) | GSOM observations against 1991-2020 normals, month alignment, an upstream unit exception, anomaly plots, and stale-lockfile guidance (available since v0.12.0) |
-| [Storm Events](storm-events/example.ipynb) | Annual gzip CSV, local Oklahoma/date filtering, report counts, damage ratings, and source verification (available since v0.8) |
-| [Radar reflectivity](radar-reflectivity/example.ipynb) | One NEXRAD volume, xradar sweeps, field units, reflectivity plot, and provenance |
-| [GOES infrared imagery](goes-imagery/example.ipynb) | NetCDF4 opening, CF decoding, quality flags, scan coordinates and brightness-temperature imagery |
-| [Event context](event-context/example.ipynb) | One Storm Events report matched to NEXRAD and GOES, explicit UTC conversion, safe radar sweep selection, projected context, and locked restoration (available since v0.9) |
+| [Weather and streamflow](https://usdata.dev/examples/weather-and-streamflow/) | NOAA/USGS inputs, manifests, provenance, cache reuse, verification, and locked restoration |
+| [Sea-surface temperature](https://usdata.dev/examples/sst-analysis/) | A four-cell CoastWatch subset, pandas opening, ERDDAP units, and a spatial plot |
+| [Monthly climate](https://usdata.dev/examples/monthly-climate/) | GSOM monthly observations, whole-month selection, a two-panel plot, and manifest verification |
+| [Climate anomalies](https://usdata.dev/examples/climate-anomalies/) | GSOM observations against 1991-2020 normals, month alignment, an upstream unit exception, anomaly plots, and stale-lockfile guidance (available since v0.12.0) |
+| [Storm Events](https://usdata.dev/examples/storm-events/) | Annual gzip CSV, local Oklahoma/date filtering, report counts, damage ratings, and source verification (available since v0.8) |
+| [Radar reflectivity](https://usdata.dev/examples/radar-reflectivity/) | One NEXRAD volume, xradar sweeps, field units, reflectivity plot, and provenance |
+| [GOES infrared imagery](https://usdata.dev/examples/goes-imagery/) | NetCDF4 opening, CF decoding, quality flags, scan coordinates and brightness-temperature imagery |
+| [Event context](https://usdata.dev/examples/event-context/) | One Storm Events report matched to NEXRAD and GOES, explicit UTC conversion, safe radar sweep selection, projected context, and locked restoration (available since v0.9) |
 
 ## Manifest examples
 
-[Annual airport climate](annual-climate/README.md) demonstrates GSOY annual
+[Annual airport climate](https://usdata.dev/examples/annual-climate/) demonstrates GSOY annual
 selection and local CSV opening with a small manifest (available since v0.10.0).
 
-[Monthly climate normals](climate-normals/README.md) requests 1991-2020 monthly
+[Monthly climate normals](https://usdata.dev/examples/climate-normals/) requests 1991-2020 monthly
 temperature and precipitation normals for the same airport and compares one
 observed month against them (available since v0.11.0).
 
-[Atlantic hurricane best tracks](hurdat2/README.md) fetches the whole HURDAT2
+[Atlantic hurricane best tracks](https://usdata.dev/examples/hurdat2/) fetches the whole HURDAT2
 Atlantic file and reads it into one row per track point (available since v0.12.0).
 
 ## Run interactively
@@ -74,4 +76,4 @@ the visible outputs. Review the notebook diff before committing a refresh;
 upstream revisions can change both observations and checksums. The notebooks are
 the tutorial source; equivalent analysis scripts are not maintained alongside them.
 
-A small [coastal water-level manifest](coastal-water-levels/README.md) demonstrates CO-OPS datum, units, quality flags, and local CSV reading (available since v0.10.0).
+A small [coastal water-level manifest](https://usdata.dev/examples/coastal-water-levels/) demonstrates CO-OPS datum, units, quality flags, and local CSV reading (available since v0.10.0).

@@ -24,7 +24,7 @@ open the resulting local files. Provenance and manifests connect those steps.
 
 - [Quick start and documentation](index.md)
 - [Fetch and analyze data](guides/fetch-and-analyze.md)
-- [Runnable examples with saved outputs](examples/README.md)
+- [Runnable examples with saved outputs](https://usdata.dev/examples/)
 - [Readers](reference/readers.md) and [reproducible manifests](reference/manifests.md)
 
 ## Source installation

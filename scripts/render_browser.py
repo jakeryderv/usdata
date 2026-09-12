@@ -6,7 +6,14 @@ import json
 import sys
 from pathlib import Path
 
-from render_registry import PACKAGE_VERSION, ROOT, availability, by_provider, catalog_entries
+from render_registry import (
+    PACKAGE_VERSION,
+    ROOT,
+    availability,
+    by_provider,
+    catalog_entries,
+    example_url,
+)
 
 from usdata.registry import Registry
 
@@ -52,7 +59,7 @@ def render() -> str:
                     "examples": [
                         {
                             "title": Path(path).parent.name.replace("-", " ").capitalize(),
-                            "url": docs_url(path),
+                            "url": example_url(path),
                         }
                         for path in entry.examples
                     ]

@@ -743,6 +743,7 @@ catalog:
     reader_extra: radar
     examples:
     - examples/radar-reflectivity/example.ipynb
+    - examples/event-context/example.ipynb
   noaa:goes-abi:
     guide: docs/providers/noaa-goes.md
     summary: GOES CONUS imagery
@@ -753,6 +754,7 @@ catalog:
     reader_extra: netcdf
     examples:
     - examples/goes-imagery/example.ipynb
+    - examples/event-context/example.ipynb
   noaa:storm-events:
     guide: docs/providers/noaa-storm-events.md
     summary: Storm Events details
@@ -763,6 +765,7 @@ catalog:
     reader_extra: pandas
     examples:
     - examples/storm-events/example.ipynb
+    - examples/event-context/example.ipynb
   noaa:hurdat2:
     guide: docs/providers/noaa-hurdat2.md
     summary: Tropical cyclone best tracks

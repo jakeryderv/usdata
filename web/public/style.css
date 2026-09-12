@@ -205,12 +205,17 @@ footer {
   }
 }
 @media (max-width: 680px) {
+  .header {
+    flex-wrap: wrap;
+    gap: 18px;
+  }
   .wrap {
     width: calc(100% - 36px);
   }
   nav {
     gap: 16px;
     font-size: 0.8rem;
+    flex-wrap: wrap;
   }
   .hero {
     padding-top: 48px;

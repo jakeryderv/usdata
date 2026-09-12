@@ -79,8 +79,8 @@ Here `example.py` contains the Python block from the corresponding guide.
 
 | Example | Corrected result |
 |---|---|
-| [Annual climate](../examples/annual-climate/README.md) | All steps exited 0; one 133-byte CSV and one 2024 row for `USW00013967`, with `PRCP=942.4` and `TAVG=17.4`. `DATE` remained a string. |
-| [Coastal water levels](../examples/coastal-water-levels/README.md) | All steps exited 0; one 186-byte CSV with UTC observations at 00:00, 00:06, and 00:12 on May 6, 2024. Water levels were 1.765, 1.730, and 1.702 meters; all three quality values were `v`. |
+| [Annual climate](https://usdata.dev/examples/annual-climate/) | All steps exited 0; one 133-byte CSV and one 2024 row for `USW00013967`, with `PRCP=942.4` and `TAVG=17.4`. `DATE` remained a string. |
+| [Coastal water levels](https://usdata.dev/examples/coastal-water-levels/) | All steps exited 0; one 186-byte CSV with UTC observations at 00:00, 00:06, and 00:12 on May 6, 2024. Water levels were 1.765, 1.730, and 1.702 meters; all three quality values were `v`. |
 
 The guides explain complete UTC-year selection for GSOY and the CO-OPS station,
 datum, minute precision, 28-day limit, quality fields, and lack of gap filling.
