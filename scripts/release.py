@@ -7,6 +7,7 @@ import re
 import subprocess
 import tempfile
 import tomllib
+from datetime import UTC, datetime
 from pathlib import Path
 
 from changelog import parse
@@ -47,7 +48,9 @@ def prepare(root: Path, bump: str) -> None:
     # All file mutations happen after branch creation; a failure leaves recoverable work.
     run(root, "git", "switch", "-c", f"release/v{target}")
     run(root, "uv", "version", "--bump", bump)
-    run(root, "uv", "run", "towncrier", "build", "--yes", "--version", target)
+    # Date the entry in UTC so it matches the tag and GitHub release, whatever the local clock says.
+    today = datetime.now(UTC).date().isoformat()
+    run(root, "uv", "run", "towncrier", "build", "--yes", "--version", target, "--date", today)
     run(root, "uv", "lock")
     run(root, "just", "docs")
     print(f"Prepared release/v{target}. Review version, changelog, and release-status wording.")
