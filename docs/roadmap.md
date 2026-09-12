@@ -47,16 +47,17 @@ does not implement an SDK remote cache. See
 
 Choose a bounded candidate from Next when its user benefit, scope, exclusions,
 and acceptance criteria are ready. The completed
-[v0.10.0 first-use review](reviews/first-use-v0.10.0.md) remains the workflow baseline.
+[v0.12.0 first-use review](reviews/first-use-v0.12.0.md) records the refreshed
+walkthrough and newest-dataset live checks. The
+[dataset browser](https://usdata.dev/datasets/) provides search, support and
+agency filters, selection rules, and links to examples, including the
+[2024 climate comparison](examples/climate-anomalies/example.md).
 
 ## Next
 
 Investigate these bounded website additions before selecting
 implementation work:
 
-- A searchable dataset browser generated from the curated registry, showing
-  support, formats, selection rules, and examples. It can start with a static
-  metadata index and does not require mirroring upstream datasets.
 - One bounded exploration workflow backed by R2: publish an example's exact
   inputs, manifest, provenance, checksums, and lightweight preview files. Show the
   previews in the website and link to downloads and SDK instructions. Define

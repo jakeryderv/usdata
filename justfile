@@ -36,6 +36,7 @@ fmt:
 # Regenerate documentation derived from code and data
 docs:
     uv run python scripts/render_registry.py
+    uv run python scripts/render_browser.py
 
 # Preview the documentation locally, watching maintained sources
 docs-serve:
@@ -50,6 +51,7 @@ docs-build:
 # Check documentation ownership, saved outputs, links and anchors
 check-docs:
     uv run python scripts/render_registry.py --check
+    uv run python scripts/render_browser.py --check
     uv run python scripts/check_release_docs.py
     just check-notebooks
     just docs-build

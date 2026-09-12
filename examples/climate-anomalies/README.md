@@ -1,8 +1,11 @@
-# Monthly climate anomalies
+# Was 2024 warmer or wetter than normal?
 
 Open the [executed notebook](example.ipynb) to compare twelve months of 2024
 observations at Will Rogers World Airport against the 1991-2020 normals for the
 same station, plot both anomaly series, and verify the manifest's locked inputs.
+The calculated summary counts warmer-than-normal months and compares total
+precipitation with the sum of the monthly normals. It describes this station
+and year, not a climate trend or statistical significance.
 See [examples setup](https://docs.usdata.dev/project/) to run it.
 
 Requires usdata v0.11 or newer for `noaa:climate-normals`. The retained

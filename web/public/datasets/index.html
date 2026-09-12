@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Find scientific data you can use with usdata. Search by topic, compare download limits, and open a working example." />
+    <meta name="color-scheme" content="dark light" />
+    <title>Find a dataset · usdata</title>
+    <link rel="canonical" href="https://usdata.dev/datasets/" />
+    <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/datasets/browser.css" />
+    <script type="module" src="/datasets/browser.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="header wrap">
+      <a class="brand" href="/" aria-label="usdata home"><img src="/logo.svg" alt="" width="30" height="30" /> usdata</a>
+      <nav aria-label="Main navigation">
+        <a href="/datasets/" aria-current="page">Datasets</a>
+        <a href="https://docs.usdata.dev/">Docs</a>
+        <a href="https://github.com/jakeryderv/usdata">GitHub</a>
+      </nav>
+    </header>
+    <main id="main" class="wrap browser">
+      <h1>Find a dataset</h1>
+      <p class="browser-intro">Search by topic, see what a download contains, and start with an example.</p>
+      <form id="filters" role="search" aria-label="Find datasets">
+        <div class="search-field">
+          <label for="query">What are you looking for?</label>
+          <input id="query" name="q" type="search" placeholder="Try rainfall, hurricanes, or streamflow" autocomplete="off" disabled />
+        </div>
+        <div class="filter-row">
+          <div><label for="provider">Agency</label><select id="provider" name="provider" disabled><option value="">All agencies</option></select></div>
+          <div><label for="availability">Support</label><select id="availability" name="availability" disabled>
+            <option value="implemented">Ready to use</option>
+            <option value="Released">Released</option>
+            <option value="Source only">Source only</option>
+            <option value="Planned">Planned</option>
+            <option value="all">All entries</option>
+          </select></div>
+          <button id="reset" type="reset" disabled>Reset filters</button>
+        </div>
+      </form>
+      <p class="catalog-note" id="catalog-note">This searches usdata’s curated catalog, not live agency inventories. Coverage varies by station, product, and date.</p>
+      <p id="result-status" role="status" aria-live="polite">Loading datasets…</p>
+      <noscript><p>Enable JavaScript to search, or <a href="https://docs.usdata.dev/generated/catalog/">browse the documentation catalog</a>.</p></noscript>
+      <div id="results" class="dataset-list"></div>
+      <aside class="example-feature" aria-labelledby="example-title">
+        <div>
+          <p class="eyebrow">TRY A COMPLETE ANALYSIS</p>
+          <h2 id="example-title">Was 2024 warmer or wetter than normal?</h2>
+          <p>Compare twelve months at Oklahoma City’s airport with its 1991–2020 averages. See the inputs, monthly differences, plots, and checksums in one runnable notebook.</p>
+          <p class="catalog-note">One station and one year; this comparison does not establish a climate trend or statistical significance.</p>
+        </div>
+        <a class="button" href="https://docs.usdata.dev/examples/climate-anomalies/example/">Explore the climate example</a>
+      </aside>
+    </main>
+    <footer class="wrap"><span>usdata · Public scientific data, with provenance.</span><a href="https://docs.usdata.dev/">Read the documentation</a></footer>
+  </body>
+</html>

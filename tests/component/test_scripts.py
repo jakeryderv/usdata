@@ -22,6 +22,24 @@ def script(name):
     return module
 
 
+def test_website_catalog_matches_registry_and_release_availability(monkeypatch) -> None:
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
+    module = script("render_browser")
+    content = json.loads(module.render())
+    records = {record["id"]: record for record in content["datasets"]}
+    registry = Registry.bundled()
+    assert records.keys() == {dataset.id for dataset in registry}
+    assert records["noaa:hurdat2"]["availability"] == "Released"
+    assert records["noaa:hurdat2"]["examples"][0]["url"].endswith("/examples/hurdat2/")
+    assert records["nasa:gpm-imerg"]["availability"] == "Planned"
+    assert records["nasa:gpm-imerg"]["examples"] == []
+    # A checkout implementing a future dataset must not advertise it as released.
+    renderer = importlib.import_module("render_registry")
+    monkeypatch.setattr(renderer, "PACKAGE_VERSION", "0.11.0")
+    changed = {record["id"]: record for record in json.loads(module.render())["datasets"]}
+    assert changed["noaa:hurdat2"]["availability"] == "Source only"
+
+
 @pytest.mark.parametrize("fault", [None, "cleared", "error", "order", "large", "malformed"])
 def test_notebook_saved_execution_checks(tmp_path, fault) -> None:
     module = script("check_notebooks")
