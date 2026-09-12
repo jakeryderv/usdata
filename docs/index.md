@@ -20,7 +20,9 @@ usdata info noaa:ghcn-daily
 ```
 
 Search is local and ranks a curated catalog. It does not query every agency's
-live catalog. Planned entries are not fetchable; see [provider coverage](providers/README.md).
+live catalog. Use the [searchable dataset browser](https://usdata.dev/datasets/)
+to compare formats, required inputs, and examples. Planned entries are not
+fetchable; see [provider coverage](providers/README.md).
 
 ## Fetch a small station query
 
