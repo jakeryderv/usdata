@@ -38,7 +38,8 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: uv run python scripts/check_pr_title.py
       - name: Require a release note or an internal-change explanation
-        if: github.event_name == 'pull_request'
+        # Dependency bumps are internal changes; Dependabot cannot add fragments.
+        if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: uv run towncrier check --compare-with "$BASE_SHA"
