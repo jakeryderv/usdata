@@ -30,7 +30,6 @@ class Status(StrEnum):
     """How far along a dataset's support is."""
 
     AVAILABLE = "available"  # adapter implemented and tested
-    STUB = "stub"  # registered with an adapter class that is not implemented yet
     PLANNED = "planned"  # registry entry only; no adapter
 
 
@@ -159,7 +158,7 @@ class Dataset(BaseModel):
     status: Status
     since: str | None = Field(default=None, description="Version an available dataset shipped in")
     target: str | None = Field(
-        default=None, description="Version a stub or planned dataset is aimed at, or 'later'"
+        default=None, description="Version a planned dataset is aimed at, or 'later'"
     )
     adapter: str | None = Field(
         default=None,
