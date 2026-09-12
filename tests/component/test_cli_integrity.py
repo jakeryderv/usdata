@@ -1,3 +1,4 @@
+import importlib
 from pathlib import Path
 
 import pytest
@@ -47,3 +48,34 @@ def test_cli_malformed_manifest_and_lockfile(tmp_path: Path) -> None:
     lockfile_path(manifest).write_text("{")
     result = CliRunner().invoke(app, ["verify", str(manifest)])
     assert result.exit_code == 2 and result.output.strip()
+
+
+@pytest.mark.parametrize(
+    "key, flag",
+    [
+        ("location", "--location"),
+        ("bbox", "--bbox"),
+        ("lat", "--lat"),
+        ("lon", "--lon"),
+        ("radius_km", "--radius-km"),
+        ("start", "--start"),
+        ("end", "--end"),
+        ("variables", "--vars"),
+        ("text", None),
+        ("provider", None),
+    ],
+)
+def test_fetch_rejects_reserved_params_before_resolving(key, flag, monkeypatch):
+    def unexpected_adapter(*args, **kwargs):
+        pytest.fail("invalid CLI input must not load an adapter")
+
+    monkeypatch.setattr(
+        importlib.import_module("usdata.cli.app"), "load_adapter", unexpected_adapter
+    )
+    result = CliRunner().invoke(
+        app, ["fetch", "noaa:ghcn-daily", "--dry-run", "-p", f"{key}=value"]
+    )
+    assert result.exit_code == 2
+    assert f"{key} is a reserved query option" in result.output
+    if flag is not None:
+        assert f"use {flag}" in result.output

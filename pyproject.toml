@@ -28,7 +28,8 @@ radar = ["xradar>=0.12.0"]
 netcdf = ["xarray>=2025.1", "h5netcdf[h5py]>=1.8.1"]
 
 [project.urls]
-Homepage = "https://github.com/jakeryderv/usdata"
+Homepage = "https://usdata.dev/"
+Documentation = "https://docs.usdata.dev/"
 Repository = "https://github.com/jakeryderv/usdata"
 
 [project.scripts]

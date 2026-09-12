@@ -14,3 +14,12 @@ updates:
     groups:
       python:
         patterns: ["*"]
+  - package-ecosystem: npm
+    directories:
+      - /web
+      - /infra
+    schedule:
+      interval: weekly
+    groups:
+      hosting:
+        patterns: ["*"]

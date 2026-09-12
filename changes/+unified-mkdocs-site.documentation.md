@@ -1,1 +1,0 @@
-Unify the homepage and documentation with MkDocs + Material, automatically deploy current main documentation, and preserve v0.10.0 as a frozen archive while retiring ongoing multi-version publication.

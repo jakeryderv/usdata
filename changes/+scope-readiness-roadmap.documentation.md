@@ -1,1 +1,1 @@
-Define Now, Next, and Later planning by scope and readiness without deadlines or promised releases, and prioritize documentation publishing and the first-use review.
+Define Now, Next, and Later planning by scope and readiness, with bounded acceptance criteria and no deadlines or promised releases.

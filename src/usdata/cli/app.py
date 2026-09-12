@@ -29,6 +29,20 @@ app = typer.Typer(
 )
 
 
+_QUERY_FLAGS = {
+    "location": "--location",
+    "bbox": "--bbox",
+    "lat": "--lat",
+    "lon": "--lon",
+    "radius_km": "--radius-km",
+    "start": "--start",
+    "end": "--end",
+    "variables": "--vars",
+    "text": None,
+    "provider": None,
+}
+
+
 def _version_callback(value: bool) -> None:
     if value:
         typer.echo(f"usdata {__version__}")
@@ -139,6 +153,19 @@ def fetch(
         key, sep, value = item.partition("=")
         if not sep:
             typer.secho(f"--param expects key=value, got {item!r}", err=True, fg="red")
+            raise typer.Exit(code=2)
+        if key in _QUERY_FLAGS:
+            flag = _QUERY_FLAGS[key]
+            hint = (
+                f"use {flag} instead of --param"
+                if flag is not None
+                else "fetch does not support this option"
+            )
+            typer.secho(
+                f"{key} is a reserved query option; {hint}",
+                err=True,
+                fg="red",
+            )
             raise typer.Exit(code=2)
         params[key] = value
     box = None
