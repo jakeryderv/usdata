@@ -14,6 +14,15 @@ GHCN-Daily Station Observations.
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
 - Examples: [weather and streamflow](../../../examples/weather-and-streamflow/example.md)
 
+## Parameters
+
+Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
+
+| Parameter | Meaning |
+|---|---|
+| `stations` | Station ids, comma-separated or a list; otherwise a location selects them. |
+| `units` | metric (default) or standard. |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-ghcn.md).

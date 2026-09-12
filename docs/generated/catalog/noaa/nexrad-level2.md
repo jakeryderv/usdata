@@ -14,6 +14,16 @@ NEXRAD Level II Radar.
 - Open locally: `usdata[radar]` · [Reader guide](../../../reference/readers.md)
 - Examples: [radar reflectivity](../../../examples/radar-reflectivity/example.md)
 
+## Parameters
+
+Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
+
+| Parameter | Meaning |
+|---|---|
+| `nearest` | Take the N radars nearest the query centre instead of naming sites. |
+| `site` | One radar ICAO id, for example KTLX. |
+| `sites` | Several radar ICAO ids, comma-separated or a list. |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-nexrad.md).

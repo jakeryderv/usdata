@@ -11,10 +11,11 @@ from __future__ import annotations
 import hashlib
 import math
 from bisect import bisect_left, bisect_right
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from itertools import pairwise
 from pathlib import Path
-from typing import cast
+from typing import ClassVar, cast
 
 import httpx
 
@@ -46,6 +47,10 @@ def _spatial_slice(
 class CoastwatchSst(_HttpProvider):
     """NOAA's 0.05-degree day/night analysis, including units and grid coordinates."""
 
+    accepted_params: ClassVar[Mapping[str, str]] = {
+        "stride": "Positive integer subsampling both spatial axes; default 1.",
+    }
+
     def list_assets(self, query: Query) -> list[Asset]:
         """Resolve a valid grid intersection into one stable, bounded CSV request."""
         if (
@@ -57,7 +62,7 @@ class CoastwatchSst(_HttpProvider):
             raise QueryError(
                 f"{self.dataset.id} requires a bbox/location and both start and end times"
             )
-        if unknown := set(query.params) - {"stride"}:
+        if unknown := set(query.params) - set(self.accepted_params):
             raise QueryError(f"unsupported CoastWatch params: {', '.join(sorted(unknown))}")
         stride = query.params.get("stride", 1)
         if isinstance(stride, str) and stride.isascii() and stride.isdigit():

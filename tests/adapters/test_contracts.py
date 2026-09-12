@@ -1,5 +1,6 @@
 """Shared behavioral contracts; dataset-specific wire semantics stay in adapter tests."""
 
+import re
 from collections.abc import Callable
 from contextlib import nullcontext
 from pathlib import Path
@@ -139,6 +140,34 @@ def test_adapter_contract(dataset_id, injected, fail, tmp_path, monkeypatch) -> 
     finally:
         if supplied is not None:
             supplied.close()
+
+
+@pytest.mark.parametrize("dataset_id", CASES)
+def test_declared_params_accepted_and_an_undeclared_one_rejected(dataset_id, monkeypatch) -> None:
+    """Every declared key is accepted; a key outside the declaration is named as unsupported.
+
+    This probes one undeclared key, so it catches an adapter that narrowed its
+    check below the declaration, not one that quietly widened it to keys nobody
+    declared. Only reading ``accepted_params`` in the rejection gives that.
+    """
+
+    def unexpected_client():
+        raise AssertionError("parameter validation must precede any transport")
+
+    monkeypatch.setattr("usdata.protocols.http.client", unexpected_client)
+    with load_adapter(default_registry().get(dataset_id)) as adapter:
+        declared = dict(adapter.accepted_params)
+        assert all(
+            description.strip() and "\n" not in description for description in declared.values()
+        )
+        probe = query(dataset_id).model_copy(
+            update={"params": {**dict.fromkeys(declared, "probe"), "unknown-key": "probe"}}
+        )
+        with pytest.raises(QueryError) as error:
+            adapter.list_assets(probe)
+    reported = re.search(r"unsupported .*params: (.+)$", str(error.value))
+    assert reported is not None, f"{dataset_id} rejected a declared parameter: {error.value}"
+    assert reported[1] == "unknown-key"
 
 
 @pytest.mark.parametrize("dataset_id", CASES)

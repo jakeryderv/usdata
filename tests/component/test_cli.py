@@ -1,8 +1,12 @@
+import importlib
 from pathlib import Path
+from types import SimpleNamespace
 
 from typer.testing import CliRunner
 
+from usdata import default_registry
 from usdata.cli import app
+from usdata.models import Status
 
 runner = CliRunner()
 
@@ -41,6 +45,41 @@ def test_info() -> None:
     assert result.exit_code == 0
     assert "GHCN-Daily" in result.stdout
     assert runner.invoke(app, ["info", "nope:x"]).exit_code == 2
+
+
+def test_info_lists_adapter_parameters() -> None:
+    result = runner.invoke(app, ["info", "noaa:climate-normals"])
+    assert result.exit_code == 0
+    listed = [line.strip() for line in result.stdout.splitlines() if line.startswith("    ")]
+    assert [line.split("  ", 1)[0] for line in listed] == ["period", "stations", "units"]
+    assert all(len(line.split("  ", 1)) == 2 and line.split("  ", 1)[1].strip() for line in listed)
+
+
+def test_info_says_none_when_an_adapter_takes_no_parameters() -> None:
+    result = runner.invoke(app, ["info", "noaa:storm-events"])
+    assert result.exit_code == 0 and "params:    none" in result.stdout
+
+
+def test_info_omits_parameters_for_planned_datasets() -> None:
+    result = runner.invoke(app, ["info", "usgs:earthquakes"])
+    assert result.exit_code == 0 and "params:" not in result.stdout
+
+
+def test_info_omits_parameters_for_a_stub_dataset(monkeypatch) -> None:
+    # A stub names an adapter that cannot run, so info must not try to construct it.
+    stub = default_registry().get("noaa:ghcn-daily")
+    stub = stub.model_copy(
+        update={
+            "status": Status.STUB,
+            "since": None,
+            "target": "later",
+            "adapter": "usdata.providers.noaa.not_built_yet:Missing",
+        }
+    )
+    module = importlib.import_module("usdata.cli.app")  # `usdata.cli.app` is the Typer object.
+    monkeypatch.setattr(module, "default_registry", lambda: SimpleNamespace(get=lambda _: stub))
+    result = runner.invoke(app, ["info", "noaa:ghcn-daily"])
+    assert result.exit_code == 0 and "params:" not in result.stdout
 
 
 def test_fetch_reports_unimplemented_adapter() -> None:

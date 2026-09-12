@@ -57,7 +57,12 @@ jobs:
       fail-fast: false
       matrix:
         python: ["3.11", "3.14"]
-        readers: [core, pandas, radar, netcdf]
+        readers: [core, pandas, pandas-floor, radar, netcdf]
+        exclude:
+          # pandas 2.2 ships no cp314 wheel and its source build against numpy 2.5
+          # segfaults, so the declared floor is exercised on 3.11 only.
+          - python: "3.14"
+            readers: pandas-floor
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
@@ -67,8 +72,16 @@ jobs:
       - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4
       - if: matrix.readers == 'core'
         run: just setup
-      - if: matrix.readers == 'pandas'
+      - if: startsWith(matrix.readers, 'pandas')
         run: uv sync --group dev --extra pandas
+      - name: Replace the locked pandas with the floor pyproject.toml declares
+        # The lockfile always resolves the newest pandas, so without this the
+        # `>=` floor in [project.optional-dependencies] is never executed.
+        if: matrix.readers == 'pandas-floor'
+        run: |
+          floor=$(uv run --no-sync python scripts/lowest_version.py pandas)
+          uv pip install "pandas==$floor.*"
+          uv run --no-sync python -c "import pandas; print('pandas', pandas.__version__)"
       - if: matrix.readers == 'radar'
         run: uv sync --group dev --extra radar
       - if: matrix.readers == 'netcdf'
