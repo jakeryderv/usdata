@@ -1,0 +1,1 @@
+Add five planned registry entries with verified endpoints for severe-weather research: RAP model output, IGRA radiosondes, the NWS watch and warning archive, NCEI billion-dollar disasters, and FEMA disaster declarations. Group the geospatial sources behind their shared reader decision on the roadmap.

@@ -756,6 +756,147 @@ datasets:
     capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: false }
 
 # Documentation composition keyed by stable dataset ID; validated by just docs.
+  - id: noaa:rap
+    provider: noaa
+    status: planned
+    domain: weather-models
+    target: later
+    title: RAP Model Output
+    description: >-
+      Rapid Refresh 13 km hourly analyses and forecasts in GRIB2 from the public
+      noaa-rap-pds S3 bucket, laid out as rap.YYYYMMDD/ with one file per cycle,
+      forecast hour, and grid family (awp130 is the 13 km CONUS grid, about 18 MB
+      per analysis). The bucket begins in December 2020; it is the environmental
+      source for years HRRR's archive does not reach only where NCEI holds older
+      runs. Same cycle and forecast-hour selection as HRRR.
+    keywords:
+      - forecast
+      - model
+      - rap
+      - grib2
+      - weather
+      - nwp
+    protocol: s3
+    homepage: https://registry.opendata.aws/noaa-rap/
+    license: US Government Work (public domain)
+    temporal_extent:
+      start: "2020-12-01T00:00:00Z"
+    capabilities:
+      spatial_subset: false
+      temporal_subset: true
+      variable_subset: false
+
+  - id: noaa:igra
+    provider: noaa
+    status: planned
+    domain: surface-weather
+    target: later
+    title: IGRA Radiosonde Observations
+    description: >-
+      Integrated Global Radiosonde Archive version 2: observed upper-air soundings
+      from 2,931 stations as one zipped fixed-width text file per station for its
+      full period of record (about 81 MB for Norman, Oklahoma), plus year-to-date
+      and derived-parameter directories, from an NCEI HTTPS directory. Needs a
+      fixed-width sounding reader.
+    keywords:
+      - radiosonde
+      - sounding
+      - upper air
+      - igra
+      - weather balloon
+    protocol: http
+    homepage: https://www.ncei.noaa.gov/products/weather-balloon/integrated-global-radiosonde-archive
+    license: US Government Work (public domain)
+    temporal_extent:
+      start: "1905-01-01T00:00:00Z"
+    capabilities:
+      spatial_subset: false
+      temporal_subset: false
+      variable_subset: false
+
+  - id: noaa:nws-warnings
+    provider: noaa
+    status: planned
+    domain: severe-weather
+    target: later
+    title: NWS Watch, Warning, and Advisory Archive
+    description: >-
+      Every National Weather Service watch, warning, and advisory polygon with
+      VTEC codes and issue, expiry, and update times, as one zipped shapefile per
+      year. The maintained archive is the Iowa Environmental Mesonet's mirror of
+      NWS products, not an NWS endpoint; the tornado and severe thunderstorm
+      storm-based warnings for 2024 are 6.5 MB and all products 351 MB. Needs a
+      shapefile reader.
+    keywords:
+      - warnings
+      - watches
+      - vtec
+      - nws
+      - verification
+      - polygons
+    protocol: http
+    homepage: https://mesonet.agron.iastate.edu/request/gis/watchwarn.phtml
+    license: US Government Work (public domain)
+    temporal_extent:
+      start: "1986-01-01T00:00:00Z"
+    capabilities:
+      spatial_subset: false
+      temporal_subset: false
+      variable_subset: true
+
+  - id: noaa:billion-dollar-disasters
+    provider: noaa
+    status: planned
+    domain: natural-hazards
+    target: later
+    title: Billion-Dollar Weather and Climate Disasters
+    description: >-
+      NCEI's list of U.S. disasters with CPI-adjusted and unadjusted costs, dates,
+      and deaths since 1980, served as one CSV with two header comment lines from
+      the NCEI access service (about 36 kB for all events).
+    keywords:
+      - disasters
+      - cost
+      - damage
+      - billion
+      - impacts
+    protocol: http
+    homepage: https://www.ncei.noaa.gov/access/billions/
+    license: US Government Work (public domain)
+    temporal_extent:
+      start: "1980-01-01T00:00:00Z"
+    capabilities:
+      spatial_subset: false
+      temporal_subset: false
+      variable_subset: true
+
+  - id: fema:disaster-declarations
+    provider: fema
+    status: planned
+    domain: natural-hazards
+    target: later
+    title: FEMA Disaster Declarations Summaries
+    description: >-
+      Every federal disaster declaration since 1953, one row per declaration and
+      designated area, with incident type, dates, programs declared, and county
+      FIPS codes, from the OpenFEMA v2 JSON API (70,402 rows on 2026-09-14; OData
+      filters and paging).
+    keywords:
+      - fema
+      - disasters
+      - declarations
+      - tornado
+      - impacts
+    protocol: http
+    homepage: https://www.fema.gov/openfema-data-page/disaster-declarations-summaries-v2
+    license: US Government Work (public domain)
+    temporal_extent:
+      start: "1953-01-01T00:00:00Z"
+    capabilities:
+      spatial_subset: false
+      temporal_subset: true
+      variable_subset: true
+
 catalog:
   noaa:ghcn-daily:
     guide: docs/providers/noaa-ghcn.md

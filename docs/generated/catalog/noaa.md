@@ -42,6 +42,24 @@ Global hourly and sub-hourly surface observations, the successor to ISD. Publish
 [Upstream information](https://www.ncei.noaa.gov/products/global-historical-climatology-network-hourly)
 Domain: Surface weather.
 
+### noaa:igra
+
+**IGRA Radiosonde Observations** · Planned · target later
+
+Integrated Global Radiosonde Archive version 2: observed upper-air soundings from 2,931 stations as one zipped fixed-width text file per station for its full period of record (about 81 MB for Norman, Oklahoma), plus year-to-date and derived-parameter directories, from an NCEI HTTPS directory. Needs a fixed-width sounding reader.
+
+[Upstream information](https://www.ncei.noaa.gov/products/weather-balloon/integrated-global-radiosonde-archive)
+Domain: Surface weather.
+
+### noaa:nws-warnings
+
+**NWS Watch, Warning, and Advisory Archive** · Planned · target later
+
+Every National Weather Service watch, warning, and advisory polygon with VTEC codes and issue, expiry, and update times, as one zipped shapefile per year. The maintained archive is the Iowa Environmental Mesonet's mirror of NWS products, not an NWS endpoint; the tornado and severe thunderstorm storm-based warnings for 2024 are 6.5 MB and all products 351 MB. Needs a shapefile reader.
+
+[Upstream information](https://mesonet.agron.iastate.edu/request/gis/watchwarn.phtml)
+Domain: Severe weather.
+
 ### noaa:ibtracs
 
 **IBTrACS Global Tropical Cyclone Tracks** · Planned · target later
@@ -58,6 +76,15 @@ Domain: Tropical cyclones.
 Statistically blended forecast guidance in GRIB2 from the public noaa-nbm-grib2-pds S3 bucket, laid out as blend.YYYYMMDD/HH/core/ with files per region and forecast hour.
 
 [Upstream information](https://registry.opendata.aws/noaa-nbm/)
+Domain: Weather models.
+
+### noaa:rap
+
+**RAP Model Output** · Planned · target later
+
+Rapid Refresh 13 km hourly analyses and forecasts in GRIB2 from the public noaa-rap-pds S3 bucket, laid out as rap.YYYYMMDD/ with one file per cycle, forecast hour, and grid family (awp130 is the 13 km CONUS grid, about 18 MB per analysis). The bucket begins in December 2020; it is the environmental source for years HRRR's archive does not reach only where NCEI holds older runs. Same cycle and forecast-hour selection as HRRR.
+
+[Upstream information](https://registry.opendata.aws/noaa-rap/)
 Domain: Weather models.
 
 ### noaa:nclimdiv
@@ -113,6 +140,15 @@ Global topography and bathymetry at 15, 30, and 60 arc-seconds as NetCDF and Geo
 
 [Upstream information](https://www.ncei.noaa.gov/products/etopo-global-relief-model)
 Domain: Bathymetry and hydrography.
+
+### noaa:billion-dollar-disasters
+
+**Billion-Dollar Weather and Climate Disasters** · Planned · target later
+
+NCEI's list of U.S. disasters with CPI-adjusted and unadjusted costs, dates, and deaths since 1980, served as one CSV with two header comment lines from the NCEI access service (about 36 kB for all events).
+
+[Upstream information](https://www.ncei.noaa.gov/access/billions/)
+Domain: Natural hazards.
 
 ### noaa:tsunami-events
 
