@@ -4,7 +4,9 @@ Provider id `usda`. Homepage: https://www.usda.gov/
 
 ## Access notes
 
-This provider is planned. No fetch adapter is implemented yet; catalog entries describe the intended scope, not currently supported downloads.
+Every dataset from this provider is planned; catalog entries describe the intended scope.
+
+--8<-- "_snippets/planned-datasets.md"
 
 ## Datasets
 

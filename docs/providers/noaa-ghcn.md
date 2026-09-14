@@ -19,10 +19,11 @@ then request CSV in groups of up to 50 stations. Search and data service outages
 can occur independently. See [service diagnostics](noaa-services.md#access-notes).
 
 Open the downloaded file with the [pandas reader](../reference/readers.md).
-The CSV has no units row; request provenance retains the unit system. NOAA can
-revise observations, so preserve cached bytes alongside manifests and lockfiles.
+The CSV has no units row; request provenance retains the unit system.
 See the [getting-started walkthrough](../getting-started.md) and
 [weather/streamflow example](https://usdata.dev/examples/weather-and-streamflow/).
+
+--8<-- "_snippets/upstream-revisions.md"
 
 [All NOAA datasets](noaa.md).
 

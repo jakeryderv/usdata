@@ -42,10 +42,10 @@ dates, files for the other basin, and non-local links are ignored.
 The complete filename is the stable asset ID, and the URL, original bytes,
 size, and checksum are preserved. The directory reports approximate sizes
 (`6.8M`), so asset size is left unknown rather than guessed. A lockfile restores
-its pinned URL without listing current revisions. When the NHC publishes the next
-season's file under a new name, an existing lockfile keeps working as long as the
-old file remains online; preserve your cache for long-term reproducibility, and
-use `pull(..., force=True)` only when intentionally moving to a new revision.
+its pinned URL without listing current revisions, so `pull --force` is what
+moves to a newer revision once the NHC publishes one.
+
+--8<-- "_snippets/upstream-revisions.md"
 
 ## Opening the file
 

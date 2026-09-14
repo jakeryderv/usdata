@@ -9,12 +9,11 @@ usdata fetch noaa:nexrad-level2 -p site=KTLX \
   --start 2024-05-06T20:00Z --end 2024-05-06T20:05Z --dry-run
 ```
 
-UTC bounds include both endpoints and span at most 31 days per query; split
-longer intervals. Timestamps without a timezone are treated
-as UTC, including directly constructed SDK queries. Explicit offsets are converted
-to UTC. A date-only end means midnight at the start of that day. Remove
-`--dry-run` to download. There is no server-side variable subsetting; each file
-contains the available scan moments.
+A query spans at most 31 days; split longer intervals. Remove `--dry-run` to
+download. There is no server-side variable subsetting; each file contains the
+available scan moments.
+
+--8<-- "_snippets/utc-window.md"
 
 `site` and `sites` are mutually exclusive and accept non-empty strings or lists.
 IDs are case-insensitive. With a geographic query, `nearest` selects a positive

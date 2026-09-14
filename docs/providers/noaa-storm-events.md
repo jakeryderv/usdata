@@ -20,9 +20,10 @@ and `c` the creation date. Resolution chooses the greatest valid creation date
 per year. The complete filename is the stable asset ID; URL, original compressed
 bytes, size, and checksum are preserved. Exact integer directory sizes are used
 when present; approximate sizes are left unknown. A lockfile restores its pinned
-URL without listing current revisions. If an old file disappears or its bytes
-change, restoration fails; preserve your cache for long-term reproducibility.
-Use `pull(..., force=True)` only when intentionally refreshing the revision.
+URL without listing current revisions, so `pull --force` is what moves to a
+newer annual revision.
+
+--8<-- "_snippets/upstream-revisions.md"
 
 `FetchedAsset.open()` uses the pandas extra and a local gzip stream. It preserves
 raw identifier strings and records source provenance in DataFrame attributes;

@@ -34,8 +34,9 @@ uv run usdata fetch noaa:lcd -p stations=72353013967 \
 
 The [hourly observations example](https://usdata.dev/examples/hourly-observations/)
 compares hourly readings with the daily summary for the same station. NCEI
-revises LCD as reports are quality-controlled, so the same request can return
-different bytes later; keep the cache with the manifest and lockfile.
+revises LCD as reports are quality-controlled.
+
+--8<-- "_snippets/upstream-revisions.md"
 
 See the [service research notes](noaa-services.md#local-climatological-data) for dated upstream probes.
 

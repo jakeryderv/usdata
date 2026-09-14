@@ -1,31 +1,27 @@
-# Fetch and analyze data
+# Fetch and analyze
 
-New to usdata? Start with the [getting-started walkthrough](../getting-started.md).
-These recipes cover the next common tasks. Dataset-specific selectors and
-scientific limits live in the [provider guides](../providers/README.md).
+New to usdata? Start with [getting started](../getting-started.md). This guide
+covers the everyday fetch loop; pinning inputs for later is in
+[pin inputs](pin-inputs.md).
 
-## Find data near a place
+## Fetch near a place, dry run first
 
 ```sh
-usdata search precipitation --location "Cleveland County, OK"
-usdata info noaa:ghcn-daily
 usdata fetch noaa:ghcn-daily --lat 35.39 --lon -97.60 --radius-km 15 \
   --start 2024-05-06 --end 2024-05-07 --vars PRCP,TMAX --dry-run
 ```
 
-Search ranks the local curated catalog. `info` shows capabilities and status;
-`fetch --dry-run` contacts the provider to list assets without downloading them.
-Remove `--dry-run` to fetch. For exact stations, use the dataset's station ID
-option instead of geographic discovery. Use `--param` only for provider-specific
-selectors such as `-p stations=USW00013967`; pass shared query options through
-their flags, such as `--start`, `--location`, and `--vars`.
+`--dry-run` contacts the provider to list what the query resolves to, with
+sizes where the service reports them, and downloads nothing. Remove it to
+fetch. Pass shared options through their own flags, `--start`, `--end`,
+`--location`, `--bbox`, `--vars`, and provider-specific selectors through
+`-p key=value`, for example `-p stations=USW00013967`. For exact stations, use
+the dataset's id option rather than geographic discovery; a place is a
+rectangle, not a boundary.
 
-Place names and FIPS codes select bounding rectangles, not precise administrative
-boundaries. See [place lookup](../reference/places.md) for ambiguity and limits.
-Time selection also varies: a station query may return selected days, while
-Storm Events returns whole annual files and GOES returns whole scenes.
+--8<-- "_snippets/utc-window.md"
 
-## Use the same query from Python
+## The same query from Python
 
 ```python
 from usdata import build_query, get
@@ -41,51 +37,26 @@ query = build_query(
 )
 for item in fetch(get("noaa:ghcn-daily"), query):
     print(item.path, item.provenance.checksum)
+    frame = item.open()
 ```
 
-Opening is a separate local step: `item.open()` uses an optional format reader.
-Install `usdata[pandas]` for CSV, `usdata[radar]` for NEXRAD, or `usdata[netcdf]`
-for NetCDF4. See [reader behavior and limits](../reference/readers.md).
-For already-listed radar/GOES assets, [temporal selection](../reference/selection.md)
-chooses a scan start using an explicit tolerance and nearest/prior direction.
+`fetch` returns one item per asset with its cached path and provenance.
+`open()` is a separate local step that needs the reader extra for the format;
+without it you still have the path. What each reader returns is in
+[readers](../concepts/readers.md), and the options in the
+[reader reference](../reference/readers.md).
 
-## Keep and refresh reproducible inputs
+## Where files go
 
-Declare inputs in a [manifest](../reference/manifests.md), then run:
+Files live under `~/.cache/usdata/` unless `USDATA_CACHE_DIR` or `--cache-dir`
+says otherwise, with a provenance sidecar beside each. A repeated query is a
+cache hit verified by checksum; `--force` re-downloads.
 
-```sh
-usdata pull dataset.yaml --cache-dir .data
-usdata verify dataset.yaml --cache-dir .data
-```
+On a terminal, fetch reports resolved counts, known sizes, download progress,
+and verified cache hits on stderr. `--no-progress` disables it, and redirecting
+output disables it automatically.
 
-The first pull resolves and downloads inputs, then writes `dataset.lock.json`.
-Subsequent pulls restore those pinned assets without repeating discovery.
-`verify` checks the manifest and local file checksums offline. Commit the manifest
-and lockfile; preserve `.data` separately because a checksum cannot recover bytes
-that upstream no longer serves.
-
-If an agency revises data behind a pinned URL, pull exits 4 and lists every
-changed asset without touching the lockfile. Accept the new bytes for just those
-entries with `usdata pull dataset.yaml --update noaa:ghcn-daily --cache-dir .data`,
-naming an asset id or dataset id. Use `usdata pull dataset.yaml --force --cache-dir .data`
-only when intentionally refreshing the source selection itself. Editing the
-manifest requires this explicit refresh. Required sources must resolve to assets;
-`allow_empty: true` permits an intentionally empty resolution, not a failed download.
-
-Without an explicit cache directory, files live under `~/.cache/usdata/`; override
-this with `USDATA_CACHE_DIR`. Provenance sidecars record the source URL, retrieval
-time, checksum, byte count, and license.
-
-## Inspect download progress
-
-On a terminal, fetch and pull report resolved asset counts, known byte sizes,
-download progress, and validated cache hits on stderr. Some APIs assemble results
-without advertising a size. Retried downloads restart their byte counter.
-Use `--no-progress` to disable progress; redirection disables it automatically.
-
-## Pick an analysis example
-
-The [examples index](https://usdata.dev/examples/) distinguishes executed notebooks
-from manifest recipes. Start with weather and streamflow for reproducible inputs,
-SST for a small gridded CSV, or monthly climate for station summaries. Saved
-notebook results are snapshots; running them again contacts live services.
+The [SST example](https://usdata.dev/examples/sst-analysis/) fetches a small
+gridded CSV and opens it with units;
+[monthly climate](https://usdata.dev/examples/monthly-climate/) does the same
+for station summaries.
