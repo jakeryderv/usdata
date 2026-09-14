@@ -1,0 +1,7 @@
+name: oklahoma-rotation-tracks
+sources:
+  - dataset: noaa:mrms
+    start: 2024-05-06T20:00:00Z
+    end: 2024-05-06T20:20:00Z
+    params:
+      product: RotationTrackML30min_00.50

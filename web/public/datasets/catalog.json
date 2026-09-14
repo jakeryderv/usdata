@@ -244,6 +244,41 @@
       ]
     },
     {
+      "id": "noaa:mrms",
+      "title": "MRMS gridded radar products",
+      "description": "Gridded CONUS products merged from every radar plus other sensors: rotation tracks, reflectivity, hail size, echo tops, precipitation rate, and lightning probability as two-minute gzipped GRIB2 files in the public noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/. Select one product from the supported list and a file-stamp window of at most one day; each asset is a complete CONUS grid with no spatial subsetting.",
+      "provider": "NOAA",
+      "domain": "Weather radar",
+      "availability": "Source only",
+      "since": "0.15",
+      "keywords": [
+        "radar",
+        "mrms",
+        "rotation",
+        "azimuthal shear",
+        "hail",
+        "reflectivity",
+        "gridded",
+        "grib2",
+        "conus",
+        "tornado"
+      ],
+      "formats": [
+        "GRIB2 (gzipped)"
+      ],
+      "selection": "Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day",
+      "inputs": "Product name and both timestamps",
+      "reader_extra": null,
+      "guide": "https://docs.usdata.dev/providers/noaa-mrms/",
+      "reference": "https://docs.usdata.dev/generated/catalog/noaa/mrms/",
+      "examples": [
+        {
+          "title": "Mrms rotation",
+          "url": "https://usdata.dev/examples/mrms-rotation/"
+        }
+      ]
+    },
+    {
       "id": "noaa:nexrad-level3",
       "title": "NEXRAD derived radar products",
       "description": "Derived single-radar products (super-resolution reflectivity and velocity, dual-polarization moments, mesocyclone and storm-track detections, echo tops, accumulations) in the public unidata-nexrad-level3 S3 bucket, with flat keys SITE_PRODUCT_YYYY_MM_DD_HH_MM_SS where the site id drops the first letter of its ICAO id. One object per product per volume scan since 2020-03-30; earlier products are archived at NCEI. Files are fetched whole and have no reader.",
@@ -535,31 +570,6 @@
         "global",
         "ghcnh",
         "ncei"
-      ],
-      "formats": [],
-      "selection": null,
-      "inputs": null,
-      "reader_extra": null,
-      "guide": null,
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
-    },
-    {
-      "id": "noaa:mrms",
-      "title": "Multi-Radar Multi-Sensor (MRMS)",
-      "description": "Gridded CONUS products merged from all radars plus other sensors (reflectivity, precipitation rate and accumulation, severe weather diagnostics), as two-minute gzipped GRIB2 files in the public noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/.",
-      "provider": "NOAA",
-      "domain": "Weather radar",
-      "availability": "Planned",
-      "since": null,
-      "keywords": [
-        "radar",
-        "mrms",
-        "precipitation",
-        "reflectivity",
-        "gridded",
-        "grib2",
-        "conus"
       ],
       "formats": [],
       "selection": null,

@@ -22,7 +22,7 @@
   {
     "slug": "climate-anomalies",
     "title": "Was 2024 warmer or wetter than normal?",
-    "summary": "Compare twelve months at Oklahoma City's airport with 1991–2020 station normals, including temperature-unit checks and monthly anomaly plots."
+    "summary": "Compare twelve months at Oklahoma City's airport with 1991\u20132020 station normals, including temperature-unit checks and monthly anomaly plots."
   },
   {
     "slug": "event-context",
@@ -67,7 +67,7 @@
   {
     "slug": "climate-normals",
     "title": "What is normal weather for a month at one station?",
-    "summary": "Read 1991–2020 monthly temperature and precipitation normals and select a month for comparison."
+    "summary": "Read 1991\u20132020 monthly temperature and precipitation normals and select a month for comparison."
   },
   {
     "slug": "coastal-water-levels",
@@ -83,5 +83,10 @@
     "slug": "glm-flashes",
     "title": "How much lightning was there around a reported tornado?",
     "summary": "Pull one hour of GOES-16 GLM detection files, flatten the flash tables, and count flashes near Oklahoma City minute by minute."
+  },
+  {
+    "slug": "mrms-rotation",
+    "title": "Where was the strongest rotation near a reported tornado?",
+    "summary": "Pull twenty minutes of MRMS mid-level rotation tracks, crop each CONUS grid to Oklahoma City locally, and report the peak azimuthal shear file by file."
   }
 ]
