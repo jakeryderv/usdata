@@ -33,6 +33,10 @@ readings against NCEI's daily summary (available since v0.14.0).
 [Atlantic hurricane best tracks](https://usdata.dev/examples/hurdat2/) fetches the whole HURDAT2
 Atlantic file and reads it into one row per track point (available since v0.12.0).
 
+[Lightning flashes around a reported tornado](https://usdata.dev/examples/glm-flashes/) pulls
+one hour of GOES-16 GLM detection files and counts the flashes near Oklahoma
+City minute by minute (available since v0.15.0).
+
 ## Run interactively
 
 From the repository root, with [uv and just installed](https://docs.usdata.dev/project/#development):

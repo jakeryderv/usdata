@@ -5,15 +5,19 @@ both timestamps at most seven days apart. The optional ``product`` must be
 ``ABI-L2-CMIPC``. Select whole single-channel NetCDF files by inclusive
 scan-start time, never by scan overlap.
 Geographic and variable subsetting are not available for these archived files.
+``list_scans`` is shared with the GLM adapter, which selects files under the
+same bucket layout by the same inclusive start-time rule.
 """
 
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import ClassVar
+
+import httpx
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import s3
@@ -33,11 +37,12 @@ def _timestamp(raw: str) -> datetime:
     stamp = datetime.strptime(raw, "%Y%j%H%M%S%f").replace(tzinfo=UTC)
     # strptime accepts day 366 in a non-leap year by spilling into the next year.
     if stamp.strftime("%Y%j%H%M%S") + str(stamp.microsecond // 100000) != raw:
-        raise ValueError("invalid ABI timestamp")
+        raise ValueError("invalid GOES timestamp")
     return stamp
 
 
-def _number(raw: object, label: str, low: int, high: int) -> int:
+def number(raw: object, label: str, low: int, high: int) -> int:
+    """Parse a bounded integer parameter, accepting ``C``-prefixed channel labels."""
     if isinstance(raw, bool) or not isinstance(raw, (str, int)):
         raise QueryError(f"{label} must be an integer from {low} to {high}")
     text = str(raw).strip()
@@ -46,6 +51,53 @@ def _number(raw: object, label: str, low: int, high: int) -> int:
     if not text.isascii() or not text.isdigit() or not low <= int(text) <= high:
         raise QueryError(f"{label} must be an integer from {low} to {high}")
     return int(text)
+
+
+def list_scans(
+    client: httpx.Client,
+    bucket: str,
+    product: str,
+    start: datetime,
+    end: datetime,
+    key_re: re.Pattern[str],
+    keep: Callable[[re.Match[str]], bool],
+    dataset_id: str,
+) -> list[Asset]:
+    """List whole GOES product files whose start stamps fall in the inclusive UTC window.
+
+    Every hourly ``PRODUCT/YYYY/DDD/HH/`` prefix touching the window is listed.
+    ``key_re`` must name ``start`` and ``end`` groups; ``keep`` decides whether a
+    matching filename belongs to the query. Files are selected by their start
+    stamp only, never because they overlap the window.
+    """
+    hour = start.replace(minute=0, second=0, microsecond=0)
+    assets: dict[str, Asset] = {}
+    while hour <= end:
+        prefix = f"{product}/{hour:%Y/%j/%H}/"
+        for obj in s3.list_objects(bucket, prefix, client):
+            if not obj.key.startswith(prefix):
+                continue
+            name = obj.key.removeprefix(prefix)
+            match = key_re.fullmatch(name)
+            if match is None or not keep(match):
+                continue
+            try:
+                scan_start, scan_end = _timestamp(match["start"]), _timestamp(match["end"])
+            except ValueError:
+                continue
+            if scan_end < scan_start or not start <= scan_start <= end:
+                continue
+            assets[obj.key] = Asset(
+                id=name,
+                dataset_id=dataset_id,
+                href=f"s3://{bucket}/{obj.key}",
+                protocol=Protocol.S3,
+                media_type="application/x-netcdf",
+                size=obj.size,
+                time=TimeRange(start=scan_start, end=scan_end),
+            )
+        hour += timedelta(hours=1)
+    return sorted(assets.values(), key=lambda asset: asset.id)
 
 
 class GoesAbi(_HttpProvider):
@@ -72,44 +124,21 @@ class GoesAbi(_HttpProvider):
         start, end = self.utc_window(query)
         if end - start > MAX_WINDOW:
             raise QueryError("GOES requests must span at most 7 days; split longer intervals")
-        satellite = _number(query.params.get("satellite"), "satellite", 16, 19)
-        channel = _number(query.params.get("channel"), "channel", 1, 16)
+        satellite = number(query.params.get("satellite"), "satellite", 16, 19)
+        channel = number(query.params.get("channel"), "channel", 1, 16)
         if end < PUBLIC_START:
             raise QueryError("GOES CMIPC public observations begin on 2017-02-28")
         start = max(start, PUBLIC_START)
-        hour = start.replace(minute=0, second=0, microsecond=0)
-        bucket = f"noaa-goes{satellite}"
-        assets: dict[str, Asset] = {}
-        while hour <= end:
-            prefix = f"{PRODUCT}/{hour:%Y/%j/%H}/"
-            for obj in s3.list_objects(bucket, prefix, self._http()):
-                if not obj.key.startswith(prefix):
-                    continue
-                name = obj.key.removeprefix(prefix)
-                match = KEY_RE.fullmatch(name)
-                if (
-                    match is None
-                    or int(match["satellite"]) != satellite
-                    or int(match["channel"]) != channel
-                ):
-                    continue
-                try:
-                    scan_start, scan_end = _timestamp(match["start"]), _timestamp(match["end"])
-                except ValueError:
-                    continue
-                if scan_end < scan_start or not start <= scan_start <= end:
-                    continue
-                assets[obj.key] = Asset(
-                    id=name,
-                    dataset_id=self.dataset.id,
-                    href=f"s3://{bucket}/{obj.key}",
-                    protocol=Protocol.S3,
-                    media_type="application/x-netcdf",
-                    size=obj.size,
-                    time=TimeRange(start=scan_start, end=scan_end),
-                )
-            hour += timedelta(hours=1)
-        return sorted(assets.values(), key=lambda asset: asset.id)
+        return list_scans(
+            self._http(),
+            f"noaa-goes{satellite}",
+            PRODUCT,
+            start,
+            end,
+            KEY_RE,
+            lambda m: int(m["satellite"]) == satellite and int(m["channel"]) == channel,
+            self.dataset.id,
+        )
 
     def fetch(self, asset: Asset, dest: Path) -> Path:
         """Download the complete archived NetCDF object without modification."""

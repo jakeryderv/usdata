@@ -1,0 +1,7 @@
+name: oklahoma-glm-hour
+sources:
+  - dataset: noaa:goes-glm
+    start: 2024-05-06T20:00:00Z
+    end: 2024-05-06T20:59:59Z
+    params:
+      satellite: 16
