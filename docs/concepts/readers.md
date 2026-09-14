@@ -56,7 +56,10 @@ Before decoding, the reader checks that moment and coordinate records align.
 An interior sweep missing its end marker can shift the decoder's coordinate
 table and pair observations with the wrong coordinates, so such a request
 raises `RadarDecodeError` rather than returning a partial result. Select an
-unaffected sweep explicitly. The guard does not repair the file or certify its
+unaffected sweep explicitly. The KTLX volume `KTLX20240507_044053_V06`, which the
+event-context and tornado-classification examples use, is the known case: its
+first sweep opens and full-volume decoding does not. The guard does not repair
+the file or certify its
 quality.
 
 Reserved codes become NaN, incomplete sweeps with aligned metadata are padded
