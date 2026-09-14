@@ -386,19 +386,24 @@ datasets:
 
   - id: noaa:gfs
     provider: noaa
-    status: planned
+    status: available
     domain: weather-models
-    target: '0.15'
+    since: "0.15"
     title: GFS Forecast Model Output
     description: >-
-      Global Forecast System output in GRIB2 from the public noaa-gfs-bdp-pds
-      S3 bucket, laid out as gfs.YYYYMMDD/HH/atmos/ with files per resolution
-      and forecast hour (for example pgrb2.0p25.fNNN).
-    keywords: [forecast, model, gfs, grib2, global, nwp]
+      Global Forecast System forecasts in GRIB2 from the anonymous
+      noaa-gfs-bdp-pds S3 bucket, one whole global file per run, forecast hour,
+      and grid resolution. Select a run by initialization window and cycle hour
+      (00, 06, 12, or 18 UTC), the forecast hours, and the 0.25, 0.5, or
+      1 degree grid. Files are 42 MB to 550 MB; fields are selected after
+      download with the GRIB2 reader, not by the server.
+    keywords: [forecast, model, gfs, grib2, global, nwp, cape, helicity, convective]
     protocol: s3
     homepage: https://registry.opendata.aws/noaa-gfs-bdp-pds/
     license: US Government Work (public domain)
+    temporal_extent: { start: "2021-03-22T12:00:00Z" }
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+    adapter: usdata.providers.noaa.gfs:Gfs
 
   - id: noaa:nbm
     provider: noaa
@@ -866,6 +871,16 @@ catalog:
     reader_extra: grib
     examples:
     - examples/hrrr-environment/README.md
+  noaa:gfs:
+    guide: docs/providers/noaa-gfs.md
+    summary: GFS model output
+    formats:
+    - GRIB2
+    selection: Whole global files by run initialization window, cycle hour, forecast hours, and grid resolution, at most one day
+    inputs: Both timestamps, cycle, and forecast_hour
+    reader_extra: grib
+    examples:
+    - examples/gfs-environment/README.md
   noaa:storm-events:
     guide: docs/providers/noaa-storm-events.md
     summary: Storm Events details

@@ -418,6 +418,40 @@
       ]
     },
     {
+      "id": "noaa:gfs",
+      "title": "GFS model output",
+      "description": "Global Forecast System forecasts in GRIB2 from the anonymous noaa-gfs-bdp-pds S3 bucket, one whole global file per run, forecast hour, and grid resolution. Select a run by initialization window and cycle hour (00, 06, 12, or 18 UTC), the forecast hours, and the 0.25, 0.5, or 1 degree grid. Files are 42 MB to 550 MB; fields are selected after download with the GRIB2 reader, not by the server.",
+      "provider": "NOAA",
+      "domain": "Weather models",
+      "availability": "Source only",
+      "since": "0.15",
+      "keywords": [
+        "forecast",
+        "model",
+        "gfs",
+        "grib2",
+        "global",
+        "nwp",
+        "cape",
+        "helicity",
+        "convective"
+      ],
+      "formats": [
+        "GRIB2"
+      ],
+      "selection": "Whole global files by run initialization window, cycle hour, forecast hours, and grid resolution, at most one day",
+      "inputs": "Both timestamps, cycle, and forecast_hour",
+      "reader_extra": "grib",
+      "guide": "https://docs.usdata.dev/providers/noaa-gfs/",
+      "reference": "https://docs.usdata.dev/generated/catalog/noaa/gfs/",
+      "examples": [
+        {
+          "title": "Gfs environment",
+          "url": "https://usdata.dev/examples/gfs-environment/"
+        }
+      ]
+    },
+    {
       "id": "noaa:hrrr",
       "title": "HRRR model output",
       "description": "High-Resolution Rapid Refresh 3 km CONUS forecasts in GRIB2 from the anonymous noaa-hrrr-bdp-pds S3 bucket, one whole file per run and forecast hour. Select a run by initialization window and cycle hour, the forecast hours, and the surface, pressure-level, or native file variant. Files are 150 MB to 750 MB; fields are selected after download with the GRIB2 reader, not by the server.",
@@ -628,30 +662,6 @@
         "best track",
         "ibtracs",
         "global"
-      ],
-      "formats": [],
-      "selection": null,
-      "inputs": null,
-      "reader_extra": null,
-      "guide": null,
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
-    },
-    {
-      "id": "noaa:gfs",
-      "title": "GFS Forecast Model Output",
-      "description": "Global Forecast System output in GRIB2 from the public noaa-gfs-bdp-pds S3 bucket, laid out as gfs.YYYYMMDD/HH/atmos/ with files per resolution and forecast hour (for example pgrb2.0p25.fNNN).",
-      "provider": "NOAA",
-      "domain": "Weather models",
-      "availability": "Planned",
-      "since": null,
-      "keywords": [
-        "forecast",
-        "model",
-        "gfs",
-        "grib2",
-        "global",
-        "nwp"
       ],
       "formats": [],
       "selection": null,
