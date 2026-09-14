@@ -90,7 +90,7 @@ check-radar:
 
 # Open the interactive examples in JupyterLab
 notebooks:
-    uv run --group examples --extra radar --extra netcdf jupyter lab examples
+    uv run --group examples --extra radar --extra netcdf --extra grib jupyter lab examples
 
 # Validate committed notebook structure and saved outputs without fetching data
 check-notebooks:
@@ -99,7 +99,7 @@ check-notebooks:
 # Execute all notebooks against live services; --write refreshes committed outputs
 [positional-arguments]
 run-notebooks *args:
-    uv run --group examples --extra radar --extra netcdf python scripts/run_notebooks.py "$@"
+    uv run --group examples --extra radar --extra netcdf --extra grib python scripts/run_notebooks.py "$@"
 
 # Run checks with the optional NetCDF4 reader installed
 check-netcdf:

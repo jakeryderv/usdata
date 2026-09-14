@@ -98,5 +98,10 @@
     "slug": "gfs-environment",
     "title": "What did the global model say the environment was before a reported tornado?",
     "summary": "Pull the GFS 00 UTC 1-degree analysis for 2024-05-06 and read surface CAPE and 0-3 km helicity at the grid point nearest Oklahoma City."
+  },
+  {
+    "slug": "tornado-classification",
+    "title": "Which severe reports came with rotation and lightning?",
+    "summary": "Convert one Oklahoma tornado report to UTC, join it to the nearest NEXRAD volume, MRMS rotation track, and GLM flashes, then build a small labeled table of rotation and lightning features for tornado, hail, and wind reports from the same evening."
   }
 ]

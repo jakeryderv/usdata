@@ -16,6 +16,7 @@ inspect the results. The website renders saved content without running analyses.
 | [Radar reflectivity](https://usdata.dev/examples/radar-reflectivity/) | One NEXRAD volume, xradar sweeps, field units, reflectivity plot, and provenance |
 | [GOES infrared imagery](https://usdata.dev/examples/goes-imagery/) | NetCDF4 opening, CF decoding, quality flags, scan coordinates and brightness-temperature imagery |
 | [Event context](https://usdata.dev/examples/event-context/) | One Storm Events report matched to NEXRAD and GOES, explicit UTC conversion, safe radar sweep selection, projected context, and locked restoration (available since v0.9) |
+| [Tornado classification](https://usdata.dev/examples/tornado-classification/) | One tornado report joined to the nearest NEXRAD volume, MRMS rotation track, and GLM flashes, then a small labeled table of rotation and lightning features for tornado, hail, and wind reports from the same evening (available since v0.15.0) |
 
 ## Manifest examples
 
@@ -68,7 +69,7 @@ just notebooks
 
 This launches JupyterLab with the optional `examples` dependency group, which
 includes pandas, plotting, and notebook tools. The commands also install the
-optional `radar` and `netcdf` extras. Notebook tools are development dependencies;
+optional `radar`, `netcdf`, and `grib` extras. Notebook tools are development dependencies;
 installing base `usdata` does not install them or the scientific reader extras. Select a notebook and use the Python 3
 kernel. In an IDE, select this checkout's `.venv` interpreter after the environment
 has been installed. Use **Restart Kernel and Run All Cells** to check that a notebook

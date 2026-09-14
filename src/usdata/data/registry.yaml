@@ -820,6 +820,7 @@ catalog:
     examples:
     - examples/radar-reflectivity/example.ipynb
     - examples/event-context/example.ipynb
+    - examples/tornado-classification/example.ipynb
   noaa:nexrad-level3:
     guide: docs/providers/noaa-nexrad-level3.md
     summary: NEXRAD derived radar products
@@ -851,6 +852,7 @@ catalog:
     reader_extra: grib
     examples:
     - examples/mrms-rotation/README.md
+    - examples/tornado-classification/example.ipynb
   noaa:goes-glm:
     guide: docs/providers/noaa-glm.md
     summary: GOES lightning detections
@@ -861,6 +863,7 @@ catalog:
     reader_extra: netcdf
     examples:
     - examples/glm-flashes/README.md
+    - examples/tornado-classification/example.ipynb
   noaa:hrrr:
     guide: docs/providers/noaa-hrrr.md
     summary: HRRR model output
@@ -892,6 +895,7 @@ catalog:
     examples:
     - examples/storm-events/example.ipynb
     - examples/event-context/example.ipynb
+    - examples/tornado-classification/example.ipynb
   noaa:spc-tornado-reports:
     guide: docs/providers/noaa-spc-tornado.md
     summary: SPC tornado database
