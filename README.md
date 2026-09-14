@@ -39,8 +39,8 @@ uv run usdata info noaa:coops-water-levels
 ```
 
 Run source examples from this checkout with `uv run usdata` (CLI) or
-`uv run python` (Python). The pandas extra enables CSV reading; use `--extra radar`
-or `--extra netcdf` for those formats. For contribution checks, continue with
+`uv run python` (Python). The pandas extra enables CSV reading; use `--extra radar`,
+`--extra netcdf`, or `--extra grib` for those formats. For contribution checks, continue with
 [development setup](#development).
 
 ## Providers

@@ -106,6 +106,11 @@ check-netcdf:
     uv sync --group dev --extra netcdf
     UV_NO_SYNC=1 just check
 
+# Run checks with the optional GRIB2 reader installed (ecCodes wheels: Linux, Windows <= 3.13)
+check-grib:
+    uv sync --group dev --extra grib
+    UV_NO_SYNC=1 just check
+
 # Build sdist and wheel into dist/
 build:
     rm -rf dist

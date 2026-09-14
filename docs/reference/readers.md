@@ -2,7 +2,7 @@
 
 Readers operate on fetched local files and are selected by format. CSV and
 HURDAT2 return a pandas DataFrame, NEXRAD returns an xarray DataTree, and NetCDF4
-returns an xarray Dataset. Each reader has an optional dependency extra.
+and GRIB2 return an xarray Dataset. Each reader has an optional dependency extra.
 
 ## CSV and ERDDAP CSV
 
@@ -187,6 +187,59 @@ the `usdata[netcdf]` extra.
 See the executed [GOES example](https://usdata.dev/examples/goes-imagery/),
 [xarray's decoding options](https://docs.xarray.dev/en/stable/generated/xarray.open_dataset.html),
 and [ADR 0009](../adr/0009-eager-local-netcdf4-reader.md).
+
+## GRIB2 fields
+
+**Unreleased.** Install `usdata[grib]` for the ecCodes Python bindings, xarray,
+and NumPy. `item.open()` recognizes `application/x-grib2`, `application/grib2`,
+`application/x-grib`, and `application/wmo-grib2`, and names ending in `.grib2`,
+`.grb2`, or their `.gz` forms when the media type is missing, generic, or gzip;
+pass `reader="grib2"` for other metadata. Gzipped files, which is how MRMS is
+published, are decompressed in memory; cached bytes are never changed.
+
+With pip alone the extra installs on Linux for every supported Python and on
+Windows for CPython 3.13 and earlier, where the `eccodes` wheel bundles the
+library. On macOS, and on Windows with Python 3.14, install the ecCodes library
+separately (`conda install -c conda-forge eccodes` or `brew install eccodes`)
+before the extra; the reader reports a missing library with that hint.
+
+The result is an xarray Dataset with one float32 data variable per selected
+message on one shared grid. Regular latitude-longitude grids get one-dimensional
+`latitude` and `longitude` coordinates computed from the grid definition;
+projected grids such as HRRR's Lambert conformal get two-dimensional
+coordinates on `y` and `x` plus the projection parameters as Dataset attributes.
+Rows always run north to south and columns west to east, whatever the file's
+scanning mode. Longitudes keep the file's convention, 0–360° for NOAA products.
+Values marked missing by a bitmap become NaN; product-defined sentinels such as
+MRMS `-999` and `-99` are kept, since their meaning is the product's. Variable
+attributes carry `units`, `name`, `typeOfLevel`, `level`, the discipline,
+category, and parameter numbers, packing type, reference and valid times, and
+step; `dataset.attrs["usdata"]` holds the same provenance copy as other readers.
+
+A file with one message opens directly. A file with several needs `select`, a
+mapping of ecCodes key names to one value or a list of values, otherwise the
+reader raises a `ValueError` listing every `(shortName, typeOfLevel, level)`
+rather than loading hundreds of fields:
+
+```python
+env = item.open(select={"shortName": ["cape", "hlcy"], "typeOfLevel": "surface"})
+print(list(env.data_vars), env.cape.attrs["units"])
+```
+
+Strings compare with the key's text form and numbers with its numeric form, so
+`{"level": 500}` and `{"level": "500"}` match the same message. Variables are
+named by `shortName`; when several selected messages share one, the level type
+and value are appended. ecCodes has no names for MRMS parameters, so those
+variables take the product from the file name, for example `RotationTrackML30min`,
+and other unnamed parameters become `parameter_<discipline>_<category>_<number>`.
+Selected messages must share one grid.
+
+Memory must fit the decoded field: a 0.005° MRMS grid is 98 million points and
+peaks near 1.2 GB while the float64 values from ecCodes are cast to float32.
+Select coarser products, or use `item.path` with a chunked backend, when that is
+too much. CSV options and `sweep` are rejected. Lazy or dask-backed opening,
+regridding, reprojection, spatial subsetting, and GRIB1 are not supported.
+See [ADR 0022](../adr/0022-grib2-reader-backend.md) for the backend choice.
 
 ## HURDAT2 best tracks
 

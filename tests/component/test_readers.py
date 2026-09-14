@@ -85,7 +85,7 @@ def test_broken_pandas_dependency_is_not_misreported(fetched) -> None:
     assert error.value.name == "numpy"
 
 
-@pytest.mark.parametrize("media_type", [None, "application/octet-stream", "application/x-grib"])
+@pytest.mark.parametrize("media_type", [None, "application/octet-stream", "application/x-hdf"])
 def test_unsupported_formats_do_not_load_pandas(fetched, media_type) -> None:
     item = fetched("not CSV", media_type=media_type)
     with (
@@ -106,6 +106,27 @@ def test_level3_products_are_refused_without_the_level2_reader(fetched) -> None:
         item.open()
     loader.assert_not_called()
     radar.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    ("media_type", "name"),
+    [
+        ("application/x-grib2", "sample.csv"),
+        ("application/octet-stream", "MRMS_MESH_00.50_20240506-200036.grib2.gz"),
+        ("application/gzip", "field.grib2.gz"),
+        (None, "hrrr.t20z.wrfsfcf00.grib2"),
+    ],
+)
+def test_grib2_is_inferred_and_names_the_grib_extra(fetched, media_type, name) -> None:
+    item = fetched("not GRIB", media_type=media_type)
+    item = item.model_copy(update={"asset": item.asset.model_copy(update={"id": name})})
+    with (
+        patch("usdata._grib.import_module", side_effect=ModuleNotFoundError(name="eccodes")),
+        pytest.raises(MissingReaderDependency, match=r"usdata\[grib\]"),
+    ):
+        item.open()
+    with pytest.raises(ValueError, match="select applies only"):
+        item.open(reader="csv", select={"shortName": "t"})
 
 
 def test_unknown_reader_rejected(fetched) -> None:

@@ -31,7 +31,7 @@ that use local files `@pytest.mark.l2` even inside adapter/transport modules;
 a module using file fixtures throughout may declare `pytestmark = pytest.mark.l2`.
 `component` modules conservatively use L2 for their combined local workflows.
 
-Use `pandas`, `radar`, and `netcdf` markers for reader test groups. These select
+Use `pandas`, `radar`, `netcdf`, and `grib` markers for reader test groups. These select
 coverage; they do not install dependencies. Tests still check optional imports,
 and core-only CI must remain valid. Contract tests describe a purpose, not a
 separate execution level.
