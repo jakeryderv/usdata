@@ -125,7 +125,7 @@ datasets:
     provider: noaa
     status: planned
     domain: weather-satellites
-    target: later
+    target: '0.15'
     title: GOES Geostationary Lightning Mapper
     description: >-
       Lightning flash, group, and event detections (GLM-L2-LCFA) in 20-second
@@ -297,7 +297,7 @@ datasets:
     provider: noaa
     status: planned
     domain: weather-radar
-    target: later
+    target: '0.15'
     title: Multi-Radar Multi-Sensor (MRMS)
     description: >-
       Gridded CONUS products merged from all radars plus other sensors
@@ -314,7 +314,7 @@ datasets:
     provider: noaa
     status: planned
     domain: weather-radar
-    target: later
+    target: '0.15'
     title: NEXRAD Level III Products
     description: >-
       Derived single-radar products (base reflectivity, velocity, storm
@@ -331,7 +331,7 @@ datasets:
     provider: noaa
     status: planned
     domain: weather-models
-    target: later
+    target: '0.15'
     title: HRRR Forecast Model Output
     description: >-
       High-Resolution Rapid Refresh 3 km hourly forecasts in GRIB2 from the
@@ -348,7 +348,7 @@ datasets:
     provider: noaa
     status: planned
     domain: weather-models
-    target: later
+    target: '0.15'
     title: GFS Forecast Model Output
     description: >-
       Global Forecast System output in GRIB2 from the public noaa-gfs-bdp-pds

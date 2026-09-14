@@ -38,7 +38,7 @@ Domain: Surface weather.
 
 ### noaa:mrms
 
-**Multi-Radar Multi-Sensor (MRMS)** · Planned · target later
+**Multi-Radar Multi-Sensor (MRMS)** · Planned · target 0.15
 
 Gridded CONUS products merged from all radars plus other sensors (reflectivity, precipitation rate and accumulation, severe weather diagnostics), as two-minute gzipped GRIB2 files in the public noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/.
 
@@ -47,7 +47,7 @@ Domain: Weather radar.
 
 ### noaa:nexrad-level3
 
-**NEXRAD Level III Products** · Planned · target later
+**NEXRAD Level III Products** · Planned · target 0.15
 
 Derived single-radar products (base reflectivity, velocity, storm totals, and others) in the public unidata-nexrad-level3 S3 bucket, with flat keys SITE_PRODUCT_YYYY_MM_DD_HH_MM_SS where the site id drops its leading K. Recent data only; the archive is at NCEI.
 
@@ -56,7 +56,7 @@ Domain: Weather radar.
 
 ### noaa:goes-glm
 
-**GOES Geostationary Lightning Mapper** · Planned · target later
+**GOES Geostationary Lightning Mapper** · Planned · target 0.15
 
 Lightning flash, group, and event detections (GLM-L2-LCFA) in 20-second NetCDF files under the same GOES S3 buckets and layout as ABI.
 
@@ -74,7 +74,7 @@ Domain: Tropical cyclones.
 
 ### noaa:gfs
 
-**GFS Forecast Model Output** · Planned · target later
+**GFS Forecast Model Output** · Planned · target 0.15
 
 Global Forecast System output in GRIB2 from the public noaa-gfs-bdp-pds S3 bucket, laid out as gfs.YYYYMMDD/HH/atmos/ with files per resolution and forecast hour (for example pgrb2.0p25.fNNN).
 
@@ -83,7 +83,7 @@ Domain: Weather models.
 
 ### noaa:hrrr
 
-**HRRR Forecast Model Output** · Planned · target later
+**HRRR Forecast Model Output** · Planned · target 0.15
 
 High-Resolution Rapid Refresh 3 km hourly forecasts in GRIB2 from the public noaa-hrrr-bdp-pds S3 bucket, laid out as hrrr.YYYYMMDD/conus/ with one file per cycle and forecast hour. Large files; cycle and forecast-hour selection are essential.
 

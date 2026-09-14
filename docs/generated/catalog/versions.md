@@ -4,6 +4,14 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 Move a dataset between phases by editing its `target` in the registry.
 
+**Target 0.15**
+
+- [`noaa:gfs`](noaa.md#noaagfs) GFS Forecast Model Output · Planned
+- [`noaa:goes-glm`](noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · Planned
+- [`noaa:hrrr`](noaa.md#noaahrrr) HRRR Forecast Model Output · Planned
+- [`noaa:mrms`](noaa.md#noaamrms) Multi-Radar Multi-Sensor (MRMS) · Planned
+- [`noaa:nexrad-level3`](noaa.md#noaanexrad-level3) NEXRAD Level III Products · Planned
+
 **Later**
 
 - [`census:acs-5year`](census.md#censusacs-5year) American Community Survey 5-Year Estimates · Planned
@@ -13,15 +21,10 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`noaa:cdr-ndvi`](noaa.md#noaacdr-ndvi) NDVI Climate Data Record · Planned
 - [`noaa:ersst`](noaa.md#noaaersst) ERSST Monthly Sea Surface Temperature · Planned
 - [`noaa:etopo`](noaa.md#noaaetopo) ETOPO 2022 Global Relief · Planned
-- [`noaa:gfs`](noaa.md#noaagfs) GFS Forecast Model Output · Planned
 - [`noaa:ghcn-hourly`](noaa.md#noaaghcn-hourly) GHCN-Hourly Station Observations · Planned
-- [`noaa:goes-glm`](noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · Planned
-- [`noaa:hrrr`](noaa.md#noaahrrr) HRRR Forecast Model Output · Planned
 - [`noaa:ibtracs`](noaa.md#noaaibtracs) IBTrACS Global Tropical Cyclone Tracks · Planned
-- [`noaa:mrms`](noaa.md#noaamrms) Multi-Radar Multi-Sensor (MRMS) · Planned
 - [`noaa:nbm`](noaa.md#noaanbm) National Blend of Models · Planned
 - [`noaa:nclimdiv`](noaa.md#noaanclimdiv) nClimDiv Climate Divisional Data · Planned
-- [`noaa:nexrad-level3`](noaa.md#noaanexrad-level3) NEXRAD Level III Products · Planned
 - [`noaa:ocads`](noaa.md#noaaocads) Ocean Carbon and Acidification Data System · Planned
 - [`noaa:oisst`](noaa.md#noaaoisst) OISST Daily Sea Surface Temperature · Planned
 - [`noaa:paleo-search`](noaa.md#noaapaleo-search) World Data Service for Paleoclimatology · Planned

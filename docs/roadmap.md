@@ -45,8 +45,17 @@ does not implement an SDK remote cache. See
 [website operations](guides/website-operations.md) and
 [ADR 0015](adr/0015-separate-sites-and-data-storage.md).
 
-Choose a bounded candidate from Next when its user benefit, scope, exclusions,
-and acceptance criteria are ready. The completed
+The selected workstream is the set of inputs a tornado classification project
+needs, tracked in [issue 118](https://github.com/jakeryderv/usdata/issues/118)
+under the v0.15.0 milestone: GLM lightning detections, SPC tornado reports,
+NEXRAD Level III products without a reader, a GRIB2 reader extra, MRMS gridded
+radar products, HRRR and GFS model output, and one example that joins Storm
+Events, Level II radar, and MRMS into labeled rows. The blocking decision is the
+GRIB2 reader backend, recorded as an ADR before the three GRIB2 datasets start.
+Release when the milestone closes; an item that slips leaves the milestone
+rather than holding the release.
+
+The completed
 [v0.14.0 first-use review](reviews/first-use-v0.14.0.md) records the published
 walkthrough, live checks for the two datasets the release added, and their
 query validation. The
@@ -79,8 +88,9 @@ and optional-reader boundaries:
 
 - Further NCEI Access Data Service datasets, such as hourly normals.
 - Bulk directories and archives, such as IBTrACS.
-- Additional GOES products/sectors, MRMS, and CO-OPS currents.
+- Additional GOES ABI products and sectors, and CO-OPS currents.
 - Geospatial readers when a supported dataset and representative fixtures justify them.
+- A NEXRAD Level III reader, once the bytes-only adapter has a concrete decoding use case.
 
 ## Later
 
@@ -89,7 +99,10 @@ and optional-reader boundaries:
 - [Remote cache backends](https://github.com/jakeryderv/usdata/issues/11):
   define lookup, freshness, trusted upload ownership, and eviction while preserving
   checksum, provenance, restoration, and published-file retention contracts.
-- GRIB2 model output with cycle/forecast-hour selection, NetCDF CDRs, and static grids.
+- NetCDF CDRs and static grids.
+- NWS damage survey polygons and SPC mesoanalysis archives: considered for the
+  tornado workstream and excluded because they need ArcGIS REST and image access
+  patterns, and geospatial readers, that the package does not have.
 - Further agencies, live catalog discovery, and third-party registry extensions.
 - Format normalization and place-name lookup beyond states and counties.
 - A hosted data API or substantial ingestion/analysis jobs when a concrete use
