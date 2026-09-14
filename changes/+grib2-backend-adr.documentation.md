@@ -1,0 +1,1 @@
+Record the GRIB2 reader decision: decode through the ecCodes Python bindings and build xarray datasets in usdata, after gribberish panicked on every 0.005-degree MRMS rotation grid and cfgrib spent 19 seconds computing coordinates for one file.

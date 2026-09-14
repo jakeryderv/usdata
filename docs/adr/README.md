@@ -25,3 +25,4 @@ is described in the guides and reference pages.
 - [0019: Climate normals as one dataset with a period parameter and placeholder-year windows](0019-climate-normals-periods.md)
 - [0020: HURDAT2 as one whole file per basin with a format reader](0020-hurdat2-whole-file-and-format-reader.md)
 - [0021: Publish examples on the main website](0021-examples-on-main-website.md)
+- [0022: GRIB2 reading through ecCodes, built into xarray by usdata](0022-grib2-reader-backend.md)
