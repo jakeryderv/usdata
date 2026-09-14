@@ -57,7 +57,7 @@ jobs:
       fail-fast: false
       matrix:
         python: ["3.11", "3.14"]
-        readers: [core, pandas, pandas-floor, radar, netcdf]
+        readers: [core, pandas, pandas-floor, radar, netcdf, grib]
         exclude:
           # pandas 2.2 ships no cp314 wheel and its source build against numpy 2.5
           # segfaults, so the declared floor is exercised on 3.11 only.
@@ -86,14 +86,17 @@ jobs:
         run: uv sync --group dev --extra radar
       - if: matrix.readers == 'netcdf'
         run: uv sync --group dev --extra netcdf
+      - if: matrix.readers == 'grib'
+        run: uv sync --group dev --extra grib
       - name: Check dependency profile
         env:
           EXPECT_PANDAS: ${{ matrix.readers != 'core' && '1' || '0' }}
-          EXPECT_XARRAY: ${{ (matrix.readers == 'radar' || matrix.readers == 'netcdf') && '1' || '0' }}
+          EXPECT_XARRAY: ${{ (matrix.readers == 'radar' || matrix.readers == 'netcdf' || matrix.readers == 'grib') && '1' || '0' }}
           EXPECT_RADAR: ${{ matrix.readers == 'radar' && '1' || '0' }}
+          EXPECT_GRIB: ${{ matrix.readers == 'grib' && '1' || '0' }}
         run: >-
           uv run --no-sync python -c
-          "import importlib.util, os; assert (importlib.util.find_spec('pandas') is not None) == (os.environ['EXPECT_PANDAS'] == '1'); assert (importlib.util.find_spec('xradar') is not None) == (os.environ['EXPECT_RADAR'] == '1'); assert (importlib.util.find_spec('xarray') is not None) == (os.environ['EXPECT_XARRAY'] == '1')"
+          "import importlib.util, os; assert (importlib.util.find_spec('pandas') is not None) == (os.environ['EXPECT_PANDAS'] == '1'); assert (importlib.util.find_spec('xradar') is not None) == (os.environ['EXPECT_RADAR'] == '1'); assert (importlib.util.find_spec('xarray') is not None) == (os.environ['EXPECT_XARRAY'] == '1'); assert (importlib.util.find_spec('eccodes') is not None) == (os.environ['EXPECT_GRIB'] == '1')"
       - run: >-
           just check-tests --junitxml=reports/junit.xml
           --cov-report=xml:reports/coverage.xml --cov-report=json:reports/coverage.json

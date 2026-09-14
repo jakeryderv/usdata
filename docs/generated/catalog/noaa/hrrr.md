@@ -11,7 +11,7 @@ HRRR Forecast Model Output.
 - Files: GRIB2
 - Selection: Whole CONUS files by run initialization window, cycle hour, forecast hours, and file variant, at most one day
 - Required inputs: Both timestamps, cycle, and forecast_hour
-- Open locally: Local files; no bundled reader for this format
+- Open locally: `usdata[grib]` · [Reader guide](../../../reference/readers.md)
 - Examples: [hrrr environment](https://usdata.dev/examples/hrrr-environment/)
 
 ## Parameters

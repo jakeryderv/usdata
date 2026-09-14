@@ -33,6 +33,7 @@ assert find_spec("xradar") is None
 assert find_spec("xarray") is None
 assert find_spec("h5netcdf") is None
 assert find_spec("h5py") is None
+assert find_spec("eccodes") is None
 assert "xradar" not in sys.modules
 assert "pandas" not in sys.modules
 assert Path(usdata.__file__).resolve().is_relative_to(Path.cwd().resolve())

@@ -843,7 +843,7 @@ catalog:
     - GRIB2 (gzipped)
     selection: Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day
     inputs: Product name and both timestamps
-    reader_extra: null
+    reader_extra: grib
     examples:
     - examples/mrms-rotation/README.md
   noaa:goes-glm:
@@ -863,7 +863,7 @@ catalog:
     - GRIB2
     selection: Whole CONUS files by run initialization window, cycle hour, forecast hours, and file variant, at most one day
     inputs: Both timestamps, cycle, and forecast_hour
-    reader_extra: null
+    reader_extra: grib
     examples:
     - examples/hrrr-environment/README.md
   noaa:storm-events:

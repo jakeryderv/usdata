@@ -39,8 +39,8 @@ uv run usdata info noaa:coops-water-levels
 ```
 
 Run source examples from this checkout with `uv run usdata` (CLI) or
-`uv run python` (Python). The pandas extra enables CSV reading; use `--extra radar`
-or `--extra netcdf` for those formats. For contribution checks, continue with
+`uv run python` (Python). The pandas extra enables CSV reading; use `--extra radar`,
+`--extra netcdf`, or `--extra grib` for those formats. For contribution checks, continue with
 [development setup](#development).
 
 ## Providers
@@ -65,6 +65,7 @@ just check     # format, lint, typecheck, offline tests, generated docs, release
 just check-pandas  # install the CSV extra and run the same checks
 just check-radar   # install the radar extra and run the same checks
 just check-netcdf  # install the NetCDF4 extra and run the same checks
+just check-grib    # install the GRIB2 extra and run the same checks (Linux, Windows <= 3.13)
 just notebooks    # launch the optional Jupyter examples environment
 just run-notebooks # execute notebooks live in fresh kernels and temporary caches
 just docs-serve # build and preview the documentation locally, with reload
@@ -90,7 +91,7 @@ project declares, so the `>=` floor is executed rather than assumed; the number
 comes from `pyproject.toml` through `scripts/lowest_version.py`. Installed-wheel
 checks cover all four profiles on Linux, macOS, and Windows. The full offline and
 live-service suites run on Linux. `just setup` restores a core-only development
-environment; the `check-pandas`, `check-radar`, and `check-netcdf` commands install
+environment; the `check-pandas`, `check-radar`, `check-netcdf`, and `check-grib` commands install
 their respective extras.
 
 Releases: `just release minor` prepares a release branch. Update release notices,

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -35,15 +36,17 @@ class FetchedAsset(BaseModel):
         usecols: list[str] | None = None,
         nrows: int | None = None,
         sweep: int | list[int] | None = None,
+        select: Mapping[str, Any] | None = None,
     ) -> Any:
-        """Open local data with an optional ``pandas``, ``radar``, or ``netcdf`` reader.
+        """Open local data with an optional ``pandas``, ``radar``, ``netcdf``, or ``grib`` reader.
 
         ERDDAP units are kept in ``frame.attrs["units"]`` and source provenance
         in ``frame.attrs["usdata"]``. NEXRAD returns a xarray DataTree with provenance
-        in ``radar.attrs["usdata"]``. NetCDF4 returns a loaded xarray Dataset with
-        matching provenance in its attributes. See ``usdata.readers.open_asset`` for options.
-        Use ``sweep=0`` or ``sweep=[0, 2]`` to load selected zero-based radar sweeps.
-        Cached files and provenance sidecars are never changed.
+        in ``radar.attrs["usdata"]``. NetCDF4 and GRIB2 return a loaded xarray Dataset
+        with matching provenance in its attributes. See ``usdata.readers.open_asset``
+        for options. Use ``sweep=0`` or ``sweep=[0, 2]`` to load selected zero-based
+        radar sweeps, and ``select={"shortName": "cape", "typeOfLevel": "surface"}``
+        to choose GRIB2 messages. Cached files and provenance sidecars are never changed.
         """
         from usdata.readers import open_asset
 
@@ -55,6 +58,7 @@ class FetchedAsset(BaseModel):
             usecols=usecols,
             nrows=nrows,
             sweep=sweep,
+            select=select,
         )
 
 

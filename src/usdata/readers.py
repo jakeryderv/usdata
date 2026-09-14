@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import gzip
 import io
+from collections.abc import Mapping
 from importlib import import_module
 from typing import TYPE_CHECKING, Any
 
@@ -14,8 +15,16 @@ if TYPE_CHECKING:
     from usdata.fetch import FetchedAsset
 
 NETCDF_MEDIA_TYPES = {"application/x-netcdf", "application/netcdf", "application/x-netcdf4"}
+GRIB2_MEDIA_TYPES = {
+    "application/x-grib2",
+    "application/grib2",
+    "application/x-grib",
+    "application/wmo-grib2",
+}
+GRIB2_SUFFIXES = (".grib2", ".grib2.gz", ".grb2", ".grb2.gz")
 CSV_MEDIA_TYPES = {"text/csv", "application/csv"}
 GZIP_MEDIA_TYPES = {"application/gzip", "application/x-gzip"}
+OPAQUE_MEDIA_TYPES = {"", "application/octet-stream"} | GZIP_MEDIA_TYPES
 IDENTIFIER_COLUMNS = {
     "station",
     "station_id",
@@ -56,8 +65,9 @@ def open_asset(
     usecols: list[str] | None = None,
     nrows: int | None = None,
     sweep: int | list[int] | None = None,
+    select: Mapping[str, Any] | None = None,
 ) -> Any:
-    """Open local CSV, NetCDF4, NEXRAD, or HURDAT2 data, retaining units and provenance.
+    """Open local CSV, NetCDF4, GRIB2, NEXRAD, or HURDAT2 data, retaining units and provenance.
 
     Gzip CSVs are decompressed locally without changing cached bytes.
     Infer ``csv`` or ``erddap-csv`` from media type and protocol, or use an
@@ -67,6 +77,9 @@ def open_asset(
     as strings. No checksum verification or downloading occurs.
     Radar accepts zero-based ``sweep`` indices (one integer or a non-empty list);
     the default opens the whole volume after checking sweep record alignment.
+    GRIB2 accepts ``select``, a mapping of ecCodes key names to one value or a
+    list of values, to choose messages from a multi-message file; a file with one
+    message needs none. Gzipped GRIB2 is decompressed in memory.
     HURDAT2 best-track text is recognized by dataset or filename and returns one
     row per track point; it takes no CSV options.
     """
@@ -74,6 +87,9 @@ def open_asset(
         media_type = (fetched.asset.media_type or "").split(";", 1)[0].strip().lower()
         name = fetched.asset.id.lower()
         gzip_csv = media_type in GZIP_MEDIA_TYPES and name.endswith(".csv.gz")
+        grib2 = media_type in GRIB2_MEDIA_TYPES or (
+            media_type in OPAQUE_MEDIA_TYPES and name.endswith(GRIB2_SUFFIXES)
+        )
         hurdat2 = fetched.asset.dataset_id == "noaa:hurdat2" or (
             name.startswith("hurdat2-") and name.endswith(".txt")
         )
@@ -88,18 +104,30 @@ def open_asset(
             reader = "hurdat2"
         elif media_type in NETCDF_MEDIA_TYPES:
             reader = "netcdf"
+        elif grib2:
+            reader = "grib2"
         elif media_type in CSV_MEDIA_TYPES or gzip_csv:
             reader = "erddap-csv" if fetched.asset.protocol is Protocol.ERDDAP else "csv"
         else:
             raise UnsupportedFormat(
                 f"no reader for {fetched.asset.media_type!r}; supported formats are CSV, "
-                "ERDDAP CSV, NetCDF4, NEXRAD Level II, and HURDAT2 best tracks. "
+                "ERDDAP CSV, NetCDF4, GRIB2, NEXRAD Level II, and HURDAT2 best tracks. "
                 "For a known CSV with ambiguous metadata, "
                 "pass reader='csv' "
                 "or reader='erddap-csv'; otherwise use fetched.path with a format-specific reader"
             )
     if sweep is not None and reader != "nexrad-level2":
         raise ValueError("sweep applies only to the NEXRAD reader")
+    if select is not None and reader != "grib2":
+        raise ValueError("select applies only to the GRIB2 reader")
+    if reader == "grib2":
+        if any(value is not None for value in (dtype, parse_dates, usecols, nrows)):
+            raise ValueError(
+                "CSV options dtype, parse_dates, usecols and nrows do not apply to GRIB2"
+            )
+        from usdata._grib import open_grib2
+
+        return open_grib2(fetched, select=select)
     if reader == "netcdf":
         if any(value is not None for value in (dtype, parse_dates, usecols, nrows)):
             raise ValueError(
@@ -128,7 +156,7 @@ def open_asset(
         return open_hurdat2(fetched)
     if reader not in {"csv", "erddap-csv"}:
         raise UnsupportedFormat(
-            f"unsupported reader {reader!r}; use 'csv', 'erddap-csv', 'netcdf', "
+            f"unsupported reader {reader!r}; use 'csv', 'erddap-csv', 'netcdf', 'grib2', "
             "'nexrad-level2', or 'hurdat2'"
         )
     try:
