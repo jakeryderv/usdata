@@ -49,12 +49,13 @@ source integrity.
 
 | Option | Behavior |
 |---|---|
-| `reader` | Defaults to inference. Explicit `"csv"`, `"erddap-csv"`, `"nexrad-level2"`, `"netcdf"`, or `"hurdat2"` handles missing or ambiguous media metadata. |
+| `reader` | Defaults to inference. Explicit `"csv"`, `"erddap-csv"`, `"nexrad-level2"`, `"netcdf"`, `"grib2"`, or `"hurdat2"` handles missing or ambiguous media metadata. |
 | `dtype` | Mapping of column names to pandas dtype strings; overrides identifier defaults for those columns. |
 | `parse_dates` | List of columns to parse as dates/timestamps; dates are not parsed by default. Use `dtype={"DATE": "string"}` to retain numeric-looking year labels as text. |
 | `usecols` | List of columns to read. Ordering follows pandas behavior. |
 | `nrows` | Maximum number of observation rows to read, excluding headers and units. |
 | `sweep` | NEXRAD only (since v0.9): zero-based integer or non-empty list of distinct nonnegative integers. `None` opens all sweeps. |
+| `select` | GRIB2 only (unreleased): mapping of ecCodes key names to one value or a list of values, choosing messages from a multi-message file. |
 
 `STATION` and other case-insensitive identifier names (`station_id`, `site_no`,
 `monitoring_location_id`, `parameter_code`, `statistic_id`) default to pandas
