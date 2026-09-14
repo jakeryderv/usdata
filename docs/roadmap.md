@@ -52,8 +52,14 @@ products without a reader, a GRIB2 reader extra on ecCodes
 ([ADR 0022](adr/0022-grib2-reader-backend.md)), MRMS gridded radar products,
 HRRR and GFS model output, and the
 [tornado classification example](https://usdata.dev/examples/tornado-classification/).
-The next step is the v0.15.0 first-use review against the published package,
-including a macOS check of the grib extra's missing-library message.
+The [v0.15.0 first-use review](reviews/first-use-v0.15.0.md) records the
+published walkthrough, an installed-package fetch from every new dataset, the
+GRIB2 reader on both grid types, and all twelve new live tests passing. It did
+not cover macOS, where the grib extra needs the ecCodes library installed
+separately; that check is still open.
+
+Choose a bounded candidate from Next when its user benefit, scope, exclusions,
+and acceptance criteria are ready.
 
 The completed
 [v0.14.0 first-use review](reviews/first-use-v0.14.0.md) records the published
