@@ -8,13 +8,22 @@ from pathlib import Path
 
 from check_notebooks import ROOT, notebook_paths
 
+# Live modules whose reader step needs an optional extra installed; others run core-only.
+LIVE_EXTRAS = {
+    "test_goes_live": "netcdf",
+    "test_glm_live": "netcdf",
+    "test_mrms_live": "grib",
+    "test_hrrr_live": "grib",
+    "test_gfs_live": "grib",
+}
+
 
 def inventory(root: Path = ROOT) -> dict[str, list[dict[str, str]]]:
     live = [
         {
             "id": path.stem,
             "path": path.relative_to(root).as_posix(),
-            "extra": "netcdf" if path.stem == "test_goes_live" else "core",
+            "extra": LIVE_EXTRAS.get(path.stem, "core"),
         }
         for path in sorted((root / "tests/live").glob("test_*_live.py"))
     ]
