@@ -47,8 +47,9 @@ does not implement an SDK remote cache. See
 
 Choose a bounded candidate from Next when its user benefit, scope, exclusions,
 and acceptance criteria are ready. The completed
-[v0.13.0 first-use review](reviews/first-use-v0.13.0.md) records the published
-walkthrough, the changed adapters' live checks, and the new query validation. The
+[v0.14.0 first-use review](reviews/first-use-v0.14.0.md) records the published
+walkthrough, live checks for the two datasets the release added, and their
+query validation. The
 [dataset browser](https://usdata.dev/datasets/) provides search, support and
 agency filters, selection rules, and links to examples, including the
 [2024 climate comparison](https://usdata.dev/examples/climate-anomalies/).
@@ -76,9 +77,9 @@ moving it to Now. Prefer additions that exercise a useful new access pattern or
 reuse an existing one while preserving the adapter, transport, cache/provenance,
 and optional-reader boundaries:
 
-- Further NCEI Access Data Service datasets, such as hourly normals or Local Climatological Data.
+- Further NCEI Access Data Service datasets, such as hourly normals.
 - Bulk directories and archives, such as IBTrACS.
-- Additional GOES products/sectors, MRMS, and CO-OPS tides/currents.
+- Additional GOES products/sectors, MRMS, and CO-OPS currents.
 - Geospatial readers when a supported dataset and representative fixtures justify them.
 
 ## Later
