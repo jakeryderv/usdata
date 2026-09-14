@@ -190,6 +190,35 @@ domain. The live test resolves and downloads `hrrr.t20z.wrfsfcf00.grib2` for
 2024-05-06, restores it through a lockfile, and opens surface CAPE when the
 `grib` extra is installed.
 
+## GFS model output
+
+Bounded listings on 2026-09-14 of `gfs.20240506/` in `noaa-gfs-bdp-pds` found
+the four cycles `00`, `06`, `12`, and `18`, each with `atmos/` and `wave/`
+prefixes. Under `atmos/`, the `gfs.tHHz.pgrb2.<resolution>.fNNN` files exist
+for `0p25`, `0p50`, and `1p00`, beside `pgrb2b` (the remaining fields),
+`pgrb2full.0p50`, `.anl` analysis files, `.grib2.idx`-style `.idx` sidecars,
+and BUFR archives. The 0.25 degree files run hourly from `f000` to `f120` and
+every three hours to `f384` (209 files); the 0.5 and 1 degree files run every
+three hours from `f000` to `f384` (129 files), in every cycle probed. A
+reproducible listing probe is:
+
+```sh
+curl --get 'https://noaa-gfs-bdp-pds.s3.amazonaws.com/' \
+  --data-urlencode 'list-type=2' \
+  --data-urlencode 'prefix=gfs.20240506/00/atmos/gfs.t00z.pgrb2.1p00.f'
+```
+
+Sizes for the 00 UTC run on 2024-05-06: `pgrb2.1p00.f000` 42,362,644 bytes
+and `f003` 44,925,309; `pgrb2.0p50.f000` 150,321,638; `pgrb2.0p25.f000`
+507,547,200 and `f120` 547,490,924. The 1 degree analysis holds 696 GRIB2
+messages on a 360 × 181 regular grid, including surface CAPE and CIN, 0–3 km
+storm-relative helicity, and mixed-layer CAPE on `pressureFromGroundLayer`
+levels. Day prefixes begin at `gfs.20210101/`, but through the 06 UTC run of
+2021-03-22 the cycles hold only WAFS files; the `atmos/` layout with `pgrb2`
+files begins with the 12 UTC run of 2021-03-22 (GFS v16). The live test
+resolves and downloads `gfs.t00z.pgrb2.1p00.f000` for 2024-05-06, restores it
+through a lockfile, and opens surface CAPE when the `grib` extra is installed.
+
 ## Storm Events annual details
 
 Bounded live probes verified on 2026-09-09 UTC (1950 archive: 10,508 bytes):

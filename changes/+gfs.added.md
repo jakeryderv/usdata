@@ -1,0 +1,1 @@
+Add `noaa:gfs`, Global Forecast System model output: whole global GRIB2 files selected by run initialization window, cycle hour, forecast hours, and 0.25, 0.5, or 1 degree grid resolution, with fields chosen after download by the GRIB2 reader.

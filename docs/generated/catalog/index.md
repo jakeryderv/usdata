@@ -20,6 +20,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | <span id="noaagoes-abi"></span>[GOES CONUS imagery](noaa/goes-abi.md) | Released | NetCDF4 | Whole single-channel CONUS scenes by inclusive UTC scan-start time |
 | <span id="noaagoes-glm"></span>[GOES lightning detections](noaa/goes-glm.md) | Source only | NetCDF4 | Whole 20-second detection files by inclusive UTC file-start time, at most one day |
 | <span id="noaahurdat2"></span>[Tropical cyclone best tracks](noaa/hurdat2.md) | Released | HURDAT2 fixed-format text | The newest revision of one whole basin file; filter track points locally |
+| <span id="noaagfs"></span>[GFS model output](noaa/gfs.md) | Source only | GRIB2 | Whole global files by run initialization window, cycle hour, forecast hours, and grid resolution, at most one day |
 | <span id="noaahrrr"></span>[HRRR model output](noaa/hrrr.md) | Source only | GRIB2 | Whole CONUS files by run initialization window, cycle hour, forecast hours, and file variant, at most one day |
 | <span id="noaaclimate-normals"></span>[30-year station climate normals](noaa/climate-normals.md) | Released | CSV | Monthly, daily, or annual/seasonal normals per station; optional month-day window for daily and monthly |
 | <span id="noaacoops-water-levels"></span>[Coastal water levels](noaa/coops-water-levels.md) | Released | CSV | Six-minute observations for one station and datum; at most 28 days |
@@ -31,7 +32,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 | Provider | Released | Source only | Planned |
 |---|---:|---:|---:|
-| [NOAA](noaa.md) | 12 | 5 | 14 |
+| [NOAA](noaa.md) | 12 | 6 | 13 |
 | [USGS](usgs.md) | 1 | 0 | 2 |
 | [Census Bureau](census.md) | 0 | 0 | 1 |
 | [EPA](epa.md) | 0 | 0 | 1 |

@@ -38,6 +38,7 @@ CASES = {
     "noaa:goes-glm": {"satellite": 16},
     "noaa:mrms": {"product": "RotationTrackML30min_00.50"},
     "noaa:hrrr": {"cycle": 12, "forecast_hour": 0},
+    "noaa:gfs": {"cycle": 12, "forecast_hour": 0, "resolution": "1p00"},
     "noaa:coastwatch-sst": {"bbox": (-80.08, 30.02, -80.02, 30.08)},
     "noaa:storm-events": {},
     "noaa:spc-tornado-reports": {},
@@ -54,6 +55,7 @@ S3_KEYS = {
     "noaa:mrms": "CONUS/RotationTrackML30min_00.50/20240506/"
     "MRMS_RotationTrackML30min_00.50_20240506-120000.grib2.gz",
     "noaa:hrrr": "hrrr.20240506/conus/hrrr.t12z.wrfsfcf00.grib2",
+    "noaa:gfs": "gfs.20240506/12/atmos/gfs.t12z.pgrb2.1p00.f000",
 }
 STORM_NAME = "StormEvents_details-ftp_v1.0_d2024_c20260323.csv.gz"
 HURDAT_NAME = "hurdat2-nepac-1949-2025-02272026.txt"

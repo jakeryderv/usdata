@@ -4,10 +4,6 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 Move a dataset between phases by editing its `target` in the registry.
 
-**Target 0.15**
-
-- [`noaa:gfs`](noaa.md#noaagfs) GFS Forecast Model Output · Planned
-
 **Later**
 
 - [`census:acs-5year`](census.md#censusacs-5year) American Community Survey 5-Year Estimates · Planned
@@ -33,6 +29,7 @@ Move a dataset between phases by editing its `target` in the registry.
 
 **Implemented, unreleased (planned 0.15)**
 
+- [`noaa:gfs`](noaa.md#noaagfs) GFS Forecast Model Output · Source only
 - [`noaa:goes-glm`](noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · Source only
 - [`noaa:hrrr`](noaa.md#noaahrrr) HRRR Forecast Model Output · Source only
 - [`noaa:mrms`](noaa.md#noaamrms) Multi-Radar Multi-Sensor (MRMS) · Source only
