@@ -1,11 +1,15 @@
 :root {
   color-scheme: dark;
-  --bg: #10191c;
-  --surface: #17272b;
-  --text: #e5eee8;
-  --muted: #b8c9c1;
-  --accent: #a8e0bd;
-  --line: #304348;
+  --bg: #0a0a0b;
+  --surface: #161618;
+  --elevated: #242428;
+  --line: #303036;
+  --primary: #2563eb;
+  --primary-hover: #3b82f6;
+  --accent: #60a5fa;
+  --text: #fafafa;
+  --muted: #a1a1aa;
+  --dim: #71717a;
   font-family: Inter, sans-serif;
   background: var(--bg);
   color: var(--text);
@@ -94,20 +98,31 @@ h1 {
   font-weight: 600;
 }
 .button.primary {
-  background: #a8e0bd;
-  color: #15251d;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fafafa;
+}
+.button.primary:hover,
+.button.primary:focus-visible {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  text-decoration: none;
+}
+.button:not(.primary):hover {
+  border-color: var(--primary-hover);
+  text-decoration: none;
 }
 .button span {
   margin-left: 12px;
 }
 .terminal {
   padding: 20px 24px;
-  background: var(--surface);
+  background: var(--elevated);
   border: 1px solid var(--line);
   border-radius: 6px;
 }
 .terminal-label {
-  color: var(--muted);
+  color: var(--dim);
   font-size: 0.65rem;
 }
 pre {
@@ -125,6 +140,7 @@ code {
 }
 .cards article {
   border: 1px solid var(--line);
+  background: var(--surface);
   padding: 28px;
   border-radius: 6px;
 }
@@ -207,7 +223,7 @@ code {
 }
 .evidence {
   padding: 16px 20px;
-  background: var(--surface);
+  background: var(--elevated);
   border: 1px solid var(--line);
   border-radius: 6px;
   font-size: 0.8rem;
@@ -224,12 +240,12 @@ code {
   background: #fff;
 }
 .result figcaption {
-  color: var(--muted);
+  color: var(--dim);
   font-size: 0.82rem;
   margin-top: 10px;
 }
 .status {
-  color: var(--muted);
+  color: var(--dim);
   font-size: 0.82rem;
   padding: 20px 0 40px;
   max-width: 850px;
@@ -241,7 +257,7 @@ footer {
   justify-content: space-between;
   gap: 20px;
   font-size: 0.78rem;
-  color: var(--muted);
+  color: var(--dim);
 }
 .skip {
   position: absolute;
@@ -256,12 +272,16 @@ footer {
 @media (prefers-color-scheme: light) {
   :root {
     color-scheme: light;
-    --bg: #f5f7f3;
-    --surface: #eaf0e9;
-    --text: #18342b;
-    --muted: #465d51;
-    --accent: #276b49;
-    --line: #cbd8cc;
+    --bg: #fafafa;
+    --surface: #f4f4f5;
+    --elevated: #ffffff;
+    --line: #e4e4e7;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --accent: #1d4ed8;
+    --text: #0a0a0b;
+    --muted: #52525b;
+    --dim: #71717a;
   }
 }
 @media (max-width: 680px) {

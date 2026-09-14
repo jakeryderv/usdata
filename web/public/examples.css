@@ -13,7 +13,7 @@
 .card-sources { font-size: 0.875rem; border-top: 1px solid var(--line); padding-top: 16px; }
 .example-inputs { padding: 20px 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
 .source-links { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 8px; }
-.snapshot-note { color: var(--muted); max-width: 850px; }
+.snapshot-note { color: var(--dim); max-width: 850px; }
 .run-guide { border-block: 1px solid var(--line); padding-block: 18px; margin-block: 28px; }
 summary { cursor: pointer; color: var(--accent); }
 summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
@@ -24,7 +24,7 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .prose code { font-size: 0.9rem; }
 .prose img { max-width: 100%; height: auto; background: white; }
 .prose figure { margin: 24px 0; }
-.prose figcaption { font-size: 0.875rem; color: var(--muted); }
+.prose figcaption { font-size: 0.875rem; color: var(--dim); }
 .table-output { overflow-x: auto; margin-block: 18px; }
 .prose table { border-collapse: collapse; font-size: 0.9rem; min-width: 50%; }
 .prose th, .prose td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; }
