@@ -36,7 +36,7 @@ print(tracks.loc[tracks.max_wind_kt.idxmax(), ["storm_id", "name", "time", "max_
 assert verify(manifest) == []
 ```
 
-For a [source installation](https://docs.usdata.dev/project/#source-installation), run from
+For a [source installation](https://docs.usdata.dev/install/#source-installation), run from
 `examples/hurdat2/` and use `uv run usdata` and `uv run python`.
 
 The reader returns one row per best-track point: `storm_id`, `name`, UTC `time`,

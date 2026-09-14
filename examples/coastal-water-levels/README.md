@@ -30,7 +30,7 @@ print(frame[["Date Time", "Water Level", "Quality"]])
 print(item.provenance.source_url)
 ```
 
-For a [source installation](https://docs.usdata.dev/project/#source-installation), run from
+For a [source installation](https://docs.usdata.dev/install/#source-installation), run from
 `examples/coastal-water-levels/` and use `uv run usdata` and `uv run python`.
 
 The CSV reader preserves original column names, including NOAA's spaces. The

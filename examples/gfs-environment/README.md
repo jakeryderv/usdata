@@ -50,7 +50,7 @@ print(f"0-3 km helicity {float(helicity[helicity_name][y, x]):.0f} m2/s2")
 assert verify(manifest) == []
 ```
 
-For a [source installation](https://docs.usdata.dev/project/#source-installation), run from
+For a [source installation](https://docs.usdata.dev/install/#source-installation), run from
 `examples/gfs-environment/` and use `uv run usdata` and `uv run python`.
 
 The analysis is the model's estimate at 00 UTC, not an observation, and one

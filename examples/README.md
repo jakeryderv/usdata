@@ -61,7 +61,7 @@ the GFS 00 UTC 1-degree analysis for 2024-05-06 and reads surface CAPE and
 
 ## Run interactively
 
-From the repository root, with [uv and just installed](https://docs.usdata.dev/project/#development):
+From the repository root, with [uv and just installed](https://github.com/jakeryderv/usdata#development):
 
 ```sh
 just notebooks

@@ -230,7 +230,7 @@ curl --fail --output /tmp/storm-1950.csv.gz \
 ```
 
 The filename is a probe snapshot; the adapter discovers current filenames instead
-of hard-coding it. The [design decision](../adr/0010-storm-events-annual-archives.md)
+of hard-coding it. The [design decision](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0010-storm-events-annual-archives.md)
 records the annual-file and compression contract. The notebook downloads one 2024 archive (~13 MB compressed),
 then filters locally; neither the test nor example downloads all archive years.
 
@@ -310,7 +310,7 @@ between latitude and longitude, and `hurdat2-nepac-1949-2022-042723.txt` line
 same span, which is also the one the adapter selects. The `-99` maximum-wind
 sentinel is documented as a 1967 convention but appears 57 times in the current
 Atlantic file, all on `TD` records from 1971 through 1987, and never in the
-Pacific file. The [design decision](../adr/0020-hurdat2-whole-file-and-format-reader.md)
+Pacific file. The [design decision](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0020-hurdat2-whole-file-and-format-reader.md)
 records the whole-file and reader contract.
 
 ## Global Summary of the Month

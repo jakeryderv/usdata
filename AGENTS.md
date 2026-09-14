@@ -1,7 +1,7 @@
 # AGENTS.md
 
 Context for coding agents working in this repo. Setup and commands are in
-[the development guide](docs/project.md#development); do not duplicate them here.
+[the README](README.md#development); do not duplicate them here.
 
 ## What this is
 

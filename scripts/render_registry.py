@@ -278,7 +278,7 @@ def render_dataset(registry: Registry, ds: Dataset, entry: CatalogEntry) -> str:
         else "Local files; no bundled reader for this format"
     )
     notice = (
-        "Install from [source](../../../project.md#source-installation) to use this dataset."
+        "Install from [source](../../../install.md#source-installation) to use this dataset."
         if availability(ds) == "Source only"
         else f"Included since usdata {ds.since}."
     )

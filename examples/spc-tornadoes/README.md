@@ -36,7 +36,7 @@ print(tracks.nlargest(3, "len")[["date", "time", "st", "mag", "len", "wid", "fat
 assert verify(manifest) == []
 ```
 
-For a [source installation](https://docs.usdata.dev/project/#source-installation), run from
+For a [source installation](https://docs.usdata.dev/install/#source-installation), run from
 `examples/spc-tornadoes/` and use `uv run usdata` and `uv run python`.
 
 Keeping only `sg == 1` counts each tornado once; the `sg == 2` rows repeat a

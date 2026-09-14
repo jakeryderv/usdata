@@ -45,7 +45,7 @@ for item in pull(manifest).fetched:
 assert verify(manifest) == []
 ```
 
-For a [source installation](https://docs.usdata.dev/project/#source-installation), run from
+For a [source installation](https://docs.usdata.dev/install/#source-installation), run from
 `examples/mrms-rotation/` and use `uv run usdata` and `uv run python`.
 
 Longitudes in MRMS grids run 230° to 300° east, so the box is selected in that

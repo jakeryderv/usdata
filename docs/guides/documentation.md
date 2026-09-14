@@ -4,6 +4,22 @@ MkDocs reads `docs/` directly. Configure navigation, plugins, and the theme in
 root `mkdocs.yml`. A page at `docs/guides/fetch-and-analyze.md` is served at
 `https://docs.usdata.dev/guides/fetch-and-analyze/`.
 
+## One audience per host
+
+Each host has one audience and nothing is duplicated between them
+([ADR 0023](../adr/0023-one-audience-per-host.md)):
+
+| Host | Audience | Owns |
+| --- | --- | --- |
+| `usdata.dev` | Someone deciding whether to use the package | Pitch, dataset browser, examples |
+| `docs.usdata.dev` | Someone using the package | Install, first dataset, guides, dataset notes, reference |
+| GitHub | Someone changing the project | README, contributing, architecture, testing, ADRs, reviews, roadmap, versioning, changelog, site operations |
+
+Contributor and project-record pages live under `docs/` so GitHub renders them
+with working relative links, but `exclude_docs` in `mkdocs.yml` keeps them out
+of the built site and its search. A user page links to GitHub only for a design
+decision that explains behaviour; it never sends a user there for setup or usage.
+
 ## Build and preview
 
 From the repository root:
@@ -32,7 +48,8 @@ MkDocs configuration. Final HTML lives in ignored `.build/docs-site/`.
 
 | Content | Edit here |
 | --- | --- |
-| Guides, setup, provider notes, reference pages | Markdown directly under `docs/` |
+| Install, guides, provider notes, reference pages | Markdown directly under `docs/` |
+| Contributor pages (architecture, testing, adding a dataset, this guide, site operations, ADRs, reviews, roadmap, versioning) | Markdown under `docs/`, excluded from the site, read on GitHub |
 | Navigation and MkDocs settings | Root `mkdocs.yml` |
 | Branding | `docs/assets/` |
 | Dataset facts | `src/usdata/data/registry.yaml`; run `just docs` afterward |
@@ -58,8 +75,8 @@ renders their tables and plots, and copies notebook and manifest downloads into
 instructions; manifest-only pages show it directly. No notebook cells execute
 during a site build, and source outputs, manifests, and lockfiles stay untouched.
 
-Root README, contribution, security, license, and changelog files are linked on
-GitHub rather than copied into documentation.
+Root README, contribution, security, license, and changelog files stay on
+GitHub and are not copied into documentation.
 
 ## Links and validation
 
