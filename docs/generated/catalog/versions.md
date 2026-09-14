@@ -7,7 +7,6 @@ Move a dataset between phases by editing its `target` in the registry.
 **Target 0.15**
 
 - [`noaa:gfs`](noaa.md#noaagfs) GFS Forecast Model Output · Planned
-- [`noaa:goes-glm`](noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · Planned
 - [`noaa:hrrr`](noaa.md#noaahrrr) HRRR Forecast Model Output · Planned
 - [`noaa:mrms`](noaa.md#noaamrms) Multi-Radar Multi-Sensor (MRMS) · Planned
 - [`noaa:nexrad-level3`](noaa.md#noaanexrad-level3) NEXRAD Level III Products · Planned
@@ -34,6 +33,10 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usda:cropland-data-layer`](usda.md#usdacropland-data-layer) Cropland Data Layer · Planned
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
 - [`usgs:earthquakes`](usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · Planned
+
+**Implemented, unreleased (planned 0.15)**
+
+- [`noaa:goes-glm`](noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · Source only
 
 **Included since 0.14**
 

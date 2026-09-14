@@ -116,6 +116,29 @@ The small channel-6 filename was
 then restores through a lockfile without relisting. Archive revisions still
 correctly fail restoration if the bytes no longer match the original checksum.
 
+## GOES GLM lightning detections
+
+Bounded probes on 2026-09-14 listed 180 `GLM-L2-LCFA` files in one hour for
+GOES-16 (2024 day 127, hour 20), between 270,140 and 394,471 bytes each, and
+confirmed GOES-19 files under the same layout (2025 day 127). A reproducible
+listing probe is:
+
+```sh
+curl --get 'https://noaa-goes16.s3.amazonaws.com/' \
+  --data-urlencode 'list-type=2' \
+  --data-urlencode 'prefix=GLM-L2-LCFA/2024/127/20/' \
+  --data-urlencode 'max-keys=1000'
+```
+
+Filenames follow `OR_GLM-L2-LCFA_G16_sYYYYDDDHHMMSSt_eYYYYDDDHHMMSSt_cYYYYDDDHHMMSSt.nc`
+with tenth-of-second stamps; the first file of the hour was
+`OR_GLM-L2-LCFA_G16_s20241272000000_e20241272000200_c20241272000213.nc`
+(288,572 bytes, 194 flashes, 2,725 groups, 5,692 events). Day-by-day listing of
+`GLM-L2-LCFA/2018/` found the earliest GOES-16 file on day 044 at 16:10 UTC
+and nothing earlier. The live test downloads that first 2024 file, checks the
+NetCDF4/HDF5 signature, restores through a lockfile without relisting, and
+opens the flash table with the `netcdf` extra.
+
 ## Storm Events annual details
 
 Bounded live probes verified on 2026-09-09 UTC (1950 archive: 10,508 bytes):
