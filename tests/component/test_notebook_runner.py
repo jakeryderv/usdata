@@ -88,6 +88,7 @@ def test_live_inventory_discovers_new_examples_and_excludes_checkpoints(monkeypa
     live = tmp_path / "tests/live"
     live.mkdir(parents=True)
     (live / "test_new_live.py").touch()
+    (live / "test_mrms_live.py").touch()
     example = tmp_path / "examples/new/example.ipynb"
     example.parent.mkdir(parents=True)
     example.touch()
@@ -96,7 +97,8 @@ def test_live_inventory_discovers_new_examples_and_excludes_checkpoints(monkeypa
     checkpoint.touch()
     data = ci_inventory.inventory(tmp_path)
     assert data["live"] == [
-        {"id": "test_new_live", "path": "tests/live/test_new_live.py", "extra": "core"}
+        {"id": "test_mrms_live", "path": "tests/live/test_mrms_live.py", "extra": "grib"},
+        {"id": "test_new_live", "path": "tests/live/test_new_live.py", "extra": "core"},
     ]
     assert data["notebooks"] == [{"id": "example-0", "path": "examples/new/example.ipynb"}]
 
