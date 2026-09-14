@@ -68,5 +68,10 @@
     "slug": "hurdat2",
     "title": "How can I inspect Atlantic hurricane tracks?",
     "summary": "Read the whole Atlantic best-track file, identify hurricane-intensity landfall records, and inspect peak winds and historical coverage limits."
+  },
+  {
+    "slug": "glm-flashes",
+    "title": "How much lightning was there around a reported tornado?",
+    "summary": "Pull one hour of GOES-16 GLM detection files, flatten the flash tables, and count flashes near Oklahoma City minute by minute."
   }
 ]

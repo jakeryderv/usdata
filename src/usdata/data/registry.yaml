@@ -123,19 +123,22 @@ datasets:
 
   - id: noaa:goes-glm
     provider: noaa
-    status: planned
+    status: available
     domain: weather-satellites
-    target: '0.15'
+    since: "0.15"
     title: GOES Geostationary Lightning Mapper
     description: >-
-      Lightning flash, group, and event detections (GLM-L2-LCFA) in 20-second
-      NetCDF files under the same GOES S3 buckets and layout as ABI.
-    keywords: [lightning, glm, goes, satellite, storms]
+      Lightning flash, group, and event detections (GLM-L2-LCFA) from GOES-16,
+      17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit satellite
+      and a file-start interval of at most one day; each asset is a complete
+      20-second NetCDF detection table with no geographic subsetting.
+    keywords: [lightning, glm, goes, satellite, storms, flashes, netcdf]
     protocol: s3
     homepage: https://registry.opendata.aws/noaa-goes/
     license: US Government Work (public domain)
-    temporal_extent: { start: "2017-01-01T00:00:00Z" }
+    temporal_extent: { start: "2018-02-13T16:10:00Z" }
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+    adapter: usdata.providers.noaa.glm:GoesGlm
 
   - id: noaa:storm-events
     provider: noaa
@@ -786,6 +789,16 @@ catalog:
     examples:
     - examples/goes-imagery/example.ipynb
     - examples/event-context/example.ipynb
+  noaa:goes-glm:
+    guide: docs/providers/noaa-glm.md
+    summary: GOES lightning detections
+    formats:
+    - NetCDF4
+    selection: Whole 20-second detection files by inclusive UTC file-start time, at most one day
+    inputs: Satellite and both timestamps
+    reader_extra: netcdf
+    examples:
+    - examples/glm-flashes/README.md
   noaa:storm-events:
     guide: docs/providers/noaa-storm-events.md
     summary: Storm Events details

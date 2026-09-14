@@ -250,6 +250,38 @@
       ]
     },
     {
+      "id": "noaa:goes-glm",
+      "title": "GOES lightning detections",
+      "description": "Lightning flash, group, and event detections (GLM-L2-LCFA) from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit satellite and a file-start interval of at most one day; each asset is a complete 20-second NetCDF detection table with no geographic subsetting.",
+      "provider": "NOAA",
+      "domain": "Weather satellites",
+      "availability": "Source only",
+      "since": "0.15",
+      "keywords": [
+        "lightning",
+        "glm",
+        "goes",
+        "satellite",
+        "storms",
+        "flashes",
+        "netcdf"
+      ],
+      "formats": [
+        "NetCDF4"
+      ],
+      "selection": "Whole 20-second detection files by inclusive UTC file-start time, at most one day",
+      "inputs": "Satellite and both timestamps",
+      "reader_extra": "netcdf",
+      "guide": "https://docs.usdata.dev/providers/noaa-glm/",
+      "reference": "https://docs.usdata.dev/generated/catalog/noaa/goes-glm/",
+      "examples": [
+        {
+          "title": "Glm flashes",
+          "url": "https://usdata.dev/examples/glm-flashes/"
+        }
+      ]
+    },
+    {
       "id": "noaa:hurdat2",
       "title": "Tropical cyclone best tracks",
       "description": "National Hurricane Center best-track database: six-hourly position, intensity, pressure, and wind radii for Atlantic (since 1851) and northeast/north-central Pacific (since 1949) tropical cyclones. One fixed-format text file per basin, revised after each season; a basin parameter picks the file and the newest revision wins. There is no query interface, so dates and geographic filters are rejected and the local reader turns the whole file into one row per track point.",
@@ -486,29 +518,6 @@
         "reflectivity",
         "velocity",
         "products"
-      ],
-      "formats": [],
-      "selection": null,
-      "inputs": null,
-      "reader_extra": null,
-      "guide": null,
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
-    },
-    {
-      "id": "noaa:goes-glm",
-      "title": "GOES Geostationary Lightning Mapper",
-      "description": "Lightning flash, group, and event detections (GLM-L2-LCFA) in 20-second NetCDF files under the same GOES S3 buckets and layout as ABI.",
-      "provider": "NOAA",
-      "domain": "Weather satellites",
-      "availability": "Planned",
-      "since": null,
-      "keywords": [
-        "lightning",
-        "glm",
-        "goes",
-        "satellite",
-        "storms"
       ],
       "formats": [],
       "selection": null,
