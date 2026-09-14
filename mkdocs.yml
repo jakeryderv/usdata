@@ -33,11 +33,16 @@ theme:
     code: JetBrains Mono
 nav:
 - Website: https://usdata.dev/
-- Start here: index.md
+- Start here:
+  - Start here: index.md
+  - Install: install.md
 - Guides:
   - Fetch and analyze: guides/fetch-and-analyze.md
 - Examples: https://usdata.dev/examples/
-- Datasets: generated/catalog/index.md
+- Datasets:
+  - Catalog: generated/catalog/index.md
+  - Versions and targets: generated/catalog/versions.md
+  - Provider notes: providers/README.md
 - Reference:
   - Python API: reference/api.md
   - CLI: generated/cli.md
@@ -45,21 +50,19 @@ nav:
   - Manifests: reference/manifests.md
   - Places: reference/places.md
   - Temporal selection: reference/selection.md
-- Development:
-  - Architecture: architecture.md
-  - Contributing: https://github.com/jakeryderv/usdata/blob/main/CONTRIBUTING.md
-  - Testing: testing.md
-  - Adding a dataset: guides/adding-a-dataset.md
-  - Maintaining documentation: guides/documentation.md
-  - Website operations: guides/website-operations.md
-  - Decisions: adr/README.md
-- Project:
-  - Project overview and setup: project.md
-  - Roadmap: roadmap.md
   - Upcoming changes: generated/changes.md
-  - Changelog: https://github.com/jakeryderv/usdata/blob/main/CHANGELOG.md
-  - Versioning and releases: versioning.md
-  - Security: https://github.com/jakeryderv/usdata/blob/main/SECURITY.md
+# Contributor and project-record pages stay in docs/ for GitHub readers but are
+# not part of the user site; see ADR 0023.
+exclude_docs: |
+  architecture.md
+  testing.md
+  roadmap.md
+  versioning.md
+  guides/adding-a-dataset.md
+  guides/documentation.md
+  guides/website-operations.md
+  adr/
+  reviews/
 extra_css:
 - assets/usdata.css
 plugins:

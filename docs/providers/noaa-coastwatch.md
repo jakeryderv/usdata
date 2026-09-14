@@ -25,7 +25,7 @@ Unknown parameters and variables fail explicitly.
 
 The asset is raw CSV with coordinate columns, a header, and a second row of
 units. This avoids the volatile per-request `history` timestamps observed in
-NetCDF responses; see [ADR 0004](../adr/0004-erddap-csv-and-coordinate-subsets.md).
+NetCDF responses; see [ADR 0004](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0004-erddap-csv-and-coordinate-subsets.md).
 Upstream revisions still cause checksum mismatches during locked restoration.
 
 

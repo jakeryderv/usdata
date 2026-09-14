@@ -42,7 +42,7 @@ print(f"{len(near)} of {len(flashes)} flashes within the box")
 assert verify(manifest) == []
 ```
 
-For a [source installation](https://docs.usdata.dev/project/#source-installation), run from
+For a [source installation](https://docs.usdata.dev/install/#source-installation), run from
 `examples/glm-flashes/` and use `uv run usdata` and `uv run python`.
 
 Flash times are the first constituent event's time and can precede a file's

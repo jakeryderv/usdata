@@ -5,9 +5,8 @@ The registry tells you which datasets are supported; adapters translate your
 query to an upstream service; optional readers decode the downloaded format.
 
 These docs describe this checkout, including features marked **Unreleased**.
-Use the [changelog](https://github.com/jakeryderv/usdata/blob/main/CHANGELOG.md) to check release availability. The walkthrough
-below works with the published package. For upcoming features, follow the
-[source installation](https://github.com/jakeryderv/usdata/blob/main/README.md#source-installation).
+The walkthrough below works with the published package. For upcoming features,
+follow the [source installation](install.md#source-installation).
 
 ## Install and discover
 
@@ -105,7 +104,6 @@ See [manifest behavior](reference/manifests.md) before intentionally refreshing 
 | Learn through saved data and plots | [Runnable notebooks](https://usdata.dev/examples/) |
 | Understand a provider's query limits | [Provider access notes](providers/README.md) |
 | Find an exact Python argument | [Python reference](reference/api.md) |
-| Extend or contribute | [Contributing](https://github.com/jakeryderv/usdata/blob/main/CONTRIBUTING.md) and [architecture](architecture.md) |
 
-For local development and documentation preview, follow the canonical
-[development setup](https://github.com/jakeryderv/usdata/blob/main/README.md#development).
+Installation options, extras, and the source checkout are on the
+[Install](install.md) page.

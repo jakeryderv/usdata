@@ -8,7 +8,7 @@ and GRIB2 return an xarray Dataset. Each reader has an optional dependency extra
 
 Available since v0.6. Install the optional pandas extra with
 `pip install "usdata[pandas]"` or `uv add "usdata[pandas]"`.
-For a source checkout, follow [development setup](https://github.com/jakeryderv/usdata/blob/main/README.md#development)
+For a source checkout, follow the [source installation](../install.md#source-installation)
 and run `uv sync --group dev --extra pandas`.
 
 ```python
@@ -133,9 +133,9 @@ metadata, which the reader does not replace with guessed coordinates.
 Root `radar.attrs["usdata"]` carries the asset ID and copied source provenance;
 it is not an export format or a record of analysis steps. Keep the input files
 and sidecars. See the [executed radar notebook](https://usdata.dev/examples/radar-reflectivity/)
-and [ADR 0008](../adr/0008-local-radar-readers.md). The
+and [ADR 0008](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0008-local-radar-readers.md). The
 [event-context notebook](https://usdata.dev/examples/event-context/) demonstrates
-explicit selection; [ADR 0011](../adr/0011-radar-sweep-alignment.md) records the guard's
+explicit selection; [ADR 0011](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0011-radar-sweep-alignment.md) records the guard's
 scope and upstream dependency. Advanced decoder options
 remain available by calling xradar directly with `item.path`.
 
@@ -187,7 +187,7 @@ the `usdata[netcdf]` extra.
 
 See the executed [GOES example](https://usdata.dev/examples/goes-imagery/),
 [xarray's decoding options](https://docs.xarray.dev/en/stable/generated/xarray.open_dataset.html),
-and [ADR 0009](../adr/0009-eager-local-netcdf4-reader.md).
+and [ADR 0009](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0009-eager-local-netcdf4-reader.md).
 
 ## GRIB2 fields
 
@@ -240,7 +240,7 @@ peaks near 1.2 GB while the float64 values from ecCodes are cast to float32.
 Select coarser products, or use `item.path` with a chunked backend, when that is
 too much. CSV options and `sweep` are rejected. Lazy or dask-backed opening,
 regridding, reprojection, spatial subsetting, and GRIB1 are not supported.
-See [ADR 0022](../adr/0022-grib2-reader-backend.md) for the backend choice.
+See [ADR 0022](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0022-grib2-reader-backend.md) for the backend choice.
 
 ## HURDAT2 best tracks
 
@@ -277,4 +277,4 @@ number of fields, or an unparseable time, coordinate, or measurement raises
 instead of returning a partly parsed table. CSV options do not
 apply and are rejected. See the [dataset guide](../providers/noaa-hurdat2.md),
 the [manifest example](https://usdata.dev/examples/hurdat2/), and
-[ADR 0020](../adr/0020-hurdat2-whole-file-and-format-reader.md).
+[ADR 0020](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0020-hurdat2-whole-file-and-format-reader.md).

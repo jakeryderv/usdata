@@ -46,7 +46,7 @@ function datasetRow(dataset) {
   details.append(element("summary", "Inspect in your terminal"));
   const install = dataset.availability === "Source only" ? null : `python -m pip install "usdata${dataset.reader_extra ? `[${dataset.reader_extra}]` : ""}"`;
   const command = [install, `usdata info ${dataset.id}`].filter(Boolean).join("\n");
-  if (!install) details.append(link("Install from source first", "https://docs.usdata.dev/project/#source-installation"));
+  if (!install) details.append(link("Install from source first", "https://docs.usdata.dev/install/#source-installation"));
   else details.append(element("p", `Included since usdata ${dataset.since}. Use Python 3.11 or newer.`, "catalog-note"));
   const pre = element("pre");
   pre.append(element("code", command));

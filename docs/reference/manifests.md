@@ -5,7 +5,7 @@ its lockfile. The cache holds the downloaded bytes and should be backed up
 separately when historical reproducibility matters.
 
 Start with the [NOAA and USGS example](https://usdata.dev/examples/weather-and-streamflow/).
-Installation and development setup are in the [README](https://github.com/jakeryderv/usdata/blob/main/README.md).
+Installation and extras are on the [Install](../install.md) page.
 
 ## Manifest fields
 

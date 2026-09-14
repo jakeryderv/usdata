@@ -1,7 +1,7 @@
 # Contributing
 
 Thanks for helping make U.S. public data easier to use. Setup and commands are
-in [the development guide](docs/project.md#development); this file covers the workflow and
+in [the README](README.md#development); this file covers the workflow and
 conventions.
 
 ## Workflow
@@ -15,7 +15,7 @@ conventions.
    should be a [Conventional Commit](https://www.conventionalcommits.org/):
    `feat: add usgs:nwis-daily adapter`. CI validates this title, including edits.
 
-Fast commit hooks are optional; see [setup](docs/project.md#development). CI runs the
+Fast commit hooks are optional; see [setup](README.md#development). CI runs the
 same configuration and workflow checks even when hooks are not installed.
 Dependabot proposes weekly updates to the SHA-pinned GitHub Actions. To refresh
 hook revisions, run `uv run pre-commit autoupdate` and review them in a PR.

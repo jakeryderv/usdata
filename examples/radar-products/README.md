@@ -54,7 +54,7 @@ radar = pyart.io.read_nexrad_level3(result.fetched[0].path)
 print(radar.fields.keys())
 ```
 
-For a [source installation](https://docs.usdata.dev/project/#source-installation), run from
+For a [source installation](https://docs.usdata.dev/install/#source-installation), run from
 `examples/radar-products/` and use `uv run usdata` and `uv run python`.
 
 The mesocyclone product is about 150 bytes when the algorithm found nothing and

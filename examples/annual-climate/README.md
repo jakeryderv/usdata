@@ -32,7 +32,7 @@ print(frame[["STATION", "DATE", "PRCP", "TAVG"]])
 assert verify(manifest) == []
 ```
 
-For a [source installation](https://docs.usdata.dev/project/#source-installation), run from
+For a [source installation](https://docs.usdata.dev/install/#source-installation), run from
 `examples/annual-climate/` and use `uv run usdata` and `uv run python`.
 
 `DATE` is a four-digit year label. Explicit `dtype` keeps numeric-looking labels
