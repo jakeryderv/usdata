@@ -16,6 +16,7 @@ NOAA access is anonymous.
 | `mrms` | [MRMS gridded radar products](noaa-mrms.md) (v0.15.0) | Whole two-minute CONUS grids of one product, at most a day |
 | `goes-abi` | [GOES imagery](noaa-goes.md) | Whole single-channel CONUS scenes |
 | `goes-glm` | [GOES lightning detections](noaa-glm.md) (v0.15.0) | Whole 20-second detection files, at most a day |
+| `hrrr` | [HRRR model output](noaa-hrrr.md) (v0.15.0) | Whole CONUS GRIB2 files per run and forecast hour |
 | `storm-events` | [Storm Events](noaa-storm-events.md) | Whole annual details archives |
 | `spc-tornado-reports` | [SPC tornado reports](noaa-spc-tornado.md) (v0.15.0) | Whole annual, half-decade, or decade files |
 | `hurdat2` | [Tropical cyclone best tracks](noaa-hurdat2.md) (v0.12.0) | One whole basin file per revision |
@@ -47,6 +48,10 @@ See [GOES ABI CONUS imagery](noaa-goes.md).
 ## GOES GLM lightning detections
 
 See [GOES GLM lightning detections](noaa-glm.md).
+
+## HRRR model output
+
+See [HRRR model output](noaa-hrrr.md).
 
 ## Storm Events annual details
 

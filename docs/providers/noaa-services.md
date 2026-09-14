@@ -166,6 +166,30 @@ and nothing earlier. The live test downloads that first 2024 file, checks the
 NetCDF4/HDF5 signature, restores through a lockfile without relisting, and
 opens the flash table with the `netcdf` extra.
 
+## HRRR model output
+
+Bounded listings on 2026-09-14 of `hrrr.20240506/conus/` in `noaa-hrrr-bdp-pds`
+found, for every cycle, the `wrfsfcf`, `wrfprsf`, `wrfnatf`, and `wrfsubhf`
+GRIB2 files with `.grib2.idx` sidecars, plus BUFR sounding archives. The 00,
+06, 12, and 18 UTC runs carry forecast hours 00 through 48 (49 files per
+variant); every other cycle stops at 18. Subhourly files stop at 18 in all
+cycles. A reproducible listing probe is:
+
+```sh
+curl --get 'https://noaa-hrrr-bdp-pds.s3.amazonaws.com/' \
+  --data-urlencode 'list-type=2' \
+  --data-urlencode 'prefix=hrrr.20240506/conus/hrrr.t20z.wrfsfcf'
+```
+
+Sizes for the 20 UTC run on 2024-05-06: `wrfsfcf00` 150,114,757 bytes and
+`wrfsfcf01` 158,293,431; `wrfprsf00` 408,899,120; `wrfnatf00` 705,956,816;
+`wrfsubhf01` 228,194,453. The surface analysis holds 170 GRIB2 messages on a
+1799 × 1059 Lambert conformal grid. The bucket's day prefixes begin at
+`hrrr.20140730/`, whose first CONUS run is 18 UTC; `alaska` is the only other
+domain. The live test resolves and downloads `hrrr.t20z.wrfsfcf00.grib2` for
+2024-05-06, restores it through a lockfile, and opens surface CAPE when the
+`grib` extra is installed.
+
 ## Storm Events annual details
 
 Bounded live probes verified on 2026-09-09 UTC (1950 archive: 10,508 bytes):

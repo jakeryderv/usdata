@@ -418,6 +418,40 @@
       ]
     },
     {
+      "id": "noaa:hrrr",
+      "title": "HRRR model output",
+      "description": "High-Resolution Rapid Refresh 3 km CONUS forecasts in GRIB2 from the anonymous noaa-hrrr-bdp-pds S3 bucket, one whole file per run and forecast hour. Select a run by initialization window and cycle hour, the forecast hours, and the surface, pressure-level, or native file variant. Files are 150 MB to 750 MB; fields are selected after download with the GRIB2 reader, not by the server.",
+      "provider": "NOAA",
+      "domain": "Weather models",
+      "availability": "Source only",
+      "since": "0.15",
+      "keywords": [
+        "forecast",
+        "model",
+        "hrrr",
+        "grib2",
+        "weather",
+        "nwp",
+        "cape",
+        "helicity",
+        "convective"
+      ],
+      "formats": [
+        "GRIB2"
+      ],
+      "selection": "Whole CONUS files by run initialization window, cycle hour, forecast hours, and file variant, at most one day",
+      "inputs": "Both timestamps, cycle, and forecast_hour",
+      "reader_extra": null,
+      "guide": "https://docs.usdata.dev/providers/noaa-hrrr/",
+      "reference": "https://docs.usdata.dev/generated/catalog/noaa/hrrr/",
+      "examples": [
+        {
+          "title": "Hrrr environment",
+          "url": "https://usdata.dev/examples/hrrr-environment/"
+        }
+      ]
+    },
+    {
       "id": "noaa:climate-normals",
       "title": "30-year station climate normals",
       "description": "Daily, monthly, and annual/seasonal 30-year station normals via the NCEI Access Data Service datasets normals-daily-1991-2020, normals-monthly-1991-2020, and normals-annualseasonal-1991-2020, chosen with a period parameter. Dates are optional; daily and monthly normals accept a month-day window inside a placeholder year. Explicit stations or station discovery through the companion search service.",
@@ -617,30 +651,6 @@
         "gfs",
         "grib2",
         "global",
-        "nwp"
-      ],
-      "formats": [],
-      "selection": null,
-      "inputs": null,
-      "reader_extra": null,
-      "guide": null,
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
-    },
-    {
-      "id": "noaa:hrrr",
-      "title": "HRRR Forecast Model Output",
-      "description": "High-Resolution Rapid Refresh 3 km hourly forecasts in GRIB2 from the public noaa-hrrr-bdp-pds S3 bucket, laid out as hrrr.YYYYMMDD/conus/ with one file per cycle and forecast hour. Large files; cycle and forecast-hour selection are essential.",
-      "provider": "NOAA",
-      "domain": "Weather models",
-      "availability": "Planned",
-      "since": null,
-      "keywords": [
-        "forecast",
-        "model",
-        "hrrr",
-        "grib2",
-        "weather",
         "nwp"
       ],
       "formats": [],

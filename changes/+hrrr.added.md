@@ -1,0 +1,1 @@
+Add `noaa:hrrr`, High-Resolution Rapid Refresh model output: whole CONUS GRIB2 files selected by run initialization window, cycle hour, forecast hours, and surface, pressure-level, or native file variant, with fields chosen after download by the GRIB2 reader.
