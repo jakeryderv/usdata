@@ -30,9 +30,10 @@ modern API.
 - The [service homepage](https://api.waterdata.usgs.gov/ogcapi/v0/?f=html)
   identifies its data as US Government work in the public domain.
 
-Reproducibility pins the CSV bytes. If observations or page membership change
-upstream, restoration detects a checksum mismatch; the service does not offer
-immutable versions through these requests.
+Reproducibility pins the CSV bytes; the service does not offer immutable
+versions through these requests.
+
+--8<-- "_snippets/upstream-revisions.md"
 
 Small probe used to verify the endpoint and filtering:
 

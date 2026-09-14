@@ -36,8 +36,7 @@ rename columns locally if desired; station, datum, units, interval, and
 timezone remain explicit in the provenance source URL. Predictions are computed
 from harmonic constituents, not observed, so they carry no quality flags and
 never contain gaps. NOAA occasionally revises a station's constituents, after
-which the same request can return different bytes; locked restoration then
-reports the change rather than silently accepting it. The
+which the same request returns different bytes. The
 [storm-surge notebook](https://usdata.dev/examples/storm-surge/) subtracts
 predictions from observations during Hurricane Helene.
 

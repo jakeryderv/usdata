@@ -17,9 +17,10 @@ continuation tokens, and selects scans whose **start times** fall in the inclusi
 UTC query interval. It does not select a scan that started before the interval
 merely because the scan overlaps it. Filename start/end stamps have tenths-of-a-
 second precision; asset metadata retains both bounds and the listed byte size.
-Naive dates/times mean UTC; a date-only end is midnight at the start of that day.
 A query spans at most seven days; split longer intervals. Even a week of one
 channel is about 2,000 whole scenes, so keep intervals short.
+
+--8<-- "_snippets/utc-window.md"
 
 For example, fetch one small shortwave-infrared scene (~255 kB):
 

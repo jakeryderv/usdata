@@ -15,8 +15,9 @@ four hours. The query window selects runs by **initialization time**,
 inclusive, and spans at most one day: a window from 00:00 to 00:00 UTC on one
 day with `cycle=0` selects exactly that run, and a 24-hour window can select
 the same cycle on two days. A window containing no `cycle` initialization is
-rejected before any request. Naive times mean UTC; a date-only end is midnight
-at the start of that day.
+rejected before any request.
+
+--8<-- "_snippets/utc-window.md"
 
 `forecast_hour` (required) is an integer, a list, or a comma-separated string
 from 0 to 384. Which hours exist depends on the grid: the 0.25 degree files are

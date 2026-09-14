@@ -95,3 +95,29 @@ HTTP-backed adapters share a small internal `_HttpProvider` lifecycle: clients
 are created lazily, owned clients are closed on context exit, and injected clients
 remain caller-owned. This helper carries no query, pagination, or dataset logic;
 the public `Provider` interface remains transport-independent.
+
+## Place table regeneration
+
+`build_query(location=...)` resolves against `src/usdata/data/places.csv`, a
+generated table of state and county bounding boxes. The
+[Census cartographic boundary page](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html)
+describes the source; the pinned archives are the 2025 1:500,000 KML files for
+[states](https://www2.census.gov/geo/tiger/GENZ2025/kml/cb_2025_us_state_500k.zip)
+and [counties](https://www2.census.gov/geo/tiger/GENZ2025/kml/cb_2025_us_county_500k.zip).
+
+`scripts/build_places.py` reads the KML with the standard library and writes
+the CSV plus `places.sources.json`, which records source URLs, archive SHA-256
+hashes, counts, vintage, scale, and CSV checksum. No geospatial runtime
+dependency or online geocoder is involved.
+
+```sh
+just places                           # download pinned 2025 archives and generate
+just places --check                   # download and compare with committed outputs
+just places --source-dir /path/to/zips --check  # reproduce offline from saved archives
+```
+
+Never hand-edit the CSV. Updating the vintage means updating the generator,
+the expected coverage tests, the places reference, and the changelog. Ordinary
+CI validates bundled counts, unique FIPS, valid bounds, aliases, and the CSV
+checksum without network access; regeneration is an explicit maintenance task.
+See [ADR 0005](adr/0005-generated-census-place-envelopes.md).

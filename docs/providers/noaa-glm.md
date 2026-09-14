@@ -15,11 +15,12 @@ seconds over the satellite's full field of view, and the server cannot crop it.
 
 The adapter lists hourly `GLM-L2-LCFA/YYYY/DDD/HH/` prefixes, follows S3
 continuation tokens, and selects files whose **start times** fall in the
-inclusive UTC query interval. Naive dates/times mean UTC; a date-only end is
-midnight at the start of that day. A query spans at most one day. That is
+inclusive UTC query interval. A query spans at most one day. That is
 shorter than ABI's seven days because GLM writes 180 files an hour: one day of
 one satellite is 4,320 files and about 1.4 GB, and a listing alone is 24 S3
 requests. Split longer intervals, and prefer minutes around an event.
+
+--8<-- "_snippets/utc-window.md"
 
 For example, fetch the single file starting at 20:00:00 UTC on 2024-05-06
 (about 290 kB):

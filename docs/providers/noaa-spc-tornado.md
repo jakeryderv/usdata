@@ -25,11 +25,10 @@ File names are stable and the bytes are revised in place: SPC refreshes prior
 years when NWS Storm Data is finalized, and the page shows an update date next
 to each file. Nothing in the name records that revision, so the asset id is the
 plain file name and the lockfile checksum is the only revision record. A
-locked restore downloads the pinned URL without reading the page; if the bytes
-have changed, restoration fails with a checksum mismatch, and
-`usdata pull --update` accepts the revision deliberately. Sizes on the page are
-approximate, so assets carry no size. Preserve your cache for long-term
-reproducibility.
+locked restore downloads the pinned URL without reading the page. Sizes on the
+page are approximate, so assets carry no size.
+
+--8<-- "_snippets/upstream-revisions.md"
 
 `FetchedAsset.open()` uses the pandas extra. Every row is one tornado or one
 segment of a tornado, following the

@@ -1,280 +1,67 @@
-# Opening fetched data
+# Reader options
 
-Readers operate on fetched local files and are selected by format. CSV and
-HURDAT2 return a pandas DataFrame, NEXRAD returns an xarray DataTree, and NetCDF4
-and GRIB2 return an xarray Dataset. Each reader has an optional dependency extra.
+How each reader behaves is explained in [readers](../concepts/readers.md).
+This page lists what to install, what is inferred, and what `open()` accepts.
 
-## CSV and ERDDAP CSV
+## Readers and extras
 
-Available since v0.6. Install the optional pandas extra with
-`pip install "usdata[pandas]"` or `uv add "usdata[pandas]"`.
-For a source checkout, follow the [source installation](../install.md#source-installation)
-and run `uv sync --group dev --extra pandas`.
+| Reader | Extra | Returns | Inferred for |
+|---|---|---|---|
+| `csv` | `pandas` | pandas DataFrame | `text/csv`, `application/csv` (charset parameters allowed); `application/gzip` or `application/x-gzip` when the id ends in `.csv.gz` |
+| `erddap-csv` | `pandas` | pandas DataFrame with `attrs["units"]` | CSV media types on an asset whose protocol is ERDDAP |
+| `hurdat2` | `pandas` | pandas DataFrame, one row per track point | `noaa:hurdat2` assets, or ids `hurdat2-*.txt` |
+| `nexrad-level2` | `radar` | xarray DataTree | `noaa:nexrad-level2` assets |
+| `netcdf` | `netcdf` | xarray Dataset | `application/x-netcdf`, `application/netcdf`, `application/x-netcdf4` |
+| `grib2` | `grib` | xarray Dataset | `application/x-grib2`, `application/grib2`, `application/x-grib`, `application/wmo-grib2`; ids ending `.grib2`, `.grb2`, or their `.gz` forms when the media type is missing, generic, or gzip |
 
-```python
-from usdata import build_query, get
-from usdata.fetch import fetch
+`noaa:nexrad-level3` assets have no reader and `open()` raises
+`UnsupportedFormat`. Install extras as `pip install "usdata[pandas,grib]"`; the
+[Install](../install.md) page has the platform notes for `grib`.
 
-items = fetch(
-    get("noaa:coastwatch-sst"),
-    build_query(
-        bbox=(-80.08, 30.02, -80.02, 30.08),
-        start="2024-05-06T12:00Z",
-        end="2024-05-06T12:00Z",
-    ),
-)
-frame = items[0].open(parse_dates=["time"])
-print(frame["analysed_sst"].mean(), frame.attrs["units"]["analysed_sst"])
-```
+## Options
 
-The same method works on `pull(...).fetched` results, including locked cache
-restoration. See the runnable [SST example](https://usdata.dev/examples/sst-analysis/).
+| Option | Applies to | Behavior |
+|---|---|---|
+| `reader` | all | Overrides inference: `"csv"`, `"erddap-csv"`, `"hurdat2"`, `"nexrad-level2"`, `"netcdf"`, or `"grib2"`. Use it for ambiguous media metadata. |
+| `dtype` | CSV readers | Mapping of column names to pandas dtype strings; overrides the identifier defaults below. |
+| `parse_dates` | CSV readers | Columns to parse as dates. Nothing is parsed by default; `dtype={"DATE": "string"}` keeps numeric-looking labels as text. |
+| `usecols` | CSV readers | Columns to read, in pandas order. |
+| `nrows` | CSV readers | Maximum observation rows, excluding header and units rows. |
+| `sweep` | `nexrad-level2` | Zero-based integer or non-empty list of distinct integers; `None` opens every sweep. |
+| `select` | `grib2` | Mapping of ecCodes key names to one value or a list of values; required when a file holds more than one message. |
 
-## Selection and options
+Passing an option to a reader it does not apply to raises `ValueError`, even
+with an empty value.
 
-For CSV, `FetchedAsset.open()` returns an in-memory pandas DataFrame. It recognizes
-`text/csv` and `application/csv` (including charset parameters). An ERDDAP asset
-uses the `erddap-csv` reader, which consumes the second CSV record as units.
-Other CSV assets use the ordinary `csv` reader. This assumes ERDDAP's standard
-`.csv` response, not its headerless or units-free variants.
+## CSV identifier defaults
 
-Gzip CSV opening is available since v0.8. Gzip media types
-(`application/gzip`, `application/x-gzip`) are recognized only when the asset ID
-ends with `.csv.gz`; ambiguous compressed files need an explicit `reader="csv"`.
-The reader checks gzip magic in the local file and decompresses through a stream,
-without rewriting the archive, downloading anything, or changing its provenance.
-Corrupt gzip/CSV errors propagate. `nrows` limits parsed rows and does not verify
-the entire compressed archive; use the ordinary cache/lockfile verification for
-source integrity.
+These column names, matched case-insensitively, default to pandas string dtype
+so leading zeros survive: `STATION`, `station_id`, `site_no`,
+`monitoring_location_id`, `parameter_code`, `statistic_id`, `event_id`,
+`episode_id`, `state_fips`, `cz_fips`, `tor_other_cz_fips`. No padding is
+added; other numeric-looking ids need an explicit `dtype`. Other columns use
+pandas inference and default missing-value parsing.
 
-| Option | Behavior |
-|---|---|
-| `reader` | Defaults to inference. Explicit `"csv"`, `"erddap-csv"`, `"nexrad-level2"`, `"netcdf"`, `"grib2"`, or `"hurdat2"` handles missing or ambiguous media metadata. |
-| `dtype` | Mapping of column names to pandas dtype strings; overrides identifier defaults for those columns. |
-| `parse_dates` | List of columns to parse as dates/timestamps; dates are not parsed by default. Use `dtype={"DATE": "string"}` to retain numeric-looking year labels as text. |
-| `usecols` | List of columns to read. Ordering follows pandas behavior. |
-| `nrows` | Maximum number of observation rows to read, excluding headers and units. |
-| `sweep` | NEXRAD only (since v0.9): zero-based integer or non-empty list of distinct nonnegative integers. `None` opens all sweeps. |
-| `select` | GRIB2 only, since v0.15.0: mapping of ecCodes key names to one value or a list of values, choosing messages from a multi-message file. |
+## Result attributes
 
-`STATION` and other case-insensitive identifier names (`station_id`, `site_no`,
-`monitoring_location_id`, `parameter_code`, `statistic_id`) default to pandas
-string dtype so leading zeros survive. Other columns use pandas type inference
-and default missing-value parsing. Numeric-looking IDs with other column names
-need an explicit string dtype. Pass an explicit dtype to change a default. Since v0.8, `event_id`, `episode_id`, `state_fips`, `cz_fips`, and
-`tor_other_cz_fips` also retain source strings. No padding is added: Storm Events
-zone codes are not automatically converted to Census county identifiers.
+| Reader | Where | Contents |
+|---|---|---|
+| CSV readers | `frame.attrs["usdata"]` | Asset id and a JSON-compatible copy of its provenance |
+| `erddap-csv` | `frame.attrs["units"]` | Units row, filtered to the selected columns |
+| `nexrad-level2` | `radar.attrs["usdata"]` | Asset id, provenance, and `sweeps` listing the returned groups |
+| `netcdf`, `grib2` | `dataset.attrs["usdata"]` | Asset id and provenance |
+| `grib2` | per-variable `attrs` | `units`, `name`, `typeOfLevel`, `level`, discipline, category, and parameter numbers, packing type, reference and valid times, step; projection parameters on the Dataset for projected grids |
 
-```python
-frame = items[0].open(usecols=["time", "analysed_sst"], nrows=100)
-```
+## Errors
 
-ERDDAP units are retained in `frame.attrs["units"]`, filtered to selected
-columns. USGS per-observation units and quality columns remain ordinary columns.
-`frame.attrs["usdata"]` contains the asset ID and a JSON-compatible copy of its
-original provenance. This metadata describes the source bytes, not any analysis
-you perform afterward. DataFrame operations/exports may discard attributes;
-keep lockfiles and provenance sidecars as the persistent record.
+| Error | From `usdata.readers` | Raised when |
+|---|---|---|
+| `MissingReaderDependency` | subclass of `ImportError` | The extra is not installed; the message names it, and for `grib` also names the ecCodes library when the binding is present but the library is not |
+| `UnsupportedFormat` | subclass of `ValueError` | No reader matches, an unknown `reader` name is passed, or the asset is a Level III product |
+| `RadarDecodeError` | subclass of `ValueError` | Moment and coordinate records do not align for the requested sweeps |
+| `Hurdat2FormatError` | subclass of `ValueError` | A HURDAT2 line, count, or value cannot be parsed; the message names the line |
+| `ValueError` | built-in | A multi-message GRIB2 file opened without `select`, or selected messages on different grids |
 
-Pandas documents [CSV conversion options](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)
-and [DataFrame attributes](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.attrs.html).
-For parser options outside this small API, use pandas directly on `item.path`,
-accounting for ERDDAP's units record yourself.
-
-## NEXRAD Level II
-
-Available since v0.8.
-
-Install `usdata[radar]` (checkout: `uv sync --group dev --extra radar`). Assets
-from `noaa:nexrad-level2` infer the radar reader; use `reader="nexrad-level2"`
-for an archive with ambiguous dataset metadata. Whole-file gzip/bzip2 and
-internal Archive II compression are supported, with offline legacy message-1
-and modern message-31 fixtures. Reader tests run on Linux Python 3.11 and 3.14;
-installed-wheel checks also verify the radar extra on macOS and Windows.
-
-```python
-radar = item.open(sweep=0)  # selected sweep of a fetched noaa:nexrad-level2 asset
-sweep = radar["sweep_0"].to_dataset()
-print(sweep["DBZH"].attrs["units"])  # dBZ
-print(radar.attrs["usdata"]["provenance"]["checksum"])
-```
-
-The result is an eagerly loaded **xarray DataTree**, decoded by
-[xradar](https://docs.openradarscience.org/projects/xradar/en/stable/generated/xradar.io.backends.nexrad_level2.open_nexradlevel2_datatree.html).
-Each `sweep_N` child has native fields and coordinates. Decoder resources are
-closed before returning. A compressed volume can expand to hundreds of MB;
-select a bounded time/site query before fetching. CSV options raise `ValueError`
-for radar rather than being ignored.
-
-Since v0.9, `sweep=0` or `sweep=[0, 2]` limits decoding and eager loading;
-the entire archived file is still downloaded and inspected. Names retain their
-original zero-based indices, and `radar.attrs["usdata"]["sweeps"]` records the
-returned groups. Invalid or out-of-range indices raise `ValueError`.
-
-The reader checks moment/coordinate record alignment before decoding. An interior
-sweep missing its end marker can shift xradar 0.12's coordinate table, causing
-shape errors or pairing equal-length observations with the wrong coordinates.
-Such a request raises `RadarDecodeError` from `usdata.readers`, before any partial
-result is returned. Select an unaffected sweep explicitly or investigate another
-decoder; this guard does not reconstruct the missing metadata or certify a file's
-scientific quality. Full-volume decoding of the affected KTLX
-`KTLX20240507_044053_V06` remains unsupported; its first sweep is readable.
-
-Units and native moment scaling are retained. Reserved codes become NaN:
-0–1 for DBZH (reflectivity), VRADH (radial velocity), WRADH (spectrum width), ZDR,
-PHIDP, and RHOHV; 0–7 for CCORH (clutter-filter power removed). Coordinates and
-unknown fields are unchanged. These are parsing conventions, not quality
-control; no rainfall conversion, clutter removal, or velocity unfolding is
-performed. Incomplete sweeps with aligned metadata are padded with NaN so received rays remain
-available. Xradar warnings about angle reconstruction are preserved; do not
-interpret those sweeps as complete observations. Legacy files may lack location
-metadata, which the reader does not replace with guessed coordinates.
-
-Root `radar.attrs["usdata"]` carries the asset ID and copied source provenance;
-it is not an export format or a record of analysis steps. Keep the input files
-and sidecars. See the [executed radar notebook](https://usdata.dev/examples/radar-reflectivity/)
-and [ADR 0008](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0008-local-radar-readers.md). The
-[event-context notebook](https://usdata.dev/examples/event-context/) demonstrates
-explicit selection; [ADR 0011](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0011-radar-sweep-alignment.md) records the guard's
-scope and upstream dependency. Advanced decoder options
-remain available by calling xradar directly with `item.path`.
-
-## Boundaries and errors
-
-Opening is local and does not re-fetch, verify checksums, alter cached files,
-update provenance, or write transformed data. Run `verify` when checking locked
-input integrity; call `pull` to restore missing files. Editing the DataFrame
-does not change its source CSV. Scientific units are not converted, and
-CSV provider-specific missing-data sentinels are not normalized beyond pandas defaults.
-
-`MissingReaderDependency` (an `ImportError`) names `usdata[pandas]`,
-`usdata[radar]`, or `usdata[netcdf]` when the required reader dependency is absent. Unsupported formats or reader names raise `UnsupportedFormat`
-(a `ValueError`). Both errors are available from `usdata.readers`. Missing local
-files and pandas parsing/conversion failures propagate normally. CSV headers
-must have unique, non-empty names, and ERDDAP units must match the header width.
-
-GRIB and geospatial readers are not implemented. Use the
-fetched path with a suitable external reader for those formats. NEXRAD Level
-III products (`noaa:nexrad-level3`, since v0.15) are fetched whole and have no
-reader: `open()` raises `UnsupportedFormat` naming `fetched.path`, and Py-ART's
-`read_nexrad_level3` decodes the cached file. The Level II reader is never
-inferred for them. The core SDK,
-CLI, fetch, cache, and lockfile workflows continue to work without pandas.
-
-## NetCDF4 scenes
-
-Available since v0.8. Install `usdata[netcdf]` for xarray plus the
-h5netcdf/h5py backend. `item.open()` recognizes `application/x-netcdf`,
-`application/netcdf`, and `application/x-netcdf4`; use `reader="netcdf"` when
-an archived asset has ambiguous media metadata. No current registry is needed.
-
-The result is an xarray Dataset of the file's root group. CF packed values,
-unsigned storage, fill values and time coordinates are decoded; dimensions,
-coordinate units, variable units, projection metadata and data-quality flags
-are retained. Quality filtering and projection are the caller's responsibility.
-`dataset.attrs["usdata"]` contains the same copied source provenance convention
-as CSV readers. CSV options (`dtype`, `parse_dates`, `usecols`, `nrows`) are
-rejected, including empty values, for NetCDF opening.
-
-The source is opened as a local binary file with a fixed engine. All variables
-are loaded into memory and both dataset/backend and file are closed before
-returning; callers need not manage a file handle. Memory must fit the decoded
-scene, which can be much larger than its compressed download size. The initial
-scope is NetCDF4/HDF5; classic NetCDF3, arbitrary HDF5, groups and lazy/dask
-opening are not supported. Use a format-specific library on `item.path` for
-those cases. Backend parsing errors propagate; missing optional modules name
-the `usdata[netcdf]` extra.
-
-See the executed [GOES example](https://usdata.dev/examples/goes-imagery/),
-[xarray's decoding options](https://docs.xarray.dev/en/stable/generated/xarray.open_dataset.html),
-and [ADR 0009](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0009-eager-local-netcdf4-reader.md).
-
-## GRIB2 fields
-
-Since v0.15.0. Install `usdata[grib]` for the ecCodes Python bindings, xarray,
-and NumPy. `item.open()` recognizes `application/x-grib2`, `application/grib2`,
-`application/x-grib`, and `application/wmo-grib2`, and names ending in `.grib2`,
-`.grb2`, or their `.gz` forms when the media type is missing, generic, or gzip;
-pass `reader="grib2"` for other metadata. Gzipped files, which is how MRMS is
-published, are decompressed in memory; cached bytes are never changed.
-
-With pip alone the extra installs on Linux for every supported Python and on
-Windows for CPython 3.13 and earlier, where the `eccodes` wheel bundles the
-library. On macOS, and on Windows with Python 3.14, install the ecCodes library
-separately (`conda install -c conda-forge eccodes` or `brew install eccodes`)
-before the extra; the reader reports a missing library with that hint.
-
-The result is an xarray Dataset with one float32 data variable per selected
-message on one shared grid. Regular latitude-longitude grids get one-dimensional
-`latitude` and `longitude` coordinates computed from the grid definition;
-projected grids such as HRRR's Lambert conformal get two-dimensional
-coordinates on `y` and `x` plus the projection parameters as Dataset attributes.
-Rows always run north to south and columns west to east, whatever the file's
-scanning mode. Longitudes keep the file's convention, 0–360° for NOAA products.
-Values marked missing by a bitmap become NaN; product-defined sentinels such as
-MRMS `-999` and `-99` are kept, since their meaning is the product's. Variable
-attributes carry `units`, `name`, `typeOfLevel`, `level`, the discipline,
-category, and parameter numbers, packing type, reference and valid times, and
-step; `dataset.attrs["usdata"]` holds the same provenance copy as other readers.
-
-A file with one message opens directly. A file with several needs `select`, a
-mapping of ecCodes key names to one value or a list of values, otherwise the
-reader raises a `ValueError` listing every `(shortName, typeOfLevel, level)`
-rather than loading hundreds of fields:
-
-```python
-env = item.open(select={"shortName": ["cape", "hlcy"], "typeOfLevel": "surface"})
-print(list(env.data_vars), env.cape.attrs["units"])
-```
-
-Strings compare with the key's text form and numbers with its numeric form, so
-`{"level": 500}` and `{"level": "500"}` match the same message. Variables are
-named by `shortName`; when several selected messages share one, the level type
-and value are appended. ecCodes has no names for MRMS parameters, so those
-variables take the product from the file name, for example `RotationTrackML30min`,
-and other unnamed parameters become `parameter_<discipline>_<category>_<number>`.
-Selected messages must share one grid.
-
-Memory must fit the decoded field: a 0.005° MRMS grid is 98 million points and
-peaks near 1.2 GB while the float64 values from ecCodes are cast to float32.
-Select coarser products, or use `item.path` with a chunked backend, when that is
-too much. CSV options and `sweep` are rejected. Lazy or dask-backed opening,
-regridding, reprojection, spatial subsetting, and GRIB1 are not supported.
-See [ADR 0022](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0022-grib2-reader-backend.md) for the backend choice.
-
-## HURDAT2 best tracks
-
-Available since v0.12.0, behind the same pandas extra as
-CSV. `noaa:hurdat2` assets and files named `hurdat2-*.txt` infer the reader, since
-the service serves generic `text/plain`; pass `reader="hurdat2"` for an archived
-copy with ambiguous metadata. Archived revisions read the same as current ones:
-lines without the radius of maximum wind, added for the 2021 season, leave that
-column NaN.
-
-```python
-tracks = item.open()  # a fetched noaa:hurdat2 asset
-landfalls = tracks[tracks.record_identifier == "L"]
-print(tracks.columns.tolist(), len(tracks), len(landfalls))
-```
-
-The result is a pandas DataFrame with one row per best-track point: `storm_id`,
-`name`, UTC `time`, `record_identifier`, `status`, signed `latitude`/`longitude`,
-`max_wind_kt`, `min_pressure_mb`, the twelve wind radii (`r34_ne_nm` through
-`r64_nw_nm`), and `max_wind_radius_nm`. Storm identity and name are repeated on
-every row of a storm, which is what makes the table groupable.
-
-Documented missing sentinels become NaN: `-999`, and `-99` where a maximum wind
-was left unassigned on a non-developing depression. Numeric columns therefore use
-float dtype; units live in the column names rather than a synthesized units map.
-Text columns keep source strings, and a blank record identifier or status is
-missing rather than an empty string. Revisions published before the 2021 season
-omit the radius of maximum wind, which is then NaN for every row. Longitudes are
-normalized into [-180, 180]: some revisions carry a track past the prime meridian
-in the unwrapped 0-360 west convention, where `358.0W` is the point 2.0 degrees
-east. A declared track-point count that does not match, a line with the wrong
-number of fields, or an unparseable time, coordinate, or measurement raises
-`Hurdat2FormatError` from `usdata.readers` (a `ValueError`) naming the line,
-instead of returning a partly parsed table. CSV options do not
-apply and are rejected. See the [dataset guide](../providers/noaa-hurdat2.md),
-the [manifest example](https://usdata.dev/examples/hurdat2/), and
-[ADR 0020](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0020-hurdat2-whole-file-and-format-reader.md).
+Missing local files and pandas, xarray, or ecCodes parsing failures propagate
+unchanged. CSV headers must be unique and non-empty, and an ERDDAP units row
+must match the header width.

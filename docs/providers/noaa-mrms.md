@@ -16,8 +16,7 @@ domain is served; the bucket's ALASKA, CARIB, GUAM, and HAWAII domains, its
 
 The adapter lists one `CONUS/<PRODUCT>/<YYYYMMDD>/` prefix per touched day,
 follows S3 continuation tokens, and selects files whose stamps fall in the
-inclusive UTC query interval. Naive dates/times mean UTC; a date-only end is
-midnight at the start of that day. A query spans at most one day: a day of one
+inclusive UTC query interval. A query spans at most one day: a day of one
 product is 720 files and, for reflectivity, more than a gigabyte. Split longer
 intervals, and prefer the minutes around an event. Use `--dry-run` to see the
 count and total size before downloading. Stamps are usually on even minutes,
@@ -80,10 +79,10 @@ asset ids keep the exact upstream filename. Values are stored with the source's
 sentinels: `-999` marks no coverage and `-99` marks no data within coverage in
 the files probed, and neither is a GRIB missing value, so mask them yourself
 before taking statistics. Files are gzipped; the reader decompresses in memory
-and the cached bytes stay as published. A decoded 0.005° rotation grid is
-98 million points and needs about 1.2 GB at peak; prefer the 0.01° products
-or a coarser rotation window when memory is tight. Without the extra, use
+and the cached bytes stay as published. Without the extra, use
 `fetched.path` with any GRIB2 decoder after decompressing.
+
+--8<-- "_snippets/large-grids.md"
 
 ## Archive coverage
 

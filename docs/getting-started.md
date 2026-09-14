@@ -20,8 +20,9 @@ usdata info noaa:ghcn-daily
 
 Search is local and ranks a curated catalog. It does not query every agency's
 live catalog. Use the [searchable dataset browser](https://usdata.dev/datasets/)
-to compare formats, required inputs, and examples. Planned entries are not
-fetchable; see [provider coverage](providers/README.md).
+to compare formats, required inputs, and examples.
+
+--8<-- "_snippets/planned-datasets.md"
 
 ## Fetch a small station query
 
@@ -55,8 +56,8 @@ frame = items[0].open()
 print(frame.head())
 ```
 
-Reading is local. CSV, radar, and NetCDF4 have separate optional extras; see
-[readers and their limits](reference/readers.md).
+Reading is local. Each format has its own optional extra; see
+[readers](concepts/readers.md).
 
 ## Preserve the inputs
 
@@ -93,17 +94,18 @@ with a checksum mismatch.
 
 Commit the manifest and lockfile and back up the cached bytes. Lockfiles detect
 changed data but cannot recover an upstream version that is no longer available.
-See [manifest behavior](reference/manifests.md) before intentionally refreshing inputs.
+See [manifests and lockfiles](concepts/manifests.md) before intentionally refreshing inputs.
 
 ## Choose the next step
 
 | Goal | Read next |
 |---|---|
-| Explore query options and CLI workflows | [Fetch and analyze](guides/fetch-and-analyze.md) |
-| Repeat an analysis with pinned inputs | [Manifests and lockfiles](reference/manifests.md) |
-| Learn through saved data and plots | [Runnable notebooks](https://usdata.dev/examples/) |
-| Understand a provider's query limits | [Provider access notes](providers/README.md) |
-| Find an exact Python argument | [Python reference](reference/api.md) |
+| Choose a dataset | [Find a dataset](guides/find-a-dataset.md) |
+| Explore query options and the fetch loop | [Fetch and analyze](guides/fetch-and-analyze.md) |
+| Repeat an analysis with pinned inputs | [Pin inputs](guides/pin-inputs.md) |
+| Learn through saved data and plots | [Examples](https://usdata.dev/examples/) |
+| Understand a provider's query limits | [Provider notes](providers/README.md) |
+| Find an exact Python argument | [Python API](reference/api.md) |
 
 Installation options, extras, and the source checkout are on the
 [Install](install.md) page.

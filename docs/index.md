@@ -59,6 +59,8 @@ all assets match dataset.lock.json
 
 ## How the pieces fit
 
+The [concepts](concepts/how-it-works.md) section explains each of these and the boundaries between them.
+
 - **The registry** is a curated list of datasets with true endpoints and
   capabilities. Search reads it locally; it never queries an agency catalog.
 - **An adapter** per dataset turns your query into the upstream service's own
@@ -76,11 +78,13 @@ all assets match dataset.lock.json
 | --- | --- |
 | Do the walkthrough above yourself, including restoring into a fresh cache | [Getting started](getting-started.md) |
 | Install with the right extras, or from source | [Install](install.md) |
-| Learn the query options and CLI workflows | [Fetch and analyze](guides/fetch-and-analyze.md) |
+| Choose a dataset and learn its quirks | [Find a dataset](guides/find-a-dataset.md) |
+| Learn the query options and the fetch loop | [Fetch and analyze](guides/fetch-and-analyze.md) |
+| Repeat an analysis with pinned inputs | [Pin inputs](guides/pin-inputs.md) |
+| Work with radar, satellite, model, or severe-weather data | [Guides](guides/radar-and-satellite.md) |
 | See a whole analysis with saved outputs | [Examples](https://usdata.dev/examples/) |
-| Choose a dataset and learn its quirks | [Catalog](generated/catalog/index.md) and [provider notes](providers/README.md) |
-| Repeat an analysis with pinned inputs | [Manifests and lockfiles](reference/manifests.md) |
-| Find an exact Python argument | [Python API](reference/api.md) |
+| Understand what usdata guarantees and what it does not | [Concepts](concepts/how-it-works.md) |
+| Find an exact option, field, or Python argument | [Reference](reference/api.md) |
 
 These pages describe the current source checkout. Anything marked
 **Unreleased** is not yet on PyPI; see [Install](install.md#source-installation).
