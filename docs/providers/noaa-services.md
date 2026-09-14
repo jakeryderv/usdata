@@ -97,6 +97,33 @@ added once a concrete, anonymously accessible dataset has been verified.
 | Space weather | Solar activity, solar wind, geomagnetic indices | SWPC real-time products, DSCOVR, GOES SUVI | `swpc-realtime` |
 | Land and environment | Vegetation, surface temperature, fire | Terrestrial Climate Data Records (NDVI, LAI) | `cdr-ndvi` |
 
+## MRMS gridded radar products
+
+Bounded probes on 2026-09-14 listed every supported product's directory for
+2024-05-06 in `noaa-mrms-pds`: 720 two-minute files for most products (719 for
+`MergedBaseReflectivityQC_00.50` and `PrecipRate_00.00`, 48 hourly files for
+the 2-hour rotation tracks), with the per-file and per-day sizes recorded in
+the [dataset guide](noaa-mrms.md#supported-products). Rotation tracks stamp
+even minutes exactly (`-200000`); most other products carry the merge second
+(`-200039`). Listing `CONUS/<PRODUCT>/` with a `/` delimiter found `20201014`
+as the first day for rotation tracks, composite reflectivity, and MESH. The
+bucket root holds `ALASKA/`, `ANC/`, `CARIB/`, `CONUS/`, `CONUS_5KM/`,
+`ConvectProb/`, `GUAM/`, `HAWAII/`, `ProbSevere/`, and `unsupported/`; only
+`CONUS/` is served. A reproducible listing probe is:
+
+```sh
+curl --get 'https://noaa-mrms-pds.s3.amazonaws.com/' \
+  --data-urlencode 'list-type=2' \
+  --data-urlencode 'prefix=CONUS/RotationTrackML30min_00.50/20240506/' \
+  --data-urlencode 'max-keys=1000'
+```
+
+The 20:00:00 rotation-track file that day was 109,540 bytes gzipped and
+189,711 bytes decompressed, one PNG-packed GRIB2 message on a 7,000 × 14,000
+regular grid from 55°N 230°E to 20°N 300°E; ecCodes reports its parameter as
+unknown (discipline 209). The live test downloads that file, checks the gzip
+and `GRIB` signatures, and restores it through a lockfile without relisting.
+
 ## GOES ABI CONUS imagery
 
 Bounded probes on 2026-09-08 listed 192 CMIPC files in one hour for each of

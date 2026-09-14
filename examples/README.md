@@ -46,6 +46,10 @@ Atlantic file and reads it into one row per track point (available since v0.12.0
 one hour of GOES-16 GLM detection files and counts the flashes near Oklahoma
 City minute by minute (available since v0.15.0).
 
+[Rotation tracks around a reported tornado](https://usdata.dev/examples/mrms-rotation/) pulls
+twenty minutes of MRMS mid-level rotation tracks and reports the peak azimuthal
+shear near Oklahoma City in each two-minute grid (available since v0.15.0).
+
 ## Run interactively
 
 From the repository root, with [uv and just installed](https://docs.usdata.dev/project/#development):

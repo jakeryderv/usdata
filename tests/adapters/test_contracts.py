@@ -36,6 +36,7 @@ CASES = {
     "noaa:nexrad-level3": {"site": "KTLX", "products": "N0B"},
     "noaa:goes-abi": {"satellite": 18, "channel": 6},
     "noaa:goes-glm": {"satellite": 16},
+    "noaa:mrms": {"product": "RotationTrackML30min_00.50"},
     "noaa:coastwatch-sst": {"bbox": (-80.08, 30.02, -80.02, 30.08)},
     "noaa:storm-events": {},
     "noaa:spc-tornado-reports": {},
@@ -49,6 +50,8 @@ S3_KEYS = {
     "OR_ABI-L2-CMIPC-M6C06_G18_s20241271201181_e20241271203560_c20241271204021.nc",
     "noaa:goes-glm": "GLM-L2-LCFA/2024/127/12/"
     "OR_GLM-L2-LCFA_G16_s20241271200000_e20241271200200_c20241271200213.nc",
+    "noaa:mrms": "CONUS/RotationTrackML30min_00.50/20240506/"
+    "MRMS_RotationTrackML30min_00.50_20240506-120000.grib2.gz",
 }
 STORM_NAME = "StormEvents_details-ftp_v1.0_d2024_c20260323.csv.gz"
 HURDAT_NAME = "hurdat2-nepac-1949-2025-02272026.txt"

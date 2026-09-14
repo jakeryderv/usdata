@@ -13,6 +13,7 @@ NOAA access is anonymous.
 | `lcd` | [Hourly airport observations](noaa-lcd.md) (v0.14.0) | Every report on whole days per station chunk |
 | `nexrad-level2` | [Radar scans](noaa-nexrad.md) | Whole Level II scans |
 | `nexrad-level3` | [Derived radar products](noaa-nexrad-level3.md) (v0.15) | Whole Level III product files, no reader |
+| `mrms` | [MRMS gridded radar products](noaa-mrms.md) (v0.15.0) | Whole two-minute CONUS grids of one product, at most a day |
 | `goes-abi` | [GOES imagery](noaa-goes.md) | Whole single-channel CONUS scenes |
 | `goes-glm` | [GOES lightning detections](noaa-glm.md) (v0.15.0) | Whole 20-second detection files, at most a day |
 | `storm-events` | [Storm Events](noaa-storm-events.md) | Whole annual details archives |
@@ -34,6 +35,10 @@ U.S. Government work in the public domain; check each source's license.
 ## NEXRAD Level III products
 
 See [NEXRAD Level III products](noaa-nexrad-level3.md).
+
+## MRMS gridded radar products
+
+See [MRMS gridded radar products](noaa-mrms.md).
 
 ## GOES ABI CONUS imagery
 

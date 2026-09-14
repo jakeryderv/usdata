@@ -17,6 +17,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | <span id="noaastorm-events"></span>[Storm Events details](noaa/storm-events.md) | Released | gzip CSV | Whole annual archives; filter rows locally after downloading |
 | <span id="noaaspc-tornado-reports"></span>[SPC tornado database](noaa/spc-tornado-reports.md) | Source only | CSV | Whole annual, half-decade, or decade files; filter rows locally after downloading |
 | <span id="noaanexrad-level2"></span>[NEXRAD radar scans](noaa/nexrad-level2.md) | Released | NEXRAD Level II | Whole radar scans by site and inclusive UTC scan-start time |
+| <span id="noaamrms"></span>[MRMS gridded radar products](noaa/mrms.md) | Source only | GRIB2 (gzipped) | Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day |
 | <span id="noaanexrad-level3"></span>[NEXRAD derived radar products](noaa/nexrad-level3.md) | Source only | NEXRAD Level III (no reader) | Whole product files by site, product code, and inclusive UTC scan time since 2020-03-30 |
 | <span id="noaagoes-abi"></span>[GOES CONUS imagery](noaa/goes-abi.md) | Released | NetCDF4 | Whole single-channel CONUS scenes by inclusive UTC scan-start time |
 | <span id="noaagoes-glm"></span>[GOES lightning detections](noaa/goes-glm.md) | Source only | NetCDF4 | Whole 20-second detection files by inclusive UTC file-start time, at most one day |
@@ -38,15 +39,6 @@ Global hourly and sub-hourly surface observations, the successor to ISD. Publish
 
 [Upstream information](https://www.ncei.noaa.gov/products/global-historical-climatology-network-hourly)
 Domain: Surface weather.
-
-### noaa:mrms
-
-**Multi-Radar Multi-Sensor (MRMS)** · Planned · target 0.15
-
-Gridded CONUS products merged from all radars plus other sensors (reflectivity, precipitation rate and accumulation, severe weather diagnostics), as two-minute gzipped GRIB2 files in the public noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/.
-
-[Upstream information](https://registry.opendata.aws/noaa-mrms-pds/)
-Domain: Weather radar.
 
 ### noaa:ibtracs
 

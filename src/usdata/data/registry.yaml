@@ -320,20 +320,25 @@ datasets:
 
   - id: noaa:mrms
     provider: noaa
-    status: planned
+    status: available
     domain: weather-radar
-    target: '0.15'
+    since: "0.15"
     title: Multi-Radar Multi-Sensor (MRMS)
     description: >-
-      Gridded CONUS products merged from all radars plus other sensors
-      (reflectivity, precipitation rate and accumulation, severe weather
-      diagnostics), as two-minute gzipped GRIB2 files in the public
-      noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/.
-    keywords: [radar, mrms, precipitation, reflectivity, gridded, grib2, conus]
+      Gridded CONUS products merged from every radar plus other sensors:
+      rotation tracks, reflectivity, hail size, echo tops, precipitation rate,
+      and lightning probability as two-minute gzipped GRIB2 files in the public
+      noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/. Select one
+      product from the supported list and a file-stamp window of at most one
+      day; each asset is a complete CONUS grid with no spatial subsetting.
+    keywords: [radar, mrms, rotation, azimuthal shear, hail, reflectivity, gridded, grib2, conus, tornado]
     protocol: s3
     homepage: https://registry.opendata.aws/noaa-mrms-pds/
     license: US Government Work (public domain)
+    spatial_extent: { west: -130.0, south: 20.0, east: -60.0, north: 55.0 }
+    temporal_extent: { start: "2020-10-14T00:00:00Z" }
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+    adapter: usdata.providers.noaa.mrms:Mrms
 
   - id: noaa:nexrad-level3
     provider: noaa
@@ -827,6 +832,16 @@ catalog:
     examples:
     - examples/goes-imagery/example.ipynb
     - examples/event-context/example.ipynb
+  noaa:mrms:
+    guide: docs/providers/noaa-mrms.md
+    summary: MRMS gridded radar products
+    formats:
+    - GRIB2 (gzipped)
+    selection: Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day
+    inputs: Product name and both timestamps
+    reader_extra: null
+    examples:
+    - examples/mrms-rotation/README.md
   noaa:goes-glm:
     guide: docs/providers/noaa-glm.md
     summary: GOES lightning detections

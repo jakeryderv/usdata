@@ -8,7 +8,6 @@ Move a dataset between phases by editing its `target` in the registry.
 
 - [`noaa:gfs`](noaa.md#noaagfs) GFS Forecast Model Output · Planned
 - [`noaa:hrrr`](noaa.md#noaahrrr) HRRR Forecast Model Output · Planned
-- [`noaa:mrms`](noaa.md#noaamrms) Multi-Radar Multi-Sensor (MRMS) · Planned
 
 **Later**
 
@@ -36,6 +35,7 @@ Move a dataset between phases by editing its `target` in the registry.
 **Implemented, unreleased (planned 0.15)**
 
 - [`noaa:goes-glm`](noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · Source only
+- [`noaa:mrms`](noaa.md#noaamrms) Multi-Radar Multi-Sensor (MRMS) · Source only
 - [`noaa:nexrad-level3`](noaa.md#noaanexrad-level3) NEXRAD Level III Products · Source only
 - [`noaa:spc-tornado-reports`](noaa.md#noaaspc-tornado-reports) SPC Tornado Reports · Source only
 
