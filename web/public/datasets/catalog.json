@@ -441,7 +441,7 @@
       ],
       "selection": "Whole CONUS files by run initialization window, cycle hour, forecast hours, and file variant, at most one day",
       "inputs": "Both timestamps, cycle, and forecast_hour",
-      "reader_extra": null,
+      "reader_extra": "grib",
       "guide": "https://docs.usdata.dev/providers/noaa-hrrr/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/hrrr/",
       "examples": [
