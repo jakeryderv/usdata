@@ -353,6 +353,27 @@ An invalid station returned HTTP 400 with a plain-text message and no CSV
 header. Observed and predicted six-minute rows for the same request bounds
 carried identical timestamps, so the two series subtract without alignment.
 
+## NEXRAD Level III products
+
+Probes on 2026-09-14 listed the anonymous `unidata-nexrad-level3` bucket with
+ListObjectsV2. Keys are flat, `SITE_PRODUCT_YYYY_MM_DD_HH_MM_SS`, with the
+three-character site prefix dropping the ICAO id's first letter. The earliest
+key in the whole bucket is `ABC_DAA_2020_03_30_00_02_41`, and every KTLX product
+probed begins on 2020-03-30 or the day after, so the archive start is a fixed
+date rather than a rolling window. KTLX carried 100 distinct product codes.
+Super-resolution reflectivity and velocity (`N0B`, `N0G`, and their `1`, `2`,
+`3`, `A`, `B` tilt variants) begin 2022-02-18; the 256-level `N0Q` and `N0U`
+end 2022-09-08; the `NTV` tornado vortex signature ends 2022-05-24, while
+`NMD` mesocyclone detection and `NST` storm tracking continue to the probe
+date. One clear-air day of KTLX `N0B` listed 127 objects with a 243 kB median;
+`NMD` listed 323 objects at 150 bytes each (empty detections); `EET` listed 126
+at 1.5 kB and `NST` 323 at 10 kB. On 2024-05-06 KTLX `N0B` listed 388 objects
+across the whole day, but `NMD` and `NST` listed 47 each, all after 20:42 UTC,
+so the feed capture has gaps that the continuous products do not show. A
+delimiter listing on `_` enumerates products and years cheaply; the adapter
+lists one `SITE_PRODUCT_YYYY_MM_DD_` prefix per day instead, which stays under
+one page.
+
 ## Local Climatological Data
 
 Hosted probes on 2026-09-12 verified the Access Data Service dataset

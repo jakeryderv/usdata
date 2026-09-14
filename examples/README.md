@@ -34,6 +34,11 @@ readings against NCEI's daily summary (available since v0.14.0).
 Storm Prediction Center's 2024 tornado file and counts tornadoes by rating,
 keeping one row per tornado (available since v0.15.0).
 
+[Derived radar products](https://usdata.dev/examples/radar-products/) pulls thirty
+minutes of NEXRAD Level III mesocyclone, storm-track, and echo-top files from
+one radar around a tornado report and shows that they are stored without a
+reader (available since v0.15).
+
 [Atlantic hurricane best tracks](https://usdata.dev/examples/hurdat2/) fetches the whole HURDAT2
 Atlantic file and reads it into one row per track point (available since v0.12.0).
 

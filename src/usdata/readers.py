@@ -77,6 +77,11 @@ def open_asset(
         hurdat2 = fetched.asset.dataset_id == "noaa:hurdat2" or (
             name.startswith("hurdat2-") and name.endswith(".txt")
         )
+        if fetched.asset.dataset_id == "noaa:nexrad-level3":
+            raise UnsupportedFormat(
+                "NEXRAD Level III products have no usdata reader; open fetched.path with "
+                "Py-ART (pyart.io.read_nexrad_level3) or another Level III decoder"
+            )
         if fetched.asset.dataset_id == "noaa:nexrad-level2":
             reader = "nexrad-level2"
         elif hurdat2:

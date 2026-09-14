@@ -33,6 +33,7 @@ CASES = {
     "noaa:climate-normals": {"stations": "USW00013967"},
     "noaa:lcd": {"stations": "72353013967"},
     "noaa:nexrad-level2": {"site": "KTLX"},
+    "noaa:nexrad-level3": {"site": "KTLX", "products": "N0B"},
     "noaa:goes-abi": {"satellite": 18, "channel": 6},
     "noaa:goes-glm": {"satellite": 16},
     "noaa:coastwatch-sst": {"bbox": (-80.08, 30.02, -80.02, 30.08)},
@@ -43,6 +44,7 @@ CASES = {
 }
 S3_KEYS = {
     "noaa:nexrad-level2": "2024/05/06/KTLX/KTLX20240506_120100_V06",
+    "noaa:nexrad-level3": "TLX_N0B_2024_05_06_12_01_00",
     "noaa:goes-abi": "ABI-L2-CMIPC/2024/127/12/"
     "OR_ABI-L2-CMIPC-M6C06_G18_s20241271201181_e20241271203560_c20241271204021.nc",
     "noaa:goes-glm": "GLM-L2-LCFA/2024/127/12/"

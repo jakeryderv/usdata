@@ -1,0 +1,8 @@
+name: ktlx-derived-products
+sources:
+  - dataset: noaa:nexrad-level3
+    start: 2024-05-06T20:30:00Z
+    end: 2024-05-06T21:00:00Z
+    params:
+      site: KTLX
+      products: [NMD, NST, EET]

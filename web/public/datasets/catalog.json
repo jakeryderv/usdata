@@ -244,6 +244,40 @@
       ]
     },
     {
+      "id": "noaa:nexrad-level3",
+      "title": "NEXRAD derived radar products",
+      "description": "Derived single-radar products (super-resolution reflectivity and velocity, dual-polarization moments, mesocyclone and storm-track detections, echo tops, accumulations) in the public unidata-nexrad-level3 S3 bucket, with flat keys SITE_PRODUCT_YYYY_MM_DD_HH_MM_SS where the site id drops the first letter of its ICAO id. One object per product per volume scan since 2020-03-30; earlier products are archived at NCEI. Files are fetched whole and have no reader.",
+      "provider": "NOAA",
+      "domain": "Weather radar",
+      "availability": "Source only",
+      "since": "0.15",
+      "keywords": [
+        "radar",
+        "nexrad",
+        "level iii",
+        "reflectivity",
+        "velocity",
+        "mesocyclone",
+        "storm tracks",
+        "products",
+        "tornado"
+      ],
+      "formats": [
+        "NEXRAD Level III (no reader)"
+      ],
+      "selection": "Whole product files by site, product code, and inclusive UTC scan time since 2020-03-30",
+      "inputs": "Both timestamps; product codes; radar IDs or a geographic query",
+      "reader_extra": null,
+      "guide": "https://docs.usdata.dev/providers/noaa-nexrad-level3/",
+      "reference": "https://docs.usdata.dev/generated/catalog/noaa/nexrad-level3/",
+      "examples": [
+        {
+          "title": "Radar products",
+          "url": "https://usdata.dev/examples/radar-products/"
+        }
+      ]
+    },
+    {
       "id": "noaa:goes-abi",
       "title": "GOES CONUS imagery",
       "description": "Single-channel CONUS Cloud and Moisture Imagery (ABI-L2-CMIPC) from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit satellite, channel, and scan-start interval; each asset is a complete NetCDF scene with no geographic or variable subsetting.",
@@ -526,30 +560,6 @@
         "gridded",
         "grib2",
         "conus"
-      ],
-      "formats": [],
-      "selection": null,
-      "inputs": null,
-      "reader_extra": null,
-      "guide": null,
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
-    },
-    {
-      "id": "noaa:nexrad-level3",
-      "title": "NEXRAD Level III Products",
-      "description": "Derived single-radar products (base reflectivity, velocity, storm totals, and others) in the public unidata-nexrad-level3 S3 bucket, with flat keys SITE_PRODUCT_YYYY_MM_DD_HH_MM_SS where the site id drops its leading K. Recent data only; the archive is at NCEI.",
-      "provider": "NOAA",
-      "domain": "Weather radar",
-      "availability": "Planned",
-      "since": null,
-      "keywords": [
-        "radar",
-        "nexrad",
-        "level iii",
-        "reflectivity",
-        "velocity",
-        "products"
       ],
       "formats": [],
       "selection": null,

@@ -12,6 +12,7 @@ NOAA access is anonymous.
 | `climate-normals` | [30-year station normals](noaa-normals.md) (v0.11.0) | Whole-year or month-day windows per period |
 | `lcd` | [Hourly airport observations](noaa-lcd.md) (v0.14.0) | Every report on whole days per station chunk |
 | `nexrad-level2` | [Radar scans](noaa-nexrad.md) | Whole Level II scans |
+| `nexrad-level3` | [Derived radar products](noaa-nexrad-level3.md) (v0.15) | Whole Level III product files, no reader |
 | `goes-abi` | [GOES imagery](noaa-goes.md) | Whole single-channel CONUS scenes |
 | `goes-glm` | [GOES lightning detections](noaa-glm.md) (v0.15.0) | Whole 20-second detection files, at most a day |
 | `storm-events` | [Storm Events](noaa-storm-events.md) | Whole annual details archives |
@@ -29,6 +30,10 @@ Geographic queries use bounding rectangles, which can include stations outside
 a state's actual boundary. See [place lookup](../reference/places.md). Use
 explicit station IDs when exact selection matters. NOAA data is generally a
 U.S. Government work in the public domain; check each source's license.
+
+## NEXRAD Level III products
+
+See [NEXRAD Level III products](noaa-nexrad-level3.md).
 
 ## GOES ABI CONUS imagery
 

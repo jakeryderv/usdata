@@ -96,6 +96,18 @@ def test_unsupported_formats_do_not_load_pandas(fetched, media_type) -> None:
     loader.assert_not_called()
 
 
+def test_level3_products_are_refused_without_the_level2_reader(fetched) -> None:
+    item = fetched("SDUS54", media_type="application/octet-stream", dataset="noaa:nexrad-level3")
+    with (
+        patch("usdata.readers.import_module") as loader,
+        patch("usdata._radar.open_nexrad", create=True) as radar,
+        pytest.raises(UnsupportedFormat, match=r"fetched\.path.*Py-ART"),
+    ):
+        item.open()
+    loader.assert_not_called()
+    radar.assert_not_called()
+
+
 def test_unknown_reader_rejected(fetched) -> None:
     with pytest.raises(UnsupportedFormat, match="unsupported reader"):
         fetched("x\n1\n").open(reader="pickle")

@@ -153,7 +153,11 @@ files and pandas parsing/conversion failures propagate normally. CSV headers
 must have unique, non-empty names, and ERDDAP units must match the header width.
 
 GRIB and geospatial readers are not implemented. Use the
-fetched path with a suitable external reader for those formats. The core SDK,
+fetched path with a suitable external reader for those formats. NEXRAD Level
+III products (`noaa:nexrad-level3`, since v0.15) are fetched whole and have no
+reader: `open()` raises `UnsupportedFormat` naming `fetched.path`, and Py-ART's
+`read_nexrad_level3` decodes the cached file. The Level II reader is never
+inferred for them. The core SDK,
 CLI, fetch, cache, and lockfile workflows continue to work without pandas.
 
 ## NetCDF4 scenes
