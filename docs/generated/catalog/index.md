@@ -32,11 +32,11 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 | Provider | Released | Source only | Planned |
 |---|---:|---:|---:|
-| [NOAA](noaa.md) | 18 | 0 | 13 |
+| [NOAA](noaa.md) | 18 | 0 | 17 |
 | [USGS](usgs.md) | 1 | 0 | 2 |
 | [Census Bureau](census.md) | 0 | 0 | 1 |
 | [EPA](epa.md) | 0 | 0 | 1 |
-| [FEMA](fema.md) | 0 | 0 | 1 |
+| [FEMA](fema.md) | 0 | 0 | 2 |
 | [NASA](nasa.md) | 0 | 0 | 1 |
 | [USDA](usda.md) | 0 | 0 | 1 |
 

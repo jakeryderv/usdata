@@ -8,18 +8,23 @@ Move a dataset between phases by editing its `target` in the registry.
 
 - [`census:acs-5year`](census.md#censusacs-5year) American Community Survey 5-Year Estimates · Planned
 - [`epa:aqs-daily`](epa.md#epaaqs-daily) Air Quality System Daily Summaries · Planned
+- [`fema:disaster-declarations`](fema.md#femadisaster-declarations) FEMA Disaster Declarations Summaries · Planned
 - [`fema:nfhl`](fema.md#femanfhl) National Flood Hazard Layer · Planned
 - [`nasa:gpm-imerg`](nasa.md#nasagpm-imerg) GPM IMERG Precipitation · Planned
+- [`noaa:billion-dollar-disasters`](noaa.md#noaabillion-dollar-disasters) Billion-Dollar Weather and Climate Disasters · Planned
 - [`noaa:cdr-ndvi`](noaa.md#noaacdr-ndvi) NDVI Climate Data Record · Planned
 - [`noaa:ersst`](noaa.md#noaaersst) ERSST Monthly Sea Surface Temperature · Planned
 - [`noaa:etopo`](noaa.md#noaaetopo) ETOPO 2022 Global Relief · Planned
 - [`noaa:ghcn-hourly`](noaa.md#noaaghcn-hourly) GHCN-Hourly Station Observations · Planned
 - [`noaa:ibtracs`](noaa.md#noaaibtracs) IBTrACS Global Tropical Cyclone Tracks · Planned
+- [`noaa:igra`](noaa.md#noaaigra) IGRA Radiosonde Observations · Planned
 - [`noaa:nbm`](noaa.md#noaanbm) National Blend of Models · Planned
 - [`noaa:nclimdiv`](noaa.md#noaanclimdiv) nClimDiv Climate Divisional Data · Planned
+- [`noaa:nws-warnings`](noaa.md#noaanws-warnings) NWS Watch, Warning, and Advisory Archive · Planned
 - [`noaa:ocads`](noaa.md#noaaocads) Ocean Carbon and Acidification Data System · Planned
 - [`noaa:oisst`](noaa.md#noaaoisst) OISST Daily Sea Surface Temperature · Planned
 - [`noaa:paleo-search`](noaa.md#noaapaleo-search) World Data Service for Paleoclimatology · Planned
+- [`noaa:rap`](noaa.md#noaarap) RAP Model Output · Planned
 - [`noaa:sea-ice-index`](noaa.md#noaasea-ice-index) Sea Ice Index · Planned
 - [`noaa:swpc-realtime`](noaa.md#noaaswpc-realtime) SWPC Real-Time Space Weather Products · Planned
 - [`noaa:tsunami-events`](noaa.md#noaatsunami-events) Global Historical Tsunami Database · Planned

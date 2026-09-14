@@ -14,6 +14,15 @@ None implemented yet.
 
 These entries are not implemented; they cannot fetch data.
 
+### fema:disaster-declarations
+
+**FEMA Disaster Declarations Summaries** · Planned · target later
+
+Every federal disaster declaration since 1953, one row per declaration and designated area, with incident type, dates, programs declared, and county FIPS codes, from the OpenFEMA v2 JSON API (70,402 rows on 2026-09-14; OData filters and paging).
+
+[Upstream information](https://www.fema.gov/openfema-data-page/disaster-declarations-summaries-v2)
+Domain: Natural hazards.
+
 ### fema:nfhl
 
 **National Flood Hazard Layer** · Planned · target later

@@ -106,9 +106,14 @@ and optional-reader boundaries:
   define lookup, freshness, trusted upload ownership, and eviction while preserving
   checksum, provenance, restoration, and published-file retention contracts.
 - NetCDF CDRs and static grids.
-- NWS damage survey polygons and SPC mesoanalysis archives: considered for the
-  tornado workstream and excluded because they need ArcGIS REST and image access
-  patterns, and geospatial readers, that the package does not have.
+- Geospatial severe-weather sources that share one blocker: NWS damage survey
+  points and polygons (an ArcGIS REST service), the NWS watch and warning
+  archive and SPC convective outlooks (shapefiles), and NLCD land cover and 3DEP
+  elevation (rasters). None can ship without a geospatial reader and, for the
+  damage surveys, an ArcGIS REST transport. Damage surveys plus the warning
+  archive would justify that decision: together they give true tornado path
+  geometry and warning verification for the labels the package already serves.
+- SPC mesoanalysis archives: images only, not machine-readable data.
 - Further agencies, live catalog discovery, and third-party registry extensions.
 - Format normalization and place-name lookup beyond states and counties.
 - A hosted data API or substantial ingestion/analysis jobs when a concrete use

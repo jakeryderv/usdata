@@ -664,6 +664,53 @@
       "examples": []
     },
     {
+      "id": "noaa:igra",
+      "title": "IGRA Radiosonde Observations",
+      "description": "Integrated Global Radiosonde Archive version 2: observed upper-air soundings from 2,931 stations as one zipped fixed-width text file per station for its full period of record (about 81 MB for Norman, Oklahoma), plus year-to-date and derived-parameter directories, from an NCEI HTTPS directory. Needs a fixed-width sounding reader.",
+      "provider": "NOAA",
+      "domain": "Surface weather",
+      "availability": "Planned",
+      "since": null,
+      "keywords": [
+        "radiosonde",
+        "sounding",
+        "upper air",
+        "igra",
+        "weather balloon"
+      ],
+      "formats": [],
+      "selection": null,
+      "inputs": null,
+      "reader_extra": null,
+      "guide": null,
+      "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
+      "examples": []
+    },
+    {
+      "id": "noaa:nws-warnings",
+      "title": "NWS Watch, Warning, and Advisory Archive",
+      "description": "Every National Weather Service watch, warning, and advisory polygon with VTEC codes and issue, expiry, and update times, as one zipped shapefile per year. The maintained archive is the Iowa Environmental Mesonet's mirror of NWS products, not an NWS endpoint; the tornado and severe thunderstorm storm-based warnings for 2024 are 6.5 MB and all products 351 MB. Needs a shapefile reader.",
+      "provider": "NOAA",
+      "domain": "Severe weather",
+      "availability": "Planned",
+      "since": null,
+      "keywords": [
+        "warnings",
+        "watches",
+        "vtec",
+        "nws",
+        "verification",
+        "polygons"
+      ],
+      "formats": [],
+      "selection": null,
+      "inputs": null,
+      "reader_extra": null,
+      "guide": null,
+      "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
+      "examples": []
+    },
+    {
       "id": "noaa:ibtracs",
       "title": "IBTrACS Global Tropical Cyclone Tracks",
       "description": "International Best Track Archive for Climate Stewardship: merged best tracks from all agencies worldwide since 1842. CSV and NetCDF files by basin or period from an NCEI HTTPS directory (v04r01).",
@@ -701,6 +748,30 @@
         "nbm",
         "grib2",
         "guidance"
+      ],
+      "formats": [],
+      "selection": null,
+      "inputs": null,
+      "reader_extra": null,
+      "guide": null,
+      "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
+      "examples": []
+    },
+    {
+      "id": "noaa:rap",
+      "title": "RAP Model Output",
+      "description": "Rapid Refresh 13 km hourly analyses and forecasts in GRIB2 from the public noaa-rap-pds S3 bucket, laid out as rap.YYYYMMDD/ with one file per cycle, forecast hour, and grid family (awp130 is the 13 km CONUS grid, about 18 MB per analysis). The bucket begins in December 2020; it is the environmental source for years HRRR's archive does not reach only where NCEI holds older runs. Same cycle and forecast-hour selection as HRRR.",
+      "provider": "NOAA",
+      "domain": "Weather models",
+      "availability": "Planned",
+      "since": null,
+      "keywords": [
+        "forecast",
+        "model",
+        "rap",
+        "grib2",
+        "weather",
+        "nwp"
       ],
       "formats": [],
       "selection": null,
@@ -850,6 +921,29 @@
         "dem",
         "etopo",
         "global"
+      ],
+      "formats": [],
+      "selection": null,
+      "inputs": null,
+      "reader_extra": null,
+      "guide": null,
+      "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
+      "examples": []
+    },
+    {
+      "id": "noaa:billion-dollar-disasters",
+      "title": "Billion-Dollar Weather and Climate Disasters",
+      "description": "NCEI's list of U.S. disasters with CPI-adjusted and unadjusted costs, dates, and deaths since 1980, served as one CSV with two header comment lines from the NCEI access service (about 36 kB for all events).",
+      "provider": "NOAA",
+      "domain": "Natural hazards",
+      "availability": "Planned",
+      "since": null,
+      "keywords": [
+        "disasters",
+        "cost",
+        "damage",
+        "billion",
+        "impacts"
       ],
       "formats": [],
       "selection": null,
@@ -1080,6 +1174,29 @@
       "reader_extra": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/epa/",
+      "examples": []
+    },
+    {
+      "id": "fema:disaster-declarations",
+      "title": "FEMA Disaster Declarations Summaries",
+      "description": "Every federal disaster declaration since 1953, one row per declaration and designated area, with incident type, dates, programs declared, and county FIPS codes, from the OpenFEMA v2 JSON API (70,402 rows on 2026-09-14; OData filters and paging).",
+      "provider": "FEMA",
+      "domain": "Natural hazards",
+      "availability": "Planned",
+      "since": null,
+      "keywords": [
+        "fema",
+        "disasters",
+        "declarations",
+        "tornado",
+        "impacts"
+      ],
+      "formats": [],
+      "selection": null,
+      "inputs": null,
+      "reader_extra": null,
+      "guide": null,
+      "reference": "https://docs.usdata.dev/generated/catalog/fema/",
       "examples": []
     },
     {
