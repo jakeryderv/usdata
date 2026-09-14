@@ -1,5 +1,5 @@
 {
-  "version": "0.14.0",
+  "version": "0.15.0",
   "datasets": [
     {
       "id": "noaa:ghcn-daily",
@@ -184,7 +184,7 @@
       "description": "The Storm Prediction Center's tornado database since 1950 as plain CSV: one row per tornado or state/county segment with date, local time, EF or F rating, injuries, fatalities, loss, start and end coordinates, path length and width, and FIPS codes. Whole files linked from the SPC page: annual from 2008, half-decade for 2000-2007, decade for 1950-1999. Stable names revised in place; no server-side row, location, or variable subsetting.",
       "provider": "NOAA",
       "domain": "Severe weather",
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.15",
       "keywords": [
         "tornado",
@@ -257,7 +257,7 @@
       "description": "Gridded CONUS products merged from every radar plus other sensors: rotation tracks, reflectivity, hail size, echo tops, precipitation rate, and lightning probability as two-minute gzipped GRIB2 files in the public noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/. Select one product from the supported list and a file-stamp window of at most one day; each asset is a complete CONUS grid with no spatial subsetting.",
       "provider": "NOAA",
       "domain": "Weather radar",
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.15",
       "keywords": [
         "radar",
@@ -296,7 +296,7 @@
       "description": "Derived single-radar products (super-resolution reflectivity and velocity, dual-polarization moments, mesocyclone and storm-track detections, echo tops, accumulations) in the public unidata-nexrad-level3 S3 bucket, with flat keys SITE_PRODUCT_YYYY_MM_DD_HH_MM_SS where the site id drops the first letter of its ICAO id. One object per product per volume scan since 2020-03-30; earlier products are archived at NCEI. Files are fetched whole and have no reader.",
       "provider": "NOAA",
       "domain": "Weather radar",
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.15",
       "keywords": [
         "radar",
@@ -368,7 +368,7 @@
       "description": "Lightning flash, group, and event detections (GLM-L2-LCFA) from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit satellite and a file-start interval of at most one day; each asset is a complete 20-second NetCDF detection table with no geographic subsetting.",
       "provider": "NOAA",
       "domain": "Weather satellites",
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.15",
       "keywords": [
         "lightning",
@@ -439,7 +439,7 @@
       "description": "Global Forecast System forecasts in GRIB2 from the anonymous noaa-gfs-bdp-pds S3 bucket, one whole global file per run, forecast hour, and grid resolution. Select a run by initialization window and cycle hour (00, 06, 12, or 18 UTC), the forecast hours, and the 0.25, 0.5, or 1 degree grid. Files are 42 MB to 550 MB; fields are selected after download with the GRIB2 reader, not by the server.",
       "provider": "NOAA",
       "domain": "Weather models",
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.15",
       "keywords": [
         "forecast",
@@ -473,7 +473,7 @@
       "description": "High-Resolution Rapid Refresh 3 km CONUS forecasts in GRIB2 from the anonymous noaa-hrrr-bdp-pds S3 bucket, one whole file per run and forecast hour. Select a run by initialization window and cycle hour, the forecast hours, and the surface, pressure-level, or native file variant. Files are 150 MB to 750 MB; fields are selected after download with the GRIB2 reader, not by the server.",
       "provider": "NOAA",
       "domain": "Weather models",
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.15",
       "keywords": [
         "forecast",

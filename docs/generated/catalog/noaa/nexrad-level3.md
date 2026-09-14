@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`noaa:nexrad-level3` · **Source only** · Install from [source](../../../project.md#source-installation) to use this dataset.
+`noaa:nexrad-level3` · **Released** · Included since usdata 0.15.
 
 NEXRAD Level III Products.
 
@@ -31,7 +31,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.15
+- Availability: since 0.15
 - Domain: Weather radar
 - Geographic bounds (WGS84): west -180°, south 15°, east -60°, north 72°
 - Catalog date range: 2020-03-30 to open-ended

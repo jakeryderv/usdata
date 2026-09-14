@@ -1,1 +1,0 @@
-Add `noaa:mrms`, Multi-Radar Multi-Sensor gridded CONUS products: whole two-minute gzipped GRIB2 grids of one product (rotation tracks, reflectivity, hail size, echo tops, precipitation rate, lightning probability) selected by product name and a file-stamp window of at most one day, plus a manifest example locating the strongest rotation near a reported tornado.

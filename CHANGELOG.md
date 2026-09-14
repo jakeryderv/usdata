@@ -12,6 +12,30 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.15.0](https://github.com/jakeryderv/usdata/releases/tag/v0.15.0) - 2026-09-14
+
+
+### Added
+
+- Add `noaa:gfs`, Global Forecast System model output: whole global GRIB2 files selected by run initialization window, cycle hour, forecast hours, and 0.25, 0.5, or 1 degree grid resolution, with fields chosen after download by the GRIB2 reader.
+- Add `noaa:goes-glm`, GOES Geostationary Lightning Mapper flash, group, and event detections: whole 20-second NetCDF files from GOES-16 through 19 selected by satellite and a file-start window of at most one day, opened with the NetCDF reader, plus a manifest example counting flashes near Oklahoma City around a reported tornado.
+- Add `noaa:hrrr`, High-Resolution Rapid Refresh model output: whole CONUS GRIB2 files selected by run initialization window, cycle hour, forecast hours, and surface, pressure-level, or native file variant, with fields chosen after download by the GRIB2 reader.
+- Add `noaa:mrms`, Multi-Radar Multi-Sensor gridded CONUS products: whole two-minute gzipped GRIB2 grids of one product (rotation tracks, reflectivity, hail size, echo tops, precipitation rate, lightning probability) selected by product name and a file-stamp window of at most one day, plus a manifest example locating the strongest rotation near a reported tornado.
+- Add `noaa:nexrad-level3`, NEXRAD Level III derived products (super-resolution reflectivity and velocity, dual-polarization moments, mesocyclone and storm-track detections, echo tops, and accumulations) from the public archive that begins 2020-03-30, selected by radar, product codes, and UTC time; files are fetched whole with provenance and lockfiles but have no reader in this release.
+- Add `noaa:spc-tornado-reports`, the Storm Prediction Center tornado database: whole annual CSV files from 2008 onward and decade or half-decade files back to 1950, selected by date range, opened with the CSV reader, and documented against Storm Events, plus a manifest example counting one year's tornadoes by rating.
+- Add `usdata[grib]`, a GRIB2 reader on the ecCodes bindings: `item.open()` returns a float32 xarray Dataset with computed coordinates for regular and projected grids, decompresses gzipped MRMS files in memory, and takes `select={...}` with ecCodes keys to choose messages from multi-message model output such as HRRR.
+
+### Documentation
+
+- Add a runnable tornado classification example that converts one Storm Events report to UTC, joins it to the nearest NEXRAD Level II volume, MRMS rotation track, and GLM flashes, and builds a small labeled table of rotation and lightning features for tornado, hail, and wind reports from the same evening. Move the MRMS rotation example to the twenty minutes around that tornado so the Oklahoma City box shows rotation.
+- Record the GRIB2 reader decision: decode through the ecCodes Python bindings and build xarray datasets in usdata, after gribberish panicked on every 0.005-degree MRMS rotation grid and cfgrib spent 19 seconds computing coordinates for one file.
+- Record the v0.14.0 first-use review: the published walkthrough, live checks for the two datasets the release added, and their query validation all passed. Remove the shipped LCD and CO-OPS tide candidates from the roadmap.
+- Select the v0.15.0 tornado research workstream on the roadmap: GLM, SPC tornado reports, NEXRAD Level III, a GRIB2 reader, MRMS, HRRR, GFS, and a tornado classification example, with the five existing planned entries targeted at 0.15.0.
+
+### Development
+
+- The scheduled live suite now installs the netcdf extra for the GLM module and the grib extra for the MRMS, HRRR, and GFS modules, so their reader steps run instead of skipping.
+
 ## [0.14.0](https://github.com/jakeryderv/usdata/releases/tag/v0.14.0) - 2026-09-12
 
 

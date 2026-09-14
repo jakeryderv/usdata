@@ -45,15 +45,15 @@ does not implement an SDK remote cache. See
 [website operations](guides/website-operations.md) and
 [ADR 0015](adr/0015-separate-sites-and-data-storage.md).
 
-The selected workstream is the set of inputs a tornado classification project
-needs, tracked in [issue 118](https://github.com/jakeryderv/usdata/issues/118)
-under the v0.15.0 milestone: GLM lightning detections, SPC tornado reports,
-NEXRAD Level III products without a reader, a GRIB2 reader extra, MRMS gridded
-radar products, HRRR and GFS model output, and one example that joins Storm
-Events, Level II radar, and MRMS into labeled rows. The blocking decision is the
-GRIB2 reader backend, recorded as an ADR before the three GRIB2 datasets start.
-Release when the milestone closes; an item that slips leaves the milestone
-rather than holding the release.
+The tornado research workstream, tracked in
+[issue 118](https://github.com/jakeryderv/usdata/issues/118), shipped complete
+in v0.15.0: GLM lightning detections, SPC tornado reports, NEXRAD Level III
+products without a reader, a GRIB2 reader extra on ecCodes
+([ADR 0022](adr/0022-grib2-reader-backend.md)), MRMS gridded radar products,
+HRRR and GFS model output, and the
+[tornado classification example](https://usdata.dev/examples/tornado-classification/).
+The next step is the v0.15.0 first-use review against the published package,
+including a macOS check of the grib extra's missing-library message.
 
 The completed
 [v0.14.0 first-use review](reviews/first-use-v0.14.0.md) records the published

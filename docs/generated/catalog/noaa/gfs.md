@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`noaa:gfs` · **Source only** · Install from [source](../../../project.md#source-installation) to use this dataset.
+`noaa:gfs` · **Released** · Included since usdata 0.15.
 
 GFS Forecast Model Output.
 
@@ -30,7 +30,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.15
+- Availability: since 0.15
 - Domain: Weather models
 - Catalog date range: 2021-03-22 to open-ended
 - Coverage varies by station, product, and date; the range above does not guarantee observations.
