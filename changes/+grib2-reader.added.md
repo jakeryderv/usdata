@@ -1,1 +1,0 @@
-Add `usdata[grib]`, a GRIB2 reader on the ecCodes bindings: `item.open()` returns a float32 xarray Dataset with computed coordinates for regular and projected grids, decompresses gzipped MRMS files in memory, and takes `select={...}` with ecCodes keys to choose messages from multi-message model output such as HRRR.

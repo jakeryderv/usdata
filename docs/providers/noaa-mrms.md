@@ -72,7 +72,7 @@ case needs another product.
 
 ## Reading grids
 
-Files are opened with the `grib` extra, which this release adds with
+Files are opened with the `grib` extra, added in v0.15.0 with
 `reader="grib2"`; see [readers and their limits](../reference/readers.md).
 ecCodes has no parameter tables for MRMS's local GRIB discipline, so the reader
 names the data variable from the product segment of the asset id, which is why

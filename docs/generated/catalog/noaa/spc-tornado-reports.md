@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`noaa:spc-tornado-reports` · **Source only** · Install from [source](../../../project.md#source-installation) to use this dataset.
+`noaa:spc-tornado-reports` · **Released** · Included since usdata 0.15.
 
 SPC Tornado Reports.
 
@@ -24,7 +24,7 @@ This dataset accepts no provider-specific parameters.
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.15
+- Availability: since 0.15
 - Domain: Severe weather
 - Catalog date range: 1950-01-01 to open-ended
 - Coverage varies by station, product, and date; the range above does not guarantee observations.

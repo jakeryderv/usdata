@@ -1,1 +1,0 @@
-Record the v0.14.0 first-use review: the published walkthrough, live checks for the two datasets the release added, and their query validation all passed. Remove the shipped LCD and CO-OPS tide candidates from the roadmap.

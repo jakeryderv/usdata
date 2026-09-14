@@ -1,1 +1,0 @@
-Add `noaa:goes-glm`, GOES Geostationary Lightning Mapper flash, group, and event detections: whole 20-second NetCDF files from GOES-16 through 19 selected by satellite and a file-start window of at most one day, opened with the NetCDF reader, plus a manifest example counting flashes near Oklahoma City around a reported tornado.

@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`noaa:mrms` · **Source only** · Install from [source](../../../project.md#source-installation) to use this dataset.
+`noaa:mrms` · **Released** · Included since usdata 0.15.
 
 Multi-Radar Multi-Sensor (MRMS).
 
@@ -28,7 +28,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.15
+- Availability: since 0.15
 - Domain: Weather radar
 - Geographic bounds (WGS84): west -130°, south 20°, east -60°, north 55°
 - Catalog date range: 2020-10-14 to open-ended

@@ -1,1 +1,0 @@
-Add `noaa:spc-tornado-reports`, the Storm Prediction Center tornado database: whole annual CSV files from 2008 onward and decade or half-decade files back to 1950, selected by date range, opened with the CSV reader, and documented against Storm Events, plus a manifest example counting one year's tornadoes by rating.

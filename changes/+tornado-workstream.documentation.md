@@ -1,1 +1,0 @@
-Select the v0.15.0 tornado research workstream on the roadmap: GLM, SPC tornado reports, NEXRAD Level III, a GRIB2 reader, MRMS, HRRR, GFS, and a tornado classification example, with the five existing planned entries targeted at 0.15.0.

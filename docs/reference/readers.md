@@ -55,7 +55,7 @@ source integrity.
 | `usecols` | List of columns to read. Ordering follows pandas behavior. |
 | `nrows` | Maximum number of observation rows to read, excluding headers and units. |
 | `sweep` | NEXRAD only (since v0.9): zero-based integer or non-empty list of distinct nonnegative integers. `None` opens all sweeps. |
-| `select` | GRIB2 only (unreleased): mapping of ecCodes key names to one value or a list of values, choosing messages from a multi-message file. |
+| `select` | GRIB2 only, since v0.15.0: mapping of ecCodes key names to one value or a list of values, choosing messages from a multi-message file. |
 
 `STATION` and other case-insensitive identifier names (`station_id`, `site_no`,
 `monitoring_location_id`, `parameter_code`, `statistic_id`) default to pandas
@@ -191,7 +191,7 @@ and [ADR 0009](../adr/0009-eager-local-netcdf4-reader.md).
 
 ## GRIB2 fields
 
-**Unreleased.** Install `usdata[grib]` for the ecCodes Python bindings, xarray,
+Since v0.15.0. Install `usdata[grib]` for the ecCodes Python bindings, xarray,
 and NumPy. `item.open()` recognizes `application/x-grib2`, `application/grib2`,
 `application/x-grib`, and `application/wmo-grib2`, and names ending in `.grib2`,
 `.grb2`, or their `.gz` forms when the media type is missing, generic, or gzip;

@@ -27,14 +27,14 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
 - [`usgs:earthquakes`](usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · Planned
 
-**Implemented, unreleased (planned 0.15)**
+**Included since 0.15**
 
-- [`noaa:gfs`](noaa.md#noaagfs) GFS Forecast Model Output · Source only
-- [`noaa:goes-glm`](noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · Source only
-- [`noaa:hrrr`](noaa.md#noaahrrr) HRRR Forecast Model Output · Source only
-- [`noaa:mrms`](noaa.md#noaamrms) Multi-Radar Multi-Sensor (MRMS) · Source only
-- [`noaa:nexrad-level3`](noaa.md#noaanexrad-level3) NEXRAD Level III Products · Source only
-- [`noaa:spc-tornado-reports`](noaa.md#noaaspc-tornado-reports) SPC Tornado Reports · Source only
+- [`noaa:gfs`](noaa.md#noaagfs) GFS Forecast Model Output · Released
+- [`noaa:goes-glm`](noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · Released
+- [`noaa:hrrr`](noaa.md#noaahrrr) HRRR Forecast Model Output · Released
+- [`noaa:mrms`](noaa.md#noaamrms) Multi-Radar Multi-Sensor (MRMS) · Released
+- [`noaa:nexrad-level3`](noaa.md#noaanexrad-level3) NEXRAD Level III Products · Released
+- [`noaa:spc-tornado-reports`](noaa.md#noaaspc-tornado-reports) SPC Tornado Reports · Released
 
 **Included since 0.14**
 
