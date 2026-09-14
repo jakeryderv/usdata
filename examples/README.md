@@ -50,6 +50,10 @@ City minute by minute (available since v0.15.0).
 twenty minutes of MRMS mid-level rotation tracks and reports the peak azimuthal
 shear near Oklahoma City in each two-minute grid (available since v0.15.0).
 
+[Model environment around a reported tornado](https://usdata.dev/examples/hrrr-environment/) pulls
+the HRRR 20 UTC surface analysis for 2024-05-06 and reads surface CAPE and
+0–3 km helicity at the grid point nearest Oklahoma City (available since v0.15.0).
+
 ## Run interactively
 
 From the repository root, with [uv and just installed](https://docs.usdata.dev/project/#development):

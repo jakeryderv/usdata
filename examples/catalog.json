@@ -88,5 +88,10 @@
     "slug": "mrms-rotation",
     "title": "Where was the strongest rotation near a reported tornado?",
     "summary": "Pull twenty minutes of MRMS mid-level rotation tracks, crop each CONUS grid to Oklahoma City locally, and report the peak azimuthal shear file by file."
+  },
+  {
+    "slug": "hrrr-environment",
+    "title": "What did the model say the environment was during a reported tornado?",
+    "summary": "Pull the HRRR 20 UTC surface analysis for 2024-05-06 and read surface CAPE and 0-3 km helicity at the grid point nearest Oklahoma City."
   }
 ]

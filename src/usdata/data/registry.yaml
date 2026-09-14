@@ -365,20 +365,24 @@ datasets:
 
   - id: noaa:hrrr
     provider: noaa
-    status: planned
+    status: available
     domain: weather-models
-    target: '0.15'
+    since: "0.15"
     title: HRRR Forecast Model Output
     description: >-
-      High-Resolution Rapid Refresh 3 km hourly forecasts in GRIB2 from the
-      public noaa-hrrr-bdp-pds S3 bucket, laid out as hrrr.YYYYMMDD/conus/
-      with one file per cycle and forecast hour. Large files; cycle and
-      forecast-hour selection are essential.
-    keywords: [forecast, model, hrrr, grib2, weather, nwp]
+      High-Resolution Rapid Refresh 3 km CONUS forecasts in GRIB2 from the
+      anonymous noaa-hrrr-bdp-pds S3 bucket, one whole file per run and
+      forecast hour. Select a run by initialization window and cycle hour,
+      the forecast hours, and the surface, pressure-level, or native file
+      variant. Files are 150 MB to 750 MB; fields are selected after download
+      with the GRIB2 reader, not by the server.
+    keywords: [forecast, model, hrrr, grib2, weather, nwp, cape, helicity, convective]
     protocol: s3
     homepage: https://registry.opendata.aws/noaa-hrrr-pds/
     license: US Government Work (public domain)
+    temporal_extent: { start: "2014-07-30T18:00:00Z" }
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+    adapter: usdata.providers.noaa.hrrr:Hrrr
 
   - id: noaa:gfs
     provider: noaa
@@ -852,6 +856,16 @@ catalog:
     reader_extra: netcdf
     examples:
     - examples/glm-flashes/README.md
+  noaa:hrrr:
+    guide: docs/providers/noaa-hrrr.md
+    summary: HRRR model output
+    formats:
+    - GRIB2
+    selection: Whole CONUS files by run initialization window, cycle hour, forecast hours, and file variant, at most one day
+    inputs: Both timestamps, cycle, and forecast_hour
+    reader_extra: null
+    examples:
+    - examples/hrrr-environment/README.md
   noaa:storm-events:
     guide: docs/providers/noaa-storm-events.md
     summary: Storm Events details
