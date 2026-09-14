@@ -15,6 +15,7 @@ NOAA access is anonymous.
 | `goes-abi` | [GOES imagery](noaa-goes.md) | Whole single-channel CONUS scenes |
 | `goes-glm` | [GOES lightning detections](noaa-glm.md) (v0.15.0) | Whole 20-second detection files, at most a day |
 | `storm-events` | [Storm Events](noaa-storm-events.md) | Whole annual details archives |
+| `spc-tornado-reports` | [SPC tornado reports](noaa-spc-tornado.md) (v0.15.0) | Whole annual, half-decade, or decade files |
 | `hurdat2` | [Tropical cyclone best tracks](noaa-hurdat2.md) (v0.12.0) | One whole basin file per revision |
 | `coastwatch-sst` | [Sea-surface temperature](noaa-coastwatch.md) | Spatial and temporal CSV subsets |
 | `coops-water-levels` | [Observed coastal water levels](noaa-coops.md) (v0.10.0) | One station and datum, at most 28 days |
@@ -40,6 +41,10 @@ See [GOES GLM lightning detections](noaa-glm.md).
 ## Storm Events annual details
 
 See [Storm Events annual details](noaa-storm-events.md).
+
+## SPC tornado reports
+
+See [SPC tornado reports](noaa-spc-tornado.md).
 
 ## HURDAT2 best tracks
 

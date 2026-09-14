@@ -161,6 +161,28 @@ datasets:
     capabilities: { spatial_subset: false, temporal_subset: false, variable_subset: false }
     adapter: usdata.providers.noaa.storm_events:StormEvents
 
+  - id: noaa:spc-tornado-reports
+    provider: noaa
+    status: available
+    domain: severe-weather
+    since: "0.15"
+    title: SPC Tornado Reports
+    description: >-
+      The Storm Prediction Center's tornado database since 1950 as plain CSV:
+      one row per tornado or state/county segment with date, local time, EF
+      or F rating, injuries, fatalities, loss, start and end coordinates, path
+      length and width, and FIPS codes. Whole files linked from the SPC page:
+      annual from 2008, half-decade for 2000-2007, decade for 1950-1999.
+      Stable names revised in place; no server-side row, location, or
+      variable subsetting.
+    keywords: [tornado, spc, severe weather, storm reports, tracks, ef scale, fujita]
+    protocol: http
+    homepage: https://www.spc.noaa.gov/wcm/#data
+    license: US Government Work (public domain)
+    temporal_extent: { start: "1950-01-01T00:00:00Z" }
+    capabilities: { spatial_subset: false, temporal_subset: false, variable_subset: false }
+    adapter: usdata.providers.noaa.spc:SpcTornadoReports
+
   - id: noaa:hurdat2
     provider: noaa
     status: available
@@ -810,6 +832,16 @@ catalog:
     examples:
     - examples/storm-events/example.ipynb
     - examples/event-context/example.ipynb
+  noaa:spc-tornado-reports:
+    guide: docs/providers/noaa-spc-tornado.md
+    summary: SPC tornado database
+    formats:
+    - CSV
+    selection: Whole annual, half-decade, or decade files; filter rows locally after downloading
+    inputs: Both dates (selects the files covering those years)
+    reader_extra: pandas
+    examples:
+    - examples/spc-tornadoes/README.md
   noaa:hurdat2:
     guide: docs/providers/noaa-hurdat2.md
     summary: Tropical cyclone best tracks

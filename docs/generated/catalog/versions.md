@@ -37,6 +37,7 @@ Move a dataset between phases by editing its `target` in the registry.
 **Implemented, unreleased (planned 0.15)**
 
 - [`noaa:goes-glm`](noaa.md#noaagoes-glm) GOES Geostationary Lightning Mapper · Source only
+- [`noaa:spc-tornado-reports`](noaa.md#noaaspc-tornado-reports) SPC Tornado Reports · Source only
 
 **Included since 0.14**
 

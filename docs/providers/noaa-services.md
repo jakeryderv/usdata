@@ -154,6 +154,39 @@ of hard-coding it. The [design decision](../adr/0010-storm-events-annual-archive
 records the annual-file and compression contract. The notebook downloads one 2024 archive (~13 MB compressed),
 then filters locally; neither the test nor example downloads all archive years.
 
+## SPC tornado reports
+
+Probes on 2026-09-14 UTC against `https://www.spc.noaa.gov/wcm/`. The data
+directory itself returns HTTP 403 and no index, so the adapter discovers files
+from the page's links instead of a directory listing. All files answered
+`text/csv` over anonymous HTTPS:
+
+| File | Size | Last-Modified |
+| --- | --- | --- |
+| `data/2025_torn.csv` | 217,624 bytes | 2026-04-24 |
+| `data/2024_torn.csv` | 230,094 bytes (1,873 rows) | 2025-05-13 |
+| `data/2023_torn.csv` | 166,684 bytes | 2024-07-17 |
+| `data/2008_torn.csv` | 193,676 bytes | epoch placeholder |
+| `data/2005-2007_torn.csv` | 3,525 rows | epoch placeholder |
+| `data/2000-2004_torn.csv` | 728,228 bytes | epoch placeholder |
+| `data/50-59_torn.csv` … `90-99_torn.csv` | 4,905 to 12,276 rows | epoch placeholder |
+| `data/1950-2025_actual_tornadoes.csv` | 9,023,445 bytes | 2026-04-24 |
+| `data/1950-2025_all_tornadoes.csv` | 9,219,030 bytes | 2026-04-24 |
+| `data/1950-2025_torn.csv.zip` | 2,028,149 bytes | 2026-04-24 |
+
+Per-year files exist for 2008 onward; earlier years are only in decade and
+half-decade files. `2026_torn.csv` and any single-year file before 2008 return
+HTTP 404. The all-years files embed the last year in their name, so
+`1950-2024_*` disappeared when `1950-2025_*` was published; per-year and decade
+names are stable and their bytes change in place (the 2024 file was modified
+after the 2025 file appeared, and the page prints an update date beside each
+link). Every file from 1950 through 2024 shares the 29-column header from the
+[format specification](https://www.spc.noaa.gov/wcm/data/SPC_severe_database_description.pdf);
+the 2025 file appends `edat` and `etime`. In 2024, `tz` was `3` on every row,
+`sg` was `1` on 1,791 rows and `2` on 81, one row carried `-9`, and `mag` ranged
+from `-9` to `4`. The specification is a scanned PDF, so its column definitions
+are restated in the [dataset guide](noaa-spc-tornado.md).
+
 ## HURDAT2 best tracks
 
 Probes on 2026-09-12 UTC listed the NHC data directory and fetched both current

@@ -30,6 +30,10 @@ observed month against them (available since v0.11.0).
 days of Local Climatological Data for one airport and checks the hourly
 readings against NCEI's daily summary (available since v0.14.0).
 
+[One year of SPC tornado reports](https://usdata.dev/examples/spc-tornadoes/) pulls the
+Storm Prediction Center's 2024 tornado file and counts tornadoes by rating,
+keeping one row per tornado (available since v0.15.0).
+
 [Atlantic hurricane best tracks](https://usdata.dev/examples/hurdat2/) fetches the whole HURDAT2
 Atlantic file and reads it into one row per track point (available since v0.12.0).
 
