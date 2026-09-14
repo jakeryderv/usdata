@@ -1,5 +1,10 @@
 [
   {
+    "slug": "radar-products",
+    "title": "Which derived radar products did KTLX publish around a tornado report?",
+    "summary": "Pull thirty minutes of NEXRAD Level III mesocyclone, storm-track, and echo-top files, lock them, and see that they are stored without a reader."
+  },
+  {
     "slug": "storm-surge",
     "title": "How high was Hurricane Helene's storm surge at Cedar Key?",
     "summary": "Subtract CO-OPS tide predictions from observed water levels to isolate the surge, find its peak, and time it against the HURDAT2 landfall."
