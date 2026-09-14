@@ -16,6 +16,7 @@ from usdata.providers import Provider, load_adapter
 from usdata.providers.base import QueryError
 from usdata.providers.noaa.coastwatch import BASE, DATASET
 from usdata.providers.noaa.hurdat2 import DIRECTORY_URL as HURDAT_URL
+from usdata.providers.noaa.spc import PAGE_URL as SPC_PAGE
 from usdata.providers.noaa.storm_events import DIRECTORY_URL
 from usdata.providers.usgs.daily import ITEMS_URL
 from usdata.query import build_query
@@ -36,6 +37,7 @@ CASES = {
     "noaa:goes-glm": {"satellite": 16},
     "noaa:coastwatch-sst": {"bbox": (-80.08, 30.02, -80.02, 30.08)},
     "noaa:storm-events": {},
+    "noaa:spc-tornado-reports": {},
     "noaa:hurdat2": {"basin": "pacific"},
     "usgs:water-daily": {"sites": "07164500"},
 }
@@ -91,6 +93,11 @@ def contract_transport(
         if str(request.url) == HURDAT_URL:
             return httpx.Response(
                 200, text=f'<table><tr><td><a href="{HURDAT_NAME}">x</a></td></tr></table>'
+            )
+        if str(request.url) == SPC_PAGE:
+            return httpx.Response(
+                200,
+                text='<table><tr><td><a href="data/2024_torn.csv">x (0.2 mb)</a></td></tr></table>',
             )
         if str(request.url) == DIRECTORY_URL:
             return httpx.Response(

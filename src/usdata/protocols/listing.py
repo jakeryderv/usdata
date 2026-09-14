@@ -26,7 +26,9 @@ class _Index(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if tag == "tr":
+            self._end_row()  # Sloppy HTML may open a row without closing the last one.
             self._in_row, self._cells, self._name, self._name_cell = True, [], None, None
+            self._in_cell = False
         elif tag == "td":
             self._cells.append("")
             self._in_cell = True
@@ -40,18 +42,21 @@ class _Index(HTMLParser):
                 self.entries.append((href, None))
 
     def handle_data(self, data: str) -> None:
-        if self._in_cell:
+        if self._in_cell and self._cells:
             self._cells[-1] += data
 
     def handle_endtag(self, tag: str) -> None:
         if tag == "td":
             self._in_cell = False
         elif tag == "tr":
-            if self._name is not None:
-                later = self._cells[(self._name_cell or 0) + 1 :]
-                sizes = [c.strip() for c in later if c.strip().isascii() and c.strip().isdigit()]
-                self.entries.append((self._name, int(sizes[0]) if sizes else None))
-            self._in_row = False
+            self._end_row()
+
+    def _end_row(self) -> None:
+        if self._in_row and self._name is not None:
+            later = self._cells[(self._name_cell or 0) + 1 :]
+            sizes = [c.strip() for c in later if c.strip().isascii() and c.strip().isdigit()]
+            self.entries.append((self._name, int(sizes[0]) if sizes else None))
+        self._in_row, self._name = False, None
 
 
 def directory_entries(html: str, pattern: re.Pattern[str]) -> list[tuple[str, int | None]]:

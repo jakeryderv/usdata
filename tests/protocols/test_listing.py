@@ -28,3 +28,12 @@ def test_anchors_outside_table_rows_have_no_size() -> None:
 def test_size_is_not_taken_from_cells_before_the_name() -> None:
     page = '<table><tr><td>42</td><td><a href="data-2021.csv.gz">x</a></td><td>-</td></tr></table>'
     assert directory_entries(page, NAME) == [("data-2021.csv.gz", None)]
+
+
+def test_unclosed_cells_and_cells_outside_rows_do_not_break_parsing() -> None:
+    page = (
+        '<table><tr><td><a href="data-2020.csv.gz">x</a><b>note'
+        '<tr><td><a href="data-2021.csv.gz">y</a></td><td>7</td></tr></table>'
+        "<td>stray</td>"
+    )
+    assert directory_entries(page, NAME) == [("data-2020.csv.gz", None), ("data-2021.csv.gz", 7)]

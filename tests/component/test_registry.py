@@ -25,8 +25,9 @@ def test_get_unknown_raises(registry: Registry) -> None:
 
 
 def test_search_ranks_by_keyword(registry: Registry) -> None:
-    results = registry.search(Query(text="tornado radar"))
+    results = registry.search(Query(text="radar reflectivity"))
     assert results[0].dataset.id == "noaa:nexrad-level2"
+    assert registry.search(Query(text="tornado"))[0].dataset.id == "noaa:spc-tornado-reports"
 
 
 def test_search_hides_planned_unless_asked(registry: Registry) -> None:

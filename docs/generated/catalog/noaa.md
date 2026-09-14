@@ -15,6 +15,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | <span id="noaagsoy"></span>[Annual station climate](noaa/gsoy.md) | Released | CSV | Complete UTC calendar years touched by the query; station and element filters |
 | <span id="noaalcd"></span>[Hourly airport observations](noaa/lcd.md) | Released | CSV | Every report on whole calendar days per station; optional column filters |
 | <span id="noaastorm-events"></span>[Storm Events details](noaa/storm-events.md) | Released | gzip CSV | Whole annual archives; filter rows locally after downloading |
+| <span id="noaaspc-tornado-reports"></span>[SPC tornado database](noaa/spc-tornado-reports.md) | Source only | CSV | Whole annual, half-decade, or decade files; filter rows locally after downloading |
 | <span id="noaanexrad-level2"></span>[NEXRAD radar scans](noaa/nexrad-level2.md) | Released | NEXRAD Level II | Whole radar scans by site and inclusive UTC scan-start time |
 | <span id="noaagoes-abi"></span>[GOES CONUS imagery](noaa/goes-abi.md) | Released | NetCDF4 | Whole single-channel CONUS scenes by inclusive UTC scan-start time |
 | <span id="noaagoes-glm"></span>[GOES lightning detections](noaa/goes-glm.md) | Source only | NetCDF4 | Whole 20-second detection files by inclusive UTC file-start time, at most one day |
