@@ -37,45 +37,81 @@
         <p class="eyebrow">OPEN DATA · PYTHON SDK + CLI</p>
         <h1 id="title">Public science.<br />Reproducible inputs.</h1>
         <p class="intro">
-          Discover U.S. scientific datasets, fetch their files, and keep the
-          evidence behind your analysis. One Python SDK and CLI for supported
-          NOAA and USGS data.
+          usdata is for anyone who puts NOAA or USGS data into a paper, a model,
+          or a report and has to show where every number came from. One command
+          finds the dataset, one fetches the exact source file, one opens it, and
+          a small manifest lets anyone repeat the download and prove the bytes
+          match.
         </p>
         <div class="actions">
           <a class="button primary" href="https://docs.usdata.dev/"
             >Start with one dataset <span aria-hidden="true">↗</span></a
           >
-          <a
-            class="button"
-            href="/datasets/"
-            >Explore the catalog</a
-          >
+          <a class="button" href="/datasets/">Explore the catalog</a>
         </div>
         <div class="terminal">
           <span class="terminal-label">YOUR TERMINAL</span>
-          <pre><code>python -m pip install usdata
+          <pre><code>python -m pip install "usdata[pandas]"
 usdata search precipitation --location Oklahoma
-usdata info noaa:ghcn-daily</code></pre>
+usdata fetch noaa:ghcn-daily -p stations=USW00013967 --start 2024-05-06 --end 2024-05-07 --vars PRCP,TMAX
+usdata pull dataset.yaml && usdata verify dataset.yaml</code></pre>
         </div>
+      </section>
+      <section class="result" aria-labelledby="result-title">
+        <div>
+          <p class="eyebrow">ONE RESULT, END TO END</p>
+          <h2 id="result-title">How high was Hurricane Helene's storm surge at Cedar Key?</h2>
+          <p>
+            Three fetches: six-minute water levels and tide predictions for one
+            NOAA gauge, and the hurricane's best track. Subtracting the
+            predictions from the observations isolates the surge.
+          </p>
+          <dl class="figures">
+            <div><dt>Peak residual</dt><dd>3.15 m above the predicted tide</dd></div>
+            <div><dt>When</dt><dd>04:54 UTC, 27 September 2024, 1.7 h after landfall</dd></div>
+            <div><dt>Highest water</dt><dd>3.99 m above mean lower low water</dd></div>
+          </dl>
+          <p>
+            Every input is pinned. The notebook ends by deleting its cache,
+            restoring from the lockfile, and checking the checksums.
+          </p>
+          <pre class="evidence"><code>noaa:coops-water-levels
+Bytes: 28075; cache hit: False
+Checksum: sha256:431fade50c78a7f1ea1f4bf27f40a54fca8809d723d26eb5b4bd7c98623057b2
+
+$ usdata verify dataset.yaml
+all assets match dataset.lock.json</code></pre>
+          <a href="/examples/storm-surge/">Open the storm-surge example <span aria-hidden="true">→</span></a>
+        </div>
+        <figure>
+          <img
+            src="/examples/storm-surge/plot-9-0.png"
+            alt="Two panels: observed and predicted water level at Cedar Key over three days, and the residual between them peaking near 3.15 metres early on 27 September 2024."
+            width="700"
+            height="500"
+            loading="lazy"
+          />
+          <figcaption>Observed water level, predicted tide, and their difference at NOAA station 8727520, from the example's saved output.</figcaption>
+        </figure>
       </section>
       <section class="cards" aria-label="Workflows">
         <article>
           <span class="number">01</span>
           <h2>Find your source</h2>
           <p>
-            Browse supported datasets with explicit formats, selection rules,
-            and practical examples.
+            A curated catalog of 14 datasets you can fetch today and 25 more
+            planned, each with its formats, selection rules, and required inputs
+            stated up front.
           </p>
-          <a href="/datasets/"
-            >Browse datasets <span aria-hidden="true">→</span></a
-          >
+          <a href="/datasets/">Browse datasets <span aria-hidden="true">→</span></a>
         </article>
         <article>
           <span class="number">02</span>
-          <h2>Fetch and analyze</h2>
+          <h2>Fetch and open</h2>
           <p>
-            Download source files and open them locally with optional CSV,
-            radar, and NetCDF readers.
+            Download the source files unchanged, with a provenance sidecar
+            beside each one. Optional readers open CSV, radar, NetCDF, and GRIB2
+            into pandas or xarray.
           </p>
           <a href="https://docs.usdata.dev/guides/fetch-and-analyze/"
             >Follow the guide <span aria-hidden="true">→</span></a
@@ -85,8 +121,8 @@ usdata info noaa:ghcn-daily</code></pre>
           <span class="number">03</span>
           <h2>Keep the evidence</h2>
           <p>
-            Record queries, provenance, and checksums. Lock, restore, and verify
-            your analysis inputs.
+            A manifest names the query; a lockfile pins the bytes. Restore on
+            another machine, and find out when an agency quietly revises a file.
           </p>
           <a href="https://docs.usdata.dev/reference/manifests/"
             >Use a manifest <span aria-hidden="true">→</span></a
@@ -95,38 +131,25 @@ usdata info noaa:ghcn-daily</code></pre>
       </section>
       <section class="examples" aria-labelledby="examples-title">
         <div>
-          <p class="eyebrow">FROM SOURCE TO ANALYSIS</p>
-          <h2 id="examples-title">See it in practice</h2>
+          <p class="eyebrow">WORKED EXAMPLES</p>
+          <h2 id="examples-title">Questions with saved answers</h2>
           <p>
-            Was 2024 warmer or wetter than normal? Start with twelve months at Oklahoma City’s airport, then inspect the plots and exact inputs.
+            Each example is a notebook or manifest that ran against the live
+            services, with its outputs, plots, and exact inputs kept.
           </p>
         </div>
         <ul>
-          <li><a href="https://usdata.dev/examples/climate-anomalies/">2024 weather against climate normals <span aria-hidden="true">↗</span></a></li>
-          <li>
-            <a
-              href="https://usdata.dev/examples/weather-and-streamflow/"
-              >Weather and streamflow <span aria-hidden="true">↗</span></a
-            >
-          </li>
-          <li>
-            <a href="https://usdata.dev/examples/goes-imagery/"
-              >Satellite imagery <span aria-hidden="true">↗</span></a
-            >
-          </li>
-          <li>
-            <a href="https://usdata.dev/examples/coastal-water-levels/"
-              >Coastal water levels <span aria-hidden="true">↗</span></a
-            >
-          </li>
+          <li><a href="/examples/tornado-classification/">Which severe reports came with rotation and lightning? <span aria-hidden="true">↗</span></a></li>
+          <li><a href="/examples/climate-anomalies/">Was 2024 warmer or wetter than normal? <span aria-hidden="true">↗</span></a></li>
+          <li><a href="/examples/event-context/">What did radar and satellites show around a reported tornado? <span aria-hidden="true">↗</span></a></li>
+          <li><a href="/examples/weather-and-streamflow/">How can I preserve weather and streamflow inputs together? <span aria-hidden="true">↗</span></a></li>
+          <li><a href="/examples/">All 21 examples <span aria-hidden="true">→</span></a></li>
         </ul>
       </section>
       <p class="status">
-        <strong>Pre-alpha.</strong> Documentation follows the current source
-        checkout. Features marked <strong>Unreleased</strong> require a source
-        installation. See the
-        <a href="https://github.com/jakeryderv/usdata/blob/main/CHANGELOG.md">changelog</a> for published
-        versions.
+        <strong>Pre-alpha.</strong> Interfaces can change between minor
+        versions. The documentation describes the current source checkout and
+        marks anything not yet on PyPI as <strong>Unreleased</strong>.
       </p>
     </main>
     <footer class="wrap">

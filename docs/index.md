@@ -1,109 +1,86 @@
-# Start with one dataset
+# usdata
 
-usdata connects **discovery → fetch → local reading → reproducible inputs**.
-The registry tells you which datasets are supported; adapters translate your
-query to an upstream service; optional readers decode the downloaded format.
+One Python SDK and CLI for U.S. scientific data. Find a dataset, fetch its
+files unchanged, open them locally, and keep a record that lets anyone repeat
+the download and check the bytes. Supported sources today are NOAA and USGS.
 
-These docs describe this checkout, including features marked **Unreleased**.
-The walkthrough below works with the published package. For upcoming features,
-follow the [source installation](install.md#source-installation).
+## Four commands
 
-## Install and discover
+Search a curated catalog. Nothing is downloaded yet.
 
-Use an activated Python 3.11+ virtual environment:
-
-```sh
-python -m pip install "usdata[pandas]"
-usdata search precipitation --location Oklahoma
-usdata info noaa:ghcn-daily
+```console
+$ usdata search precipitation --location Oklahoma
+noaa:ghcn-daily       available  since 0.2     GHCN-Daily Station Observations
+noaa:climate-normals  available  since 0.11    U.S. Climate Normals 1991-2020
+noaa:gsom             available  since 0.7     Global Summary of the Month
+noaa:lcd              available  since 0.14    Local Climatological Data
+noaa:nexrad-level2    available  since 0.2     NEXRAD Level II Radar
+noaa:mrms             available  since 0.15    Multi-Radar Multi-Sensor (MRMS)
 ```
 
-Search is local and ranks a curated catalog. It does not query every agency's
-live catalog. Use the [searchable dataset browser](https://usdata.dev/datasets/)
-to compare formats, required inputs, and examples. Planned entries are not
-fetchable; see [provider coverage](providers/README.md).
+Fetch two days of one station's precipitation and maximum temperature. The
+file lands in a local cache with a provenance sidecar recording the source
+URL, retrieval time, and checksum.
 
-## Fetch a small station query
-
-```sh
-usdata fetch noaa:ghcn-daily -p stations=USW00013967 \
-    --start 2024-05-06 --end 2024-05-07 --vars PRCP,TMAX
+```console
+$ usdata fetch noaa:ghcn-daily -p stations=USW00013967 --start 2024-05-06 --end 2024-05-07 --vars PRCP,TMAX
+~/.cache/usdata/noaa/ghcn-daily/daily-summaries_2024-05-06_2024-05-07_e700cb60a834.csv	fetched	209 bytes
 ```
 
-Fetching needs network access. Files are cached under `~/.cache/usdata/` by
-default, with source URLs, retrieval timestamps and checksums in provenance sidecars.
-
-## Open the local result
-
-The pandas extra installed above opens CSV files. Run this in a Python script
-or interpreter in the same environment:
+Open it. The same query in Python returns the cached file, and the pandas
+extra reads it.
 
 ```python
 from usdata import build_query, get
 from usdata.fetch import fetch
 
-items = fetch(
-    get("noaa:ghcn-daily"),
-    build_query(
-        start="2024-05-06",
-        end="2024-05-07",
-        variables=["PRCP", "TMAX"],
-        stations="USW00013967",
-    ),
+query = build_query(
+    start="2024-05-06", end="2024-05-07", variables=["PRCP", "TMAX"], stations="USW00013967"
 )
-frame = items[0].open()
-print(frame.head())
+items = fetch(get("noaa:ghcn-daily"), query)
+print(items[0].open())
 ```
 
-Reading is local. CSV, radar, and NetCDF4 have separate optional extras; see
-[readers and their limits](reference/readers.md).
-
-## Preserve the inputs
-
-Save this as `dataset.yaml` to repeat the same station query:
-
-```yaml
-name: first-station
-sources:
-  - dataset: noaa:ghcn-daily
-    start: 2024-05-06
-    end: 2024-05-07
-    variables: [PRCP, TMAX]
-    params:
-      stations: USW00013967
+```text
+       STATION  LATITUDE  LONGITUDE  ELEVATION        DATE  PRCP  TMAX
+0  USW00013967  35.38843  -97.60035      389.9  2024-05-06  10.9  27.2
+1  USW00013967  35.38843  -97.60035      389.9  2024-05-07   0.0  26.7
 ```
 
-```sh
-usdata pull dataset.yaml
-usdata verify dataset.yaml
+Pin it. A manifest names the query; the first pull writes a lockfile with the
+checksum; verify compares local bytes against it without touching the network.
+
+```console
+$ usdata pull dataset.yaml
+1 asset(s); wrote dataset.lock.json
+$ usdata verify dataset.yaml
+all assets match dataset.lock.json
 ```
 
-The first pull writes `dataset.lock.json`; later pulls restore its pinned assets.
-To try restoration into a new cache, choose an empty directory:
+## How the pieces fit
 
-```sh
-usdata pull dataset.yaml --cache-dir restored-data
-usdata verify dataset.yaml --cache-dir restored-data
-```
+- **The registry** is a curated list of datasets with true endpoints and
+  capabilities. Search reads it locally; it never queries an agency catalog.
+- **An adapter** per dataset turns your query into the upstream service's own
+  requests and returns whole files, never rewritten.
+- **The cache** keeps those files with a provenance sidecar each. Adapters
+  cannot write to it; the core does.
+- **Readers** are optional extras that open a cached file into pandas or
+  xarray. Without one, you still have the file and its provenance.
+- **Manifests and lockfiles** make a query and its exact bytes repeatable, and
+  tell you when an agency revises a file underneath you.
 
-Keep the same manifest and lockfile. Pull downloads missing pinned files;
-verification checks local bytes without network access. Use the same cache
-directory for both commands. An upstream revision can cause restoration to fail
-with a checksum mismatch.
+## Where to go
 
-Commit the manifest and lockfile and back up the cached bytes. Lockfiles detect
-changed data but cannot recover an upstream version that is no longer available.
-See [manifest behavior](reference/manifests.md) before intentionally refreshing inputs.
-
-## Choose the next step
-
-| Goal | Read next |
-|---|---|
-| Explore query options and CLI workflows | [Fetch and analyze](guides/fetch-and-analyze.md) |
+| You want to | Read |
+| --- | --- |
+| Do the walkthrough above yourself, including restoring into a fresh cache | [Getting started](getting-started.md) |
+| Install with the right extras, or from source | [Install](install.md) |
+| Learn the query options and CLI workflows | [Fetch and analyze](guides/fetch-and-analyze.md) |
+| See a whole analysis with saved outputs | [Examples](https://usdata.dev/examples/) |
+| Choose a dataset and learn its quirks | [Catalog](generated/catalog/index.md) and [provider notes](providers/README.md) |
 | Repeat an analysis with pinned inputs | [Manifests and lockfiles](reference/manifests.md) |
-| Learn through saved data and plots | [Runnable notebooks](https://usdata.dev/examples/) |
-| Understand a provider's query limits | [Provider access notes](providers/README.md) |
-| Find an exact Python argument | [Python reference](reference/api.md) |
+| Find an exact Python argument | [Python API](reference/api.md) |
 
-Installation options, extras, and the source checkout are on the
-[Install](install.md) page.
+These pages describe the current source checkout. Anything marked
+**Unreleased** is not yet on PyPI; see [Install](install.md#source-installation).

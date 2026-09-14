@@ -34,7 +34,8 @@ theme:
 nav:
 - Website: https://usdata.dev/
 - Start here:
-  - Start here: index.md
+  - Overview: index.md
+  - Getting started: getting-started.md
   - Install: install.md
 - Guides:
   - Fetch and analyze: guides/fetch-and-analyze.md

@@ -1,6 +1,6 @@
 # Fetch and analyze data
 
-New to usdata? Start with the [one-dataset walkthrough](../index.md).
+New to usdata? Start with the [getting-started walkthrough](../getting-started.md).
 These recipes cover the next common tasks. Dataset-specific selectors and
 scientific limits live in the [provider guides](../providers/README.md).
 

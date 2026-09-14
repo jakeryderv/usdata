@@ -168,6 +168,66 @@ code {
   padding: 15px 0;
   text-decoration: none;
 }
+.result {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+  margin-block: 24px 72px;
+  padding-top: 56px;
+  border-top: 1px solid var(--line);
+}
+.result h2 {
+  font-size: 1.7rem;
+  letter-spacing: -0.03em;
+  margin: 12px 0 16px;
+}
+.result p {
+  color: var(--muted);
+}
+.figures {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0;
+}
+.figures div {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: 12px;
+  border-left: 2px solid var(--accent);
+  padding-left: 14px;
+}
+.figures dt {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.figures dd {
+  margin: 0;
+  font-weight: 600;
+}
+.evidence {
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  margin: 20px 0;
+}
+.result figure {
+  margin: 0;
+}
+.result img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+}
+.result figcaption {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 10px;
+}
 .status {
   color: var(--muted);
   font-size: 0.82rem;
@@ -224,8 +284,13 @@ footer {
     font-size: 1rem;
   }
   .cards,
-  .examples {
+  .examples,
+  .result {
     grid-template-columns: 1fr;
+  }
+  .figures div {
+    grid-template-columns: 1fr;
+    gap: 2px;
   }
   .examples {
     gap: 8px;
