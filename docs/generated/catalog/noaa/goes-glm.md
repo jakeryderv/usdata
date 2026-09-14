@@ -12,7 +12,7 @@ GOES Geostationary Lightning Mapper.
 - Selection: Whole 20-second detection files by inclusive UTC file-start time, at most one day
 - Required inputs: Satellite and both timestamps
 - Open locally: `usdata[netcdf]` · [Reader guide](../../../reference/readers.md)
-- Examples: [glm flashes](https://usdata.dev/examples/glm-flashes/)
+- Examples: [glm flashes](https://usdata.dev/examples/glm-flashes/), [tornado classification](https://usdata.dev/examples/tornado-classification/)
 
 ## Parameters
 

@@ -171,6 +171,10 @@
         {
           "title": "Event context",
           "url": "https://usdata.dev/examples/event-context/"
+        },
+        {
+          "title": "Tornado classification",
+          "url": "https://usdata.dev/examples/tornado-classification/"
         }
       ]
     },
@@ -240,6 +244,10 @@
         {
           "title": "Event context",
           "url": "https://usdata.dev/examples/event-context/"
+        },
+        {
+          "title": "Tornado classification",
+          "url": "https://usdata.dev/examples/tornado-classification/"
         }
       ]
     },
@@ -275,6 +283,10 @@
         {
           "title": "Mrms rotation",
           "url": "https://usdata.dev/examples/mrms-rotation/"
+        },
+        {
+          "title": "Tornado classification",
+          "url": "https://usdata.dev/examples/tornado-classification/"
         }
       ]
     },
@@ -379,6 +391,10 @@
         {
           "title": "Glm flashes",
           "url": "https://usdata.dev/examples/glm-flashes/"
+        },
+        {
+          "title": "Tornado classification",
+          "url": "https://usdata.dev/examples/tornado-classification/"
         }
       ]
     },

@@ -12,7 +12,7 @@ Multi-Radar Multi-Sensor (MRMS).
 - Selection: Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day
 - Required inputs: Product name and both timestamps
 - Open locally: `usdata[grib]` · [Reader guide](../../../reference/readers.md)
-- Examples: [mrms rotation](https://usdata.dev/examples/mrms-rotation/)
+- Examples: [mrms rotation](https://usdata.dev/examples/mrms-rotation/), [tornado classification](https://usdata.dev/examples/tornado-classification/)
 
 ## Parameters
 

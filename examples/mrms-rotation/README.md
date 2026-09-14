@@ -1,9 +1,12 @@
 # Rotation tracks around a reported tornado
 
 Available since v0.15.0. The [manifest](dataset.yaml) requests twenty minutes
-of MRMS mid-level rotation tracks through `noaa:mrms`, from 20:00 to 20:20 UTC
-on 2024-05-06, around the Oklahoma Storm Events report used by the
-[event context example](https://usdata.dev/examples/event-context/). MRMS
+of MRMS mid-level rotation tracks through `noaa:mrms`, from 04:30 to 04:50 UTC
+on 2024-05-07, around Oklahoma Storm Events tornado report 1184052 (22:39 CST
+on May 6), the case used by the
+[event context](https://usdata.dev/examples/event-context/) and
+[tornado classification](https://usdata.dev/examples/tornado-classification/)
+examples. MRMS
 writes one file every two minutes, so the window is eleven files of roughly
 100 kB each, about 1 MB in total. Each file is the whole CONUS grid; the
 manifest cannot crop to Oklahoma, so the snippet below does that locally.
@@ -31,7 +34,7 @@ manifest = Path("dataset.yaml")
 for item in pull(manifest).fetched:
     grid = item.open()
     (name,) = list(grid.data_vars)
-    shear = grid[name].sel(latitude=slice(36.5, 34.5), longitude=slice(261.5, 263.5))
+    shear = grid[name].sel(latitude=slice(35.8, 35.0), longitude=slice(262.0, 263.0))
     values = shear.where(shear >= 0)
     peak = values.max().item()
     where = values.argmax(dim=("latitude", "longitude"))
