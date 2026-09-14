@@ -843,7 +843,7 @@ catalog:
     - GRIB2 (gzipped)
     selection: Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day
     inputs: Product name and both timestamps
-    reader_extra: null
+    reader_extra: grib
     examples:
     - examples/mrms-rotation/README.md
   noaa:goes-glm:

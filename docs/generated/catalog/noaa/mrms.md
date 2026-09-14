@@ -11,7 +11,7 @@ Multi-Radar Multi-Sensor (MRMS).
 - Files: GRIB2 (gzipped)
 - Selection: Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day
 - Required inputs: Product name and both timestamps
-- Open locally: Local files; no bundled reader for this format
+- Open locally: `usdata[grib]` · [Reader guide](../../../reference/readers.md)
 - Examples: [mrms rotation](https://usdata.dev/examples/mrms-rotation/)
 
 ## Parameters
