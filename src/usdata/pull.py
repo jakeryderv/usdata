@@ -20,7 +20,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 from usdata import __version__, _progress, provenance
-from usdata._fetch import ChecksumMismatch, FetchedAsset, _fetch_asset, fetch
+from usdata._fetch import ChecksumMismatch, FetchedAsset, _fetch_asset, _fetch_with
 from usdata.cache import asset_path, sha256_file
 from usdata.manifest import LockedAsset, Lockfile, Manifest, lockfile_path
 from usdata.providers import Provider, load_adapter
@@ -92,11 +92,22 @@ def _load(manifest_path: Path, registry: Registry) -> Manifest:
     return manifest
 
 
-def _check_params(manifest: Manifest, registry: Registry) -> None:
-    """Validate every source's parameters up front, so a bad one fails before any download."""
+def _checked_adapters(
+    manifest: Manifest, registry: Registry, stack: ExitStack
+) -> dict[str, Provider]:
+    """Open one adapter per distinct dataset and validate every source's parameters through it.
+
+    The whole manifest is checked before the first listing, so a bad source fails
+    before any download; each adapter stays open on ``stack`` for the fetches that
+    follow, and sources sharing a dataset share its adapter.
+    """
+    adapters: dict[str, Provider] = {}
     for source in manifest.sources:
-        with load_adapter(registry.get(source.dataset)) as adapter:
-            adapter.validate_params(source.to_query())
+        dataset = registry.get(source.dataset)
+        if dataset.id not in adapters:
+            adapters[dataset.id] = stack.enter_context(load_adapter(dataset))
+        adapters[dataset.id].validate_params(source.to_query())
+    return adapters
 
 
 def resolve(
@@ -105,21 +116,22 @@ def resolve(
     """Resolve every source through its adapter, fetch, and write a fresh lockfile."""
     reg = registry or default_registry()
     manifest = _load(manifest_path, reg)
-    _check_params(manifest, reg)
     fetched: list[FetchedAsset] = []
     locked: list[LockedAsset] = []
-    for index, source in enumerate(manifest.sources, start=1):
-        dataset = reg.get(source.dataset)
-        items = fetch(dataset, source.to_query(), root=root)
-        if not items and not source.allow_empty:
-            raise EmptySource(
-                f"source {index} ({dataset.id}) matched no assets; "
-                "check the query or set allow_empty: true for this source"
-            )
-        for item in items:
-            fetched.append(item)
-            pinned = item.asset.model_copy(update={"checksum": item.provenance.checksum})
-            locked.append(LockedAsset(asset=pinned, provenance=item.provenance))
+    with ExitStack() as stack:
+        adapters = _checked_adapters(manifest, reg, stack)
+        for index, source in enumerate(manifest.sources, start=1):
+            dataset = reg.get(source.dataset)
+            items = _fetch_with(adapters[dataset.id], dataset, source.to_query(), root=root)
+            if not items and not source.allow_empty:
+                raise EmptySource(
+                    f"source {index} ({dataset.id}) matched no assets; "
+                    "check the query or set allow_empty: true for this source"
+                )
+            for item in items:
+                fetched.append(item)
+                pinned = item.asset.model_copy(update={"checksum": item.provenance.checksum})
+                locked.append(LockedAsset(asset=pinned, provenance=item.provenance))
     lock = Lockfile(
         manifest=manifest.name,
         manifest_checksum=sha256_file(manifest_path),

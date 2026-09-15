@@ -124,11 +124,23 @@ def fetch_asset(
         return _fetch_asset(dataset, asset, adapter, root=root, force=force)
 
 
+def _fetch_with(
+    adapter: Provider,
+    dataset: Dataset,
+    query: Query,
+    *,
+    root: Path | None = None,
+    force: bool = False,
+) -> list[FetchedAsset]:
+    """Run the loop on an adapter the caller opened, so one adapter can serve many queries."""
+    assets = adapter.list_assets(query)
+    _progress.batch([asset.size for asset in assets])
+    return [_fetch_asset(dataset, a, adapter, root=root, force=force) for a in assets]
+
+
 def fetch(
     dataset: Dataset, query: Query, *, root: Path | None = None, force: bool = False
 ) -> list[FetchedAsset]:
     """Resolve and fetch a query, sharing one adapter and closing its owned resources."""
     with load_adapter(dataset) as adapter:
-        assets = adapter.list_assets(query)
-        _progress.batch([asset.size for asset in assets])
-        return [_fetch_asset(dataset, a, adapter, root=root, force=force) for a in assets]
+        return _fetch_with(adapter, dataset, query, root=root, force=force)
