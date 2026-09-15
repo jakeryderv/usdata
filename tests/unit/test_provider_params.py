@@ -57,7 +57,7 @@ DATASET = Dataset(
 
 
 class Sampler(Provider):
-    """A migrated adapter: it declares a model and parses through it."""
+    """An ordinary adapter: it declares a model and parses through it."""
 
     params_model = Sample
 
@@ -69,10 +69,22 @@ class Sampler(Provider):
         return dest
 
 
-class Handwritten(Provider):
-    """An adapter that has not migrated: it keeps its own mapping and unknown-key check."""
+class Overriding(Provider):
+    """An adapter that declares a model and a mapping: the derived mapping still wins."""
 
+    params_model = Sample
     accepted_params: ClassVar[Mapping[str, str]] = {"station": "Station id."}
+
+    def list_assets(self, query: Query) -> list[Asset]:
+        self.parse_params(query, Sample)
+        return []
+
+    def fetch(self, asset: Asset, dest: Path) -> Path:
+        return dest
+
+
+class Unparameterized(Provider):
+    """An adapter that takes no parameters: it declares no model, so it accepts no key."""
 
     def list_assets(self, query: Query) -> list[Asset]:
         self.check_params(query)
@@ -170,14 +182,16 @@ def test_upper_string_list_rejects_non_text_values(raw) -> None:
     )
 
 
-def test_an_optional_upper_string_list_separates_absent_from_empty_or_null() -> None:
-    """Leaving the key out is the only way to mean "no value"; null and "" stay errors."""
+def test_an_optional_upper_string_list_reads_an_explicit_null_as_not_given() -> None:
+    """A null is the manifest's way of leaving a key out; only an empty selection is wrong."""
     assert parse(cycle=0, hours=1).site is None
+    assert parse(cycle=0, hours=1, site=None).site is None
     assert parse(cycle=0, hours=1, site="ktlx").site == ["KTLX"]
-    assert error(cycle=0, hours=1, site=None) == (
+    assert error(cycle=0, hours=1, site="") == "site must not be empty"
+    assert error(cycle=0, hours=1, site=[]) == "site must not be empty"
+    assert error(cycle=0, hours=1, site=7) == (
         "site must be text: one value, a list, or a comma-separated string"
     )
-    assert error(cycle=0, hours=1, site="") == "site must not be empty"
 
 
 def test_choice_names_the_accepted_values() -> None:
@@ -227,13 +241,29 @@ def test_described_params_requires_a_description_per_field() -> None:
         described_params(Undescribed)
 
 
-def test_validate_params_covers_both_declaration_forms() -> None:
+def test_a_declared_model_overrides_a_hand_written_mapping() -> None:
+    """The model is the only form, so a mapping written in the class body does not survive."""
+    assert dict(Overriding.accepted_params) == dict(Sampler.accepted_params)
+    assert "station" not in Overriding.accepted_params
+    with pytest.raises(QueryError, match="unsupported test:params params: station"):
+        Overriding(DATASET).list_assets(Query(params={"station": "anything"}))
+
+
+def test_an_adapter_without_a_model_accepts_no_params() -> None:
+    """``params_model = None`` means no parameters, and every key is named as unsupported."""
+    assert dict(Unparameterized.accepted_params) == {}
+    Unparameterized(DATASET).check_params(Query())
+    with pytest.raises(QueryError, match="unsupported test:params params: station"):
+        Unparameterized(DATASET).check_params(Query(params={"station": "anything"}))
+
+
+def test_validate_params_parses_a_model_and_rejects_keys_without_one() -> None:
     Sampler(DATASET).validate_params(Query(params={"cycle": 0, "hours": 1}))
     with pytest.raises(QueryError, match="cycle must be an integer"):
         Sampler(DATASET).validate_params(Query(params={"cycle": 99, "hours": 1}))
-    Handwritten(DATASET).validate_params(Query(params={"station": "anything"}))
+    Unparameterized(DATASET).validate_params(Query())
     with pytest.raises(QueryError, match="unsupported test:params params: typo"):
-        Handwritten(DATASET).validate_params(Query(params={"typo": "x"}))
+        Unparameterized(DATASET).validate_params(Query(params={"typo": "x"}))
 
 
 def test_params_error_keeps_a_messages_own_field_name() -> None:

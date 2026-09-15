@@ -83,6 +83,18 @@ def test_site_selection_rules(adapter: NexradLevel2) -> None:
         chosen(adapter, build_query(site="XXXX"))
 
 
+def test_an_explicit_null_site_selects_by_location(adapter: NexradLevel2) -> None:
+    """``site:`` with no value in a manifest means "not given", so the bbox still selects."""
+    ok = build_query(location="ok").bbox
+    assert ok is not None
+    inside = [s.id for s in sites.sites_in(ok)]
+    assert chosen(adapter, build_query(location="ok", site=None)) == inside
+    assert chosen(adapter, build_query(location="ok", sites=None)) == inside
+    assert chosen(adapter, build_query(location="ok", site=None, sites=None)) == inside
+    # An explicit null is not a selection, so it does not collide with nearest either.
+    assert len(chosen(adapter, build_query(lat=35.39, lon=-97.60, site=None, nearest=3))) == 3
+
+
 def test_list_assets_spans_days_filters_window_and_paginates(adapter: NexradLevel2) -> None:
     q = build_query(site="KTLX", start="2024-05-06T23:50", end="2024-05-07T00:20")
     d1, d2 = "2024/05/06/KTLX/", "2024/05/07/KTLX/"
@@ -158,7 +170,6 @@ def test_fetch_downloads_via_https(tmp_path: Path, adapter: NexradLevel2) -> Non
         ({"sites": ""}, "sites must not be empty"),
         ({"sites": " , "}, "sites must not be empty"),
         ({"sites": []}, "sites must not be empty"),
-        ({"sites": None}, "sites must be text"),
         ({"sites": [123]}, "sites must be text"),
         ({"sites": 123}, "sites must be text"),
         ({"site": 123}, "site must be text"),

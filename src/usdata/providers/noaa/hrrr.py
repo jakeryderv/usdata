@@ -145,7 +145,6 @@ class ModelRuns(_HttpProvider):
 
     def list_assets(self, query: Query) -> list[Asset]:
         """One asset per requested forecast hour of each run initialized inside the window."""
-        self.check_params(query)
         self.reject(query, "bbox", "text", "variables", hint=self.hint)
         start, end = self.utc_window(query)
         if end - start > MAX_WINDOW:

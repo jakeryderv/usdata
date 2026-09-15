@@ -85,9 +85,9 @@ class Provider(ABC):
     """One adapter per dataset. Translates a normalized query into concrete assets.
 
     ``list_assets`` implementations validate with the shared helpers before any
-    transport: ``parse_params`` (or ``check_params`` where no parameter model is
-    declared yet) for provider-specific keys, ``reject`` for query fields the
-    source cannot honour, and ``utc_window`` for the time bounds.
+    transport: ``parse_params`` for provider-specific keys, or ``check_params``
+    for an adapter that accepts none; ``reject`` for query fields the source
+    cannot honour; and ``utc_window`` for the time bounds.
     Every adapter then reports the same errors for the same mistakes, and no
     query field is silently ignored.
     """
@@ -95,26 +95,26 @@ class Provider(ABC):
     params_model: ClassVar[type[BaseModel] | None] = None
     """The pydantic model declaring this adapter's ``query.params``, or ``None`` for no params.
 
-    Declaring one is the current form: ``parse_params`` validates against it and
-    returns the typed parameters, and ``accepted_params`` is derived from its
-    fields and their descriptions. Adapters that still hand-parse ``query.params``
-    leave this ``None`` and declare ``accepted_params`` themselves.
+    The model is the only declaration form: ``parse_params`` validates against it
+    and returns the typed parameters, and ``accepted_params`` is derived from its
+    fields and their descriptions. ``None`` means the adapter takes no parameters
+    at all, so it accepts no key.
     """
 
     accepted_params: ClassVar[Mapping[str, str]] = MappingProxyType({})
     """Accepted ``query.params`` keys, each mapped to a one-line description.
 
     This is the adapter's statement of what it accepts: ``list_assets`` rejects
-    every key outside it, and ``usdata info`` prints it. A declared
-    ``params_model`` fills it in; adapters without one write it out, and
-    subclasses that extend a parent's set spread it, as
-    ``{**Parent.accepted_params, "extra": "..."}``.
+    every key outside it, and ``usdata info`` prints it. It is always derived
+    from ``params_model`` and never written by hand, so it is empty exactly when
+    no model is declared; a subclass extends its parent's parameters by
+    subclassing the parent's model.
     """
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         """Derive ``accepted_params`` from a declared model, so one declaration feeds both."""
         super().__init_subclass__(**kwargs)
-        if cls.params_model is not None and "accepted_params" not in cls.__dict__:
+        if cls.params_model is not None:
             cls.accepted_params = described_params(cls.params_model)
 
     def __init__(self, dataset: Dataset) -> None:
@@ -136,7 +136,11 @@ class Provider(ABC):
         return None
 
     def check_params(self, query: Query) -> None:
-        """Reject every ``query.params`` key outside ``accepted_params``, naming it."""
+        """Reject every ``query.params`` key outside ``accepted_params``, naming it.
+
+        An adapter that declares no ``params_model`` accepts nothing, so this is
+        its whole parameter check; ``parse_params`` runs it first for the rest.
+        """
         if unknown := set(query.params) - set(self.accepted_params):
             raise QueryError(f"unsupported {self.dataset.id} params: {', '.join(sorted(unknown))}")
 
