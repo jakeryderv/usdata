@@ -17,6 +17,7 @@ See [fetch and analyze](../guides/fetch-and-analyze.md) for complete workflows.
 ## Fetching and opening
 
 ::: usdata.fetch.fetch
+::: usdata.fetch.fetch_asset
 ::: usdata.fetch.FetchedAsset
     options:
       members: [asset, path, provenance, from_cache, open]

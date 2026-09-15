@@ -7,8 +7,7 @@ what you need.
 ```python
 from datetime import UTC, datetime, timedelta
 
-from usdata import build_query, get, select_by_time
-from usdata.fetch import fetch
+from usdata import build_query, fetch, get, select_by_time
 from usdata.providers import load_adapter
 
 dataset = get("noaa:nexrad-level2")

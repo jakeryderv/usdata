@@ -40,8 +40,7 @@ The pandas extra installed above opens CSV files. Run this in a Python script
 or interpreter in the same environment:
 
 ```python
-from usdata import build_query, get
-from usdata.fetch import fetch
+from usdata import build_query, fetch, get
 
 items = fetch(
     get("noaa:ghcn-daily"),

@@ -31,8 +31,7 @@ Open it. The same query in Python returns the cached file, and the pandas
 extra reads it.
 
 ```python
-from usdata import build_query, get
-from usdata.fetch import fetch
+from usdata import build_query, fetch, get
 
 query = build_query(
     start="2024-05-06", end="2024-05-07", variables=["PRCP", "TMAX"], stations="USW00013967"
