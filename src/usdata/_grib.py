@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING, Any
 from usdata.readers import MissingReaderDependency
 
 if TYPE_CHECKING:
-    from usdata.fetch import FetchedAsset
+    from usdata._fetch import FetchedAsset
 
 PIP_HINT = 'GRIB2 reading requires eccodes and xarray; install: pip install "usdata[grib]"'
 LIBRARY_HINT = (

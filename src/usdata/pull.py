@@ -20,8 +20,8 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 from usdata import __version__, _progress, provenance
+from usdata._fetch import ChecksumMismatch, FetchedAsset, _fetch_asset, fetch
 from usdata.cache import asset_path, sha256_file
-from usdata.fetch import ChecksumMismatch, FetchedAsset, _fetch_asset, fetch
 from usdata.manifest import LockedAsset, Lockfile, Manifest, lockfile_path
 from usdata.providers import Provider, load_adapter
 from usdata.registry import Registry, default_registry

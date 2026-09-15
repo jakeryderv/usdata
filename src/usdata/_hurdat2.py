@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Any
 from usdata.readers import Hurdat2FormatError, MissingReaderDependency
 
 if TYPE_CHECKING:
-    from usdata.fetch import FetchedAsset
+    from usdata._fetch import FetchedAsset
 
 STORM_ID = re.compile(r"[A-Z]{2}\d{6}")
 TEXT_COLUMNS = ["storm_id", "name", "record_identifier", "status"]

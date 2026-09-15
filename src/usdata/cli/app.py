@@ -9,10 +9,10 @@ import httpx
 import typer
 
 from usdata import __version__, build_query, default_registry
+from usdata._fetch import ChecksumMismatch
+from usdata._fetch import fetch as fetch_query
 from usdata._progress import batch
 from usdata.cli.progress import progress
-from usdata.fetch import ChecksumMismatch
-from usdata.fetch import fetch as fetch_query
 from usdata.manifest import lockfile_path
 from usdata.models import Status
 from usdata.providers import load_adapter

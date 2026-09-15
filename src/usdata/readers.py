@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 from usdata.models import Protocol
 
 if TYPE_CHECKING:
-    from usdata.fetch import FetchedAsset
+    from usdata._fetch import FetchedAsset
 
 NETCDF_MEDIA_TYPES = {"application/x-netcdf", "application/netcdf", "application/x-netcdf4"}
 GRIB2_MEDIA_TYPES = {

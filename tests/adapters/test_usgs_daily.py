@@ -5,9 +5,8 @@ import pytest
 import respx
 from typer.testing import CliRunner
 
-from usdata import build_query, get
+from usdata import build_query, fetch, get
 from usdata.cli import app
-from usdata.fetch import fetch
 from usdata.models import Query
 from usdata.providers.base import QueryError
 from usdata.providers.noaa.ghcnd import DATA_URL as NOAA_DATA_URL

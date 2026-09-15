@@ -14,7 +14,8 @@ pre-1.0 reading:
 A breaking change is anything that alters documented behavior of:
 
 - The top-level `usdata` package exports listed in `usdata.__all__`, and the
-  `usdata.fetch`, `usdata.manifest`, and `usdata.providers.base` modules.
+  `usdata.manifest` and `usdata.providers.base` modules. The fetch workflow is
+  public through the package root names, not through any submodule.
 - CLI commands, their flags, output format, and exit codes.
 - The manifest and lockfile schemas.
 - The provenance sidecar schema.

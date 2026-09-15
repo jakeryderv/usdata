@@ -6,8 +6,7 @@ import httpx
 import pytest
 import respx
 
-from usdata import build_query, get
-from usdata.fetch import FetchedAsset, fetch
+from usdata import FetchedAsset, build_query, fetch, get
 from usdata.models import Asset, Protocol, Provenance
 from usdata.readers import MissingReaderDependency, UnsupportedFormat
 

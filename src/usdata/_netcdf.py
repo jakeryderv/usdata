@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 from usdata.readers import MissingReaderDependency
 
 if TYPE_CHECKING:
-    from usdata.fetch import FetchedAsset
+    from usdata._fetch import FetchedAsset
 
 
 def open_netcdf(fetched: FetchedAsset) -> Any:

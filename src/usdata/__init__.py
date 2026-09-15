@@ -10,7 +10,7 @@ try:
 except PackageNotFoundError:  # running from a source tree without an install
     __version__ = "0.0.0"
 
-from usdata.fetch import FetchedAsset, fetch, fetch_asset
+from usdata._fetch import ChecksumMismatch, FetchedAsset, fetch, fetch_asset
 from usdata.models import Asset, BBox, Dataset, Provenance, Query, TemporalSelection, TimeRange
 from usdata.pull import pull, verify
 from usdata.query import build_query
@@ -20,6 +20,7 @@ from usdata.selection import select_by_time
 __all__ = [
     "Asset",
     "BBox",
+    "ChecksumMismatch",
     "Dataset",
     "DatasetNotFound",
     "FetchedAsset",
