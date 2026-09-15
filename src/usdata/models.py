@@ -22,7 +22,6 @@ class Protocol(StrEnum):
     HTTP = "http"
     S3 = "s3"
     ERDDAP = "erddap"
-    OPENDAP = "opendap"
     THREDDS = "thredds"
 
 
