@@ -27,6 +27,10 @@ jobs:
       actions: read
     env:
       RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      published: ${{ steps.version.outputs.tagged != 'true' }}
+      sha: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -72,3 +76,25 @@ jobs:
         run: |
           uv run --no-project python scripts/changelog.py notes "$V" > notes.md
           gh release create "v$V" --target "$RELEASE_SHA" --title "v$V" --notes-file notes.md
+
+  # The getting-started guide's own commands, run against the package as users
+  # install it. Network access is required and no local checkout is imported.
+  # A failure reports a broken release; it never untags or unpublishes one.
+  walkthrough:
+    needs: publish
+    if: needs.publish.outputs.published == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.publish.outputs.sha }}
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          python-version: "3.14"
+      - name: Walk the published package through the getting-started guide
+        env:
+          V: ${{ needs.publish.outputs.version }}
+        run: uv run --no-project python scripts/walkthrough.py --version "$V"

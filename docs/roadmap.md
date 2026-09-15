@@ -52,21 +52,16 @@ products without a reader, a GRIB2 reader extra on ecCodes
 ([ADR 0022](adr/0022-grib2-reader-backend.md)), MRMS gridded radar products,
 HRRR and GFS model output, and the
 [tornado classification example](https://usdata.dev/examples/tornado-classification/).
-The [v0.15.0 first-use review](reviews/first-use-v0.15.0.md) records the
-published walkthrough, an installed-package fetch from every new dataset, the
-GRIB2 reader on both grid types, and all twelve new live tests passing. It did
-not cover macOS, where the grib extra needs the ecCodes library installed
-separately; that check is still open.
+The [worked examples](https://usdata.dev/examples/) are the usage record for a
+release: each one states the question it answers and what was awkward while
+answering it ([ADR 0025](adr/0025-examples-as-usage-review.md)). The grib extra
+is still unchecked on macOS, where ecCodes must be installed separately.
 
 Choose a bounded candidate from Next when its user benefit, scope, exclusions,
 and acceptance criteria are ready.
 
-The completed
-[v0.14.0 first-use review](reviews/first-use-v0.14.0.md) records the published
-walkthrough, live checks for the two datasets the release added, and their
-query validation. The
-[dataset browser](https://usdata.dev/datasets/) provides search, support and
-agency filters, selection rules, and links to examples, including the
+The [dataset browser](https://usdata.dev/datasets/) provides search, support
+and agency filters, selection rules, and links to examples, including the
 [2024 climate comparison](https://usdata.dev/examples/climate-anomalies/).
 
 ## Next
