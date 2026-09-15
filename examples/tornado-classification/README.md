@@ -15,7 +15,7 @@ empty-cache restoration of all 80 locked assets.
 Requires usdata v0.15.0 or later for the MRMS, GLM, and GRIB2 reader support,
 and the repository's examples, radar, netcdf, and grib environments. Run
 `just notebooks` from the repo root; see the
-[examples guide](https://docs.usdata.dev/project/) for setup and fresh-kernel
+[examples guide](https://usdata.dev/examples/#run-examples) for setup and fresh-kernel
 checks. Expect about 68 MB of source downloads, another 68 MB for restoration,
 and about 1.3 GB of peak memory while each MRMS grid is decoded and cropped.
 Source revisions can change; preserve the manifest, its generated lockfile, and

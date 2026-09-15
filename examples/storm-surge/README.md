@@ -5,7 +5,7 @@ from the observed water levels at Cedar Key, Florida, across Hurricane Helene's
 landfall on 27 September 2024, find the peak of the non-tidal residual, and
 time it against the HURDAT2 best track. The residual at one gauge is the
 closest routine measurement of storm surge; it is not a regional surge height
-or a return-period estimate. See [examples setup](https://docs.usdata.dev/project/) to run it.
+or a return-period estimate. See [examples setup](https://usdata.dev/examples/#run-examples) to run it.
 
 Available since v0.14.0, which adds
 `noaa:coops-tide-predictions`. The retained [manifest](dataset.yaml) holds three

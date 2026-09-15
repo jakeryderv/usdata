@@ -8,7 +8,7 @@ model run placed the most favorable environment relative to a point on the
 ground, inside a single analysis hour. It does not measure the air the storm
 ingested, it does not verify anything at the time of the report, and CAPE and
 helicity are ingredients rather than a tornado detection. See
-[examples setup](https://docs.usdata.dev/project/) to run it.
+[examples setup](https://usdata.dev/examples/#run-examples) to run it.
 
 Available since v0.15.0, which adds `noaa:hrrr`. The retained
 [manifest](dataset.yaml) holds one source: forecast hour 0 of the run

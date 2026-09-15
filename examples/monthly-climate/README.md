@@ -2,7 +2,7 @@
 
 Open the [executed notebook](example.ipynb) to inspect May 2024 precipitation and
 mean temperature at Will Rogers World Airport, plot both measurements, and verify
-the manifest's locked inputs. See [examples setup](https://docs.usdata.dev/project/) to run it.
+the manifest's locked inputs. See [examples setup](https://usdata.dev/examples/#run-examples) to run it.
 
 Requires usdata v0.7 or newer. The retained [manifest](dataset.yaml) requests
 `units: metric`: PRCP is millimeters and TAVG is degrees Celsius. NCEI's CSV has

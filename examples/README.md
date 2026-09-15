@@ -17,6 +17,9 @@ inspect the results. The website renders saved content without running analyses.
 | [GOES infrared imagery](https://usdata.dev/examples/goes-imagery/) | NetCDF4 opening, CF decoding, quality flags, scan coordinates and brightness-temperature imagery |
 | [Event context](https://usdata.dev/examples/event-context/) | One Storm Events report matched to NEXRAD and GOES, explicit UTC conversion, safe radar sweep selection, projected context, and locked restoration (available since v0.9) |
 | [Tornado classification](https://usdata.dev/examples/tornado-classification/) | One tornado report joined to the nearest NEXRAD volume, MRMS rotation track, and GLM flashes, then a small labeled table of rotation and lightning features for tornado, hail, and wind reports from the same evening (available since v0.15.0) |
+| [GLM lightning flashes](https://usdata.dev/examples/glm-flashes/) | One hour of GOES-16 GLM detection files, flash tables flattened to pandas, a per-minute series inside a fixed box against a control box and the whole field of view, and quality flags (available since v0.15.0) |
+| [MRMS rotation tracks](https://usdata.dev/examples/mrms-rotation/) | Eleven two-minute MRMS mid-level rotation grids opened with the GRIB2 reader, box maxima with tie handling, the track of the peaks against the reported path start, and decode memory cost (available since v0.15.0) |
+| [HRRR environment](https://usdata.dev/examples/hrrr-environment/) | One whole-CONUS HRRR analysis opened with select, surface CAPE and 0-3 km helicity at the nearest grid point and their maxima within 100 km, one map, and what an analysis field is versus a forecast (available since v0.15.0) |
 
 ## Manifest examples
 
@@ -42,18 +45,6 @@ reader (available since v0.15).
 
 [Atlantic hurricane best tracks](https://usdata.dev/examples/hurdat2/) fetches the whole HURDAT2
 Atlantic file and reads it into one row per track point (available since v0.12.0).
-
-[Lightning flashes around a reported tornado](https://usdata.dev/examples/glm-flashes/) pulls
-one hour of GOES-16 GLM detection files and counts the flashes near Oklahoma
-City minute by minute (available since v0.15.0).
-
-[Rotation tracks around a reported tornado](https://usdata.dev/examples/mrms-rotation/) pulls
-twenty minutes of MRMS mid-level rotation tracks and reports the peak azimuthal
-shear near Oklahoma City in each two-minute grid (available since v0.15.0).
-
-[Model environment around a reported tornado](https://usdata.dev/examples/hrrr-environment/) pulls
-the HRRR 20 UTC surface analysis for 2024-05-06 and reads surface CAPE and
-0–3 km helicity at the grid point nearest Oklahoma City (available since v0.15.0).
 
 [Global model environment before a reported tornado](https://usdata.dev/examples/gfs-environment/) pulls
 the GFS 00 UTC 1-degree analysis for 2024-05-06 and reads surface CAPE and
