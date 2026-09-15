@@ -42,7 +42,8 @@ SDK, and ERDDAP coordinate subsets.
 
 **The cache** holds one current file per asset id under `~/.cache/usdata/` or
 `USDATA_CACHE_DIR`, each with a provenance sidecar. Only the core writes
-there. A second fetch of the same asset is a cache hit verified by checksum.
+there. A second fetch of the same asset is a cache hit checked against that
+sidecar, and re-hashed only when the file has been touched since it was written.
 
 **Readers** open a cached file into pandas or xarray behind optional extras.
 Without the extra you still have the file, its path, and its provenance.

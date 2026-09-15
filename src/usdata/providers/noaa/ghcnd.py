@@ -13,16 +13,17 @@ from __future__ import annotations
 
 import hashlib
 import logging
-from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import Annotated, Any
 
 import httpx
+from pydantic import BaseModel, ConfigDict, Field
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
 from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.params import StrList, choice
 
 SEARCH_URL = "https://www.ncei.noaa.gov/access/services/search/v1/data"
 DATA_URL = "https://www.ncei.noaa.gov/access/services/data/v1"
@@ -36,24 +37,24 @@ def _date(value: Any) -> str:
     return value.strftime("%Y-%m-%d")
 
 
-def _stations_param(raw: Any) -> list[str]:
-    if isinstance(raw, str):
-        raw = raw.split(",")
-    if not isinstance(raw, (list, tuple)) or not all(isinstance(s, str) for s in raw):
-        raise QueryError("stations must be a string or list of strings")
-    stations = list(dict.fromkeys(s.strip() for s in raw if s.strip()))
-    if not stations:
-        raise QueryError("stations must not be empty")
-    return stations
+class GhcnDailyParams(BaseModel):
+    """Which stations one NCEI Access Data Service query names, and in which unit system."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    stations: StrList | None = Field(
+        default=None,
+        description="Station ids, comma-separated or a list; otherwise a location selects them.",
+    )
+    units: Annotated[str, choice("metric", "standard")] = Field(
+        default="metric", description="metric (default) or standard."
+    )
 
 
 class GhcnDaily(_HttpProvider):
     """GHCN-Daily adapter. Params: ``stations`` (list or comma string), ``units``."""
 
-    accepted_params: ClassVar[Mapping[str, str]] = {
-        "stations": "Station ids, comma-separated or a list; otherwise a location selects them.",
-        "units": "metric (default) or standard.",
-    }
+    params_model = GhcnDailyParams
     ncei_dataset = NCEI_DATASET
 
     def find_stations(self, query: Query) -> list[str]:
@@ -114,31 +115,24 @@ class GhcnDaily(_HttpProvider):
         """Stations per CSV asset; subclasses with wide rows lower it."""
         return STATIONS_PER_ASSET
 
-    def _units(self, query: Query) -> str:
-        units = query.params.get("units", "metric")
-        if units not in ("metric", "standard"):
-            raise QueryError("units must be metric or standard")
-        return units
-
-    def _stations(self, query: Query) -> list[str]:
+    def _stations(self, query: Query, stations: list[str] | None) -> list[str]:
         """Explicit ``stations`` or the ones found inside the bbox, never a mix of both."""
-        if "stations" in query.params and query.bbox is not None:
+        if stations is not None and query.bbox is not None:
             raise QueryError("pass stations or a location/bbox, not both")
-        if "stations" in query.params:
-            return _stations_param(query.params["stations"])
+        if stations is not None:
+            return stations
         if query.bbox is not None:
             return self.find_stations(query)
         raise QueryError(f"{self.dataset.id} needs a location, bbox, or stations=...")
 
     def list_assets(self, query: Query) -> list[Asset]:
         """One CSV asset per chunk of up to STATIONS_PER_ASSET stations for the query window."""
-        self.check_params(query)
+        params = self.parse_params(query, GhcnDailyParams)
         self.reject(query, "text", hint="search the registry instead")
         start_at, end_at = self.utc_window(query)
         window = TimeRange(start=start_at, end=end_at)
         query = query.model_copy(update={"time": window})
-        units = self._units(query)
-        stations = self._stations(query)
+        stations = self._stations(query, params.stations)
         if not stations:
             return []
 
@@ -147,18 +141,18 @@ class GhcnDaily(_HttpProvider):
         size = self._chunk_size()
         for i in range(0, len(stations), size):
             chunk = stations[i : i + size]
-            params: dict[str, Any] = {
+            request: dict[str, Any] = {
                 "dataset": self.ncei_dataset,
                 "stations": ",".join(chunk),
                 "startDate": start,
                 "endDate": end,
                 "format": "csv",
-                "units": units,
+                "units": params.units,
                 "includeStationLocation": "1",
             }
             if query.variables:
-                params["dataTypes"] = ",".join(query.variables)
-            url = str(httpx.URL(DATA_URL, params=params))
+                request["dataTypes"] = ",".join(query.variables)
+            url = str(httpx.URL(DATA_URL, params=request))
             digest = hashlib.sha1(url.encode()).hexdigest()[:12]
             assets.append(
                 Asset(

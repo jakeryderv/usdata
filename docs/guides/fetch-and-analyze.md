@@ -49,7 +49,8 @@ without it you still have the path. What each reader returns is in
 
 Files live under `~/.cache/usdata/` unless `USDATA_CACHE_DIR` or `--cache-dir`
 says otherwise, with a provenance sidecar beside each. A repeated query is a
-cache hit verified by checksum; `--force` re-downloads.
+cache hit checked against that sidecar; `--force` re-downloads and `usdata verify`
+re-reads the bytes.
 
 On a terminal, fetch reports resolved counts, known sizes, download progress,
 and verified cache hits on stderr. `--no-progress` disables it, and redirecting

@@ -5,9 +5,10 @@ import httpx
 import pytest
 import respx
 
+from usdata.models import Query
 from usdata.providers.base import QueryError
-from usdata.providers.noaa.ghcnd import DATA_URL, SEARCH_URL
-from usdata.providers.noaa.normals import ClimateNormals
+from usdata.providers.noaa.ghcnd import DATA_URL, SEARCH_URL, GhcnDailyParams
+from usdata.providers.noaa.normals import ClimateNormals, ClimateNormalsParams
 from usdata.pull import pull, verify
 from usdata.query import build_query
 from usdata.registry import default_registry
@@ -104,6 +105,25 @@ def test_no_matching_stations_is_empty(adapter) -> None:
     with respx.mock() as mock:
         mock.get(SEARCH_URL).respond(200, json={"count": 0, "results": []})
         assert adapter.list_assets(build_query(location="ok")) == []
+
+
+def test_period_extends_the_shared_station_declaration(adapter) -> None:
+    """Normals add one parameter to GHCN-Daily's, so the model extends rather than repeats it."""
+    assert issubclass(ClimateNormalsParams, GhcnDailyParams)
+
+    def message(**params: object) -> str:
+        with pytest.raises(QueryError) as raised:
+            adapter.parse_params(Query(params=params), ClimateNormalsParams)
+        return str(raised.value)
+
+    assert adapter.parse_params(Query(params={}), ClimateNormalsParams).period == "monthly"
+    assert adapter.parse_params(Query(params={"period": "daily"}), ClimateNormalsParams).period == (
+        "daily"
+    )
+    assert message(period="hourly") == "period must be monthly, daily, or annualseasonal"
+    assert message(period=1) == "period must be monthly, daily, or annualseasonal"
+    assert message(stations=[]) == "stations must not be empty"
+    assert message(units="kelvin") == "units must be metric or standard"
 
 
 @pytest.mark.parametrize(

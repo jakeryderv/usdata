@@ -15,10 +15,10 @@ Filter the parsed track table locally with the ``hurdat2`` reader.
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping
 from datetime import UTC, date, datetime
 from pathlib import Path
-from typing import ClassVar
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
@@ -41,22 +41,33 @@ def _revision(value: str) -> date | None:
         return None
 
 
+class Hurdat2Params(BaseModel):
+    """Which basin's complete best-track database one HURDAT2 query names."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    basin: str = Field(
+        default="atlantic", description="Best-track basin: 'atlantic' (default) or 'pacific'."
+    )
+
+    @field_validator("basin", mode="before")
+    @classmethod
+    def _published_basin(cls, value: object) -> object:
+        """Fold case and surrounding space; the NHC publishes exactly these two basins."""
+        basin = value.strip().casefold() if isinstance(value, str) else ""
+        if basin not in BASIN_TOKENS:
+            raise ValueError(f"must be 'atlantic' (default) or 'pacific', not {value!r}")
+        return basin
+
+
 class Hurdat2(_HttpProvider):
     """Resolve one whole-basin best-track file; preserve the original text bytes."""
 
-    accepted_params: ClassVar[Mapping[str, str]] = {
-        "basin": "Best-track basin: 'atlantic' (default) or 'pacific'.",
-    }
+    params_model = Hurdat2Params
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Select the newest revision of the requested basin's complete database."""
-        self.check_params(query)
-        requested = query.params.get("basin", "atlantic")
-        basin = requested.strip().casefold() if isinstance(requested, str) else ""
-        if basin not in BASIN_TOKENS:
-            raise QueryError(
-                f"unsupported HURDAT2 basin {requested!r}; use 'atlantic' (default) or 'pacific'"
-            )
+        basin = self.parse_params(query, Hurdat2Params).basin
         self.reject(
             query,
             "bbox",

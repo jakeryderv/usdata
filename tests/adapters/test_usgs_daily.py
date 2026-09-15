@@ -8,9 +8,10 @@ from typer.testing import CliRunner
 from usdata import build_query, get
 from usdata.cli import app
 from usdata.fetch import fetch
+from usdata.models import Query
 from usdata.providers.base import QueryError
 from usdata.providers.noaa.ghcnd import DATA_URL as NOAA_DATA_URL
-from usdata.providers.usgs.daily import ITEMS_URL, WaterDaily
+from usdata.providers.usgs.daily import ITEMS_URL, WaterDaily, WaterDailyParams
 from usdata.pull import pull, verify
 
 CSV = b"time,monitoring_location_id,parameter_code,value\n2024-05-06,USGS-07164500,00060,12300\n"
@@ -49,6 +50,61 @@ def test_bad_queries_fail_before_network(kwargs: dict) -> None:
     query = build_query(**{**defaults, **kwargs})
     with WaterDaily(get("usgs:water-daily")) as adapter, pytest.raises(QueryError):
         adapter.list_assets(query)
+
+
+def parse(**params: object) -> WaterDailyParams:
+    with WaterDaily(get("usgs:water-daily")) as adapter:
+        return adapter.parse_params(Query(params=params), WaterDailyParams)
+
+
+def message(**params: object) -> str:
+    with pytest.raises(QueryError) as raised:
+        parse(**params)
+    return str(raised.value)
+
+
+@pytest.mark.parametrize(
+    ("params", "expected"),
+    [
+        ({"site": "07164500"}, ["USGS-07164500"]),
+        ({"site": "USGS-07164500"}, ["USGS-07164500"]),
+        ({"sites": "USGS-07164500,07164500"}, ["USGS-07164500"]),
+        ({"sites": ["07331295", "07164500"]}, ["USGS-07164500", "USGS-07331295"]),
+        ({}, []),
+    ],
+)
+def test_either_selector_resolves_to_prefixed_ids_in_a_stable_order(params, expected) -> None:
+    """``site`` and ``sites`` feed the same list, so a repeated id makes one request."""
+    assert parse(**params).monitoring_ids == expected
+
+
+def test_site_and_sites_are_alternatives_named_together() -> None:
+    """A cross-field rule states its own subject, so the line names both parameters."""
+    assert message(site="07164500", sites="07164500") == "pass only one of site or sites"
+
+
+@pytest.mark.parametrize("params", [{"site": "wrong"}, {"sites": "1234567"}, {"site": ["x"]}])
+def test_monitoring_ids_must_look_like_usgs_ids(params) -> None:
+    assert message(**params) == "sites must be USGS monitoring IDs, for example USGS-07164500"
+
+
+@pytest.mark.parametrize("raw", [12345, [123], 7164500.0])
+def test_a_bare_number_is_not_a_monitoring_id(raw) -> None:
+    assert message(sites=raw) == (
+        "sites must be text: one value, a list, or a comma-separated string"
+    )
+
+
+@pytest.mark.parametrize("raw", [3, "3", "000031", "0000a", True, None])
+def test_statistic_id_must_stay_a_quoted_five_digit_code(raw) -> None:
+    """YAML strips the leading zeros off ``00003``, so only text can carry the code."""
+    assert message(statistic_id=raw) == (
+        "statistic_id must be a quoted five-digit code, for example 00003"
+    )
+
+
+def test_statistic_id_defaults_to_the_daily_mean() -> None:
+    assert parse().statistic_id == "00003"
 
 
 def test_listing_probes_one_row_per_page_and_pins_whole_csv_pages() -> None:

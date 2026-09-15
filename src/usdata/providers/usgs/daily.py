@@ -15,79 +15,92 @@ from __future__ import annotations
 
 import hashlib
 import re
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from itertools import product
 from pathlib import Path
-from typing import ClassVar
 
 import httpx
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
 from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.params import StrList
 
 ITEMS_URL = "https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily/items"
 PAGE_SIZE = 10000
+MONITORING_ID = re.compile(r"USGS-\d{8,15}")
+STATISTIC_ID = re.compile(r"\d{5}")
 
 
-def _values(raw: object, name: str) -> list[str]:
-    if isinstance(raw, str):
-        values = raw.split(",")
-    elif isinstance(raw, (list, tuple)) and all(isinstance(v, str) for v in raw):
-        values = raw
-    else:
-        raise QueryError(f"{name} must be a string or list of strings; quote numeric codes")
-    cleaned = sorted({v.strip() for v in values if v.strip()})
-    if not cleaned:
-        raise QueryError(f"{name} must not be empty")
-    return cleaned
+class WaterDailyParams(BaseModel):
+    """Which USGS monitoring sites and daily statistic one query names."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    site: StrList | None = Field(
+        default=None, description="One USGS monitoring ID, with or without the USGS- prefix."
+    )
+    sites: StrList | None = Field(
+        default=None, description="Several monitoring IDs, comma-separated or a list."
+    )
+    statistic_id: str = Field(
+        default="00003", description="Five-digit statistic code; default 00003 (daily mean)."
+    )
+
+    @field_validator("statistic_id", mode="before")
+    @classmethod
+    def _five_digits(cls, value: object) -> object:
+        """A leading zero only survives as text, so a bare number is a mistake worth naming."""
+        if not isinstance(value, str) or not STATISTIC_ID.fullmatch(value):
+            raise ValueError("must be a quoted five-digit code, for example 00003")
+        return value
+
+    @model_validator(mode="after")
+    def _one_selector_of_monitoring_ids(self) -> WaterDailyParams:
+        """``site`` and ``sites`` are alternatives, and either one names real monitoring ids."""
+        if self.site is not None and self.sites is not None:
+            raise ValueError("pass only one of site or sites")
+        if any(not MONITORING_ID.fullmatch(value) for value in self.monitoring_ids):
+            raise ValueError("sites must be USGS monitoring IDs, for example USGS-07164500")
+        return self
+
+    @property
+    def monitoring_ids(self) -> list[str]:
+        """Every requested site as a distinct prefixed id, in a stable order."""
+        requested = self.sites if self.sites is not None else self.site
+        return sorted({s if s.startswith("USGS-") else f"USGS-{s}" for s in requested or []})
 
 
 class WaterDaily(_HttpProvider):
     """USGS daily statistics as paginated CSV assets, with anonymous access."""
 
-    accepted_params: ClassVar[Mapping[str, str]] = {
-        "site": "One USGS monitoring ID, with or without the USGS- prefix.",
-        "sites": "Several monitoring IDs, comma-separated or a list.",
-        "statistic_id": "Five-digit statistic code; default 00003 (daily mean).",
-    }
+    params_model = WaterDailyParams
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Resolve site or bbox queries to paginated CSV requests."""
-        self.check_params(query)
+        params = self.parse_params(query, WaterDailyParams)
         self.reject(query, "text", hint="select sites, a location, or parameter codes")
         start, end = self.utc_window(query)
         query = query.model_copy(update={"time": TimeRange(start=start, end=end)})
-        if "site" in query.params and "sites" in query.params:
-            raise QueryError("pass only one of site or sites")
-        raw_sites = query.params.get("sites", query.params.get("site"))
-        site_filters: Sequence[str | None] = [None]
-        if raw_sites is not None:
-            ids = _values(raw_sites, "sites")
-            normalized = [s if s.startswith("USGS-") else f"USGS-{s}" for s in ids]
-            if any(not re.fullmatch(r"USGS-\d{8,15}", s) for s in normalized):
-                raise QueryError("sites must be USGS monitoring IDs, for example USGS-07164500")
-            site_filters = sorted(set(normalized))
-        elif query.bbox is None:
+        site_filters: Sequence[str | None] = params.monitoring_ids or [None]
+        if not params.monitoring_ids and query.bbox is None:
             raise QueryError(f"{self.dataset.id} needs a location, bbox, lat/lon, or sites=...")
         variables: Sequence[str | None] = sorted(set(query.variables)) or [None]
-        statistic = query.params.get("statistic_id", "00003")
-        if not isinstance(statistic, str) or not re.fullmatch(r"\d{5}", statistic):
-            raise QueryError("statistic_id must be a quoted five-digit code, for example 00003")
-        if any(v is not None and not re.fullmatch(r"\d{5}", v) for v in variables):
+        if any(v is not None and not STATISTIC_ID.fullmatch(v) for v in variables):
             raise QueryError("variables must be five-digit USGS parameter codes, for example 00060")
-        params = {
+        common = {
             "f": "json",
             "time": f"{start.date().isoformat()}/{end.date().isoformat()}",
-            "statistic_id": statistic,
+            "statistic_id": params.statistic_id,
             "limit": str(PAGE_SIZE),
         }
         if query.bbox is not None:
-            params["bbox"] = ",".join(str(v) for v in query.bbox.as_tuple())
+            common["bbox"] = ",".join(str(v) for v in query.bbox.as_tuple())
         assets: list[Asset] = []
         for site, variable in product(site_filters, variables):
-            filters = dict(params)
+            filters = dict(common)
             if site is not None:
                 filters["monitoring_location_id"] = site
             if variable is not None:
