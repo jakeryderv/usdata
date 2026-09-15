@@ -1,3 +1,4 @@
+import importlib
 import os
 import shutil
 from pathlib import Path
@@ -8,6 +9,9 @@ from usdata import build_query, provenance
 from usdata.cache import sha256_file
 from usdata.fetch import ChecksumMismatch, fetch, fetch_asset
 from usdata.models import Asset, Protocol
+
+# ``usdata.fetch`` names the function once the package root exports it; fetch the module itself.
+fetch_module = importlib.import_module("usdata.fetch")
 
 
 def _rewrite_after_sidecar(path: Path, data: bytes) -> None:
@@ -25,7 +29,7 @@ def _forbid_hashing(monkeypatch: pytest.MonkeyPatch) -> None:
     def refuse(path: Path) -> str:
         raise AssertionError(f"a trusted cache hit must not hash {path}")
 
-    monkeypatch.setattr("usdata.fetch.sha256_file", refuse)
+    monkeypatch.setattr(fetch_module, "sha256_file", refuse)
 
 
 def test_cached_asset_honors_new_checksum_and_preserves_old_file(
@@ -83,7 +87,7 @@ def test_file_touched_after_its_sidecar_is_hashed_and_refetched(
         hashed.append(path)
         return sha256_file(path)
 
-    monkeypatch.setattr("usdata.fetch.sha256_file", counting)
+    monkeypatch.setattr(fetch_module, "sha256_file", counting)
     (repaired,) = fetch(ds, build_query(), root=tmp_path)
     assert hashed == [first.path]
     assert not repaired.from_cache and repaired.path.read_bytes() == b"original"
