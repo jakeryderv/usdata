@@ -55,6 +55,12 @@ cache, and provenance together; the CLI calls it rather than adapters directly.
 - **Search is over the registry, not live catalogs.** See ADR 0001.
 - **Heavy scientific dependencies are optional.** Core depends on pydantic, pyyaml, typer, and httpx. Anything that opens data (xarray, pandas, geopandas, Py-ART) lives behind extras.
 
+Some things are deliberately out of scope. Decoding and analysis belong to
+xarray and pandas, which readers hand off to rather than reimplement. Breadth
+within one agency's data belongs to the libraries built for it, such as Herbie
+for model output or dataretrieval for USGS; usdata owns one interface across
+sources plus pinned, provenance-tracked inputs.
+
 ## CLI exit codes
 
 | Code | Meaning |

@@ -24,8 +24,7 @@ rectangle, not a boundary.
 ## The same query from Python
 
 ```python
-from usdata import build_query, get
-from usdata.fetch import fetch
+from usdata import build_query, fetch, get
 
 query = build_query(
     lat=35.39,
