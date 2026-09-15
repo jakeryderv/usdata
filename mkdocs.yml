@@ -9,11 +9,18 @@ theme:
   name: material
   logo: assets/logo.svg
   favicon: assets/logo.svg
+  custom_dir: docs/overrides
   features:
-  - navigation.tabs
   - navigation.sections
+  - navigation.indexes
+  - navigation.path
+  - navigation.instant
+  - navigation.instant.prefetch
+  - navigation.instant.progress
+  - navigation.tracking
   - navigation.top
   - navigation.footer
+  - toc.follow
   - content.code.copy
   palette:
   - scheme: slate
@@ -31,10 +38,16 @@ theme:
   font:
     text: Inter
     code: JetBrains Mono
+extra:
+  homepage: https://usdata.dev/
+  social:
+  - icon: fontawesome/brands/github
+    link: https://github.com/jakeryderv/usdata
+  - icon: fontawesome/brands/python
+    link: https://pypi.org/project/usdata/
 nav:
-- Website: https://usdata.dev/
 - Start here:
-  - Overview: index.md
+  - index.md
   - Getting started: getting-started.md
   - Install: install.md
 - Guides:
@@ -44,9 +57,8 @@ nav:
   - Radar and satellite: guides/radar-and-satellite.md
   - Model output: guides/model-output.md
   - Severe weather labels: guides/severe-weather-labels.md
-- Examples: https://usdata.dev/examples/
 - Datasets:
-  - Catalog: generated/catalog/index.md
+  - generated/catalog/index.md
   - Versions and targets: generated/catalog/versions.md
   - Provider notes: providers/README.md
 - Concepts:
@@ -66,6 +78,7 @@ nav:
 # Contributor and project-record pages stay in docs/ for GitHub readers but are
 # not part of the user site; see ADR 0023. Snippets are included, not served.
 exclude_docs: |
+  overrides/
   architecture.md
   testing.md
   roadmap.md

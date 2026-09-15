@@ -1,7 +1,10 @@
 # Maintaining documentation
 
 MkDocs reads `docs/` directly. Configure navigation, plugins, and the theme in
-root `mkdocs.yml`. A page at `docs/guides/fetch-and-analyze.md` is served at
+root `mkdocs.yml`. The theme's header partial is overridden in
+`docs/overrides/partials/header.html` to add the Website, Datasets, and Examples
+links; it is a copy of the installed mkdocs-material partial with one marked
+block added, so re-sync it from `site-packages` whenever the theme is upgraded. A page at `docs/guides/fetch-and-analyze.md` is served at
 `https://docs.usdata.dev/guides/fetch-and-analyze/`.
 
 ## One audience per host

@@ -48,3 +48,27 @@
   border-color: #3b82f6;
   color: #fafafa;
 }
+
+/* Header links to the other hosts (see overrides/partials/header.html). */
+.md-header__links {
+  display: flex;
+  gap: 1.1rem;
+  margin-left: 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.md-header__links a {
+  color: var(--md-primary-bg-color--light);
+  opacity: 0.9;
+}
+.md-header__links a:hover,
+.md-header__links a:focus-visible {
+  color: var(--md-primary-bg-color);
+  opacity: 1;
+}
+@media screen and (max-width: 59.9375em) {
+  .md-header__links {
+    display: none;
+  }
+}
