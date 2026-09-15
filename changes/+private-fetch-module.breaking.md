@@ -1,1 +1,0 @@
-The `usdata.fetch` module is now private; import `fetch`, `fetch_asset`, `FetchedAsset`, and `ChecksumMismatch` from the `usdata` package root instead, where `usdata.fetch` is unambiguously the function.

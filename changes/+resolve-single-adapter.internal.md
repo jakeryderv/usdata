@@ -1,1 +1,0 @@
-No release note: `pull` now opens each manifest dataset's adapter once while resolving, using it for parameter validation, listing, and downloads instead of one lifecycle for the up-front check and another per source. Errors, ordering, and the lockfile are unchanged.

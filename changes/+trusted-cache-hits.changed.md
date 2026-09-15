@@ -1,1 +1,0 @@
-A cache hit whose provenance sidecar checks out and whose file has not been touched since is reused without re-hashing it, so repeated fetches of large GRIB2 or NEXRAD files return immediately; restore and `usdata verify` still re-hash every file.
