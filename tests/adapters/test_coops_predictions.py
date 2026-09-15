@@ -8,8 +8,9 @@ import pytest
 from typer.testing import CliRunner
 
 from usdata.cli.app import app
+from usdata.models import Query
 from usdata.providers.base import QueryError
-from usdata.providers.noaa.coops import CoopsTidePredictions
+from usdata.providers.noaa.coops import CoopsParams, CoopsPredictionParams, CoopsTidePredictions
 from usdata.query import build_query
 from usdata.registry import default_registry
 
@@ -69,6 +70,27 @@ def test_interval_is_normalized_into_the_request(raw, sent):
     with adapter() as provider:
         (asset,) = provider.list_assets(query(interval=raw))
     assert httpx.URL(asset.href).params["interval"] == sent
+
+
+def test_interval_extends_the_shared_station_declaration():
+    """Predictions add one parameter to the water-level model's, by extending it."""
+    assert issubclass(CoopsPredictionParams, CoopsParams)
+    with adapter() as provider:
+        parsed = provider.parse_params(
+            Query(params={"station": "8518750", "datum": "MLLW"}), CoopsPredictionParams
+        )
+    assert parsed.interval == "6"
+
+
+@pytest.mark.parametrize("raw", [0, "2", True, 1.5, "max_slack", "", None, ["6"]])
+def test_interval_names_every_token_the_api_accepts(raw):
+    """The API's own vocabulary, not a number range: h and hilo sit beside the minute steps."""
+    with adapter() as provider, pytest.raises(QueryError) as raised:
+        provider.parse_params(
+            Query(params={"station": "8518750", "datum": "MLLW", "interval": raw}),
+            CoopsPredictionParams,
+        )
+    assert str(raised.value) == "interval must be h, hilo, or minutes: 1, 5, 6, 10, 15, 30, or 60"
 
 
 @pytest.mark.parametrize("changes", [{"interval": "hilo"}, {"interval": "h"}, {"units": "english"}])

@@ -11,18 +11,20 @@ from __future__ import annotations
 
 import csv
 import hashlib
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import Annotated, ClassVar
 
 import httpx
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from usdata._files import staged_path
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
 from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.params import choice
 
 DATA_URL = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
 DATUMS = {"CRD", "IGLD", "LWD", "MHHW", "MHW", "MTL", "MSL", "MLW", "MLLW", "NAVD", "STND"}
@@ -90,28 +92,67 @@ def _validate_predictions(path: Path, asset: Asset, interval: str) -> None:
         raise ValueError("no tide predictions returned")
 
 
+class CoopsParams(BaseModel):
+    """Which CO-OPS station, vertical datum, and unit system one query names."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    station: str = Field(
+        description="Required seven-digit CO-OPS station id, for example '8518750'."
+    )
+    datum: str = Field(description=f"Required vertical datum: {', '.join(sorted(DATUMS))}.")
+    units: Annotated[str, choice("metric", "english")] = Field(
+        default="metric", description="metric (default) or english."
+    )
+
+    @field_validator("station", mode="before")
+    @classmethod
+    def _one_station_id(cls, value: object) -> object:
+        """One station per request, spelled as the seven ASCII digits the API addresses."""
+        if (
+            not isinstance(value, str)
+            or len(value) != 7
+            or not value.isascii()
+            or not value.isdigit()
+        ):
+            raise ValueError("must be a seven-digit string, for example '8518750'")
+        return value
+
+    @field_validator("datum", mode="before")
+    @classmethod
+    def _explicit_datum(cls, value: object) -> object:
+        """Never defaulted: a water level means nothing without the datum it is measured from."""
+        if not isinstance(value, str) or value not in DATUMS:
+            raise ValueError(f"must be explicit: {', '.join(sorted(DATUMS))}")
+        return value
+
+
+class CoopsPredictionParams(CoopsParams):
+    """A tide-prediction query also names the interval its series steps on."""
+
+    interval: str = Field(
+        default="6",
+        description="6 (default), 1, 5, 10, 15, 30, or 60 minutes; h (hourly); hilo (high/low).",
+    )
+
+    @field_validator("interval", mode="before")
+    @classmethod
+    def _api_token(cls, value: object) -> object:
+        """Normalize to the exact token the API accepts, folding case and integer minutes."""
+        message = "must be h, hilo, or minutes: 1, 5, 6, 10, 15, 30, or 60"
+        if isinstance(value, bool) or not isinstance(value, (str, int)):
+            raise ValueError(message)
+        token = str(value).strip().lower()
+        if token not in INTERVALS:
+            raise ValueError(message)
+        return token
+
+
 class _CoopsStation(_HttpProvider):
-    """Shared station, datum, units, and window rules for CO-OPS station products."""
+    """Shared window, request, and validation rules for CO-OPS station products."""
 
     product: ClassVar[str]
     label: ClassVar[str]
-
-    def _station(self, query: Query) -> tuple[str, str, str]:
-        station = query.params.get("station")
-        if (
-            not isinstance(station, str)
-            or len(station) != 7
-            or not station.isascii()
-            or not station.isdigit()
-        ):
-            raise QueryError("station must be a seven-digit string, for example '8518750'")
-        datum = query.params.get("datum")
-        if not isinstance(datum, str) or datum not in DATUMS:
-            raise QueryError(f"datum must be explicit: {', '.join(sorted(DATUMS))}")
-        units = query.params.get("units", "metric")
-        if units not in ("metric", "english"):
-            raise QueryError("units must be metric or english")
-        return station, datum, units
 
     def _window(self, query: Query, limit: timedelta) -> tuple[datetime, datetime]:
         start, end = self.utc_window(query)
@@ -178,32 +219,18 @@ class CoopsWaterLevels(_CoopsStation):
 
     product = "water_level"
     label = "water-level"
-    accepted_params: ClassVar[Mapping[str, str]] = {
-        "station": "Required seven-digit CO-OPS station id, for example '8518750'.",
-        "datum": f"Required vertical datum: {', '.join(sorted(DATUMS))}.",
-        "units": "metric (default) or english.",
-    }
+    params_model = CoopsParams
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Describe one bounded CSV request; availability is checked during fetching."""
-        self.check_params(query)
+        params = self.parse_params(query, CoopsParams)
         self.reject(query, "bbox", "text", "variables", hint="CO-OPS requires an explicit station")
-        station, datum, units = self._station(query)
         start, end = self._window(query, MAX_INTERVAL)
-        return [self._asset(station, start, end, {"datum": datum, "units": units})]
+        request = {"datum": params.datum, "units": params.units}
+        return [self._asset(params.station, start, end, request)]
 
     def _validate(self, path: Path, asset: Asset) -> None:
         _validate_observations(path, asset)
-
-
-def _interval(raw: Any) -> str:
-    """Normalize ``interval`` to the exact token the API accepts."""
-    if isinstance(raw, bool) or not isinstance(raw, (str, int)):
-        raise QueryError("interval must be h, hilo, or minutes: 1, 5, 6, 10, 15, 30, or 60")
-    value = str(raw).strip().lower()
-    if value not in INTERVALS:
-        raise QueryError("interval must be h, hilo, or minutes: 1, 5, 6, 10, 15, 30, or 60")
-    return value
 
 
 class CoopsTidePredictions(_CoopsStation):
@@ -211,20 +238,15 @@ class CoopsTidePredictions(_CoopsStation):
 
     product = "predictions"
     label = "tide-prediction"
-    accepted_params: ClassVar[Mapping[str, str]] = {
-        **CoopsWaterLevels.accepted_params,
-        "interval": "6 (default), 1, 5, 10, 15, 30, or 60 minutes; h (hourly); hilo (high/low).",
-    }
+    params_model = CoopsPredictionParams
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Describe one bounded CSV request; subordinate stations only serve hilo."""
-        self.check_params(query)
+        params = self.parse_params(query, CoopsPredictionParams)
         self.reject(query, "bbox", "text", "variables", hint="CO-OPS requires an explicit station")
-        station, datum, units = self._station(query)
-        interval = _interval(query.params.get("interval", "6"))
         start, end = self._window(query, MAX_PREDICTION_INTERVAL)
-        params = {"datum": datum, "units": units, "interval": interval}
-        return [self._asset(station, start, end, params)]
+        request = {"datum": params.datum, "units": params.units, "interval": params.interval}
+        return [self._asset(params.station, start, end, request)]
 
     def _validate(self, path: Path, asset: Asset) -> None:
         interval = httpx.URL(asset.href).params.get("interval", "6")

@@ -1,0 +1,1 @@
+No release note: this is the second of three adapter migrations to the declared parameter form, moving the station and tabular adapters onto pydantic parameter models without changing what any query accepts, what `usdata info` prints, or any asset URL, beyond the four error wordings listed in the pull request.

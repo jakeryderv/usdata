@@ -12,9 +12,9 @@ from usdata import provenance
 from usdata.cache import sha256_file
 from usdata.cli import app
 from usdata.fetch import ChecksumMismatch, fetch
-from usdata.models import Protocol
+from usdata.models import Protocol, Query
 from usdata.providers.base import QueryError
-from usdata.providers.noaa.hurdat2 import DIRECTORY_URL, Hurdat2
+from usdata.providers.noaa.hurdat2 import DIRECTORY_URL, Hurdat2, Hurdat2Params
 from usdata.pull import pull, verify
 from usdata.query import build_query
 from usdata.registry import default_registry
@@ -127,6 +127,25 @@ def test_rejects_unsupported_queries_before_network(adapter, kwargs) -> None:
     with respx.mock() as mock, pytest.raises(QueryError):
         adapter.list_assets(build_query(**kwargs))
     assert not mock.calls
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [("atlantic", "atlantic"), ("Pacific", "pacific"), (" PACIFIC ", "pacific")],
+)
+def test_basin_folds_case_and_surrounding_space(adapter, raw, expected) -> None:
+    assert adapter.parse_params(Query(params={"basin": raw}), Hurdat2Params).basin == expected
+
+
+def test_basin_defaults_to_the_atlantic(adapter) -> None:
+    assert adapter.parse_params(Query(params={}), Hurdat2Params).basin == "atlantic"
+
+
+@pytest.mark.parametrize("raw", ["gulf", "", 1, None, ["atlantic"]])
+def test_basin_names_the_two_the_nhc_publishes_and_echoes_the_rejected_value(adapter, raw) -> None:
+    with pytest.raises(QueryError) as raised:
+        adapter.parse_params(Query(params={"basin": raw}), Hurdat2Params)
+    assert str(raised.value) == f"basin must be 'atlantic' (default) or 'pacific', not {raw!r}"
 
 
 def test_rejected_dates_explain_that_the_file_is_complete(adapter) -> None:
