@@ -81,6 +81,21 @@ during a site build, and source outputs, manifests, and lockfiles stay untouched
 Root README, contribution, security, license, and changelog files stay on
 GitHub and are not copied into documentation.
 
+## Examples
+
+An example is written question-first. Its README title is the question a
+student or analyst would ask, decided before touching the tool, and the
+notebook or manifest answers it. The same question is the example's entry in
+`examples/catalog.json`.
+
+Each README ends with a short section titled "What was awkward", listing the
+places the author had to work around the tool or the data while answering the
+question. Every entry there is an issue candidate. This is where usage friction
+is recorded, in place of the retired per-release first-use review
+([ADR 0025](../adr/0025-examples-as-usage-review.md)); a release should have
+exercised its new behavior in at least one example, because the live example run
+then guards it.
+
 ## Links and validation
 
 Use normal relative Markdown links between docs pages. Links to repository files

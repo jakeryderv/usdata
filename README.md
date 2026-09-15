@@ -74,7 +74,8 @@ the `check-*` commands install their respective extras.
 
 Releases: `just release minor` prepares a release branch. Update release
 notices, then `just release-pr` validates and opens a draft for review. Merging
-the reviewed PR publishes to PyPI and creates the tag and GitHub release. See
+the reviewed PR publishes to PyPI and creates the tag and GitHub release, then
+walks the published package through the getting-started guide. See
 [versioning](docs/versioning.md).
 
 The main way the project grows is a new dataset: one registry entry and one
