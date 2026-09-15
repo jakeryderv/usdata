@@ -95,6 +95,16 @@ def test_an_explicit_null_site_selects_by_location(adapter: NexradLevel2) -> Non
     assert len(chosen(adapter, build_query(lat=35.39, lon=-97.60, site=None, nearest=3))) == 3
 
 
+def test_an_explicit_null_nearest_selects_by_location(adapter: NexradLevel2) -> None:
+    """``nearest:`` with no value in a manifest means "not given", so the bbox still selects."""
+    ok = build_query(location="ok").bbox
+    assert ok is not None
+    inside = [s.id for s in sites.sites_in(ok)]
+    assert chosen(adapter, build_query(location="ok", nearest=None)) == inside
+    # Not a selection, so it does not collide with a named site either.
+    assert chosen(adapter, build_query(location="ok", site="ktlx", nearest=None)) == ["KTLX"]
+
+
 def test_list_assets_spans_days_filters_window_and_paginates(adapter: NexradLevel2) -> None:
     q = build_query(site="KTLX", start="2024-05-06T23:50", end="2024-05-07T00:20")
     d1, d2 = "2024/05/06/KTLX/", "2024/05/07/KTLX/"
@@ -178,7 +188,6 @@ def test_fetch_downloads_via_https(tmp_path: Path, adapter: NexradLevel2) -> Non
         ({"nearest": 1.5}, "nearest must be a positive integer"),
         ({"nearest": True}, "nearest must be a positive integer"),
         ({"nearest": "two"}, "nearest must be a positive integer"),
-        ({"nearest": None}, "nearest must be a positive integer"),
     ],
 )
 def test_rejects_invalid_provider_params(adapter: NexradLevel2, params, message) -> None:
