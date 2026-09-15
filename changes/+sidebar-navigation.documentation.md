@@ -1,0 +1,1 @@
+Lay the documentation site out like uv's: sections and pages in a collapsible left sidebar with breadcrumbs and instant navigation, the logo linking back to the homepage, and Website, Datasets, and Examples in the header instead of the navigation.
