@@ -1,0 +1,1 @@
+The HRRR environment example now ships an executed notebook: it reads surface CAPE and 0-3 km storm-relative helicity from one 150 MB analysis file, compares the grid point nearest an Oklahoma tornado report with the largest values within 100 km, maps both fields, and states what an analysis is and is not.

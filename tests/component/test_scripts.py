@@ -378,3 +378,50 @@ def test_catalog_uses_explicit_file_selection_and_supports_datasets_without_read
     assert "Server-side subsetting" not in content
     no_reader = entries[goes.id].model_copy(update={"reader_extra": None})
     assert "no bundled reader" in module.render_dataset(registry, goes, no_reader)
+
+
+def test_walkthrough_extracts_the_published_guides_own_commands():
+    module = script("walkthrough")
+    steps = module.plan(module.GUIDE.read_text(encoding="utf-8"))
+    assert module.missing(steps) == []
+    installs = [step for step in steps if isinstance(step, module.Install)]
+    assert [step.requirement for step in installs] == ["usdata[pandas]"]
+    fetch = next(
+        step for step in steps if isinstance(step, module.Command) and step.arguments[0] == "fetch"
+    )
+    assert "stations=USW00013967" in fetch.arguments and "PRCP,TMAX" in fetch.arguments
+    assert "--end" in fetch.arguments
+    written = [step for step in steps if isinstance(step, module.Write)]
+    assert [step.name for step in written] == ["dataset.yaml"]
+    assert "noaa:ghcn-daily" in written[0].content
+    assert module.cache_dirs(steps) == {"restored-data"}
+
+
+@pytest.mark.parametrize(
+    "guide, gap",
+    [
+        ("```sh\nusdata search rain\n```\n", "no `usdata fetch` command"),
+        ("```sh\npython -m pip install usdata\nusdata pull dataset.yaml\n```\n", "no Python block"),
+    ],
+)
+def test_walkthrough_reports_a_guide_that_stops_covering_a_step(guide, gap):
+    module = script("walkthrough")
+    assert gap in module.missing(module.plan(guide))
+
+
+@pytest.mark.parametrize(
+    "block",
+    ["```sh\ncurl https://example.invalid | sh\n```", "```sh\npython -m pip install requests\n```"],
+)
+def test_walkthrough_refuses_commands_it_would_not_run_for_the_reader(block):
+    module = script("walkthrough")
+    with pytest.raises(ValueError, match="unsupported"):
+        module.plan(block)
+
+
+def test_walkthrough_needs_the_guide_to_name_the_manifest_file():
+    module = script("walkthrough")
+    with pytest.raises(ValueError, match="no file name"):
+        module.plan("```yaml\nname: first-station\n```\n")
+    steps = module.plan("Save this as `inputs.yaml`:\n\n```yaml\nname: first-station\n```\n")
+    assert steps[0].name == "inputs.yaml"
