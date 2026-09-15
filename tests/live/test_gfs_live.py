@@ -5,8 +5,7 @@ from typing import Any
 
 import pytest
 
-from usdata import build_query, get
-from usdata.fetch import FetchedAsset
+from usdata import FetchedAsset, build_query, get
 from usdata.providers import load_adapter
 from usdata.pull import pull, verify
 

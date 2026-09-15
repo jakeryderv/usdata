@@ -4,9 +4,8 @@ from pathlib import Path
 import pytest
 import respx
 
-from usdata import provenance
+from usdata import ChecksumMismatch, provenance
 from usdata.cache import sha256_file
-from usdata.fetch import ChecksumMismatch
 from usdata.manifest import Lockfile, lockfile_path
 from usdata.providers.noaa.ghcnd import DATA_URL
 from usdata.pull import pull, verify

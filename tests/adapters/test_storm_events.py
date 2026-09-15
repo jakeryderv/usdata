@@ -9,10 +9,9 @@ import pytest
 import respx
 from typer.testing import CliRunner
 
-from usdata import provenance
+from usdata import ChecksumMismatch, fetch, provenance
 from usdata.cache import sha256_file
 from usdata.cli import app
-from usdata.fetch import ChecksumMismatch, fetch
 from usdata.models import Protocol
 from usdata.providers.base import QueryError
 from usdata.providers.noaa.storm_events import DIRECTORY_URL, StormEvents

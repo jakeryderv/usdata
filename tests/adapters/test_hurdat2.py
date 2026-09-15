@@ -8,10 +8,9 @@ import pytest
 import respx
 from typer.testing import CliRunner
 
-from usdata import provenance
+from usdata import ChecksumMismatch, fetch, provenance
 from usdata.cache import sha256_file
 from usdata.cli import app
-from usdata.fetch import ChecksumMismatch, fetch
 from usdata.models import Protocol, Query
 from usdata.providers.base import QueryError
 from usdata.providers.noaa.hurdat2 import DIRECTORY_URL, Hurdat2, Hurdat2Params

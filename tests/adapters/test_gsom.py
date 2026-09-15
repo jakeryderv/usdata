@@ -4,8 +4,7 @@ import httpx
 import pytest
 import respx
 
-from usdata import provenance
-from usdata.fetch import ChecksumMismatch, fetch
+from usdata import ChecksumMismatch, fetch, provenance
 from usdata.providers.base import QueryError
 from usdata.providers.noaa.ghcnd import DATA_URL, SEARCH_URL
 from usdata.providers.noaa.gsom import GlobalSummaryMonthly

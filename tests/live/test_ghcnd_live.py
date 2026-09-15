@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from usdata.fetch import fetch
+from usdata import fetch
 from usdata.providers.noaa.ghcnd import GhcnDaily
 from usdata.query import build_query
 from usdata.registry import default_registry

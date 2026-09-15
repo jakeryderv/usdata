@@ -5,8 +5,8 @@ import pytest
 import respx
 from typer.testing import CliRunner
 
+from usdata import ChecksumMismatch
 from usdata.cli import app
-from usdata.fetch import ChecksumMismatch
 from usdata.manifest import Lockfile, lockfile_path
 from usdata.providers.base import QueryError
 from usdata.providers.noaa.ghcnd import DATA_URL, SEARCH_URL

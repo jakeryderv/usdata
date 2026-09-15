@@ -21,7 +21,7 @@ MOMENT_FLAG_COUNTS = {
 }
 
 if TYPE_CHECKING:
-    from usdata.fetch import FetchedAsset
+    from usdata._fetch import FetchedAsset
 
 
 def _check_sweeps(content: bytes, sweep: int | list[int] | None) -> None:

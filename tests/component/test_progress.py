@@ -11,11 +11,10 @@ import pytest
 import respx
 from typer.testing import CliRunner
 
-from usdata import build_query, default_registry
+from usdata import ChecksumMismatch, build_query, default_registry, fetch
 from usdata._progress import AssetProgress, Batch, Event, TransferProgress, emit, observe
 from usdata.cli import app
 from usdata.cli.progress import _Display
-from usdata.fetch import ChecksumMismatch, fetch
 from usdata.protocols import http
 from usdata.providers.noaa.ghcnd import DATA_URL
 from usdata.pull import pull

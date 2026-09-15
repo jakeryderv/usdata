@@ -8,8 +8,8 @@ import pytest
 import respx
 from typer.testing import CliRunner
 
+from usdata import ChecksumMismatch
 from usdata.cli import app
-from usdata.fetch import ChecksumMismatch
 from usdata.models import Query
 from usdata.providers.base import QueryError
 from usdata.providers.noaa.coastwatch import BASE, DATASET, CoastwatchSst, CoastwatchSstParams

@@ -1,8 +1,8 @@
-import importlib
 from pathlib import Path
 
 import pytest
 
+from usdata import _fetch
 from usdata.models import Asset, Dataset, Protocol, Query, Status
 from usdata.providers.base import Provider
 
@@ -41,5 +41,5 @@ def fake_source(monkeypatch):
         def close(self) -> None:
             state["closed"] += 1
 
-    monkeypatch.setattr(importlib.import_module("usdata.fetch"), "load_adapter", FakeProvider)
+    monkeypatch.setattr(_fetch, "load_adapter", FakeProvider)
     return dataset, state

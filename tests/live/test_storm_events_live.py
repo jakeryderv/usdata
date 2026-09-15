@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
+from usdata import fetch
 from usdata.cache import sha256_file
-from usdata.fetch import fetch
 from usdata.query import build_query
 from usdata.registry import default_registry
 

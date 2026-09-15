@@ -6,7 +6,7 @@ import httpx
 import pytest
 import respx
 
-from usdata.fetch import ChecksumMismatch
+from usdata import ChecksumMismatch
 from usdata.protocols import s3
 from usdata.providers.base import QueryError
 from usdata.providers.noaa.mrms import PRODUCTS, Mrms, file_time

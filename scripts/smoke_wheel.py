@@ -97,7 +97,7 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from usdata.cache import sha256_file
-from usdata.fetch import FetchedAsset
+from usdata import FetchedAsset
 from usdata.models import Asset, Provenance
 assert "xradar" not in sys.modules
 path = Path("radar.bz2")
@@ -129,7 +129,7 @@ import sys
 from pathlib import Path
 from importlib.util import find_spec
 import usdata
-from usdata.fetch import FetchedAsset
+from usdata import FetchedAsset
 from usdata.models import Asset, Protocol
 from usdata.provenance import record
 assert "xarray" not in sys.modules

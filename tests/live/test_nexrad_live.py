@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from usdata.fetch import fetch_asset
+from usdata import fetch_asset
 from usdata.providers import load_adapter
 from usdata.query import build_query
 from usdata.registry import default_registry

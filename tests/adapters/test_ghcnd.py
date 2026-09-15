@@ -5,8 +5,7 @@ import httpx
 import pytest
 import respx
 
-from usdata import provenance
-from usdata.fetch import fetch, fetch_asset
+from usdata import fetch, fetch_asset, provenance
 from usdata.models import Query
 from usdata.providers.base import QueryError
 from usdata.providers.noaa.ghcnd import DATA_URL, SEARCH_URL, GhcnDaily, GhcnDailyParams

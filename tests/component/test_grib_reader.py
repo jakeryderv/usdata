@@ -10,8 +10,8 @@ from unittest.mock import patch
 
 import pytest
 
+from usdata import FetchedAsset
 from usdata.cache import sha256_file
-from usdata.fetch import FetchedAsset
 from usdata.models import Asset, Protocol, Provenance
 from usdata.readers import MissingReaderDependency, open_asset
 
