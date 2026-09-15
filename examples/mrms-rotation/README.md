@@ -7,7 +7,7 @@ each one inside two stated boxes around Oklahoma Storm Events tornado report
 this measures is where radar-derived azimuthal shear maxima were in the 3 to
 6 km layer, in units of 0.001 s⁻¹. It is not a tornado detection, not a
 storm-motion product, and not a statement about the low-level circulation that
-a tornado report describes. See [examples setup](https://docs.usdata.dev/project/)
+a tornado report describes. See [examples setup](https://usdata.dev/examples/#run-examples)
 to run it.
 
 Available since v0.15.0, which adds `noaa:mrms` and the GRIB2 reader. The

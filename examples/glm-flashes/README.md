@@ -99,7 +99,7 @@ the lockfile, and the cached bytes together.
   at a path that was never typed. `examples/README.md` documents
   `just run-notebooks` without showing `--notebook` at all.
 - The "examples guide" link that ten example READMEs point at,
-  `https://docs.usdata.dev/project/`, matches no page under `docs/` and no entry
+  `https://usdata.dev/examples/#run-examples`, matches no page under `docs/` and no entry
   in the mkdocs nav. `mkdocs build --strict` only validates local links, so
   `just check` cannot see it, and a student following it from a sibling example
   lands nowhere.

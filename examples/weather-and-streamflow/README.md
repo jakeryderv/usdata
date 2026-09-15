@@ -2,7 +2,7 @@
 
 Open the [executed notebook](example.ipynb) to inspect a two-source manifest, fetch
 NOAA weather and USGS streamflow, view their data and provenance, and verify and
-restore the locked inputs. See [examples setup](https://docs.usdata.dev/project/) to run it.
+restore the locked inputs. See [examples setup](https://usdata.dev/examples/#run-examples) to run it.
 
 The retained [manifest](dataset.yaml) requests two days of station weather near
 Oklahoma City and streamflow at the Tulsa site. These are different locations;

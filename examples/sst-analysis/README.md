@@ -2,7 +2,7 @@
 
 Open the [executed notebook](example.ipynb) to inspect four CoastWatch ocean grid
 centers, their units and provenance, a small spatial plot, and cache reuse.
-See [examples setup](https://docs.usdata.dev/project/) to run it interactively or refresh its outputs.
+See [examples setup](https://usdata.dev/examples/#run-examples) to run it interactively or refresh its outputs.
 
 Requires usdata v0.6 or newer. The sample is at 2024-05-06T12:00Z. Its mean is an
 unweighted average of four nearby grid centers, not a regional climate statistic.

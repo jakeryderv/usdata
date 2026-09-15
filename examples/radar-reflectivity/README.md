@@ -7,5 +7,5 @@ sweep fields and units, plot reflectivity by azimuth and slant range, and check
 provenance/cache reuse. The download is about 10 MB; decoding uses several
 hundred MB of memory.
 
-Run `just notebooks` from the repository root. See the [examples guide](https://docs.usdata.dev/project/)
+Run `just notebooks` from the repository root. See the [examples guide](https://usdata.dev/examples/#run-examples)
 for fresh-kernel execution and output refresh instructions.

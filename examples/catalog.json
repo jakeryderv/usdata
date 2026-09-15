@@ -81,18 +81,18 @@
   },
   {
     "slug": "glm-flashes",
-    "title": "How much lightning was there around a reported tornado?",
-    "summary": "Pull one hour of GOES-16 GLM detection files, flatten the flash tables, and count flashes near Oklahoma City minute by minute."
+    "title": "Did lightning near the storm pick up before the Oklahoma City tornado report?",
+    "summary": "Count GOES-16 GLM flashes minute by minute in a fixed box around the report over the hour ending at it, against a same-size control box and the whole field of view."
   },
   {
     "slug": "mrms-rotation",
-    "title": "Where was the strongest rotation near a reported tornado?",
-    "summary": "Pull twenty minutes of MRMS mid-level rotation tracks, crop each CONUS grid to Oklahoma City locally, and report the peak azimuthal shear file by file."
+    "title": "Where was the strongest mid-level rotation in each two-minute grid, and did it move toward the reported tornado?",
+    "summary": "Locate the strongest MRMS mid-level azimuthal shear in each two-minute grid inside two boxes around the report and measure how far each peak sat from the reported path start."
   },
   {
     "slug": "hrrr-environment",
-    "title": "What did the model say the environment was during a reported tornado?",
-    "summary": "Pull the HRRR 20 UTC surface analysis for 2024-05-06 and read surface CAPE and 0-3 km helicity at the grid point nearest Oklahoma City."
+    "title": "What did the HRRR analysis say about the storm environment over central Oklahoma at 20 UTC, and how far was the tornado report from the most favorable values?",
+    "summary": "Read surface CAPE and 0-3 km helicity from one HRRR analysis at the grid point nearest the report, find the largest values within 100 km, and map both fields."
   },
   {
     "slug": "gfs-environment",

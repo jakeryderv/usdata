@@ -6,7 +6,7 @@ same station, plot both anomaly series, and verify the manifest's locked inputs.
 The calculated summary counts warmer-than-normal months and compares total
 precipitation with the sum of the monthly normals. It describes this station
 and year, not a climate trend or statistical significance.
-See [examples setup](https://docs.usdata.dev/project/) to run it.
+See [examples setup](https://usdata.dev/examples/#run-examples) to run it.
 
 Requires usdata v0.11 or newer for `noaa:climate-normals`. The retained
 [manifest](dataset.yaml) holds both sources: `noaa:gsom` with the 2024 calendar

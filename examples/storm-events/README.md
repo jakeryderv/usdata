@@ -3,7 +3,7 @@
 Available since v0.8. Open the [executed notebook](example.ipynb) to
 fetch the annual 2024 details archive, open its gzip CSV locally, and describe
 Oklahoma tornado, hail, and thunderstorm-wind reports beginning in May. See
-[examples setup](https://docs.usdata.dev/project/) to run it.
+[examples setup](https://usdata.dev/examples/#run-examples) to run it.
 
 The [manifest](dataset.yaml) selects one complete annual file (~13 MB compressed),
 not a server-side May or Oklahoma subset. Unsupported geographic, variable, and
