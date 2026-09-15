@@ -8,8 +8,9 @@ import pytest
 from typer.testing import CliRunner
 
 from usdata.cli.app import app
+from usdata.models import Query
 from usdata.providers.base import QueryError
-from usdata.providers.noaa.coops import CoopsWaterLevels
+from usdata.providers.noaa.coops import CoopsParams, CoopsWaterLevels
 from usdata.query import build_query
 from usdata.registry import default_registry
 
@@ -110,6 +111,47 @@ def test_invalid_queries_fail_before_client_creation(changes, monkeypatch):
     monkeypatch.setattr("usdata.protocols.http.client", unexpected)
     with adapter() as provider, pytest.raises(QueryError):
         provider.list_assets(query(**changes))
+
+
+def message(**params: object) -> str:
+    """The reported problems with one set of CO-OPS parameters, as the CLI prints them."""
+    with adapter() as provider, pytest.raises(QueryError) as raised:
+        provider.parse_params(Query(params=params), CoopsParams)
+    return str(raised.value)
+
+
+def test_station_and_datum_are_named_when_missing():
+    """Neither has a default, so each missing one reports what it needs, on its own line."""
+    assert message() == (
+        "station is required: seven-digit CO-OPS station id, for example '8518750'; "
+        "datum is required: vertical datum: CRD, IGLD, LWD, MHHW, MHW, MLLW, MLW, MSL, "
+        "MTL, NAVD, STND"
+    )
+
+
+@pytest.mark.parametrize("raw", [8518750, True, "851875", "85187500", "8518750,8724580", None])
+def test_station_must_be_seven_ascii_digits(raw):
+    assert message(station=raw, datum="MLLW") == (
+        "station must be a seven-digit string, for example '8518750'"
+    )
+
+
+@pytest.mark.parametrize("raw", ["bad", [], "mllw", None])
+def test_datum_names_every_value_it_accepts(raw):
+    assert message(station="8518750", datum=raw) == (
+        "datum must be explicit: CRD, IGLD, LWD, MHHW, MHW, MLLW, MLW, MSL, MTL, NAVD, STND"
+    )
+
+
+def test_units_default_to_metric_and_reject_the_other_systems_token():
+    with adapter() as provider:
+        parsed = provider.parse_params(
+            Query(params={"station": "8518750", "datum": "MLLW"}), CoopsParams
+        )
+    assert parsed.units == "metric"
+    assert message(station="8518750", datum="MLLW", units="standard") == (
+        "units must be metric or english"
+    )
 
 
 def test_interval_limit_inclusive_and_naive_dates_use_utc():

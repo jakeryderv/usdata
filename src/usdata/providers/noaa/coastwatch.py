@@ -11,13 +11,13 @@ from __future__ import annotations
 import hashlib
 import math
 from bisect import bisect_left, bisect_right
-from collections.abc import Mapping
 from datetime import UTC, datetime
 from itertools import pairwise
 from pathlib import Path
-from typing import ClassVar, cast
+from typing import cast
 
 import httpx
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from usdata.models import Asset, BBox, Protocol, Query, TimeRange
 from usdata.protocols import erddap, http
@@ -44,25 +44,38 @@ def _spatial_slice(
     ), length
 
 
+class CoastwatchSstParams(BaseModel):
+    """How coarsely one CoastWatch subset walks the analysis grid."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    stride: int = Field(
+        default=1, description="Positive integer subsampling both spatial axes; default 1."
+    )
+
+    @field_validator("stride", mode="before")
+    @classmethod
+    def _positive(cls, value: object) -> object:
+        """Accept the digit strings the CLI passes, rejecting the booleans and floats int takes."""
+        if isinstance(value, str) and value.isascii() and value.isdigit():
+            value = int(value)
+        if type(value) is not int or value < 1:
+            raise ValueError("must be a positive integer")
+        return value
+
+
 class CoastwatchSst(_HttpProvider):
     """NOAA's 0.05-degree day/night analysis, including units and grid coordinates."""
 
-    accepted_params: ClassVar[Mapping[str, str]] = {
-        "stride": "Positive integer subsampling both spatial axes; default 1.",
-    }
+    params_model = CoastwatchSstParams
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Resolve a valid grid intersection into one stable, bounded CSV request."""
-        self.check_params(query)
+        stride = self.parse_params(query, CoastwatchSstParams).stride
         self.reject(query, "text", hint="select a bbox/location, time window, and variables")
         if query.bbox is None:
             raise QueryError(f"{self.dataset.id} requires a bbox/location and both start and end")
         start, end = self.utc_window(query)
-        stride = query.params.get("stride", 1)
-        if isinstance(stride, str) and stride.isascii() and stride.isdigit():
-            stride = int(stride)
-        if type(stride) is not int or stride < 1:
-            raise QueryError("stride must be a positive integer")
         variables = sorted(set(query.variables)) if query.variables else ["analysed_sst"]
         if unsupported := set(variables) - VARIABLES:
             raise QueryError(f"unsupported CoastWatch variables: {', '.join(sorted(unsupported))}")

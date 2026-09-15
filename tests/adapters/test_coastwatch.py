@@ -10,8 +10,9 @@ from typer.testing import CliRunner
 
 from usdata.cli import app
 from usdata.fetch import ChecksumMismatch
+from usdata.models import Query
 from usdata.providers.base import QueryError
-from usdata.providers.noaa.coastwatch import BASE, DATASET, CoastwatchSst
+from usdata.providers.noaa.coastwatch import BASE, DATASET, CoastwatchSst, CoastwatchSstParams
 from usdata.pull import pull, verify
 from usdata.query import build_query
 from usdata.registry import default_registry
@@ -60,6 +61,24 @@ def adapter():
 def test_invalid_constraints_fail_before_http(adapter, override) -> None:
     with pytest.raises(QueryError):
         adapter.list_assets(query(**override))
+
+
+@pytest.mark.parametrize(("raw", "expected"), [("2", 2), (2, 2), ("1", 1)])
+def test_stride_accepts_the_digit_strings_the_cli_passes(adapter, raw, expected) -> None:
+    assert adapter.parse_params(Query(params={"stride": raw}), CoastwatchSstParams).stride == (
+        expected
+    )
+
+
+@pytest.mark.parametrize("raw", [0, -1, True, 1.5, "oops", "2.0", None, "-3"])
+def test_stride_rejects_everything_that_is_not_a_positive_integer(adapter, raw) -> None:
+    with pytest.raises(QueryError) as raised:
+        adapter.parse_params(Query(params={"stride": raw}), CoastwatchSstParams)
+    assert str(raised.value) == "stride must be a positive integer"
+
+
+def test_stride_defaults_to_every_grid_point(adapter) -> None:
+    assert adapter.parse_params(Query(params={}), CoastwatchSstParams).stride == 1
 
 
 def test_subset_uses_available_times_and_contained_grid_centers(adapter) -> None:

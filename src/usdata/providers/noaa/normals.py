@@ -14,15 +14,16 @@ carry the 1991-2020 normals period as their time bounds.
 from __future__ import annotations
 
 import hashlib
-from collections.abc import Mapping
 from datetime import UTC, datetime
-from typing import Any, ClassVar
+from typing import Annotated, Any
 
 import httpx
+from pydantic import Field
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.providers.base import QueryError, to_utc
-from usdata.providers.noaa.ghcnd import DATA_URL, STATIONS_PER_ASSET, GhcnDaily
+from usdata.providers.noaa.ghcnd import DATA_URL, STATIONS_PER_ASSET, GhcnDaily, GhcnDailyParams
+from usdata.providers.params import choice
 
 PERIODS = {
     "monthly": "normals-monthly-1991-2020",
@@ -36,11 +37,12 @@ NORMALS_PERIOD = TimeRange(
 )
 
 
-def _period(query: Query) -> str:
-    period = query.params.get("period", "monthly")
-    if period not in PERIODS:
-        raise QueryError("period must be monthly, daily, or annualseasonal")
-    return period
+class ClimateNormalsParams(GhcnDailyParams):
+    """A normals query also names which averaging period it wants."""
+
+    period: Annotated[str, choice(*PERIODS)] = Field(
+        default="monthly", description="monthly (default), daily, or annualseasonal."
+    )
 
 
 def _window(query: Query, period: str) -> tuple[str, str] | None:
@@ -67,46 +69,41 @@ def _window(query: Query, period: str) -> tuple[str, str] | None:
 class ClimateNormals(GhcnDaily):
     """1991-2020 normals as CSV subsets, reusing NCEI station discovery and transport."""
 
-    accepted_params: ClassVar[Mapping[str, str]] = {
-        **GhcnDaily.accepted_params,
-        "period": "monthly (default), daily, or annualseasonal.",
-    }
+    params_model = ClimateNormalsParams
 
     def find_stations(self, query: Query) -> list[str]:
         """Stations with normals for the selected period inside the query's bbox."""
-        dataset = PERIODS[_period(query)]
+        dataset = PERIODS[self.parse_params(query, ClimateNormalsParams).period]
         return self._search_stations(dataset, query.model_copy(update={"time": NORMALS_PERIOD}))
 
     def list_assets(self, query: Query) -> list[Asset]:
         """One CSV asset per chunk of stations for the selected period and window."""
-        self.check_params(query)
+        params = self.parse_params(query, ClimateNormalsParams)
         self.reject(query, "text", hint="search the registry instead")
-        period = _period(query)
-        units = self._units(query)
-        window = _window(query, period)
-        stations = self._stations(query)
+        window = _window(query, params.period)
+        stations = self._stations(query, params.stations)
         if not stations:
             return []
 
-        ncei_dataset = PERIODS[period]
+        ncei_dataset = PERIODS[params.period]
         label = ncei_dataset
         if window is not None:
             label = f"{ncei_dataset}_{window[0][5:]}_{window[1][5:]}"
         assets: list[Asset] = []
         for i in range(0, len(stations), STATIONS_PER_ASSET):
             chunk = stations[i : i + STATIONS_PER_ASSET]
-            params: dict[str, Any] = {
+            request: dict[str, Any] = {
                 "dataset": ncei_dataset,
                 "stations": ",".join(chunk),
                 "format": "csv",
-                "units": units,
+                "units": params.units,
                 "includeStationLocation": "1",
             }
             if window is not None:
-                params["startDate"], params["endDate"] = window
+                request["startDate"], request["endDate"] = window
             if query.variables:
-                params["dataTypes"] = ",".join(query.variables)
-            url = str(httpx.URL(DATA_URL, params=params))
+                request["dataTypes"] = ",".join(query.variables)
+            url = str(httpx.URL(DATA_URL, params=request))
             digest = hashlib.sha1(url.encode()).hexdigest()[:12]
             assets.append(
                 Asset(

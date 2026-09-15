@@ -7,8 +7,12 @@ import respx
 
 from usdata import provenance
 from usdata.fetch import fetch, fetch_asset
+from usdata.models import Query
 from usdata.providers.base import QueryError
-from usdata.providers.noaa.ghcnd import DATA_URL, SEARCH_URL, GhcnDaily
+from usdata.providers.noaa.ghcnd import DATA_URL, SEARCH_URL, GhcnDaily, GhcnDailyParams
+from usdata.providers.noaa.gsom import GlobalSummaryMonthly
+from usdata.providers.noaa.gsoy import GlobalSummaryYearly
+from usdata.providers.noaa.lcd import LocalClimatologicalData
 from usdata.query import build_query
 from usdata.registry import default_registry
 
@@ -132,6 +136,52 @@ def test_fetch_http_error_leaves_no_partial_file(tmp_path: Path, adapter: GhcnDa
     with pytest.raises(httpx.HTTPStatusError), respx.mock() as mock:
         mock.get(DATA_URL).mock(return_value=httpx.Response(404))
         fetch_asset(adapter.dataset, asset, root=tmp_path)
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("USW00013967", ["USW00013967"]),
+        (" USW00013967 , USW00003954 ", ["USW00013967", "USW00003954"]),
+        (["A", "A", "B"], ["A", "B"]),
+        ("A,,B", ["A", "B"]),
+    ],
+)
+def test_station_lists_split_strip_and_dedupe(adapter: GhcnDaily, raw, expected) -> None:
+    """The wire sends one id, a list, or a comma string; the model reads all three."""
+    params = adapter.parse_params(Query(params={"stations": raw}), GhcnDailyParams)
+    assert params.stations == expected
+
+
+def test_parameter_problems_name_their_field(adapter: GhcnDaily) -> None:
+    """One line per problem, each prefixed with the parameter that caused it."""
+
+    def message(**params: object) -> str:
+        with pytest.raises(QueryError) as raised:
+            adapter.parse_params(Query(params=params), GhcnDailyParams)
+        return str(raised.value)
+
+    unreadable = "stations must be text: one value, a list, or a comma-separated string"
+    assert message(stations=123) == unreadable
+    assert message(stations=[123]) == unreadable
+    assert message(stations=[]) == "stations must not be empty"
+    assert message(units="kelvin") == "units must be metric or standard"
+    assert message(untis="metric") == "unsupported noaa:ghcn-daily params: untis"
+
+
+def test_defaults_leave_the_station_list_to_a_location(adapter: GhcnDaily) -> None:
+    """Without ``stations`` the adapter searches, so the model names none to chunk."""
+    params = adapter.parse_params(Query(params={}), GhcnDailyParams)
+    assert params.stations is None and params.units == "metric"
+
+
+@pytest.mark.parametrize(
+    "cls", [GlobalSummaryMonthly, GlobalSummaryYearly, LocalClimatologicalData]
+)
+def test_subclasses_adding_no_params_inherit_the_declaration(cls) -> None:
+    """GSOM, GSOY, and LCD accept exactly what GHCN-Daily does, from the same model."""
+    assert cls.params_model is GhcnDailyParams
+    assert dict(cls.accepted_params) == dict(GhcnDaily.accepted_params)
 
 
 @pytest.mark.parametrize(
