@@ -12,6 +12,7 @@ from usdata.providers.noaa.nexrad_level3 import (
     BUCKET,
     PRODUCTS,
     NexradLevel3,
+    NexradLevel3Params,
     bucket_site,
     product_time,
 )
@@ -60,21 +61,37 @@ def test_product_allowlist_covers_tilts_and_single_products() -> None:
     assert all(description for description in PRODUCTS.values())
 
 
+def codes(adapter: NexradLevel3, **params) -> list[str]:
+    """The product codes one query resolves to, through the declared parameter model."""
+    query = build_query(site="KTLX", **params)
+    return adapter.parse_params(query, NexradLevel3Params).products
+
+
 def test_product_selection_normalizes_and_validates(adapter: NexradLevel3) -> None:
-    assert adapter.select_products(build_query(site="KTLX", products="n0b, nmd,N0B")) == [
-        "N0B",
-        "NMD",
-    ]
-    assert adapter.select_products(build_query(site="KTLX", products=["EET"])) == ["EET"]
-    with pytest.raises(QueryError, match="needs products="):
-        adapter.select_products(build_query(site="KTLX"))
+    assert codes(adapter, products="n0b, nmd,N0B") == ["N0B", "NMD"]
+    assert codes(adapter, products=["EET"]) == ["EET"]
+    with pytest.raises(QueryError, match="products is required"):
+        codes(adapter)
     with pytest.raises(QueryError, match="unknown Level III products: ZZZ"):
-        adapter.select_products(build_query(site="KTLX", products="N0B,ZZZ"))
-    for bad in ("", " , ", [], [1], 5, None):
-        with pytest.raises(QueryError):
-            adapter.select_products(build_query(site="KTLX", products=bad))
+        codes(adapter, products="N0B,ZZZ")
+    for bad in ("", " , ", []):
+        with pytest.raises(QueryError, match="products must not be empty"):
+            codes(adapter, products=bad)
+    for bad in ([1], 5, None):
+        with pytest.raises(QueryError, match="products must be text"):
+            codes(adapter, products=bad)
     with pytest.raises(QueryError, match="unsupported"):
-        adapter.select_products(build_query(site="KTLX", products="N0B", product="N0B"))
+        codes(adapter, products="N0B", product="N0B")
+
+
+def test_the_level_ii_site_rules_carry_into_level_iii(adapter: NexradLevel3) -> None:
+    """The model extends its parent's, so the site selection rules come with it."""
+    parsed = adapter.parse_params(
+        build_query(sites="ktlx, kvnx", products="N0B"), NexradLevel3Params
+    )
+    assert parsed.sites == ["KTLX", "KVNX"] and parsed.products == ["N0B"]
+    with pytest.raises(QueryError, match="pass only one of site or sites"):
+        codes(adapter, sites="KVNX", products="N0B")
 
 
 def test_list_assets_iterates_products_days_and_pages(adapter: NexradLevel3) -> None:
@@ -184,7 +201,7 @@ def test_missing_products_is_rejected_before_listing(adapter: NexradLevel3) -> N
     q = build_query(site="KTLX", start="2024-05-06T12:00", end="2024-05-06T12:01")
     with (
         respx.mock(assert_all_called=False) as mock,
-        pytest.raises(QueryError, match="needs products="),
+        pytest.raises(QueryError, match="products is required: Level III product codes"),
     ):
         adapter.list_assets(q)
     assert not mock.calls

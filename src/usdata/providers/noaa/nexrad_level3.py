@@ -18,12 +18,14 @@ import re
 from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import ClassVar
+
+from pydantic import Field, model_validator
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import s3
 from usdata.providers.base import QueryError
-from usdata.providers.noaa.nexrad import MAX_WINDOW, NexradLevel2
+from usdata.providers.noaa.nexrad import MAX_WINDOW, NexradLevel2, NexradParams
+from usdata.providers.params import UpperStrList
 
 BUCKET = "unidata-nexrad-level3"
 ARCHIVE_START = datetime(2020, 3, 30, tzinfo=UTC)
@@ -83,44 +85,36 @@ def bucket_site(icao: str) -> str:
     return icao.upper()[1:]
 
 
-def _products_param(raw: object) -> list[str]:
-    if isinstance(raw, str):
-        raw = raw.split(",")
-    if not isinstance(raw, (list, tuple)) or not all(isinstance(p, str) for p in raw):
-        raise QueryError("products must be a string or list of strings")
-    codes = list(dict.fromkeys(p.strip().upper() for p in raw if p.strip()))
-    if not codes:
-        raise QueryError("products must not be empty")
-    if unknown := [code for code in codes if code not in PRODUCTS]:
-        raise QueryError(
-            f"unknown Level III products: {', '.join(unknown)}; "
-            f"supported codes are {', '.join(sorted(PRODUCTS))}"
-        )
-    return codes
+class NexradLevel3Params(NexradParams):
+    """The Level II radar selection, plus the Level III product codes to download."""
+
+    products: UpperStrList = Field(
+        description="Required Level III product codes, comma-separated or a list, "
+        "for example N0B,NMD."
+    )
+
+    @model_validator(mode="after")
+    def _products_are_in_the_allowlist(self) -> NexradLevel3Params:
+        """Every code is checked against the bucket's vocabulary before any request."""
+        if unknown := [code for code in self.products if code not in PRODUCTS]:
+            raise ValueError(
+                f"unknown Level III products: {', '.join(unknown)}; "
+                f"supported codes are {', '.join(sorted(PRODUCTS))}"
+            )
+        return self
 
 
 class NexradLevel3(NexradLevel2):
     """NEXRAD Level III adapter. Params: Level II site selection plus ``products``."""
 
-    accepted_params: ClassVar[Mapping[str, str]] = {
-        **NexradLevel2.accepted_params,
-        "products": "Required Level III product codes, comma-separated or a list, "
-        "for example N0B,NMD.",
-    }
-
-    def select_products(self, query: Query) -> list[str]:
-        """The validated product codes, in request order."""
-        self.check_params(query)
-        if "products" not in query.params:
-            raise QueryError(f"{self.dataset.id} needs products=..., for example products=N0B,NMD")
-        return _products_param(query.params["products"])
+    params_model = NexradLevel3Params
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Every selected product for the selected sites inside the UTC time window."""
+        params = self.parse_params(query, NexradLevel3Params)
         self.reject(
             query, "text", "variables", hint="products and site select whole Level III files"
         )
-        products = self.select_products(query)
         start, end = self.utc_window(query)
         if end - start > MAX_WINDOW:
             raise QueryError("NEXRAD requests must span at most 31 days; split longer intervals")
@@ -130,9 +124,9 @@ class NexradLevel3(NexradLevel2):
                 f"products are archived at NCEI ({NCEI_ARCHIVE}) and are not reachable here"
             )
         assets: list[Asset] = []
-        for icao in self.select_sites(query):
+        for icao in self.select_sites(query, params):
             site = bucket_site(icao)
-            for product in products:
+            for product in params.products:
                 day = start.date()
                 while day <= end.date():
                     prefix = f"{site}_{product}_{day:%Y_%m_%d}_"

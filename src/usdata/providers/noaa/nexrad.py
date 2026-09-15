@@ -13,31 +13,21 @@ inside the query bbox, then the single radar nearest the bbox centre.
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import ClassVar
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import s3
 from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
 from usdata.providers.noaa import sites
+from usdata.providers.params import OptionalUpperStrList
 
 BUCKET = "unidata-nexrad-level2"
 MAX_WINDOW = timedelta(days=31)
 KEY_RE = re.compile(r"^(?P<site>[A-Z]{4})(?P<stamp>\d{8}_\d{6})(?:_V0[36])?(?:\.gz)?$")
-
-
-def _sites_param(raw: object) -> list[str]:
-    if isinstance(raw, str):
-        raw = raw.split(",")
-    if not isinstance(raw, (list, tuple)) or not all(isinstance(s, str) for s in raw):
-        raise QueryError("sites must be a string or list of strings")
-    ids = list(dict.fromkeys(s.strip().upper() for s in raw if s.strip()))
-    if not ids:
-        raise QueryError("sites must not be empty")
-    return ids
 
 
 def scan_time(key: str) -> datetime | None:
@@ -48,46 +38,71 @@ def scan_time(key: str) -> datetime | None:
     return datetime.strptime(m["stamp"], "%Y%m%d_%H%M%S").replace(tzinfo=UTC)
 
 
+class NexradParams(BaseModel):
+    """Which radars one NEXRAD query names, or how many to take from the query centre."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    site: OptionalUpperStrList = Field(
+        default=None, description="One radar ICAO id, for example KTLX."
+    )
+    sites: OptionalUpperStrList = Field(
+        default=None, description="Several radar ICAO ids, comma-separated or a list."
+    )
+    nearest: int | None = Field(
+        default=None,
+        description="Take the N radars nearest the query centre instead of naming sites.",
+    )
+
+    @field_validator("nearest", mode="before")
+    @classmethod
+    def _a_count_of_radars(cls, value: object) -> object:
+        """Accept the digit strings the CLI passes, and nothing a count cannot be."""
+        if isinstance(value, bool) or not isinstance(value, (int, str)):
+            raise ValueError("must be a positive integer")
+        try:
+            count = int(value)
+        except ValueError:
+            raise ValueError("must be a positive integer") from None
+        if count < 1:
+            raise ValueError("must be a positive integer")
+        return count
+
+    @model_validator(mode="after")
+    def _one_way_of_choosing_radars(self) -> NexradParams:
+        """site, sites, and nearest are three alternatives, so only one may be given."""
+        if self.site is not None and self.sites is not None:
+            raise ValueError("pass only one of site or sites")
+        if self.nearest is not None and (self.site is not None or self.sites is not None):
+            raise ValueError("nearest cannot be combined with site or sites")
+        return self
+
+    @property
+    def named(self) -> list[str] | None:
+        """The radar ids the query named through either key, or None when it named none."""
+        return self.sites if self.sites is not None else self.site
+
+
 class NexradLevel2(_HttpProvider):
     """NEXRAD Level II adapter. Params: ``site``/``sites`` (ICAO ids), ``nearest`` (int)."""
 
-    accepted_params: ClassVar[Mapping[str, str]] = {
-        "site": "One radar ICAO id, for example KTLX.",
-        "sites": "Several radar ICAO ids, comma-separated or a list.",
-        "nearest": "Take the N radars nearest the query centre instead of naming sites.",
-    }
+    params_model = NexradParams
 
-    def select_sites(self, query: Query) -> list[str]:
+    def select_sites(self, query: Query, params: NexradParams) -> list[str]:
         """Radar site ids the query refers to; see the module docstring for the rules."""
-        self.check_params(query)
-        if "site" in query.params and "sites" in query.params:
-            raise QueryError("pass only one of site or sites")
-        if "nearest" in query.params and {"site", "sites"}.intersection(query.params):
-            raise QueryError("nearest cannot be combined with site or sites")
-        raw = query.params.get("sites", query.params.get("site"))
-        if {"site", "sites"}.intersection(query.params):
-            ids = _sites_param(raw)
-            for sid in ids:
+        if (named := params.named) is not None:
+            for sid in named:
                 try:
                     sites.get_site(sid)
                 except KeyError as e:
                     raise QueryError(str(e)) from e
-            return ids
+            return named
         if query.bbox is None:
             raise QueryError(f"{self.dataset.id} needs a location, bbox, lat/lon, or site=...")
         b = query.bbox
         lat, lon = (b.south + b.north) / 2, (b.west + b.east) / 2
-        if "nearest" in query.params:
-            count = query.params["nearest"]
-            if isinstance(count, bool) or not isinstance(count, (int, str)):
-                raise QueryError("nearest must be a positive integer")
-            try:
-                count = int(count)
-            except ValueError:
-                raise QueryError("nearest must be a positive integer") from None
-            if count < 1:
-                raise QueryError("nearest must be a positive integer")
-            return [s.id for s in sites.nearest(lat, lon, count)]
+        if params.nearest is not None:
+            return [s.id for s in sites.nearest(lat, lon, params.nearest)]
         inside = sites.sites_in(b)
         if inside:
             return [s.id for s in inside]
@@ -95,6 +110,7 @@ class NexradLevel2(_HttpProvider):
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Every volume scan for the selected sites inside the query's UTC time window."""
+        params = self.parse_params(query, NexradParams)
         self.reject(
             query, "text", "variables", hint="whole volume scans are selected by site and time"
         )
@@ -102,7 +118,7 @@ class NexradLevel2(_HttpProvider):
         if end - start > MAX_WINDOW:
             raise QueryError("NEXRAD requests must span at most 31 days; split longer intervals")
         assets: list[Asset] = []
-        for site in self.select_sites(query):
+        for site in self.select_sites(query, params):
             day = start.date()
             while day <= end.date():
                 prefix = f"{day:%Y/%m/%d}/{site}/"

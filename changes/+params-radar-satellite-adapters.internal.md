@@ -1,0 +1,1 @@
+Third and last of the adapter migrations to declared parameter models, covering the radar and satellite adapters (GOES ABI, GLM, NEXRAD Level II and III, MRMS); no user-visible behavior changes beyond the error wording listed in the pull request.

@@ -9,7 +9,7 @@ import respx
 from usdata.models import BBox, Query, TimeRange
 from usdata.providers.base import QueryError
 from usdata.providers.noaa import sites
-from usdata.providers.noaa.nexrad import BUCKET, NexradLevel2, scan_time
+from usdata.providers.noaa.nexrad import BUCKET, NexradLevel2, NexradParams, scan_time
 from usdata.query import build_query
 from usdata.registry import default_registry
 
@@ -36,6 +36,11 @@ def adapter():
         yield NexradLevel2(default_registry().get("noaa:nexrad-level2"), client=client)
 
 
+def chosen(adapter: NexradLevel2, query: Query) -> list[str]:
+    """The site ids one query resolves to, through the declared parameter model."""
+    return adapter.select_sites(query, adapter.parse_params(query, NexradParams))
+
+
 def test_scan_time_parses_all_key_generations() -> None:
     t = datetime(2024, 5, 6, 20, 2, 43, tzinfo=UTC)
     assert scan_time("2024/05/06/KTLX/KTLX20240506_200243_V06") == t
@@ -59,18 +64,23 @@ def test_site_table_and_geometry() -> None:
 
 
 def test_site_selection_rules(adapter: NexradLevel2) -> None:
-    assert adapter.select_sites(build_query(site="ktlx")) == ["KTLX"]
-    assert adapter.select_sites(build_query(sites="KTLX, KVNX")) == ["KTLX", "KVNX"]
+    assert chosen(adapter, build_query(site="ktlx")) == ["KTLX"]
+    assert chosen(adapter, build_query(sites="KTLX, KVNX")) == ["KTLX", "KVNX"]
+    # Case folds before duplicates collapse, so one radar named twice stays one radar.
+    assert chosen(adapter, build_query(sites="ktlx,KTLX")) == ["KTLX"]
     ok = build_query(location="ok").bbox
     assert ok is not None
-    assert adapter.select_sites(build_query(location="ok")) == [s.id for s in sites.sites_in(ok)]
+    assert chosen(adapter, build_query(location="ok")) == [s.id for s in sites.sites_in(ok)]
     # A small box with no radar inside falls back to the nearest one.
-    assert adapter.select_sites(build_query(lat=35.39, lon=-97.60, radius_km=10)) == ["KTLX"]
-    assert len(adapter.select_sites(build_query(lat=35.39, lon=-97.60, nearest=3))) == 3
+    assert chosen(adapter, build_query(lat=35.39, lon=-97.60, radius_km=10)) == ["KTLX"]
+    assert len(chosen(adapter, build_query(lat=35.39, lon=-97.60, nearest=3))) == 3
+    assert chosen(adapter, build_query(lat=35.39, lon=-97.60, nearest="3")) == chosen(
+        adapter, build_query(lat=35.39, lon=-97.60, nearest=3)
+    )
     with pytest.raises(QueryError):
-        adapter.select_sites(build_query())
+        chosen(adapter, build_query())
     with pytest.raises(QueryError):
-        adapter.select_sites(build_query(site="XXXX"))
+        chosen(adapter, build_query(site="XXXX"))
 
 
 def test_list_assets_spans_days_filters_window_and_paginates(adapter: NexradLevel2) -> None:
@@ -140,25 +150,30 @@ def test_fetch_downloads_via_https(tmp_path: Path, adapter: NexradLevel2) -> Non
 
 
 @pytest.mark.parametrize(
-    "params",
+    ("params", "message"),
     [
-        {"site": "KTLX", "nearestt": 2},
-        {"site": "KTLX", "sites": "KVNX"},
-        {"site": "KTLX", "nearest": 2},
-        {"sites": ""},
-        {"sites": None},
-        {"sites": [123]},
-        {"sites": 123},
-        {"nearest": 0},
-        {"nearest": -1},
-        {"nearest": 1.5},
-        {"nearest": True},
-        {"nearest": "two"},
+        ({"site": "KTLX", "nearestt": 2}, "unsupported noaa:nexrad-level2 params: nearestt"),
+        ({"site": "KTLX", "sites": "KVNX"}, "pass only one of site or sites"),
+        ({"site": "KTLX", "nearest": 2}, "nearest cannot be combined with site or sites"),
+        ({"sites": ""}, "sites must not be empty"),
+        ({"sites": " , "}, "sites must not be empty"),
+        ({"sites": []}, "sites must not be empty"),
+        ({"sites": None}, "sites must be text"),
+        ({"sites": [123]}, "sites must be text"),
+        ({"sites": 123}, "sites must be text"),
+        ({"site": 123}, "site must be text"),
+        ({"nearest": 0}, "nearest must be a positive integer"),
+        ({"nearest": -1}, "nearest must be a positive integer"),
+        ({"nearest": 1.5}, "nearest must be a positive integer"),
+        ({"nearest": True}, "nearest must be a positive integer"),
+        ({"nearest": "two"}, "nearest must be a positive integer"),
+        ({"nearest": None}, "nearest must be a positive integer"),
     ],
 )
-def test_rejects_invalid_provider_params(adapter: NexradLevel2, params: dict) -> None:
-    with pytest.raises(QueryError):
-        adapter.select_sites(build_query(location="ok", **params))
+def test_rejects_invalid_provider_params(adapter: NexradLevel2, params, message) -> None:
+    with pytest.raises(QueryError) as raised:
+        chosen(adapter, build_query(location="ok", **params))
+    assert message in str(raised.value)
 
 
 @pytest.mark.skipif(not hasattr(time, "tzset"), reason="requires process timezone control")

@@ -93,7 +93,33 @@ def _strings(value: object) -> list[str]:
     return list(dict.fromkeys(items))
 
 
+def _upper_strings(value: object) -> list[str]:
+    """``_strings`` with each item upper-cased before the duplicates collapse."""
+    return list(dict.fromkeys(item.upper() for item in _strings(value)))
+
+
 StrList = Annotated[list[str], BeforeValidator(_strings)]
 """A string list field: one value, a list, or a comma-separated string."""
 
-__all__ = ["StrList", "choice", "int_list", "int_range"]
+UpperStrList = Annotated[list[str], BeforeValidator(_upper_strings)]
+"""``StrList`` for codes written in upper case, such as radar ids and product codes.
+
+Items are upper-cased before repeats collapse, so ``ktlx,KTLX`` is one site
+rather than two spellings of one.
+"""
+
+OptionalUpperStrList = Annotated[list[str] | None, BeforeValidator(_upper_strings)]
+"""``UpperStrList`` for a key that may be left out, but never given as empty or null.
+
+The coercion runs on whatever the query supplies, so an explicit ``None`` is the
+error it has always been; only an absent key reaches the ``None`` default.
+"""
+
+__all__ = [
+    "OptionalUpperStrList",
+    "StrList",
+    "UpperStrList",
+    "choice",
+    "int_list",
+    "int_range",
+]

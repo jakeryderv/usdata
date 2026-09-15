@@ -11,16 +11,18 @@ the detections happens after opening the file, not in the query.
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import ClassVar
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, Field
 
 from usdata.models import Asset, Query
 from usdata.protocols import s3
 from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
-from usdata.providers.noaa.goes import list_scans, number
+from usdata.providers.noaa.goes import list_scans
+from usdata.providers.params import int_range
 
 PRODUCT = "GLM-L2-LCFA"
 PUBLIC_START = datetime(2018, 2, 13, 16, 10, tzinfo=UTC)
@@ -30,16 +32,24 @@ KEY_RE = re.compile(
 )
 
 
+class GlmParams(BaseModel):
+    """Which GOES satellite's lightning detections one GLM query selects."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    satellite: Annotated[int, int_range(16, 19)] = Field(
+        description="Required GOES satellite number: 16, 17, 18, or 19."
+    )
+
+
 class GoesGlm(_HttpProvider):
     """Whole 20-second GLM detection files; params: satellite."""
 
-    accepted_params: ClassVar[Mapping[str, str]] = {
-        "satellite": "Required GOES satellite number: 16, 17, 18, or 19.",
-    }
+    params_model = GlmParams
 
     def list_assets(self, query: Query) -> list[Asset]:
         """List 20-second files whose start stamps fall inside the inclusive UTC interval."""
-        self.check_params(query)
+        params = self.parse_params(query, GlmParams)
         self.reject(
             query,
             "bbox",
@@ -50,7 +60,7 @@ class GoesGlm(_HttpProvider):
         start, end = self.utc_window(query)
         if end - start > MAX_WINDOW:
             raise QueryError("GLM requests must span at most 1 day; split longer intervals")
-        satellite = number(query.params.get("satellite"), "satellite", 16, 19)
+        satellite = params.satellite
         if end < PUBLIC_START:
             raise QueryError("GLM public detections begin on 2018-02-13T16:10Z")
         start = max(start, PUBLIC_START)

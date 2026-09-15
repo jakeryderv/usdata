@@ -16,7 +16,8 @@ import re
 from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import ClassVar
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import s3
@@ -66,36 +67,48 @@ def file_time(name: str) -> tuple[str, datetime] | None:
     return match["product"], stamp.replace(tzinfo=UTC)
 
 
-def _product(raw: object) -> str:
-    if not isinstance(raw, str) or not raw.strip():
-        raise QueryError(
-            "product must be a non-empty string, for example RotationTrackML30min_00.50"
-        )
-    product = raw.strip()
-    if product not in PRODUCTS:
-        hint = next(
-            (name for name in PRODUCTS if name.lower() == product.lower()),
-            None,
-        )
-        suggestion = f"; did you mean {hint}?" if hint else ""
-        raise QueryError(
-            f"unknown MRMS product {product!r}{suggestion}; supported products are "
-            + ", ".join(PRODUCTS)
-        )
-    return product
+class MrmsParams(BaseModel):
+    """Which one of the gridded CONUS products an MRMS query downloads."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    product: str = Field(
+        description="Required product directory name, for example RotationTrackML30min_00.50; "
+        "see the dataset guide for the supported list."
+    )
+
+    @field_validator("product", mode="before")
+    @classmethod
+    def _one_directory_name(cls, value: object) -> object:
+        """A product names one bucket directory, so only a non-empty string can be one."""
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("must be a non-empty string, for example RotationTrackML30min_00.50")
+        return value.strip()
+
+    @model_validator(mode="after")
+    def _product_is_served(self) -> MrmsParams:
+        """Directory names are case-sensitive upstream, so a near miss is named, not accepted."""
+        if self.product not in PRODUCTS:
+            hint = next(
+                (name for name in PRODUCTS if name.lower() == self.product.lower()),
+                None,
+            )
+            suggestion = f"; did you mean {hint}?" if hint else ""
+            raise ValueError(
+                f"unknown MRMS product {self.product!r}{suggestion}; supported products are "
+                + ", ".join(PRODUCTS)
+            )
+        return self
 
 
 class Mrms(_HttpProvider):
     """Whole two-minute MRMS CONUS GRIB2 files; params: product."""
 
-    accepted_params: ClassVar[Mapping[str, str]] = {
-        "product": "Required product directory name, for example RotationTrackML30min_00.50; "
-        "see the dataset guide for the supported list.",
-    }
+    params_model = MrmsParams
 
     def list_assets(self, query: Query) -> list[Asset]:
         """List files of one product whose stamps fall inside the inclusive UTC interval."""
-        self.check_params(query)
+        params = self.parse_params(query, MrmsParams)
         self.reject(
             query,
             "bbox",
@@ -106,7 +119,7 @@ class Mrms(_HttpProvider):
         start, end = self.utc_window(query)
         if end - start > MAX_WINDOW:
             raise QueryError("MRMS requests must span at most 1 day; split longer intervals")
-        product = _product(query.params.get("product"))
+        product = params.product
         if end < ARCHIVE_START:
             raise QueryError(
                 f"the {BUCKET} archive begins on {ARCHIVE_START:%Y-%m-%d}; "
