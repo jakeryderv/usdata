@@ -60,6 +60,8 @@ Create `src/usdata/providers/<agency>/<name>.py` with a `Provider` subclass:
 
 ```python
 class GhcnDaily(Provider):
+    params_model = GhcnDailyParams  # The pydantic model declaring `--param` keys.
+
     def list_assets(self, query: Query) -> list[Asset]:
         """Translate the query into concrete objects. No downloading here."""
 
@@ -71,12 +73,14 @@ Rules:
 
 - Validate before any transport, using the `Provider` helpers so every adapter
   reports the same mistakes the same way:
-  - `self.check_params(query)` rejects every `query.params` key outside the
-    class-level `accepted_params` mapping. Declare each accepted key there with a
-    one-line description; `usdata info` and the generated catalog page print that
-    mapping, so deriving the rejection from it is what keeps them honest.
-    `tests/adapters/test_contracts.py` checks that every declared key is accepted
-    and an undeclared one is rejected by name.
+  - `self.parse_params(query, YourParams)` validates `query.params` against the
+    pydantic model the class declares as `params_model` and returns it typed.
+    The model is the whole declaration: its field types and validators say what
+    is accepted, its `Field(description=...)` text is what `usdata info` and the
+    generated catalog page print, and `accepted_params` is derived from it.
+    `tests/adapters/test_contracts.py` checks that every declared key is accepted,
+    that an undeclared one is rejected by name, and that a declared model forbids
+    extra keys and matches `accepted_params`.
   - `self.reject(query, "text", ...)` names the query fields (`text`, `bbox`,
     `variables`, `time`) the source cannot honour, with a `hint` saying what to
     do instead. No adapter supports free text, and a contract test checks that
@@ -85,11 +89,40 @@ Rules:
   - `self.utc_window(query)` returns the required start and end in UTC, reading
     naive bounds as UTC. Use `usdata.providers.base.to_utc` for optional bounds.
     A contract test checks that naive and offset bounds resolve like UTC ones.
+- Declare the parameters as a model. `query.params` stays an untyped dict on the
+  wire, between the CLI, a manifest, and the adapter; typing starts at the
+  adapter boundary:
+
+  ```python
+  class GhcnDailyParams(BaseModel):
+      """What one GHCN-Daily query names."""
+
+      model_config = ConfigDict(extra="forbid")
+
+      stations: StrList = Field(
+          description="Required station id(s): one, a list, or comma-separated."
+      )
+      units: Annotated[str, choice("metric", "standard")] = Field(
+          default="metric", description="Unit system: metric (default) or standard."
+      )
+  ```
+
+  Reuse the coercions in `usdata.providers.params` (`int_range`, `int_list`,
+  `choice`, `StrList`) rather than writing new ones: they accept the strings the
+  CLI passes, reject the booleans and floats a lax integer would swallow, and
+  split comma-separated lists. Cross-field rules, such as a ceiling that depends
+  on another parameter, belong in a `model_validator(mode="after")`. Write
+  validator messages as the tail of a sentence about the field ("must be sfc,
+  prs, or nat"); the field name is prefixed for you, cross-field messages name
+  their own subject, and a required field's description, minus a leading
+  "Required ", becomes the hint in its "is required" message. Adapters that have
+  not migrated yet still hand-parse `query.params` and declare the
+  `accepted_params` mapping themselves, with `self.check_params(query)` rejecting
+  unknown keys; a subclass extending its parent's mapping spreads it.
 - Raise `QueryError` with a helpful message when the query lacks something else
   the source needs (a station list, an explicit datum). The CLI turns it into
   exit code 2. Reject empty explicit identifiers and conflicting selectors too;
-  do not silently fall back after a typo. A subclass extending its parent's
-  `accepted_params` spreads the parent's mapping. Keep the longer prose in the
+  do not silently fall back after a typo. Keep the longer prose in the
   module docstring and the provider access notes.
 - Use `usdata.protocols.http`, `usdata.protocols.s3`, or `usdata.protocols.erddap` for transport. Take an
   optional `httpx.Client` in `__init__` so tests can inject one. Override

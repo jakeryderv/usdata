@@ -17,11 +17,13 @@ from __future__ import annotations
 import re
 from collections.abc import Mapping
 from datetime import UTC, datetime
-from typing import ClassVar
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from usdata.models import Query
-from usdata.providers.base import QueryError
-from usdata.providers.noaa.hrrr import ModelRuns, parse_cycle, parse_forecast_hours
+from usdata.providers.noaa.hrrr import ModelRuns
+from usdata.providers.params import choice, int_list, int_range
 
 BUCKET = "noaa-gfs-bdp-pds"
 ARCHIVE_START = datetime(2021, 3, 22, 12, tzinfo=UTC)
@@ -44,10 +46,41 @@ def forecast_hours(resolution: str) -> list[int]:
     return list(range(hourly + 1)) + list(range(hourly + 3 - hourly % 3, MAX_HOUR + 1, 3))
 
 
-def _resolution(raw: object) -> str:
-    if not isinstance(raw, str) or raw not in RESOLUTIONS:
-        raise QueryError("resolution must be 0p25, 0p50, or 1p00")
-    return raw
+class GfsParams(BaseModel):
+    """Which run, which forecast hours, and which grid one GFS query names."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    cycle: Annotated[int, int_range(0, 23)] = Field(
+        description="Required UTC initialization hour of the run: 0, 6, 12, or 18."
+    )
+    forecast_hour: Annotated[list[int], int_list(0, MAX_HOUR)] = Field(
+        description="Required forecast hour(s): an integer, list, or comma-separated "
+        "string, 0 to 384; hourly to 120 then every 3 hours at 0p25, every 3 hours at "
+        "0p50 and 1p00."
+    )
+    resolution: Annotated[str, choice(*RESOLUTIONS)] = Field(
+        default="0p25",
+        description="Grid spacing: 0p25 (default, 0.25 degree), 0p50, or 1p00.",
+    )
+
+    @model_validator(mode="after")
+    def _run_and_hours_are_published(self) -> GfsParams:
+        """GFS runs four times a day, and each grid publishes its own forecast hours."""
+        if self.cycle not in CYCLES:
+            raise ValueError("cycle must be 0, 6, 12, or 18: GFS runs four times a day")
+        published = set(forecast_hours(self.resolution))
+        if unpublished := [f"{hour:03d}" for hour in self.forecast_hour if hour not in published]:
+            step = (
+                "hourly to 120, then every 3 hours to 384"
+                if HOURLY_UNTIL[self.resolution]
+                else "every 3 hours from 0 to 384"
+            )
+            raise ValueError(
+                f"forecast hour(s) {', '.join(unpublished)} are not published at "
+                f"{self.resolution}: files are {step}"
+            )
+        return self
 
 
 class Gfs(ModelRuns):
@@ -59,33 +92,12 @@ class Gfs(ModelRuns):
     key_re = KEY_RE
     hint = "GFS files are whole global grids; download, then open(select=...) picks fields"
     hour_width = 3
-    accepted_params: ClassVar[Mapping[str, str]] = {
-        "cycle": "Required UTC initialization hour of the run: 0, 6, 12, or 18.",
-        "forecast_hour": "Required forecast hour(s): an integer, list, or comma-separated "
-        "string, 0 to 384; hourly to 120 then every 3 hours at 0p25, every 3 hours at "
-        "0p50 and 1p00.",
-        "resolution": "Grid spacing: 0p25 (default, 0.25 degree), 0p50, or 1p00.",
-    }
+    params_model = GfsParams
 
     def resolve(self, query: Query) -> tuple[int, str, list[int]]:
         """Validated cycle, file variant, and forecast hours for one GFS query."""
-        cycle = parse_cycle(query.params.get("cycle"))
-        if cycle not in CYCLES:
-            raise QueryError("cycle must be 0, 6, 12, or 18: GFS runs four times a day")
-        resolution = _resolution(query.params.get("resolution", "0p25"))
-        hours = parse_forecast_hours(query.params.get("forecast_hour"), MAX_HOUR)
-        published = set(forecast_hours(resolution))
-        if unpublished := [f"{hour:03d}" for hour in hours if hour not in published]:
-            step = (
-                "hourly to 120, then every 3 hours to 384"
-                if HOURLY_UNTIL[resolution]
-                else "every 3 hours from 0 to 384"
-            )
-            raise QueryError(
-                f"forecast hour(s) {', '.join(unpublished)} are not published at {resolution}: "
-                f"files are {step}"
-            )
-        return cycle, resolution, hours
+        params = self.parse_params(query, GfsParams)
+        return params.cycle, params.resolution, params.forecast_hour
 
     def run_prefix(self, init: datetime, variant: str) -> str:
         """Key prefix listing one run's files of the chosen variant."""

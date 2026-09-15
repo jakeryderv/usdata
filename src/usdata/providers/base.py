@@ -8,11 +8,15 @@ from collections.abc import Mapping
 from datetime import UTC, datetime
 from pathlib import Path
 from types import MappingProxyType, TracebackType
-from typing import ClassVar, Literal, Self
+from typing import Any, ClassVar, Literal, Self, TypeVar
+
+from pydantic import BaseModel, ValidationError
+from pydantic_core import ErrorDetails
 
 from usdata.models import Asset, Dataset, Query
 
 QueryField = Literal["text", "bbox", "variables", "time"]
+Params = TypeVar("Params", bound=BaseModel)
 _LABELS: dict[QueryField, str] = {
     "text": "text",
     "bbox": "location/bbox",
@@ -34,6 +38,39 @@ def to_utc(value: datetime) -> datetime:
     return value.replace(tzinfo=value.tzinfo or UTC).astimezone(UTC)
 
 
+def described_params(model: type[BaseModel]) -> Mapping[str, str]:
+    """Each field of a parameter model mapped to its description, as ``usdata info`` prints it."""
+    described: dict[str, str] = {}
+    for name, field in model.model_fields.items():
+        if not field.description:
+            raise ValueError(f"{model.__name__}.{name} needs a Field(description=...)")
+        described[name] = field.description
+    return MappingProxyType(described)
+
+
+def _required_hint(model: type[BaseModel], name: str) -> str:
+    """What a missing field needs, taken from the description the declaration already carries."""
+    description = model.model_fields[name].description or ""
+    return description.removeprefix("Required ").rstrip(".")
+
+
+def _problem(detail: ErrorDetails, model: type[BaseModel]) -> str:
+    """One validation failure as a line of prose, named by its field."""
+    message = detail["msg"].removeprefix("Value error, ")
+    if not detail["loc"]:
+        return message  # A cross-field rule states its own subject.
+    name = str(detail["loc"][0])
+    if detail["type"] == "missing":
+        return f"{name} is required: {_required_hint(model, name)}"
+    return message if message.startswith(name) else f"{name} {message}"
+
+
+def params_error(error: ValidationError, model: type[BaseModel]) -> QueryError:
+    """Turn a parameter model's ``ValidationError`` into one ``QueryError``, a line per problem."""
+    lines = dict.fromkeys(_problem(detail, model) for detail in error.errors())
+    return QueryError("; ".join(lines))
+
+
 def _is_set(query: Query, field: QueryField) -> bool:
     if field == "text":
         return bool(query.text)
@@ -48,19 +85,37 @@ class Provider(ABC):
     """One adapter per dataset. Translates a normalized query into concrete assets.
 
     ``list_assets`` implementations validate with the shared helpers before any
-    transport: ``check_params`` for provider-specific keys, ``reject`` for query
-    fields the source cannot honour, and ``utc_window`` for the time bounds.
+    transport: ``parse_params`` (or ``check_params`` where no parameter model is
+    declared yet) for provider-specific keys, ``reject`` for query fields the
+    source cannot honour, and ``utc_window`` for the time bounds.
     Every adapter then reports the same errors for the same mistakes, and no
     query field is silently ignored.
+    """
+
+    params_model: ClassVar[type[BaseModel] | None] = None
+    """The pydantic model declaring this adapter's ``query.params``, or ``None`` for no params.
+
+    Declaring one is the current form: ``parse_params`` validates against it and
+    returns the typed parameters, and ``accepted_params`` is derived from its
+    fields and their descriptions. Adapters that still hand-parse ``query.params``
+    leave this ``None`` and declare ``accepted_params`` themselves.
     """
 
     accepted_params: ClassVar[Mapping[str, str]] = MappingProxyType({})
     """Accepted ``query.params`` keys, each mapped to a one-line description.
 
     This is the adapter's statement of what it accepts: ``list_assets`` rejects
-    every key outside it, and ``usdata info`` prints it. Subclasses that extend a
-    parent's set spread it, as ``{**Parent.accepted_params, "extra": "..."}``.
+    every key outside it, and ``usdata info`` prints it. A declared
+    ``params_model`` fills it in; adapters without one write it out, and
+    subclasses that extend a parent's set spread it, as
+    ``{**Parent.accepted_params, "extra": "..."}``.
     """
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Derive ``accepted_params`` from a declared model, so one declaration feeds both."""
+        super().__init_subclass__(**kwargs)
+        if cls.params_model is not None and "accepted_params" not in cls.__dict__:
+            cls.accepted_params = described_params(cls.params_model)
 
     def __init__(self, dataset: Dataset) -> None:
         self.dataset = dataset
@@ -84,6 +139,30 @@ class Provider(ABC):
         """Reject every ``query.params`` key outside ``accepted_params``, naming it."""
         if unknown := set(query.params) - set(self.accepted_params):
             raise QueryError(f"unsupported {self.dataset.id} params: {', '.join(sorted(unknown))}")
+
+    def parse_params(self, query: Query, model: type[Params]) -> Params:
+        """Validate ``query.params`` against ``model`` and return the typed parameters.
+
+        Unknown keys are named first, on their own, so a typo reads the same
+        whatever else the query got wrong; the remaining problems are reported
+        together, one line each.
+        """
+        self.check_params(query)
+        try:
+            return model.model_validate(query.params)
+        except ValidationError as error:
+            raise params_error(error, model) from None
+
+    def validate_params(self, query: Query) -> None:
+        """Check ``query.params`` as far as this adapter declares them, without any transport.
+
+        The core calls this before fetching anything, so a bad source fails
+        before its siblings download.
+        """
+        if self.params_model is None:
+            self.check_params(query)
+        else:
+            self.parse_params(query, self.params_model)
 
     def reject(self, query: Query, *fields: QueryField, hint: str = "") -> None:
         """Raise ``QueryError`` when the query sets a field this dataset cannot honour.
