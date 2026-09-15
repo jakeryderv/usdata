@@ -133,6 +133,12 @@ def test_window_starts_at_public_archive(adapter):
     ]
 
 
+def test_windows_ending_before_the_archive_are_rejected_before_listing(adapter):
+    with respx.mock() as mock, pytest.raises(QueryError, match="archive begins on 2020-10-14"):
+        adapter.list_assets(query(start="2020-10-13T12:00Z", end="2020-10-13T23:59Z"))
+    assert not mock.calls
+
+
 @pytest.mark.parametrize(
     "params",
     [
