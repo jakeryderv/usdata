@@ -9,25 +9,26 @@ variant. Files are whole CONUS grids of hundreds of fields; there is no
 server-side subsetting, so message selection happens after download with the
 GRIB2 reader's ``select``.
 
-The run-selection helpers (:func:`parse_cycle`, :func:`parse_forecast_hours`,
-:func:`select_runs`, :func:`list_run_files`) and the :class:`ModelRuns` listing
-base are shared with the GFS adapter.
+The run-selection helpers (:func:`select_runs`, :func:`list_run_files`) and the
+:class:`ModelRuns` listing base are shared with the GFS adapter.
 """
 
 from __future__ import annotations
 
 import re
-from collections.abc import Iterable, Mapping
+from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import ClassVar
+from typing import Annotated, ClassVar
 
 import httpx
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import s3
 from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.params import choice, int_list, int_range
 
 BUCKET = "noaa-hrrr-bdp-pds"
 DOMAIN = "conus"
@@ -36,41 +37,49 @@ ARCHIVE_START = datetime(2014, 7, 30, 18, tzinfo=UTC)
 MAX_WINDOW = timedelta(days=1)
 FILES: Mapping[str, str] = {"sfc": "wrfsfcf", "prs": "wrfprsf", "nat": "wrfnatf"}
 LONG_CYCLES = frozenset({0, 6, 12, 18})
-MAX_HOUR = {True: 48, False: 18}
+MAX_HOUR = 18
+LONG_MAX_HOUR = 48
 KEY_RE = re.compile(r"hrrr\.t(?P<cycle>\d{2})z\.(?P<variant>wrf[a-z]+f)(?P<hour>\d{2,3})\.grib2")
 
 
-def _int_param(raw: object, label: str, low: int, high: int) -> int:
-    if isinstance(raw, bool) or not isinstance(raw, (str, int)):
-        raise QueryError(f"{label} must be an integer from {low} to {high}")
-    text = str(raw).strip()
-    if not text.isascii() or not text.isdigit() or not low <= int(text) <= high:
-        raise QueryError(f"{label} must be an integer from {low} to {high}")
-    return int(text)
+class HrrrParams(BaseModel):
+    """Which run, which forecast hours, and which file variant one HRRR query names."""
 
+    model_config = ConfigDict(extra="forbid")
 
-def parse_cycle(raw: object) -> int:
-    """The run's UTC initialization hour, 0 to 23, from an int or zero-padded string."""
-    if raw is None:
-        raise QueryError("cycle is required: the run's UTC initialization hour, 0 to 23")
-    return _int_param(raw, "cycle", 0, 23)
+    cycle: Annotated[int, int_range(0, 23)] = Field(
+        description="Required UTC initialization hour of the run, 0 to 23."
+    )
+    forecast_hour: Annotated[list[int], int_list(0, LONG_MAX_HOUR)] = Field(
+        description="Required forecast hour(s): an integer, list, or comma-separated "
+        "string; 0 to 18, or 0 to 48 for the 00, 06, 12, and 18 UTC runs."
+    )
+    file: Annotated[str, choice(*FILES)] = Field(
+        default="sfc",
+        description="File variant: sfc (default, 2-D fields), prs (pressure levels), or nat "
+        "(native levels).",
+    )
 
+    @field_validator("file", mode="before")
+    @classmethod
+    def _reject_subhourly(cls, value: object) -> object:
+        """Name the one variant this adapter leaves out, rather than listing it as a typo."""
+        if value == "subh":
+            raise ValueError("file=subh (15-minute output) is out of scope; use sfc, prs, or nat")
+        return value
 
-def parse_forecast_hours(raw: object, max_hour: int) -> list[int]:
-    """Distinct forecast hours in request order from an int, list, or comma-separated string."""
-    if raw is None:
-        raise QueryError(f"forecast_hour is required: one or more integers from 0 to {max_hour}")
-    items: Iterable[object]
-    if isinstance(raw, str):
-        items = raw.split(",")
-    elif isinstance(raw, (list, tuple)):
-        items = raw
-    else:
-        items = [raw]
-    hours = [_int_param(item, "forecast_hour", 0, max_hour) for item in items]
-    if not hours:
-        raise QueryError("forecast_hour must not be empty")
-    return list(dict.fromkeys(hours))
+    @model_validator(mode="after")
+    def _hours_fit_the_cycle(self) -> HrrrParams:
+        """Only the 00, 06, 12, and 18 UTC runs reach 48 hours; the others stop at 18."""
+        ceiling = LONG_MAX_HOUR if self.cycle in LONG_CYCLES else MAX_HOUR
+        if any(hour > ceiling for hour in self.forecast_hour):
+            raise ValueError(f"forecast_hour must be an integer from 0 to {ceiling}")
+        return self
+
+    @property
+    def variant(self) -> str:
+        """The key fragment naming the chosen file variant, for example ``wrfsfcf``."""
+        return FILES[self.file]
 
 
 def select_runs(start: datetime, end: datetime, cycle: int) -> list[datetime]:
@@ -196,22 +205,12 @@ class Hrrr(ModelRuns):
     archive_start = ARCHIVE_START
     key_re = KEY_RE
     hint = "HRRR files are whole CONUS grids; download, then open(select=...) picks fields"
-    accepted_params: ClassVar[Mapping[str, str]] = {
-        "cycle": "Required UTC initialization hour of the run, 0 to 23.",
-        "forecast_hour": "Required forecast hour(s): an integer, list, or comma-separated "
-        "string; 0 to 18, or 0 to 48 for the 00, 06, 12, and 18 UTC runs.",
-        "file": "File variant: sfc (default, 2-D fields), prs (pressure levels), or nat "
-        "(native levels).",
-    }
+    params_model = HrrrParams
 
     def resolve(self, query: Query) -> tuple[int, str, list[int]]:
         """Validated cycle, file variant, and forecast hours for one HRRR query."""
-        cycle = parse_cycle(query.params.get("cycle"))
-        variant = self._variant(query.params.get("file", "sfc"))
-        hours = parse_forecast_hours(
-            query.params.get("forecast_hour"), MAX_HOUR[cycle in LONG_CYCLES]
-        )
-        return cycle, variant, hours
+        params = self.parse_params(query, HrrrParams)
+        return params.cycle, params.variant, params.forecast_hour
 
     def run_prefix(self, init: datetime, variant: str) -> str:
         """Key prefix listing one run's files of the chosen variant."""
@@ -224,11 +223,3 @@ class Hrrr(ModelRuns):
     def files_label(self, variant: str) -> str:
         """Name for these files in missing-run errors."""
         return f"HRRR {DOMAIN} {variant}"
-
-    @staticmethod
-    def _variant(raw: object) -> str:
-        if raw == "subh":
-            raise QueryError("file=subh (15-minute output) is out of scope; use sfc, prs, or nat")
-        if not isinstance(raw, str) or raw not in FILES:
-            raise QueryError("file must be sfc, prs, or nat")
-        return FILES[raw]

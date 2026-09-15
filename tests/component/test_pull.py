@@ -8,6 +8,7 @@ from typer.testing import CliRunner
 from usdata.cli import app
 from usdata.fetch import ChecksumMismatch
 from usdata.manifest import Lockfile, lockfile_path
+from usdata.providers.base import QueryError
 from usdata.providers.noaa.ghcnd import DATA_URL, SEARCH_URL
 from usdata.pull import ManifestChanged, pull, verify
 
@@ -162,6 +163,35 @@ def test_empty_source_is_explicit_and_failed_resolve_preserves_lock(
     else:
         assert result.exit_code == 1 and "source 2" in result.output
         assert lockfile_path(manifest).read_bytes() == original_lock
+
+
+@pytest.mark.parametrize(
+    ("source", "message"),
+    [
+        (
+            "  - dataset: noaa:hrrr\n    start: 2024-05-06T20:00Z\n    end: 2024-05-06T20:00Z\n"
+            "    params: { cycle: 99, forecast_hour: 0 }\n",
+            "cycle must be an integer from 0 to 23",
+        ),
+        (
+            "  - dataset: noaa:ghcn-daily\n    start: 2024-05-06\n    end: 2024-05-07\n"
+            "    params: { station: USW00013967 }\n",
+            "unsupported noaa:ghcn-daily params: station",
+        ),
+    ],
+    ids=["declared-model", "hand-written"],
+)
+def test_a_bad_source_fails_before_the_first_one_is_fetched(
+    tmp_path: Path, source: str, message: str
+) -> None:
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text(MANIFEST + source)
+    with respx.mock(assert_all_called=False) as mock:
+        data = mock.get(DATA_URL)
+        with pytest.raises(QueryError, match=message):
+            pull(manifest, root=tmp_path)
+    assert not data.called
+    assert not lockfile_path(manifest).exists()
 
 
 def test_empty_initial_pull_does_not_create_lockfile(tmp_path: Path) -> None:

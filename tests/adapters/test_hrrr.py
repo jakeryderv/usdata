@@ -9,7 +9,7 @@ import respx
 from usdata.fetch import ChecksumMismatch
 from usdata.protocols import s3
 from usdata.providers.base import QueryError
-from usdata.providers.noaa.hrrr import BUCKET, Hrrr, parse_forecast_hours, select_runs
+from usdata.providers.noaa.hrrr import BUCKET, Hrrr, HrrrParams, select_runs
 from usdata.pull import pull, verify
 from usdata.query import build_query
 from usdata.registry import default_registry
@@ -129,13 +129,20 @@ def test_select_runs_uses_inclusive_bounds():
     assert select_runs(start, start, 4) == []
 
 
-def test_parse_forecast_hours_shapes():
-    assert parse_forecast_hours(5, 18) == [5]
-    assert parse_forecast_hours("5,05, 6", 18) == [5, 6]
-    assert parse_forecast_hours([0, "18"], 18) == [0, 18]
-    for bad in ("", "a", -1, 19, [19], True, 3.5, [], "1,,2", "1,x"):
-        with pytest.raises(QueryError):
-            parse_forecast_hours(bad, 18)
+@pytest.mark.parametrize(
+    ("raw", "hours"),
+    [(5, [5]), ("5,05, 6", [5, 6]), ([0, "18"], [0, 18]), ("1,,2", [1, 2]), ((3,), [3])],
+)
+def test_forecast_hour_shapes_reach_the_model(adapter, raw, hours):
+    params = adapter.parse_params(query(forecast_hour=raw), HrrrParams)
+    assert params.forecast_hour == hours
+    assert params.cycle == 20 and params.file == "sfc" and params.variant == "wrfsfcf"
+
+
+@pytest.mark.parametrize("raw", ["", "a", -1, 19, [19], True, 3.5, [], "1,x", {"0": 1}])
+def test_forecast_hour_shapes_rejected(adapter, raw):
+    with pytest.raises(QueryError, match="forecast_hour"):
+        adapter.parse_params(query(forecast_hour=raw), HrrrParams)
 
 
 def test_missing_run_and_missing_hour_are_named(adapter):

@@ -92,12 +92,20 @@ def _load(manifest_path: Path, registry: Registry) -> Manifest:
     return manifest
 
 
+def _check_params(manifest: Manifest, registry: Registry) -> None:
+    """Validate every source's parameters up front, so a bad one fails before any download."""
+    for source in manifest.sources:
+        with load_adapter(registry.get(source.dataset)) as adapter:
+            adapter.validate_params(source.to_query())
+
+
 def resolve(
     manifest_path: Path, *, root: Path | None = None, registry: Registry | None = None
 ) -> PullResult:
     """Resolve every source through its adapter, fetch, and write a fresh lockfile."""
     reg = registry or default_registry()
     manifest = _load(manifest_path, reg)
+    _check_params(manifest, reg)
     fetched: list[FetchedAsset] = []
     locked: list[LockedAsset] = []
     for index, source in enumerate(manifest.sources, start=1):
