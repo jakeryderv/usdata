@@ -465,7 +465,7 @@ datasets:
       NetCDF and GeoTIFF tiles, served through the NCEI THREDDS catalog with
       OPeNDAP access; the THREDDS pattern.
     keywords: [bathymetry, topography, elevation, relief, dem, etopo, global]
-    protocol: thredds
+    protocol: http
     homepage: https://www.ncei.noaa.gov/products/etopo-global-relief-model
     license: US Government Work (public domain)
     capabilities: { spatial_subset: true, temporal_subset: false, variable_subset: true }

@@ -30,7 +30,7 @@ Add to `src/usdata/data/registry.yaml`:
     description: >-                 # what it is, how it is served, what subsetting exists
       ...
     keywords: [climate, precipitation, stations, daily]
-    protocol: http                  # http | s3 | erddap | thredds
+    protocol: http                  # http | s3 | erddap
     homepage: https://...
     license: US Government Work (public domain)
     spatial_extent: { west: -180.0, south: -90.0, east: 180.0, north: 90.0 }
