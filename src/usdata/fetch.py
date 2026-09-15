@@ -62,6 +62,20 @@ class FetchedAsset(BaseModel):
         )
 
 
+def _sidecar_not_older(path: Path) -> bool:
+    """Whether ``path`` still carries the mtime it had when its sidecar was written.
+
+    The sidecar is always written after the data file lands, so a data file that
+    is newer than its sidecar was touched afterwards and the record no longer
+    implies its bytes. See ADR 0024.
+    """
+    try:
+        sidecar = provenance.sidecar_path(path).stat()
+        return path.stat().st_mtime_ns <= sidecar.st_mtime_ns
+    except OSError:
+        return False
+
+
 def _fetch_asset(
     dataset: Dataset,
     asset: Asset,
@@ -86,7 +100,8 @@ def _fetch_asset(
             and prov.source_url == asset.href
             and prov.size == path.stat().st_size
             and (asset.checksum is None or prov.checksum == asset.checksum)
-            and sha256_file(path) == prov.checksum
+            # Trust an untouched cached file; hash whenever anything is unclear.
+            and (_sidecar_not_older(path) or sha256_file(path) == prov.checksum)
         ):
             _progress.emit(_progress.AssetProgress(asset.id, "cached", prov.size))
             return FetchedAsset(asset=asset, path=path, provenance=prov, from_cache=True)
@@ -104,7 +119,7 @@ def _fetch_asset(
 def fetch_asset(
     dataset: Dataset, asset: Asset, *, root: Path | None = None, force: bool = False
 ) -> FetchedAsset:
-    """Fetch one asset, reusing the cache only when bytes and provenance agree."""
+    """Fetch one asset, reusing the cache only when its provenance still describes it."""
     with load_adapter(dataset) as adapter:
         return _fetch_asset(dataset, asset, adapter, root=root, force=force)
 

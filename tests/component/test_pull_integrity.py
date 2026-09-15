@@ -1,3 +1,4 @@
+import importlib
 from pathlib import Path
 
 import pytest
@@ -64,3 +65,26 @@ def test_restore_recovers_sidecar_and_legacy_unpinned_asset(tmp_path: Path) -> N
         mock.get(DATA_URL).respond(200, content=b"changed")
         with pytest.raises(ChecksumMismatch):
             pull(manifest, root=tmp_path / "cache")
+
+
+def test_restore_rehashes_every_cached_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The lockfile is the reproducibility contract: restore never trusts an mtime."""
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text(MANIFEST)
+    with respx.mock() as mock:
+        mock.get(DATA_URL).respond(200, content=b"original")
+        first = pull(manifest, root=tmp_path / "cache")
+    hashed: list[Path] = []
+
+    def counting(path: Path) -> str:
+        hashed.append(path)
+        return sha256_file(path)
+
+    # usdata.pull names both a module and a re-exported function; import the module.
+    monkeypatch.setattr(importlib.import_module("usdata.pull"), "sha256_file", counting)
+    with respx.mock():
+        restored = pull(manifest, root=tmp_path / "cache")
+    assert restored.from_lockfile and restored.fetched[0].from_cache
+    assert first.fetched[0].path in hashed
