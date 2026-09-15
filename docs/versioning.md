@@ -67,6 +67,11 @@ inspection; nothing is published or merged.
 5. After merge, return to the main checkout and run `just cleanup PR_NUMBER`.
    Verify the publish workflow, GitHub release, and PyPI artifacts.
 
+The release ends there. No first-use review document is written; the published
+package is exercised automatically and usage friction is recorded in the worked
+examples ([ADR 0025](adr/0025-examples-as-usage-review.md)). The existing
+[review files](reviews/) remain as historical records.
+
 If preparation stops, inspect `git status` and finish the failed command on the
 release branch; use `just release-pr` once version, changelog, lockfile, and docs
 are ready. Do not rerun `just release` from that branch or bump again. If a PR
@@ -80,6 +85,17 @@ After the PR merges and CI succeeds on that exact main-branch commit, the
 `Publish to PyPI` workflow downloads the wheel and sdist from successful CI for
 that commit, validates their package name and version, uploads them via trusted
 publishing, then creates the `vX.Y.Z` tag and GitHub release with notes from the changelog.
+
+A final job then walks the published package through the getting-started guide.
+It installs that exact version from PyPI with the extra the guide names,
+retrying while the index catches up, and runs the guide's own search, info,
+fetch, Python reading, pull, verify, and second-cache restoration steps against
+it with a temporary cache. `scripts/walkthrough.py` extracts those commands from
+`docs/getting-started.md` instead of restating them, so the guide and the check
+cannot disagree, and it refuses to run if the guide stops covering one of them.
+The job reports a broken release and changes nothing: a failure leaves the tag,
+the release, and the uploaded files in place, to be fixed forward in the next
+version.
 
 The website follows main and deploys independently of package releases. It does
 not create new per-release documentation archives. Existing v0.10.0 downloads

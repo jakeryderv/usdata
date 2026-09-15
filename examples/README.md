@@ -81,6 +81,18 @@ their `dataset.yaml` files; a first pull creates an ignored `dataset.lock.json`
 beside the manifest. When changing a locked manifest deliberately, use
 `pull(manifest, force=True)` to resolve and lock the new inputs.
 
+## Writing an example
+
+Start from the question, not from the package. The README title is the question
+a student or analyst would ask, written down before touching the tool, and the
+notebook or manifest answers it. The index entry in `catalog.json` carries the
+same question.
+
+End the README with a short section titled "What was awkward": the places where
+you had to work around the tool or the data to get the answer. Each entry is an
+issue candidate, and together they are how usage friction reaches the project
+([ADR 0025](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0025-examples-as-usage-review.md)).
+
 ## Validate or refresh saved outputs
 
 ```sh

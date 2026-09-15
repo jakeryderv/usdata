@@ -101,7 +101,12 @@ anchor validation. The website job separately renders the examples and checks
 their local links, exact notebook/manifest downloads, dataset relationships,
 and supported saved outputs. See [maintaining documentation](guides/documentation.md).
 
-The [v0.10.0 first-use review](reviews/first-use-v0.10.0.md) records a bounded
+After a release is published, the Publish workflow walks the published package
+through the getting-started guide: it installs that version from PyPI and runs
+the guide's own commands, extracted by `scripts/walkthrough.py`, against live
+services. That check replaces the manual per-release first-use review
+([ADR 0025](adr/0025-examples-as-usage-review.md)). The
+[v0.10.0 first-use review](reviews/first-use-v0.10.0.md) records a bounded
 live walkthrough from a fresh PyPI installation, its documentation fixes, and
 its limits. It is historical review evidence, not a current upstream-health check.
 
