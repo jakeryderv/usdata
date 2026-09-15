@@ -1,3 +1,4 @@
+import importlib
 from pathlib import Path
 
 import httpx
@@ -8,7 +9,8 @@ from typer.testing import CliRunner
 from usdata import ChecksumMismatch
 from usdata.cli import app
 from usdata.manifest import Lockfile, lockfile_path
-from usdata.providers.base import QueryError
+from usdata.models import Dataset
+from usdata.providers.base import Provider, QueryError
 from usdata.providers.noaa.ghcnd import DATA_URL, SEARCH_URL
 from usdata.pull import ManifestChanged, pull, verify
 
@@ -21,6 +23,10 @@ sources:
     variables: [PRCP]
     params: { stations: "USW00013967,USW00003954" }
 """
+SECOND_SOURCE = (
+    "  - dataset: noaa:ghcn-daily\n    start: 2024-05-06\n    end: 2024-05-07\n"
+    "    params: { stations: USW00094728 }\n"
+)
 CSV_V1 = b'"DATE","STATION","PRCP"\n"2024-05-06","USW00013967","10.9"\n'
 CSV_V2 = b'"DATE","STATION","PRCP"\n"2024-05-06","USW00013967","99.9"\n'
 
@@ -204,4 +210,57 @@ def test_empty_initial_pull_does_not_create_lockfile(tmp_path: Path) -> None:
         mock.get(SEARCH_URL).respond(200, json={"results": [], "count": 0})
         result = CliRunner().invoke(app, ["pull", str(manifest), "--cache-dir", str(tmp_path)])
     assert result.exit_code == 1 and "matched no assets" in result.output
+    assert not lockfile_path(manifest).exists()
+
+
+def _counting_adapters(monkeypatch: pytest.MonkeyPatch) -> tuple[list[str], list[str]]:
+    """Record the dataset of every adapter resolve opens, and of every one it closes."""
+    # usdata.pull names both a module and a re-exported function; import the module.
+    module = importlib.import_module("usdata.pull")
+    real = module.load_adapter
+    opened: list[str] = []
+    closed: list[str] = []
+
+    def counting(dataset: Dataset) -> Provider:
+        adapter = real(dataset)
+        opened.append(dataset.id)
+        release = adapter.close
+
+        def close() -> None:
+            closed.append(dataset.id)
+            release()
+
+        monkeypatch.setattr(adapter, "close", close)
+        return adapter
+
+    monkeypatch.setattr(module, "load_adapter", counting)
+    return opened, closed
+
+
+def test_resolve_shares_one_adapter_across_sources_on_a_dataset(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text(MANIFEST + SECOND_SOURCE)
+    opened, closed = _counting_adapters(monkeypatch)
+    with respx.mock() as mock:
+        mock.get(DATA_URL).mock(return_value=httpx.Response(200, content=CSV_V1))
+        result = pull(manifest, root=tmp_path)
+    assert len(result.fetched) == 2
+    assert opened == ["noaa:ghcn-daily"] and closed == ["noaa:ghcn-daily"]
+
+
+def test_resolve_closes_the_shared_adapter_when_a_later_source_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text(MANIFEST + SECOND_SOURCE)
+    opened, closed = _counting_adapters(monkeypatch)
+    with respx.mock() as mock:
+        mock.get(DATA_URL).mock(
+            side_effect=[httpx.Response(200, content=CSV_V1), httpx.Response(404)]
+        )
+        with pytest.raises(httpx.HTTPStatusError):
+            pull(manifest, root=tmp_path)
+    assert opened == ["noaa:ghcn-daily"] and closed == ["noaa:ghcn-daily"]
     assert not lockfile_path(manifest).exists()
