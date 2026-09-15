@@ -15,14 +15,16 @@ import re
 from collections.abc import Callable, Mapping
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import ClassVar
+from typing import Annotated
 
 import httpx
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import s3
 from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.params import int_range
 
 PRODUCT = "ABI-L2-CMIPC"
 PUBLIC_START = datetime(2017, 2, 28, tzinfo=UTC)
@@ -41,16 +43,33 @@ def _timestamp(raw: str) -> datetime:
     return stamp
 
 
-def number(raw: object, label: str, low: int, high: int) -> int:
-    """Parse a bounded integer parameter, accepting ``C``-prefixed channel labels."""
-    if isinstance(raw, bool) or not isinstance(raw, (str, int)):
-        raise QueryError(f"{label} must be an integer from {low} to {high}")
-    text = str(raw).strip()
-    if label == "channel" and text.startswith("C"):
-        text = text[1:]
-    if not text.isascii() or not text.isdigit() or not low <= int(text) <= high:
-        raise QueryError(f"{label} must be an integer from {low} to {high}")
-    return int(text)
+class GoesAbiParams(BaseModel):
+    """Which satellite, which ABI channel, and which product one GOES query selects."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    satellite: Annotated[int, int_range(16, 19)] = Field(
+        description="Required GOES satellite number: 16, 17, 18, or 19."
+    )
+    channel: Annotated[int, int_range(1, 16)] = Field(
+        description="Required ABI channel, 1 to 16 or C01 to C16."
+    )
+    product: str = Field(default=PRODUCT, description=f"ABI product; only {PRODUCT} is supported.")
+
+    @field_validator("channel", mode="before")
+    @classmethod
+    def _drop_the_channel_prefix(cls, value: object) -> object:
+        """``C06`` is how the filenames spell channel 6; both reach the same integer."""
+        text = value.strip() if isinstance(value, str) else value
+        return text[1:] if isinstance(text, str) and text.startswith("C") else text
+
+    @model_validator(mode="before")
+    @classmethod
+    def _one_supported_product(cls, data: object) -> object:
+        """This adapter serves one ABI product, so name it rather than list the rest."""
+        if isinstance(data, Mapping) and data.get("product", PRODUCT) != PRODUCT:
+            raise ValueError(f"only product={PRODUCT} is supported")
+        return data
 
 
 def list_scans(
@@ -103,17 +122,11 @@ def list_scans(
 class GoesAbi(_HttpProvider):
     """Single-channel CONUS ABI imagery; params: satellite, channel, product."""
 
-    accepted_params: ClassVar[Mapping[str, str]] = {
-        "satellite": "Required GOES satellite number: 16, 17, 18, or 19.",
-        "channel": "Required ABI channel, 1 to 16 or C01 to C16.",
-        "product": f"ABI product; only {PRODUCT} is supported.",
-    }
+    params_model = GoesAbiParams
 
     def list_assets(self, query: Query) -> list[Asset]:
         """List complete scenes whose scan starts fall inside the inclusive UTC interval."""
-        self.check_params(query)
-        if query.params.get("product", PRODUCT) != PRODUCT:
-            raise QueryError(f"only product={PRODUCT} is supported")
+        params = self.parse_params(query, GoesAbiParams)
         self.reject(
             query,
             "bbox",
@@ -124,8 +137,7 @@ class GoesAbi(_HttpProvider):
         start, end = self.utc_window(query)
         if end - start > MAX_WINDOW:
             raise QueryError("GOES requests must span at most 7 days; split longer intervals")
-        satellite = number(query.params.get("satellite"), "satellite", 16, 19)
-        channel = number(query.params.get("channel"), "channel", 1, 16)
+        satellite, channel = params.satellite, params.channel
         if end < PUBLIC_START:
             raise QueryError("GOES CMIPC public observations begin on 2017-02-28")
         start = max(start, PUBLIC_START)

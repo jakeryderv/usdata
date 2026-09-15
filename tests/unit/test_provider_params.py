@@ -7,7 +7,14 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_valida
 
 from usdata.models import Asset, Dataset, Protocol, Query, Status
 from usdata.providers.base import Provider, QueryError, described_params, params_error
-from usdata.providers.params import StrList, choice, int_list, int_range
+from usdata.providers.params import (
+    OptionalUpperStrList,
+    StrList,
+    UpperStrList,
+    choice,
+    int_list,
+    int_range,
+)
 
 
 class Sample(BaseModel):
@@ -22,6 +29,10 @@ class Sample(BaseModel):
         description="Required forecast hour(s): an integer, list, or comma-separated string."
     )
     stations: StrList = Field(default_factory=list, description="Station ids to keep.")
+    codes: UpperStrList = Field(
+        default_factory=list, description="Product codes to keep, upper-cased."
+    )
+    site: OptionalUpperStrList = Field(default=None, description="One site id, or nothing at all.")
     file: Annotated[str, choice("sfc", "prs", "nat")] = Field(
         default="sfc", description="File variant: sfc (default), prs, or nat."
     )
@@ -132,6 +143,41 @@ def test_string_list_splits_strips_and_dedupes(raw, expected) -> None:
 @pytest.mark.parametrize("raw", [7, ["KTLX", 7], "", [" "]])
 def test_string_list_rejects_non_text_and_empty_values(raw) -> None:
     assert error(cycle=0, hours=1, stations=raw).startswith("stations must ")
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("n0b", ["N0B"]),
+        (" n0b , NMD ", ["N0B", "NMD"]),
+        ("n0b,N0B", ["N0B"]),
+        (["ktlx", "KTLX", "kvnx"], ["KTLX", "KVNX"]),
+    ],
+)
+def test_upper_string_list_folds_case_before_duplicates_collapse(raw, expected) -> None:
+    assert parse(cycle=0, hours=1, codes=raw).codes == expected
+
+
+@pytest.mark.parametrize("raw", ["", " ", [], ",,"])
+def test_upper_string_list_rejects_an_empty_selection(raw) -> None:
+    assert error(cycle=0, hours=1, codes=raw) == "codes must not be empty"
+
+
+@pytest.mark.parametrize("raw", [7, ["KTLX", 7], None])
+def test_upper_string_list_rejects_non_text_values(raw) -> None:
+    assert error(cycle=0, hours=1, codes=raw) == (
+        "codes must be text: one value, a list, or a comma-separated string"
+    )
+
+
+def test_an_optional_upper_string_list_separates_absent_from_empty_or_null() -> None:
+    """Leaving the key out is the only way to mean "no value"; null and "" stay errors."""
+    assert parse(cycle=0, hours=1).site is None
+    assert parse(cycle=0, hours=1, site="ktlx").site == ["KTLX"]
+    assert error(cycle=0, hours=1, site=None) == (
+        "site must be text: one value, a list, or a comma-separated string"
+    )
+    assert error(cycle=0, hours=1, site="") == "site must not be empty"
 
 
 def test_choice_names_the_accepted_values() -> None:
