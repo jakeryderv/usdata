@@ -115,10 +115,14 @@ Rules:
   validator messages as the tail of a sentence about the field ("must be sfc,
   prs, or nat"); the field name is prefixed for you, cross-field messages name
   their own subject, and a required field's description, minus a leading
-  "Required ", becomes the hint in its "is required" message. Adapters that have
-  not migrated yet still hand-parse `query.params` and declare the
-  `accepted_params` mapping themselves, with `self.check_params(query)` rejecting
-  unknown keys; a subclass extending its parent's mapping spreads it.
+  "Required ", becomes the hint in its "is required" message. Declare an optional
+  key as a union with `None` (`StrList | None`, `OptionalUpperStrList`), so the
+  coercion annotates the value rather than the union: an explicit null then means
+  "not given" and falls through to the field default exactly as an absent key
+  does, while an empty string or list stays an error. The model is the only
+  declaration form, so a subclass extends its parent's parameters by subclassing
+  the parent's model, and an adapter that takes no parameters declares none and
+  calls `self.check_params(query)`, which then rejects every key.
 - Raise `QueryError` with a helpful message when the query lacks something else
   the source needs (a station list, an explicit datum). The CLI turns it into
   exit code 2. Reject empty explicit identifiers and conflicting selectors too;

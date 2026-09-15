@@ -108,11 +108,12 @@ Items are upper-cased before repeats collapse, so ``ktlx,KTLX`` is one site
 rather than two spellings of one.
 """
 
-OptionalUpperStrList = Annotated[list[str] | None, BeforeValidator(_upper_strings)]
-"""``UpperStrList`` for a key that may be left out, but never given as empty or null.
+OptionalUpperStrList = UpperStrList | None
+"""``UpperStrList`` for a key the query may leave out, spelling out that it is optional.
 
-The coercion runs on whatever the query supplies, so an explicit ``None`` is the
-error it has always been; only an absent key reaches the ``None`` default.
+An explicit null means "not given", the same as an absent key: it matches the
+``None`` member and falls through to the field's default. Only a value that was
+meant to select something, such as ``""`` or ``[]``, is still an error.
 """
 
 __all__ = [
