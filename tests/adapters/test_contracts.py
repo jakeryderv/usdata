@@ -218,6 +218,24 @@ def test_declared_params_accepted_and_an_undeclared_one_rejected(dataset_id, mon
     assert reported[1] == "unknown-key"
 
 
+def test_a_declared_model_is_the_whole_parameter_declaration() -> None:
+    """Where an adapter declares a model, it forbids extras and fills ``accepted_params``.
+
+    Adapters that still hand-parse ``query.params`` are covered by the checks
+    above; this one holds the migrated ones to a single declaration.
+    """
+    migrated = []
+    for dataset_id in CASES:
+        with load_adapter(default_registry().get(dataset_id)) as adapter:
+            model = adapter.params_model
+            if model is None:
+                continue
+            assert model.model_config.get("extra") == "forbid", dataset_id
+            assert set(adapter.accepted_params) == set(model.model_fields), dataset_id
+            migrated.append(dataset_id)
+    assert migrated  # The declaration form is in use, so the contract is not vacuous.
+
+
 @pytest.mark.parametrize("dataset_id", CASES)
 def test_text_rejected_by_every_adapter_without_creating_client(dataset_id, monkeypatch) -> None:
     """Free text searches the registry; no adapter can honour it, so none may ignore it."""
