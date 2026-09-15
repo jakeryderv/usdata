@@ -1,1 +1,0 @@
-Adapters declare their `query.params` as a pydantic model, so validation, `usdata info` help, and the generated catalog come from one declaration; see the shared coercions in `usdata.providers.params`.

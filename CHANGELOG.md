@@ -12,6 +12,45 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.16.0](https://github.com/jakeryderv/usdata/releases/tag/v0.16.0) - 2026-09-15
+
+
+### Breaking
+
+- The `usdata.fetch` module is now private; import `fetch`, `fetch_asset`, `FetchedAsset`, and `ChecksumMismatch` from the `usdata` package root instead, where `usdata.fetch` is unambiguously the function.
+
+### Removed
+
+- Removed the `opendap` protocol value, which no transport or registry entry ever used.
+- Removed the `thredds` protocol value, which no transport implemented.
+
+### Added
+
+- `fetch`, `fetch_asset`, and `FetchedAsset` are now importable directly from `usdata`, so a script needs one import line instead of two.
+
+### Changed
+
+- A cache hit whose provenance sidecar checks out and whose file has not been touched since is reused without re-hashing it, so repeated fetches of large GRIB2 or NEXRAD files return immediately; restore and `usdata verify` still re-hash every file.
+- Provider parameters are now validated against each adapter's declared model, and `usdata pull` rejects a manifest source with bad parameters before fetching any source.
+
+### Fixed
+
+- A NEXRAD query that gives `nearest` an explicit null now reads it as not given, the same as leaving the key out, instead of failing.
+
+### Documentation
+
+- Add a Concepts section (how it works, manifests and lockfiles, readers, time and place, provenance and drift), five task guides (find a dataset, pin inputs, radar and satellite, model output, severe weather labels), and trim the reference pages to options and tables, with the recurring warnings about UTC windows, upstream revisions, large grids, and planned datasets defined once and included where they apply.
+- Add five planned registry entries with verified endpoints for severe-weather research: RAP model output, IGRA radiosondes, the NWS watch and warning archive, NCEI billion-dollar disasters, and FEMA disaster declarations. Group the geospatial sources behind their shared reader decision on the roadmap.
+- Give each website one audience: the documentation site now holds only user pages plus a new Install page with extras and platform notes, while contributor and project-record pages are read on GitHub from the README, which absorbs the former docs project page.
+- Lay the documentation site out like uv's: sections and pages in a collapsible left sidebar with breadcrumbs and instant navigation, the logo linking back to the homepage, and Website, Datasets, and Examples in the header instead of the navigation.
+- Record the v0.15.0 first-use review: the published walkthrough, one installed-package fetch from each of the six new datasets, the GRIB2 reader on MRMS and GFS grids, network-blocked validation for every new adapter, all twelve new live tests, and the tornado classification notebook passed.
+- Restyle both websites and the documentation theme on a near-black, graphite, and cobalt palette with a matching light scheme and logo, and name the KTLX volume that the radar alignment guard rejects.
+- Rewrite the two landing pages: the homepage now shows one complete result inline, Hurricane Helene's surge at Cedar Key with its pinned inputs, and the documentation front page opens with the four commands and their real output, with the walkthrough moved to its own Getting started page.
+
+### Development
+
+- Adapters declare their `query.params` as a pydantic model, so validation, `usdata info` help, and the generated catalog come from one declaration; see the shared coercions in `usdata.providers.params`.
+
 ## [0.15.0](https://github.com/jakeryderv/usdata/releases/tag/v0.15.0) - 2026-09-14
 
 

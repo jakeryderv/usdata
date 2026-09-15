@@ -1,1 +1,0 @@
-Give each website one audience: the documentation site now holds only user pages plus a new Install page with extras and platform notes, while contributor and project-record pages are read on GitHub from the README, which absorbs the former docs project page.

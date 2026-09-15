@@ -1,1 +1,0 @@
-Rewrite the two landing pages: the homepage now shows one complete result inline, Hurricane Helene's surge at Cedar Key with its pinned inputs, and the documentation front page opens with the four commands and their real output, with the walkthrough moved to its own Getting started page.
