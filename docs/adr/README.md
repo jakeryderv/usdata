@@ -27,3 +27,4 @@ is described in the guides and reference pages.
 - [0021: Publish examples on the main website](0021-examples-on-main-website.md)
 - [0022: GRIB2 reading through ecCodes, built into xarray by usdata](0022-grib2-reader-backend.md)
 - [0023: One audience per host](0023-one-audience-per-host.md)
+- [0024: Trust verified cache hits without re-hashing](0024-trusted-cache-hits.md)

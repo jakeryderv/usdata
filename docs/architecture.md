@@ -91,6 +91,10 @@ owned or injected client. Transport remains independent of dataset semantics.
 lockfiles, source bytes, or sidecars. Format selection uses the asset rather than
 a current registry lookup, so restored results remain readable. See the
 [reader reference](reference/readers.md) and [ADR 0006](adr/0006-optional-local-csv-readers.md).
+Fetch trusts a cache hit whose sidecar checks pass and whose file has not been
+touched since that sidecar was written, and hashes in every other case; restore
+and verify still re-hash everything. See
+[ADR 0024](adr/0024-trusted-cache-hits.md).
 
 CLI progress uses private, synchronous events scoped by a context variable. Core
 reports resolved batches and verified assets; HTTP reports bytes per attempt.

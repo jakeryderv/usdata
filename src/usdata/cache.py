@@ -39,10 +39,8 @@ def asset_path(asset: Asset, root: Path | None = None) -> Path:
     return path
 
 
-def sha256_file(path: Path, chunk_size: int = 1 << 20) -> str:
+def sha256_file(path: Path) -> str:
     """Hex sha256 of a file, prefixed 'sha256:' to match Asset.checksum."""
-    h = hashlib.sha256()
     with path.open("rb") as f:
-        while chunk := f.read(chunk_size):
-            h.update(chunk)
-    return f"sha256:{h.hexdigest()}"
+        digest = hashlib.file_digest(f, "sha256")
+    return f"sha256:{digest.hexdigest()}"
