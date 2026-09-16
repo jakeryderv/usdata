@@ -27,8 +27,8 @@ reader's inventory, a 5,817 character `ValueError` listing every
 `select={"shortName": ["cape", "hlcy"], "typeOfLevel": ["surface",
 "heightAboveGroundLayer"]}`. Two short names crossed with two level types match
 four messages, not two, so the Dataset also carries 0-1 km helicity and 0-3 km
-layer CAPE, and every variable is renamed to `shortName_typeOfLevel_level`
-because the short names repeat. A value that matches nothing is dropped in
+layer CAPE, and every variable is named `shortName_typeOfLevel_level` because
+the selection spans more than one level type. A value that matches nothing is dropped in
 silence; only a select that matches no message at all raises.
 
 The caveats that matter for the answer:
@@ -98,12 +98,19 @@ promise.
   character message, which arrives as one line containing duplicate triples and
   a dozen `unknown` short names from HRRR's local parameter tables. There is no
   method that returns the inventory as data.
-- Variable names cannot be predicted before the first run.
-  `cape_surface_0` and `hlcy_heightAboveGroundLayer_3000` follow from a rule
-  stated in the concepts page, but the guide's shorter version of that rule,
-  "Variables that share a `shortName` get the level appended to their names",
-  omits the level type that is also appended. Writing the next line of analysis
-  code means running the select once to see what came back.
+- Variable names could not be predicted before the first run. When this notebook
+  was written the suffix was added only to the short names that repeated, so
+  whether a field arrived as `hlcy` or as `hlcy_heightAboveGroundLayer_3000`
+  depended on what else the select had matched, and the guide's shorter version
+  of the rule, "Variables that share a `shortName` get the level appended to
+  their names", omitted the level type that is also appended. Writing the next
+  line of analysis code meant running the select once to see what came back. The
+  rule is now stated in the
+  [reader reference](https://docs.usdata.dev/reference/readers/): every variable
+  takes `shortName_typeOfLevel_level` as soon as the selection spans more than
+  one level type or level, and every variable keeps its bare `shortName` when
+  they all share one. This select spans two level types, so the names below are
+  the same ones either rule produces.
 - Units arrive as raw ecCodes strings, `J kg**-1` and `m**2 s**-2`. Every plot
   label and sentence has to translate them by hand, and there is no documented
   canonical form to translate to.
