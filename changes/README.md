@@ -3,7 +3,7 @@
 Each PR adds a small Markdown fragment here. Towncrier builds the changelog at
 release time; do not edit `CHANGELOG.md` for pending changes.
 
-From the [development environment](../README.md#development):
+From the [development environment](../CONTRIBUTING.md#setup):
 
 ```sh
 just change +csv-units.fixed.md   # opens the editor; choose a unique slug

@@ -8,12 +8,30 @@ authors = [
     { name = "Jake Van Slyke", email = "jakervanslyke@gmail.com" }
 ]
 requires-python = ">=3.11"
-keywords = ["noaa", "usgs", "nasa", "open-data", "scientific-data", "provenance"]
+keywords = [
+    "noaa",
+    "usgs",
+    "open-data",
+    "scientific-data",
+    "provenance",
+    "reproducible-research",
+    "weather",
+    "climate",
+    "meteorology",
+]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
     "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Topic :: Scientific/Engineering :: Hydrology",
 ]
 dependencies = [
     "httpx>=0.28.1",
@@ -38,6 +56,9 @@ grib = [
 Homepage = "https://usdata.dev/"
 Documentation = "https://docs.usdata.dev/"
 Repository = "https://github.com/jakeryderv/usdata"
+Examples = "https://usdata.dev/examples/"
+Changelog = "https://github.com/jakeryderv/usdata/blob/main/CHANGELOG.md"
+Issues = "https://github.com/jakeryderv/usdata/issues"
 
 [project.scripts]
 usdata = "usdata.cli:app"
