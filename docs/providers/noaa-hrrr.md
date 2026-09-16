@@ -50,8 +50,9 @@ uv run usdata fetch noaa:hrrr \
   -p cycle=20 -p forecast_hour=0,1 --dry-run
 ```
 
-Remove `--dry-run` to download about 310 MB. Cached bytes are the exact
-objects; lockfiles pin their checksums like every other dataset.
+The listing gives each file's exact size and the total, so remove `--dry-run`
+to download about 310 MB. Cached bytes are the exact objects; lockfiles pin
+their checksums like every other dataset.
 
 ## Reading fields
 
