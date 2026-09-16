@@ -36,6 +36,35 @@ Dates/times in rows are local, with `CZ_TIMEZONE` needed for instant conversion.
 The [executed notebook](https://usdata.dev/examples/storm-events/) filters on
 reported calendar dates and keeps timezone labels visible.
 
+## The timezone rule
+
+`CZ_TIMEZONE` is a local-standard-time label ending in its whole-hour UTC
+offset, so `CST-6` is UTC−6 and Guam's `GST10`, which omits the sign, is UTC+10.
+The labels seen in the annual files are `CST-6`, `EST-5`, `MST-7`, `PST-8`,
+`AST-4`, `AKST-9`, `HST-10`, `SST-11`, and `GST10`, plus a few daylight spellings
+(`CDT-5`, `EDT-4`, `PDT-7`) whose trailing offset is still the one to use. Files
+before 2006 carry bare labels such as `CST` with no offset at all. No Python
+timezone accepts these strings, and applying a named regional zone would add
+daylight saving the reports do not use.
+
+When the frame keeps `BEGIN_DATE_TIME`, `END_DATE_TIME`, and `CZ_TIMEZONE`,
+`open()` adds `BEGIN_UTC` and `END_UTC` as timezone-aware UTC timestamps,
+leaving the original columns alone. A row whose label has no offset, or whose
+timestamp does not parse, gets `NaT`; the rule used and the count of such rows
+per derived column are listed under `frame.attrs["usdata"]["derived"]`.
+
+```python
+frame = item.open(usecols=["EVENT_ID", "BEGIN_DATE_TIME", "END_DATE_TIME", "CZ_TIMEZONE"])
+print(frame[["BEGIN_DATE_TIME", "CZ_TIMEZONE", "BEGIN_UTC", "END_UTC"]].head())
+print(frame.attrs["usdata"]["derived"])  # column, source, rule, unparsed rows
+hours = pd.to_numeric(frame.CZ_TIMEZONE.str.extract(r"^[A-Za-z]+([+-]?\d{1,2})$", expand=False))
+local = pd.to_datetime(frame.BEGIN_DATE_TIME, format="%d-%b-%y %H:%M:%S", errors="coerce")
+```
+
+The last two lines are the manual form: subtract `pd.to_timedelta(hours, unit="h")`
+from `local` and call `.dt.tz_localize("UTC")` to get the same instants without
+the reader.
+
 Reported events, impacts, and damage ratings require care when aggregating:
 physical storms can span several records, historical reporting varies, and
 missing reports do not establish an absence of hazards. Source field meanings

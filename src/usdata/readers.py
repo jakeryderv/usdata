@@ -35,6 +35,22 @@ PRODUCT_LEVEL = re.compile(r"^(?P<product>.+?)_\d{2}\.\d{2}$")
 UNSET_UNITS = {"", "unknown"}
 """Unit strings that state nothing, so the registry may fill them."""
 
+STORM_EVENTS_DATASET = "noaa:storm-events"
+"""The dataset whose local timestamps the CSV reader pairs with UTC columns."""
+
+STORM_EVENTS_UTC_COLUMNS = {"BEGIN_DATE_TIME": "BEGIN_UTC", "END_DATE_TIME": "END_UTC"}
+"""Each Storm Events local timestamp column and the derived UTC column beside it."""
+
+STORM_EVENTS_TIMEZONE_COLUMN = "CZ_TIMEZONE"
+STORM_EVENTS_LOCAL_FORMAT = "%d-%b-%y %H:%M:%S"
+CZ_TIMEZONE_OFFSET = re.compile(r"^[A-Za-z]+([+-]?\d{1,2})$")
+"""A Storm Events timezone label, capturing the whole-hour UTC offset it ends with."""
+
+STORM_EVENTS_RULE = (
+    "local time parsed as %d-%b-%y %H:%M:%S and shifted by the whole-hour UTC "
+    "offset ending CZ_TIMEZONE (CST-6 is UTC-6, GST10 is UTC+10)"
+)
+
 IDENTIFIER_COLUMNS = {
     "station",
     "station_id",
@@ -136,6 +152,50 @@ def fill_registry_attrs(fetched: FetchedAsset, data: Any) -> None:
         data.attrs["usdata"]["registry_attrs"] = filled
 
 
+def _local_timestamps(pandas: Any, values: Any) -> Any:
+    """Storm Events local timestamps as tz-naive datetimes, unparsable strings as NaT."""
+    if pandas.api.types.is_datetime64_any_dtype(values):
+        return values.dt.tz_localize(None) if values.dt.tz is not None else values
+    return pandas.to_datetime(values, format=STORM_EVENTS_LOCAL_FORMAT, errors="coerce")
+
+
+def derive_storm_events_utc(pandas: Any, frame: Any) -> None:
+    """Add ``BEGIN_UTC`` and ``END_UTC`` to a Storm Events frame that carries the sources.
+
+    Storm Events rows are stamped in local standard time with a ``CZ_TIMEZONE``
+    label such as ``CST-6`` that no Python timezone accepts. The trailing signed
+    integer is the whole-hour UTC offset, so each local timestamp is shifted by
+    it and labelled UTC. Original columns are never modified, a row whose label
+    or timestamp does not parse gets ``NaT``, and each derived column, its
+    source, the rule, and that row count are listed under
+    ``frame.attrs["usdata"]["derived"]``. A frame missing any of the three
+    source columns is left alone.
+
+    Args:
+        pandas: The imported pandas module.
+        frame: The DataFrame read from a Storm Events details CSV.
+    """
+    required = {*STORM_EVENTS_UTC_COLUMNS, STORM_EVENTS_TIMEZONE_COLUMN}
+    if not required.issubset(frame.columns):
+        return
+    labels = frame[STORM_EVENTS_TIMEZONE_COLUMN].astype("string").str.strip()
+    hours = pandas.to_numeric(labels.str.extract(CZ_TIMEZONE_OFFSET, expand=False), errors="coerce")
+    offsets = pandas.to_timedelta(hours, unit="h")
+    derived = []
+    for source, column in STORM_EVENTS_UTC_COLUMNS.items():
+        local = _local_timestamps(pandas, frame[source])
+        frame[column] = (local - offsets).dt.tz_localize("UTC")
+        derived.append(
+            {
+                "column": column,
+                "source": source,
+                "rule": STORM_EVENTS_RULE,
+                "unparsed": int(frame[column].isna().sum()),
+            }
+        )
+    frame.attrs["usdata"]["derived"] = derived
+
+
 def inventory(path: Path) -> list[GribMessage]:
     """List every message in a local GRIB2 file without decoding any values.
 
@@ -187,6 +247,10 @@ def open_asset(
     raises either way. Gzipped GRIB2 is decompressed in memory.
     HURDAT2 best-track text is recognized by dataset or filename and returns one
     row per track point; it takes no CSV options.
+    A Storm Events CSV gains ``BEGIN_UTC`` and ``END_UTC`` when the frame keeps
+    ``BEGIN_DATE_TIME``, ``END_DATE_TIME``, and ``CZ_TIMEZONE``: the local
+    timestamp shifted by the whole-hour offset ending the timezone label, with
+    unparsable rows left ``NaT`` and counted under ``attrs["usdata"]["derived"]``.
     NetCDF4 and GRIB2 results have units the file leaves missing or ``unknown``
     and missing long names filled from the registry entry's variables, listed
     under ``attrs["usdata"]["registry_attrs"]``.
@@ -316,4 +380,6 @@ def open_asset(
         "asset_id": fetched.asset.id,
         "provenance": fetched.provenance.model_dump(mode="json"),
     }
+    if fetched.asset.dataset_id == STORM_EVENTS_DATASET:
+        derive_storm_events_utc(pandas, frame)
     return frame
