@@ -1,8 +1,8 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 import pytest
 
-from usdata.models import BBox
+from usdata.models import BBox, TimeRange
 from usdata.query import UnknownPlace, build_query, parse_datetime, resolve_place
 
 
@@ -17,6 +17,23 @@ def test_parse_datetime_defaults_to_utc() -> None:
     assert parse_datetime("2024-05-06") == datetime(2024, 5, 6, tzinfo=UTC)
     assert parse_datetime("2024-05-06T20:00") == datetime(2024, 5, 6, 20, tzinfo=UTC)
     assert parse_datetime(None) is None
+
+
+def test_bare_end_date_runs_to_the_last_instant_of_its_day() -> None:
+    last = datetime(2024, 5, 7, 23, 59, 59, 999999, tzinfo=UTC)
+    assert parse_datetime("2024-05-07", end=True) == last
+    assert parse_datetime(" 2024-05-07 ", end=True) == last
+    assert parse_datetime(date(2024, 5, 7), end=True) == last
+    # A datetime is taken as given on either bound, and a bare start is still midnight.
+    assert parse_datetime("2024-05-07T00:00Z", end=True) == datetime(2024, 5, 7, tzinfo=UTC)
+    assert parse_datetime(datetime(2024, 5, 7), end=True) == datetime(2024, 5, 7, tzinfo=UTC)
+    assert parse_datetime(date(2024, 5, 7)) == datetime(2024, 5, 7, tzinfo=UTC)
+    whole_day = build_query(start="2024-05-07", end="2024-05-07").time
+    assert whole_day == TimeRange(start=datetime(2024, 5, 7, tzinfo=UTC), end=last)
+    assert whole_day == build_query(start=date(2024, 5, 7), end=date(2024, 5, 7)).time
+    assert (
+        whole_day == build_query(start="2024-05-07T00:00Z", end="2024-05-07T23:59:59.999999Z").time
+    )
 
 
 def test_build_query_from_location_and_dates() -> None:

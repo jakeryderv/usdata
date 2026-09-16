@@ -2,7 +2,8 @@
 
 Both datasets share one station model: one seven-digit ``station``, an explicit
 ``datum``, optional ``units`` (metric or english), and both timestamps at minute
-precision, requested in UTC. Observations span at most 28 days; predictions
+precision, requested in UTC; a bare end date means 23:59 on that day.
+Observations span at most 28 days; predictions
 span at most a year on any ``interval`` (six-minute by default, another minute
 step, hourly, or high/low), within NOAA's own limits.
 """
@@ -25,6 +26,7 @@ from usdata.protocols import http
 from usdata.providers.base import QueryError
 from usdata.providers.http import HttpProvider
 from usdata.providers.params import choice
+from usdata.query import LAST_INSTANT
 
 DATA_URL = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
 DATUMS = {"CRD", "IGLD", "LWD", "MHHW", "MHW", "MTL", "MSL", "MLW", "MLLW", "NAVD", "STND"}
@@ -156,6 +158,8 @@ class _CoopsStation(HttpProvider):
 
     def _window(self, query: Query, limit: timedelta) -> tuple[datetime, datetime]:
         start, end = self.utc_window(query)
+        if end.time() == LAST_INSTANT:
+            end = end.replace(second=0, microsecond=0)  # a bare end date: its last minute
         if any(value.second or value.microsecond for value in (start, end)):
             raise QueryError("CO-OPS timestamps must have minute precision (zero seconds)")
         if end - start > limit:

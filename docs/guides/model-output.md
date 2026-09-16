@@ -21,9 +21,10 @@ any request.
 
 --8<-- "_snippets/utc-window.md"
 
-The pitfall follows from that rule: `--start 2024-05-07 --end 2024-05-07`
-spans only midnight, so with `cycle=4` it contains no run and is rejected. Give
-the end a time, or use the next day.
+So `--start 2024-05-07 --end 2024-05-07` is the whole of that day and selects
+its `cycle` run, whichever hour that is. A window given with times must reach
+the initialization hour: 20:00 to 20:00 with `cycle=4` contains no run and is
+rejected before any request.
 
 ## Files and sizes
 

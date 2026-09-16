@@ -19,7 +19,8 @@ The query window selects runs by **initialization time**, inclusive, and spans
 at most one day. `cycle` (required) names the hour; a run is selected when its
 initialization falls inside the window, so a window from 20:00 to 20:00 UTC on
 one day with `cycle=20` selects exactly that run, and a 24-hour window can
-select the same cycle on two days. A window that contains no `cycle`
+select the same cycle on two days. A bare date as both bounds is that whole
+day and selects its `cycle` run. A window that contains no `cycle`
 initialization is rejected before any request.
 
 --8<-- "_snippets/utc-window.md"

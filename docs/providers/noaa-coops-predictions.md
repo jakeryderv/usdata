@@ -22,7 +22,7 @@ rejected.
 Offsets are normalized to UTC and the API request fixes `time_zone=gmt`. Bounds
 are inclusive, must have zero seconds/microseconds, and span at most 366 days
 on any interval, within NOAA's one-year limit for predictions. A year of
-six-minute predictions is about 87,600 rows. Date-only bounds remain midnight.
+six-minute predictions is about 87,600 rows. A date alone as the end means 23:59 on that day.
 The adapter constructs one stable CSV request; it checks the response on fetch.
 
 ```sh

@@ -14,7 +14,7 @@ Unknown parameters, geographic/text selectors, and `variables` are rejected.
 
 Offsets are normalized to UTC and the API request fixes `time_zone=gmt`. Bounds
 are inclusive, must have zero seconds/microseconds, and span at most 28 days,
-conservatively within NOAA's one-month limit. Date-only bounds remain midnight.
+conservatively within NOAA's one-month limit. A date alone as the end means 23:59 on that day.
 The adapter constructs one stable CSV request; it checks availability on fetch.
 
 ```sh

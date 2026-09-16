@@ -45,8 +45,9 @@ is `O or I (for verified)`. Consult the [official field definitions](https://api
 before filtering observations. Gaps and missing measurements are not filled.
 
 Both timestamps must have minute precision and span at most 28 days. Longer
-requests can be declared as separate manifest sources. Date-only bounds mean
-midnight UTC, not the end of a calendar day. Empty or invalid API responses raise
+requests can be declared as separate manifest sources. A date alone as the end
+means 23:59 UTC on that day, so two bare dates select whole calendar days.
+Empty or invalid API responses raise
 an upstream error during fetching, including NOAA's HTTP-200 no-data message;
 `allow_empty` only applies to empty resolution and does not suppress that error.
 

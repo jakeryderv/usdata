@@ -17,8 +17,8 @@ Its metadata describes data use as free and open under the GHRSST protocol.
 
 Require a bbox/location and both timestamps. Bounds include only grid centers
 and timestamps inside the requested interval; an interval with no matching
-coordinates returns no assets. UTC bounds are inclusive. A date-only end means
-midnight at the start of that date, before the noon analysis. `params.stride`
+coordinates returns no assets. UTC bounds are inclusive. A date alone as the
+end runs through that day, so it includes the day's noon analysis. `params.stride`
 (or `-p stride=2`) subsamples both spatial axes with a positive integer. Reduce
 the area/time window or increase stride when a query exceeds 1,000,000 rows.
 Unknown parameters and variables fail explicitly.
