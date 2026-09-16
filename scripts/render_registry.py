@@ -127,6 +127,21 @@ def dataset_table(datasets: list[Dataset]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def system_sections(registry: Registry, datasets: list[Dataset]) -> str:
+    """Datasets grouped by the system they come from, ungrouped ones under the provider."""
+    groups: dict[str | None, list[Dataset]] = {}
+    for ds in datasets:
+        groups.setdefault(ds.system, []).append(ds)
+    blocks = [dataset_table(groups[None])] if None in groups else []
+    for system_id, group in groups.items():
+        if system_id is None:
+            continue
+        info = registry.system(system_id)
+        heading = f"[{info.name}]({info.homepage})" if info.homepage else info.name
+        blocks.append(f"### {heading}\n\n" + dataset_table(group))
+    return "\n".join(blocks)
+
+
 def planned_block(registry: Registry, datasets: list[Dataset]) -> str:
     if not datasets:
         return "No planned datasets for this provider.\n"
@@ -371,7 +386,7 @@ def render_all(registry: Registry) -> dict[Path, str]:
             f"[Provider access notes](../../providers/{info.id}.md).\n\n"
             + AVAILABILITY_NOTE
             + "\n## Implemented datasets\n\n"
-            + (dataset_table(available) if available else "None implemented yet.\n")
+            + (system_sections(registry, available) if available else "None implemented yet.\n")
             + "\n## Planned datasets\n\n"
             + planned_block(registry, planned)
         )

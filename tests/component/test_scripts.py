@@ -205,6 +205,21 @@ def test_catalog_summary_separates_source_only_and_planned(monkeypatch):
     assert module.summary_table(registry, "").splitlines()[2].endswith("| 2 | 0 | 1 |")
 
 
+def test_catalog_groups_a_providers_datasets_by_system():
+    module = script("render_registry")
+    bundled = Registry.bundled()
+    registry = Registry(
+        [bundled.get(key) for key in ("noaa:ghcn-daily", "noaa:gsom", "noaa:mrms")],
+        domains=bundled.domains(),
+        systems=bundled.systems(),
+    )
+    sections = module.system_sections(registry, list(registry))
+    # MRMS belongs to no system, so it stays in the table directly under the provider.
+    assert sections.startswith("| Dataset |") and "noaamrms" in sections.split("### ")[0]
+    assert sections.count("### ") == 1
+    assert "### [NCEI Access Data Service](https://www.ncei.noaa.gov/" in sections
+
+
 def test_radar_generator_writes_lf(tmp_path, monkeypatch):
     module = script("build_nexrad_sites")
     source = tmp_path / "stations.txt"
