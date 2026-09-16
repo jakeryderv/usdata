@@ -1,1 +1,0 @@
-The README is the front door: badges, the pitch, the four commands, and where to look; setup, commands, CI, and releases moved to CONTRIBUTING.md. The package now lists Python 3.11 to 3.14, atmospheric science and hydrology topics, and links to the examples, changelog, and issue tracker on PyPI.

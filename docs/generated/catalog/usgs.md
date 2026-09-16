@@ -4,13 +4,13 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 [Provider access notes](../../providers/usgs.md).
 
-**Released** is included in usdata 0.18.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
+**Released** is included in usdata 0.19.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
 
 ## Implemented datasets
 
 | Dataset | Availability | Files | What gets selected |
 |---|---|---|---|
-| <span id="usgsearthquakes"></span>[Earthquake events](usgs/earthquakes.md) | Source only | CSV | Events inside an inclusive UTC window and optional box, magnitude, and depth bounds |
+| <span id="usgsearthquakes"></span>[Earthquake events](usgs/earthquakes.md) | Released | CSV | Events inside an inclusive UTC window and optional box, magnitude, and depth bounds |
 | <span id="usgswater-daily"></span>[Daily water observations](usgs/water-daily.md) | Released | CSV | Site observations for inclusive local calendar dates; parameter and statistic filters |
 
 ## Planned datasets

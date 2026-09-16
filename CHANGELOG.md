@@ -12,6 +12,31 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.19.0](https://github.com/jakeryderv/usdata/releases/tag/v0.19.0) - 2026-09-16
+
+
+### Breaking
+
+- A date alone as a query, CLI, or manifest `end` now means the last instant of that UTC day rather than its first, so `--start 2024-05-07 --end 2024-05-07` is the whole day: listing-based sources such as GOES, GLM, MRMS, HRRR, and GFS gain the rest of the day, CO-OPS reads it as 23:59, and calendar-date sources are unchanged. Window limits are measured between instants, so two bare dates a day apart now span two days. ([#220](https://github.com/jakeryderv/usdata/issues/220))
+
+### Added
+
+- The six archive-backed examples commit their lockfiles, the offline checks hold each to its manifest, the example pages offer the lockfile for download, and a weekly `restore` job pulls every one into an empty cache and reports the assets that drifted. ([#218](https://github.com/jakeryderv/usdata/issues/218))
+- A content-addressed mirror: with `USDATA_MIRROR_URL` set, `usdata pull` restores a pinned asset whose source no longer serves its bytes from `<mirror>/sha256/<checksum>`, verifies it against the same pin, reports it as `mirrored`, and records the mirror object in the provenance sidecar; the lockfile is unchanged and the SDK never uploads. The weekly restore job fills `data.usdata.dev` with the objects the committed example lockfiles pin, and a manual workflow prunes what none pins. ([#219](https://github.com/jakeryderv/usdata/issues/219))
+- `PullResult.one(source)` returns the single asset of a manifest source and says how many it has otherwise, and every result now orders a source's assets by start time and then id, whatever order the adapter listed them, so `fetch`, `pull`, `by_source`, and `pull --dry-run` never need a defensive sort. ([#221](https://github.com/jakeryderv/usdata/issues/221))
+- `usgs:earthquakes` fetches events from the ANSS Comprehensive Catalog through the FDSN event service: a UTC window, an optional box, and magnitude and depth bounds resolve to CSV pages of at most 20,000 events, counted first and ordered by time, opened with the pandas reader. A manifest example pulls Oklahoma's events on the May 2024 tornado days.
+
+### Changed
+
+- The package is now classified as Alpha rather than Pre-Alpha: releases are tested and lockfiles are stable, while the Python API and CLI can still change between minor versions.
+
+### Documentation
+
+- Every page on usdata.dev and docs.usdata.dev now declares an Open Graph card, so a pasted link unfurls with an image; the README shows the same card as its link to the site.
+- The README is the front door: badges, the pitch, the four commands, and where to look; setup, commands, CI, and releases moved to CONTRIBUTING.md. The package now lists Python 3.11 to 3.14, atmospheric science and hydrology topics, and links to the examples, changelog, and issue tracker on PyPI.
+- The README shows a preview of usdata.dev, the same four steps in Python, a docs badge, and one sentence on when another library is the better tool; a CITATION.cff file lets GitHub offer a software citation beside the dataset citations usdata prints.
+- Two decision records plan reproducible inputs in fact: the archive-backed examples will commit their lockfiles and restore them weekly, and a content-addressed mirror on R2 will serve pinned bytes after an agency stops serving them. The README compares usdata with pooch, intake, DVC, Herbie, and dataretrieval, the roadmap selects that workstream, and the 1.0 criteria now ask for a provider that requires credentials.
+
 ## [0.18.0](https://github.com/jakeryderv/usdata/releases/tag/v0.18.0) - 2026-09-16
 
 

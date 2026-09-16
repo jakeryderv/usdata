@@ -1,5 +1,5 @@
 {
-  "version": "0.18.0",
+  "version": "0.19.0",
   "datasets": [
     {
       "id": "noaa:ghcn-daily",
@@ -2261,7 +2261,7 @@
       "provider": "USGS",
       "domain": "Natural hazards",
       "system": null,
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.19",
       "keywords": [
         "earthquakes",
