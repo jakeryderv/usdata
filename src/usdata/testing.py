@@ -70,6 +70,9 @@ REFUSED: dict[QueryField, str] = {
 SELECTORS = frozenset({"site", "sites", "station", "stations", "nearest"})
 """Parameters naming a station or site. A bbox stands in for one wherever they are declared."""
 
+PARTIAL_PARAM = "messages"
+"""The parameter an adapter declaring ``partial_fetch`` asks for a byte subset through."""
+
 
 class TransportReached(Exception):
     """Raised in place of a client, so a probe that got past validation is visible."""
@@ -280,6 +283,12 @@ def check_declared_capabilities(
     ``temporal_subset`` is false only where the window plays no part, which
     HURDAT2 shows by refusing start/end. Such a dataset must not require a
     window either, having nothing to select with it.
+
+    ``partial_fetch`` is the claim that a caller can ask for part of an object
+    and get a file of the declared media type back, so it is read from the
+    adapter's declared parameters: an adapter that promises it declares
+    ``messages``, and one that does not must not, since there would be no way
+    to ask.
     """
     dataset_id = dataset.id
 
@@ -298,6 +307,7 @@ def check_declared_capabilities(
         time_refused = _refuses(adapter, timed_query, "time")
         requires_window = _demands_window(adapter, base.model_copy(update={"time": None}))
         selects_by_site = bool(SELECTORS & set(adapter.accepted_params))
+        selects_parts = PARTIAL_PARAM in adapter.accepted_params
 
     assert variables_refused is not declared.variable_subset, (
         f"{dataset_id} declares variable_subset={declared.variable_subset} and "
@@ -309,6 +319,10 @@ def check_declared_capabilities(
     )
     if not declared.temporal_subset:
         assert not requires_window, f"{dataset_id} requires a window it declares it cannot use"
+    assert selects_parts is declared.partial_fetch, (
+        f"{dataset_id} declares partial_fetch={declared.partial_fetch} and "
+        f"{'declares' if selects_parts else 'declares no'} {PARTIAL_PARAM!r} parameter"
+    )
     if bbox_refused:
         assert not declared.spatial_subset, f"{dataset_id} declares a bbox its adapter refuses"
     elif not selects_by_site:
@@ -443,6 +457,7 @@ def check_provider_contract(
 
 
 __all__ = [
+    "PARTIAL_PARAM",
     "PROBE_BBOX",
     "REFUSED",
     "SELECTORS",

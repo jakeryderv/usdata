@@ -9,7 +9,7 @@ HRRR Forecast Model Output.
 ## At a glance
 
 - Files: GRIB2
-- Selection: Whole CONUS files by run initialization window, cycle hour, forecast hours, and file variant, at most one day
+- Selection: CONUS files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file variant
 - Required inputs: Both timestamps, cycle, and forecast_hour
 - Open locally: `usdata[grib]` · [Reader guide](../../../reference/readers.md)
 - Examples: [hrrr environment](https://usdata.dev/examples/hrrr-environment/), [severe weather case study](https://usdata.dev/examples/severe-weather-case-study/)
@@ -23,6 +23,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `cycle` | Required UTC initialization hour of the run, 0 to 23. |
 | `file` | File variant: sfc (default, 2-D fields), prs (pressure levels), or nat (native levels). |
 | `forecast_hour` | Required forecast hour(s): an integer, list, or comma-separated string; 0 to 18, or 0 to 48 for the 00, 06, 12, and 18 UTC runs. |
+| `messages` | Optional GRIB2 messages to fetch instead of the whole file, spelled as the object's wgrib2 .idx sidecar spells them: 'SHORTNAME:level text', such as 'TMP:2 m above ground', with an optional ':step text'; one value, a list, or a comma-separated string. Short names are upper case and both fields match exactly. |
 
 ## Variables
 

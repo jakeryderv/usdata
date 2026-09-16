@@ -303,6 +303,10 @@ def open_grib2(
 ) -> Any:
     """Decode selected GRIB2 messages into one loaded xarray Dataset.
 
+    A file of several messages needs ``select``, unless its provenance says the
+    fetch already selected them: a partial fetch concatenated the messages that
+    were asked for, so all of them are wanted and ``select`` stays optional.
+
     A select value that matches none of the selected messages warns, or raises
     ``ValueError`` when ``strict``; a select that matches nothing always raises.
     """
@@ -316,9 +320,10 @@ def open_grib2(
     grid: _Grid | None = None
     count = 0
     names: list[str] = []
+    needs_select = select is None and not fetched.provenance.is_partial
     for h in _messages(eccodes, fetched.path):
         count += 1
-        if count > 1 and select is None:
+        if count > 1 and needs_select:
             continue
         hits = {key: _matched(eccodes, h, key, wanted) for key, wanted in options.items()}
         missed = [key for key, indexes in hits.items() if not indexes]
@@ -365,7 +370,7 @@ def open_grib2(
             )
         names.append(short)
         fields[f"{short}#{len(names)}"] = (data, attrs)
-    if count > 1 and select is None:
+    if count > 1 and needs_select:
         raise ValueError(
             f"{count} messages; pass select={{...}} with ecCodes keys to choose, "
             f"for example select={{'shortName': ..., 'typeOfLevel': ...}}. "

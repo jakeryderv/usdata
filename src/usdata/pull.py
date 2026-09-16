@@ -23,6 +23,7 @@ from usdata import __version__, _progress, provenance
 from usdata._fetch import ChecksumMismatch, FetchedAsset, _fetch_asset, _fetch_with
 from usdata.cache import asset_path, sha256_file
 from usdata.manifest import LockedAsset, Lockfile, Manifest, lockfile_path
+from usdata.protocols.http import ObjectChanged
 from usdata.providers import Provider, load_adapter
 from usdata.registry import Registry, default_registry
 
@@ -205,7 +206,9 @@ def restore(
 
     ``update`` names assets or datasets whose current upstream bytes replace their
     pins. Every other entry must still match; if any does not, the whole run raises
-    ``UpstreamChanged`` listing them and the lockfile is left as it was.
+    ``UpstreamChanged`` listing them and the lockfile is left as it was. An entry
+    pinning byte ranges re-issues exactly those ranges against the pinned ETag, so
+    a republished object is reported as drift rather than silently re-resolved.
     """
     reg = registry or default_registry()
     lock_path = lockfile_path(manifest_path)
@@ -245,7 +248,9 @@ def restore(
             if refresh:
                 # Fetch unpinned so whatever upstream serves now becomes the new pin.
                 unpinned = entry.asset.model_copy(update={"checksum": None})
-                item = _fetch_asset(dataset, unpinned, adapter, root=root, force=True)
+                item = _fetch_asset(
+                    dataset, unpinned, adapter, root=root, force=True, pinned=entry.provenance
+                )
                 if item.provenance.checksum == entry.provenance.checksum:
                     entries.append(entry)  # Same bytes: keep the original pin and record.
                 else:
@@ -258,8 +263,13 @@ def restore(
                 continue
             pinned = entry.asset.model_copy(update={"checksum": entry.provenance.checksum})
             try:
-                fetched.append(_fetch_asset(dataset, pinned, adapter, root=root, force=True))
-            except ChecksumMismatch:
+                fetched.append(
+                    _fetch_asset(
+                        dataset, pinned, adapter, root=root, force=True, pinned=entry.provenance
+                    )
+                )
+            # A republished object refuses the pinned ETag, which is drift by another name.
+            except (ChecksumMismatch, ObjectChanged):
                 drift.append(
                     Drift(
                         asset_id=entry.asset.id,

@@ -1,0 +1,1 @@
+ADR 0028 records how a partial GRIB2 fetch identifies, pins, and reads a subset of one object, with the S3 range and index behaviour it was verified against; the HRRR and GFS guides, the manifest reference, and the provenance page document the `messages` parameter and the new sidecar fields.

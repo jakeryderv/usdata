@@ -5,9 +5,14 @@ each run writes one GRIB2 file per forecast hour under
 ``hrrr.YYYYMMDD/conus/hrrr.tHHz.<variant>fNN.grib2``. The query window selects
 runs by initialization time, ``cycle`` names the run's hour, ``forecast_hour``
 names the files, and ``file`` chooses the surface, pressure-level, or native
-variant. Files are whole CONUS grids of hundreds of fields; there is no
-server-side subsetting, so message selection happens after download with the
-GRIB2 reader's ``select``.
+variant. Files are whole CONUS grids of hundreds of fields; the server subsets
+none of them, so message selection happens either after download with the GRIB2
+reader's ``select``, or before it with ``messages``.
+
+``messages`` names fields the way the object's ``.idx`` sidecar names them, and
+the adapter turns them into byte ranges at listing time; the resulting asset is
+the concatenation of those messages, which is itself a valid GRIB2 file. See
+ADR 0028.
 
 The run-selection helpers (:func:`select_runs`, :func:`list_run_files`) and the
 :class:`ModelRuns` listing base are shared with the GFS adapter.
@@ -15,20 +20,40 @@ The run-selection helpers (:func:`select_runs`, :func:`list_run_files`) and the
 
 from __future__ import annotations
 
+import hashlib
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Annotated, ClassVar
+from typing import Annotated, ClassVar, NamedTuple
 
 import httpx
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 
-from usdata.models import Asset, Protocol, Query, TimeRange
-from usdata.protocols import s3
+from usdata.cache import sha256_bytes
+from usdata.models import (
+    PARTIAL_FRAGMENT,
+    Asset,
+    Dataset,
+    PartialFetch,
+    Protocol,
+    Provenance,
+    Query,
+    TimeRange,
+)
+from usdata.protocols import http, s3
 from usdata.providers.base import QueryError
 from usdata.providers.http import HttpProvider
-from usdata.providers.params import choice, int_list, int_range
+from usdata.providers.noaa import grib_index
+from usdata.providers.params import StrList, choice, int_list, int_range
 
 BUCKET = "noaa-hrrr-bdp-pds"
 DOMAIN = "conus"
@@ -40,6 +65,28 @@ LONG_CYCLES = frozenset({0, 6, 12, 18})
 MAX_HOUR = 18
 LONG_MAX_HOUR = 48
 KEY_RE = re.compile(r"hrrr\.t(?P<cycle>\d{2})z\.(?P<variant>wrf[a-z]+f)(?P<hour>\d{2,3})\.grib2")
+ABSENT_INDEX = {403, 404}
+MESSAGES = (
+    "Optional GRIB2 messages to fetch instead of the whole file, spelled as the object's "
+    "wgrib2 .idx sidecar spells them: 'SHORTNAME:level text', such as "
+    "'TMP:2 m above ground', with an optional ':step text'; one value, a list, or a "
+    "comma-separated string. Short names are upper case and both fields match exactly."
+)
+
+
+def checked_selectors(value: list[str]) -> list[str]:
+    """Reject a misspelled ``messages`` entry while the parameters are validated.
+
+    Shape is checked here so a typo fails before any request; whether the index
+    holds a matching message can only be answered once it has been read.
+    """
+    for raw in value:
+        grib_index.parse_selector(raw)
+    return value
+
+
+MessageList = Annotated[StrList, AfterValidator(checked_selectors)]
+"""``messages`` as a list of well-formed selectors, in request order."""
 
 
 class HrrrParams(BaseModel):
@@ -59,6 +106,8 @@ class HrrrParams(BaseModel):
         description="File variant: sfc (default, 2-D fields), prs (pressure levels), or nat "
         "(native levels).",
     )
+
+    messages: MessageList | None = Field(default=None, description=MESSAGES)
 
     @field_validator("file", mode="before")
     @classmethod
@@ -111,13 +160,65 @@ def list_run_files(
     return found
 
 
+class RunSelection(NamedTuple):
+    """What one query names: the run, its file variant, its hours, and any message selectors."""
+
+    cycle: int
+    variant: str
+    hours: list[int]
+    messages: list[str]
+
+
+def message_digest(messages: Sequence[int]) -> str:
+    """Twelve hex characters standing for one message list, so a partial asset id is stable."""
+    numbers = ",".join(str(number) for number in messages)
+    return hashlib.sha256(numbers.encode()).hexdigest()[:12]
+
+
+def pinned_partial(pinned: Provenance) -> PartialFetch:
+    """Rebuild the byte ranges a provenance record pins, without reading any index.
+
+    Args:
+        pinned: The record a lockfile holds for a partial asset.
+
+    Returns:
+        The same selection the original fetch resolved.
+
+    Raises:
+        QueryError: The record is missing part of what a range request needs.
+    """
+    object_url, _, fragment = pinned.source_url.partition("#")
+    numbers = fragment.removeprefix(f"{PARTIAL_FRAGMENT}=").split(",")
+    try:
+        return PartialFetch(
+            object_url=object_url,
+            object_size=pinned.object_size or 0,
+            object_etag=pinned.object_etag or "",
+            index_url=pinned.index_url or "",
+            index_checksum=pinned.index_checksum or "",
+            messages=[int(number) for number in numbers],
+            ranges=list(pinned.ranges),
+        )
+    except (ValidationError, ValueError) as error:
+        raise QueryError(
+            f"the pinned record for {pinned.source_url} does not describe byte ranges "
+            f"that can be re-fetched ({error}); pull with force to resolve it again"
+        ) from None
+
+
 class ModelRuns(HttpProvider):
     """Shared listing for models that publish one whole GRIB2 file per run and forecast hour.
 
     Subclasses validate their own parameters in :meth:`resolve` and describe the
-    bucket layout through :meth:`run_prefix`, :meth:`asset_id`, and
-    :meth:`files_label`; the window, run selection, listing, and missing-file
-    errors are identical for HRRR and GFS.
+    bucket layout through :meth:`run_prefix`, :meth:`asset_id`, :meth:`files_label`,
+    and the ``suffix`` their ids end with; the window, run selection, listing,
+    missing-file errors, and message selection are identical for HRRR and GFS.
+
+    With ``messages``, listing reads each object's ``.idx`` sidecar and resolves
+    the selectors to byte ranges, which :meth:`fetch` then concatenates. Those
+    ranges live on the adapter instance, keyed by the asset href that names them;
+    a later process reaches them through the provenance sidecar instead, so see
+    :meth:`prepare_fetch`.
     """
 
     name: ClassVar[str]
@@ -126,9 +227,14 @@ class ModelRuns(HttpProvider):
     key_re: ClassVar[re.Pattern[str]]
     hint: ClassVar[str]
     hour_width: ClassVar[int] = 2
+    suffix: ClassVar[str] = ""
 
-    def resolve(self, query: Query) -> tuple[int, str, list[int]]:
-        """Validated ``(cycle, variant, forecast hours)`` from the provider parameters."""
+    def __init__(self, dataset: Dataset, client: httpx.Client | None = None) -> None:
+        super().__init__(dataset, client)
+        self._partials: dict[str, PartialFetch] = {}
+
+    def resolve(self, query: Query) -> RunSelection:
+        """Validated run, variant, forecast hours, and message selectors for one query."""
         raise NotImplementedError
 
     def run_prefix(self, init: datetime, variant: str) -> str:
@@ -151,7 +257,7 @@ class ModelRuns(HttpProvider):
             raise QueryError(
                 f"{self.name} requests must span at most 1 day; split longer intervals"
             )
-        cycle, variant, hours = self.resolve(query)
+        cycle, variant, hours, messages = self.resolve(query)
         if end < self.archive_start:
             raise QueryError(
                 f"the {self.bucket} archive begins with the {self.archive_start:%Y-%m-%d %HZ} run"
@@ -178,38 +284,142 @@ class ModelRuns(HttpProvider):
             for hour in hours:
                 obj = found[hour]
                 valid = init + timedelta(hours=hour)
-                assets.append(
-                    Asset(
-                        id=self.asset_id(init, variant, hour),
-                        dataset_id=self.dataset.id,
-                        href=f"s3://{self.bucket}/{obj.key}",
-                        protocol=Protocol.S3,
-                        media_type=MEDIA_TYPE,
-                        size=obj.size,
-                        time=TimeRange(start=valid, end=valid),
-                    )
+                whole = Asset(
+                    id=self.asset_id(init, variant, hour),
+                    dataset_id=self.dataset.id,
+                    href=f"s3://{self.bucket}/{obj.key}",
+                    protocol=Protocol.S3,
+                    media_type=MEDIA_TYPE,
+                    size=obj.size,
+                    time=TimeRange(start=valid, end=valid),
                 )
+                assets.append(self.select_messages(whole, messages) if messages else whole)
         return assets
 
+    def partial_id(self, asset_id: str, digest: str) -> str:
+        """The whole file's id with ``.part-<digest>`` before the suffix, or at its end."""
+        tag = f".part-{digest}"
+        if self.suffix and asset_id.endswith(self.suffix):
+            return f"{asset_id[: -len(self.suffix)]}{tag}{self.suffix}"
+        return f"{asset_id}{tag}"
+
+    def index_text(self, index_url: str) -> tuple[str, str]:
+        """The index sidecar's text, and the sha256 of the bytes it arrived as.
+
+        Raises:
+            QueryError: The object publishes no index, so there is nothing to
+                resolve selectors against and never a whole-file fetch instead.
+        """
+        try:
+            response = http.get(s3.object_url(index_url), self._http())
+        except httpx.HTTPStatusError as error:
+            if error.response.status_code not in ABSENT_INDEX:
+                raise
+            raise QueryError(
+                f"{index_url} is not published ({error.response.status_code}), so messages "
+                "cannot be selected; drop messages to fetch the whole file"
+            ) from None
+        return response.text, sha256_bytes(response.content)
+
+    def select_messages(self, whole: Asset, selectors: Sequence[str]) -> Asset:
+        """Resolve message selectors against one object's index into a partial asset.
+
+        The object's size and ETag are read first, so the ranges and the identity
+        they will be checked against describe the same copy of the object.
+
+        Args:
+            whole: The whole-file asset listing resolved, whose href names the object.
+            selectors: ``messages`` as the caller wrote them.
+
+        Returns:
+            An asset whose id carries a digest of the selected message numbers,
+            whose href carries the numbers as a fragment, and whose size is their total.
+
+        Raises:
+            QueryError: The index is absent or unreadable, or a selector matches nothing.
+        """
+        parsed = [grib_index.parse_selector(selector) for selector in selectors]
+        index_url = f"{whole.href}{grib_index.INDEX_SUFFIX}"
+        obj = s3.head_object(whole.href, self._http())
+        text, checksum = self.index_text(index_url)
+        entries = grib_index.parse_index(text, object_size=obj.size, url=whole.href)
+        chosen = grib_index.resolve(entries, parsed, url=whole.href)
+        partial = PartialFetch(
+            object_url=whole.href,
+            object_size=obj.size,
+            object_etag=obj.etag or "",
+            index_url=index_url,
+            index_checksum=checksum,
+            messages=[entry.number for entry in chosen],
+            ranges=[entry.byte_range for entry in chosen],
+        )
+        href = f"{whole.href}#{partial.fragment}"
+        self._partials[href] = partial
+        return whole.model_copy(
+            update={
+                "id": self.partial_id(whole.id, message_digest(partial.messages)),
+                "href": href,
+                "size": partial.size,
+            }
+        )
+
+    def prepare_fetch(self, asset: Asset, pinned: Provenance | None = None) -> PartialFetch | None:
+        """The ranges this asset's fetch will concatenate, or ``None`` for a whole object.
+
+        A partial asset this adapter listed is already resolved. One restored from
+        a lockfile is rebuilt from its pinned record, ranges and ETag included, so
+        no index is read and a republished index cannot move a pin.
+        """
+        if f"#{PARTIAL_FRAGMENT}=" not in asset.href:
+            return None
+        known = self._partials.get(asset.href)
+        if known is not None:
+            return known
+        if pinned is None or pinned.source_url != asset.href or not pinned.is_partial:
+            raise QueryError(
+                f"{asset.id} selects GRIB2 messages, but neither this adapter nor a pinned "
+                "provenance record holds their byte ranges; resolve the query again with "
+                "fetch or pull --force"
+            )
+        partial = pinned_partial(pinned)
+        self._partials[asset.href] = partial
+        return partial
+
     def fetch(self, asset: Asset, dest: Path) -> Path:
-        """Download one whole GRIB2 object anonymously to ``dest``."""
-        return s3.download(asset.href, dest, self._http())
+        """Download one whole GRIB2 object, or the messages it selects, to ``dest``."""
+        partial = self.prepare_fetch(asset)
+        if partial is None:
+            return s3.download(asset.href, dest, self._http())
+        return http.download_ranges(
+            s3.object_url(partial.object_url),
+            dest,
+            partial.ranges,
+            etag=partial.object_etag,
+            total=partial.object_size,
+            http=self._http(),
+        )
 
 
 class Hrrr(ModelRuns):
-    """Whole HRRR CONUS GRIB2 files; params: cycle, forecast_hour, file."""
+    """HRRR CONUS GRIB2 files, whole or by message; params: cycle, forecast_hour, file, messages."""
 
     name = "HRRR"
     bucket = BUCKET
     archive_start = ARCHIVE_START
     key_re = KEY_RE
-    hint = "HRRR files are whole CONUS grids; download, then open(select=...) picks fields"
+    hint = (
+        "HRRR files are whole CONUS grids; fetch with messages=..., or download and let "
+        "open(select=...) pick fields"
+    )
+    suffix = ".grib2"
     params_model = HrrrParams
 
-    def resolve(self, query: Query) -> tuple[int, str, list[int]]:
-        """Validated cycle, file variant, and forecast hours for one HRRR query."""
+    def resolve(self, query: Query) -> RunSelection:
+        """Validated cycle, file variant, forecast hours, and messages for one HRRR query."""
         params = self.parse_params(query, HrrrParams)
-        return params.cycle, params.variant, params.forecast_hour
+        return RunSelection(
+            params.cycle, params.variant, params.forecast_hour, params.messages or []
+        )
 
     def run_prefix(self, init: datetime, variant: str) -> str:
         """Key prefix listing one run's files of the chosen variant."""

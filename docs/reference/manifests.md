@@ -18,6 +18,14 @@ sources:
     params:
       stations: USW00013967
       units: metric
+  - name: environment
+    dataset: noaa:hrrr
+    start: 2024-05-06T20:00Z
+    end: 2024-05-06T20:00Z
+    params:
+      cycle: 20
+      forecast_hour: 0
+      messages: "CAPE:surface,HLCY:3000-0 m above ground"
 ```
 
 | Field | Meaning |
@@ -61,8 +69,8 @@ line.
 | `noaa:goes-abi` | Required `satellite`: 16, 17, 18, or 19, and `channel`: 1–16 or `C01`–`C16`. Optional `product`: only `ABI-L2-CMIPC`. Geographic selection is rejected. | Whole single-channel CONUS scenes selected by inclusive UTC scan-start time; at most seven days. Variable subsetting is rejected; select a channel. |
 | `noaa:goes-glm` | Required `satellite`: 16, 17, 18, or 19. Geographic selection is rejected. | Whole 20-second files selected by inclusive UTC start time; at most one day. |
 | `noaa:mrms` | Required `product`: one directory name from the allowlist, case-sensitive. | Whole two-minute CONUS grids selected by inclusive UTC stamp; at most one day; not before 2020-10-14. |
-| `noaa:hrrr` | Required `cycle` (0–23) and `forecast_hour` (integer, list, or comma-separated; 0–48 on the 00, 06, 12, and 18 UTC runs, 0–18 otherwise). `file`: `sfc` (default), `prs`, or `nat`. | The window selects runs by initialization time, inclusive, at most one day. |
-| `noaa:gfs` | Required `cycle` (0, 6, 12, or 18) and `forecast_hour` (0–384; hourly to 120 then every 3 hours at 0p25, every 3 hours at 0p50 and 1p00). `resolution`: `0p25` (default), `0p50`, or `1p00`. | The window selects runs by initialization time, inclusive, at most one day. |
+| `noaa:hrrr` | Required `cycle` (0–23) and `forecast_hour` (integer, list, or comma-separated; 0–48 on the 00, 06, 12, and 18 UTC runs, 0–18 otherwise). `file`: `sfc` (default), `prs`, or `nat`. `messages`: GRIB2 messages to fetch instead of the whole file, as the object's `.idx` sidecar spells them. | The window selects runs by initialization time, inclusive, at most one day. |
+| `noaa:gfs` | Required `cycle` (0, 6, 12, or 18) and `forecast_hour` (0–384; hourly to 120 then every 3 hours at 0p25, every 3 hours at 0p50 and 1p00). `resolution`: `0p25` (default), `0p50`, or `1p00`. `messages`: as HRRR. | The window selects runs by initialization time, inclusive, at most one day. |
 | `noaa:coops-water-levels` | Required string `station` (seven digits) and `datum`; optional `units`: `metric` or `english`. | Six-minute observations. Both bounds required, UTC, minute precision, inclusive, at most 28 days. No geographic, text, or variable selection. No-data responses fail on fetch; `allow_empty` cannot suppress them. |
 | `noaa:coops-tide-predictions` | As water levels, plus `interval`: `6` (default), `1`, `5`, `10`, `15`, `30`, `60`, `h`, or `hilo`. | Both bounds required, UTC, minute precision, inclusive, at most 366 days. |
 | `noaa:storm-events` | None. | Both dates required; every UTC calendar year touched selects its latest annual details archive in full. Variable subsetting is rejected; filter rows locally. |
@@ -70,6 +78,17 @@ line.
 | `noaa:hurdat2` | `basin`: `atlantic` (default) or `pacific`, case-insensitive. No geographic selection. | The newest revision of one whole basin file. Dates are rejected; filter track points locally. |
 | `noaa:coastwatch-sst` | Requires a bbox or location. `stride`: positive integer, default 1, subsamples both spatial axes. At most 1,000,000 grid rows per request. | `analysed_sst` (default), `analysis_error`, `sea_ice_fraction`, `mask`. Inclusive UTC timestamps. |
 | `usgs:water-daily` | `site` or `sites`: quoted monitoring ids, mutually exclusive, or a geographic query; explicit sites and a geographic filter both apply. `statistic_id`: quoted five-digit code, default `"00003"` (daily mean). | Quoted parameter codes such as `"00060"`; inclusive local calendar dates. |
+
+`messages` takes one selector, a list, or a comma-separated string, each
+`SHORTNAME:level text` with an optional `:step text`, matched exactly and
+case-sensitively against the object's wgrib2 index: `CAPE:surface`,
+`HLCY:3000-0 m above ground`. This is the index's vocabulary, not the ecCodes
+names the reader's `select` takes. The asset is the named messages
+concatenated, its id gains a `.part-<digest>` tag, and its URL gains a
+`#messages=105,131` fragment; the lockfile pins the byte ranges and the
+object's ETag. A selector that matches nothing, and an object with no index,
+are errors rather than a whole-file download. See the
+[HRRR guide](../providers/noaa-hrrr.md#fetching-selected-messages).
 
 Plural `stations` and `sites` accept strings or lists of strings. CO-OPS
 `station` takes one seven-digit string, not a list. Radar ids are
@@ -112,7 +131,10 @@ fetched asset in `fetched` order.
 
 GET requests retry transient connection, timeout, and remote protocol
 failures, and HTTP 429, 500, 502, 503, and 504, for at most three attempts,
-with backoff of 0.5 then 1 second. `Retry-After` seconds and HTTP dates are
+with backoff of 0.5 then 1 second. Range requests follow the same policy and
+restart every run from the beginning; a refused `If-Match` (412), a whole
+object served in place of a range (200), and a mismatched `Content-Range` are
+not transient and fail immediately, before anything is written. `Retry-After` seconds and HTTP dates are
 respected; a requested wait over 30 seconds is surfaced as an error instead of
 retried early. Interrupted downloads restart from the beginning in a temporary
 file. Permanent HTTP errors, local filesystem failures, and checksum mismatches

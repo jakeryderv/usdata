@@ -105,7 +105,14 @@ def _fetch_asset(
     *,
     root: Path | None = None,
     force: bool = False,
+    pinned: Provenance | None = None,
 ) -> FetchedAsset:
+    """Fetch one asset through the cache, passing any pinned record to the adapter.
+
+    ``pinned`` is the provenance a lockfile holds for this asset. The adapter sees
+    it through ``prepare_fetch``, so an asset that pins byte ranges is reproduced
+    from the record rather than by resolving its query again.
+    """
     if asset.dataset_id != dataset.id:
         raise ValueError(f"asset dataset {asset.dataset_id!r} does not match {dataset.id!r}")
     _progress.emit(_progress.AssetProgress(asset.id, "start", asset.size))
@@ -128,8 +135,9 @@ def _fetch_asset(
             _progress.emit(_progress.AssetProgress(asset.id, "cached", prov.size))
             return FetchedAsset(asset=asset, path=path, provenance=prov, from_cache=True)
     with staged_path(path) as tmp:
+        partial = adapter.prepare_fetch(asset, pinned)
         adapter.fetch(asset, tmp)
-        prov = provenance.record(dataset, asset, tmp)
+        prov = provenance.record(dataset, asset, tmp, partial)
         if asset.checksum and prov.checksum != asset.checksum:
             raise ChecksumMismatch(f"{asset.id}: expected {asset.checksum}, got {prov.checksum}")
     # A crash between replacements leaves a detectable mismatch, never a trusted partial file.

@@ -44,8 +44,8 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 | Dataset | Availability | Files | What gets selected |
 |---|---|---|---|
-| <span id="noaagfs"></span>[GFS model output](noaa/gfs.md) | Released | GRIB2 | Whole global files by run initialization window, cycle hour, forecast hours, and grid resolution, at most one day |
-| <span id="noaahrrr"></span>[HRRR model output](noaa/hrrr.md) | Released | GRIB2 | Whole CONUS files by run initialization window, cycle hour, forecast hours, and file variant, at most one day |
+| <span id="noaagfs"></span>[GFS model output](noaa/gfs.md) | Released | GRIB2 | Global files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and grid resolution |
+| <span id="noaahrrr"></span>[HRRR model output](noaa/hrrr.md) | Released | GRIB2 | CONUS files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file variant |
 
 ### [CO-OPS Data API](https://tidesandcurrents.noaa.gov/)
 

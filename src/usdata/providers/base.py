@@ -13,7 +13,7 @@ from typing import Any, ClassVar, Literal, Self, TypeVar
 from pydantic import BaseModel, ValidationError
 from pydantic_core import ErrorDetails
 
-from usdata.models import Asset, Dataset, Query
+from usdata.models import Asset, Dataset, PartialFetch, Provenance, Query
 
 QueryField = Literal["text", "bbox", "variables", "time"]
 Params = TypeVar("Params", bound=BaseModel)
@@ -188,6 +188,27 @@ class Provider(ABC):
     @abstractmethod
     def list_assets(self, query: Query) -> list[Asset]:
         """Resolve a query to the concrete objects that satisfy it, without downloading."""
+
+    def prepare_fetch(self, asset: Asset, pinned: Provenance | None = None) -> PartialFetch | None:
+        """Settle how one asset will be fetched, immediately before ``fetch`` writes it.
+
+        The core calls this once per fetch and records whatever it returns in the
+        provenance sidecar, so an adapter that fetches selected byte ranges can
+        say which ones without the core knowing what they mean. ``pinned`` is the
+        provenance a lockfile holds for this asset, so a restore reproduces a
+        partial fetch from the record rather than by resolving the query again.
+
+        Args:
+            asset: The asset ``fetch`` is about to be given.
+            pinned: The provenance already pinned for it, when one is being restored.
+
+        Returns:
+            The byte ranges this fetch will concatenate, or ``None`` for a whole object.
+
+        Raises:
+            QueryError: The asset names a selection this adapter cannot reproduce.
+        """
+        return None
 
     @abstractmethod
     def fetch(self, asset: Asset, dest: Path) -> Path:

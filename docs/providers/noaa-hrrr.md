@@ -39,10 +39,12 @@ times record each file's valid time.
 | `nat` | `wrfnatf` | Fields on native hybrid levels | 706 MB |
 
 Later forecast hours are slightly larger. Subhourly output (`wrfsubhf`,
-15-minute steps), the `alaska` domain, BUFR soundings, and the `.grib2.idx`
-sidecars are out of scope. Every file is a whole CONUS grid of many fields;
-`variables`, text, and geographic constraints are rejected because the server
-cannot subset them. Check what a query will download before fetching:
+15-minute steps), the `alaska` domain, and BUFR soundings are out of scope.
+Every file is a whole CONUS grid of many fields; `variables`, text, and
+geographic constraints are rejected because the server cannot subset them. The
+`.grib2.idx` sidecar beside each object is not a separate dataset, but
+[`messages`](#fetching-selected-messages) reads it to fetch part of one file.
+Check what a query will download before fetching:
 
 ```sh
 uv run usdata fetch noaa:hrrr \
@@ -54,12 +56,65 @@ The listing gives each file's exact size and the total, so remove `--dry-run`
 to download about 310 MB. Cached bytes are the exact objects; lockfiles pin
 their checksums like every other dataset.
 
+## Fetching selected messages
+
+`messages` fetches only the GRIB2 messages you name, as byte ranges of the
+object, instead of the whole file. Name them the way the object's `.idx`
+sidecar names them, `SHORTNAME:level text`, with an optional `:step text`:
+
+```sh
+uv run usdata fetch noaa:hrrr \
+  --start 2024-05-06T20:00Z --end 2024-05-06T20:00Z \
+  -p cycle=20 -p forecast_hour=0 \
+  -p messages="CAPE:surface,HLCY:3000-0 m above ground" --dry-run
+```
+
+```text
+hrrr.20240506.t20z.wrfsfcf00.part-13819cd0ccdf.grib2	1838460	s3://noaa-hrrr-bdp-pds/hrrr.20240506/conus/hrrr.t20z.wrfsfcf00.grib2#messages=105,131
+1 asset(s) matched, 1838460 bytes
+```
+
+That is 1.8 MB instead of 150 MB for the two fields the
+[HRRR environment example](https://usdata.dev/examples/hrrr-environment/) uses.
+The spelling is exact and case-sensitive: short names are upper case (`CAPE`,
+`HLCY`, `TMP`), and the level text is the sidecar's own wording, which is
+**not** the ecCodes vocabulary `open(select=...)` takes. `2 m above ground`,
+not `heightAboveGround`; `3000-0 m above ground`, not `heightAboveGroundLayer`.
+Pass one value, a list, or a comma-separated string; a selector matching no
+message is an error listing the levels that short name publishes or the nearest
+short names. If the run publishes no index, the query fails rather than
+quietly downloading 150 MB.
+
+Common surface-file selectors, read from the 2024-05-06 20Z index:
+
+| Field | `messages` |
+|---|---|
+| Surface-based CAPE | `CAPE:surface` |
+| Surface-based CIN | `CIN:surface` |
+| 0–3 km storm-relative helicity | `HLCY:3000-0 m above ground` |
+| 0–1 km storm-relative helicity | `HLCY:1000-0 m above ground` |
+| Composite reflectivity | `REFC:entire atmosphere` |
+| 10 m wind components | `UGRD:10 m above ground`, `VGRD:10 m above ground` |
+| 2 m temperature and dewpoint | `TMP:2 m above ground`, `DPT:2 m above ground` |
+| Mixed-layer CAPE (lowest 90 hPa) | `CAPE:90-0 mb above ground` |
+
+The fetched file is the selected messages concatenated, which is itself a valid
+GRIB2 file: `usdata inspect` lists them and `open()` reads them, with `select`
+optional because the fetch already selected. The asset id carries a digest of
+the resolved message numbers, so a partial file never collides with the whole
+one in the cache, and the lockfile pins the byte ranges and the object's ETag.
+A restore re-issues exactly those ranges and never re-reads the index; if the
+object has been republished, the ETag no longer matches and the run reports
+drift instead of silently mixing revisions. See
+[ADR 0028](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0028-partial-grib2-fetch-through-index-files.md).
+
 ## Reading fields
 
 The `grib` extra opens a file with `FetchedAsset.open(select=...)` as an
 xarray Dataset. A surface file holds 170 messages, so `select` is required to
 choose them by ecCodes keys; opening without it lists the available
-`(shortName, typeOfLevel, level)` triples. Keys observed in the 2024-05-06 20Z
+`(shortName, typeOfLevel, level)` triples. A file fetched with `messages` is
+already a selection, so it opens without `select`. Keys observed in the 2024-05-06 20Z
 surface analysis:
 
 | Field | `select` |
@@ -120,6 +175,7 @@ rather than estimated.
 - Variables: the `select` table above. A file holds hundreds of fields, so the entry
   lists only the ones this guide and the example use.
 - Longest query window: `MAX_WINDOW` in `usdata.providers.noaa.hrrr`.
+- Message selectors: the run's own `.grib2.idx` sidecar, read on 2026-09-15.
 - Latency is empty: NODD states no lag between a run's initialization and its
   appearance.
 

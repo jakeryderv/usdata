@@ -42,10 +42,36 @@ The column is `?` for the datasets whose service reports no size at listing
 time, and the summary then ends with `size unknown for N`. Add `--json` to get
 the same asset records as a JSON array instead of columns.
 
+## Fetching only the fields you need
+
+Add `messages` and the same query fetches byte ranges of the object instead of
+all of it. Name the fields as the object's `.idx` sidecar names them, not as
+the reader's `select` does:
+
+```sh
+usdata fetch noaa:hrrr -p cycle=20 -p forecast_hour=0 \
+  -p messages="CAPE:surface,HLCY:3000-0 m above ground" \
+  --start 2024-05-06T20:00Z --end 2024-05-06T20:00Z --dry-run
+```
+
+```text
+hrrr.20240506.t20z.wrfsfcf00.part-13819cd0ccdf.grib2	1838460	s3://noaa-hrrr-bdp-pds/hrrr.20240506/conus/hrrr.t20z.wrfsfcf00.grib2#messages=105,131
+1 asset(s) matched, 1838460 bytes
+```
+
+The same run without `messages` reports 150,114,757 bytes, so the two fields
+cost about 1.2% of the file. The result is those messages concatenated, which
+is a valid GRIB2 file: `open()` reads it with `select` optional, since the
+fetch already selected. A manifest pins the byte ranges and the object's ETag
+and restores from them without re-reading the index. Each provider guide lists
+verified selectors:
+[HRRR](../providers/noaa-hrrr.md#fetching-selected-messages),
+[GFS](../providers/noaa-gfs.md#fetching-selected-messages).
+
 ## Selecting fields
 
-A file holds hundreds of messages, so `open()` needs `select` with ecCodes key
-names. Opening without it raises an error listing every
+A whole file holds hundreds of messages, so `open()` needs `select` with
+ecCodes key names. Opening without it raises an error listing every
 `(shortName, typeOfLevel, level)` in the file, which is the quickest way to
 discover what a run contains:
 

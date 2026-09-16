@@ -31,3 +31,4 @@ is described in the guides and reference pages.
 - [0025: Worked examples are the usage review](0025-examples-as-usage-review.md)
 - [0026: One registry schema, verified against the adapters](0026-one-registry-schema.md)
 - [0027: The provider contract](0027-provider-contract.md)
+- [0028: Partial GRIB2 fetch through index files](0028-partial-grib2-fetch-through-index-files.md)

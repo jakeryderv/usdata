@@ -7,13 +7,14 @@ import os
 import warnings
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
 from usdata import FetchedAsset
 from usdata.cache import sha256_file
-from usdata.models import Asset, Protocol, Provenance
+from usdata.models import Asset, ByteRange, Protocol, Provenance
 from usdata.readers import MissingReaderDependency, open_asset
 
 pytestmark = [pytest.mark.l2, pytest.mark.grib]
@@ -75,13 +76,30 @@ def item(
     name="field.grib2",
     media_type="application/x-grib2",
     dataset_id="noaa:hrrr",
+    messages: list[int] | None = None,
 ):
     path = tmp_path / name
     path.write_bytes(content)
+    href = f"s3://noaa-hrrr-bdp-pds/{name}"
+    partial: dict[str, Any] = {}
+    if messages is not None:
+        # What a partial fetch records: the object, its index, and the ranges it read.
+        numbers = ",".join(str(number) for number in messages)
+        href = f"{href}#messages={numbers}"
+        partial = {
+            "transformations": [
+                f"grib2 messages {numbers} concatenated from s3://noaa-hrrr-bdp-pds/{name}"
+            ],
+            "index_url": f"s3://noaa-hrrr-bdp-pds/{name}.idx",
+            "index_checksum": "sha256:" + "0" * 64,
+            "ranges": [ByteRange(start=0, end=path.stat().st_size - 1)],
+            "object_size": path.stat().st_size,
+            "object_etag": "81198a73ad430c73adfbe3335421ea99",
+        }
     asset = Asset(
         id=name,
         dataset_id=dataset_id,
-        href=f"s3://noaa-hrrr-bdp-pds/{name}",
+        href=href,
         protocol=Protocol.S3,
         media_type=media_type,
     )
@@ -93,6 +111,7 @@ def item(
         checksum=sha256_file(path),
         size=path.stat().st_size,
         usdata_version="0.15.0",
+        **partial,
     )
     return FetchedAsset(asset=asset, path=path, provenance=provenance, from_cache=True)
 
@@ -342,3 +361,31 @@ def test_missing_dependency_and_missing_library_messages(tmp_path) -> None:
         pytest.raises(MissingReaderDependency, match="conda-forge"),
     ):
         open_asset(fetched)
+
+
+def test_a_partial_fetch_opens_with_and_without_select(tmp_path) -> None:
+    """A concatenation of chosen messages needs no select: the fetch already chose."""
+    parts = [
+        message(np.full(12, 288.0), level_type="heightAboveGround", level=2),
+        message(np.full(12, 1500.0), param=59, level_type="surface", level=0),
+    ]
+    fetched = item(tmp_path, b"".join(parts), name="part.grib2", messages=[71, 170])
+    assert fetched.provenance.is_partial
+    everything = fetched.open()
+    assert set(everything.data_vars) == {"2t", "cape"}
+    assert float(everything["2t"].values[0, 0]) == 288.0
+    one = fetched.open(select={"shortName": "cape"})
+    assert list(one.data_vars) == ["cape"]
+    assert one.attrs["usdata"]["provenance"]["ranges"] == [
+        {"start": 0, "end": fetched.path.stat().st_size - 1}
+    ]
+
+
+def test_a_whole_file_of_the_same_bytes_still_demands_select(tmp_path) -> None:
+    parts = [
+        message(np.full(12, 288.0), level_type="heightAboveGround", level=2),
+        message(np.full(12, 1500.0), param=59, level_type="surface", level=0),
+    ]
+    whole = item(tmp_path, b"".join(parts), name="whole.grib2")
+    with pytest.raises(ValueError, match=r"2 messages; pass select"):
+        whole.open()

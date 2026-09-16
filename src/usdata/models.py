@@ -408,6 +408,79 @@ class Asset(BaseModel):
     bbox: BBox | None = None
 
 
+class ByteRange(BaseModel):
+    """One inclusive byte interval of a remote object, as an HTTP ``Range`` names it."""
+
+    model_config = ConfigDict(frozen=True)
+
+    start: int = Field(ge=0)
+    end: int = Field(ge=0, description="Last byte of the interval, inclusive, as HTTP counts it")
+
+    @model_validator(mode="after")
+    def _ordered(self) -> ByteRange:
+        if self.end < self.start:
+            raise ValueError("end must be >= start")
+        return self
+
+    @property
+    def length(self) -> int:
+        """How many bytes the interval covers."""
+        return self.end - self.start + 1
+
+    @property
+    def header(self) -> str:
+        """The interval as an HTTP ``Range`` header value."""
+        return f"bytes={self.start}-{self.end}"
+
+
+PARTIAL_FRAGMENT = "messages"
+"""Href fragment key naming the GRIB2 messages a partial asset selects."""
+
+
+class PartialFetch(BaseModel):
+    """The byte ranges one partial asset resolved to, and the object they were read from.
+
+    An adapter builds this while listing, the core records it in the provenance
+    sidecar, and a restore rebuilds it from that sidecar, so re-fetching a pinned
+    partial asset never re-reads an index.
+    """
+
+    object_url: str = Field(description="The whole object the ranges are read from")
+    object_size: int = Field(ge=0, description="Size of that object when the ranges were resolved")
+    object_etag: str = Field(description="ETag sent as ``If-Match`` on every range request")
+    index_url: str = Field(description="The index sidecar the ranges were resolved through")
+    index_checksum: str = Field(description="'sha256:<hex>' of the index text as fetched")
+    messages: list[int] = Field(description="Selected message numbers, ascending and distinct")
+    ranges: list[ByteRange] = Field(description="Byte ranges of those messages, in the same order")
+
+    @model_validator(mode="after")
+    def _aligned(self) -> PartialFetch:
+        if not self.messages or len(self.messages) != len(self.ranges):
+            raise ValueError("a partial fetch needs one byte range per selected message")
+        if sorted(set(self.messages)) != self.messages:
+            raise ValueError("selected messages must be ascending and distinct")
+        return self
+
+    @property
+    def size(self) -> int:
+        """Total bytes the selected ranges cover."""
+        return sum(part.length for part in self.ranges)
+
+    @property
+    def fragment(self) -> str:
+        """The href fragment that names this selection, such as ``messages=71,170``."""
+        return f"{PARTIAL_FRAGMENT}={','.join(str(number) for number in self.messages)}"
+
+    def describe(self) -> str:
+        """The ``transformations`` entry a provenance record carries for this fetch."""
+        numbers = ",".join(str(number) for number in self.messages)
+        return f"grib2 messages {numbers} concatenated from {self.object_url}"
+
+
+PARTIAL_TRANSFORMATION = "grib2 messages "
+"""Prefix of the ``transformations`` entry :meth:`PartialFetch.describe` writes."""
+
+
 class TemporalSelection(BaseModel):
     """A start-time selection and its explicit policy; not source provenance.
 
@@ -436,3 +509,23 @@ class Provenance(BaseModel):
     license: str | None = None
     usdata_version: str
     transformations: list[str] = Field(default_factory=list)
+    index_url: str | None = Field(
+        default=None, description="Index sidecar a partial fetch resolved its ranges through"
+    )
+    index_checksum: str | None = Field(
+        default=None, description="'sha256:<hex>' of that index text as it was fetched"
+    )
+    ranges: list[ByteRange] = Field(
+        default_factory=list, description="Byte ranges a partial fetch concatenated, in order"
+    )
+    object_size: int | None = Field(
+        default=None, ge=0, description="Size of the whole object those ranges came from"
+    )
+    object_etag: str | None = Field(
+        default=None, description="ETag that object carried, re-sent as ``If-Match`` on a restore"
+    )
+
+    @property
+    def is_partial(self) -> bool:
+        """Whether this record describes selected byte ranges rather than a whole object."""
+        return any(entry.startswith(PARTIAL_TRANSFORMATION) for entry in self.transformations)

@@ -7,9 +7,11 @@ selects runs by initialization time, ``cycle`` names the run, ``forecast_hour``
 names the files, and ``resolution`` chooses the 0.25, 0.5, or 1 degree grid.
 The 0.25 degree files are hourly to 120 and three-hourly to 384; the coarser
 grids are three-hourly throughout. Files are whole global grids of hundreds of
-fields; message selection happens after download with the GRIB2 reader's
-``select``. The ``atmos`` layout begins with the GFS v16 run of 2021-03-22 12
-UTC; earlier runs use another layout and are not reachable here.
+fields; message selection happens either before download with ``messages``, which
+reads the object's ``.idx`` sidecar, or after it with the GRIB2 reader's
+``select``. GFS keys carry no extension, so a sidecar is ``<key>.idx``. The
+``atmos`` layout begins with the GFS v16 run of 2021-03-22 12 UTC; earlier runs
+use another layout and are not reachable here.
 """
 
 from __future__ import annotations
@@ -22,7 +24,7 @@ from typing import Annotated
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from usdata.models import Query
-from usdata.providers.noaa.hrrr import ModelRuns
+from usdata.providers.noaa.hrrr import MESSAGES, MessageList, ModelRuns, RunSelection
 from usdata.providers.params import choice, int_list, int_range
 
 BUCKET = "noaa-gfs-bdp-pds"
@@ -64,6 +66,8 @@ class GfsParams(BaseModel):
         description="Grid spacing: 0p25 (default, 0.25 degree), 0p50, or 1p00.",
     )
 
+    messages: MessageList | None = Field(default=None, description=MESSAGES)
+
     @model_validator(mode="after")
     def _run_and_hours_are_published(self) -> GfsParams:
         """GFS runs four times a day, and each grid publishes its own forecast hours."""
@@ -84,20 +88,28 @@ class GfsParams(BaseModel):
 
 
 class Gfs(ModelRuns):
-    """Whole GFS global GRIB2 files; params: cycle, forecast_hour, resolution."""
+    """GFS global GRIB2 files, whole or by message.
+
+    Params: cycle, forecast_hour, resolution, messages.
+    """
 
     name = "GFS"
     bucket = BUCKET
     archive_start = ARCHIVE_START
     key_re = KEY_RE
-    hint = "GFS files are whole global grids; download, then open(select=...) picks fields"
+    hint = (
+        "GFS files are whole global grids; fetch with messages=..., or download and let "
+        "open(select=...) pick fields"
+    )
     hour_width = 3
     params_model = GfsParams
 
-    def resolve(self, query: Query) -> tuple[int, str, list[int]]:
-        """Validated cycle, file variant, and forecast hours for one GFS query."""
+    def resolve(self, query: Query) -> RunSelection:
+        """Validated cycle, file variant, forecast hours, and messages for one GFS query."""
         params = self.parse_params(query, GfsParams)
-        return params.cycle, params.resolution, params.forecast_hour
+        return RunSelection(
+            params.cycle, params.resolution, params.forecast_hour, params.messages or []
+        )
 
     def run_prefix(self, init: datetime, variant: str) -> str:
         """Key prefix listing one run's files of the chosen variant."""
