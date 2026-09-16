@@ -20,6 +20,11 @@ def test_fetch_names_are_listed_in_all() -> None:
     assert usdata.__all__ == sorted(usdata.__all__)
 
 
+def test_datasets_is_exported_as_the_listing_helper() -> None:
+    assert callable(usdata.datasets)
+    assert "datasets" in usdata.__all__
+
+
 def test_usdata_fetch_is_the_function_and_never_a_module() -> None:
     assert not isinstance(usdata.fetch, types.ModuleType)
     assert callable(usdata.fetch)
