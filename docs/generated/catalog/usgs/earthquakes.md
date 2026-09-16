@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`usgs:earthquakes` · **Source only** · Install from [source](../../../install.md#source-installation) to use this dataset.
+`usgs:earthquakes` · **Released** · Included since usdata 0.19.
 
 Earthquake Catalog (ComCat).
 
@@ -46,7 +46,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.19
+- Availability: since 0.19
 - Domain: Natural hazards
 - Spatial resolution: Point epicenters in decimal degrees, as located by the contributing network
 - Temporal resolution: Origin times to the millisecond
