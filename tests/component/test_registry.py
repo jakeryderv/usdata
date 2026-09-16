@@ -1,9 +1,14 @@
+import tomllib
+from pathlib import Path
+
 import pytest
 
-from usdata.models import BBox, Query, Status
+from usdata.models import READER_EXTRAS, BBox, Query, Status
 from usdata.providers import Provider, load_adapter
 from usdata.providers.base import NotImplementedProvider
 from usdata.registry import DatasetNotFound, Registry, default_registry
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 @pytest.fixture(scope="module")
@@ -70,3 +75,28 @@ def test_duplicate_ids_rejected(registry: Registry) -> None:
     ds = registry.get("noaa:ghcn-daily")
     with pytest.raises(ValueError, match="duplicate"):
         Registry([ds, ds])
+
+
+def test_from_yaml_rejects_a_leftover_catalog_block(tmp_path: Path) -> None:
+    path = tmp_path / "registry.yaml"
+    path.write_text("datasets: []\ncatalog:\n  noaa:thing:\n    summary: Old shape\n")
+    with pytest.raises(ValueError, match="'catalog' block is gone"):
+        Registry.from_yaml(path)
+
+
+def test_every_available_dataset_documents_itself(registry: Registry) -> None:
+    for ds in registry:
+        if ds.status is not Status.AVAILABLE:
+            continue
+        assert ds.summary and ds.formats, f"{ds.id} does not say what it delivers"
+        assert ds.guide and (ROOT / ds.guide).is_file(), f"{ds.id} has no usage guide on disk"
+        assert ds.examples, f"{ds.id} lists no examples"
+        for example in ds.examples:
+            assert (ROOT / example).is_file(), f"{ds.id} lists a missing example {example}"
+
+
+def test_reader_extras_are_packaged_optional_dependencies() -> None:
+    extras = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"][
+        "optional-dependencies"
+    ]
+    assert set(READER_EXTRAS) <= set(extras)

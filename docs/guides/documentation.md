@@ -64,8 +64,8 @@ MkDocs configuration. Final HTML lives in ignored `.build/docs-site/`.
 
 `docs/generated/catalog/` is committed generated Markdown. Never add prose to it.
 Dataset reference pages link to handwritten usage guides in `docs/providers/`;
-no build step merges the two pages. The registry's `catalog` metadata records
-file formats, selection rules, required inputs, reader extras, and example sources.
+no build step merges the two pages. Each registry entry records file formats,
+selection rules, required inputs, the reader extra, and example sources.
 
 `scripts/generate_docs.py` regenerates only the catalog, CLI reference, and
 upcoming changes. It removes the former disposable `docs/examples/` output so

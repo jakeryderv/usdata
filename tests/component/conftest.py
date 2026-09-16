@@ -14,6 +14,8 @@ def fake_source(monkeypatch):
         id="test:bytes",
         provider="test",
         title="Test bytes",
+        summary="Test bytes",
+        formats=["bytes"],
         protocol=Protocol.HTTP,
         domain="test",
         status=Status.AVAILABLE,

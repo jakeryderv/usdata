@@ -11,6 +11,7 @@ import math
 import re
 from datetime import datetime, timedelta
 from enum import StrEnum
+from pathlib import PurePosixPath
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -138,6 +139,23 @@ class Capabilities(BaseModel):
     variable_subset: bool = False
 
 
+READER_EXTRAS = ("pandas", "radar", "netcdf", "grib")
+READER_EXTRAS_TEXT = ", ".join(READER_EXTRAS)
+
+
+def _check_line(value: str | None, field: str) -> None:
+    if value is not None and (not value.strip() or "\n" in value):
+        raise ValueError(f"{field} must be a nonempty single line")
+
+
+def _check_repo_path(value: str, field: str, parent: str, suffixes: set[str]) -> None:
+    path = PurePosixPath(value)
+    if path.is_absolute() or ".." in path.parts or not path.is_relative_to(parent):
+        raise ValueError(f"{field} must be a repository-relative path inside {parent}")
+    if path.suffix not in suffixes:
+        raise ValueError(f"{field} must name a {' or '.join(sorted(suffixes))} file")
+
+
 class Dataset(BaseModel):
     """A registry entry. One per curated dataset, identified as ``provider:name``."""
 
@@ -152,6 +170,29 @@ class Dataset(BaseModel):
     spatial_extent: BBox | None = None
     temporal_extent: TimeRange | None = None
     capabilities: Capabilities = Field(default_factory=Capabilities)
+    summary: str | None = Field(
+        default=None, max_length=80, description="One-line label shown by the docs, site, and CLI"
+    )
+    formats: list[str] = Field(
+        default_factory=list, description="File formats this dataset delivers, as delivered"
+    )
+    selection: str | None = Field(
+        default=None, max_length=160, description="What one query selects, in a single sentence"
+    )
+    inputs: str | None = Field(
+        default=None, max_length=200, description="What a caller must supply to fetch anything"
+    )
+    reader: str | None = Field(
+        default=None,
+        description=f"Extra that opens the files ({READER_EXTRAS_TEXT}); None means bytes only",
+    )
+    guide: str | None = Field(
+        default=None, description="Repository-relative path to the handwritten usage guide"
+    )
+    examples: list[str] = Field(
+        default_factory=list,
+        description="Repository-relative paths to worked examples using this dataset",
+    )
     domain: str = Field(description="Id of a domain declared in the registry")
     status: Status
     since: str | None = Field(default=None, description="Version an available dataset shipped in")
@@ -184,7 +225,24 @@ class Dataset(BaseModel):
                 raise ValueError("available datasets have no target")
         elif self.target is None:
             raise ValueError(f"{self.status.value} datasets need a target version or 'later'")
+        self._check_usage()
         return self
+
+    def _check_usage(self) -> None:
+        """Documentation metadata: single lines, known extras, and safe relative paths."""
+        _check_line(self.summary, "summary")
+        _check_line(self.selection, "selection")
+        _check_line(self.inputs, "inputs")
+        for value in self.formats:
+            _check_line(value, "formats entries")
+        if self.reader is not None and self.reader not in READER_EXTRAS:
+            raise ValueError(f"reader must name a known extra ({READER_EXTRAS_TEXT})")
+        if self.guide is not None:
+            _check_repo_path(self.guide, "guide", "docs/providers", {".md"})
+        for example in self.examples:
+            _check_repo_path(example, "examples entries", "examples", {".md", ".ipynb"})
+        if self.status is Status.AVAILABLE and not (self.summary and self.formats):
+            raise ValueError("available datasets need a summary and at least one format")
 
     @property
     def version_label(self) -> str:

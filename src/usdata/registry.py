@@ -95,6 +95,12 @@ class Registry:
     def from_yaml(cls, path: Path) -> Registry:
         """Load a registry from YAML with top-level ``providers``, ``domains``, ``datasets``."""
         raw = yaml.safe_load(path.read_text()) or {}
+        if "catalog" in raw:
+            raise ValueError(
+                f"{path}: the top-level 'catalog' block is gone; guide, summary, formats, "
+                "selection, inputs, reader (was reader_extra), and examples now belong on "
+                "each entry under 'datasets'"
+            )
         providers = [
             ProviderInfo(id=pid, **(info or {})) for pid, info in raw.get("providers", {}).items()
         ]

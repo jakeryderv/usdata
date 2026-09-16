@@ -16,9 +16,6 @@ import tomllib
 from collections import Counter
 from pathlib import Path
 
-import yaml
-from pydantic import BaseModel, ConfigDict, Field
-
 from usdata.models import LATER, Dataset, ProviderInfo, Status
 from usdata.providers import load_adapter
 from usdata.registry import Registry, version_key
@@ -105,17 +102,27 @@ def cell(text: str) -> str:
     return text.replace("|", "&#124;").replace("\n", " ")
 
 
-def dataset_table(datasets: list[Dataset], entries: dict[str, CatalogEntry]) -> str:
+def required(ds: Dataset, field: str) -> str:
+    """Read a usage field that every implemented dataset must carry."""
+    value = getattr(ds, field)
+    if not isinstance(value, str):
+        raise ValueError(f"{ds.id}: implemented datasets require {field}")
+    return value
+
+
+def dataset_table(datasets: list[Dataset]) -> str:
     lines = [
         "| Dataset | Availability | Files | What gets selected |",
         "|---|---|---|---|",
     ]
     for ds in datasets:
-        entry = entries[ds.id]
         anchor = _anchor(ds.id.replace(":", ""))
+        summary = cell(required(ds, "summary"))
+        formats = cell(", ".join(ds.formats))
+        selection = cell(required(ds, "selection"))
         lines.append(
-            f'| <span id="{anchor}"></span>[{cell(entry.summary)}]({ds.provider}/{ds.name}.md) '
-            f"| {availability(ds)} | {cell(', '.join(entry.formats))} | {cell(entry.selection)} |"
+            f'| <span id="{anchor}"></span>[{summary}]({ds.provider}/{ds.name}.md) '
+            f"| {availability(ds)} | {formats} | {selection} |"
         )
     return "\n".join(lines) + "\n"
 
@@ -170,71 +177,39 @@ def render_roadmap_block(registry: Registry) -> str:
     return "\n".join(lines) + "\n"
 
 
-class CatalogEntry(BaseModel):
-    """Documentation metadata, validated separately from the SDK dataset model."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
-    guide: str
-    summary: str = Field(min_length=1, max_length=80)
-    formats: list[str] = Field(min_length=1)
-    selection: str = Field(min_length=1, max_length=160)
-    inputs: str = Field(min_length=1, max_length=200)
-    reader_extra: str | None
-    examples: list[str] = Field(min_length=1)
+def existing(ds: Dataset, path: str, label: str, root: Path) -> Path:
+    """A repository-relative path the model already shaped, resolved in this checkout."""
+    if not (root / path).is_file():
+        raise ValueError(f"{ds.id}: {label} {path!r} does not exist in this checkout")
+    return (root / path).resolve()
 
 
-def catalog_entries(registry: Registry, root: Path = ROOT) -> dict[str, CatalogEntry]:
-    raw = yaml.safe_load((root / "src/usdata/data/registry.yaml").read_text())
-    entries = {key: CatalogEntry.model_validate(value) for key, value in raw["catalog"].items()}
-    known = {ds.id for ds in registry}
-    if unknown := entries.keys() - known:
-        raise ValueError(f"unknown catalog IDs: {sorted(unknown)}")
-    extras = tomllib.loads((root / "pyproject.toml").read_text())["project"][
-        "optional-dependencies"
-    ]
-    guides = set()
+def check_usage_metadata(registry: Registry, root: Path = ROOT) -> None:
+    """Every implemented dataset documents itself, with guide and example paths that exist.
+
+    The model already validates the shape of each field; this adds what only a
+    checkout can answer, plus the rule that every implemented dataset is documented.
+    """
+    guides: set[Path] = set()
     for ds in registry:
         if not all(re.fullmatch(r"[a-z0-9][a-z0-9-]*", part) for part in (ds.provider, ds.name)):
             raise ValueError(
                 f"{ds.id}: catalog IDs must use lowercase letters, digits, and hyphens"
             )
-        if ds.status is Status.AVAILABLE and ds.id not in entries:
-            raise ValueError(f"{ds.id}: implemented datasets require catalog metadata")
-    for key, entry in entries.items():
-        if registry.get(key).status is not Status.AVAILABLE:
-            raise ValueError(f"{key}: usage metadata is only for implemented datasets")
-        if entry.reader_extra is not None and entry.reader_extra not in extras:
-            raise ValueError(f"{key}: unknown reader extra {entry.reader_extra!r}")
-        for example in entry.examples:
-            path = Path(example)
-            if (
-                path.is_absolute()
-                or ".." in path.parts
-                or not path.is_relative_to("examples")
-                or path.suffix not in {".md", ".ipynb"}
-                or not (root / path).resolve().is_relative_to(root.resolve())
-                or not (root / path).is_file()
-            ):
-                raise ValueError(f"{key}: example must be an existing document in examples")
-        if any(
-            not value.strip() or "\n" in value
-            for value in [entry.summary, entry.selection, entry.inputs, *entry.formats]
-        ):
-            raise ValueError(f"{key}: catalog summaries and formats must be nonempty single lines")
-        path = Path(entry.guide)
-        if (
-            path.is_absolute()
-            or ".." in path.parts
-            or not path.is_relative_to("docs/providers")
-            or path.suffix != ".md"
-            or not (root / path).resolve().is_relative_to(root.resolve())
-            or not (root / path).is_file()
-        ):
-            raise ValueError(f"{key}: guide must be an existing Markdown file in docs/providers")
-        if (root / path).resolve() in guides:
-            raise ValueError(f"{key}: each dataset needs its own usage guide")
-        guides.add((root / path).resolve())
-    return entries
+        if ds.status is not Status.AVAILABLE:
+            if ds.summary or ds.formats or ds.guide or ds.examples:
+                raise ValueError(f"{ds.id}: usage metadata is only for implemented datasets")
+            continue
+        required(ds, "selection")
+        required(ds, "inputs")
+        if not ds.examples:
+            raise ValueError(f"{ds.id}: implemented datasets require at least one example")
+        for example in ds.examples:
+            existing(ds, example, "example", root)
+        guide = existing(ds, required(ds, "guide"), "guide", root)
+        if guide in guides:
+            raise ValueError(f"{ds.id}: each dataset needs its own usage guide")
+        guides.add(guide)
 
 
 def parameter_block(ds: Dataset) -> list[str]:
@@ -257,8 +232,8 @@ def dataset_path(ds: Dataset) -> Path:
     return Path("docs/generated/catalog") / ds.provider / f"{ds.name}.md"
 
 
-def usage_link(ds: Dataset, entry: CatalogEntry) -> str:
-    relative = posixpath.relpath(entry.guide, dataset_path(ds).parent.as_posix())
+def usage_link(ds: Dataset) -> str:
+    relative = posixpath.relpath(required(ds, "guide"), dataset_path(ds).parent.as_posix())
     return f"[Usage guide]({relative})."
 
 
@@ -267,14 +242,13 @@ def example_url(path: str) -> str:
     return f"https://usdata.dev/examples/{Path(path).parent.name}/"
 
 
-def render_dataset(registry: Registry, ds: Dataset, entry: CatalogEntry) -> str:
+def render_dataset(registry: Registry, ds: Dataset) -> str:
     examples = ", ".join(
-        f"[{Path(path).parent.name.replace('-', ' ')}]({example_url(path)})"
-        for path in entry.examples
+        f"[{Path(path).parent.name.replace('-', ' ')}]({example_url(path)})" for path in ds.examples
     )
     reader = (
-        f"`usdata[{entry.reader_extra}]` · [Reader guide](../../../reference/readers.md)"
-        if entry.reader_extra
+        f"`usdata[{ds.reader}]` · [Reader guide](../../../reference/readers.md)"
+        if ds.reader
         else "Local files; no bundled reader for this format"
     )
     notice = (
@@ -283,7 +257,7 @@ def render_dataset(registry: Registry, ds: Dataset, entry: CatalogEntry) -> str:
         else f"Included since usdata {ds.since}."
     )
     lines = [
-        f"# {entry.summary}",
+        f"# {required(ds, 'summary')}",
         "",
         GENERATED_NOTE,
         "",
@@ -293,9 +267,9 @@ def render_dataset(registry: Registry, ds: Dataset, entry: CatalogEntry) -> str:
         "",
         "## At a glance",
         "",
-        f"- Files: {', '.join(entry.formats)}",
-        f"- Selection: {entry.selection}",
-        f"- Required inputs: {entry.inputs}",
+        f"- Files: {', '.join(ds.formats)}",
+        f"- Selection: {required(ds, 'selection')}",
+        f"- Required inputs: {required(ds, 'inputs')}",
         f"- Open locally: {reader}",
         f"- Examples: {examples}",
         "",
@@ -305,7 +279,7 @@ def render_dataset(registry: Registry, ds: Dataset, entry: CatalogEntry) -> str:
         "",
         "## Usage and limitations",
         "",
-        usage_link(ds, entry),
+        usage_link(ds),
         "",
         "## Catalog reference",
         "",
@@ -334,7 +308,7 @@ AVAILABILITY_NOTE = (
 
 def render_all(registry: Registry) -> dict[Path, str]:
     """Generate only inside the owned catalog directory; never rewrite prose."""
-    entries = catalog_entries(registry)
+    check_usage_metadata(registry)
     implemented = [
         ds
         for _, datasets in by_provider(registry)
@@ -347,7 +321,7 @@ def render_all(registry: Registry) -> dict[Path, str]:
         + "\n\n"
         + AVAILABILITY_NOTE
         + "\n## Implemented datasets\n\n"
-        + dataset_table(implemented, entries)
+        + dataset_table(implemented)
         + "\n## Browse by provider\n\n"
         + summary_table(registry, "")
         + "\nPlanned entries are listed separately on each provider page. "
@@ -361,12 +335,12 @@ def render_all(registry: Registry) -> dict[Path, str]:
             f"[Provider access notes](../../providers/{info.id}.md).\n\n"
             + AVAILABILITY_NOTE
             + "\n## Implemented datasets\n\n"
-            + (dataset_table(available, entries) if available else "None implemented yet.\n")
+            + (dataset_table(available) if available else "None implemented yet.\n")
             + "\n## Planned datasets\n\n"
             + planned_block(registry, planned)
         )
         for ds in available:
-            outputs[ROOT / dataset_path(ds)] = render_dataset(registry, ds, entries[ds.id])
+            outputs[ROOT / dataset_path(ds)] = render_dataset(registry, ds)
     outputs[CATALOG_DIR / "versions.md"] = (
         "# Dataset versions and targets\n\n" + render_roadmap_block(registry)
     )
