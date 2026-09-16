@@ -111,12 +111,29 @@ def _echo_detail(summary: Summary, width: int) -> None:
             ],
         )
     if (fields := summary.grib2) is not None:
+        # A partial fetch knows both numberings and the selector each message
+        # was asked for; a whole file knows neither, so those columns are dropped.
+        in_object = any(message.object_index is not None for message in fields.messages)
+        asked = any(message.selector is not None for message in fields.messages)
+        numbering = ["file #", "object #"] if in_object else ["#"]
         _echo_table(
             "messages",
-            ["#", "shortName", "name", "typeOfLevel", "level", "step", "units", "grid"],
+            [
+                *numbering,
+                *(["selector"] if asked else []),
+                "shortName",
+                "name",
+                "typeOfLevel",
+                "level",
+                "step",
+                "units",
+                "grid",
+            ],
             [
                 [
-                    str(message.index),
+                    str(message.file_index),
+                    *([str(message.object_index or "")] if in_object else []),
+                    *([message.selector or ""] if asked else []),
                     message.short_name or "",
                     message.name or "",
                     message.type_of_level or "",

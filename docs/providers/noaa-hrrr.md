@@ -98,6 +98,16 @@ Common surface-file selectors, read from the 2024-05-06 20Z index:
 | 2 m temperature and dewpoint | `TMP:2 m above ground`, `DPT:2 m above ground` |
 | Mixed-layer CAPE (lowest 90 hPa) | `CAPE:90-0 mb above ground` |
 
+A selector asks in the index's vocabulary and the reader answers in ecCodes',
+and the fetch records which is which, so you never have to guess the pairing.
+Provenance stores one selector beside each fetched byte range, `usdata inspect`
+prints a `selector` column for a partial file, `attrs["usdata"]["messages"]`
+gives each variable a `selector`, and `summary.grib2.variable_for("CAPE:surface")`
+returns the variable name that selector produces, `cape_surface_0` for
+the two-field fetch above and a bare `cape` had every fetched message shared one
+level. A selector no message here was fetched for raises `KeyError` listing the
+ones that were.
+
 The fetched file is the selected messages concatenated, which is itself a valid
 GRIB2 file: `usdata inspect` lists them and `open()` reads them, with `select`
 optional because the fetch already selected. The asset id carries a digest of

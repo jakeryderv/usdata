@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 from datetime import date, datetime
 from pathlib import Path
@@ -81,8 +82,9 @@ class Manifest(BaseModel):
         return [source.name or str(position) for position, source in enumerate(self.sources, 1)]
 
     @classmethod
-    def load(cls, path: Path) -> Manifest:
+    def load(cls, path: str | os.PathLike[str]) -> Manifest:
         """Parse a manifest YAML file."""
+        path = Path(path)
         try:
             raw = yaml.safe_load(path.read_text())
         except yaml.YAMLError as e:
@@ -126,15 +128,15 @@ class Lockfile(BaseModel):
     assets: list[LockedAsset] = Field(default_factory=list)
 
     @classmethod
-    def load(cls, path: Path) -> Lockfile:
+    def load(cls, path: str | os.PathLike[str]) -> Lockfile:
         """Read a lockfile written by ``save``."""
-        return cls.model_validate_json(path.read_text())
+        return cls.model_validate_json(Path(path).read_text())
 
-    def save(self, path: Path) -> None:
+    def save(self, path: str | os.PathLike[str]) -> None:
         """Write the lockfile as indented JSON."""
-        atomic_write_text(path, self.model_dump_json(indent=2))
+        atomic_write_text(Path(path), self.model_dump_json(indent=2))
 
 
-def lockfile_path(manifest_path: Path) -> Path:
+def lockfile_path(manifest_path: str | os.PathLike[str]) -> Path:
     """The lockfile that pairs with a manifest: <manifest stem>.lock.json."""
-    return manifest_path.with_suffix(".lock.json")
+    return Path(manifest_path).with_suffix(".lock.json")

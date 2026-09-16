@@ -23,8 +23,9 @@ def record(
         asset: The asset that was fetched, whose href is the recorded source URL.
         path: The file that arrived, which is hashed and measured here.
         partial: The byte ranges a partial fetch concatenated, when it was one.
-            Its index, ranges, and object identity are recorded alongside the
-            checksum of the local file, which still covers exactly these bytes.
+            Its index, ranges, selectors, and object identity are recorded
+            alongside the checksum of the local file, which still covers exactly
+            these bytes.
 
     Returns:
         The record to write beside ``path``.
@@ -42,6 +43,7 @@ def record(
         index_url=None if partial is None else partial.index_url,
         index_checksum=None if partial is None else partial.index_checksum,
         ranges=[] if partial is None else list(partial.ranges),
+        selectors=[] if partial is None else list(partial.selectors),
         object_size=None if partial is None else partial.object_size,
         object_etag=None if partial is None else partial.object_etag,
     )

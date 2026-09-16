@@ -158,29 +158,6 @@ notebook pins:
   download, because the SPC page publishes approximate sizes and the adapter
   records none, so the figure this README quotes had to come from the pull rather
   than from the plan.
-- The two fields are named twice, in two vocabularies, and nothing connects them.
-  The manifest asks for `CAPE:surface` and `HLCY:3000-0 m above ground`, the
-  wgrib2 index spelling; the same messages come back as `cape_surface_0` and
-  `hlcy_heightAboveGroundLayer_3000`, the ecCodes spelling. The HRRR provider page
-  prints both tables, one under "Fetching selected messages" and one under
-  "Reading fields", but pairing a row of one with a row of the other is left to
-  the reader, and nothing in the package translates a `messages` selector into
-  the `select` or the variable name it will produce. A typo is caught, at least:
-  a selector that matches no message is an error naming the levels that short
-  name publishes.
-- The naming rule is written for a `select`, and a partial file is opened without
-  one. The [reader reference](https://docs.usdata.dev/reference/readers/) says
-  variables take `shortName_typeOfLevel_level` "as soon as the selection spans
-  more than one" level type or level, and the HRRR page says a file fetched with
-  `messages` "opens without `select`". Neither says what the selection is when
-  there is no `select`, so whether a two-message file would come back as `cape`
-  and `hlcy` or as the long names was settled by running it once.
-- Message numbers mean two things. The URL fragment and the provenance record the
-  messages as 105 and 131, their positions in the 170-message object;
-  `inspect()` and `attrs["usdata"]["messages"]` number the same two fields 0 and
-  1, their positions in the file that was fetched. Both are right, nothing is
-  mislabelled, and a student tracing a field back to the source object still has
-  to notice that the two numberings are not the same.
 - The derived Storm Events columns are pandas timestamps and asset times are
   `datetime` objects. Subtracting one from the other gives a `Timedelta` that
   prints as `0 days 00:39:00` where the notebook's other clocks print `0:39:00`,
@@ -193,8 +170,3 @@ notebook pins:
   listed that source's assets", which is not promised to be chronological, so
   anything that wants the earliest or latest asset sorts on
   `item.asset.time.start` defensively.
-- `usdata.inspect_path` wants a `pathlib.Path` and says so nowhere. The readers
-  page introduces it as `usdata.inspect_path(path)`; handed the string that
-  `usdata inspect` prints, it raises `AttributeError: 'str' object has no
-  attribute 'name'` from inside the package. The manifest reference states the
-  rule for `pull()` and `verify()`, and nothing states it here.

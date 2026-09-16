@@ -37,6 +37,7 @@ PARTIAL = PartialFetch(
     index_checksum="sha256:" + "ab" * 32,
     messages=[105, 131],
     ranges=[ByteRange(start=64292396, end=65005961), ByteRange(start=96828629, end=97953522)],
+    selectors=["CAPE:surface", "HLCY:3000-0 m above ground"],
 )
 
 
@@ -58,6 +59,7 @@ def test_a_partial_record_describes_the_ranges_and_the_object_they_came_from(
     assert prov.index_url == PARTIAL.index_url
     assert prov.index_checksum == PARTIAL.index_checksum
     assert prov.ranges == PARTIAL.ranges
+    assert prov.selectors == ["CAPE:surface", "HLCY:3000-0 m above ground"]
     assert prov.object_size == 150_114_757
     assert prov.object_etag == "17ef4503533b3bd3b4c6338b7dddcf2c"
     assert prov.transformations == [
@@ -68,6 +70,28 @@ def test_a_partial_record_describes_the_ranges_and_the_object_they_came_from(
     assert provenance.read(f) == prov
     written = json.loads(provenance.sidecar_path(f).read_text())
     assert written["ranges"][0] == {"start": 64292396, "end": 65005961}
+    assert written["selectors"] == ["CAPE:surface", "HLCY:3000-0 m above ground"]
+
+
+def test_a_partial_record_numbers_its_messages_in_the_source_object(tmp_path: Path) -> None:
+    """The nth recorded range is the nth message on disk, so the two lists pair up."""
+    f = tmp_path / "part.grib2"
+    f.write_bytes(b"GRIB2 messages")
+    ds = default_registry().get("noaa:hrrr")
+    asset = Asset(
+        id="part.grib2",
+        dataset_id=ds.id,
+        href=f"{PARTIAL.object_url}#{PARTIAL.fragment}",
+        protocol=Protocol.S3,
+    )
+    prov = provenance.record(ds, asset, f, PARTIAL)
+    assert prov.object_messages == [105, 131]
+    # A whole file has no such numbering, and neither has a record whose lists disagree.
+    assert (
+        provenance.record(ds, asset.model_copy(update={"href": "s3://x/y"}), f).object_messages
+        == []
+    )
+    assert prov.model_copy(update={"ranges": prov.ranges[:1]}).object_messages == []
 
 
 def test_a_sidecar_written_before_partial_fetch_still_parses(tmp_path: Path) -> None:
@@ -87,5 +111,6 @@ def test_a_sidecar_written_before_partial_fetch_still_parses(tmp_path: Path) -> 
     provenance.sidecar_path(f).write_text(json.dumps(older))
     prov = provenance.read(f)
     assert prov.ranges == [] and prov.index_url is None and prov.object_etag is None
+    assert prov.selectors == []
     assert not prov.is_partial
     assert Provenance.model_validate(older) == prov

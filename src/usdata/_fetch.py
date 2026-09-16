@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -147,11 +148,17 @@ def _fetch_asset(
 
 
 def fetch_asset(
-    dataset: Dataset, asset: Asset, *, root: Path | None = None, force: bool = False
+    dataset: Dataset,
+    asset: Asset,
+    *,
+    root: str | os.PathLike[str] | None = None,
+    force: bool = False,
 ) -> FetchedAsset:
     """Fetch one asset, reusing the cache only when its provenance still describes it."""
     with load_adapter(dataset) as adapter:
-        return _fetch_asset(dataset, asset, adapter, root=root, force=force)
+        return _fetch_asset(
+            dataset, asset, adapter, root=None if root is None else Path(root), force=force
+        )
 
 
 def _fetch_with(
@@ -169,8 +176,14 @@ def _fetch_with(
 
 
 def fetch(
-    dataset: Dataset, query: Query, *, root: Path | None = None, force: bool = False
+    dataset: Dataset,
+    query: Query,
+    *,
+    root: str | os.PathLike[str] | None = None,
+    force: bool = False,
 ) -> list[FetchedAsset]:
     """Resolve and fetch a query, sharing one adapter and closing its owned resources."""
     with load_adapter(dataset) as adapter:
-        return _fetch_with(adapter, dataset, query, root=root, force=force)
+        return _fetch_with(
+            adapter, dataset, query, root=None if root is None else Path(root), force=force
+        )

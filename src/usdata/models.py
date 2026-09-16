@@ -452,11 +452,17 @@ class PartialFetch(BaseModel):
     index_checksum: str = Field(description="'sha256:<hex>' of the index text as fetched")
     messages: list[int] = Field(description="Selected message numbers, ascending and distinct")
     ranges: list[ByteRange] = Field(description="Byte ranges of those messages, in the same order")
+    selectors: list[str] = Field(
+        default_factory=list,
+        description="Index selector naming each of those messages, in the same order",
+    )
 
     @model_validator(mode="after")
     def _aligned(self) -> PartialFetch:
         if not self.messages or len(self.messages) != len(self.ranges):
             raise ValueError("a partial fetch needs one byte range per selected message")
+        if self.selectors and len(self.selectors) != len(self.messages):
+            raise ValueError("a partial fetch needs one selector per selected message")
         if sorted(set(self.messages)) != self.messages:
             raise ValueError("selected messages must be ascending and distinct")
         return self
@@ -518,6 +524,10 @@ class Provenance(BaseModel):
     ranges: list[ByteRange] = Field(
         default_factory=list, description="Byte ranges a partial fetch concatenated, in order"
     )
+    selectors: list[str] = Field(
+        default_factory=list,
+        description="Index selector each of those ranges was fetched for, in the same order",
+    )
     object_size: int | None = Field(
         default=None, ge=0, description="Size of the whole object those ranges came from"
     )
@@ -529,3 +539,23 @@ class Provenance(BaseModel):
     def is_partial(self) -> bool:
         """Whether this record describes selected byte ranges rather than a whole object."""
         return any(entry.startswith(PARTIAL_TRANSFORMATION) for entry in self.transformations)
+
+    @property
+    def object_messages(self) -> list[int]:
+        """The source object's own message numbers, in the order the local file holds them.
+
+        A partial fetch concatenated one message per recorded range, so the nth
+        number here numbers the nth message on disk as the index sidecar numbers
+        it, one-based. Empty for a whole file, and empty rather than wrong when
+        the href fragment and the recorded ranges disagree.
+        """
+        if not self.is_partial:
+            return []
+        _, _, fragment = self.source_url.partition("#")
+        try:
+            numbers = [
+                int(number) for number in fragment.removeprefix(f"{PARTIAL_FRAGMENT}=").split(",")
+            ]
+        except ValueError:
+            return []
+        return numbers if len(numbers) == len(self.ranges) else []

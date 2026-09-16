@@ -70,6 +70,17 @@ def message(values, *, grid=REGULAR, param=130, level_type="surface", level=0, *
         ec.codes_release(handle)
 
 
+def message_ranges(content: bytes) -> list[ByteRange]:
+    """One inclusive byte range per message, as a partial fetch records them."""
+    ranges: list[ByteRange] = []
+    offset = 0
+    while offset < len(content):
+        length = int.from_bytes(content[offset + 8 : offset + 16], "big")
+        ranges.append(ByteRange(start=offset, end=offset + length - 1))
+        offset += length
+    return ranges
+
+
 def item(
     tmp_path: Path,
     content: bytes,
@@ -77,6 +88,7 @@ def item(
     media_type="application/x-grib2",
     dataset_id="noaa:hrrr",
     messages: list[int] | None = None,
+    selectors: list[str] | None = None,
 ):
     path = tmp_path / name
     path.write_bytes(content)
@@ -92,7 +104,8 @@ def item(
             ],
             "index_url": f"s3://noaa-hrrr-bdp-pds/{name}.idx",
             "index_checksum": "sha256:" + "0" * 64,
-            "ranges": [ByteRange(start=0, end=path.stat().st_size - 1)],
+            "ranges": message_ranges(content),
+            "selectors": selectors or [],
             "object_size": path.stat().st_size,
             "object_etag": "81198a73ad430c73adfbe3335421ea99",
         }
@@ -150,7 +163,8 @@ def test_regular_grid_coordinates_values_attrs_and_provenance(tmp_path) -> None:
         "provenance": fetched.provenance.model_dump(mode="json"),
         "messages": {
             "t": {
-                "index": 0,
+                "file_index": 0,
+                "object_index": None,
                 "shortName": "t",
                 "typeOfLevel": "surface",
                 "level": 0,
@@ -271,30 +285,33 @@ def test_messages_attribute_maps_every_variable_to_the_message_it_came_from(leve
     result = levels.open(select={"shortName": ["t", "r"], "level": [500, 850]})
     assert result.attrs["usdata"]["messages"] == {
         "t_isobaricInhPa_500": {
-            "index": 0,
+            "file_index": 0,
+            "object_index": None,
             "shortName": "t",
             "typeOfLevel": "isobaricInhPa",
             "level": 500,
             "step": 0,
         },
         "r_isobaricInhPa_500": {
-            "index": 1,
+            "file_index": 1,
+            "object_index": None,
             "shortName": "r",
             "typeOfLevel": "isobaricInhPa",
             "level": 500,
             "step": 0,
         },
         "t_isobaricInhPa_850": {
-            "index": 2,
+            "file_index": 2,
+            "object_index": None,
             "shortName": "t",
             "typeOfLevel": "isobaricInhPa",
             "level": 850,
             "step": 0,
         },
     }
-    # The index numbers every message in the file, not just the selected ones.
+    # file_index numbers every message in the file, not just the selected ones.
     bare = levels.open(select={"level": 850})
-    assert bare.attrs["usdata"]["messages"]["t"]["index"] == 2
+    assert bare.attrs["usdata"]["messages"]["t"]["file_index"] == 2
 
 
 def test_select_without_match_or_with_bad_values_is_rejected(multi) -> None:
@@ -436,14 +453,22 @@ def test_a_partial_fetch_opens_with_and_without_select(tmp_path) -> None:
         message(np.full(12, 288.0), level_type="heightAboveGround", level=2),
         message(np.full(12, 1500.0), param=59, level_type="surface", level=0),
     ]
-    fetched = item(tmp_path, b"".join(parts), name="part.grib2", messages=[71, 170])
+    fetched = item(
+        tmp_path,
+        b"".join(parts),
+        name="part.grib2",
+        messages=[71, 170],
+        selectors=["TMP:2 m above ground", "CAPE:surface"],
+    )
     assert fetched.provenance.is_partial
     everything = fetched.open()
     # Two level types, so the same rule a select would follow suffixes both variables.
     assert set(everything.data_vars) == {"2t_heightAboveGround_2", "cape_entireAtmosphere_0"}
     assert float(everything["2t_heightAboveGround_2"].values[0, 0]) == 288.0
     assert everything.attrs["usdata"]["messages"]["cape_entireAtmosphere_0"] == {
-        "index": 1,
+        "file_index": 1,
+        "object_index": 170,
+        "selector": "CAPE:surface",
         "shortName": "cape",
         "typeOfLevel": "entireAtmosphere",
         "level": 0,
@@ -451,9 +476,12 @@ def test_a_partial_fetch_opens_with_and_without_select(tmp_path) -> None:
     }
     one = fetched.open(select={"shortName": "cape"})
     assert list(one.data_vars) == ["cape"]
+    # One recorded range per selected message, which is what pairs the two numberings.
     assert one.attrs["usdata"]["provenance"]["ranges"] == [
-        {"start": 0, "end": fetched.path.stat().st_size - 1}
+        {"start": 0, "end": len(parts[0]) - 1},
+        {"start": len(parts[0]), "end": fetched.path.stat().st_size - 1},
     ]
+    assert one.attrs["usdata"]["messages"]["cape"]["object_index"] == 170
 
 
 def test_a_partial_fetch_of_one_level_keeps_bare_names(tmp_path) -> None:
@@ -463,6 +491,12 @@ def test_a_partial_fetch_of_one_level_keeps_bare_names(tmp_path) -> None:
     ]
     fetched = item(tmp_path, b"".join(parts), name="level.grib2", messages=[12, 13])
     assert set(fetched.open().data_vars) == {"t", "r"}
+
+
+def test_a_whole_file_carries_no_selector_in_the_messages_mapping(tmp_path) -> None:
+    """Only a partial fetch was asked for anything, so only it names a selector."""
+    result = item(tmp_path, message(np.arange(12, dtype=float))).open()
+    assert "selector" not in result.attrs["usdata"]["messages"]["t"]
 
 
 def test_a_whole_file_of_the_same_bytes_still_demands_select(tmp_path) -> None:

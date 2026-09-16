@@ -29,6 +29,7 @@ messages concatenated:
 | `index_url` | The `<key>.idx` sidecar the byte ranges were resolved through. |
 | `index_checksum` | `sha256:<hex>` of that index text as it arrived. |
 | `ranges` | The inclusive `start` and `end` byte pairs that were fetched, in order. |
+| `selectors` | The index selector each of those ranges was fetched for, in the same order. |
 | `object_size` | Size of the whole object when the ranges were resolved. |
 | `object_etag` | The ETag that object carried, re-sent as `If-Match` on every later request. |
 | `transformations` | One entry, `grib2 messages 105,131 concatenated from <object url>`. |
@@ -38,6 +39,7 @@ messages concatenated:
   { "start": 64292396, "end": 65005961 },
   { "start": 96828629, "end": 97953522 }
 ],
+"selectors": ["CAPE:surface", "HLCY:3000-0 m above ground"],
 "object_size": 150114757,
 "object_etag": "17ef4503533b3bd3b4c6338b7dddcf2c"
 ```
@@ -46,7 +48,15 @@ A whole-file sidecar is unchanged: the new fields are optional, an older
 sidecar loads with `ranges` empty and the rest unset, and the lockfile schema
 is the same. The asset's URL carries the selection as a fragment,
 `...wrfsfcf00.grib2#messages=105,131`, so the lockfile entry alone says which
-bytes were taken and from where. See
+bytes were taken and from where.
+
+Those numbers, 105 and 131, are the source object's own: the one-based message
+numbers its `.idx` sidecar publishes, and the readers surface them as
+`object_index`. The fetched file holds the same two messages at positions 0 and
+1, which is what `usdata inspect` prints and what the readers call `file_index`.
+The recorded `selectors` name the same two messages a third way, in the index's
+own vocabulary, and `Grib2Summary.variable_for` turns one of those back into the
+variable name the reader gives it. See
 [ADR 0028](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0028-partial-grib2-fetch-through-index-files.md).
 
 ## What a checksum can and cannot do

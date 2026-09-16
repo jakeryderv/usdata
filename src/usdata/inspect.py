@@ -12,6 +12,7 @@ from __future__ import annotations
 import csv
 import gzip
 import io
+import os
 from datetime import datetime
 from enum import StrEnum
 from pathlib import Path
@@ -68,9 +69,23 @@ class NetcdfSummary(BaseModel):
 
 
 class GribMessage(BaseModel):
-    """One GRIB2 message as ecCodes reports it: the keys ``select`` matches on, plus the grid."""
+    """One GRIB2 message as ecCodes reports it: the keys ``select`` matches on, plus the grid.
 
-    index: int = Field(ge=0, description="Zero-based position in the file")
+    Two numberings name the same message. ``file_index`` counts messages in the
+    local file from zero; ``object_index`` is the number the source object's
+    index sidecar gave it, one-based, and is set only for a partial fetch, as is
+    ``selector``, the index selector the message was fetched for.
+    """
+
+    file_index: int = Field(ge=0, description="Zero-based position in the local file")
+    object_index: int | None = Field(
+        default=None,
+        ge=1,
+        description="One-based message number in the source object, for a partial fetch",
+    )
+    selector: str | None = Field(
+        default=None, description="Index selector this message was fetched for, for a partial fetch"
+    )
     short_name: str | None = Field(default=None, description="ecCodes shortName")
     name: str | None = Field(default=None, description="ecCodes name")
     type_of_level: str | None = Field(default=None, description="ecCodes typeOfLevel")
@@ -84,6 +99,44 @@ class Grib2Summary(BaseModel):
     """Every message a GRIB2 file holds, in file order."""
 
     messages: list[GribMessage]
+
+    def variable_for(self, selector: str) -> str:
+        """The variable name ``open()`` will give the message one index selector fetched.
+
+        This closes the loop a partial fetch opens: ``messages="CAPE:surface"``
+        asks in the index sidecar's vocabulary, and the reader answers in
+        ecCodes', so this says which name that selector produces given every
+        message this file holds. Only a partial fetch records selectors.
+
+        Args:
+            selector: A selector exactly as the provenance recorded it, such as
+                ``CAPE:surface``.
+
+        Returns:
+            The variable name the GRIB2 naming rule gives that message.
+
+        Raises:
+            KeyError: No message here was fetched for that selector; the message
+                lists the selectors that were.
+        """
+        from usdata._grib import variable_names
+
+        names = variable_names(
+            [
+                (message.short_name or "", message.type_of_level, message.level)
+                for message in self.messages
+            ]
+        )
+        for message, name in zip(self.messages, names, strict=True):
+            if message.selector == selector:
+                return name
+        recorded = ", ".join(
+            repr(message.selector) for message in self.messages if message.selector is not None
+        )
+        raise KeyError(
+            f"no message in this file was fetched for selector {selector!r}; "
+            f"selectors recorded here: {recorded or 'none'}"
+        )
 
 
 class Summary(BaseModel):
@@ -136,11 +189,12 @@ def inspect_asset(fetched: FetchedAsset) -> Summary:
     )
 
 
-def inspect_path(path: Path) -> Summary:
+def inspect_path(path: str | os.PathLike[str]) -> Summary:
     """Summarize a cached file, reading the provenance sidecar written beside it.
 
     Args:
-        path: A cached file whose ``<name>.provenance.json`` sidecar exists.
+        path: A cached file whose ``<name>.provenance.json`` sidecar exists,
+            written as a string or as any ``os.PathLike``.
 
     Returns:
         The summary ``inspect_asset`` builds, with the format taken from the file
@@ -150,7 +204,8 @@ def inspect_path(path: Path) -> Summary:
         OSError: The file or its provenance sidecar is missing or unreadable.
         ValueError: The sidecar is not a provenance record.
     """
-    return _summarize(path, path.name, provenance.read(path), _detect(path.name, None))
+    local = Path(path)
+    return _summarize(local, local.name, provenance.read(local), _detect(local.name, None))
 
 
 def _summarize(path: Path, asset_id: str, record: Provenance, fmt: AssetFormat) -> Summary:
@@ -159,7 +214,7 @@ def _summarize(path: Path, asset_id: str, record: Provenance, fmt: AssetFormat) 
     note: str | None = None
     if fmt is not AssetFormat.BYTES:
         try:
-            detail = _detail(path, fmt)
+            detail = _detail(path, fmt, record)
         except readers.MissingReaderDependency as error:
             note = str(error)
         # A cached file that no longer decodes is reported, not raised: a summary
@@ -203,7 +258,9 @@ def _detect(name: str, media_type: str | None) -> AssetFormat:
     return AssetFormat.BYTES
 
 
-def _detail(path: Path, fmt: AssetFormat) -> CsvSummary | NetcdfSummary | Grib2Summary:
+def _detail(
+    path: Path, fmt: AssetFormat, record: Provenance
+) -> CsvSummary | NetcdfSummary | Grib2Summary:
     """The detail for one recognized format, reading only what that format needs."""
     if fmt is AssetFormat.CSV:
         return _csv_summary(path)
@@ -211,7 +268,26 @@ def _detail(path: Path, fmt: AssetFormat) -> CsvSummary | NetcdfSummary | Grib2S
         from usdata._netcdf import variables
 
         return NetcdfSummary(variables=variables(path))
-    return Grib2Summary(messages=readers.inventory(path))
+    return Grib2Summary(messages=_paired(readers.inventory(path), record))
+
+
+def _paired(messages: list[GribMessage], record: Provenance) -> list[GribMessage]:
+    """Each message as the fetch that took it described it, where provenance says.
+
+    The file itself carries neither number nor selector: a partial fetch recorded
+    one message number and one selector per range, so the lists pair up in order.
+    A whole file, or a record that does not pair, leaves both unset.
+    """
+    numbers = record.object_messages
+    if len(numbers) != len(messages):
+        return messages
+    selectors = (
+        record.selectors if len(record.selectors) == len(messages) else [None] * len(messages)
+    )
+    return [
+        message.model_copy(update={"object_index": number, "selector": selector})
+        for message, number, selector in zip(messages, numbers, selectors, strict=True)
+    ]
 
 
 def _csv_summary(path: Path) -> CsvSummary:

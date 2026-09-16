@@ -3,6 +3,9 @@
 Signatures and descriptions below are generated from Python source at build time.
 This reference covers the public workflow and the objects it returns; internal
 transports and provider implementation helpers are intentionally omitted.
+Every public function that takes a filesystem path accepts a `str` or any
+`os.PathLike[str]` and coerces it once on entry, so a path `usdata inspect`
+printed can be pasted straight back in.
 See [fetch and analyze](../guides/fetch-and-analyze.md) for complete workflows.
 
 ## Discovery and queries

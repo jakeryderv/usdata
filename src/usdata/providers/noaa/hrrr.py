@@ -198,6 +198,7 @@ def pinned_partial(pinned: Provenance) -> PartialFetch:
             index_checksum=pinned.index_checksum or "",
             messages=[int(number) for number in numbers],
             ranges=list(pinned.ranges),
+            selectors=list(pinned.selectors),
         )
     except (ValidationError, ValueError) as error:
         raise QueryError(
@@ -333,7 +334,9 @@ class ModelRuns(HttpProvider):
 
         Returns:
             An asset whose id carries a digest of the selected message numbers,
-            whose href carries the numbers as a fragment, and whose size is their total.
+            whose href carries the numbers as a fragment, and whose size is their
+            total. The selector each message was fetched for travels with the
+            ranges, so provenance can name it later.
 
         Raises:
             QueryError: The index is absent or unreadable, or a selector matches nothing.
@@ -350,8 +353,9 @@ class ModelRuns(HttpProvider):
             object_etag=obj.etag or "",
             index_url=index_url,
             index_checksum=checksum,
-            messages=[entry.number for entry in chosen],
-            ranges=[entry.byte_range for entry in chosen],
+            messages=[selection.entry.number for selection in chosen],
+            ranges=[selection.entry.byte_range for selection in chosen],
+            selectors=[selection.selector for selection in chosen],
         )
         href = f"{whole.href}#{partial.fragment}"
         self._partials[href] = partial

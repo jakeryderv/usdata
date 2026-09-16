@@ -400,6 +400,8 @@ def test_partial_provenance_records_the_index_ranges_and_object(tmp_path: Path) 
     assert record.index_url == f"s3://{BUCKET}/{KEY}.idx"
     assert record.index_checksum == sha256_bytes(INDEX.encode())
     assert [(part.start, part.end) for part in record.ranges] == [(40, 79), (80, 119)]
+    # One selector per range, the text the caller wrote where it named one message.
+    assert record.selectors == ["TMP:2 m above ground", "HLCY:3000-0 m above ground"]
     assert record.object_size == len(OBJECT) and record.object_etag == ETAG
     assert record.transformations == [f"grib2 messages 2,3 concatenated from s3://{BUCKET}/{KEY}"]
     assert record.is_partial
@@ -429,6 +431,9 @@ def test_restore_reissues_the_pinned_ranges_without_reading_the_index(tmp_path: 
         mock.get(OBJECT_URL).side_effect = ranged()
         restored = pull(manifest, root=root)
     assert restored.from_lockfile and restored.lockfile == first.lockfile
+    # The selectors survive the lockfile on disk, and a restore re-records them.
+    assert restored.lockfile.assets[0].provenance.selectors == entry.provenance.selectors
+    assert restored.fetched[0].provenance.selectors == entry.provenance.selectors
     assert restored.fetched[0].path.read_bytes() == PART
     assert (listed.call_count, index.call_count, head.call_count) == (0, 0, 0)
     assert verify(manifest, root=root) == []

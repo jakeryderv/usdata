@@ -53,6 +53,13 @@ class IndexEntry(BaseModel):
         return f"{self.short_name}:{self.level}:{self.step}"
 
 
+class Selection(BaseModel):
+    """One selected message and the index selector text that names exactly it."""
+
+    entry: IndexEntry
+    selector: str
+
+
 class Selector(BaseModel):
     """One ``VAR:level text`` request, optionally narrowed by a step text."""
 
@@ -158,8 +165,13 @@ def _hint(entries: Sequence[IndexEntry], selector: Selector) -> str:
 
 def resolve(
     entries: Sequence[IndexEntry], selectors: Iterable[Selector], *, url: str
-) -> list[IndexEntry]:
+) -> list[Selection]:
     """The messages the selectors name, ascending by message number and each listed once.
+
+    Each selection also carries the text that names its one message: the
+    selector as the caller wrote it when that selector matched nothing else, and
+    the index line's own short name, level, and step text when the caller wrote
+    a broader one that several messages answered.
 
     Args:
         entries: Every message of the object, as ``parse_index`` read them.
@@ -167,12 +179,12 @@ def resolve(
         url: The object, named in any error.
 
     Returns:
-        The selected entries, ascending by message number.
+        The selected messages, ascending by message number.
 
     Raises:
         QueryError: A selector matches no message, which is never a whole-file fetch.
     """
-    chosen: dict[int, IndexEntry] = {}
+    chosen: dict[int, Selection] = {}
     for selector in selectors:
         hits = [entry for entry in entries if selector.matches(entry)]
         if not hits:
@@ -180,13 +192,17 @@ def resolve(
                 f"messages selector {selector.text!r} matched no message in "
                 f"{url}{INDEX_SUFFIX}; {_hint(entries, selector)}"
             )
-        chosen.update({entry.number: entry for entry in hits})
+        text = selector.text if len(hits) == 1 else None
+        chosen.update(
+            {entry.number: Selection(entry=entry, selector=text or entry.label) for entry in hits}
+        )
     return [chosen[number] for number in sorted(chosen)]
 
 
 __all__ = [
     "INDEX_SUFFIX",
     "IndexEntry",
+    "Selection",
     "Selector",
     "parse_index",
     "parse_selector",

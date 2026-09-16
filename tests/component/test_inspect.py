@@ -6,6 +6,7 @@ import gzip
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import pytest
 from typer.testing import CliRunner
@@ -14,13 +15,24 @@ from usdata import FetchedAsset, inspect_asset, inspect_path
 from usdata.cache import cached_path, sha256_file
 from usdata.cli import app
 from usdata.inspect import AssetFormat, CsvSummary, NetcdfSummary
-from usdata.models import Asset, Protocol, Provenance
+from usdata.models import Asset, ByteRange, Protocol, Provenance
 from usdata.provenance import write
 
 NETCDF_FIXTURE = Path(__file__).parents[1] / "fixtures/netcdf/packed-grid.nc"
 CSV = b"time,station,value\n2024-05-06,USW00013967,1.0\n2024-05-07,USW00013967,2.0\n"
 
 runner = CliRunner()
+
+
+def grib_ranges(content: bytes) -> list[ByteRange]:
+    """One inclusive byte range per GRIB2 message, as a partial fetch records them."""
+    ranges: list[ByteRange] = []
+    offset = 0
+    while offset < len(content):
+        length = int.from_bytes(content[offset + 8 : offset + 16], "big")
+        ranges.append(ByteRange(start=offset, end=offset + length - 1))
+        offset += length
+    return ranges
 
 
 def cached(
@@ -31,14 +43,37 @@ def cached(
     media_type: str | None = None,
     dataset_id: str = "noaa:ghcn-daily",
     sidecar: bool = True,
+    messages: list[int] | None = None,
+    selectors: list[str] | None = None,
 ) -> FetchedAsset:
-    """One asset on disk with the provenance sidecar a real fetch writes beside it."""
+    """One asset on disk with the provenance sidecar a real fetch writes beside it.
+
+    With ``messages``, the sidecar is the one a partial GRIB2 fetch writes: the
+    source object's message numbers in the href fragment and one recorded byte
+    range per message.
+    """
     path = tmp_path / name
+    href = f"https://example.test/{name}"
     path.write_bytes(content)
+    partial: dict[str, Any] = {}
+    if messages is not None:
+        numbers = ",".join(str(number) for number in messages)
+        href = f"{href}#messages={numbers}"
+        partial = {
+            "transformations": [
+                f"grib2 messages {numbers} concatenated from https://example.test/{name}"
+            ],
+            "index_url": f"https://example.test/{name}.idx",
+            "index_checksum": "sha256:" + "0" * 64,
+            "ranges": grib_ranges(content),
+            "selectors": selectors or [],
+            "object_size": 151_717_165,
+            "object_etag": "81198a73ad430c73adfbe3335421ea99",
+        }
     asset = Asset(
         id=name,
         dataset_id=dataset_id,
-        href=f"https://example.test/{name}",
+        href=href,
         protocol=Protocol.HTTP,
         media_type=media_type,
     )
@@ -50,6 +85,7 @@ def cached(
         checksum=sha256_file(path),
         size=path.stat().st_size,
         usdata_version="0.16.0",
+        **partial,
     )
     if sidecar:
         write(record, path)
@@ -122,6 +158,12 @@ def test_inspect_path_reads_the_sidecar_and_infers_the_format_from_the_name(
     assert summary.format is AssetFormat.CSV
     assert summary.asset_id == "daily.csv" and summary.dataset_id == "noaa:ghcn-daily"
     assert summary.csv is not None and summary.csv.columns == ["time", "station", "value"]
+
+
+def test_inspect_path_accepts_the_string_the_cli_prints(tmp_path: Path) -> None:
+    """The CLI prints a plain path, so pasting one back in must not need a Path()."""
+    fetched = cached(tmp_path, "daily.csv", CSV)
+    assert inspect_path(str(fetched.path)) == inspect_path(fetched.path)
 
 
 def test_inspect_path_without_a_sidecar_raises(tmp_path: Path) -> None:
@@ -220,12 +262,119 @@ def test_grib2_messages_are_listed_with_the_keys_select_matches(grib: FetchedAss
     assert summary.format is AssetFormat.GRIB2
     assert summary.grib2 is not None and summary.note is None
     messages = summary.grib2.messages
-    assert [message.index for message in messages] == [0, 1, 2]
+    assert [message.file_index for message in messages] == [0, 1, 2]
+    assert [message.object_index for message in messages] == [None, None, None]
     assert [message.short_name for message in messages] == ["t", "t", "cape"]
     assert [message.level for message in messages] == ["500", "850", "0"]
     assert messages[0].type_of_level == "isobaricInhPa" and messages[0].units == "K"
     assert messages[0].name == "Temperature" and messages[0].shape == (3, 4)
     assert messages[2].type_of_level == "entireAtmosphere"
+
+
+@pytest.fixture
+def partial_grib(tmp_path: Path) -> FetchedAsset:
+    """Two messages taken from a 170-message object, as a partial fetch leaves them."""
+    ec = pytest.importorskip("eccodes")
+    np = pytest.importorskip("numpy")
+    pytest.importorskip("xarray")
+
+    def message(value: float, *, param: int, level_type: str, level: int) -> bytes:
+        handle = ec.codes_grib_new_from_samples("regular_ll_sfc_grib2")
+        try:
+            for key, setting in (("Ni", 4), ("Nj", 3)):
+                ec.codes_set(handle, key, setting)
+            ec.codes_set(handle, "typeOfLevel", level_type)
+            ec.codes_set(handle, "level", level)
+            ec.codes_set(handle, "paramId", param)
+            ec.codes_set(handle, "packingType", "grid_simple")
+            ec.codes_set_values(handle, np.full(12, value))
+            return ec.codes_get_message(handle)
+        finally:
+            ec.codes_release(handle)
+
+    parts = [
+        message(1500.0, param=59, level_type="surface", level=0),
+        message(288.0, param=130, level_type="heightAboveGround", level=2),
+    ]
+    return cached(
+        tmp_path,
+        "part.grib2",
+        b"".join(parts),
+        media_type="application/x-grib2",
+        dataset_id="noaa:hrrr",
+        messages=[105, 131],
+        selectors=["CAPE:surface", "TMP:2 m above ground"],
+    )
+
+
+@pytest.mark.grib
+def test_a_partial_file_also_numbers_each_message_in_the_source_object(
+    partial_grib: FetchedAsset,
+) -> None:
+    summary = partial_grib.inspect()
+    assert summary.grib2 is not None
+    messages = summary.grib2.messages
+    assert [message.file_index for message in messages] == [0, 1]
+    assert [message.object_index for message in messages] == [105, 131]
+    assert [message.selector for message in messages] == ["CAPE:surface", "TMP:2 m above ground"]
+
+
+@pytest.mark.grib
+def test_variable_for_answers_in_the_readers_vocabulary(partial_grib: FetchedAsset) -> None:
+    """Selector in, variable name out, for both halves of the naming rule."""
+    spanning = partial_grib.inspect().grib2
+    assert spanning is not None
+    # Two level types, so every name is suffixed.
+    assert spanning.variable_for("CAPE:surface") == "cape_entireAtmosphere_0"
+    assert list(partial_grib.open().data_vars) == [
+        spanning.variable_for("CAPE:surface"),
+        spanning.variable_for("TMP:2 m above ground"),
+    ]
+
+
+@pytest.mark.grib
+def test_variable_for_keeps_the_bare_name_when_one_level_is_spanned(
+    tmp_path: Path, partial_grib: FetchedAsset
+) -> None:
+    ec = pytest.importorskip("eccodes")
+    np = pytest.importorskip("numpy")
+    messages = []
+    for param in (130, 157):
+        handle = ec.codes_grib_new_from_samples("regular_ll_sfc_grib2")
+        try:
+            for key, setting in (("Ni", 4), ("Nj", 3)):
+                ec.codes_set(handle, key, setting)
+            ec.codes_set(handle, "typeOfLevel", "isobaricInhPa")
+            ec.codes_set(handle, "level", 500)
+            ec.codes_set(handle, "paramId", param)
+            ec.codes_set(handle, "packingType", "grid_simple")
+            ec.codes_set_values(handle, np.full(12, 1.0))
+            messages.append(ec.codes_get_message(handle))
+        finally:
+            ec.codes_release(handle)
+    one_level = cached(
+        tmp_path,
+        "level.grib2",
+        b"".join(messages),
+        media_type="application/x-grib2",
+        dataset_id="noaa:hrrr",
+        messages=[12, 13],
+        selectors=["TMP:500 mb", "RH:500 mb"],
+    )
+    summary = one_level.inspect()
+    assert summary.grib2 is not None
+    assert summary.grib2.variable_for("TMP:500 mb") == "t"
+    assert summary.grib2.variable_for("RH:500 mb") == "r"
+    assert set(one_level.open().data_vars) == {"t", "r"}
+
+
+@pytest.mark.grib
+def test_variable_for_names_the_selectors_a_file_does_hold(partial_grib: FetchedAsset) -> None:
+    summary = partial_grib.inspect()
+    assert summary.grib2 is not None
+    with pytest.raises(KeyError, match="CAPE:surface") as error:
+        summary.grib2.variable_for("cape:surface")
+    assert "'cape:surface'" in str(error.value)
 
 
 @pytest.mark.grib
@@ -325,6 +474,21 @@ def test_the_cli_prints_the_grib2_message_table(grib: FetchedAsset) -> None:
     assert "messages:" in result.stdout and "shortName" in result.stdout
     assert "isobaricInhPa" in result.stdout and "3 x 4" in result.stdout
     assert "cape" in result.stdout
+
+
+@pytest.mark.grib
+def test_the_cli_prints_both_numberings_only_for_a_partial_file(
+    grib: FetchedAsset, partial_grib: FetchedAsset
+) -> None:
+    whole = runner.invoke(app, ["inspect", str(grib.path)])
+    assert whole.exit_code == 0
+    assert "object #" not in whole.stdout and "file #" not in whole.stdout
+    part = runner.invoke(app, ["inspect", str(partial_grib.path)])
+    assert part.exit_code == 0
+    header = next(line for line in part.stdout.splitlines() if "shortName" in line)
+    assert header.split()[:5] == ["file", "#", "object", "#", "selector"]
+    assert "105" in part.stdout and "131" in part.stdout
+    assert "CAPE:surface" in part.stdout and "selector" not in whole.stdout
 
 
 @pytest.mark.grib

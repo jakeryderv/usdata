@@ -41,6 +41,27 @@ Variables are named by `shortName` when every selected message shares one
 as soon as the selection spans more than one, so the names follow from the
 select rather than from which short names happened to repeat.
 
+## GRIB2 message numbering
+
+A message carries two numbers, and they are not the same. `file_index` is its
+zero-based position in the local file, which is what `usdata inspect` prints
+and what `readers.inventory` counts. `object_index` is the one-based number the
+source object's `.idx` sidecar gave it, so it survives only where a
+[partial fetch](../concepts/provenance-and-drift.md#files-fetched-as-byte-ranges)
+recorded which messages it took; it is `None` for a whole file. Both appear on
+`GribMessage` and in `attrs["usdata"]["messages"]`, and `usdata inspect` prints
+the `object #` column only when the file has one.
+
+## GRIB2 selectors and variable names
+
+A partial fetch also records the index `selector` each message was fetched for,
+which `usdata inspect` prints in a `selector` column and the reader puts on each
+`messages` entry. `Grib2Summary.variable_for(selector)` turns one of those
+selectors into the variable name the naming rule above gives that message, so a
+notebook that asked for `CAPE:surface` can look up the `cape_surface_0` it became
+instead of guessing it; a selector this file holds no message for raises
+`KeyError` naming the ones it does.
+
 ## CSV identifier defaults
 
 These column names, matched case-insensitively, default to pandas string dtype
@@ -58,7 +79,7 @@ pandas inference and default missing-value parsing.
 | `erddap-csv` | `frame.attrs["units"]` | Units row, filtered to the selected columns |
 | `nexrad-level2` | `radar.attrs["usdata"]` | Asset id, provenance, and `sweeps` listing the returned groups |
 | `netcdf`, `grib2` | `dataset.attrs["usdata"]` | Asset id and provenance |
-| `grib2` | `dataset.attrs["usdata"]["messages"]` | Each variable name mapped to its message's `index` in the file, `shortName`, `typeOfLevel`, `level`, and `step` |
+| `grib2` | `dataset.attrs["usdata"]["messages"]` | Each variable name mapped to its message's `file_index`, `object_index`, `shortName`, `typeOfLevel`, `level`, and `step`, plus the `selector` a partial fetch asked for |
 | `grib2` | per-variable `attrs` | `units`, `name`, `typeOfLevel`, `level`, discipline, category, and parameter numbers, packing type, reference and valid times, step; projection parameters on the Dataset for projected grids |
 
 ## Errors

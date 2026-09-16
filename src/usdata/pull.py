@@ -16,6 +16,7 @@ would fetch and how many of its bytes the adapters can measure.
 
 from __future__ import annotations
 
+import os
 from collections.abc import Iterable
 from contextlib import ExitStack
 from datetime import UTC, datetime
@@ -148,10 +149,15 @@ def _checked_adapters(
 
 
 def resolve(
-    manifest_path: Path, *, root: Path | None = None, registry: Registry | None = None
+    manifest_path: str | os.PathLike[str],
+    *,
+    root: str | os.PathLike[str] | None = None,
+    registry: Registry | None = None,
 ) -> PullResult:
     """Resolve every source through its adapter, fetch, and write a fresh lockfile."""
     reg = registry or default_registry()
+    manifest_path = Path(manifest_path)
+    root = None if root is None else Path(root)
     manifest = _load(manifest_path, reg)
     fetched: list[FetchedAsset] = []
     locked: list[LockedAsset] = []
@@ -244,7 +250,7 @@ class Plan(BaseModel):
         return [source.source for source in self.sources if source.unknown_sizes]
 
 
-def plan(manifest_path: Path, *, registry: Registry | None = None) -> Plan:
+def plan(manifest_path: str | os.PathLike[str], *, registry: Registry | None = None) -> Plan:
     """List every source through its adapter and price the result; download nothing.
 
     Validates the whole manifest first, exactly as ``resolve`` does, then makes
@@ -252,14 +258,14 @@ def plan(manifest_path: Path, *, registry: Registry | None = None) -> Plan:
     requests a partial-fetch source needs to work out its byte ranges.
 
     Args:
-        manifest_path: Path of the manifest YAML file.
+        manifest_path: Path of the manifest YAML file, as a string or any ``os.PathLike``.
         registry: Registry to resolve dataset ids against; the default one if omitted.
 
     Returns:
         A ``Plan`` holding each source's assets and the totals over them.
     """
     reg = registry or default_registry()
-    manifest = _load(manifest_path, reg)
+    manifest = _load(Path(manifest_path), reg)
     sources: list[SourcePlan] = []
     with ExitStack() as stack:
         adapters = _checked_adapters(manifest, reg, stack)
@@ -284,9 +290,9 @@ def _selected(lock: Lockfile, update: Iterable[str]) -> set[str]:
 
 
 def restore(
-    manifest_path: Path,
+    manifest_path: str | os.PathLike[str],
     *,
-    root: Path | None = None,
+    root: str | os.PathLike[str] | None = None,
     registry: Registry | None = None,
     update: Iterable[str] = (),
 ) -> PullResult:
@@ -299,6 +305,8 @@ def restore(
     a republished object is reported as drift rather than silently re-resolved.
     """
     reg = registry or default_registry()
+    manifest_path = Path(manifest_path)
+    root = None if root is None else Path(root)
     lock_path = lockfile_path(manifest_path)
     lock = Lockfile.load(lock_path)
     _check_manifest(manifest_path, lock)
@@ -384,9 +392,9 @@ def restore(
 
 
 def pull(
-    manifest_path: Path,
+    manifest_path: str | os.PathLike[str],
     *,
-    root: Path | None = None,
+    root: str | os.PathLike[str] | None = None,
     force: bool = False,
     registry: Registry | None = None,
     update: Iterable[str] = (),
@@ -396,6 +404,7 @@ def pull(
     ``update`` names assets or datasets whose pins should follow current upstream
     bytes; it needs an existing lockfile and is exclusive with ``force``.
     """
+    manifest_path = Path(manifest_path)
     update = list(update)
     if update and force:
         raise ValueError("update and force are exclusive; force re-resolves every source")
@@ -406,8 +415,12 @@ def pull(
     return restore(manifest_path, root=root, registry=registry, update=update)
 
 
-def verify(manifest_path: Path, *, root: Path | None = None) -> list[Drift]:
+def verify(
+    manifest_path: str | os.PathLike[str], *, root: str | os.PathLike[str] | None = None
+) -> list[Drift]:
     """Check manifest consistency, then compare cached files against the lockfile."""
+    manifest_path = Path(manifest_path)
+    root = None if root is None else Path(root)
     lock = Lockfile.load(lockfile_path(manifest_path))
     _check_manifest(manifest_path, lock)
     drift: list[Drift] = []
