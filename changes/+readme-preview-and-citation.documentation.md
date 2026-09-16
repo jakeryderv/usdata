@@ -1,0 +1,1 @@
+The README shows a preview of usdata.dev, the same four steps in Python, a docs badge, and one sentence on when another library is the better tool; a CITATION.cff file lets GitHub offer a software citation beside the dataset citations usdata prints.

@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: If you use usdata in a paper or report, cite the datasets it fetched (usdata cite prints them) and, if useful, the software itself as below.
+type: software
+title: usdata
+abstract: Reproducible acquisition of U.S. public scientific data. One Python SDK and CLI discovers curated NOAA and USGS datasets, fetches their files, and pins them in a lockfile with provenance.
+authors:
+  - family-names: Van Slyke
+    given-names: Jake
+repository-code: https://github.com/jakeryderv/usdata
+url: https://usdata.dev/
+license: Apache-2.0
+keywords:
+  - noaa
+  - usgs
+  - open-data
+  - provenance
+  - reproducible-research
