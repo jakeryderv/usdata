@@ -13,6 +13,7 @@ from usdata import __version__, build_query, default_registry
 from usdata._fetch import ChecksumMismatch
 from usdata._fetch import fetch as fetch_query
 from usdata._progress import batch
+from usdata.cli.cache import cache_app
 from usdata.cli.cite import cite
 from usdata.cli.doctor import doctor
 from usdata.cli.progress import progress
@@ -37,6 +38,7 @@ app = typer.Typer(
     help="Discover, fetch, and track provenance of U.S. public scientific data.",
     no_args_is_help=True,
 )
+app.add_typer(cache_app, name="cache")
 app.command()(cite)
 
 
