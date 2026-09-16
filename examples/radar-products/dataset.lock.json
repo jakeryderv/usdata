@@ -1,0 +1,552 @@
+{
+  "manifest": "ktlx-derived-products",
+  "manifest_checksum": "sha256:72d1441d2c2cabbb9817558b8a9420592299f9b09628a0f5b5837bf675867a7e",
+  "generated_at": "2026-09-16T16:05:20.848123Z",
+  "usdata_version": "0.18.0",
+  "assets": [
+    {
+      "asset": {
+        "id": "TLX_EET_2024_05_06_20_34_35",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_EET_2024_05_06_20_34_35",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 2764,
+        "checksum": "sha256:9ded5d4007d9d4e28e2187bae6d891e047b9a62633b198cff427ea38cb83e528",
+        "time": {
+          "start": "2024-05-06T20:34:35Z",
+          "end": "2024-05-06T20:34:35Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_EET_2024_05_06_20_34_35",
+        "retrieved_at": "2026-09-16T16:05:19.585544Z",
+        "checksum": "sha256:9ded5d4007d9d4e28e2187bae6d891e047b9a62633b198cff427ea38cb83e528",
+        "size": 2764,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "TLX_EET_2024_05_06_20_42_46",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_EET_2024_05_06_20_42_46",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 2759,
+        "checksum": "sha256:7f1d9f12709a7ddba01354006988d90bf374ee707c75873799bc80f8a931694f",
+        "time": {
+          "start": "2024-05-06T20:42:46Z",
+          "end": "2024-05-06T20:42:46Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_EET_2024_05_06_20_42_46",
+        "retrieved_at": "2026-09-16T16:05:19.726995Z",
+        "checksum": "sha256:7f1d9f12709a7ddba01354006988d90bf374ee707c75873799bc80f8a931694f",
+        "size": 2759,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "TLX_EET_2024_05_06_20_46_49",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_EET_2024_05_06_20_46_49",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 2903,
+        "checksum": "sha256:0a92b82d177d8d69b647f23d72d4e923a5b7610e4d403e67f907d6300ec9ea9d",
+        "time": {
+          "start": "2024-05-06T20:46:49Z",
+          "end": "2024-05-06T20:46:49Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_EET_2024_05_06_20_46_49",
+        "retrieved_at": "2026-09-16T16:05:19.810029Z",
+        "checksum": "sha256:0a92b82d177d8d69b647f23d72d4e923a5b7610e4d403e67f907d6300ec9ea9d",
+        "size": 2903,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "TLX_EET_2024_05_06_20_51_08",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_EET_2024_05_06_20_51_08",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 3144,
+        "checksum": "sha256:f42b304c811b204375846bfcb9fb3b28f18ffe3790bda7121ef66c335320b9cc",
+        "time": {
+          "start": "2024-05-06T20:51:08Z",
+          "end": "2024-05-06T20:51:08Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_EET_2024_05_06_20_51_08",
+        "retrieved_at": "2026-09-16T16:05:19.887210Z",
+        "checksum": "sha256:f42b304c811b204375846bfcb9fb3b28f18ffe3790bda7121ef66c335320b9cc",
+        "size": 3144,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "TLX_EET_2024_05_06_20_55_25",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_EET_2024_05_06_20_55_25",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 3219,
+        "checksum": "sha256:d0afbd26006aa049456a9a370c3c37dad2f2dd4037ce8e39df75e23ec045fbe5",
+        "time": {
+          "start": "2024-05-06T20:55:25Z",
+          "end": "2024-05-06T20:55:25Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_EET_2024_05_06_20_55_25",
+        "retrieved_at": "2026-09-16T16:05:19.957581Z",
+        "checksum": "sha256:d0afbd26006aa049456a9a370c3c37dad2f2dd4037ce8e39df75e23ec045fbe5",
+        "size": 3219,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "TLX_EET_2024_05_06_20_59_43",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_EET_2024_05_06_20_59_43",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 3247,
+        "checksum": "sha256:231461ed4b824d9cbb79f4566437b42c799620c57197ba6f842fe5afaf79bac4",
+        "time": {
+          "start": "2024-05-06T20:59:43Z",
+          "end": "2024-05-06T20:59:43Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_EET_2024_05_06_20_59_43",
+        "retrieved_at": "2026-09-16T16:05:20.040989Z",
+        "checksum": "sha256:231461ed4b824d9cbb79f4566437b42c799620c57197ba6f842fe5afaf79bac4",
+        "size": 3247,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "TLX_NMD_2024_05_06_20_42_46",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_NMD_2024_05_06_20_42_46",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 150,
+        "checksum": "sha256:878d8ea7c594a1289b494f870446e1d9e2d28a6d00d64fd35eae82359974782d",
+        "time": {
+          "start": "2024-05-06T20:42:46Z",
+          "end": "2024-05-06T20:42:46Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_NMD_2024_05_06_20_42_46",
+        "retrieved_at": "2026-09-16T16:05:20.106117Z",
+        "checksum": "sha256:878d8ea7c594a1289b494f870446e1d9e2d28a6d00d64fd35eae82359974782d",
+        "size": 150,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "TLX_NMD_2024_05_06_20_46_49",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_NMD_2024_05_06_20_46_49",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 150,
+        "checksum": "sha256:0efc7081336ae17ef70047caaba125f39f46b727b4201d756bcaac950f3705e6",
+        "time": {
+          "start": "2024-05-06T20:46:49Z",
+          "end": "2024-05-06T20:46:49Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_NMD_2024_05_06_20_46_49",
+        "retrieved_at": "2026-09-16T16:05:20.174509Z",
+        "checksum": "sha256:0efc7081336ae17ef70047caaba125f39f46b727b4201d756bcaac950f3705e6",
+        "size": 150,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "TLX_NMD_2024_05_06_20_51_08",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_NMD_2024_05_06_20_51_08",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 150,
+        "checksum": "sha256:d3eb0be797ab243f771fa8848c1033ba4252c849a7f64b83e21d516b1726ec68",
+        "time": {
+          "start": "2024-05-06T20:51:08Z",
+          "end": "2024-05-06T20:51:08Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_NMD_2024_05_06_20_51_08",
+        "retrieved_at": "2026-09-16T16:05:20.239430Z",
+        "checksum": "sha256:d3eb0be797ab243f771fa8848c1033ba4252c849a7f64b83e21d516b1726ec68",
+        "size": 150,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "TLX_NMD_2024_05_06_20_55_25",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_NMD_2024_05_06_20_55_25",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 150,
+        "checksum": "sha256:eaae91d87a18491eccdea29efea8414592720338e88b405a3cbfa30384a65b64",
+        "time": {
+          "start": "2024-05-06T20:55:25Z",
+          "end": "2024-05-06T20:55:25Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_NMD_2024_05_06_20_55_25",
+        "retrieved_at": "2026-09-16T16:05:20.303761Z",
+        "checksum": "sha256:eaae91d87a18491eccdea29efea8414592720338e88b405a3cbfa30384a65b64",
+        "size": 150,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "TLX_NMD_2024_05_06_20_59_43",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_NMD_2024_05_06_20_59_43",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 150,
+        "checksum": "sha256:fb925c8312fa22e927e7d9d8b4e42eb58e8f9cb59cb18d7c4185c2e5a0de1601",
+        "time": {
+          "start": "2024-05-06T20:59:43Z",
+          "end": "2024-05-06T20:59:43Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_NMD_2024_05_06_20_59_43",
+        "retrieved_at": "2026-09-16T16:05:20.372124Z",
+        "checksum": "sha256:fb925c8312fa22e927e7d9d8b4e42eb58e8f9cb59cb18d7c4185c2e5a0de1601",
+        "size": 150,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "TLX_NST_2024_05_06_20_42_46",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_NST_2024_05_06_20_42_46",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 5726,
+        "checksum": "sha256:90c740d6ba1cf58b3a781f2fdf90f9ea51abe89691b0157b63b5d13b77c28f23",
+        "time": {
+          "start": "2024-05-06T20:42:46Z",
+          "end": "2024-05-06T20:42:46Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_NST_2024_05_06_20_42_46",
+        "retrieved_at": "2026-09-16T16:05:20.444621Z",
+        "checksum": "sha256:90c740d6ba1cf58b3a781f2fdf90f9ea51abe89691b0157b63b5d13b77c28f23",
+        "size": 5726,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "TLX_NST_2024_05_06_20_46_49",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_NST_2024_05_06_20_46_49",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 5910,
+        "checksum": "sha256:32bd2c9eee067cf6416a99a932f7407270f7f0009512832ed7b34c2fb25dec7b",
+        "time": {
+          "start": "2024-05-06T20:46:49Z",
+          "end": "2024-05-06T20:46:49Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_NST_2024_05_06_20_46_49",
+        "retrieved_at": "2026-09-16T16:05:20.539996Z",
+        "checksum": "sha256:32bd2c9eee067cf6416a99a932f7407270f7f0009512832ed7b34c2fb25dec7b",
+        "size": 5910,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "TLX_NST_2024_05_06_20_51_08",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_NST_2024_05_06_20_51_08",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 6096,
+        "checksum": "sha256:f159e11eca3ed8ad2cd89411aade2c33d9122acd3cbbcd8965f32dcc0cb266d8",
+        "time": {
+          "start": "2024-05-06T20:51:08Z",
+          "end": "2024-05-06T20:51:08Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_NST_2024_05_06_20_51_08",
+        "retrieved_at": "2026-09-16T16:05:20.632588Z",
+        "checksum": "sha256:f159e11eca3ed8ad2cd89411aade2c33d9122acd3cbbcd8965f32dcc0cb266d8",
+        "size": 6096,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "TLX_NST_2024_05_06_20_55_25",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_NST_2024_05_06_20_55_25",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 6248,
+        "checksum": "sha256:021e21e2252ccd49ca045914d6dc8acbed29c70e9ddc25cd9bd5b658c824dee9",
+        "time": {
+          "start": "2024-05-06T20:55:25Z",
+          "end": "2024-05-06T20:55:25Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_NST_2024_05_06_20_55_25",
+        "retrieved_at": "2026-09-16T16:05:20.723005Z",
+        "checksum": "sha256:021e21e2252ccd49ca045914d6dc8acbed29c70e9ddc25cd9bd5b658c824dee9",
+        "size": 6248,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "TLX_NST_2024_05_06_20_59_43",
+        "dataset_id": "noaa:nexrad-level3",
+        "href": "s3://unidata-nexrad-level3/TLX_NST_2024_05_06_20_59_43",
+        "protocol": "s3",
+        "media_type": "application/octet-stream",
+        "size": 6666,
+        "checksum": "sha256:18e28de55f3bd2966cd9508bf421b8bc63acb723b3b313cbd4b96ac31fb2f1c0",
+        "time": {
+          "start": "2024-05-06T20:59:43Z",
+          "end": "2024-05-06T20:59:43Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:nexrad-level3",
+        "provider": "noaa",
+        "source_url": "s3://unidata-nexrad-level3/TLX_NST_2024_05_06_20_59_43",
+        "retrieved_at": "2026-09-16T16:05:20.847438Z",
+        "checksum": "sha256:18e28de55f3bd2966cd9508bf421b8bc63acb723b3b313cbd4b96ac31fb2f1c0",
+        "size": 6666,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    }
+  ]
+}

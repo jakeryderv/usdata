@@ -8,6 +8,13 @@ __pycache__/
 .ruff_cache/
 .coverage
 examples/**/*.lock.json
+# Pinned examples commit theirs (ADR 0029); the list is examples/catalog.json.
+!examples/gfs-environment/dataset.lock.json
+!examples/glm-flashes/dataset.lock.json
+!examples/goes-imagery/dataset.lock.json
+!examples/hrrr-environment/dataset.lock.json
+!examples/mrms-rotation/dataset.lock.json
+!examples/radar-products/dataset.lock.json
 .ipynb_checkpoints/
 reports/
 

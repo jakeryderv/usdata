@@ -7,7 +7,8 @@
   {
     "slug": "radar-products",
     "title": "Which derived radar products did KTLX publish around a tornado report?",
-    "summary": "Pull thirty minutes of NEXRAD Level III mesocyclone, storm-track, and echo-top files, lock them, and see that they are stored without a reader."
+    "summary": "Pull thirty minutes of NEXRAD Level III mesocyclone, storm-track, and echo-top files, lock them, and see that they are stored without a reader.",
+    "pinned": true
   },
   {
     "slug": "storm-surge",
@@ -62,7 +63,8 @@
   {
     "slug": "goes-imagery",
     "title": "What did a satellite see in infrared?",
-    "summary": "Decode a GOES CONUS scene, inspect quality flags and scan coordinates, and plot brightness temperatures."
+    "summary": "Decode a GOES CONUS scene, inspect quality flags and scan coordinates, and plot brightness temperatures.",
+    "pinned": true
   },
   {
     "slug": "annual-climate",
@@ -87,22 +89,26 @@
   {
     "slug": "glm-flashes",
     "title": "Did lightning near the storm pick up before the Oklahoma City tornado report?",
-    "summary": "Count GOES-16 GLM flashes minute by minute in a fixed box around the report over the hour ending at it, against a same-size control box and the whole field of view."
+    "summary": "Count GOES-16 GLM flashes minute by minute in a fixed box around the report over the hour ending at it, against a same-size control box and the whole field of view.",
+    "pinned": true
   },
   {
     "slug": "mrms-rotation",
     "title": "Where was the strongest mid-level rotation in each two-minute grid, and did it move toward the reported tornado?",
-    "summary": "Locate the strongest MRMS mid-level azimuthal shear in each two-minute grid inside two boxes around the report and measure how far each peak sat from the reported path start."
+    "summary": "Locate the strongest MRMS mid-level azimuthal shear in each two-minute grid inside two boxes around the report and measure how far each peak sat from the reported path start.",
+    "pinned": true
   },
   {
     "slug": "hrrr-environment",
     "title": "What did the HRRR analysis say about the storm environment over central Oklahoma at 20 UTC, and how far was the tornado report from the most favorable values?",
-    "summary": "Read surface CAPE and 0-3 km helicity from one HRRR analysis at the grid point nearest the report, find the largest values within 100 km, and map both fields."
+    "summary": "Read surface CAPE and 0-3 km helicity from one HRRR analysis at the grid point nearest the report, find the largest values within 100 km, and map both fields.",
+    "pinned": true
   },
   {
     "slug": "gfs-environment",
     "title": "What did the global model say the environment was before a reported tornado?",
-    "summary": "Pull the GFS 00 UTC 1-degree analysis for 2024-05-06 and read surface CAPE and 0-3 km helicity at the grid point nearest Oklahoma City."
+    "summary": "Pull the GFS 00 UTC 1-degree analysis for 2024-05-06 and read surface CAPE and 0-3 km helicity at the grid point nearest Oklahoma City.",
+    "pinned": true
   },
   {
     "slug": "tornado-classification",

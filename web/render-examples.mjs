@@ -85,7 +85,7 @@ export async function buildExamples(root, output) {
   await mkdir(destination, {recursive:true});
   const cards = [];
   for (const example of catalog) {
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(example.slug) || !example.title?.trim() || !example.summary?.trim()) throw new Error("Invalid example catalog entry");
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(example.slug) || !example.title?.trim() || !example.summary?.trim() || (example.pinned !== undefined && typeof example.pinned !== "boolean")) throw new Error("Invalid example catalog entry");
     const url = `/examples/${example.slug}/`;
     const directory = join(destination, example.slug);
     await mkdir(directory, {recursive:true});
@@ -94,10 +94,13 @@ export async function buildExamples(root, output) {
     const related = datasets.filter(dataset => dataset.examples.some(entry => entry.url === `https://usdata.dev${url}`));
     if (!related.length) throw new Error(`${example.slug}: missing dataset catalog relationship`);
     const sources = related.map(dataset => `<a href="/datasets/?q=${encodeURIComponent(dataset.id)}">${escape(dataset.title)}</a>`).join("");
+    // A pinned example (ADR 0029) commits its lockfile, and the page offers it beside the manifest.
+    if (example.pinned && !files.includes("dataset.lock.json")) throw new Error(`${example.slug}: pinned example has no committed lockfile`);
+    const labels = {"example.ipynb": "Download notebook", "dataset.yaml": "Download manifest", "dataset.lock.json": "Download lockfile"};
     const downloads = [];
-    for (const filename of ["example.ipynb", "dataset.yaml"].filter(filename => files.includes(filename))) {
+    for (const filename of ["example.ipynb", "dataset.yaml", ...(example.pinned ? ["dataset.lock.json"] : [])].filter(filename => files.includes(filename))) {
       await copyFile(join(source, example.slug, filename), join(directory, filename));
-      downloads.push(`<a class="button" href="${filename}" download>${filename.endsWith("ipynb") ? "Download notebook" : "Download manifest"}</a>`);
+      downloads.push(`<a class="button" href="${filename}" download>${labels[filename]}</a>`);
     }
     const readme = renderMarkdown(withoutTitle(await readFile(join(source, example.slug, "README.md"), "utf8")));
     const rendered = notebook ? await renderNotebook(JSON.parse(await readFile(join(source, example.slug, "example.ipynb"), "utf8")), directory, example.title) : null;

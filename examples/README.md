@@ -81,10 +81,37 @@ caches downloads in a fresh directory; pass `--cache DIR` (or set
 large example does not download it again.
 
 The first run needs access to NOAA and/or USGS. Interactive runs use the normal
-usdata cache (`USDATA_CACHE_DIR` overrides it). The manifest examples retain
-their `dataset.yaml` files; a first pull creates an ignored `dataset.lock.json`
-beside the manifest. When changing a locked manifest deliberately, use
-`pull(manifest, force=True)` to resolve and lock the new inputs.
+usdata cache (`USDATA_CACHE_DIR` overrides it). Every example keeps its
+`dataset.yaml`; what happens to the lockfile depends on the example.
+
+## Pinned examples
+
+Six examples commit their `dataset.lock.json`, marked `"pinned": true` in
+`catalog.json`: `goes-imagery`, `glm-flashes`, `hrrr-environment`,
+`mrms-rotation`, `gfs-environment`, and `radar-products`. Their only sources
+are object archives on public buckets, written once and republished rarely, so
+a pin can be expected to hold. The notebook runner carries the committed
+lockfile beside the manifest, so those notebooks restore the pinned inputs
+instead of resolving their query again, and the example page offers the
+lockfile for download beside the manifest. `just check` holds each committed
+lockfile to its manifest offline; the weekly Integration workflow restores each
+one into an empty cache and reports every asset that drifted
+([ADR 0029](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0029-committed-example-lockfiles.md)).
+
+```sh
+just restore-examples                       # every pinned example, each into a fresh cache
+just restore-examples --manifest glm-flashes
+```
+
+Re-pin deliberately, never from the runner: after editing a pinned manifest
+run `usdata pull examples/<slug>/dataset.yaml --force`, or `--update <id>` to
+accept one archive's new bytes, and review the lockfile diff in the pull
+request that carries it.
+
+The other examples name query services and archives that revise in place, so
+their lockfiles stay ignored: a first pull creates `dataset.lock.json` beside
+the manifest, and `pull(manifest, force=True)` re-resolves after a deliberate
+manifest change.
 
 ## Writing an example
 

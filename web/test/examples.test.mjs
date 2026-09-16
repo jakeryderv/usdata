@@ -20,9 +20,14 @@ test("all examples keep their saved content, exact downloads, and valid website 
       const generated = join(output, "examples", example.slug);
       const sourceFiles = await readdir(directory);
       files.push(`examples/${example.slug}/index.html`);
-      for (const download of ["example.ipynb", "dataset.yaml"].filter(name => sourceFiles.includes(name))) {
+      for (const download of ["example.ipynb", "dataset.yaml", "dataset.lock.json"].filter(name => sourceFiles.includes(name))) {
+        if (download === "dataset.lock.json" && !example.pinned) {
+          assert.ok(!await exists(join(generated, download)), `${example.slug}: an unpinned lockfile must not be published`);
+          continue;
+        }
         assert.deepEqual(await readFile(join(generated, download)), await readFile(join(directory, download)));
       }
+      if (example.pinned) assert.match(await readFile(join(generated, "index.html"), "utf8"), /Download lockfile/);
       if (sourceFiles.includes("example.ipynb")) {
         const notebook = JSON.parse(await readFile(join(directory, "example.ipynb"), "utf8"));
         for (const [cellIndex, cell] of notebook.cells.entries()) {

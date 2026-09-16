@@ -1,0 +1,382 @@
+{
+  "manifest": "oklahoma-rotation-tracks",
+  "manifest_checksum": "sha256:bf5db750aa9d9bc4ae4e34a8a802386ba812785a5e46bc3b8e6640323da6af2e",
+  "generated_at": "2026-09-16T16:05:23.536932Z",
+  "usdata_version": "0.18.0",
+  "assets": [
+    {
+      "asset": {
+        "id": "MRMS_RotationTrackML30min_00.50_20240507-043000.grib2.gz",
+        "dataset_id": "noaa:mrms",
+        "href": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-043000.grib2.gz",
+        "protocol": "s3",
+        "media_type": "application/x-grib2",
+        "size": 192425,
+        "checksum": "sha256:e591e48d94ff36b233ded6ba8b37bfcd7b4d6970d80b5fa670b2e4e586885750",
+        "time": {
+          "start": "2024-05-07T04:30:00Z",
+          "end": "2024-05-07T04:30:00Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:mrms",
+        "provider": "noaa",
+        "source_url": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-043000.grib2.gz",
+        "retrieved_at": "2026-09-16T16:05:21.772026Z",
+        "checksum": "sha256:e591e48d94ff36b233ded6ba8b37bfcd7b4d6970d80b5fa670b2e4e586885750",
+        "size": 192425,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "MRMS_RotationTrackML30min_00.50_20240507-043200.grib2.gz",
+        "dataset_id": "noaa:mrms",
+        "href": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-043200.grib2.gz",
+        "protocol": "s3",
+        "media_type": "application/x-grib2",
+        "size": 187260,
+        "checksum": "sha256:cc4941537be1604a94a24a1b97d20dc16f7bcad3c046c037b2f47862109756cd",
+        "time": {
+          "start": "2024-05-07T04:32:00Z",
+          "end": "2024-05-07T04:32:00Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:mrms",
+        "provider": "noaa",
+        "source_url": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-043200.grib2.gz",
+        "retrieved_at": "2026-09-16T16:05:21.977268Z",
+        "checksum": "sha256:cc4941537be1604a94a24a1b97d20dc16f7bcad3c046c037b2f47862109756cd",
+        "size": 187260,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "MRMS_RotationTrackML30min_00.50_20240507-043400.grib2.gz",
+        "dataset_id": "noaa:mrms",
+        "href": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-043400.grib2.gz",
+        "protocol": "s3",
+        "media_type": "application/x-grib2",
+        "size": 187420,
+        "checksum": "sha256:3cda44c77866953f094a71f1f8d17c5124b078d55dbb4564f0623310e9b9a0cf",
+        "time": {
+          "start": "2024-05-07T04:34:00Z",
+          "end": "2024-05-07T04:34:00Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:mrms",
+        "provider": "noaa",
+        "source_url": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-043400.grib2.gz",
+        "retrieved_at": "2026-09-16T16:05:22.144436Z",
+        "checksum": "sha256:3cda44c77866953f094a71f1f8d17c5124b078d55dbb4564f0623310e9b9a0cf",
+        "size": 187420,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "MRMS_RotationTrackML30min_00.50_20240507-043600.grib2.gz",
+        "dataset_id": "noaa:mrms",
+        "href": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-043600.grib2.gz",
+        "protocol": "s3",
+        "media_type": "application/x-grib2",
+        "size": 188309,
+        "checksum": "sha256:61416a30de6aaa1124b4bf2e9a56a2a3abe87cdad187e6ab0531b78e4c8b2ce3",
+        "time": {
+          "start": "2024-05-07T04:36:00Z",
+          "end": "2024-05-07T04:36:00Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:mrms",
+        "provider": "noaa",
+        "source_url": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-043600.grib2.gz",
+        "retrieved_at": "2026-09-16T16:05:22.329055Z",
+        "checksum": "sha256:61416a30de6aaa1124b4bf2e9a56a2a3abe87cdad187e6ab0531b78e4c8b2ce3",
+        "size": 188309,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "MRMS_RotationTrackML30min_00.50_20240507-043800.grib2.gz",
+        "dataset_id": "noaa:mrms",
+        "href": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-043800.grib2.gz",
+        "protocol": "s3",
+        "media_type": "application/x-grib2",
+        "size": 182758,
+        "checksum": "sha256:63939708fc33a4c314582bf32c35032759f38e3529a65d4d0222565593f410bd",
+        "time": {
+          "start": "2024-05-07T04:38:00Z",
+          "end": "2024-05-07T04:38:00Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:mrms",
+        "provider": "noaa",
+        "source_url": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-043800.grib2.gz",
+        "retrieved_at": "2026-09-16T16:05:22.540462Z",
+        "checksum": "sha256:63939708fc33a4c314582bf32c35032759f38e3529a65d4d0222565593f410bd",
+        "size": 182758,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "MRMS_RotationTrackML30min_00.50_20240507-044000.grib2.gz",
+        "dataset_id": "noaa:mrms",
+        "href": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-044000.grib2.gz",
+        "protocol": "s3",
+        "media_type": "application/x-grib2",
+        "size": 184277,
+        "checksum": "sha256:24f55a5eb16be956b957cdc726317d0a51d0bb64e02194807b6c7c95d203f691",
+        "time": {
+          "start": "2024-05-07T04:40:00Z",
+          "end": "2024-05-07T04:40:00Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:mrms",
+        "provider": "noaa",
+        "source_url": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-044000.grib2.gz",
+        "retrieved_at": "2026-09-16T16:05:22.721236Z",
+        "checksum": "sha256:24f55a5eb16be956b957cdc726317d0a51d0bb64e02194807b6c7c95d203f691",
+        "size": 184277,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "MRMS_RotationTrackML30min_00.50_20240507-044200.grib2.gz",
+        "dataset_id": "noaa:mrms",
+        "href": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-044200.grib2.gz",
+        "protocol": "s3",
+        "media_type": "application/x-grib2",
+        "size": 184212,
+        "checksum": "sha256:ad765ea727a2995a31953dde4ecf6d6ee60638590da3a23ea25b19d64529eeec",
+        "time": {
+          "start": "2024-05-07T04:42:00Z",
+          "end": "2024-05-07T04:42:00Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:mrms",
+        "provider": "noaa",
+        "source_url": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-044200.grib2.gz",
+        "retrieved_at": "2026-09-16T16:05:22.895115Z",
+        "checksum": "sha256:ad765ea727a2995a31953dde4ecf6d6ee60638590da3a23ea25b19d64529eeec",
+        "size": 184212,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "MRMS_RotationTrackML30min_00.50_20240507-044400.grib2.gz",
+        "dataset_id": "noaa:mrms",
+        "href": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-044400.grib2.gz",
+        "protocol": "s3",
+        "media_type": "application/x-grib2",
+        "size": 181434,
+        "checksum": "sha256:840d34aaebf86a67eff7f28f22e2f6ac5876288c9bdfcbada3d684c38e4aa7ac",
+        "time": {
+          "start": "2024-05-07T04:44:00Z",
+          "end": "2024-05-07T04:44:00Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:mrms",
+        "provider": "noaa",
+        "source_url": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-044400.grib2.gz",
+        "retrieved_at": "2026-09-16T16:05:23.081857Z",
+        "checksum": "sha256:840d34aaebf86a67eff7f28f22e2f6ac5876288c9bdfcbada3d684c38e4aa7ac",
+        "size": 181434,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "MRMS_RotationTrackML30min_00.50_20240507-044600.grib2.gz",
+        "dataset_id": "noaa:mrms",
+        "href": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-044600.grib2.gz",
+        "protocol": "s3",
+        "media_type": "application/x-grib2",
+        "size": 180739,
+        "checksum": "sha256:be954a82d96c498b6e0e6c90cb170dda118a0d782c1029532a4628b019f78893",
+        "time": {
+          "start": "2024-05-07T04:46:00Z",
+          "end": "2024-05-07T04:46:00Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:mrms",
+        "provider": "noaa",
+        "source_url": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-044600.grib2.gz",
+        "retrieved_at": "2026-09-16T16:05:23.234902Z",
+        "checksum": "sha256:be954a82d96c498b6e0e6c90cb170dda118a0d782c1029532a4628b019f78893",
+        "size": 180739,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "MRMS_RotationTrackML30min_00.50_20240507-044800.grib2.gz",
+        "dataset_id": "noaa:mrms",
+        "href": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-044800.grib2.gz",
+        "protocol": "s3",
+        "media_type": "application/x-grib2",
+        "size": 182037,
+        "checksum": "sha256:1c247978561970b5d1d7125baa55e3b4323206344a6971de954e2f2961d73204",
+        "time": {
+          "start": "2024-05-07T04:48:00Z",
+          "end": "2024-05-07T04:48:00Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:mrms",
+        "provider": "noaa",
+        "source_url": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-044800.grib2.gz",
+        "retrieved_at": "2026-09-16T16:05:23.392362Z",
+        "checksum": "sha256:1c247978561970b5d1d7125baa55e3b4323206344a6971de954e2f2961d73204",
+        "size": 182037,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    },
+    {
+      "asset": {
+        "id": "MRMS_RotationTrackML30min_00.50_20240507-045000.grib2.gz",
+        "dataset_id": "noaa:mrms",
+        "href": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-045000.grib2.gz",
+        "protocol": "s3",
+        "media_type": "application/x-grib2",
+        "size": 177612,
+        "checksum": "sha256:a46fb0096a878c38d9b3dc154bfc5e9803f2a5a65eccf8e6da900eefe3ab12c4",
+        "time": {
+          "start": "2024-05-07T04:50:00Z",
+          "end": "2024-05-07T04:50:00Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:mrms",
+        "provider": "noaa",
+        "source_url": "s3://noaa-mrms-pds/CONUS/RotationTrackML30min_00.50/20240507/MRMS_RotationTrackML30min_00.50_20240507-045000.grib2.gz",
+        "retrieved_at": "2026-09-16T16:05:23.536349Z",
+        "checksum": "sha256:a46fb0096a878c38d9b3dc154bfc5e9803f2a5a65eccf8e6da900eefe3ab12c4",
+        "size": 177612,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    }
+  ]
+}

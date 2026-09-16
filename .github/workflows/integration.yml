@@ -9,10 +9,10 @@ on:
       scope:
         description: Checks to run (weekly runs always use all)
         type: choice
-        options: [all, live, notebooks, minimum]
+        options: [all, live, notebooks, restores, minimum]
         default: all
       target:
-        description: Optional live module (coops) or notebook folder (sst-analysis); blank runs the scope
+        description: Optional live module (coops), notebook folder (sst-analysis), or pinned example (glm-flashes); blank runs the scope
         type: string
         default: ''
 
@@ -27,6 +27,7 @@ jobs:
       minimum: ${{ steps.discover.outputs.minimum }}
       live: ${{ steps.discover.outputs.live }}
       notebooks: ${{ steps.discover.outputs.notebooks }}
+      restores: ${{ steps.discover.outputs.restores }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - id: discover
@@ -101,6 +102,40 @@ jobs:
         if: always()
         with:
           name: notebook-${{ matrix.id }}
+          path: reports/
+          retention-days: 14
+
+  # Restore each committed example lockfile into an empty cache (ADR 0029).
+  restore:
+    needs: inventory
+    if: needs.inventory.outputs.restores != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.inventory.outputs.restores) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          python-version: "3.14"
+          enable-cache: true
+      - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4
+      - run: just setup
+      - env:
+          MANIFEST: ${{ matrix.path }}
+          UV_NO_SYNC: '1'
+        run: uv run python scripts/restore_lockfiles.py --manifest "$MANIFEST" --output-dir reports/restore
+      - name: Summarize restore results
+        if: always()
+        env:
+          LABEL: restore ${{ matrix.id }}
+        run: python scripts/ci_summary.py --label "$LABEL" --restore reports/restore/summary.json >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: always()
+        with:
+          name: restore-${{ matrix.id }}
           path: reports/
           retention-days: 14
 

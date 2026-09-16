@@ -92,9 +92,14 @@ check-radar:
 notebooks:
     uv run --group examples --extra radar --extra netcdf --extra grib jupyter lab examples
 
-# Validate committed notebook structure and saved outputs without fetching data
+# Validate committed notebook outputs and pinned lockfiles without fetching data
 check-notebooks:
     uv run python scripts/check_notebooks.py
+
+# Restore the pinned examples' lockfiles into empty caches against live services
+[positional-arguments]
+restore-examples *args:
+    uv run python scripts/restore_lockfiles.py "$@"
 
 # Execute all notebooks against live services; --write refreshes committed outputs
 [positional-arguments]
