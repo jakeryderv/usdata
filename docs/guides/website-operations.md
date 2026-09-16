@@ -108,10 +108,11 @@ and CORS. It uses a unique `checks/github-<run>-<attempt>.txt` object and always
 attempts to delete that exact object. It does not upload any dataset or alter
 other objects. A failed cleanup must be resolved using the key shown in the run.
 
-The bucket is ready for data; SDK remote caching is not implemented. Before a
-first dataset upload, define stable object identities, provenance, checksums,
-upload ownership, and retention. Published example inputs must survive disposable
-cache eviction. The [roadmap](../roadmap.md) keeps exploration in Next and general
+The bucket is ready for data; SDK remote caching is not implemented.
+[ADR 0030](../adr/0030-content-addressed-mirror.md) settles what the first
+uploads are: objects keyed by their sha256, written only by the weekly restore
+job for the checksums that committed example lockfiles pin, and kept while any
+committed lockfile references them. The [roadmap](../roadmap.md) keeps general
 remote caching in Later without dates or release commitments.
 
 ## Verification and recovery
