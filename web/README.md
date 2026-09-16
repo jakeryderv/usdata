@@ -19,7 +19,7 @@ hosting settings in `../infra/docs.wrangler.jsonc`.
 
 The browser at `/datasets/` searches a committed static metadata index in
 `public/datasets/catalog.json`. Run `just docs` from the repository root to
-regenerate it after registry, catalog metadata, or package-version changes.
+regenerate it after registry or package-version changes.
 `just check-docs` rejects stale output. The generator reuses the documentation
 catalog's availability rules and validates the same guide/example sources.
 The Node-only homepage build needs no Python runtime or upstream access.
@@ -32,8 +32,8 @@ If JavaScript or catalog loading fails, a link opens the documentation catalog.
 `render-examples.mjs` builds `/examples/` from `../examples/catalog.json` and
 one canonical detail page per example folder. Edit notebook content, saved
 outputs, and run instructions in `../examples/`; edit only index questions and
-summaries in its `catalog.json`. Dataset relationships come from the registry's
-catalog metadata through the generated browser index. No data is fetched and no
+summaries in its `catalog.json`. Dataset relationships come from the registry
+entries through the generated browser index. No data is fetched and no
 notebook cells execute during builds. Downloads preserve source bytes; Markdown
 and saved HTML outputs are sanitized, and saved PNGs are extracted locally.
 

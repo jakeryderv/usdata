@@ -36,6 +36,14 @@ Add to `src/usdata/data/registry.yaml`:
     spatial_extent: { west: -180.0, south: -90.0, east: 180.0, north: 90.0 }
     temporal_extent: { start: "1763-01-01T00:00:00Z" }
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+    summary: Daily station weather      # <= 80 characters; the title used by docs, site, and CLI
+    formats: [CSV]                      # what the files actually are, at least one
+    selection: Station observations within inclusive calendar dates; selected elements
+    inputs: Both dates; station IDs or a geographic query
+    reader: pandas                      # pandas | radar | netcdf | grib, or null for bytes only
+    guide: docs/providers/noaa-ghcn.md  # this dataset's own usage guide
+    examples:                           # repository-relative example documents
+      - examples/weather-and-streamflow/example.ipynb
     adapter: usdata.providers.noaa.ghcnd:GhcnDaily
 ```
 
@@ -46,10 +54,14 @@ to `available` when the live test passes, replacing `target` with `since`. Plann
 unless `--planned` is passed; `info` always works. Moving a dataset to a different
 phase is a one-line change to `target`; the generated versions and catalog pages follow.
 Run `just docs` after editing to refresh `docs/generated/catalog/`. The README
-and provider index remain handwritten. For every implemented dataset, add a
-unique usage guide under `docs/providers/` and register its path in the registry
-`catalog` mapping, including a short summary, explicit output formats, selection
-behavior, required inputs, reader extra, and example paths. The generated catalog links each reference to its usage guide and examples;
+and provider index remain handwritten. The entry is the only schema: `summary`,
+`formats`, `selection`, `inputs`, `reader`, `guide`, and `examples` feed the
+generated reference, the website browser, and `usdata info` from the same place.
+A planned entry leaves them out; an implemented one must give a summary, at least
+one format, a selection rule, its required inputs, its own usage guide under
+`docs/providers/`, and at least one example that exists. `reader` names the extra
+that opens the files, or is `null` for a format with no bundled reader. The
+generated catalog links each reference to its usage guide and examples;
 no manual dataset navigation entry is needed. For a new agency, write access notes in
 `docs/providers/<provider>.md` and link its generated catalog. See the
 [documentation workflow](documentation.md) for source ownership and preview commands.

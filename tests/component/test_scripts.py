@@ -6,7 +6,6 @@ import zipfile
 from pathlib import Path
 
 import pytest
-import yaml
 
 from usdata.registry import Registry
 
@@ -298,46 +297,72 @@ def test_catalog_generator_owns_only_generated_directory():
     assert module.ROOT / "docs/providers/README.md" not in outputs
 
 
+def _checkout(root, registry):
+    """A tree holding just the guide and example files the registry entries name."""
+    for dataset in registry:
+        for name in [*dataset.examples, *([dataset.guide] if dataset.guide else [])]:
+            path = root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("placeholder\n")
+
+
+def _with(dataset_id, **updates):
+    bundled = Registry.bundled()
+    replaced = bundled.get(dataset_id).model_copy(update=updates)
+    datasets = [replaced if ds.id == dataset_id else ds for ds in bundled]
+    return Registry(datasets, domains=bundled.domains())
+
+
 @pytest.mark.parametrize(
-    "fault",
-    ["missing", "unknown", "duplicate", "alias", "outside", "typo", "extra", "example", "format"],
+    "dataset_id, updates, message",
+    [
+        ("noaa:ghcn-daily", {"guide": None}, "require guide"),
+        ("noaa:ghcn-daily", {"selection": None}, "require selection"),
+        ("noaa:ghcn-daily", {"inputs": None}, "require inputs"),
+        ("noaa:ghcn-daily", {"examples": []}, "require at least one example"),
+        ("noaa:ghcn-daily", {"guide": "docs/providers/absent.md"}, "does not exist"),
+        ("noaa:ghcn-daily", {"examples": ["examples/absent/README.md"]}, "does not exist"),
+        ("noaa:gsom", {"guide": "docs/providers/noaa-ghcn.md"}, "own usage guide"),
+        ("noaa:gsom", {"guide": "docs/providers/./noaa-ghcn.md"}, "own usage guide"),
+        ("nasa:gpm-imerg", {"summary": "Planned rainfall"}, "only for implemented datasets"),
+    ],
 )
-def test_catalog_rejects_invalid_guide_metadata(tmp_path, fault):
+def test_usage_metadata_rejects_undocumented_or_missing_files(
+    tmp_path, dataset_id, updates, message
+):
     module = script("render_registry")
-    raw = yaml.safe_load((ROOT / "src/usdata/data/registry.yaml").read_text())
-    (tmp_path / "pyproject.toml").write_text((ROOT / "pyproject.toml").read_text())
-    for entry in raw["catalog"].values():
-        for example in entry["examples"]:
-            file = tmp_path / example
-            file.parent.mkdir(parents=True, exist_ok=True)
-            file.write_text("example")
-        path = tmp_path / entry["guide"]
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("# Usage\n")
-    entry = raw["catalog"]["noaa:ghcn-daily"]
-    if fault == "missing":
-        del raw["catalog"]["noaa:ghcn-daily"]
-    elif fault == "unknown":
-        raw["catalog"]["noaa:typo"] = entry
-    elif fault == "duplicate":
-        raw["catalog"]["noaa:gsom"]["guide"] = entry["guide"]
-    elif fault == "alias":
-        raw["catalog"]["noaa:gsom"]["guide"] = entry["guide"].replace("providers/", "providers/./")
-    elif fault == "extra":
-        entry["reader_extra"] = "nonexistent"
-    elif fault == "example":
-        entry["examples"] = ["examples/missing.md"]
-    elif fault == "format":
-        entry["formats"] = [""]
-    elif fault == "outside":
-        entry["guide"] = "../outside.md"
-    else:
-        entry["gudie"] = entry["guide"]
-    path = tmp_path / "src/usdata/data/registry.yaml"
-    path.parent.mkdir(parents=True)
-    path.write_text(yaml.safe_dump(raw))
-    with pytest.raises(ValueError):
-        module.catalog_entries(Registry.bundled(), tmp_path)
+    registry = _with(dataset_id, **updates)
+    _checkout(tmp_path, Registry.bundled())
+    with pytest.raises(ValueError, match=message):
+        module.check_usage_metadata(registry, tmp_path)
+
+
+def test_usage_metadata_accepts_the_bundled_registry(tmp_path):
+    module = script("render_registry")
+    registry = Registry.bundled()
+    _checkout(tmp_path, registry)
+    module.check_usage_metadata(registry, tmp_path)
+    module.check_usage_metadata(registry)
+
+
+def test_usage_metadata_rejects_paths_in_dataset_ids():
+    module = script("render_registry")
+    bundled = Registry.bundled()
+    dataset = bundled.get("noaa:gfs").model_copy(update={"id": "noaa:../../README"})
+    registry = Registry([*bundled, dataset], domains=bundled.domains())
+    with pytest.raises(ValueError, match="catalog IDs"):
+        module.check_usage_metadata(registry)
+
+
+def test_catalog_uses_explicit_file_selection_and_supports_datasets_without_readers():
+    module = script("render_registry")
+    registry = Registry.bundled()
+    goes = registry.get("noaa:goes-abi")
+    content = module.render_dataset(registry, goes)
+    assert "Files: NetCDF4" in content and "Whole single-channel CONUS scenes" in content
+    assert "Server-side subsetting" not in content
+    no_reader = goes.model_copy(update={"reader": None})
+    assert "no bundled reader" in module.render_dataset(registry, no_reader)
 
 
 def test_catalog_sync_detects_obsolete_outputs_and_preserves_unrecognized_files(
@@ -357,27 +382,6 @@ def test_catalog_sync_detects_obsolete_outputs_and_preserves_unrecognized_files(
     assert old.read_text() == "handwritten content"
     with pytest.raises(ValueError, match="inside"):
         module.sync({tmp_path / ".." / "README.md": "bad"}, check=False)
-
-
-def test_catalog_rejects_paths_in_dataset_ids():
-    module = script("render_registry")
-    bundled = Registry.bundled()
-    dataset = bundled.get("noaa:gfs").model_copy(update={"id": "noaa:../../README"})
-    registry = Registry([*bundled, dataset], domains=bundled.domains())
-    with pytest.raises(ValueError, match="catalog IDs"):
-        module.catalog_entries(registry)
-
-
-def test_catalog_uses_explicit_file_selection_and_supports_datasets_without_readers():
-    module = script("render_registry")
-    registry = Registry.bundled()
-    entries = module.catalog_entries(registry)
-    goes = registry.get("noaa:goes-abi")
-    content = module.render_dataset(registry, goes, entries[goes.id])
-    assert "Files: NetCDF4" in content and "Whole single-channel CONUS scenes" in content
-    assert "Server-side subsetting" not in content
-    no_reader = entries[goes.id].model_copy(update={"reader_extra": None})
-    assert "no bundled reader" in module.render_dataset(registry, goes, no_reader)
 
 
 def test_walkthrough_extracts_the_published_guides_own_commands():

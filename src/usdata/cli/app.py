@@ -14,7 +14,7 @@ from usdata._fetch import fetch as fetch_query
 from usdata._progress import batch
 from usdata.cli.progress import progress
 from usdata.manifest import lockfile_path
-from usdata.models import Status
+from usdata.models import Dataset, Status
 from usdata.providers import load_adapter
 from usdata.providers.base import NotImplementedProvider
 from usdata.pull import EmptySource, ManifestChanged, UnknownDatasets, UpstreamChanged
@@ -120,16 +120,30 @@ def info(
             f"  time:      {ds.temporal_extent.start} .. {ds.temporal_extent.end or 'present'}"
         )
     if ds.status is not Status.AVAILABLE:
-        return  # Planned entries have no adapter to ask.
+        return  # Planned entries have no adapter or usage metadata to show.
     with load_adapter(ds) as adapter:
         declared = dict(adapter.accepted_params)
-    if not declared:
+    if declared:
+        typer.echo("  params:")
+        width = max(len(name) for name in declared)
+        for name, description in sorted(declared.items()):
+            typer.echo(f"    {name:<{width}}  {description}")
+    else:
         typer.echo("  params:    none")
-        return
-    typer.echo("  params:")
-    width = max(len(name) for name in declared)
-    for name, description in sorted(declared.items()):
-        typer.echo(f"    {name:<{width}}  {description}")
+    _echo_usage(ds)
+
+
+def _echo_usage(ds: Dataset) -> None:
+    """What the dataset delivers and what it takes, from the registry entry."""
+    if ds.formats:
+        typer.echo(f"  formats:   {', '.join(ds.formats)}")
+        typer.echo(f"  reader:    {f'usdata[{ds.reader}]' if ds.reader else 'none'}")
+    if ds.selection:
+        typer.echo(f"  selection: {ds.selection}")
+    if ds.inputs:
+        typer.echo(f"  inputs:    {ds.inputs}")
+    if ds.examples:
+        typer.echo(f"  examples:  {', '.join(ds.examples)}")
 
 
 @app.command()

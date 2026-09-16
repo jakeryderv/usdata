@@ -11,10 +11,11 @@ from render_registry import (
     ROOT,
     availability,
     by_provider,
-    catalog_entries,
+    check_usage_metadata,
     example_url,
 )
 
+from usdata.models import Status
 from usdata.registry import Registry
 
 OUTPUT = ROOT / "web/public/datasets/catalog.json"
@@ -31,29 +32,29 @@ def docs_url(path: str) -> str:
 
 def render() -> str:
     registry = Registry.bundled()
-    entries = catalog_entries(registry)
+    check_usage_metadata(registry)
     datasets = []
     for provider, group in by_provider(registry):
         for dataset in group:
-            entry = entries.get(dataset.id)
+            implemented = dataset.status is Status.AVAILABLE
             datasets.append(
                 {
                     "id": dataset.id,
-                    "title": entry.summary if entry else dataset.title,
+                    "title": dataset.summary or dataset.title,
                     "description": dataset.description.strip(),
                     "provider": provider.name,
                     "domain": registry.domain(dataset.domain).name,
                     "availability": availability(dataset),
                     "since": dataset.since,
                     "keywords": dataset.keywords,
-                    "formats": entry.formats if entry else [],
-                    "selection": entry.selection if entry else None,
-                    "inputs": entry.inputs if entry else None,
-                    "reader_extra": entry.reader_extra if entry else None,
-                    "guide": docs_url(entry.guide) if entry else None,
+                    "formats": dataset.formats,
+                    "selection": dataset.selection,
+                    "inputs": dataset.inputs,
+                    "reader_extra": dataset.reader,
+                    "guide": docs_url(dataset.guide) if dataset.guide else None,
                     "reference": (
                         DOCS + f"generated/catalog/{dataset.provider}/{dataset.name}/"
-                        if entry
+                        if implemented
                         else DOCS + f"generated/catalog/{dataset.provider}/"
                     ),
                     "examples": [
@@ -61,10 +62,8 @@ def render() -> str:
                             "title": Path(path).parent.name.replace("-", " ").capitalize(),
                             "url": example_url(path),
                         }
-                        for path in entry.examples
-                    ]
-                    if entry
-                    else [],
+                        for path in dataset.examples
+                    ],
                 }
             )
     return json.dumps({"version": PACKAGE_VERSION, "datasets": datasets}, indent=2) + "\n"

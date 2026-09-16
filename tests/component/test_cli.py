@@ -61,6 +61,29 @@ def test_info_omits_parameters_for_planned_datasets() -> None:
     assert result.exit_code == 0 and "params:" not in result.stdout
 
 
+def test_info_shows_what_a_dataset_delivers_and_needs() -> None:
+    result = runner.invoke(app, ["info", "noaa:ghcn-daily"])
+    assert result.exit_code == 0
+    assert "formats:   CSV" in result.stdout
+    assert "reader:    usdata[pandas]" in result.stdout
+    assert "selection: Station observations within inclusive calendar dates" in result.stdout
+    assert "inputs:    Both dates; station IDs or a geographic query" in result.stdout
+    assert "examples:  examples/weather-and-streamflow/example.ipynb" in result.stdout
+
+
+def test_info_says_none_for_a_dataset_with_no_reader() -> None:
+    result = runner.invoke(app, ["info", "noaa:nexrad-level3"])
+    assert result.exit_code == 0
+    assert "formats:   NEXRAD Level III (no reader)" in result.stdout
+    assert "reader:    none" in result.stdout
+
+
+def test_info_omits_usage_lines_for_planned_datasets() -> None:
+    result = runner.invoke(app, ["info", "usgs:earthquakes"])
+    assert result.exit_code == 0
+    assert "formats:" not in result.stdout and "examples:" not in result.stdout
+
+
 def test_fetch_reports_unimplemented_adapter() -> None:
     result = runner.invoke(app, ["fetch", "usgs:earthquakes", "--state", "OK"])
     assert result.exit_code == 3
