@@ -285,7 +285,9 @@ def test_fetch_dry_run_marks_assets_whose_size_the_service_withholds() -> None:
     assert result.exit_code == 0
     (line,) = result.stdout.splitlines()
     assert line.split("\t")[1] == "?"
-    assert result.stderr == "1 asset(s) matched, 0 bytes; size unknown for 1\n"
+    assert result.stderr == (
+        "1 asset(s) matched, at least 0 bytes; size unknown for 1 asset(s) from noaa:ghcn-daily\n"
+    )
 
 
 def test_fetch_dry_run_json_emits_only_asset_records() -> None:

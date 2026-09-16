@@ -37,8 +37,11 @@ See [fetch and analyze](../guides/fetch-and-analyze.md) for complete workflows.
 ## Reproducible inputs
 
 ::: usdata.pull.pull
+::: usdata.pull.plan
 ::: usdata.pull.verify
 ::: usdata.pull.PullResult
+::: usdata.pull.Plan
+::: usdata.pull.SourcePlan
 ::: usdata.pull.Drift
 ::: usdata.manifest.Manifest
 ::: usdata.manifest.SourceSpec
