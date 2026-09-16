@@ -69,12 +69,18 @@ def message(values, *, grid=REGULAR, param=130, level_type="surface", level=0, *
         ec.codes_release(handle)
 
 
-def item(tmp_path: Path, content: bytes, name="field.grib2", media_type="application/x-grib2"):
+def item(
+    tmp_path: Path,
+    content: bytes,
+    name="field.grib2",
+    media_type="application/x-grib2",
+    dataset_id="noaa:hrrr",
+):
     path = tmp_path / name
     path.write_bytes(content)
     asset = Asset(
         id=name,
-        dataset_id="noaa:hrrr",
+        dataset_id=dataset_id,
         href=f"s3://noaa-hrrr-bdp-pds/{name}",
         protocol=Protocol.S3,
         media_type=media_type,
@@ -257,6 +263,42 @@ def test_mrms_products_are_named_from_the_asset_when_eccodes_has_no_name(tmp_pat
     assert result.RotationTrackML30min.attrs["parameterNumber"] == 14
     other = item(tmp_path, content, name="local.grib2", media_type="application/octet-stream")
     assert list(other.open().data_vars) == ["parameter_209_3_14"]
+
+
+def test_registry_fills_units_and_long_name_the_file_leaves_unknown(tmp_path) -> None:
+    content = message(
+        np.arange(12, dtype=float), discipline=209, parameterCategory=3, parameterNumber=14
+    )
+    name = "MRMS_RotationTrackML30min_00.50_20240506-200000.grib2"
+    result = item(tmp_path, content, name=name, dataset_id="noaa:mrms").open()
+    # The decoded name drops the level suffix the registry entry's name carries.
+    track = result.RotationTrackML30min
+    assert track.attrs["units"] == "0.001 s-1"
+    assert track.attrs["long_name"] == "30-minute maximum mid-level azimuthal shear"
+    assert result.attrs["usdata"]["registry_attrs"] == [
+        {"variable": "RotationTrackML30min", "attribute": "units"},
+        {"variable": "RotationTrackML30min", "attribute": "long_name"},
+    ]
+
+
+def test_registry_never_overwrites_units_the_file_provides(tmp_path) -> None:
+    content = message(np.arange(6, dtype=float), grid=LAMBERT, param=59)
+    result = item(tmp_path, content).open()
+    assert result.cape.attrs["units"] == "J kg**-1"
+    assert result.cape.attrs["long_name"] == (
+        "Convective available potential energy, surface or a ground layer"
+    )
+    assert result.attrs["usdata"]["registry_attrs"] == [
+        {"variable": "cape", "attribute": "long_name"}
+    ]
+
+
+def test_registry_leaves_a_dataset_without_an_entry_alone(tmp_path) -> None:
+    fetched = item(tmp_path, message(np.arange(12, dtype=float)))
+    fetched.asset = fetched.asset.model_copy(update={"dataset_id": "unknown:archived"})
+    result = fetched.open()
+    assert result.t.attrs["units"] == "K" and "long_name" not in result.t.attrs
+    assert "registry_attrs" not in result.attrs["usdata"]
 
 
 def test_reader_options_are_scoped(tmp_path) -> None:

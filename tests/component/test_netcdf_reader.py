@@ -6,8 +6,9 @@ import pytest
 
 from usdata import FetchedAsset
 from usdata.cache import sha256_file
-from usdata.models import Asset, Protocol, Provenance
+from usdata.models import Asset, Dataset, Protocol, Provenance, Status, Variable
 from usdata.readers import MissingReaderDependency
+from usdata.registry import Registry
 
 pytestmark = pytest.mark.netcdf
 
@@ -103,13 +104,62 @@ def test_invalid_or_truncated_file_fails_without_mutation(item, xr, content):
     item.path.unlink()
 
 
-def test_explicit_reader_on_restored_asset_needs_no_registry(item, xr):
+def test_explicit_reader_on_restored_asset_needs_no_registry_entry(item, xr):
     item.asset = item.asset.model_copy(
         update={"dataset_id": "unknown:archived", "media_type": None}
     )
-    with patch("usdata.registry.default_registry", side_effect=AssertionError("no registry")):
-        result = item.open(reader="netcdf")
+    result = item.open(reader="netcdf")
     assert result.CMI.attrs["units"] == "K"
+    assert "registry_attrs" not in result.attrs["usdata"]
+
+
+def synthetic(*variables: Variable) -> Registry:
+    """A one-entry registry standing in for the bundled one, so the fixture stays independent."""
+    entry = Dataset(
+        id="noaa:goes-abi",
+        provider="noaa",
+        title="Synthetic entry",
+        protocol=Protocol.S3,
+        domain="weather-satellites",
+        status=Status.AVAILABLE,
+        since="0.15",
+        summary="Synthetic entry",
+        formats=["NetCDF4"],
+        adapter="usdata.providers.noaa.goes:GoesAbi",
+        variables=list(variables),
+    )
+    return Registry([entry])
+
+
+def test_registry_variables_fill_only_what_the_file_leaves_unstated(item, xr):
+    registry = synthetic(
+        Variable(name="cmi", units="reflectance factor", description="Cloud and moisture imagery"),
+        Variable(name="DQF", units="%", description="Per-pixel data quality flags"),
+        Variable(name="t", units="CF datetime", description="Scene mid-point time"),
+    )
+    with patch("usdata.registry.default_registry", return_value=registry):
+        result = item.open()
+    # The file states both for CMI, which a case-insensitive match must not overwrite.
+    assert result.CMI.attrs["units"] == "K"
+    assert result.CMI.attrs["long_name"] == "Packed brightness temperature"
+    assert result.DQF.attrs["units"] == "1"
+    assert result.DQF.attrs["long_name"] == "Per-pixel data quality flags"
+    assert result.t.attrs["units"] == "CF datetime"
+    assert result.t.attrs["long_name"] == "Scene mid-point time"
+    assert result.unsigned_count.attrs == {"units": "1"}
+    assert result.attrs["usdata"]["registry_attrs"] == [
+        {"variable": "DQF", "attribute": "long_name"},
+        {"variable": "t", "attribute": "units"},
+        {"variable": "t", "attribute": "long_name"},
+    ]
+
+
+def test_registry_entry_without_variables_records_nothing(item, xr):
+    with patch("usdata.registry.default_registry", return_value=synthetic()):
+        result = item.open()
+    assert result.CMI.attrs["units"] == "K"
+    assert "long_name" not in result.DQF.attrs
+    assert "registry_attrs" not in result.attrs["usdata"]
 
 
 def test_local_file_object_and_fixed_engine(item, xr):
