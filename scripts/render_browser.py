@@ -44,6 +44,7 @@ def render() -> str:
                     "description": dataset.description.strip(),
                     "provider": provider.name,
                     "domain": registry.domain(dataset.domain).name,
+                    "system": (registry.system(dataset.system).name if dataset.system else None),
                     "availability": availability(dataset),
                     "since": dataset.since,
                     "keywords": dataset.keywords,

@@ -47,6 +47,19 @@ class DomainInfo(BaseModel):
     name: str
 
 
+class SystemInfo(BaseModel):
+    """A product family or service one provider publishes several datasets through.
+
+    Ids are conventionally ``provider:name``; ``provider`` is what the registry
+    checks an entry against.
+    """
+
+    id: str
+    name: str
+    homepage: str | None = None
+    provider: str
+
+
 VERSION_RE = re.compile(r"^\d+\.\d+$")
 LATER = "later"
 
@@ -277,6 +290,10 @@ class Dataset(BaseModel):
     )
     limits: Limits | None = Field(
         default=None, description="Request limits the adapter enforces, such as the longest window"
+    )
+    system: str | None = Field(
+        default=None,
+        description="Id of a system declared in the registry, for datasets that belong to one",
     )
     domain: str = Field(description="Id of a domain declared in the registry")
     status: Status

@@ -15,7 +15,16 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, ConfigDict
 
-from usdata.models import LATER, Capabilities, Dataset, DomainInfo, ProviderInfo, Query, Status
+from usdata.models import (
+    LATER,
+    Capabilities,
+    Dataset,
+    DomainInfo,
+    ProviderInfo,
+    Query,
+    Status,
+    SystemInfo,
+)
 
 _TOKEN = re.compile(r"[a-z0-9]+")
 
@@ -83,6 +92,7 @@ class Registry:
         datasets: Iterable[Dataset],
         providers: Iterable[ProviderInfo] = (),
         domains: Iterable[DomainInfo] = (),
+        systems: Iterable[SystemInfo] = (),
     ) -> None:
         self._by_id: dict[str, Dataset] = {}
         for ds in datasets:
@@ -91,7 +101,9 @@ class Registry:
             self._by_id[ds.id] = ds
         self._providers = {p.id: p for p in providers}
         self._domains = {d.id: d for d in domains}
+        self._systems = {s.id: s for s in systems}
         explicit_domains = bool(self._domains)
+        explicit_systems = bool(self._systems)
         for ds in self._by_id.values():
             self._providers.setdefault(
                 ds.provider, ProviderInfo(id=ds.provider, name=ds.provider.upper())
@@ -99,10 +111,24 @@ class Registry:
             if explicit_domains and ds.domain not in self._domains:
                 raise ValueError(f"{ds.id}: unknown domain {ds.domain!r}")
             self._domains.setdefault(ds.domain, DomainInfo(id=ds.domain, name=ds.domain))
+            if ds.system is not None:
+                self._check_system(ds, ds.system, explicit_systems)
+
+    def _check_system(self, ds: Dataset, system_id: str, explicit: bool) -> None:
+        """A named system is declared, or inferred, and publishes for this entry's provider."""
+        if explicit and system_id not in self._systems:
+            raise ValueError(f"{ds.id}: unknown system {system_id!r}")
+        system = self._systems.setdefault(
+            system_id, SystemInfo(id=system_id, name=system_id, provider=ds.provider)
+        )
+        if system.provider != ds.provider:
+            raise ValueError(
+                f"{ds.id}: system {system_id!r} belongs to provider {system.provider!r}"
+            )
 
     @classmethod
     def from_yaml(cls, path: Path) -> Registry:
-        """Load a registry from YAML with top-level ``providers``, ``domains``, ``datasets``."""
+        """Load from YAML with ``providers``, ``domains``, ``systems``, and ``datasets``."""
         raw = yaml.safe_load(path.read_text()) or {}
         if "catalog" in raw:
             raise ValueError(
@@ -116,8 +142,11 @@ class Registry:
         domains = [
             DomainInfo(id=did, **(info or {})) for did, info in raw.get("domains", {}).items()
         ]
+        systems = [
+            SystemInfo(id=sid, **(info or {})) for sid, info in raw.get("systems", {}).items()
+        ]
         datasets = (Dataset.model_validate(d) for d in raw.get("datasets", []))
-        return cls(datasets, providers, domains)
+        return cls(datasets, providers, domains, systems)
 
     @classmethod
     def bundled(cls) -> Registry:
@@ -156,6 +185,14 @@ class Registry:
     def domains(self) -> list[DomainInfo]:
         """All declared domains in declaration order."""
         return list(self._domains.values())
+
+    def system(self, system_id: str) -> SystemInfo:
+        """Display information for a system id."""
+        return self._systems[system_id]
+
+    def systems(self, provider: str | None = None) -> list[SystemInfo]:
+        """All declared systems in declaration order, optionally for one provider."""
+        return [s for s in self._systems.values() if provider is None or s.provider == provider]
 
     def next_target(self) -> str | None:
         """The nearest version any planned dataset is aimed at, or None."""
