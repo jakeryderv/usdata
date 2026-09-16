@@ -1,0 +1,42 @@
+{
+  "manifest": "oklahoma-gfs-analysis",
+  "manifest_checksum": "sha256:1bedf17379b1b0a2312612b68730081fcb30cb8a81d3a56e48a64e76ebb258a5",
+  "generated_at": "2026-09-16T16:05:31.339769Z",
+  "usdata_version": "0.18.0",
+  "assets": [
+    {
+      "asset": {
+        "id": "gfs.20240506.t00z.pgrb2.1p00.f000",
+        "dataset_id": "noaa:gfs",
+        "href": "s3://noaa-gfs-bdp-pds/gfs.20240506/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+        "protocol": "s3",
+        "media_type": "application/x-grib2",
+        "size": 42362644,
+        "checksum": "sha256:63817e7acae0e1b5dd85cef3b4ffa8b03aba3d7707fdaa9cd54e2dcb5500643e",
+        "time": {
+          "start": "2024-05-06T00:00:00Z",
+          "end": "2024-05-06T00:00:00Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:gfs",
+        "provider": "noaa",
+        "source_url": "s3://noaa-gfs-bdp-pds/gfs.20240506/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+        "retrieved_at": "2026-09-16T16:05:31.325062Z",
+        "checksum": "sha256:63817e7acae0e1b5dd85cef3b4ffa8b03aba3d7707fdaa9cd54e2dcb5500643e",
+        "size": 42362644,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    }
+  ]
+}

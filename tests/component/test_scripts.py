@@ -271,6 +271,31 @@ def test_ci_summary_reports_failures_skips_and_timings(tmp_path):
         json.dumps([{"path": "examples/a/example.ipynb", "status": "failed", "seconds": 2}])
     )
     assert "a/example.ipynb | failed | 2.00" in module.notebook_summary(path)
+    path.write_text(
+        json.dumps(
+            [
+                {
+                    "path": "examples/a/dataset.yaml",
+                    "status": "restored",
+                    "assets": 2,
+                    "bytes": 1500,
+                    "seconds": 1,
+                    "drift": [],
+                },
+                {
+                    "path": "examples/b/dataset.yaml",
+                    "status": "drifted",
+                    "assets": 1,
+                    "bytes": 7,
+                    "seconds": 2,
+                    "drift": [{"asset_id": "x|y", "problem": "upstream changed"}],
+                },
+            ]
+        )
+    )
+    report = module.restore_summary(path)
+    assert "| a | restored | 2 | 1,500 | 1.00 |" in report
+    assert "| b | x&#124;y | upstream changed |" in report
 
 
 def test_release_notices_include_navigation_and_notebook_markdown_only(tmp_path):

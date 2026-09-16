@@ -6,7 +6,7 @@ import argparse
 import json
 from pathlib import Path
 
-from check_notebooks import ROOT, notebook_paths
+from check_notebooks import ROOT, notebook_paths, pinned_manifests
 
 # Live modules whose reader step needs an optional extra installed; others run core-only.
 LIVE_EXTRAS = {
@@ -31,18 +31,22 @@ def inventory(root: Path = ROOT) -> dict[str, list[dict[str, str]]]:
         {"id": f"example-{index}", "path": path.relative_to(root).as_posix()}
         for index, path in enumerate(notebook_paths(root))
     ]
+    restores = [
+        {"id": manifest.parent.name, "path": manifest.relative_to(root).as_posix()}
+        for manifest in pinned_manifests(root)
+    ]
     if not live or not notebooks:
         raise ValueError("live tests and notebooks must both be present")
-    return {"live": live, "notebooks": notebooks}
+    return {"live": live, "notebooks": notebooks, "restores": restores}
 
 
 def select_inventory(
     data: dict[str, list[dict[str, str]]], scope: str, target: str = ""
 ) -> dict[str, list[dict[str, str]]]:
-    if scope not in {"all", "live", "notebooks", "minimum"}:
+    if scope not in {"all", "live", "notebooks", "restores", "minimum"}:
         raise ValueError(f"unknown scope: {scope}")
-    if target and scope not in {"live", "notebooks"}:
-        raise ValueError("target requires scope live or notebooks")
+    if target and scope not in {"live", "notebooks", "restores"}:
+        raise ValueError("target requires scope live, notebooks, or restores")
     selected = {name: entries if scope in ("all", name) else [] for name, entries in data.items()}
     if target:
 
@@ -50,7 +54,7 @@ def select_inventory(
             short = (
                 entry["id"].removeprefix("test_").removesuffix("_live")
                 if scope == "live"
-                else Path(entry["path"]).parent.name
+                else Path(entry["path"]).parent.name  # the example folder, for both others
             )
             return target in {entry["id"], entry["path"], short}
 
@@ -65,7 +69,9 @@ def select_inventory(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--scope", choices=["all", "live", "notebooks", "minimum"], default="all")
+    parser.add_argument(
+        "--scope", choices=["all", "live", "notebooks", "restores", "minimum"], default="all"
+    )
     parser.add_argument("--target", default="")
     args = parser.parse_args()
     try:

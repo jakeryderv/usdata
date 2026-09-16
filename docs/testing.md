@@ -79,9 +79,13 @@ retains machine-readable results. Coverage includes branches; it is diagnostic,
 not a target for adding superficial tests. CI retains JUnit, coverage, and timing
 reports for 14 days under uniquely named artifacts for each profile.
 
-The scheduled/manual Integration workflow discovers jobs from live test modules
-and example notebooks. Each dataset and example runs independently with fail-fast
-disabled and a job timeout. GOES live decoding explicitly uses the NetCDF extra;
+The scheduled/manual Integration workflow discovers jobs from live test modules,
+example notebooks, and the pinned examples' committed lockfiles. Each dataset,
+example, and restore runs independently with fail-fast disabled and a job
+timeout. A restore pulls one lockfile into an empty cache and verifies it,
+never rewriting the pin; its summary lists every asset that drifted, so the
+workflow history records how often each archive republishes
+([ADR 0029](adr/0029-committed-example-lockfiles.md)). GOES live decoding explicitly uses the NetCDF extra;
 a core-only run reports that decoder test as skipped rather than silently omitting
 its assertions. The workflow also tests minimum direct runtime dependencies on
 Python 3.11 in a fresh environment, retaining the resolved versions. This probes
@@ -99,7 +103,7 @@ iteration and prints which notebooks use it; the default and the Integration
 workflow keep a fresh cache per run.
 
 Documentation is checked once in the static job: `just check-docs` checks generated
-catalogs and saved notebooks, then builds the site with strict internal link and
+catalogs, saved notebooks, and committed lockfiles, then builds the site with strict internal link and
 anchor validation. The website job separately renders the examples and checks
 their local links, exact notebook/manifest downloads, dataset relationships,
 and supported saved outputs. See [maintaining documentation](guides/documentation.md).
@@ -122,12 +126,14 @@ whole selected scope. Examples from a checkout with the GitHub CLI:
 ```sh
 gh workflow run integration.yml -f scope=live -f target=coops
 gh workflow run integration.yml -f scope=notebooks -f target=sst-analysis
+gh workflow run integration.yml -f scope=restores -f target=glm-flashes
 gh workflow run integration.yml -f scope=minimum
 gh workflow run integration.yml -f scope=all
 ```
 
 A live target is the test module stem without `test_` and `_live`; a notebook
-target is its example folder name. Full repository-relative paths also work.
+or restore target is its example folder name. Full repository-relative paths
+also work.
 Unknown or ambiguous targets fail before starting jobs. The `all` and `minimum`
 scopes reject a target. Use `--ref BRANCH` to test a workflow change before merging.
 Each test job writes counts, failures, skips, and execution time to the Actions

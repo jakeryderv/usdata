@@ -1,0 +1,42 @@
+{
+  "manifest": "goes18-infrared-scene",
+  "manifest_checksum": "sha256:ccfbdefb3c6def5690ae109c89435f0f596e147692c20859780e7f6617624d65",
+  "generated_at": "2026-09-16T16:05:25.090447Z",
+  "usdata_version": "0.18.0",
+  "assets": [
+    {
+      "asset": {
+        "id": "OR_ABI-L2-CMIPC-M6C13_G18_s20241271201181_e20241271203566_c20241271204061.nc",
+        "dataset_id": "noaa:goes-abi",
+        "href": "s3://noaa-goes18/ABI-L2-CMIPC/2024/127/12/OR_ABI-L2-CMIPC-M6C13_G18_s20241271201181_e20241271203566_c20241271204061.nc",
+        "protocol": "s3",
+        "media_type": "application/x-netcdf",
+        "size": 3821830,
+        "checksum": "sha256:3331dc3dcf67f3015e221484750fefebead4c51d728272045c3e31c9123a0c0a",
+        "time": {
+          "start": "2024-05-06T12:01:18.100000Z",
+          "end": "2024-05-06T12:03:56.600000Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:goes-abi",
+        "provider": "noaa",
+        "source_url": "s3://noaa-goes18/ABI-L2-CMIPC/2024/127/12/OR_ABI-L2-CMIPC-M6C13_G18_s20241271201181_e20241271203566_c20241271204061.nc",
+        "retrieved_at": "2026-09-16T16:05:25.088251Z",
+        "checksum": "sha256:3331dc3dcf67f3015e221484750fefebead4c51d728272045c3e31c9123a0c0a",
+        "size": 3821830,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    }
+  ]
+}

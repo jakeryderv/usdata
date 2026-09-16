@@ -59,7 +59,8 @@ pandas with the oldest release the project declares, so the `>=` floor is
 executed rather than assumed; the number comes from `pyproject.toml` through
 `scripts/lowest_version.py`. Installed-wheel checks cover core, pandas, radar,
 and NetCDF on Linux, macOS, and Windows. The full offline and live-service
-suites run on Linux, and the worked examples run live on a schedule.
+suites run on Linux, and the worked examples run live on a schedule, which also
+restores each pinned example's committed lockfile into an empty cache.
 
 ## Workflow
 

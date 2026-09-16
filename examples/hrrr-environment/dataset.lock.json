@@ -1,0 +1,42 @@
+{
+  "manifest": "oklahoma-hrrr-analysis",
+  "manifest_checksum": "sha256:fae1e6f78e417c308a8ab7a039cabde3c06811aee0b67d9ef8408aa9ebb5fe05",
+  "generated_at": "2026-09-16T16:06:23.390134Z",
+  "usdata_version": "0.18.0",
+  "assets": [
+    {
+      "asset": {
+        "id": "hrrr.20240506.t20z.wrfsfcf00.grib2",
+        "dataset_id": "noaa:hrrr",
+        "href": "s3://noaa-hrrr-bdp-pds/hrrr.20240506/conus/hrrr.t20z.wrfsfcf00.grib2",
+        "protocol": "s3",
+        "media_type": "application/x-grib2",
+        "size": 150114757,
+        "checksum": "sha256:0f67cd6e1edd9d0876cb1a23459e9db59c892f7345e6a74b645b663302b7655c",
+        "time": {
+          "start": "2024-05-06T20:00:00Z",
+          "end": "2024-05-06T20:00:00Z"
+        },
+        "bbox": null
+      },
+      "provenance": {
+        "dataset_id": "noaa:hrrr",
+        "provider": "noaa",
+        "source_url": "s3://noaa-hrrr-bdp-pds/hrrr.20240506/conus/hrrr.t20z.wrfsfcf00.grib2",
+        "retrieved_at": "2026-09-16T16:06:23.342265Z",
+        "checksum": "sha256:0f67cd6e1edd9d0876cb1a23459e9db59c892f7345e6a74b645b663302b7655c",
+        "size": 150114757,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.18.0",
+        "transformations": [],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null
+      },
+      "source": "1"
+    }
+  ]
+}

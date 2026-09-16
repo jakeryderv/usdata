@@ -47,7 +47,9 @@ usdata pull dataset.yaml --cache-dir fresh && usdata verify dataset.yaml --cache
 Commit `dataset.yaml` and `dataset.lock.json`. Back up the cache directory
 separately for anything that must be reproducible years later: a checksum
 proves bytes are unchanged, but cannot recover bytes an agency no longer
-serves.
+serves. The archive-backed [examples](https://usdata.dev/examples/) commit
+their lockfiles and are restored from them every week, so each example page
+has a lockfile to download alongside its manifest.
 
 ## When pull exits 4
 

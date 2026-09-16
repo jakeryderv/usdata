@@ -1,4 +1,4 @@
-"""Check that example notebooks contain small, successful saved executions.
+"""Check the committed example artifacts: saved notebook executions and pinned lockfiles.
 
 Uses only the standard library so ordinary CI can check the committed examples
 without installing Jupyter or contacting their live data services.
@@ -6,12 +6,70 @@ without installing Jupyter or contacting their live data services.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MAX_OUTPUT_BYTES = 1_000_000
+
+
+def catalog(root: Path = ROOT) -> list[dict[str, object]]:
+    """The example index, or an empty list where a checkout has none."""
+    path = root / "examples/catalog.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+
+
+def pinned_manifests(root: Path = ROOT) -> list[Path]:
+    """Manifests of the examples whose lockfiles are committed, in catalog order.
+
+    An example opts in with ``"pinned": true`` in ``examples/catalog.json``;
+    ADR 0029 says which examples do and why the rest do not.
+    """
+    return [
+        root / "examples" / str(entry["slug"]) / "dataset.yaml"
+        for entry in catalog(root)
+        if entry.get("pinned") is True
+    ]
+
+
+def check_lockfile(manifest: Path) -> list[str]:
+    """Errors for a pinned manifest whose committed lockfile is missing or stale.
+
+    The lockfile must parse, must record the sha256 of the manifest beside it,
+    and must pin a checksum on every entry. Nothing here touches the network
+    or the cache; it is the offline half of what the weekly restore proves.
+    """
+    lock = manifest.with_suffix(".lock.json")
+    if not manifest.is_file():
+        return [f"{manifest}: pinned example has no manifest"]
+    if not lock.is_file():
+        return [f"{lock}: pinned example has no committed lockfile; run usdata pull"]
+    try:
+        data = json.loads(lock.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, ValueError) as exc:
+        return [f"{lock}: cannot read lockfile: {exc}"]
+    if not isinstance(data, dict) or not isinstance(data.get("assets"), list):
+        return [f"{lock}: expected a lockfile with an assets list"]
+    errors = []
+    digest = "sha256:" + hashlib.sha256(manifest.read_bytes()).hexdigest()
+    if data.get("manifest_checksum") != digest:
+        errors.append(f"{lock}: manifest changed since it was written; run usdata pull --force")
+    if not data["assets"]:
+        errors.append(f"{lock}: pins no assets")
+    for index, entry in enumerate(data["assets"], start=1):
+        asset = entry.get("asset") if isinstance(entry, dict) else None
+        provenance = entry.get("provenance") if isinstance(entry, dict) else None
+        if not isinstance(asset, dict) or not isinstance(provenance, dict):
+            errors.append(f"{lock}: entry {index}: expected an asset and its provenance")
+            continue
+        checksum = provenance.get("checksum")
+        if not isinstance(checksum, str) or not checksum.startswith("sha256:"):
+            errors.append(f"{lock}: entry {index}: no sha256 pinned")
+        elif asset.get("checksum") != checksum:
+            errors.append(f"{lock}: entry {index}: asset and provenance checksums differ")
+    return errors
 
 
 def notebook_paths(root: Path = ROOT) -> list[Path]:
@@ -101,10 +159,15 @@ def main() -> None:
     paths = notebook_paths()
     if not paths:
         sys.exit("No example notebooks found")
+    pinned = pinned_manifests()
     errors = [error for path in paths for error in check_notebook(path)]
+    errors += [error for manifest in pinned for error in check_lockfile(manifest)]
     if errors:
         sys.exit("\n".join(errors))
-    print(f"{len(paths)} example notebooks have valid saved executions")
+    print(
+        f"{len(paths)} example notebooks have valid saved executions; "
+        f"{len(pinned)} committed lockfiles match their manifests"
+    )
 
 
 if __name__ == "__main__":

@@ -10,10 +10,10 @@ import sys
 import tempfile
 import time
 import traceback
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Collection, Mapping
 from pathlib import Path
 
-from check_notebooks import ROOT, check_notebook, notebook_paths
+from check_notebooks import ROOT, check_notebook, notebook_paths, pinned_manifests
 
 CACHE_ENVIRONMENT_VARIABLE = "USDATA_NOTEBOOK_CACHE"
 
@@ -69,15 +69,22 @@ def run_notebooks(
     *,
     write: bool = False,
     cache_dir: Path | None = None,
+    pinned: Collection[Path] | None = None,
     execute: Callable[[Path, Path, Path, Path], None] = execute_notebook,
 ) -> list[str]:
     """Execute ``paths``, writing diagnostics to ``output_dir`` and returning failures.
 
     ``cache_dir``, when given, is reused as ``USDATA_CACHE_DIR`` by every
     notebook so repeated runs do not re-download; the default gives each
-    notebook a fresh cache under a temporary working directory.
+    notebook a fresh cache under a temporary working directory. ``pinned``
+    names the manifests whose committed lockfile travels with them, so those
+    notebooks restore their pins instead of resolving again; it defaults to the
+    catalog's pinned examples.
     """
     output_dir.mkdir(parents=True, exist_ok=True)
+    pinned_dirs = {
+        manifest.parent.resolve() for manifest in (pinned_manifests() if pinned is None else pinned)
+    }
     failures: list[str] = []
     results = []
     executed_paths = []
@@ -112,6 +119,9 @@ def run_notebooks(
                 manifest = path.parent / "dataset.yaml"
                 if manifest.exists():
                     shutil.copy2(manifest, working_dir / manifest.name)
+                lockfile = manifest.with_suffix(".lock.json")
+                if path.parent.resolve() in pinned_dirs and lockfile.exists():
+                    shutil.copy2(lockfile, working_dir / lockfile.name)
                 cache = cache_dir if cache_dir is not None else working_dir / "cache"
                 cache.mkdir(parents=True, exist_ok=True)
                 execute(working_dir / path.name, executed, kernel_dir, cache)

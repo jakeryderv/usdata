@@ -180,6 +180,13 @@ def test_live_inventory_discovers_new_examples_and_excludes_checkpoints(monkeypa
         {"id": "test_new_live", "path": "tests/live/test_new_live.py", "extra": "core"},
     ]
     assert data["notebooks"] == [{"id": "example-0", "path": "examples/new/example.ipynb"}]
+    assert data["restores"] == []
+    (tmp_path / "examples/catalog.json").write_text(
+        json.dumps([{"slug": "new", "title": "Q?", "summary": "A.", "pinned": True}])
+    )
+    assert ci_inventory.inventory(tmp_path)["restores"] == [
+        {"id": "new", "path": "examples/new/dataset.yaml"}
+    ]
 
 
 def test_inventory_focus_rejects_unknown_and_ambiguous_targets(monkeypatch):
@@ -191,9 +198,14 @@ def test_inventory_focus_rejects_unknown_and_ambiguous_targets(monkeypatch):
     assert [entry["id"] for entry in focused["live"]] == ["test_coops_live"]
     assert focused["notebooks"] == []
     assert select_inventory(data, "all") == data
-    assert select_inventory(data, "minimum") == {"live": [], "notebooks": []}
+    assert select_inventory(data, "minimum") == {"live": [], "notebooks": [], "restores": []}
     notebook = select_inventory(data, "notebooks", "sst-analysis")
-    assert len(notebook["notebooks"]) == 1 and not notebook["live"]
+    assert len(notebook["notebooks"]) == 1 and not notebook["live"] and not notebook["restores"]
+    restore = select_inventory(data, "restores", "glm-flashes")
+    assert restore["restores"] == [
+        {"id": "glm-flashes", "path": "examples/glm-flashes/dataset.yaml"}
+    ]
+    assert not restore["live"] and not restore["notebooks"]
     for scope, target in [("all", "coops"), ("minimum", "coops"), ("live", "$(echo x)")]:
         with pytest.raises(ValueError):
             select_inventory(data, scope, target)
@@ -222,3 +234,23 @@ def test_notebook_selection_accepts_slugs_and_paths_and_names_what_was_typed(run
     message = str(raised.value)
     assert "glm_flashes" in message
     assert "slug" in message and "examples/glm-flashes/glm-flashes.ipynb" in message
+
+
+def test_runner_carries_a_committed_lockfile_only_for_pinned_examples(runner, tmp_path):
+    seen: dict[str, list[str]] = {}
+    for slug in ("pinned", "loose"):
+        example = tmp_path / "examples" / slug
+        example.mkdir(parents=True)
+        (example / "example.ipynb").write_text(json.dumps(notebook("original")))
+        (example / "dataset.yaml").write_text(f"name: {slug}\nsources: []\n")
+        (example / "dataset.lock.json").write_text("{}")
+
+    def execute(source, output, kernel_dir, cache_dir):
+        seen[source.parent.name] = sorted(p.name for p in source.parent.iterdir() if p.is_file())
+        output.write_text(json.dumps(notebook("executed")))
+
+    paths = [tmp_path / "examples/pinned/example.ipynb", tmp_path / "examples/loose/example.ipynb"]
+    pinned = [tmp_path / "examples/pinned/dataset.yaml"]
+    assert not runner.run_notebooks(paths, tmp_path / "reports", pinned=pinned, execute=execute)
+    assert seen["example-0"] == ["dataset.lock.json", "dataset.yaml", "example.ipynb"]
+    assert seen["example-1"] == ["dataset.yaml", "example.ipynb"]
