@@ -17,6 +17,16 @@ Every result carries a copy of the asset id and provenance under a `usdata`
 attribute. That is metadata about the source bytes, not a record of your
 analysis; see [provenance and drift](provenance-and-drift.md).
 
+Where a file leaves a variable's units missing or `unknown`, the NetCDF4 and
+GRIB2 readers fill `units` and `long_name` from the registry entry's variable
+table, matching each data variable's name against the entry's names exactly and
+then case-insensitively. A decoded MRMS variable drops the product's level
+suffix, so `RotationTrackML30min` matches the entry's
+`RotationTrackML30min_00.50`. A value the file provides is never overwritten,
+no other attribute is touched, and the `registry_attrs` list under the `usdata`
+attribute names every variable and attribute filled, so a stamped value stays
+distinguishable from the file's own. The CSV readers are unchanged.
+
 Readers are eager. The whole decoded object is in memory when `open()`
 returns, and file handles are closed before it does, so there is nothing for
 you to manage. The cost is that the decoded size, not the download size, has
@@ -101,9 +111,11 @@ rather than loading hundreds of fields. Strings match a key's text form and
 numbers its numeric form. Variables are named by `shortName`, with level type
 and value appended when several selected messages share one. ecCodes has no
 names for MRMS parameters, so those take the product from the file name, for
-example `RotationTrackML30min`. Values marked missing by a bitmap become NaN;
-product sentinels such as MRMS `-999` and `-99` are kept because their meaning
-belongs to the product. Gzipped files are decompressed in memory.
+example `RotationTrackML30min`, which the registry's
+`RotationTrackML30min_00.50` entry then supplies the units for. Values marked
+missing by a bitmap become NaN; product sentinels such as MRMS `-999` and `-99`
+are kept because their meaning belongs to the product. Gzipped files are
+decompressed in memory.
 
 A select value that matches none of the selected messages is reported: by
 default the reader warns and returns the fields it did find, and `strict=True`

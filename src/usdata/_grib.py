@@ -23,7 +23,7 @@ from inspect import currentframe
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from usdata.readers import MissingReaderDependency
+from usdata.readers import MissingReaderDependency, fill_registry_attrs
 
 if TYPE_CHECKING:
     from usdata._fetch import FetchedAsset
@@ -368,4 +368,5 @@ def open_grib2(
         "asset_id": fetched.asset.id,
         "provenance": fetched.provenance.model_dump(mode="json"),
     }
+    fill_registry_attrs(fetched, dataset)
     return dataset

@@ -5,11 +5,12 @@ from __future__ import annotations
 import csv
 import gzip
 import io
+import re
 from collections.abc import Mapping
 from importlib import import_module
 from typing import TYPE_CHECKING, Any
 
-from usdata.models import Protocol
+from usdata.models import Protocol, Variable
 
 if TYPE_CHECKING:
     from usdata._fetch import FetchedAsset
@@ -25,6 +26,12 @@ GRIB2_SUFFIXES = (".grib2", ".grib2.gz", ".grb2", ".grb2.gz")
 CSV_MEDIA_TYPES = {"text/csv", "application/csv"}
 GZIP_MEDIA_TYPES = {"application/gzip", "application/x-gzip"}
 OPAQUE_MEDIA_TYPES = {"", "application/octet-stream"} | GZIP_MEDIA_TYPES
+PRODUCT_LEVEL = re.compile(r"^(?P<product>.+?)_\d{2}\.\d{2}$")
+"""A registry variable name and the MRMS product-level suffix a decoded name drops."""
+
+UNSET_UNITS = {"", "unknown"}
+"""Unit strings that state nothing, so the registry may fill them."""
+
 IDENTIFIER_COLUMNS = {
     "station",
     "station_id",
@@ -56,6 +63,76 @@ class Hurdat2FormatError(ValueError):
     """A fetched file does not follow the documented HURDAT2 layout."""
 
 
+def _name_tables(variables: list[Variable]) -> list[tuple[bool, dict[str, Variable]]]:
+    """Lookup tables from most to least specific, each flagged as case-folded or not.
+
+    A decoded MRMS variable drops the product's level suffix, so
+    ``RotationTrackML30min_00.50`` is also offered as ``RotationTrackML30min``,
+    after both exact and case-insensitive matching on the full name.
+    """
+    named = [(variable.name, variable) for variable in variables]
+    products = [
+        (match["product"], variable)
+        for name, variable in named
+        if (match := PRODUCT_LEVEL.match(name))
+    ]
+    tables = []
+    for fold, pairs in ((False, named), (True, named), (False, products), (True, products)):
+        table: dict[str, Variable] = {}
+        for name, variable in pairs:
+            table.setdefault(name.casefold() if fold else name, variable)
+        tables.append((fold, table))
+    return tables
+
+
+def _matching(tables: list[tuple[bool, dict[str, Variable]]], name: str) -> Variable | None:
+    """The first registry variable a decoded name matches, or None."""
+    for fold, table in tables:
+        variable = table.get(name.casefold() if fold else name)
+        if variable is not None:
+            return variable
+    return None
+
+
+def _units_stated(attrs: Mapping[str, Any]) -> bool:
+    """Whether the file states units, counting an empty or ``unknown`` value as silence."""
+    return str(attrs.get("units", "")).strip().casefold() not in UNSET_UNITS
+
+
+def fill_registry_attrs(fetched: FetchedAsset, data: Any) -> None:
+    """Fill units and long names the file left unstated from the registry's variable table.
+
+    Matches each data variable of an xarray Dataset against the entry for
+    ``fetched``'s dataset by name, first exactly and then case-insensitively,
+    and lists every attribute filled under ``data.attrs["usdata"]``. A value the
+    file provides is never overwritten, and an asset whose dataset has no entry
+    or no variables is left alone.
+    """
+    from usdata.registry import DatasetNotFound, default_registry
+
+    try:
+        entry = default_registry().get(fetched.asset.dataset_id)
+    except DatasetNotFound:
+        return
+    if not entry.variables:
+        return
+    tables = _name_tables(entry.variables)
+    filled: list[dict[str, str]] = []
+    for key, array in data.data_vars.items():
+        name = str(key)
+        variable = _matching(tables, name)
+        if variable is None:
+            continue
+        if variable.units and not _units_stated(array.attrs):
+            array.attrs["units"] = variable.units
+            filled.append({"variable": name, "attribute": "units"})
+        if variable.description and "long_name" not in array.attrs:
+            array.attrs["long_name"] = variable.description
+            filled.append({"variable": name, "attribute": "long_name"})
+    if filled:
+        data.attrs["usdata"]["registry_attrs"] = filled
+
+
 def open_asset(
     fetched: FetchedAsset,
     *,
@@ -85,6 +162,9 @@ def open_asset(
     raises either way. Gzipped GRIB2 is decompressed in memory.
     HURDAT2 best-track text is recognized by dataset or filename and returns one
     row per track point; it takes no CSV options.
+    NetCDF4 and GRIB2 results have units the file leaves missing or ``unknown``
+    and missing long names filled from the registry entry's variables, listed
+    under ``attrs["usdata"]["registry_attrs"]``.
     """
     if reader is None:
         media_type = (fetched.asset.media_type or "").split(";", 1)[0].strip().lower()

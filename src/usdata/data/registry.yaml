@@ -41,11 +41,36 @@ domains:
   demographics:           { name: "Demographics" }
   agriculture:            { name: "Agriculture" }
 
+# systems: the product family or service behind an entry, declared per provider.
+# Datasets without an obvious family leave `system` unset.
+systems:
+  noaa:ncei-access:
+    name: "NCEI Access Data Service"
+    provider: noaa
+    homepage: https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation
+  noaa:nexrad:
+    name: "Next Generation Weather Radar (NEXRAD)"
+    provider: noaa
+    homepage: https://www.ncei.noaa.gov/products/radar/next-generation-weather-radar
+  noaa:goes-r:
+    name: "GOES-R Series"
+    provider: noaa
+    homepage: https://www.goes-r.gov/
+  noaa:ncep-models:
+    name: "NCEP model output"
+    provider: noaa
+    homepage: https://www.nco.ncep.noaa.gov/pmb/products/
+  noaa:coops:
+    name: "CO-OPS Data API"
+    provider: noaa
+    homepage: https://tidesandcurrents.noaa.gov/
+
 datasets:
   # ---------------------------------------------------------------- NOAA
   - id: noaa:nexrad-level2
     provider: noaa
     status: available
+    system: noaa:nexrad
     domain: weather-radar
     since: "0.2"
     title: NEXRAD Level II Radar
@@ -90,6 +115,7 @@ datasets:
   - id: noaa:ghcn-daily
     provider: noaa
     status: available
+    system: noaa:ncei-access
     domain: surface-weather
     since: "0.2"
     title: GHCN-Daily Station Observations
@@ -179,6 +205,7 @@ datasets:
   - id: noaa:goes-abi
     provider: noaa
     status: available
+    system: noaa:goes-r
     domain: weather-satellites
     since: "0.8"
     title: GOES-R ABI CONUS Cloud and Moisture Imagery
@@ -219,6 +246,7 @@ datasets:
   - id: noaa:goes-glm
     provider: noaa
     status: available
+    system: noaa:goes-r
     domain: weather-satellites
     since: "0.15"
     title: GOES Geostationary Lightning Mapper
@@ -459,6 +487,7 @@ datasets:
   - id: noaa:coops-water-levels
     provider: noaa
     status: available
+    system: noaa:coops
     domain: sea-level-tides
     since: "0.10"
     title: CO-OPS Observed Water Levels
@@ -506,6 +535,7 @@ datasets:
   - id: noaa:coops-tide-predictions
     provider: noaa
     status: available
+    system: noaa:coops
     domain: sea-level-tides
     since: "0.14"
     title: CO-OPS Tide Predictions
@@ -549,6 +579,7 @@ datasets:
   - id: noaa:gsom
     provider: noaa
     status: available
+    system: noaa:ncei-access
     domain: surface-weather
     since: "0.7"
     title: Global Summary of the Month
@@ -590,6 +621,7 @@ datasets:
   - id: noaa:gsoy
     provider: noaa
     status: available
+    system: noaa:ncei-access
     domain: surface-weather
     since: "0.10"
     title: Global Summary of the Year
@@ -629,6 +661,7 @@ datasets:
   - id: noaa:climate-normals
     provider: noaa
     status: available
+    system: noaa:ncei-access
     domain: climate
     since: "0.11"
     title: U.S. Climate Normals 1991-2020
@@ -743,6 +776,7 @@ datasets:
   - id: noaa:nexrad-level3
     provider: noaa
     status: available
+    system: noaa:nexrad
     domain: weather-radar
     since: "0.15"
     title: NEXRAD Level III Products
@@ -804,6 +838,7 @@ datasets:
   - id: noaa:hrrr
     provider: noaa
     status: available
+    system: noaa:ncep-models
     domain: weather-models
     since: "0.15"
     title: HRRR Forecast Model Output
@@ -852,6 +887,7 @@ datasets:
   - id: noaa:gfs
     provider: noaa
     status: available
+    system: noaa:ncep-models
     domain: weather-models
     since: "0.15"
     title: GFS Forecast Model Output
@@ -983,6 +1019,7 @@ datasets:
   - id: noaa:lcd
     provider: noaa
     status: available
+    system: noaa:ncei-access
     domain: surface-weather
     since: "0.14"
     title: Local Climatological Data
