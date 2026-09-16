@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel
 
@@ -13,6 +13,9 @@ from usdata._files import staged_path
 from usdata.cache import asset_path, sha256_file
 from usdata.models import Asset, Dataset, Provenance, Query
 from usdata.providers import Provider, load_adapter
+
+if TYPE_CHECKING:
+    from usdata.inspect import Summary
 
 
 class ChecksumMismatch(RuntimeError):
@@ -66,6 +69,19 @@ class FetchedAsset(BaseModel):
             select=select,
             strict=strict,
         )
+
+    def inspect(self) -> Summary:
+        """Summarize this file: provenance, format, and what that format holds.
+
+        CSV columns and a capped row count need no extra; NetCDF4 variables and
+        GRIB2 messages need the same extras ``open`` does, and a missing one
+        yields a summary with no detail and a note naming it. Like ``open``,
+        this reads the cached file and changes nothing. See
+        ``usdata.inspect.inspect_asset``.
+        """
+        from usdata.inspect import inspect_asset
+
+        return inspect_asset(self)
 
 
 def _sidecar_not_older(path: Path) -> bool:

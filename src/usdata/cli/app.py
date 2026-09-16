@@ -16,6 +16,7 @@ from usdata._progress import batch
 from usdata.cli.cache import cache_app
 from usdata.cli.cite import cite
 from usdata.cli.doctor import doctor
+from usdata.cli.inspect import inspect
 from usdata.cli.progress import progress
 from usdata.manifest import lockfile_path
 from usdata.models import READER_EXTRAS_TEXT, Dataset, Status, describe_duration
@@ -246,6 +247,9 @@ def info(
         typer.echo("  params:    none")
     _echo_usage(ds)
     _echo_description(ds)
+
+
+app.command()(inspect)
 
 
 def _echo_usage(ds: Dataset) -> None:
