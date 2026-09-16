@@ -10,20 +10,12 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 | Dataset | Availability | Files | What gets selected |
 |---|---|---|---|
+| <span id="usgsearthquakes"></span>[Earthquake events](usgs/earthquakes.md) | Source only | CSV | Events inside an inclusive UTC window and optional box, magnitude, and depth bounds |
 | <span id="usgswater-daily"></span>[Daily water observations](usgs/water-daily.md) | Released | CSV | Site observations for inclusive local calendar dates; parameter and statistic filters |
 
 ## Planned datasets
 
 These entries are not implemented; they cannot fetch data.
-
-### usgs:earthquakes
-
-**Earthquake Catalog (ComCat)** · Planned · target later
-
-Global earthquake events with location, magnitude, and depth from the ANSS Comprehensive Catalog via the FDSN event web service. Anonymous REST with bbox, time, and magnitude filters.
-
-[Upstream information](https://earthquake.usgs.gov/fdsnws/event/1/)
-Domain: Natural hazards.
 
 ### usgs:3dep-elevation
 

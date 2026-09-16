@@ -49,6 +49,10 @@ minutes of NEXRAD Level III mesocyclone, storm-track, and echo-top files from
 one radar around a tornado report and shows that they are stored without a
 reader (available since v0.15).
 
+[Oklahoma earthquakes](https://usdata.dev/examples/earthquakes/) pulls every
+magnitude 1.0 or larger event inside the state on the two tornado-outbreak days
+from the USGS catalog as one CSV and ranks them (available since v0.19.0).
+
 [Atlantic hurricane best tracks](https://usdata.dev/examples/hurdat2/) fetches the whole HURDAT2
 Atlantic file and reads it into one row per track point (available since v0.12.0).
 

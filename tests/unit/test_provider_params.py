@@ -14,6 +14,7 @@ from usdata.providers.params import (
     choice,
     int_list,
     int_range,
+    number_range,
 )
 
 
@@ -27,6 +28,9 @@ class Sample(BaseModel):
     )
     hours: Annotated[list[int], int_list(0, 48)] = Field(
         description="Required forecast hour(s): an integer, list, or comma-separated string."
+    )
+    magnitude: Annotated[float, number_range(-10, 10)] | None = Field(
+        default=None, description="A bound with decimals, or nothing."
     )
     stations: StrList = Field(default_factory=list, description="Station ids to keep.")
     codes: UpperStrList = Field(
@@ -281,3 +285,16 @@ def test_params_error_keeps_a_messages_own_field_name() -> None:
     assert str(params_error(raised.value, Prefixed)) == (
         "file=subh (15-minute output) is out of scope"
     )
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"), [("2.5", 2.5), (3, 3.0), (-1.75, -1.75), (" 10 ", 10.0), (None, None)]
+)
+def test_number_fields_accept_the_shapes_the_cli_and_manifests_send(raw, expected) -> None:
+    assert Sample.model_validate({"cycle": 0, "hours": 0, "magnitude": raw}).magnitude == expected
+
+
+@pytest.mark.parametrize("raw", ["big", True, 10.5, "nan", "inf", [2], ""])
+def test_number_fields_reject_text_booleans_and_out_of_range_values(raw) -> None:
+    with pytest.raises(ValidationError, match="must be a number from -10 to 10"):
+        Sample.model_validate({"cycle": 0, "hours": 0, "magnitude": raw})

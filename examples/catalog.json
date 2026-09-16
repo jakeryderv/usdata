@@ -114,5 +114,10 @@
     "slug": "tornado-classification",
     "title": "Which severe reports came with rotation and lightning?",
     "summary": "Convert one Oklahoma tornado report to UTC, join it to the nearest NEXRAD volume, MRMS rotation track, and GLM flashes, then build a small labeled table of rotation and lightning features for tornado, hail, and wind reports from the same evening."
+  },
+  {
+    "slug": "earthquakes",
+    "title": "Which earthquakes did Oklahoma record on the days of the May 2024 tornado outbreak?",
+    "summary": "Pull every magnitude 1.0 or larger event inside Oklahoma on 6 and 7 May 2024 from the USGS catalog as one pinned CSV, then rank them by magnitude."
   }
 ]
