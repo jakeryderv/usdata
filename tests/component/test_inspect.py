@@ -6,6 +6,7 @@ import gzip
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import pytest
 from typer.testing import CliRunner
@@ -14,13 +15,24 @@ from usdata import FetchedAsset, inspect_asset, inspect_path
 from usdata.cache import cached_path, sha256_file
 from usdata.cli import app
 from usdata.inspect import AssetFormat, CsvSummary, NetcdfSummary
-from usdata.models import Asset, Protocol, Provenance
+from usdata.models import Asset, ByteRange, Protocol, Provenance
 from usdata.provenance import write
 
 NETCDF_FIXTURE = Path(__file__).parents[1] / "fixtures/netcdf/packed-grid.nc"
 CSV = b"time,station,value\n2024-05-06,USW00013967,1.0\n2024-05-07,USW00013967,2.0\n"
 
 runner = CliRunner()
+
+
+def grib_ranges(content: bytes) -> list[ByteRange]:
+    """One inclusive byte range per GRIB2 message, as a partial fetch records them."""
+    ranges: list[ByteRange] = []
+    offset = 0
+    while offset < len(content):
+        length = int.from_bytes(content[offset + 8 : offset + 16], "big")
+        ranges.append(ByteRange(start=offset, end=offset + length - 1))
+        offset += length
+    return ranges
 
 
 def cached(
@@ -31,14 +43,35 @@ def cached(
     media_type: str | None = None,
     dataset_id: str = "noaa:ghcn-daily",
     sidecar: bool = True,
+    messages: list[int] | None = None,
 ) -> FetchedAsset:
-    """One asset on disk with the provenance sidecar a real fetch writes beside it."""
+    """One asset on disk with the provenance sidecar a real fetch writes beside it.
+
+    With ``messages``, the sidecar is the one a partial GRIB2 fetch writes: the
+    source object's message numbers in the href fragment and one recorded byte
+    range per message.
+    """
     path = tmp_path / name
+    href = f"https://example.test/{name}"
     path.write_bytes(content)
+    partial: dict[str, Any] = {}
+    if messages is not None:
+        numbers = ",".join(str(number) for number in messages)
+        href = f"{href}#messages={numbers}"
+        partial = {
+            "transformations": [
+                f"grib2 messages {numbers} concatenated from https://example.test/{name}"
+            ],
+            "index_url": f"https://example.test/{name}.idx",
+            "index_checksum": "sha256:" + "0" * 64,
+            "ranges": grib_ranges(content),
+            "object_size": 151_717_165,
+            "object_etag": "81198a73ad430c73adfbe3335421ea99",
+        }
     asset = Asset(
         id=name,
         dataset_id=dataset_id,
-        href=f"https://example.test/{name}",
+        href=href,
         protocol=Protocol.HTTP,
         media_type=media_type,
     )
@@ -50,6 +83,7 @@ def cached(
         checksum=sha256_file(path),
         size=path.stat().st_size,
         usdata_version="0.16.0",
+        **partial,
     )
     if sidecar:
         write(record, path)
@@ -226,12 +260,59 @@ def test_grib2_messages_are_listed_with_the_keys_select_matches(grib: FetchedAss
     assert summary.format is AssetFormat.GRIB2
     assert summary.grib2 is not None and summary.note is None
     messages = summary.grib2.messages
-    assert [message.index for message in messages] == [0, 1, 2]
+    assert [message.file_index for message in messages] == [0, 1, 2]
+    assert [message.object_index for message in messages] == [None, None, None]
     assert [message.short_name for message in messages] == ["t", "t", "cape"]
     assert [message.level for message in messages] == ["500", "850", "0"]
     assert messages[0].type_of_level == "isobaricInhPa" and messages[0].units == "K"
     assert messages[0].name == "Temperature" and messages[0].shape == (3, 4)
     assert messages[2].type_of_level == "entireAtmosphere"
+
+
+@pytest.fixture
+def partial_grib(tmp_path: Path) -> FetchedAsset:
+    """Two messages taken from a 170-message object, as a partial fetch leaves them."""
+    ec = pytest.importorskip("eccodes")
+    np = pytest.importorskip("numpy")
+    pytest.importorskip("xarray")
+
+    def message(value: float, *, param: int, level_type: str, level: int) -> bytes:
+        handle = ec.codes_grib_new_from_samples("regular_ll_sfc_grib2")
+        try:
+            for key, setting in (("Ni", 4), ("Nj", 3)):
+                ec.codes_set(handle, key, setting)
+            ec.codes_set(handle, "typeOfLevel", level_type)
+            ec.codes_set(handle, "level", level)
+            ec.codes_set(handle, "paramId", param)
+            ec.codes_set(handle, "packingType", "grid_simple")
+            ec.codes_set_values(handle, np.full(12, value))
+            return ec.codes_get_message(handle)
+        finally:
+            ec.codes_release(handle)
+
+    parts = [
+        message(1500.0, param=59, level_type="surface", level=0),
+        message(288.0, param=130, level_type="heightAboveGround", level=2),
+    ]
+    return cached(
+        tmp_path,
+        "part.grib2",
+        b"".join(parts),
+        media_type="application/x-grib2",
+        dataset_id="noaa:hrrr",
+        messages=[105, 131],
+    )
+
+
+@pytest.mark.grib
+def test_a_partial_file_also_numbers_each_message_in_the_source_object(
+    partial_grib: FetchedAsset,
+) -> None:
+    summary = partial_grib.inspect()
+    assert summary.grib2 is not None
+    messages = summary.grib2.messages
+    assert [message.file_index for message in messages] == [0, 1]
+    assert [message.object_index for message in messages] == [105, 131]
 
 
 @pytest.mark.grib
@@ -331,6 +412,20 @@ def test_the_cli_prints_the_grib2_message_table(grib: FetchedAsset) -> None:
     assert "messages:" in result.stdout and "shortName" in result.stdout
     assert "isobaricInhPa" in result.stdout and "3 x 4" in result.stdout
     assert "cape" in result.stdout
+
+
+@pytest.mark.grib
+def test_the_cli_prints_both_numberings_only_for_a_partial_file(
+    grib: FetchedAsset, partial_grib: FetchedAsset
+) -> None:
+    whole = runner.invoke(app, ["inspect", str(grib.path)])
+    assert whole.exit_code == 0
+    assert "object #" not in whole.stdout and "file #" not in whole.stdout
+    part = runner.invoke(app, ["inspect", str(partial_grib.path)])
+    assert part.exit_code == 0
+    header = next(line for line in part.stdout.splitlines() if "shortName" in line)
+    assert header.split()[:3] == ["file", "#", "object"]
+    assert "105" in part.stdout and "131" in part.stdout
 
 
 @pytest.mark.grib

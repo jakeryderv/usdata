@@ -46,7 +46,13 @@ A whole-file sidecar is unchanged: the new fields are optional, an older
 sidecar loads with `ranges` empty and the rest unset, and the lockfile schema
 is the same. The asset's URL carries the selection as a fragment,
 `...wrfsfcf00.grib2#messages=105,131`, so the lockfile entry alone says which
-bytes were taken and from where. See
+bytes were taken and from where.
+
+Those numbers, 105 and 131, are the source object's own: the one-based message
+numbers its `.idx` sidecar publishes, and the readers surface them as
+`object_index`. The fetched file holds the same two messages at positions 0 and
+1, which is what `usdata inspect` prints and what the readers call `file_index`.
+See
 [ADR 0028](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0028-partial-grib2-fetch-through-index-files.md).
 
 ## What a checksum can and cannot do

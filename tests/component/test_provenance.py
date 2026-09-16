@@ -70,6 +70,27 @@ def test_a_partial_record_describes_the_ranges_and_the_object_they_came_from(
     assert written["ranges"][0] == {"start": 64292396, "end": 65005961}
 
 
+def test_a_partial_record_numbers_its_messages_in_the_source_object(tmp_path: Path) -> None:
+    """The nth recorded range is the nth message on disk, so the two lists pair up."""
+    f = tmp_path / "part.grib2"
+    f.write_bytes(b"GRIB2 messages")
+    ds = default_registry().get("noaa:hrrr")
+    asset = Asset(
+        id="part.grib2",
+        dataset_id=ds.id,
+        href=f"{PARTIAL.object_url}#{PARTIAL.fragment}",
+        protocol=Protocol.S3,
+    )
+    prov = provenance.record(ds, asset, f, PARTIAL)
+    assert prov.object_messages == [105, 131]
+    # A whole file has no such numbering, and neither has a record whose lists disagree.
+    assert (
+        provenance.record(ds, asset.model_copy(update={"href": "s3://x/y"}), f).object_messages
+        == []
+    )
+    assert prov.model_copy(update={"ranges": prov.ranges[:1]}).object_messages == []
+
+
 def test_a_sidecar_written_before_partial_fetch_still_parses(tmp_path: Path) -> None:
     f = tmp_path / "whole.csv"
     f.write_bytes(b"station,value\n")

@@ -207,7 +207,7 @@ def inventory(path: Path) -> list[GribMessage]:
         keys = {key: _get(eccodes, h, key, str) for key in INVENTORY_KEYS}
         messages.append(
             GribMessage(
-                index=index,
+                file_index=index,
                 short_name=keys["shortName"],
                 name=keys["name"],
                 type_of_level=keys["typeOfLevel"],
@@ -329,7 +329,9 @@ def open_grib2(
     them as soon as the selection spans more than one, so the names follow from
     the select rather than from which short names happened to repeat.
     ``attrs["usdata"]["messages"]`` maps each variable name to the message it
-    came from.
+    came from: ``file_index`` numbers it in this file from zero, and
+    ``object_index`` numbers it in the source object as that object's index
+    sidecar does, one-based, for a partial fetch and ``None`` for a whole file.
 
     A select value that matches none of the selected messages warns, or raises
     ``ValueError`` when ``strict``; a select that matches nothing always raises.
@@ -344,6 +346,7 @@ def open_grib2(
     grid: _Grid | None = None
     count = 0
     needs_select = select is None and not fetched.provenance.is_partial
+    object_messages = fetched.provenance.object_messages
     for h in _messages(eccodes, fetched.path):
         count += 1
         if count > 1 and needs_select:
@@ -386,7 +389,8 @@ def open_grib2(
             if stamp:
                 attrs[label] = stamp
         message = {
-            "index": count - 1,
+            "file_index": count - 1,
+            "object_index": object_messages[count - 1] if object_messages else None,
             "shortName": _get(eccodes, h, "shortName", str),
             "typeOfLevel": attrs.get("typeOfLevel"),
             "level": attrs.get("level"),

@@ -69,9 +69,19 @@ class NetcdfSummary(BaseModel):
 
 
 class GribMessage(BaseModel):
-    """One GRIB2 message as ecCodes reports it: the keys ``select`` matches on, plus the grid."""
+    """One GRIB2 message as ecCodes reports it: the keys ``select`` matches on, plus the grid.
 
-    index: int = Field(ge=0, description="Zero-based position in the file")
+    Two numberings name the same message. ``file_index`` counts messages in the
+    local file from zero; ``object_index`` is the number the source object's
+    index sidecar gave it, one-based, and is set only for a partial fetch.
+    """
+
+    file_index: int = Field(ge=0, description="Zero-based position in the local file")
+    object_index: int | None = Field(
+        default=None,
+        ge=1,
+        description="One-based message number in the source object, for a partial fetch",
+    )
     short_name: str | None = Field(default=None, description="ecCodes shortName")
     name: str | None = Field(default=None, description="ecCodes name")
     type_of_level: str | None = Field(default=None, description="ecCodes typeOfLevel")
@@ -162,7 +172,7 @@ def _summarize(path: Path, asset_id: str, record: Provenance, fmt: AssetFormat) 
     note: str | None = None
     if fmt is not AssetFormat.BYTES:
         try:
-            detail = _detail(path, fmt)
+            detail = _detail(path, fmt, record)
         except readers.MissingReaderDependency as error:
             note = str(error)
         # A cached file that no longer decodes is reported, not raised: a summary
@@ -206,7 +216,9 @@ def _detect(name: str, media_type: str | None) -> AssetFormat:
     return AssetFormat.BYTES
 
 
-def _detail(path: Path, fmt: AssetFormat) -> CsvSummary | NetcdfSummary | Grib2Summary:
+def _detail(
+    path: Path, fmt: AssetFormat, record: Provenance
+) -> CsvSummary | NetcdfSummary | Grib2Summary:
     """The detail for one recognized format, reading only what that format needs."""
     if fmt is AssetFormat.CSV:
         return _csv_summary(path)
@@ -214,7 +226,23 @@ def _detail(path: Path, fmt: AssetFormat) -> CsvSummary | NetcdfSummary | Grib2S
         from usdata._netcdf import variables
 
         return NetcdfSummary(variables=variables(path))
-    return Grib2Summary(messages=readers.inventory(path))
+    return Grib2Summary(messages=_numbered(readers.inventory(path), record))
+
+
+def _numbered(messages: list[GribMessage], record: Provenance) -> list[GribMessage]:
+    """Each message also numbered as the source object numbers it, where provenance says.
+
+    The file itself carries no such number: a partial fetch recorded one message
+    number per range, so the two lists pair up in order, and a whole file or a
+    record that does not pair leaves ``object_index`` unset.
+    """
+    numbers = record.object_messages
+    if len(numbers) != len(messages):
+        return messages
+    return [
+        message.model_copy(update={"object_index": number})
+        for message, number in zip(messages, numbers, strict=True)
+    ]
 
 
 def _csv_summary(path: Path) -> CsvSummary:

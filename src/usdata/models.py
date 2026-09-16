@@ -529,3 +529,23 @@ class Provenance(BaseModel):
     def is_partial(self) -> bool:
         """Whether this record describes selected byte ranges rather than a whole object."""
         return any(entry.startswith(PARTIAL_TRANSFORMATION) for entry in self.transformations)
+
+    @property
+    def object_messages(self) -> list[int]:
+        """The source object's own message numbers, in the order the local file holds them.
+
+        A partial fetch concatenated one message per recorded range, so the nth
+        number here numbers the nth message on disk as the index sidecar numbers
+        it, one-based. Empty for a whole file, and empty rather than wrong when
+        the href fragment and the recorded ranges disagree.
+        """
+        if not self.is_partial:
+            return []
+        _, _, fragment = self.source_url.partition("#")
+        try:
+            numbers = [
+                int(number) for number in fragment.removeprefix(f"{PARTIAL_FRAGMENT}=").split(",")
+            ]
+        except ValueError:
+            return []
+        return numbers if len(numbers) == len(self.ranges) else []
