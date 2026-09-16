@@ -27,7 +27,10 @@ usdata verify dataset.yaml --cache-dir .data   # offline: manifest checksum and 
 ```
 
 The first pull writes the lockfile. Later pulls restore from it without
-repeating discovery. Verify never touches the network.
+repeating discovery. Verify never touches the network. Pull prints one
+tab-separated line per asset and a summary line on stderr; `--quiet` keeps the
+summary and drops the per-asset lines, and `--no-progress` turns off the
+terminal progress display without changing either.
 
 ## Restore on another machine
 

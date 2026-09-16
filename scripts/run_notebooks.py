@@ -112,6 +112,39 @@ def run_notebooks(
     return failures
 
 
+def resolve_notebooks(names: list[str], paths: list[Path], *, root: Path = ROOT) -> list[Path]:
+    """The subset of ``paths`` that ``names`` selects, by example slug or by path.
+
+    A slug is an example folder name, such as ``glm-flashes``, and selects every
+    notebook in it; a path is repository-relative, such as
+    ``examples/glm-flashes/glm-flashes.ipynb``. Results keep the order of
+    ``paths`` and repeats collapse. A name that selects nothing raises
+    ``ValueError`` quoting exactly what was typed.
+    """
+    by_path = {path.resolve(): path for path in paths}
+    by_slug: dict[str, list[Path]] = {}
+    for path in paths:
+        by_slug.setdefault(path.parent.name, []).append(path)
+    selected: set[Path] = set()
+    unknown: list[str] = []
+    for name in names:
+        matched = by_slug.get(name.strip("/"))
+        if matched is None:
+            one = by_path.get((root / name).resolve())
+            matched = [one] if one is not None else None
+        if matched is None:
+            unknown.append(name)
+            continue
+        selected.update(matched)
+    if unknown:
+        raise ValueError(
+            f"unknown example notebook(s): {', '.join(unknown)}; "
+            "name an example slug (glm-flashes) or a repository-relative path "
+            "(examples/glm-flashes/glm-flashes.ipynb)"
+        )
+    return [path for path in paths if path in selected]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -121,17 +154,16 @@ def main() -> None:
         "--notebook",
         action="append",
         default=[],
-        help="repository-relative example path; repeatable",
+        help="example slug (glm-flashes) or repository-relative path; repeatable",
     )
     parser.add_argument("--output-dir", type=Path, default=ROOT / "reports/notebooks")
     args = parser.parse_args()
     paths = notebook_paths()
     if args.notebook:
-        selected = {(ROOT / name).resolve() for name in args.notebook}
-        unknown = selected - {path.resolve() for path in paths}
-        if unknown:
-            parser.error(f"unknown example notebooks: {', '.join(map(str, sorted(unknown)))}")
-        paths = [path for path in paths if path.resolve() in selected]
+        try:
+            paths = resolve_notebooks(args.notebook, paths)
+        except ValueError as exc:
+            parser.error(str(exc))
     if not paths:
         parser.error("No example notebooks found")
     failures = run_notebooks(paths, args.output_dir.resolve(), write=args.write)

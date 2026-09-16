@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node build.mjs",
     "test": "node --test",
-    "check": "npm test && wrangler deploy --dry-run",
+    "check": "npm run build && npm test && wrangler deploy --dry-run",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },

@@ -17,31 +17,18 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Annotated
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import s3
 from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
 from usdata.providers.noaa import sites
-from usdata.providers.params import OptionalUpperStrList
+from usdata.providers.params import OptionalUpperStrList, positive_int
 
 BUCKET = "unidata-nexrad-level2"
 MAX_WINDOW = timedelta(days=31)
 KEY_RE = re.compile(r"^(?P<site>[A-Z]{4})(?P<stamp>\d{8}_\d{6})(?:_V0[36])?(?:\.gz)?$")
-
-
-def _a_count_of_radars(value: object) -> object:
-    """Accept the digit strings the CLI passes, and nothing a count cannot be."""
-    if isinstance(value, bool) or not isinstance(value, (int, str)):
-        raise ValueError("must be a positive integer")
-    try:
-        count = int(value)
-    except ValueError:
-        raise ValueError("must be a positive integer") from None
-    if count < 1:
-        raise ValueError("must be a positive integer")
-    return count
 
 
 def scan_time(key: str) -> datetime | None:
@@ -63,7 +50,7 @@ class NexradParams(BaseModel):
     sites: OptionalUpperStrList = Field(
         default=None, description="Several radar ICAO ids, comma-separated or a list."
     )
-    nearest: Annotated[int, BeforeValidator(_a_count_of_radars)] | None = Field(
+    nearest: Annotated[int, positive_int()] | None = Field(
         default=None,
         description="Take the N radars nearest the query centre instead of naming sites.",
     )

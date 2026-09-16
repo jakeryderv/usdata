@@ -121,3 +121,25 @@ def test_inventory_focus_rejects_unknown_and_ambiguous_targets(monkeypatch):
     duplicates = {"live": data["live"] * 2, "notebooks": data["notebooks"]}
     with pytest.raises(ValueError, match="exactly one"):
         select_inventory(duplicates, "live", "coops")
+
+
+def test_notebook_selection_accepts_slugs_and_paths_and_names_what_was_typed(runner, tmp_path):
+    paths = [
+        tmp_path / "examples/glm-flashes/glm-flashes.ipynb",
+        tmp_path / "examples/sst-analysis/sst-analysis.ipynb",
+    ]
+    for path in paths:
+        path.parent.mkdir(parents=True)
+        path.touch()
+    resolve = runner.resolve_notebooks
+
+    assert resolve(["glm-flashes"], paths, root=tmp_path) == [paths[0]]
+    assert resolve(["examples/sst-analysis/sst-analysis.ipynb"], paths, root=tmp_path) == [paths[1]]
+    # Repeats collapse and results keep inventory order, not the order typed.
+    assert resolve(["sst-analysis", "glm-flashes", "sst-analysis"], paths, root=tmp_path) == paths
+
+    with pytest.raises(ValueError) as raised:
+        resolve(["glm_flashes"], paths, root=tmp_path)
+    message = str(raised.value)
+    assert "glm_flashes" in message
+    assert "slug" in message and "examples/glm-flashes/glm-flashes.ipynb" in message
