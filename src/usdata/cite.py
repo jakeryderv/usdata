@@ -21,6 +21,18 @@ from usdata.registry import Registry, default_registry
 ACCESSED_VIA = "accessed via usdata"
 """Tail of the fallback citation used when a registry entry states none."""
 
+DATE_PLACEHOLDER = "[date]"
+"""Literal an agency's requested citation leaves where the retrieval date belongs."""
+
+PLACEHOLDER_NOTE = (
+    f"{DATE_PLACEHOLDER} is filled from a lockfile; cite a pulled manifest to date this"
+)
+"""Note rendered beside a citation whose placeholder no lockfile has filled."""
+
+UNRECORDED_DATE = "an unrecorded date"
+"""Stand-in for a retrieval range that carries no bounds at all."""
+
+_ON_PLACEHOLDER = re.compile(rf"\bon {re.escape(DATE_PLACEHOLDER)}")
 _NOT_KEY = re.compile(r"[^A-Za-z0-9]+")
 _BIBTEX_SPECIAL = re.compile(r"([&%$#_])")
 
@@ -49,6 +61,23 @@ class Citation(BaseModel):
     sources: list[str] = Field(
         default_factory=list, description="Keys of the manifest sources that pinned the assets"
     )
+
+    def as_text(self) -> str:
+        """Render this citation the way ``usdata cite`` prints it.
+
+        Returns:
+            The dataset id, the citation text, and each field that is set, one
+            labelled line apiece.
+        """
+        return render_text([self])
+
+    def as_bibtex(self) -> str:
+        """Render this citation the way ``usdata cite --format bibtex`` prints it.
+
+        Returns:
+            One ``@misc`` entry keyed on the dataset id.
+        """
+        return render_bibtex([self])
 
 
 def cite_dataset(dataset: Dataset, *, registry: Registry | None = None) -> Citation:
@@ -126,11 +155,13 @@ def _cite_pinned(
 ) -> Citation:
     """One dataset's citation, extended with what its lockfile entries record."""
     times = [entry.provenance.retrieved_at for entry in entries]
+    retrieved = TimeRange(start=min(times), end=max(times))
     base = cite_dataset(registry.get(dataset_id), registry=registry)
     return base.model_copy(
         update={
+            "text": _fill_date(base.text, retrieved),
             "license": base.license or entries[0].provenance.license,
-            "retrieved": TimeRange(start=min(times), end=max(times)),
+            "retrieved": retrieved,
             "asset_count": len(entries),
             "total_bytes": sum(entry.provenance.size for entry in entries),
             "usdata_version": usdata_version,
@@ -139,10 +170,31 @@ def _cite_pinned(
     )
 
 
+def _dates(retrieved: TimeRange) -> list[str]:
+    """The distinct ISO dates a retrieval range touches, earliest first."""
+    bounds = [moment.date().isoformat() for moment in (retrieved.start, retrieved.end) if moment]
+    return list(dict.fromkeys(bounds))
+
+
+def _fill_date(text: str, retrieved: TimeRange) -> str:
+    """The citation text with any literal ``[date]`` replaced by when it was retrieved.
+
+    A range within one day reads as that date, and a wider one as 'between A and
+    B', so no rendering of a lockfile citation keeps the placeholder.
+    """
+    if DATE_PLACEHOLDER not in text:
+        return text
+    dates = _dates(retrieved)
+    if len(dates) < 2:
+        return text.replace(DATE_PLACEHOLDER, dates[0] if dates else UNRECORDED_DATE)
+    span = f"between {dates[0]} and {dates[-1]}"
+    # 'accessed on [date]' has to read 'accessed between A and B', not 'on between'.
+    return _ON_PLACEHOLDER.sub(span, text).replace(DATE_PLACEHOLDER, span)
+
+
 def _retrieval(citation: Citation, retrieved: TimeRange) -> str:
     """The retrieval dates, checksummed asset count, size, and pinning version."""
-    bounds = [moment.date().isoformat() for moment in (retrieved.start, retrieved.end) if moment]
-    dates = " through ".join(dict.fromkeys(bounds)) or "an unrecorded date"
+    dates = " through ".join(_dates(retrieved)) or UNRECORDED_DATE
     assets = "asset" if citation.asset_count == 1 else "assets"
     version = f" by usdata {citation.usdata_version}" if citation.usdata_version else ""
     return (
@@ -164,6 +216,8 @@ def _text_lines(citation: Citation) -> list[str]:
         lines.append(f"  retrieved: {_retrieval(citation, retrieved)}")
     if citation.sources:
         lines.append(f"  sources: {', '.join(citation.sources)}")
+    if DATE_PLACEHOLDER in citation.text:
+        lines.append(f"  note: {PLACEHOLDER_NOTE}")
     return lines
 
 
@@ -189,6 +243,9 @@ def _escape(value: str) -> str:
 
 __all__ = [
     "ACCESSED_VIA",
+    "DATE_PLACEHOLDER",
+    "PLACEHOLDER_NOTE",
+    "UNRECORDED_DATE",
     "Citation",
     "cite_dataset",
     "cite_lockfile",
