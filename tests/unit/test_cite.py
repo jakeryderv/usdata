@@ -5,6 +5,8 @@ import pytest
 
 from usdata.cache import sha256_file
 from usdata.cite import (
+    DATE_PLACEHOLDER,
+    PLACEHOLDER_NOTE,
     Citation,
     cite_dataset,
     cite_lockfile,
@@ -30,6 +32,7 @@ sources:
   - name: first
     dataset: test:widgets
 """
+PLACEHOLDER_CITATION = "Widgets on AWS were accessed on [date] from https://example.test/widgets"
 
 
 def make_dataset(**overrides) -> Dataset:
@@ -79,8 +82,7 @@ def locked(asset_id: str, retrieved: datetime, size: int, source: str) -> Locked
     )
 
 
-@pytest.fixture
-def pinned(tmp_path: Path) -> Path:
+def pin(tmp_path: Path, *assets: LockedAsset) -> Path:
     manifest = tmp_path / "dataset.yaml"
     manifest.write_text(MANIFEST)
     Lockfile(
@@ -88,12 +90,18 @@ def pinned(tmp_path: Path) -> Path:
         manifest_checksum=sha256_file(manifest),
         generated_at=datetime(2026, 5, 8, tzinfo=UTC),
         usdata_version="0.16.0",
-        assets=[
-            locked("a", datetime(2026, 5, 6, 12, tzinfo=UTC), 1200, "first"),
-            locked("b", datetime(2026, 5, 7, 9, tzinfo=UTC), 34, "first"),
-        ],
+        assets=list(assets),
     ).save(lockfile_path(manifest))
     return manifest
+
+
+@pytest.fixture
+def pinned(tmp_path: Path) -> Path:
+    return pin(
+        tmp_path,
+        locked("a", datetime(2026, 5, 6, 12, tzinfo=UTC), 1200, "first"),
+        locked("b", datetime(2026, 5, 7, 9, tzinfo=UTC), 34, "first"),
+    )
 
 
 def test_cite_dataset_uses_the_registry_citation() -> None:
@@ -203,6 +211,46 @@ def test_render_bibtex_falls_back_to_the_terms_url_and_counts_one_asset() -> Non
     entry = render_bibtex([citation])
     assert "url          = {https://example.test/terms}," in entry
     assert "note         = {Retrieved 2026-05-06; 1 checksummed asset (58 bytes) pinned}," in entry
+
+
+def test_cite_lockfile_fills_the_date_placeholder_with_the_retrieval_range(pinned: Path) -> None:
+    dataset = make_dataset(citation=PLACEHOLDER_CITATION)
+    (citation,) = cite_lockfile(pinned, make_registry(dataset))
+    assert citation.text == (
+        "Widgets on AWS were accessed between 2026-05-06 and 2026-05-07 "
+        "from https://example.test/widgets"
+    )
+
+
+def test_cite_lockfile_fills_the_placeholder_with_one_date_within_a_day(tmp_path: Path) -> None:
+    manifest = pin(
+        tmp_path,
+        locked("a", datetime(2026, 5, 6, 1, tzinfo=UTC), 12, "first"),
+        locked("b", datetime(2026, 5, 6, 23, tzinfo=UTC), 34, "first"),
+    )
+    dataset = make_dataset(citation=PLACEHOLDER_CITATION)
+    (citation,) = cite_lockfile(manifest, make_registry(dataset))
+    assert citation.text == PLACEHOLDER_CITATION.replace(DATE_PLACEHOLDER, "2026-05-06")
+
+
+def test_render_bibtex_of_a_lockfile_citation_has_no_date_placeholder(pinned: Path) -> None:
+    dataset = make_dataset(citation=PLACEHOLDER_CITATION)
+    entry = render_bibtex(cite_lockfile(pinned, make_registry(dataset)))
+    assert DATE_PLACEHOLDER not in entry
+    assert "howpublished = {Widgets on AWS were accessed between 2026-05-06" in entry
+
+
+def test_cite_dataset_keeps_the_placeholder_and_render_text_says_where_it_comes_from() -> None:
+    dataset = make_dataset(citation=PLACEHOLDER_CITATION)
+    citation = cite_dataset(dataset, registry=make_registry(dataset))
+    assert citation.text == PLACEHOLDER_CITATION
+    assert f"  note: {PLACEHOLDER_NOTE}" in render_text([citation]).splitlines()
+
+
+def test_as_text_and_as_bibtex_render_the_single_citation(pinned: Path) -> None:
+    (citation,) = cite_lockfile(pinned, make_registry(make_dataset()))
+    assert citation.as_text() == render_text([citation])
+    assert citation.as_bibtex() == render_bibtex([citation])
 
 
 def test_renderers_say_so_when_a_retrieval_range_has_no_bounds() -> None:

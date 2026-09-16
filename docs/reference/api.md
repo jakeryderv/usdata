@@ -21,7 +21,18 @@ See [fetch and analyze](../guides/fetch-and-analyze.md) for complete workflows.
 ::: usdata.fetch_asset
 ::: usdata.FetchedAsset
     options:
-      members: [asset, path, provenance, from_cache, open]
+      members: [asset, path, provenance, from_cache, open, inspect]
+
+## Inspecting a file
+
+::: usdata.inspect_asset
+::: usdata.inspect_path
+::: usdata.inspect.Summary
+::: usdata.inspect.CsvSummary
+::: usdata.inspect.NetcdfSummary
+::: usdata.inspect.NetcdfVariable
+::: usdata.inspect.Grib2Summary
+::: usdata.inspect.GribMessage
 
 ## Reproducible inputs
 
@@ -33,6 +44,14 @@ See [fetch and analyze](../guides/fetch-and-analyze.md) for complete workflows.
 ::: usdata.manifest.SourceSpec
 ::: usdata.manifest.Lockfile
 ::: usdata.manifest.LockedAsset
+
+## Citations
+
+::: usdata.cite_dataset
+::: usdata.cite_lockfile
+::: usdata.Citation
+    options:
+      members: [as_text, as_bibtex]
 
 ## Temporal selection
 
