@@ -7,12 +7,13 @@ See [fetch and analyze](../guides/fetch-and-analyze.md) for complete workflows.
 
 ## Discovery and queries
 
+::: usdata.datasets
 ::: usdata.search
 ::: usdata.get
 ::: usdata.build_query
 ::: usdata.Registry
     options:
-      members: [bundled, from_yaml, search, get, providers, domains]
+      members: [bundled, from_yaml, list, search, get, providers, domains]
 
 ## Fetching and opening
 

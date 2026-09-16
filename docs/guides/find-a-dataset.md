@@ -1,8 +1,9 @@
 # Find a dataset
 
 Search ranks the curated registry by keyword and can filter by provider,
-place, and time. It runs offline and never queries an agency catalog, so
-anything it returns as **available** can be fetched.
+place, and time. `usdata datasets` lists the same registry without a keyword.
+Both run offline and never query an agency catalog, so anything they return as
+**available** can be fetched.
 
 ```console
 $ usdata search precipitation --location "Cleveland County, OK"
@@ -14,6 +15,42 @@ noaa:nexrad-level2    available  since 0.2     NEXRAD Level II Radar
 noaa:mrms             available  since 0.15    Multi-Radar Multi-Sensor (MRMS)
 $ usdata info noaa:mrms
 ```
+
+## List and filter without a search term
+
+`usdata datasets` prints the whole registry as a table of id, status with the
+version it shipped in, domain, delivered formats, the reader extra that opens
+the files, and a one-line summary. Every filter narrows the list, and they
+combine:
+
+```console
+$ usdata datasets --domain severe-weather
+noaa:storm-events         available (since 0.8)   severe-weather  gzip CSV  pandas  Storm Events details
+noaa:spc-tornado-reports  available (since 0.15)  severe-weather  CSV       pandas  SPC tornado database
+$ usdata datasets --format grib2 --capability temporal_subset
+noaa:mrms  available (since 0.15)  weather-radar   GRIB2 (gzipped)  grib  MRMS gridded radar products
+noaa:hrrr  available (since 0.15)  weather-models  GRIB2            grib  HRRR model output
+noaa:gfs   available (since 0.15)  weather-models  GRIB2            grib  GFS model output
+```
+
+`--provider` and `--domain` take an id. `--format` matches case-insensitively
+anywhere in a declared format, so `csv` also finds `gzip CSV`. `--reader` takes
+a reader extra or `none` for datasets that arrive as bytes with no reader.
+`--capability` takes `spatial_subset`, `temporal_subset`, or `variable_subset`
+and keeps the datasets that declare it. `--status` is `available` (the default),
+`planned`, or `all`.
+
+`usdata search` accepts the same six options on top of its keywords, place, and
+time, and both commands accept `--json`, which prints the matching registry
+entries as a JSON array and nothing else. Search records carry their `score`.
+
+```console
+$ usdata datasets --reader pandas --provider usgs --json | jq -r '.[].id'
+usgs:water-daily
+```
+
+Both commands exit 1 when nothing matches, so a shell script can tell an empty
+result from a bad option, which exits 2.
 
 `info` prints a dataset's status, domain, license, extent, capabilities, and
 every provider parameter it accepts with a one-line description. That list is

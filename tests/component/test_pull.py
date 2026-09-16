@@ -137,6 +137,17 @@ def test_cli_pull_and_verify_roundtrip(manifest: Path, tmp_path: Path) -> None:
     )
 
 
+def test_cli_pull_quiet_keeps_the_summary_and_drops_the_per_asset_lines(
+    manifest: Path, tmp_path: Path
+) -> None:
+    runner = CliRunner()
+    with respx.mock() as mock:
+        mock.get(DATA_URL).mock(return_value=httpx.Response(200, content=CSV_V1))
+        quiet = runner.invoke(app, ["pull", str(manifest), "--cache-dir", str(tmp_path), "--quiet"])
+    assert quiet.exit_code == 0 and "wrote" in quiet.output
+    assert "\t" not in quiet.output and "bytes" not in quiet.output
+
+
 def test_verify_rejects_changed_manifest(manifest: Path, tmp_path: Path) -> None:
     with respx.mock() as mock:
         mock.get(DATA_URL).respond(200, content=CSV_V1)

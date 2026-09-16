@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+import usdata
 from usdata import providers
 from usdata.models import READER_EXTRAS, BBox, Query, Status
 from usdata.providers import Provider, load_adapter
@@ -147,3 +148,73 @@ def test_reader_extras_are_packaged_optional_dependencies() -> None:
         "optional-dependencies"
     ]
     assert set(READER_EXTRAS) <= set(extras)
+
+
+def test_list_defaults_to_available_datasets_in_registry_order(registry: Registry) -> None:
+    listed = registry.list()
+    assert [ds.id for ds in listed] == [ds.id for ds in registry if ds.status is Status.AVAILABLE]
+
+
+def test_list_filters_by_provider_domain_and_status(registry: Registry) -> None:
+    assert {ds.provider for ds in registry.list(provider="usgs", status="all")} == {"usgs"}
+    assert "noaa:nexrad-level2" in {ds.id for ds in registry.list(domain="weather-radar")}
+    planned = registry.list(status="planned")
+    assert planned and all(ds.status is Status.PLANNED for ds in planned)
+    assert len(registry.list(status="all")) == len(registry)
+
+
+def test_list_matches_a_format_case_insensitively(registry: Registry) -> None:
+    ids = {ds.id for ds in registry.list(format="csv")}
+    assert {"noaa:ghcn-daily", "noaa:storm-events"} <= ids  # declared 'CSV' and 'gzip CSV'
+    assert "noaa:nexrad-level2" not in ids
+    assert registry.list(format="CSV") == registry.list(format="csv")
+
+
+def test_list_filters_by_reader_extra_or_bytes_only(registry: Registry) -> None:
+    assert all(ds.reader == "pandas" for ds in registry.list(reader="pandas"))
+    bytes_only = registry.list(reader="none")
+    assert [ds.id for ds in bytes_only] == ["noaa:nexrad-level3"]
+    assert all(ds.reader is None for ds in bytes_only)
+
+
+def test_list_filters_by_declared_capability(registry: Registry) -> None:
+    subsetting = registry.list(capability="temporal_subset")
+    assert subsetting and all(ds.capabilities.temporal_subset for ds in subsetting)
+    assert len(subsetting) < len(registry.list())
+
+
+def test_list_combines_filters(registry: Registry) -> None:
+    combined = registry.list(provider="noaa", domain="weather-radar", reader="grib")
+    assert [ds.id for ds in combined] == ["noaa:mrms"]
+    assert registry.list(provider="noaa", domain="air-quality", status="all") == []
+
+
+def test_list_rejects_an_unknown_capability_or_status(registry: Registry) -> None:
+    with pytest.raises(ValueError, match="unknown capability 'subset'; choose one of"):
+        registry.list(capability="subset")
+    with pytest.raises(ValueError, match="unknown status 'retired'; choose one of"):
+        registry.list(status="retired")
+
+
+def test_search_applies_the_listing_filters_before_scoring(registry: Registry) -> None:
+    assert [r.dataset.id for r in registry.search(Query(text="radar"), reader="grib")] == [
+        "noaa:mrms"
+    ]
+    assert registry.search(Query(text="radar"), domain="air-quality") == []
+    assert registry.search(Query(text="radar"), capability="spatial_subset") == []
+
+
+def test_package_level_datasets_delegates_to_the_default_registry(registry: Registry) -> None:
+    assert usdata.datasets(domain="weather-radar") == registry.list(domain="weather-radar")
+    assert usdata.datasets(status="all") == registry.list(status="all")
+    assert usdata.search("radar", reader="grib") == registry.search(
+        Query(text="radar"), reader="grib"
+    )
+
+
+def test_search_status_supersedes_include_planned(registry: Registry) -> None:
+    planned = registry.search(Query(), include_planned=False, status="planned")
+    assert planned and all(r.dataset.status is Status.PLANNED for r in planned)
+    assert len(registry.search(Query(), include_planned=True, status="available")) == len(
+        registry.list()
+    )

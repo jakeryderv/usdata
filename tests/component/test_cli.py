@@ -1,9 +1,11 @@
+import json
 from itertools import takewhile
 from pathlib import Path
 
 from typer.testing import CliRunner
 
 from usdata.cli import app
+from usdata.registry import default_registry
 
 runner = CliRunner()
 
@@ -35,6 +37,83 @@ def test_fetch_planned_dataset_exits_3() -> None:
 
 def test_search_unknown_state_exits_2() -> None:
     assert runner.invoke(app, ["search", "radar", "--state", "Atlantis"]).exit_code == 2
+
+
+def test_datasets_prints_an_aligned_table() -> None:
+    result = runner.invoke(app, ["datasets", "--domain", "weather-radar"])
+    assert result.exit_code == 0
+    lines = result.stdout.splitlines()
+    assert len(lines) == 3
+    assert lines[0].startswith("noaa:nexrad-level2  available (since 0.2)")
+    assert "NEXRAD radar scans" in lines[0]
+    assert len({line.index("weather-radar") for line in lines}) == 1
+    summaries = [ds.summary or ds.title for ds in default_registry().list(domain="weather-radar")]
+    assert len({line.index(s) for line, s in zip(lines, summaries, strict=True)}) == 1
+
+
+def test_datasets_filters_by_format_reader_and_capability() -> None:
+    result = runner.invoke(app, ["datasets", "--format", "csv", "--reader", "pandas"])
+    assert result.exit_code == 0
+    assert "noaa:storm-events" in result.stdout and "noaa:nexrad-level2" not in result.stdout
+    grib = runner.invoke(app, ["datasets", "--capability", "variable_subset", "--reader", "grib"])
+    assert grib.exit_code == 0 and "noaa:mrms" in grib.stdout
+
+
+def test_datasets_status_selects_planned_entries() -> None:
+    result = runner.invoke(app, ["datasets", "--status", "planned", "--provider", "usgs"])
+    assert result.exit_code == 0
+    assert "usgs:earthquakes" in result.stdout and "target later" in result.stdout
+    assert runner.invoke(app, ["datasets", "--provider", "usgs"]).stdout.count("planned") == 0
+
+
+def test_datasets_exits_1_when_nothing_matches() -> None:
+    result = runner.invoke(app, ["datasets", "--provider", "noaa", "--domain", "air-quality"])
+    assert result.exit_code == 1 and "No datasets matched." in result.stdout
+
+
+def test_datasets_rejects_unknown_filter_values() -> None:
+    bad_capability = runner.invoke(app, ["datasets", "--capability", "subset"])
+    assert bad_capability.exit_code == 2 and "unknown capability" in bad_capability.output
+    bad_status = runner.invoke(app, ["datasets", "--status", "retired"])
+    assert bad_status.exit_code == 2 and "unknown status" in bad_status.output
+
+
+def test_datasets_json_emits_only_dataset_records() -> None:
+    result = runner.invoke(app, ["datasets", "--domain", "weather-radar", "--json"])
+    assert result.exit_code == 0
+    records = json.loads(result.stdout)
+    assert [r["id"] for r in records] == [
+        "noaa:nexrad-level2",
+        "noaa:mrms",
+        "noaa:nexrad-level3",
+    ]
+    assert records[0]["status"] == "available" and "score" not in records[0]
+
+
+def test_datasets_json_is_an_empty_array_when_nothing_matches() -> None:
+    result = runner.invoke(app, ["datasets", "--domain", "nope", "--json"])
+    assert result.exit_code == 1 and json.loads(result.stdout) == []
+
+
+def test_search_takes_the_listing_filters() -> None:
+    result = runner.invoke(app, ["search", "radar", "--reader", "grib"])
+    assert result.exit_code == 0 and result.stdout.splitlines() == [
+        line for line in result.stdout.splitlines() if "noaa:mrms" in line
+    ]
+    assert runner.invoke(app, ["search", "radar", "--domain", "air-quality"]).exit_code == 1
+
+
+def test_search_status_supersedes_the_planned_flag() -> None:
+    result = runner.invoke(app, ["search", "earthquakes", "--status", "all"])
+    assert result.exit_code == 0 and "usgs:earthquakes" in result.stdout
+
+
+def test_search_json_adds_the_score_to_each_record() -> None:
+    result = runner.invoke(app, ["search", "nexrad", "--json"])
+    assert result.exit_code == 0
+    records = json.loads(result.stdout)
+    assert records[0]["id"] == "noaa:nexrad-level2" and records[0]["score"] > 0
+    assert all(record["status"] == "available" for record in records)
 
 
 def test_info() -> None:
