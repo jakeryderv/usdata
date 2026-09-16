@@ -17,6 +17,43 @@ from usdata.registry import default_registry
 LIST_URL = f"https://{BUCKET}.s3.amazonaws.com/"
 RUN = "gfs.20240506/00/atmos/gfs.t00z."
 DATA = b"GRIB\x00\x00\x00\x02mock model bytes"
+KEY = f"{RUN}pgrb2.1p00.f000"
+OBJECT_URL = s3.https_url(BUCKET, KEY)
+ETAG = "0b331c56f52ef7c459ac80067fc5474c"
+OBJECT = b"".join(b"GRIB" + bytes([number]) * 36 for number in (1, 2))
+INDEX = "1:0:d=2024050600:PRMSL:mean sea level:anl:\n2:40:d=2024050600:CAPE:surface:anl:\n"
+PARTIAL_MANIFEST = """name: gfs-messages
+sources:
+  - dataset: noaa:gfs
+    start: 2024-05-06T00:00Z
+    end: 2024-05-06T00:00Z
+    params: {cycle: 0, forecast_hour: 0, resolution: 1p00, messages: "CAPE:surface"}
+"""
+
+
+def ranged(content: bytes = OBJECT, *, etag: str = ETAG):
+    """Answer a range request the way the bucket does."""
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        if request.headers.get("If-Match") != etag:
+            return httpx.Response(412)
+        start, end = (int(value) for value in request.headers["Range"][6:].split("-"))
+        return httpx.Response(
+            206,
+            content=content[start : end + 1],
+            headers={"Content-Range": f"bytes {start}-{end}/{len(content)}"},
+        )
+
+    return respond
+
+
+def arm_partial(mock):
+    """The listing, HEAD, and index requests one partial GFS listing makes."""
+    mock.get(LIST_URL).respond(200, text=listing([(KEY, len(OBJECT))]))
+    mock.head(OBJECT_URL).respond(
+        200, headers={"Content-Length": str(len(OBJECT)), "ETag": f'"{ETAG}"'}
+    )
+    return mock.get(f"{OBJECT_URL}.idx").respond(200, text=INDEX)
 
 
 def listing(keys, token=None):
@@ -248,3 +285,46 @@ sources:
     with respx.mock() as mock, pytest.raises(ChecksumMismatch):
         mock.get(s3.https_url(BUCKET, key)).respond(200, content=b"revised bytes")
         pull(manifest, root=tmp_path / "cache")
+
+
+def test_a_partial_gfs_id_appends_the_digest_because_keys_carry_no_extension(adapter) -> None:
+    with respx.mock() as mock:
+        arm_partial(mock)
+        (asset,) = adapter.list_assets(query(resolution="1p00", messages="CAPE:surface"))
+        (again,) = adapter.list_assets(query(resolution="1p00", messages=["CAPE:surface"]))
+    assert asset.id == "gfs.20240506.t00z.pgrb2.1p00.f000.part-d4735e3a265e"
+    assert asset.id == again.id and asset.href == again.href
+    assert asset.href == f"s3://{BUCKET}/{KEY}#messages=2"
+    assert asset.size == 40 and asset.media_type == "application/x-grib2"
+
+
+def test_the_index_sidecar_is_the_key_plus_idx(adapter) -> None:
+    with respx.mock() as mock:
+        index = arm_partial(mock)
+        adapter.list_assets(query(resolution="1p00", messages="CAPE:surface"))
+    assert str(index.calls[0].request.url).endswith("gfs.t00z.pgrb2.1p00.f000.idx")
+
+
+@pytest.mark.l2
+def test_gfs_messages_round_trip_through_a_lockfile(tmp_path: Path) -> None:
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text(PARTIAL_MANIFEST)
+    root = tmp_path / "cache"
+    with respx.mock() as mock:
+        arm_partial(mock)
+        mock.get(OBJECT_URL).side_effect = ranged()
+        first = pull(manifest, root=root)
+    (item,) = first.fetched
+    assert item.path.read_bytes() == OBJECT[40:80]
+    assert item.provenance.object_etag == ETAG and item.provenance.object_size == len(OBJECT)
+    assert [(part.start, part.end) for part in item.provenance.ranges] == [(40, 79)]
+    item.path.unlink()
+    with respx.mock(assert_all_called=False) as mock:
+        listed = mock.get(LIST_URL)
+        index = mock.get(f"{OBJECT_URL}.idx")
+        mock.get(OBJECT_URL).side_effect = ranged()
+        restored = pull(manifest, root=root)
+    assert restored.from_lockfile and restored.lockfile == first.lockfile
+    assert restored.fetched[0].path.read_bytes() == OBJECT[40:80]
+    assert listed.call_count == 0 and index.call_count == 0
+    assert verify(manifest, root=root) == []

@@ -853,18 +853,19 @@ datasets:
       High-Resolution Rapid Refresh 3 km CONUS forecasts in GRIB2 from the anonymous
       noaa-hrrr-bdp-pds S3 bucket, one whole file per run and forecast hour. Select a run by
       initialization window and cycle hour, the forecast hours, and the surface, pressure-level,
-      or native file variant. Files are 150 MB to 750 MB; fields are selected after download
-      with the GRIB2 reader, not by the server. Each file holds hundreds of fields; the catalog
-      lists the handful the guide and example select.
+      or native file variant. Files are 150 MB to 750 MB; the server subsets nothing, so fields
+      are chosen either by naming GRIB2 messages, which fetches their byte ranges through the
+      object's index sidecar, or after download with the GRIB2 reader. Each file holds hundreds
+      of fields; the catalog lists the handful the guide and example select.
     keywords: [forecast, model, hrrr, grib2, weather, nwp, cape, helicity, convective]
     protocol: s3
     homepage: https://registry.opendata.aws/noaa-hrrr-pds/
     license: US Government Work (public domain)
     temporal_extent: { start: "2014-07-30T18:00:00Z" }
-    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false, partial_fetch: true }
     summary: HRRR model output
     formats: [GRIB2]
-    selection: Whole CONUS files by run initialization window, cycle hour, forecast hours, and file variant, at most one day
+    selection: CONUS files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file variant
     inputs: Both timestamps, cycle, and forecast_hour
     reader: grib
     guide: docs/providers/noaa-hrrr.md
@@ -903,18 +904,19 @@ datasets:
       Global Forecast System forecasts in GRIB2 from the anonymous noaa-gfs-bdp-pds S3 bucket,
       one whole global file per run, forecast hour, and grid resolution. Select a run by
       initialization window and cycle hour (00, 06, 12, or 18 UTC), the forecast hours, and the
-      0.25, 0.5, or 1 degree grid. Files are 42 MB to 550 MB; fields are selected after download
-      with the GRIB2 reader, not by the server. Each file holds hundreds of fields; the catalog
-      lists the handful the guide and example select.
+      0.25, 0.5, or 1 degree grid. Files are 42 MB to 550 MB; the server subsets nothing, so fields
+      are chosen either by naming GRIB2 messages, which fetches their byte ranges through the
+      object's index sidecar, or after download with the GRIB2 reader. Each file holds hundreds
+      of fields; the catalog lists the handful the guide and example select.
     keywords: [forecast, model, gfs, grib2, global, nwp, cape, helicity, convective]
     protocol: s3
     homepage: https://registry.opendata.aws/noaa-gfs-bdp-pds/
     license: US Government Work (public domain)
     temporal_extent: { start: "2021-03-22T12:00:00Z" }
-    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false, partial_fetch: true }
     summary: GFS model output
     formats: [GRIB2]
-    selection: Whole global files by run initialization window, cycle hour, forecast hours, and grid resolution, at most one day
+    selection: Global files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and grid resolution
     inputs: Both timestamps, cycle, and forecast_hour
     reader: grib
     guide: docs/providers/noaa-gfs.md

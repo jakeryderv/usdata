@@ -250,3 +250,13 @@ def test_every_adapter_window_constant_is_declared_in_the_registry() -> None:
             if name.startswith("MAX_") and isinstance(value, timedelta)
         }
     assert found == set(WINDOW_CONSTANTS.values())
+
+
+def test_partial_fetch_is_declared_exactly_where_the_adapter_takes_messages() -> None:
+    """The capability is a promise about a query surface, so the two must agree."""
+    registry = default_registry()
+    assert {ds.id for ds in registry if ds.capabilities.partial_fetch} == {"noaa:hrrr", "noaa:gfs"}
+    for dataset_id in CASES:
+        with adapter_factory(dataset_id)() as adapter:
+            declares = testing.PARTIAL_PARAM in adapter.accepted_params
+            assert declares is registry.get(dataset_id).capabilities.partial_fetch, dataset_id
