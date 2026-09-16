@@ -88,6 +88,7 @@ def item(
     media_type="application/x-grib2",
     dataset_id="noaa:hrrr",
     messages: list[int] | None = None,
+    selectors: list[str] | None = None,
 ):
     path = tmp_path / name
     path.write_bytes(content)
@@ -104,6 +105,7 @@ def item(
             "index_url": f"s3://noaa-hrrr-bdp-pds/{name}.idx",
             "index_checksum": "sha256:" + "0" * 64,
             "ranges": message_ranges(content),
+            "selectors": selectors or [],
             "object_size": path.stat().st_size,
             "object_etag": "81198a73ad430c73adfbe3335421ea99",
         }
@@ -451,7 +453,13 @@ def test_a_partial_fetch_opens_with_and_without_select(tmp_path) -> None:
         message(np.full(12, 288.0), level_type="heightAboveGround", level=2),
         message(np.full(12, 1500.0), param=59, level_type="surface", level=0),
     ]
-    fetched = item(tmp_path, b"".join(parts), name="part.grib2", messages=[71, 170])
+    fetched = item(
+        tmp_path,
+        b"".join(parts),
+        name="part.grib2",
+        messages=[71, 170],
+        selectors=["TMP:2 m above ground", "CAPE:surface"],
+    )
     assert fetched.provenance.is_partial
     everything = fetched.open()
     # Two level types, so the same rule a select would follow suffixes both variables.
@@ -460,6 +468,7 @@ def test_a_partial_fetch_opens_with_and_without_select(tmp_path) -> None:
     assert everything.attrs["usdata"]["messages"]["cape_entireAtmosphere_0"] == {
         "file_index": 1,
         "object_index": 170,
+        "selector": "CAPE:surface",
         "shortName": "cape",
         "typeOfLevel": "entireAtmosphere",
         "level": 0,
@@ -482,6 +491,12 @@ def test_a_partial_fetch_of_one_level_keeps_bare_names(tmp_path) -> None:
     ]
     fetched = item(tmp_path, b"".join(parts), name="level.grib2", messages=[12, 13])
     assert set(fetched.open().data_vars) == {"t", "r"}
+
+
+def test_a_whole_file_carries_no_selector_in_the_messages_mapping(tmp_path) -> None:
+    """Only a partial fetch was asked for anything, so only it names a selector."""
+    result = item(tmp_path, message(np.arange(12, dtype=float))).open()
+    assert "selector" not in result.attrs["usdata"]["messages"]["t"]
 
 
 def test_a_whole_file_of_the_same_bytes_still_demands_select(tmp_path) -> None:

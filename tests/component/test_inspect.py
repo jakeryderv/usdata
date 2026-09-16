@@ -44,6 +44,7 @@ def cached(
     dataset_id: str = "noaa:ghcn-daily",
     sidecar: bool = True,
     messages: list[int] | None = None,
+    selectors: list[str] | None = None,
 ) -> FetchedAsset:
     """One asset on disk with the provenance sidecar a real fetch writes beside it.
 
@@ -65,6 +66,7 @@ def cached(
             "index_url": f"https://example.test/{name}.idx",
             "index_checksum": "sha256:" + "0" * 64,
             "ranges": grib_ranges(content),
+            "selectors": selectors or [],
             "object_size": 151_717_165,
             "object_etag": "81198a73ad430c73adfbe3335421ea99",
         }
@@ -301,6 +303,7 @@ def partial_grib(tmp_path: Path) -> FetchedAsset:
         media_type="application/x-grib2",
         dataset_id="noaa:hrrr",
         messages=[105, 131],
+        selectors=["CAPE:surface", "TMP:2 m above ground"],
     )
 
 
@@ -313,6 +316,65 @@ def test_a_partial_file_also_numbers_each_message_in_the_source_object(
     messages = summary.grib2.messages
     assert [message.file_index for message in messages] == [0, 1]
     assert [message.object_index for message in messages] == [105, 131]
+    assert [message.selector for message in messages] == ["CAPE:surface", "TMP:2 m above ground"]
+
+
+@pytest.mark.grib
+def test_variable_for_answers_in_the_readers_vocabulary(partial_grib: FetchedAsset) -> None:
+    """Selector in, variable name out, for both halves of the naming rule."""
+    spanning = partial_grib.inspect().grib2
+    assert spanning is not None
+    # Two level types, so every name is suffixed.
+    assert spanning.variable_for("CAPE:surface") == "cape_entireAtmosphere_0"
+    assert list(partial_grib.open().data_vars) == [
+        spanning.variable_for("CAPE:surface"),
+        spanning.variable_for("TMP:2 m above ground"),
+    ]
+
+
+@pytest.mark.grib
+def test_variable_for_keeps_the_bare_name_when_one_level_is_spanned(
+    tmp_path: Path, partial_grib: FetchedAsset
+) -> None:
+    ec = pytest.importorskip("eccodes")
+    np = pytest.importorskip("numpy")
+    messages = []
+    for param in (130, 157):
+        handle = ec.codes_grib_new_from_samples("regular_ll_sfc_grib2")
+        try:
+            for key, setting in (("Ni", 4), ("Nj", 3)):
+                ec.codes_set(handle, key, setting)
+            ec.codes_set(handle, "typeOfLevel", "isobaricInhPa")
+            ec.codes_set(handle, "level", 500)
+            ec.codes_set(handle, "paramId", param)
+            ec.codes_set(handle, "packingType", "grid_simple")
+            ec.codes_set_values(handle, np.full(12, 1.0))
+            messages.append(ec.codes_get_message(handle))
+        finally:
+            ec.codes_release(handle)
+    one_level = cached(
+        tmp_path,
+        "level.grib2",
+        b"".join(messages),
+        media_type="application/x-grib2",
+        dataset_id="noaa:hrrr",
+        messages=[12, 13],
+        selectors=["TMP:500 mb", "RH:500 mb"],
+    )
+    summary = one_level.inspect()
+    assert summary.grib2 is not None
+    assert summary.grib2.variable_for("TMP:500 mb") == "t"
+    assert summary.grib2.variable_for("RH:500 mb") == "r"
+    assert set(one_level.open().data_vars) == {"t", "r"}
+
+
+@pytest.mark.grib
+def test_variable_for_names_the_selectors_a_file_does_hold(partial_grib: FetchedAsset) -> None:
+    summary = partial_grib.inspect()
+    assert summary.grib2 is not None
+    with pytest.raises(KeyError, match="CAPE:surface") as error:
+        summary.grib2.variable_for("cape:surface")
+    assert "'cape:surface'" in str(error.value)
 
 
 @pytest.mark.grib
@@ -424,8 +486,9 @@ def test_the_cli_prints_both_numberings_only_for_a_partial_file(
     part = runner.invoke(app, ["inspect", str(partial_grib.path)])
     assert part.exit_code == 0
     header = next(line for line in part.stdout.splitlines() if "shortName" in line)
-    assert header.split()[:3] == ["file", "#", "object"]
+    assert header.split()[:5] == ["file", "#", "object", "#", "selector"]
     assert "105" in part.stdout and "131" in part.stdout
+    assert "CAPE:surface" in part.stdout and "selector" not in whole.stdout
 
 
 @pytest.mark.grib

@@ -17,7 +17,7 @@ from __future__ import annotations
 import gzip
 import re
 import warnings
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from importlib import import_module
@@ -309,10 +309,33 @@ class _Field(NamedTuple):
     message: dict[str, Any]
 
 
-def _spans_levels(selected: list[_Field]) -> bool:
-    """Whether the selected messages cover more than one type of level or level."""
-    levels = {(field.attrs.get("typeOfLevel"), field.attrs.get("level")) for field in selected}
-    return len(levels) > 1
+def variable_names(fields: Sequence[tuple[str, Any, Any]]) -> list[str]:
+    """The names one set of selected messages takes, under the one GRIB2 naming rule.
+
+    Every name is the bare short name while the messages share one type of level
+    and level, and every name is ``short_typeOfLevel_level`` as soon as they span
+    more than one, so the names follow from the selection rather than from which
+    short names happened to repeat. A name that would still repeat gains its
+    position.
+
+    Args:
+        fields: One ``(short name, type of level, level)`` triple per message, in
+            the order the messages appear.
+
+    Returns:
+        One variable name per field, in the same order.
+    """
+    spans = len({(level_type, level) for _, level_type, level in fields}) > 1
+    names: list[str] = []
+    for short, level_type, level in fields:
+        label = short
+        if spans:
+            kind = "level" if level_type is None else level_type
+            label = f"{short}_{kind}_{'' if level is None else level}"
+        if label in names:
+            label = f"{label}_{len(names)}"
+        names.append(label)
+    return names
 
 
 def open_grib2(
@@ -332,6 +355,8 @@ def open_grib2(
     came from: ``file_index`` numbers it in this file from zero, and
     ``object_index`` numbers it in the source object as that object's index
     sidecar does, one-based, for a partial fetch and ``None`` for a whole file.
+    A partial fetch's entries also carry ``selector``, the index selector the
+    message was fetched for.
 
     A select value that matches none of the selected messages warns, or raises
     ``ValueError`` when ``strict``; a select that matches nothing always raises.
@@ -347,6 +372,7 @@ def open_grib2(
     count = 0
     needs_select = select is None and not fetched.provenance.is_partial
     object_messages = fetched.provenance.object_messages
+    selectors = fetched.provenance.selectors if object_messages else []
     for h in _messages(eccodes, fetched.path):
         count += 1
         if count > 1 and needs_select:
@@ -388,7 +414,7 @@ def open_grib2(
             stamp = _time(attrs.get(date_key), attrs.get(time_key))
             if stamp:
                 attrs[label] = stamp
-        message = {
+        message: dict[str, Any] = {
             "file_index": count - 1,
             "object_index": object_messages[count - 1] if object_messages else None,
             "shortName": _get(eccodes, h, "shortName", str),
@@ -396,6 +422,8 @@ def open_grib2(
             "level": attrs.get("level"),
             "step": attrs.get("step"),
         }
+        if selectors:
+            message["selector"] = selectors[count - 1]
         short = message["shortName"]
         if short in (None, "", "unknown", "~"):
             short = _product_name(fetched.asset.id) or (
@@ -422,14 +450,13 @@ def open_grib2(
         warnings.warn(report, UserWarning, stacklevel=_caller_stacklevel())
     variables: dict[str, Any] = {}
     messages: dict[str, dict[str, Any]] = {}
-    by_level = _spans_levels(selected)
-    for field in selected:
-        label = field.short
-        if by_level:
-            level_type = field.attrs.get("typeOfLevel", "level")
-            label = f"{field.short}_{level_type}_{field.attrs.get('level', '')}"
-        if label in variables:
-            label = f"{label}_{len(variables)}"
+    names = variable_names(
+        [
+            (field.short, field.attrs.get("typeOfLevel"), field.attrs.get("level"))
+            for field in selected
+        ]
+    )
+    for label, field in zip(names, selected, strict=True):
         variables[label] = (grid.dims, field.data, field.attrs)
         messages[label] = field.message
     dataset = xarray.Dataset(variables, coords=grid.coords)

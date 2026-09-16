@@ -99,9 +99,9 @@ def test_selection_is_ascending_distinct_and_keeps_every_matching_message() -> N
         selectors("HLCY:3000-0 m above ground", "TMP:2 m above ground", "TMP:2 m above ground"),
         url=URL,
     )
-    assert [e.number for e in chosen] == [2, 4]
+    assert [s.entry.number for s in chosen] == [2, 4]
     both_levels = resolve(entries(), selectors("TMP:surface", "TMP:2 m above ground"), url=URL)
-    assert [e.number for e in both_levels] == [2, 3]
+    assert [s.entry.number for s in both_levels] == [2, 3]
 
 
 def test_a_step_narrows_a_selector_that_would_otherwise_match_two_messages() -> None:
@@ -111,9 +111,23 @@ def test_a_step_narrows_a_selector_that_would_otherwise_match_two_messages() -> 
         "3:200:d=x:CAPE:surface:1 hour fcst:\n"
     )
     parsed = parse_index(text, object_size=300, url=URL)
-    assert [e.number for e in resolve(parsed, selectors("TMP:surface"), url=URL)] == [1, 2]
+    assert [s.entry.number for s in resolve(parsed, selectors("TMP:surface"), url=URL)] == [1, 2]
     stepped = resolve(parsed, selectors("TMP:surface:2 hour fcst"), url=URL)
-    assert [e.number for e in stepped] == [2]
+    assert [s.entry.number for s in stepped] == [2]
+
+
+def test_each_selection_carries_text_naming_its_one_message() -> None:
+    """A selector that named one message is kept; a broader one gives way to the index line."""
+    text = (
+        "1:0:d=x:TMP:surface:1 hour fcst:\n"
+        "2:100:d=x:TMP:surface:2 hour fcst:\n"
+        "3:200:d=x:CAPE:surface:1 hour fcst:\n"
+    )
+    parsed = parse_index(text, object_size=300, url=URL)
+    exact = resolve(parsed, selectors("CAPE:surface"), url=URL)
+    assert [s.selector for s in exact] == ["CAPE:surface"]
+    broad = resolve(parsed, selectors("TMP:surface"), url=URL)
+    assert [s.selector for s in broad] == ["TMP:surface:1 hour fcst", "TMP:surface:2 hour fcst"]
 
 
 def test_an_unknown_level_lists_the_levels_that_short_name_publishes() -> None:

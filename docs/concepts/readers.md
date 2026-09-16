@@ -46,7 +46,7 @@ needs no extra; the count stops after 100,000 rows and says so. A NetCDF4 file
 reports its data variables with dims, shape, units, and long name, and a GRIB2
 file reports every message with its `file_index`, `shortName`, `name`,
 `typeOfLevel`, `level`, `step`, `units`, and grid shape, plus the `object_index`
-a partial fetch recorded. Those two use the same extras `open()` does,
+and `selector` a partial fetch recorded. Those two use the same extras `open()` does,
 and a missing one produces a summary whose detail is `None` and whose `note`
 names the extra rather than an exception. Bytes that no longer decode are
 reported the same way, so a summary of the provenance always comes back.
@@ -158,7 +158,9 @@ it came from: its `file_index`, its `object_index`, `shortName`, `typeOfLevel`,
 `level`, and `step`. `file_index` counts messages in the file that was fetched,
 from zero; `object_index` is the number the source object's index sidecar gave
 the same message, one-based, which only a partial fetch knows and which is
-`None` for a whole file. ecCodes has no names for MRMS parameters, so those take the product from
+`None` for a whole file. A partial fetch's entries also carry the `selector`
+they were fetched for, and `summary.grib2.variable_for(selector)` maps one back
+to the variable name it produces. ecCodes has no names for MRMS parameters, so those take the product from
 the file name, for example `RotationTrackML30min`, which the registry's
 `RotationTrackML30min_00.50` entry then supplies the units for. Values marked
 missing by a bitmap become NaN; product sentinels such as MRMS `-999` and `-99`

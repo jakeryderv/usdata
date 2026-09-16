@@ -73,7 +73,8 @@ class GribMessage(BaseModel):
 
     Two numberings name the same message. ``file_index`` counts messages in the
     local file from zero; ``object_index`` is the number the source object's
-    index sidecar gave it, one-based, and is set only for a partial fetch.
+    index sidecar gave it, one-based, and is set only for a partial fetch, as is
+    ``selector``, the index selector the message was fetched for.
     """
 
     file_index: int = Field(ge=0, description="Zero-based position in the local file")
@@ -81,6 +82,9 @@ class GribMessage(BaseModel):
         default=None,
         ge=1,
         description="One-based message number in the source object, for a partial fetch",
+    )
+    selector: str | None = Field(
+        default=None, description="Index selector this message was fetched for, for a partial fetch"
     )
     short_name: str | None = Field(default=None, description="ecCodes shortName")
     name: str | None = Field(default=None, description="ecCodes name")
@@ -95,6 +99,44 @@ class Grib2Summary(BaseModel):
     """Every message a GRIB2 file holds, in file order."""
 
     messages: list[GribMessage]
+
+    def variable_for(self, selector: str) -> str:
+        """The variable name ``open()`` will give the message one index selector fetched.
+
+        This closes the loop a partial fetch opens: ``messages="CAPE:surface"``
+        asks in the index sidecar's vocabulary, and the reader answers in
+        ecCodes', so this says which name that selector produces given every
+        message this file holds. Only a partial fetch records selectors.
+
+        Args:
+            selector: A selector exactly as the provenance recorded it, such as
+                ``CAPE:surface``.
+
+        Returns:
+            The variable name the GRIB2 naming rule gives that message.
+
+        Raises:
+            KeyError: No message here was fetched for that selector; the message
+                lists the selectors that were.
+        """
+        from usdata._grib import variable_names
+
+        names = variable_names(
+            [
+                (message.short_name or "", message.type_of_level, message.level)
+                for message in self.messages
+            ]
+        )
+        for message, name in zip(self.messages, names, strict=True):
+            if message.selector == selector:
+                return name
+        recorded = ", ".join(
+            repr(message.selector) for message in self.messages if message.selector is not None
+        )
+        raise KeyError(
+            f"no message in this file was fetched for selector {selector!r}; "
+            f"selectors recorded here: {recorded or 'none'}"
+        )
 
 
 class Summary(BaseModel):
@@ -226,22 +268,25 @@ def _detail(
         from usdata._netcdf import variables
 
         return NetcdfSummary(variables=variables(path))
-    return Grib2Summary(messages=_numbered(readers.inventory(path), record))
+    return Grib2Summary(messages=_paired(readers.inventory(path), record))
 
 
-def _numbered(messages: list[GribMessage], record: Provenance) -> list[GribMessage]:
-    """Each message also numbered as the source object numbers it, where provenance says.
+def _paired(messages: list[GribMessage], record: Provenance) -> list[GribMessage]:
+    """Each message as the fetch that took it described it, where provenance says.
 
-    The file itself carries no such number: a partial fetch recorded one message
-    number per range, so the two lists pair up in order, and a whole file or a
-    record that does not pair leaves ``object_index`` unset.
+    The file itself carries neither number nor selector: a partial fetch recorded
+    one message number and one selector per range, so the lists pair up in order.
+    A whole file, or a record that does not pair, leaves both unset.
     """
     numbers = record.object_messages
     if len(numbers) != len(messages):
         return messages
+    selectors = (
+        record.selectors if len(record.selectors) == len(messages) else [None] * len(messages)
+    )
     return [
-        message.model_copy(update={"object_index": number})
-        for message, number in zip(messages, numbers, strict=True)
+        message.model_copy(update={"object_index": number, "selector": selector})
+        for message, number, selector in zip(messages, numbers, selectors, strict=True)
     ]
 
 
