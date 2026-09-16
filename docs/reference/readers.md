@@ -29,6 +29,7 @@ This page lists what to install, what is inferred, and what `open()` accepts.
 | `nrows` | CSV readers | Maximum observation rows, excluding header and units rows. |
 | `sweep` | `nexrad-level2` | Zero-based integer or non-empty list of distinct integers; `None` opens every sweep. |
 | `select` | `grib2` | Mapping of ecCodes key names to one value or a list of values; required when a file holds more than one message. |
+| `strict` | `grib2` | `True` raises when a `select` value matches none of the selected messages; the default warns and returns the rest. |
 
 Passing an option to a reader it does not apply to raises `ValueError`, even
 with an empty value.
@@ -60,7 +61,7 @@ pandas inference and default missing-value parsing.
 | `UnsupportedFormat` | subclass of `ValueError` | No reader matches, an unknown `reader` name is passed, or the asset is a Level III product |
 | `RadarDecodeError` | subclass of `ValueError` | Moment and coordinate records do not align for the requested sweeps |
 | `Hurdat2FormatError` | subclass of `ValueError` | A HURDAT2 line, count, or value cannot be parsed; the message names the line |
-| `ValueError` | built-in | A multi-message GRIB2 file opened without `select`, or selected messages on different grids |
+| `ValueError` | built-in | A multi-message GRIB2 file opened without `select`, a `select` that matches no message at all, selected messages on different grids, or, under `strict`, a `select` value that matched none of them |
 
 Missing local files and pandas, xarray, or ecCodes parsing failures propagate
 unchanged. CSV headers must be unique and non-empty, and an ERDDAP units row

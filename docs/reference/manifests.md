@@ -10,7 +10,8 @@ the provider options, and the numbers.
 name: weather-and-streamflow
 version: "1.0"
 sources:
-  - dataset: noaa:ghcn-daily
+  - name: precip
+    dataset: noaa:ghcn-daily
     start: 2024-05-06
     end: 2024-05-07
     variables: [PRCP, TMAX]
@@ -30,6 +31,7 @@ Each source accepts:
 | Field | Meaning |
 |---|---|
 | `dataset` | Required registry id, such as `usgs:water-daily`. |
+| `name` | Optional label of letters, digits, hyphens, and underscores that keys this source in results and the lockfile. Must be unique, including against the one-based positions unnamed sources use. |
 | `location` | A place name, postal code, or quoted FIPS code; see the [places reference](places.md). Mutually exclusive with `bbox`. |
 | `bbox` | WGS84 box with `west`, `south`, `east`, `north`. |
 | `start`, `end` | ISO dates or datetimes. Most adapters require both; climate normals make them optional and HURDAT2 rejects them. |
@@ -89,6 +91,22 @@ In Python, `pull()` and `verify()` take `pathlib.Path` manifest arguments, not
 strings; `pull(update=[...])` selects entries and raises `UpstreamChanged`
 with a `drift` list when unaccepted changes remain. Exit codes are listed in
 [how it works](../concepts/how-it-works.md#cli-exit-codes).
+
+`pull()` returns a `PullResult`. Its `fetched` list is in manifest order, then
+in the order each adapter listed that source's assets, and `by_source` groups
+the same objects by source key: a source's `name`, or its one-based position as
+a string when it has none.
+
+```python
+result = pull(Path("dataset.yaml"))
+(observed,) = result.by_source["surge"]
+```
+
+A lockfile written before source keys existed loads unchanged and records none;
+its entries fall back to grouping by dataset id in manifest order, so sources
+that share a dataset land together until you name them and re-run
+`pull --force`. The command line output does not change: it lists one line per
+fetched asset in `fetched` order.
 
 ## Failures and retries
 

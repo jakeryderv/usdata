@@ -37,6 +37,7 @@ class FetchedAsset(BaseModel):
         nrows: int | None = None,
         sweep: int | list[int] | None = None,
         select: Mapping[str, Any] | None = None,
+        strict: bool = False,
     ) -> Any:
         """Open local data with an optional ``pandas``, ``radar``, ``netcdf``, or ``grib`` reader.
 
@@ -46,7 +47,9 @@ class FetchedAsset(BaseModel):
         with matching provenance in its attributes. See ``usdata.readers.open_asset``
         for options. Use ``sweep=0`` or ``sweep=[0, 2]`` to load selected zero-based
         radar sweeps, and ``select={"shortName": "cape", "typeOfLevel": "surface"}``
-        to choose GRIB2 messages. Cached files and provenance sidecars are never changed.
+        to choose GRIB2 messages; ``strict=True`` raises instead of warning when a
+        GRIB2 select value matches none of the selected messages. Cached files and
+        provenance sidecars are never changed.
         """
         from usdata.readers import open_asset
 
@@ -59,6 +62,7 @@ class FetchedAsset(BaseModel):
             nrows=nrows,
             sweep=sweep,
             select=select,
+            strict=strict,
         )
 
 
