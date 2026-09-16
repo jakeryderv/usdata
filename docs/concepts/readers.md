@@ -34,6 +34,35 @@ to fit.
 
 --8<-- "_snippets/large-grids.md"
 
+## Looking before you open
+
+`item.inspect()` returns a typed summary of a fetched file: where it came from,
+how large it is, the format that was recognized, and what that format holds. A
+CSV reports its columns and a row count read with the standard library, so it
+needs no extra; the count stops after 100,000 rows and says so. A NetCDF4 file
+reports its data variables with dims, shape, units, and long name, and a GRIB2
+file reports every message with its `shortName`, `name`, `typeOfLevel`, `level`,
+`step`, `units`, and grid shape. Those two use the same extras `open()` does,
+and a missing one produces a summary whose detail is `None` and whose `note`
+names the extra rather than an exception. Bytes that no longer decode are
+reported the same way, so a summary of the provenance always comes back.
+
+Inspection reads only the local file and the provenance sidecar beside it.
+`usdata.inspect_path(path)` does the same for a cached path without a fetch
+result in hand, and `usdata.readers.inventory(path)` returns the GRIB2 message
+list on its own. That list is the one the reader's "pass `select`" error prints,
+so a multi-message file no longer has to be inventoried by provoking and parsing
+an exception.
+
+```sh
+usdata inspect ~/.cache/usdata/noaa/hrrr/hrrr.t18z.wrfprsf00.grib2
+usdata inspect noaa:hrrr/hrrr.t18z.wrfprsf00.grib2 --json
+```
+
+The command takes a cache path or a dataset and asset id, prints the summary
+with a table for the detail, and exits 2 when the path has no sidecar or the id
+names nothing cached. `--json` emits the summary object and nothing else.
+
 ## CSV and ERDDAP CSV
 
 The pandas extra returns a DataFrame. Identifier-like columns default to

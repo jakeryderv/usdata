@@ -1,0 +1,361 @@
+"""Format-aware summaries: CSV without an extra, NetCDF and GRIB2 with theirs, and the CLI."""
+
+from __future__ import annotations
+
+import gzip
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+
+import pytest
+from typer.testing import CliRunner
+
+from usdata import FetchedAsset, inspect_asset, inspect_path
+from usdata.cache import cached_path, sha256_file
+from usdata.cli import app
+from usdata.inspect import AssetFormat, CsvSummary, NetcdfSummary
+from usdata.models import Asset, Protocol, Provenance
+from usdata.provenance import write
+
+NETCDF_FIXTURE = Path(__file__).parents[1] / "fixtures/netcdf/packed-grid.nc"
+CSV = b"time,station,value\n2024-05-06,USW00013967,1.0\n2024-05-07,USW00013967,2.0\n"
+
+runner = CliRunner()
+
+
+def cached(
+    tmp_path: Path,
+    name: str,
+    content: bytes,
+    *,
+    media_type: str | None = None,
+    dataset_id: str = "noaa:ghcn-daily",
+    sidecar: bool = True,
+) -> FetchedAsset:
+    """One asset on disk with the provenance sidecar a real fetch writes beside it."""
+    path = tmp_path / name
+    path.write_bytes(content)
+    asset = Asset(
+        id=name,
+        dataset_id=dataset_id,
+        href=f"https://example.test/{name}",
+        protocol=Protocol.HTTP,
+        media_type=media_type,
+    )
+    record = Provenance(
+        dataset_id=dataset_id,
+        provider=dataset_id.partition(":")[0],
+        source_url=asset.href,
+        retrieved_at=datetime(2026, 9, 15, tzinfo=UTC),
+        checksum=sha256_file(path),
+        size=path.stat().st_size,
+        usdata_version="0.16.0",
+    )
+    if sidecar:
+        write(record, path)
+    return FetchedAsset(asset=asset, path=path, provenance=record, from_cache=True)
+
+
+def test_csv_columns_and_row_count_need_no_extra(tmp_path: Path) -> None:
+    fetched = cached(tmp_path, "daily.csv", CSV, media_type="text/csv")
+    summary = fetched.inspect()
+    assert summary.format is AssetFormat.CSV
+    assert summary.dataset_id == "noaa:ghcn-daily" and summary.asset_id == "daily.csv"
+    assert summary.size == len(CSV) and summary.checksum == fetched.provenance.checksum
+    assert summary.source_url == "https://example.test/daily.csv"
+    assert summary.retrieved_at == datetime(2026, 9, 15, tzinfo=UTC)
+    assert isinstance(summary.detail, CsvSummary)
+    assert summary.csv is not None
+    assert summary.csv.columns == ["time", "station", "value"]
+    assert (summary.csv.row_count, summary.csv.truncated) == (2, False)
+    assert summary.note is None
+
+
+def test_a_capped_csv_scan_reports_the_count_as_a_lower_bound(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("usdata.inspect.ROW_LIMIT", 2)
+    rows = b"".join(b"2024-05-%02d,USW00013967,1.0\n" % day for day in range(1, 6))
+    summary = cached(tmp_path, "long.csv", b"time,station,value\n" + rows).inspect()
+    assert summary.csv is not None
+    assert summary.csv.row_count == 2 and summary.csv.row_limit == 2
+    assert summary.csv.truncated
+
+
+def test_a_gzipped_csv_is_summarized_without_changing_the_cached_bytes(tmp_path: Path) -> None:
+    content = gzip.compress(CSV)
+    fetched = cached(tmp_path, "daily.csv.gz", content, media_type="application/gzip")
+    summary = inspect_asset(fetched)
+    assert summary.format is AssetFormat.CSV
+    assert summary.csv is not None and summary.csv.row_count == 2
+    assert fetched.path.read_bytes() == content
+
+
+@pytest.mark.parametrize("content", [b"\x1f\x8b\x07nonsense", gzip.compress(CSV)[:20]])
+def test_bytes_that_no_longer_decode_are_a_note_rather_than_a_failure(
+    tmp_path: Path, content: bytes
+) -> None:
+    fetched = cached(tmp_path, "daily.csv.gz", content, media_type="application/gzip")
+    summary = fetched.inspect()
+    assert summary.format is AssetFormat.CSV and summary.detail is None
+    assert summary.note is not None and summary.note.startswith("not readable as csv")
+    assert summary.size == len(content) and summary.dataset_id == "noaa:ghcn-daily"
+
+
+@pytest.mark.parametrize("name, media_type", [("tile.tif", "image/tiff"), ("notes.txt", None)])
+def test_a_format_with_no_reader_is_summarized_as_bytes(
+    tmp_path: Path, name: str, media_type: str | None
+) -> None:
+    summary = cached(
+        tmp_path, name, b"II*\x00", media_type=media_type, dataset_id="usgs:3dep"
+    ).inspect()
+    assert summary.format is AssetFormat.BYTES
+    assert summary.detail is None and summary.note is None
+    assert summary.size == 4
+
+
+def test_inspect_path_reads_the_sidecar_and_infers_the_format_from_the_name(
+    tmp_path: Path,
+) -> None:
+    fetched = cached(tmp_path, "daily.csv", CSV)
+    summary = inspect_path(fetched.path)
+    assert summary.format is AssetFormat.CSV
+    assert summary.asset_id == "daily.csv" and summary.dataset_id == "noaa:ghcn-daily"
+    assert summary.csv is not None and summary.csv.columns == ["time", "station", "value"]
+
+
+def test_inspect_path_without_a_sidecar_raises(tmp_path: Path) -> None:
+    fetched = cached(tmp_path, "daily.csv", CSV, sidecar=False)
+    with pytest.raises(OSError):
+        inspect_path(fetched.path)
+
+
+@pytest.mark.netcdf
+def test_a_missing_extra_yields_a_note_naming_it_and_no_detail(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from usdata import _netcdf
+
+    real_import = _netcdf.import_module
+
+    def without_xarray(name: str) -> object:
+        if name == "xarray":
+            raise ModuleNotFoundError("No module named 'xarray'", name="xarray")
+        return real_import(name)
+
+    monkeypatch.setattr(_netcdf, "import_module", without_xarray)
+    fetched = cached(
+        tmp_path,
+        "scene.nc",
+        NETCDF_FIXTURE.read_bytes(),
+        media_type="application/x-netcdf",
+        dataset_id="noaa:goes-abi",
+    )
+    summary = fetched.inspect()
+    assert summary.format is AssetFormat.NETCDF
+    assert summary.detail is None and summary.netcdf is None
+    assert summary.note is not None and "usdata[netcdf]" in summary.note
+
+
+@pytest.mark.netcdf
+def test_netcdf_variables_carry_dims_shape_and_stated_metadata(tmp_path: Path) -> None:
+    pytest.importorskip("h5netcdf")
+    pytest.importorskip("h5py")
+    pytest.importorskip("xarray")
+    fetched = cached(
+        tmp_path,
+        "scene.nc",
+        NETCDF_FIXTURE.read_bytes(),
+        media_type="application/x-netcdf",
+        dataset_id="noaa:goes-abi",
+    )
+    summary = fetched.inspect()
+    assert isinstance(summary.detail, NetcdfSummary)
+    assert summary.netcdf is not None and summary.note is None
+    variables = {variable.name: variable for variable in summary.netcdf.variables}
+    assert {"CMI", "DQF", "unsigned_count", "t"} <= set(variables)
+    assert variables["CMI"].dims == ["y", "x"] and variables["CMI"].shape == [2, 3]
+    assert variables["CMI"].units == "K"
+    assert fetched.path.read_bytes() == NETCDF_FIXTURE.read_bytes()
+
+
+@pytest.fixture
+def grib(tmp_path: Path) -> FetchedAsset:
+    """Three synthetic messages on one grid, the file the reader demands a select for."""
+    ec = pytest.importorskip("eccodes")
+    np = pytest.importorskip("numpy")
+    pytest.importorskip("xarray")
+
+    def message(value: float, *, param: int, level_type: str, level: int) -> bytes:
+        handle = ec.codes_grib_new_from_samples("regular_ll_sfc_grib2")
+        try:
+            for key, setting in (("Ni", 4), ("Nj", 3)):
+                ec.codes_set(handle, key, setting)
+            ec.codes_set(handle, "typeOfLevel", level_type)
+            ec.codes_set(handle, "level", level)
+            ec.codes_set(handle, "paramId", param)
+            ec.codes_set(handle, "packingType", "grid_simple")
+            ec.codes_set_values(handle, np.full(12, value))
+            return ec.codes_get_message(handle)
+        finally:
+            ec.codes_release(handle)
+
+    parts = [
+        message(500.0, param=130, level_type="isobaricInhPa", level=500),
+        message(850.0, param=130, level_type="isobaricInhPa", level=850),
+        message(7.0, param=59, level_type="surface", level=0),
+    ]
+    return cached(
+        tmp_path,
+        "multi.grib2",
+        b"".join(parts),
+        media_type="application/x-grib2",
+        dataset_id="noaa:hrrr",
+    )
+
+
+@pytest.mark.grib
+def test_grib2_messages_are_listed_with_the_keys_select_matches(grib: FetchedAsset) -> None:
+    summary = grib.inspect()
+    assert summary.format is AssetFormat.GRIB2
+    assert summary.grib2 is not None and summary.note is None
+    messages = summary.grib2.messages
+    assert [message.index for message in messages] == [0, 1, 2]
+    assert [message.short_name for message in messages] == ["t", "t", "cape"]
+    assert [message.level for message in messages] == ["500", "850", "0"]
+    assert messages[0].type_of_level == "isobaricInhPa" and messages[0].units == "K"
+    assert messages[0].name == "Temperature" and messages[0].shape == (3, 4)
+    assert messages[2].type_of_level == "entireAtmosphere"
+
+
+@pytest.mark.grib
+def test_the_reader_error_lists_exactly_what_the_inventory_holds(grib: FetchedAsset) -> None:
+    from usdata.readers import inventory
+
+    messages = inventory(grib.path)
+    with pytest.raises(ValueError, match=r"3 messages; pass select") as error:
+        grib.open()
+    for message in messages:
+        triple = f"({message.short_name!r}, {message.type_of_level!r}, {message.level!r})"
+        assert triple in str(error.value)
+
+
+def test_the_cli_prints_the_provenance_block_and_the_column_table(tmp_path: Path) -> None:
+    fetched = cached(tmp_path, "daily.csv", CSV, media_type="text/csv")
+    result = runner.invoke(app, ["inspect", str(fetched.path)])
+    assert result.exit_code == 0
+    assert "noaa:ghcn-daily" in result.stdout and "daily.csv" in result.stdout
+    assert "format:" in result.stdout and "csv" in result.stdout
+    assert "rows:" in result.stdout and "columns:" in result.stdout
+    assert "station" in result.stdout
+
+
+def test_the_cli_emits_the_summary_as_json(tmp_path: Path) -> None:
+    fetched = cached(tmp_path, "daily.csv", CSV, media_type="text/csv")
+    result = runner.invoke(app, ["inspect", str(fetched.path), "--json"])
+    assert result.exit_code == 0
+    record = json.loads(result.stdout)
+    assert record["format"] == "csv" and record["dataset_id"] == "noaa:ghcn-daily"
+    assert record["csv"]["columns"] == ["time", "station", "value"]
+    assert record["csv"]["row_count"] == 2 and record["netcdf"] is None
+
+
+def test_the_cli_resolves_a_dataset_and_asset_id_against_the_cache(tmp_path: Path) -> None:
+    path = cached_path("noaa:ghcn-daily", "daily.csv", tmp_path)
+    path.parent.mkdir(parents=True)
+    cached(path.parent, "daily.csv", CSV)
+    result = runner.invoke(
+        app, ["inspect", "noaa:ghcn-daily/daily.csv", "--cache-dir", str(tmp_path)]
+    )
+    assert result.exit_code == 0
+    assert "noaa:ghcn-daily" in result.stdout
+
+
+def test_the_cli_says_a_capped_row_count_is_a_lower_bound(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("usdata.inspect.ROW_LIMIT", 1)
+    fetched = cached(tmp_path, "daily.csv", CSV, media_type="text/csv")
+    result = runner.invoke(app, ["inspect", str(fetched.path)])
+    assert result.exit_code == 0
+    assert "at least 1, scanned the first 1" in result.stdout
+
+
+def test_the_cli_reports_an_empty_csv_as_no_columns(tmp_path: Path) -> None:
+    fetched = cached(tmp_path, "empty.csv", b"", media_type="text/csv")
+    result = runner.invoke(app, ["inspect", str(fetched.path)])
+    assert result.exit_code == 0
+    assert "rows:" in result.stdout and "columns: none" in result.stdout
+
+
+@pytest.mark.netcdf
+def test_the_cli_names_the_missing_extra_instead_of_failing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from usdata import _netcdf
+
+    def without_xarray(name: str) -> object:
+        raise ModuleNotFoundError(f"No module named {name!r}", name=name)
+
+    monkeypatch.setattr(_netcdf, "import_module", without_xarray)
+    fetched = cached(tmp_path, "scene.nc", b"", dataset_id="noaa:goes-abi")
+    result = runner.invoke(app, ["inspect", str(fetched.path)])
+    assert result.exit_code == 0
+    assert "format:" in result.stdout and "netcdf" in result.stdout
+    assert "usdata[netcdf]" in result.stdout
+
+
+@pytest.mark.netcdf
+def test_the_cli_prints_the_netcdf_variable_table(tmp_path: Path) -> None:
+    pytest.importorskip("h5netcdf")
+    pytest.importorskip("h5py")
+    pytest.importorskip("xarray")
+    fetched = cached(tmp_path, "scene.nc", NETCDF_FIXTURE.read_bytes(), dataset_id="noaa:goes-abi")
+    result = runner.invoke(app, ["inspect", str(fetched.path)])
+    assert result.exit_code == 0
+    assert "variables:" in result.stdout
+    assert "name" in result.stdout and "long_name" in result.stdout
+    assert "CMI" in result.stdout and "y, x" in result.stdout and "2 x 3" in result.stdout
+
+
+@pytest.mark.grib
+def test_the_cli_prints_the_grib2_message_table(grib: FetchedAsset) -> None:
+    result = runner.invoke(app, ["inspect", str(grib.path)])
+    assert result.exit_code == 0
+    assert "messages:" in result.stdout and "shortName" in result.stdout
+    assert "isobaricInhPa" in result.stdout and "3 x 4" in result.stdout
+    assert "cape" in result.stdout
+
+
+@pytest.mark.grib
+def test_the_cli_says_when_a_grib2_file_holds_no_messages(tmp_path: Path) -> None:
+    pytest.importorskip("eccodes")
+    pytest.importorskip("numpy")
+    pytest.importorskip("xarray")
+    fetched = cached(tmp_path, "empty.grib2", b"", dataset_id="noaa:hrrr")
+    result = runner.invoke(app, ["inspect", str(fetched.path)])
+    assert result.exit_code == 0
+    assert "messages: none" in result.stdout
+
+
+def test_the_cli_exits_2_for_an_unsafe_dataset_id(tmp_path: Path) -> None:
+    result = runner.invoke(app, ["inspect", "no aa:x/y", "--cache-dir", str(tmp_path)])
+    assert result.exit_code == 2
+    assert "unsafe dataset id" in result.output
+
+
+@pytest.mark.parametrize(
+    "target, expected",
+    [("noaa:ghcn-daily/absent.csv", "no cached file at"), ("absent.csv", "no file at")],
+)
+def test_the_cli_exits_2_for_an_unknown_asset(tmp_path: Path, target: str, expected: str) -> None:
+    result = runner.invoke(app, ["inspect", target, "--cache-dir", str(tmp_path)])
+    assert result.exit_code == 2
+    assert expected in result.output
+
+
+def test_the_cli_exits_2_for_a_file_with_no_sidecar(tmp_path: Path) -> None:
+    fetched = cached(tmp_path, "daily.csv", CSV, sidecar=False)
+    result = runner.invoke(app, ["inspect", str(fetched.path)])
+    assert result.exit_code == 2
+    assert "no usable provenance beside" in result.output

@@ -43,6 +43,9 @@ for item in fetch(get("noaa:ghcn-daily"), query):
 `item.provenance.source_url` records the URL the bytes were actually fetched
 from and `item.asset.href` records where the listing pointed, which are equal
 today but need not stay equal.
+`item.inspect()`, or `usdata inspect <path>`, summarizes what a fetched file
+holds before you open it: CSV columns and row count with no extra installed,
+NetCDF4 variables or GRIB2 messages with the format's extra.
 `open()` is a separate local step that needs the reader extra for the format;
 without it you still have the path. What each reader returns is in
 [readers](../concepts/readers.md), and the options in the

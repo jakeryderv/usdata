@@ -13,7 +13,10 @@ from typing import TYPE_CHECKING, Any
 from usdata.models import Protocol, Variable
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from usdata._fetch import FetchedAsset
+    from usdata.inspect import GribMessage
 
 NETCDF_MEDIA_TYPES = {"application/x-netcdf", "application/netcdf", "application/x-netcdf4"}
 GRIB2_MEDIA_TYPES = {
@@ -131,6 +134,28 @@ def fill_registry_attrs(fetched: FetchedAsset, data: Any) -> None:
             filled.append({"variable": name, "attribute": "long_name"})
     if filled:
         data.attrs["usdata"]["registry_attrs"] = filled
+
+
+def inventory(path: Path) -> list[GribMessage]:
+    """List every message in a local GRIB2 file without decoding any values.
+
+    This is the one inventory of a GRIB2 file: the reader's own "pass select"
+    and "select matched no messages" errors list the same messages.
+
+    Args:
+        path: A local GRIB2 file, gzipped or not. Nothing is fetched or written.
+
+    Returns:
+        One entry per message in file order, carrying the ecCodes keys that
+        ``select`` matches on plus the grid shape.
+
+    Raises:
+        MissingReaderDependency: The grib extra, or the ecCodes library, is unavailable.
+        ValueError: The file is not GRIB edition 2, or a message is truncated.
+    """
+    from usdata._grib import inventory as grib_inventory
+
+    return grib_inventory(path)
 
 
 def open_asset(

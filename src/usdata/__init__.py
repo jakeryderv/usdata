@@ -12,6 +12,7 @@ except PackageNotFoundError:  # running from a source tree without an install
 
 from usdata._fetch import ChecksumMismatch, FetchedAsset, fetch, fetch_asset
 from usdata.cite import cite_dataset, cite_lockfile
+from usdata.inspect import inspect_asset, inspect_path
 from usdata.models import Asset, BBox, Dataset, Provenance, Query, TemporalSelection, TimeRange
 from usdata.pull import pull, verify
 from usdata.query import build_query
@@ -40,6 +41,8 @@ __all__ = [
     "fetch",
     "fetch_asset",
     "get",
+    "inspect_asset",
+    "inspect_path",
     "pull",
     "search",
     "select_by_time",

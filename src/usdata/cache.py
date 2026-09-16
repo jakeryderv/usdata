@@ -23,14 +23,31 @@ def cache_dir() -> Path:
 
 def asset_path(asset: Asset, root: Path | None = None) -> Path:
     """Where an asset lives in the cache: <root>/<provider>/<dataset>/<asset id>."""
-    provider, sep, name = asset.dataset_id.partition(":")
+    return cached_path(asset.dataset_id, asset.id, root)
+
+
+def cached_path(dataset_id: str, asset_id: str, root: Path | None = None) -> Path:
+    """Where the cache keeps one asset, addressed by its ids rather than the asset itself.
+
+    Args:
+        dataset_id: The owning dataset's ``provider:name`` id.
+        asset_id: The asset's id; slashes become underscores, as they do on fetch.
+        root: Cache root to resolve against, or the configured cache directory.
+
+    Returns:
+        The path the cache uses for that asset, whether or not it exists.
+
+    Raises:
+        ValueError: Either id is unsafe, or the path would escape the cache root.
+    """
+    provider, sep, name = dataset_id.partition(":")
     if not sep or any(
         not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", part) for part in (provider, name)
     ):
-        raise ValueError(f"unsafe dataset id: {asset.dataset_id!r}")
-    safe_id = asset.id.replace("/", "_")
+        raise ValueError(f"unsafe dataset id: {dataset_id!r}")
+    safe_id = asset_id.replace("/", "_")
     if not safe_id or safe_id in {".", ".."} or "\\" in safe_id or "\x00" in safe_id:
-        raise ValueError(f"unsafe asset id: {asset.id!r}")
+        raise ValueError(f"unsafe asset id: {asset_id!r}")
     base = (root or cache_dir()).expanduser().resolve()
     path = base / provider / name / safe_id
     for candidate in (path, path.with_name(path.name + ".provenance.json")):

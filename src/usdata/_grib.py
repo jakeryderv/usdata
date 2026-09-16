@@ -23,6 +23,7 @@ from inspect import currentframe
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from usdata.inspect import GribMessage
 from usdata.readers import MissingReaderDependency, fill_registry_attrs
 
 if TYPE_CHECKING:
@@ -35,7 +36,7 @@ LIBRARY_HINT = (
     "`conda install -c conda-forge eccodes` or `brew install eccodes`"
 )
 MRMS_NAME = re.compile(r"^MRMS_(?P<product>.+?)_\d{2}\.\d{2}_\d{8}-\d{6}\.grib2(?:\.gz)?$")
-SUMMARY_KEYS = ("shortName", "typeOfLevel", "level")
+INVENTORY_KEYS = ("shortName", "name", "typeOfLevel", "level", "step", "units")
 VARIABLE_KEYS = (
     "name",
     "units",
@@ -188,8 +189,41 @@ def _caller_stacklevel() -> int:
     return level
 
 
-def _summary(eccodes: Any, h: int) -> tuple[str, str, Any]:
-    return tuple(_get(eccodes, h, key, str) for key in SUMMARY_KEYS)  # type: ignore[return-value]
+def _shape(eccodes: Any, h: int) -> tuple[int, int] | None:
+    """A message's grid rows and columns under either key pair, or None when neither is set."""
+    rows, cols = _get(eccodes, h, "Nj", int), _get(eccodes, h, "Ni", int)
+    if rows is None or cols is None:
+        rows, cols = _get(eccodes, h, "Ny", int), _get(eccodes, h, "Nx", int)
+    return None if rows is None or cols is None else (rows, cols)
+
+
+def inventory(path: Path) -> list[GribMessage]:
+    """Every message in a local GRIB2 file, in file order, without decoding its values."""
+    eccodes = _modules()[0]
+    messages = []
+    for index, h in enumerate(_messages(eccodes, path)):
+        keys = {key: _get(eccodes, h, key, str) for key in INVENTORY_KEYS}
+        messages.append(
+            GribMessage(
+                index=index,
+                short_name=keys["shortName"],
+                name=keys["name"],
+                type_of_level=keys["typeOfLevel"],
+                level=keys["level"],
+                step=keys["step"],
+                units=keys["units"],
+                shape=_shape(eccodes, h),
+            )
+        )
+    return messages
+
+
+def _available(path: Path) -> str:
+    """Every message as a (shortName, typeOfLevel, level) triple, for a reader error to list."""
+    return ", ".join(
+        f"({message.short_name!r}, {message.type_of_level!r}, {message.level!r})"
+        for message in inventory(path)
+    )
 
 
 def _product_name(asset_id: str) -> str | None:
@@ -215,13 +249,11 @@ class _Grid:
 
     def __init__(self, eccodes: Any, numpy: Any, h: int) -> None:
         self.grid_type = _get(eccodes, h, "gridType", str) or "unknown"
-        rows = _get(eccodes, h, "Nj", int)
-        cols = _get(eccodes, h, "Ni", int)
-        if rows is None or cols is None:
-            rows, cols = _get(eccodes, h, "Ny", int), _get(eccodes, h, "Nx", int)
-        if rows is None or cols is None:
+        shape = _shape(eccodes, h)
+        if shape is None:
             raise ValueError(f"cannot determine the grid shape of a {self.grid_type} message")
-        self.shape = (rows, cols)
+        self.shape = shape
+        rows, cols = shape
         self.flip_rows = bool(_get(eccodes, h, "jScansPositively", int))
         self.flip_cols = bool(_get(eccodes, h, "iScansNegatively", int))
         if _get(eccodes, h, "jPointsAreConsecutive", int):
@@ -282,11 +314,11 @@ def open_grib2(
     present: dict[str, list[str]] = {key: [] for key in options}
     fields: dict[str, tuple[Any, dict[str, Any]]] = {}
     grid: _Grid | None = None
-    available: list[tuple[str, str, Any]] = []
+    count = 0
     names: list[str] = []
     for h in _messages(eccodes, fetched.path):
-        available.append(_summary(eccodes, h))
-        if len(available) > 1 and select is None:
+        count += 1
+        if count > 1 and select is None:
             continue
         hits = {key: _matched(eccodes, h, key, wanted) for key, wanted in options.items()}
         missed = [key for key, indexes in hits.items() if not indexes]
@@ -333,19 +365,18 @@ def open_grib2(
             )
         names.append(short)
         fields[f"{short}#{len(names)}"] = (data, attrs)
-    if len(available) > 1 and select is None:
-        listing = ", ".join(f"({s!r}, {t!r}, {lv!r})" for s, t, lv in available)
+    if count > 1 and select is None:
         raise ValueError(
-            f"{len(available)} messages; pass select={{...}} with ecCodes keys to choose, "
+            f"{count} messages; pass select={{...}} with ecCodes keys to choose, "
             f"for example select={{'shortName': ..., 'typeOfLevel': ...}}. "
-            f"Available (shortName, typeOfLevel, level): {listing}"
+            f"Available (shortName, typeOfLevel, level): {_available(fetched.path)}"
         )
     if grid is None or not fields:
-        if not available:
+        if not count:
             raise ValueError("no GRIB2 messages found")
-        listing = ", ".join(f"({s!r}, {t!r}, {lv!r})" for s, t, lv in available)
         raise ValueError(
-            f"select matched no messages. Available (shortName, typeOfLevel, level): {listing}"
+            "select matched no messages. Available (shortName, typeOfLevel, level): "
+            f"{_available(fetched.path)}"
         )
     if report := _unmatched_report(options, matched, present):
         if strict:
