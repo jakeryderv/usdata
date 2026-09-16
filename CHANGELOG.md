@@ -12,6 +12,37 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.18.0](https://github.com/jakeryderv/usdata/releases/tag/v0.18.0) - 2026-09-16
+
+
+### Added
+
+- HRRR and GFS accept a `messages` parameter that fetches only the GRIB2 messages you name, as byte ranges of the object resolved through its wgrib2 `.idx` sidecar, instead of the whole file: two HRRR fields are 1.8 MB rather than 150 MB. Selectors are the index's own `SHORTNAME:level text` spelling, such as `CAPE:surface`. The result is those messages concatenated, which is a valid GRIB2 file the reader opens without `select`, and a manifest pins its byte ranges and the object's ETag so a restore reproduces it without re-reading the index. ([#174](https://github.com/jakeryderv/usdata/issues/174))
+- `usdata pull dataset.yaml --dry-run` prices a manifest before fetching it: it lists every source through its adapter, printing one line per asset in the same columns as `fetch --dry-run`, a subtotal per source, and the manifest total on stderr, and downloads nothing. `--json` emits the plan, and `usdata.pull.plan()` returns it from Python. Both dry runs now report a missing size honestly: the known bytes read `at least M bytes` and the sources whose adapters report no size are named, instead of a bare `0 bytes`. ([#194](https://github.com/jakeryderv/usdata/issues/194))
+- `Citation` is exported from the package root and renders itself through `as_text()` and `as_bibtex()`, so citations no longer have to be produced by shelling out to the console script, and `python -m usdata` now runs the CLI. ([#196](https://github.com/jakeryderv/usdata/issues/196))
+- Storm Events CSVs opened with the pandas reader gain `BEGIN_UTC` and `END_UTC` columns, derived from the local timestamps and the `CZ_TIMEZONE` offset label and recorded under `frame.attrs["usdata"]["derived"]`. ([#199](https://github.com/jakeryderv/usdata/issues/199))
+- A partial GRIB2 fetch now records the index selector each message was fetched for. Provenance gains `selectors`, aligned with `ranges`; every entry of `dataset.attrs["usdata"]["messages"]` gains `selector`; `usdata inspect` prints a `selector` column for a partial file; and `Grib2Summary.variable_for(selector)` returns the variable name the reader's naming rule gives that message, so `CAPE:surface` can be looked up as `cape_entireAtmosphere_0` instead of guessed. ([#210](https://github.com/jakeryderv/usdata/issues/210))
+
+### Changed
+
+- The GRIB2 message key `index`, on `GribMessage`, in `readers.inventory`, and in `dataset.attrs["usdata"]["messages"]`, is now `file_index`: the message's zero-based position in the local file. A new `object_index` carries the one-based number the source object's index sidecar gave the same message, set for a partial fetch and `None` for a whole file, and `usdata inspect` prints both columns when a file has both. The old key was renamed before any release used it, so there is no alias. ([#211](https://github.com/jakeryderv/usdata/issues/211))
+
+### Fixed
+
+- `usdata cite` fills the literal `[date]` placeholder an agency's requested citation leaves with the retrieval date the lockfile records, as one date or `between A and B` across a span, so a BibTeX entry no longer publishes the placeholder; citing a dataset id alone keeps it and notes that a lockfile is what fills it. ([#195](https://github.com/jakeryderv/usdata/issues/195))
+- GRIB2 variable names now follow only from the messages a `select` matched: every variable is named `shortName_typeOfLevel_level` when the selection spans more than one type of level or more than one level within a type, and every variable keeps its bare `shortName` when they all share one, so the same select always returns the same names instead of suffixing only the short names that happened to repeat. `dataset.attrs["usdata"]["messages"]` maps each variable name to its message's index, `shortName`, `typeOfLevel`, `level`, and `step`. A select that spans levels whose short names did not repeat now returns a suffixed name where it previously returned a bare one. ([#197](https://github.com/jakeryderv/usdata/issues/197))
+- Public functions that take a filesystem path now accept a `str` as well as a `Path`, coercing once on entry, so the path `usdata inspect` prints can be pasted straight into `inspect_path` instead of raising `AttributeError`. This covers `inspect_path`, `readers.inventory`, `fetch`, `fetch_asset`, `cite_lockfile`, `pull`, `resolve`, `restore`, `plan`, `verify`, `Manifest.load`, `Lockfile.load`, `Lockfile.save`, and `Registry.from_yaml`. ([#209](https://github.com/jakeryderv/usdata/issues/209))
+
+### Documentation
+
+- ADR 0028 records how a partial GRIB2 fetch identifies, pins, and reads a subset of one object, with the S3 range and index behaviour it was verified against; the HRRR and GFS guides, the manifest reference, and the provenance page document the `messages` parameter and the new sidecar fields.
+- The severe-weather case study was re-run on the features that landed since it was written: its HRRR source names the CAPE and helicity messages, so the manifest pins 84.9 MB instead of 216.3 MB; the README prices it with one `usdata pull dataset.yaml --dry-run`; the notebook reads the Storm Events `BEGIN_UTC` and `END_UTC` columns instead of converting `CZ_TIMEZONE` by hand, and opens the partial GRIB2 file once, taking its two variable names from `attrs["usdata"]["messages"]`.
+
+### Development
+
+- `just run-notebooks` accepts `--cache DIR` (or `USDATA_NOTEBOOK_CACHE`) to reuse a download cache across runs, so refreshing a large example does not fetch it again; the default is still a fresh cache per run. ([#198](https://github.com/jakeryderv/usdata/issues/198))
+- The post-release walkthrough waits up to ten minutes for the new version to appear on the PyPI index before reporting a broken release, after the v0.17.0 upload lagged its first run.
+
 ## [0.17.0](https://github.com/jakeryderv/usdata/releases/tag/v0.17.0) - 2026-09-16
 
 
