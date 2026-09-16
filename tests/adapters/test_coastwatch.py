@@ -98,7 +98,7 @@ def test_subset_uses_available_times_and_contained_grid_centers(adapter) -> None
     "override",
     [
         {"start": "2020-01-01", "end": "2020-01-02"},
-        {"start": "2024-05-07", "end": "2024-05-08"},
+        {"start": "2024-05-07", "end": "2024-05-08T00:00Z"},
         {"start": "2027-01-01", "end": "2027-01-02"},
     ],
 )
@@ -107,6 +107,14 @@ def test_empty_time_intersections_do_not_snap_to_other_days(adapter, override) -
         mock.get(INFO_URL).respond(200, text=INFO)
         mock.get(GRID_URL + "?time").respond(200, text=TIMES)
         assert adapter.list_assets(query(**override)) == []
+
+
+def test_a_bare_end_date_includes_that_days_analysis(adapter) -> None:
+    with respx.mock() as mock:
+        mock.get(INFO_URL).respond(200, text=INFO)
+        mock.get(GRID_URL + "?time").respond(200, text=TIMES)
+        (asset,) = adapter.list_assets(query(start="2024-05-07", end="2024-05-08"))
+    assert asset.time and asset.time.start == datetime(2024, 5, 8, 12, tzinfo=UTC)
 
 
 def test_box_without_grid_centers_returns_empty_without_http(adapter) -> None:

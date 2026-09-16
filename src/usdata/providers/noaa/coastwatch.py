@@ -1,6 +1,6 @@
 """CoastWatch blended day/night SST as reproducible ERDDAP CSV subsets.
 
-Requires bbox and inclusive UTC start/end timestamps. Dates mean midnight UTC.
+Requires bbox and inclusive UTC start/end timestamps; a bare end date runs to the end of its day.
 Variables default to analysed_sst; stride optionally subsamples both spatial
 axes by a positive integer. Empty intersections resolve to no assets. Requests
 exceeding one million grid rows must be narrowed or use a larger stride.

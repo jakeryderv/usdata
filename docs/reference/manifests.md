@@ -42,7 +42,7 @@ Each source accepts:
 | `name` | Optional label of letters, digits, hyphens, and underscores that keys this source in results and the lockfile. Must be unique, including against the one-based positions unnamed sources use. |
 | `location` | A place name, postal code, or quoted FIPS code; see the [places reference](places.md). Mutually exclusive with `bbox`. |
 | `bbox` | WGS84 box with `west`, `south`, `east`, `north`. |
-| `start`, `end` | ISO dates or datetimes. Most adapters require both; climate normals make them optional and HURDAT2 rejects them. |
+| `start`, `end` | ISO dates or datetimes. A date alone is the first instant of its UTC day as `start` and the last as `end`, so two bare dates select whole calendar days. Most adapters require both; climate normals make them optional and HURDAT2 rejects them. |
 | `variables` | Dataset-specific variable names or codes. Quote numeric codes to keep leading zeros. |
 | `params` | Provider-specific options from the table below. Unknown keys are errors. |
 | `allow_empty` | Default `false`. `true` only when this source may legitimately resolve to no assets. |

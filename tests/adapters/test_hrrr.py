@@ -180,6 +180,10 @@ def test_select_runs_uses_inclusive_bounds():
     assert select_runs(start, end, 2) == [datetime(2024, 5, 7, 2, tzinfo=UTC)]
     assert select_runs(start, end, 4) == [datetime(2024, 5, 6, 4, tzinfo=UTC)]
     assert select_runs(start, start, 4) == []
+    day = build_query(start="2024-05-07", end="2024-05-07").time
+    assert day and day.start and day.end
+    assert select_runs(day.start, day.end, 4) == [datetime(2024, 5, 7, 4, tzinfo=UTC)]
+    assert select_runs(day.start, day.end, 23) == [datetime(2024, 5, 7, 23, tzinfo=UTC)]
 
 
 @pytest.mark.parametrize(

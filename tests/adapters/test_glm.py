@@ -142,6 +142,7 @@ def test_window_starts_at_public_archive(adapter):
         {"text": "lightning"},
         {"start": "2018-02-13T15:00", "end": "2018-02-13T16:09"},
         {"start": "2024-05-06T00:00", "end": "2024-05-07T00:01"},
+        {"start": "2024-05-06", "end": "2024-05-07"},  # two whole days
     ],
 )
 def test_bad_queries_fail_before_network(adapter, params):
@@ -177,3 +178,13 @@ sources:
     with respx.mock() as mock, pytest.raises(ChecksumMismatch):
         mock.get(s3.https_url("noaa-goes16", KEY)).respond(200, content=b"revised bytes")
         pull(manifest, root=tmp_path / "cache")
+
+
+def test_one_bare_date_is_one_whole_day(adapter):
+    with respx.mock() as mock:
+        route = mock.get(LIST_URL).respond(200, text=listing([(KEY, len(DATA))]))
+        assets = adapter.list_assets(query(start="2024-05-06", end="2024-05-06"))
+    assert [asset.id for asset in assets] == [NAME]
+    prefixes = [call.request.url.params["prefix"] for call in route.calls]
+    assert len(prefixes) == 24
+    assert prefixes[0] == "GLM-L2-LCFA/2024/127/00/" and prefixes[-1] == "GLM-L2-LCFA/2024/127/23/"

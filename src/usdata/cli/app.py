@@ -184,7 +184,10 @@ def search(
         typer.Option("--location", "--state", help="State, 'County, ST', or quoted FIPS code."),
     ] = None,
     start: Annotated[str | None, typer.Option(help="ISO date or datetime.")] = None,
-    end: Annotated[str | None, typer.Option(help="ISO date or datetime.")] = None,
+    end: Annotated[
+        str | None,
+        typer.Option(help="ISO date or datetime; a date alone runs to the end of that UTC day."),
+    ] = None,
     planned: Annotated[
         bool, typer.Option("--planned", help="Include planned datasets that have no adapter yet.")
     ] = False,
@@ -321,7 +324,10 @@ def fetch(
     lon: Annotated[float | None, typer.Option()] = None,
     radius_km: Annotated[float, typer.Option(help="Radius around --lat/--lon.")] = 50.0,
     start: Annotated[str | None, typer.Option(help="ISO date or datetime.")] = None,
-    end: Annotated[str | None, typer.Option(help="ISO date or datetime.")] = None,
+    end: Annotated[
+        str | None,
+        typer.Option(help="ISO date or datetime; a date alone runs to the end of that UTC day."),
+    ] = None,
     variables: Annotated[
         str | None, typer.Option("--vars", help="Comma-separated variable names.")
     ] = None,

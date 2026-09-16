@@ -14,7 +14,8 @@ GFS runs at 00, 06, 12, and 18 UTC; `cycle` (required) must be one of those
 four hours. The query window selects runs by **initialization time**,
 inclusive, and spans at most one day: a window from 00:00 to 00:00 UTC on one
 day with `cycle=0` selects exactly that run, and a 24-hour window can select
-the same cycle on two days. A window containing no `cycle` initialization is
+the same cycle on two days. A bare date as both bounds is that whole day and
+selects its `cycle` run. A window containing no `cycle` initialization is
 rejected before any request.
 
 --8<-- "_snippets/utc-window.md"

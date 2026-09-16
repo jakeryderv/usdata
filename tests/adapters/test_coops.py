@@ -156,10 +156,22 @@ def test_units_default_to_metric_and_reject_the_other_systems_token():
 
 def test_interval_limit_inclusive_and_naive_dates_use_utc():
     with adapter() as provider:
-        (asset,) = provider.list_assets(query(start="2024-05-06", end="2024-06-03"))
+        (asset,) = provider.list_assets(query(start="2024-05-06", end="2024-06-03T00:00"))
     assert asset.time is not None
     assert asset.time.start == datetime(2024, 5, 6, tzinfo=UTC)
     assert httpx.URL(asset.href).params["end_date"] == "20240603 00:00"
+
+
+def test_a_bare_end_date_means_its_last_minute():
+    with adapter() as provider:
+        (asset,) = provider.list_assets(query(start="2024-05-06", end="2024-06-02"))
+        assert httpx.URL(asset.href).params["end_date"] == "20240602 23:59"
+        assert asset.time and asset.time.end == datetime(2024, 6, 2, 23, 59, tzinfo=UTC)
+        # Twenty-nine calendar days exceed the limit; seconds on a datetime still fail precision.
+        with pytest.raises(QueryError, match="at most 28 days"):
+            provider.list_assets(query(start="2024-05-06", end="2024-06-03"))
+        with pytest.raises(QueryError, match="minute precision"):
+            provider.list_assets(query(start="2024-05-06", end="2024-05-06T10:00:30"))
 
 
 @pytest.mark.l2

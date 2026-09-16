@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import csv
 import io
-from datetime import UTC, date, datetime
+import re
+from datetime import UTC, date, datetime, time
 from functools import lru_cache
 from importlib import resources
 from typing import Any
@@ -72,14 +73,27 @@ def resolve_place(name: str) -> BBox:
     return places[next(iter(candidates))][1]
 
 
-def parse_datetime(value: str | date | datetime | None) -> datetime | None:
-    """Accept ISO dates or datetimes; naive values are treated as UTC."""
+LAST_INSTANT = time(23, 59, 59, 999999)
+"""The time of day a bare end date resolves to: the last microsecond of its UTC day."""
+
+_BARE_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def parse_datetime(value: str | date | datetime | None, *, end: bool = False) -> datetime | None:
+    """Accept ISO dates or datetimes; naive values are treated as UTC.
+
+    A date alone is the first instant of its UTC day, or with ``end=True`` the
+    last, ``23:59:59.999999``, so a window bounded by two bare dates covers
+    whole calendar days. A datetime is taken as given, whichever bound it is.
+    """
     if value is None:
         return None
     if isinstance(value, datetime):
         dt = value
     elif isinstance(value, date):
-        dt = datetime(value.year, value.month, value.day)
+        dt = datetime.combine(value, LAST_INSTANT if end else time.min)
+    elif _BARE_DATE.match(value.strip()):
+        dt = datetime.combine(date.fromisoformat(value.strip()), LAST_INSTANT if end else time.min)
     else:
         dt = datetime.fromisoformat(value.strip())
     if dt.tzinfo is None:
@@ -123,7 +137,7 @@ def build_query(
     elif lat is not None and lon is not None:
         box = BBox.from_point(lat, lon, radius_km)
 
-    start_dt, end_dt = parse_datetime(start), parse_datetime(end)
+    start_dt, end_dt = parse_datetime(start), parse_datetime(end, end=True)
     time = TimeRange(start=start_dt, end=end_dt) if (start_dt or end_dt) else None
 
     return Query(

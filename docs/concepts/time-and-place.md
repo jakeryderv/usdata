@@ -13,8 +13,10 @@ observations inside it. Whole-file archives such as Storm Events return every
 annual file the window touches. Radar, satellite, and MRMS queries select files
 whose start stamps fall inside the window, never files that merely overlap it.
 Model output selects runs whose initialization time falls inside the window,
-so a same-day window with a non-zero cycle hour must extend past that hour.
-Each dataset's guide states its rule and its maximum window.
+so a window given with times must reach the cycle hour, while a bare date
+covers every hour of its day. Each dataset's guide states its rule and its
+maximum window, and a window's length is measured between its instants: two
+bare dates a day apart span two whole days, not one.
 
 Some sources report local time in their rows even though the query was UTC.
 Storm Events carries a `CZ_TIMEZONE` column for exactly this reason; convert
