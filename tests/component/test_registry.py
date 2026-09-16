@@ -1,34 +1,15 @@
-import pkgutil
 import tomllib
-from datetime import timedelta
-from importlib import import_module
 from pathlib import Path
 
 import pytest
 
 import usdata
-from usdata import providers
 from usdata.models import READER_EXTRAS, BBox, Query, Status
 from usdata.providers import Provider, load_adapter
 from usdata.providers.base import NotImplementedProvider
 from usdata.registry import DatasetNotFound, Registry, default_registry
 
 ROOT = Path(__file__).resolve().parents[2]
-
-# The window each adapter enforces, named where the adapter defines or imports it. Reading
-# the constants is why this module may import provider packages, as tests/adapters do.
-WINDOW_CONSTANTS = {
-    "noaa:nexrad-level2": ("usdata.providers.noaa.nexrad", "MAX_WINDOW"),
-    "noaa:nexrad-level3": ("usdata.providers.noaa.nexrad_level3", "MAX_WINDOW"),
-    "noaa:goes-abi": ("usdata.providers.noaa.goes", "MAX_WINDOW"),
-    "noaa:goes-glm": ("usdata.providers.noaa.glm", "MAX_WINDOW"),
-    "noaa:mrms": ("usdata.providers.noaa.mrms", "MAX_WINDOW"),
-    "noaa:hrrr": ("usdata.providers.noaa.hrrr", "MAX_WINDOW"),
-    # GFS inherits its window from the shared ModelRuns base in the HRRR module.
-    "noaa:gfs": ("usdata.providers.noaa.hrrr", "MAX_WINDOW"),
-    "noaa:coops-water-levels": ("usdata.providers.noaa.coops", "MAX_INTERVAL"),
-    "noaa:coops-tide-predictions": ("usdata.providers.noaa.coops", "MAX_PREDICTION_INTERVAL"),
-}
 
 
 @pytest.fixture(scope="module")
@@ -144,26 +125,6 @@ def test_every_available_dataset_can_be_cited(registry: Registry) -> None:
             continue
         assert ds.citation, f"{ds.id} says nothing about how to cite it"
         assert ds.terms and ds.terms.startswith("https://"), f"{ds.id} has no terms URL"
-
-
-def test_declared_windows_equal_the_windows_the_adapters_enforce(registry: Registry) -> None:
-    for dataset_id, (module_name, constant) in WINDOW_CONSTANTS.items():
-        limits = registry.get(dataset_id).limits
-        assert limits is not None and limits.max_window is not None, dataset_id
-        assert limits.max_window == getattr(import_module(module_name), constant), dataset_id
-
-
-def test_every_adapter_window_constant_is_declared_in_the_registry() -> None:
-    """A window a new adapter enforces has to reach the registry, not only the module."""
-    found: set[tuple[str, str]] = set()
-    for info in pkgutil.walk_packages(providers.__path__, f"{providers.__name__}."):
-        module = import_module(info.name)
-        found |= {
-            (info.name, name)
-            for name, value in vars(module).items()
-            if name.startswith("MAX_") and isinstance(value, timedelta)
-        }
-    assert found == set(WINDOW_CONSTANTS.values())
 
 
 def test_reader_extras_are_packaged_optional_dependencies() -> None:

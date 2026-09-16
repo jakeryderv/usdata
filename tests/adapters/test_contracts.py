@@ -1,19 +1,22 @@
 """Shared behavioral contracts; dataset-specific wire semantics stay in adapter tests."""
 
+import pkgutil
 import re
 from collections.abc import Callable
 from contextlib import nullcontext
 from datetime import timedelta, timezone
+from importlib import import_module
 from pathlib import Path
 from typing import cast
 
 import httpx
 import pytest
 
-from usdata.models import Query, Status, TimeRange
+from usdata import providers
+from usdata.models import BBox, Query, Status, TimeRange
 from usdata.protocols import s3
 from usdata.providers import Provider, load_adapter
-from usdata.providers.base import QueryError
+from usdata.providers.base import QueryError, QueryField
 from usdata.providers.noaa.coastwatch import BASE, DATASET
 from usdata.providers.noaa.hurdat2 import DIRECTORY_URL as HURDAT_URL
 from usdata.providers.noaa.spc import PAGE_URL as SPC_PAGE
@@ -61,13 +64,36 @@ STORM_NAME = "StormEvents_details-ftp_v1.0_d2024_c20260323.csv.gz"
 HURDAT_NAME = "hurdat2-nepac-1949-2025-02272026.txt"
 # HURDAT2 publishes the complete record per basin, so it rejects a time filter.
 UNTIMED = {"noaa:hurdat2"}
+WINDOW = {"start": "2024-05-06T12:00Z", "end": "2024-05-06T12:05Z"}
+PROBE_BBOX = BBox(west=-97.7, south=35.2, east=-97.2, north=35.7)
+# How Provider.reject names each field it refuses, which is what a refusal is read from.
+REFUSED = {"bbox": "location/bbox", "variables": "variables", "time": "start/end"}
+# Parameters naming a station or site. A bbox stands in for one wherever they are declared.
+SELECTORS = frozenset({"site", "sites", "station", "stations", "nearest"})
+# The window each adapter enforces, named where the adapter defines or imports it. Reading
+# the constants is why this module imports provider packages, as the adapter tests do.
+WINDOW_CONSTANTS = {
+    "noaa:nexrad-level2": ("usdata.providers.noaa.nexrad", "MAX_WINDOW"),
+    "noaa:nexrad-level3": ("usdata.providers.noaa.nexrad_level3", "MAX_WINDOW"),
+    "noaa:goes-abi": ("usdata.providers.noaa.goes", "MAX_WINDOW"),
+    "noaa:goes-glm": ("usdata.providers.noaa.glm", "MAX_WINDOW"),
+    "noaa:mrms": ("usdata.providers.noaa.mrms", "MAX_WINDOW"),
+    "noaa:hrrr": ("usdata.providers.noaa.hrrr", "MAX_WINDOW"),
+    # GFS inherits its window from the shared ModelRuns base in the HRRR module.
+    "noaa:gfs": ("usdata.providers.noaa.hrrr", "MAX_WINDOW"),
+    "noaa:coops-water-levels": ("usdata.providers.noaa.coops", "MAX_INTERVAL"),
+    "noaa:coops-tide-predictions": ("usdata.providers.noaa.coops", "MAX_PREDICTION_INTERVAL"),
+}
 
 
 def query(dataset_id: str) -> Query:
-    window = (
-        {} if dataset_id in UNTIMED else {"start": "2024-05-06T12:00Z", "end": "2024-05-06T12:05Z"}
-    )
+    window = {} if dataset_id in UNTIMED else WINDOW
     return build_query(**window, **CASES[dataset_id])
+
+
+def timed_query(dataset_id: str) -> Query:
+    """The scenario query with a window, even for an adapter that refuses one."""
+    return build_query(**WINDOW, **CASES[dataset_id])
 
 
 def contract_data(dataset_id: str) -> bytes:
@@ -291,3 +317,115 @@ def test_invalid_query_rejected_without_creating_client(dataset_id, monkeypatch)
     )
     with load_adapter(default_registry().get(dataset_id)) as adapter, pytest.raises(QueryError):
         adapter.list_assets(invalid)
+
+
+class TransportReached(Exception):
+    """Raised in place of a client, so a probe that got past validation is visible."""
+
+
+def refuses(adapter: Provider, probe: Query, field: QueryField) -> bool:
+    """Whether ``adapter`` refuses ``field`` outright, before reaching any transport.
+
+    Only ``Provider.reject`` counts: its wording is the adapter's statement that
+    the source cannot honour the field at all, as opposed to a rule about how
+    one query combines its inputs.
+    """
+    try:
+        adapter.list_assets(probe)
+    except QueryError as error:
+        message = str(error)
+        return message.startswith(f"{adapter.dataset.id} does not support") and (
+            REFUSED[field] in message
+        )
+    except TransportReached:
+        return False
+    return False
+
+
+def demands_window(adapter: Provider, probe: Query) -> bool:
+    """Whether ``adapter`` refuses a query that leaves start and end out."""
+    try:
+        adapter.list_assets(probe)
+    except QueryError as error:
+        return str(error) == f"{adapter.dataset.id} requires both start and end"
+    except TransportReached:
+        return False
+    return False
+
+
+@pytest.mark.parametrize("dataset_id", CASES)
+def test_declared_capabilities_are_the_ones_the_adapter_honours(dataset_id, monkeypatch) -> None:
+    """A declared capability is one the adapter accepts, and a false one is a field it refuses.
+
+    The probes stop at validation: the transport raises instead of connecting,
+    and reaching it counts as acceptance. A refusal is read from
+    ``Provider.reject``, so a rule such as GHCN's "pass stations or a
+    location/bbox, not both" is not one; it constrains how a query combines its
+    inputs rather than what the source can do.
+
+    A bbox means two things. For a gridded or whole-file source it asks for a
+    spatial subset, and the adapter either honours it or refuses it. For a
+    source that selects by station or site -- one whose parameters name them --
+    a bbox only chooses which stations or sites to ask for, and each asset still
+    arrives whole, so accepting one proves nothing about subsetting. Those
+    adapters are held to the refusal direction alone: refusing a bbox still
+    means ``spatial_subset`` is false, while accepting one may be either.
+
+    ``temporal_subset`` is false only where the window plays no part, which
+    HURDAT2 shows by refusing start/end. Such a dataset must not require a
+    window either, having nothing to select with it.
+    """
+
+    def unexpected_client() -> httpx.Client:
+        raise TransportReached(dataset_id)
+
+    monkeypatch.setattr("usdata.protocols.http.client", unexpected_client)
+    dataset = default_registry().get(dataset_id)
+    declared = dataset.capabilities
+    assert dataset.variables, f"{dataset_id} names no variable to probe with"
+    variable = dataset.variables[0].name
+    with load_adapter(dataset) as adapter:
+        base = query(dataset_id)
+        bbox_refused = refuses(adapter, base.model_copy(update={"bbox": PROBE_BBOX}), "bbox")
+        variables_refused = refuses(
+            adapter, base.model_copy(update={"variables": [variable]}), "variables"
+        )
+        time_refused = refuses(adapter, timed_query(dataset_id), "time")
+        requires_window = demands_window(adapter, base.model_copy(update={"time": None}))
+        selects_by_site = bool(SELECTORS & set(adapter.accepted_params))
+
+    assert variables_refused is not declared.variable_subset, (
+        f"{dataset_id} declares variable_subset={declared.variable_subset} and "
+        f"{'refuses' if variables_refused else 'accepts'} variables={variable!r}"
+    )
+    assert time_refused is not declared.temporal_subset, (
+        f"{dataset_id} declares temporal_subset={declared.temporal_subset} and "
+        f"{'refuses' if time_refused else 'accepts'} a query window"
+    )
+    if not declared.temporal_subset:
+        assert not requires_window, f"{dataset_id} requires a window it declares it cannot use"
+    if bbox_refused:
+        assert not declared.spatial_subset, f"{dataset_id} declares a bbox its adapter refuses"
+    elif not selects_by_site:
+        assert declared.spatial_subset, f"{dataset_id} accepts a bbox it does not declare"
+
+
+def test_declared_windows_equal_the_windows_the_adapters_enforce() -> None:
+    registry = default_registry()
+    for dataset_id, (module_name, constant) in WINDOW_CONSTANTS.items():
+        limits = registry.get(dataset_id).limits
+        assert limits is not None and limits.max_window is not None, dataset_id
+        assert limits.max_window == getattr(import_module(module_name), constant), dataset_id
+
+
+def test_every_adapter_window_constant_is_declared_in_the_registry() -> None:
+    """A window a new adapter enforces has to reach the registry, not only the module."""
+    found: set[tuple[str, str]] = set()
+    for info in pkgutil.walk_packages(providers.__path__, f"{providers.__name__}."):
+        module = import_module(info.name)
+        found |= {
+            (info.name, name)
+            for name, value in vars(module).items()
+            if name.startswith("MAX_") and isinstance(value, timedelta)
+        }
+    assert found == set(WINDOW_CONSTANTS.values())

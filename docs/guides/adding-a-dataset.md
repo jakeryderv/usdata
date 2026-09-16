@@ -8,7 +8,8 @@ using `noaa:ghcn-daily` as the worked example.
 Before writing code, answer these against the live service:
 
 - How are files or records addressed? (bucket layout, REST parameters, ERDDAP grammar)
-- Does the server subset by space, time, or variable? This becomes `capabilities`.
+- Does the server subset by space, time, or variable? This becomes `capabilities`,
+  which a contract test holds to the fields the adapter accepts and refuses.
 - Is access anonymous? Datasets needing credentials are not yet supported.
 - What is the license? Most federal data is public domain; say so explicitly.
 
@@ -140,7 +141,10 @@ Rules:
     `variables`, `time`) the source cannot honour, with a `hint` saying what to
     do instead. No adapter supports free text, and a contract test checks that
     none ignores it; a source that cannot filter by location or variable must
-    reject those fields rather than return unfiltered data.
+    reject those fields rather than return unfiltered data. What is rejected
+    here is what the entry's `capabilities` may claim: a contract test probes a
+    bbox, a variable, and a window against every available adapter, so a
+    declared capability the adapter refuses fails the offline suite.
   - `self.utc_window(query)` returns the required start and end in UTC, reading
     naive bounds as UTC. Use `usdata.providers.base.to_utc` for optional bounds.
     A contract test checks that naive and offset bounds resolve like UTC ones.
@@ -208,7 +212,8 @@ Rules:
 Add a representative scenario to `tests/adapters/test_contracts.py`. Its shared
 checks cover every available dataset: stable assets, dataset identity, explicit
 fetch destinations, exact bytes, no provider cache/sidecars, invalid-input
-rejection before client creation, and owned/injected cleanup. Source-specific
+rejection before client creation, owned/injected cleanup, and the entry's
+declared `capabilities` and `limits.max_window`. Source-specific
 query and pagination assertions remain in the adapter module.
 
 ## 5. Docs and changelog
