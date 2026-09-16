@@ -34,6 +34,13 @@ This page lists what to install, what is inferred, and what `open()` accepts.
 Passing an option to a reader it does not apply to raises `ValueError`, even
 with an empty value.
 
+## GRIB2 variable names
+
+Variables are named by `shortName` when every selected message shares one
+`typeOfLevel` and level, and by `shortName_typeOfLevel_level` for all of them
+as soon as the selection spans more than one, so the names follow from the
+select rather than from which short names happened to repeat.
+
 ## CSV identifier defaults
 
 These column names, matched case-insensitively, default to pandas string dtype
@@ -51,6 +58,7 @@ pandas inference and default missing-value parsing.
 | `erddap-csv` | `frame.attrs["units"]` | Units row, filtered to the selected columns |
 | `nexrad-level2` | `radar.attrs["usdata"]` | Asset id, provenance, and `sweeps` listing the returned groups |
 | `netcdf`, `grib2` | `dataset.attrs["usdata"]` | Asset id and provenance |
+| `grib2` | `dataset.attrs["usdata"]["messages"]` | Each variable name mapped to its message's `index` in the file, `shortName`, `typeOfLevel`, `level`, and `step` |
 | `grib2` | per-variable `attrs` | `units`, `name`, `typeOfLevel`, `level`, discipline, category, and parameter numbers, packing type, reference and valid times, step; projection parameters on the Dataset for projected grids |
 
 ## Errors

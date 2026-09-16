@@ -3,7 +3,9 @@
 Messages are decoded one at a time with the ecCodes Python bindings, never
 cfgrib. The reader builds the xarray Dataset itself: one data variable per
 selected message on one shared grid, coordinates computed from the grid
-definition, and provenance under ``attrs["usdata"]``. Values arrive from
+definition, and provenance under ``attrs["usdata"]``. Variable names follow
+from the set of selected messages alone, never from which short names happen to
+repeat, so the same select always yields the same names. Values arrive from
 ecCodes as float64, are masked to NaN where the message's bitmap marks them
 missing, and are stored as float32; the float64 array is released before the
 Dataset is returned. Rows are ordered north to south and columns west to east
@@ -21,7 +23,7 @@ from datetime import UTC, datetime
 from importlib import import_module
 from inspect import currentframe
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 from usdata.inspect import GribMessage
 from usdata.readers import MissingReaderDependency, fill_registry_attrs
@@ -298,6 +300,21 @@ class _Grid:
         return numpy.ascontiguousarray(grid)
 
 
+class _Field(NamedTuple):
+    """One decoded message: its short name, values, variable attributes, and identity."""
+
+    short: str
+    data: Any
+    attrs: dict[str, Any]
+    message: dict[str, Any]
+
+
+def _spans_levels(selected: list[_Field]) -> bool:
+    """Whether the selected messages cover more than one type of level or level."""
+    levels = {(field.attrs.get("typeOfLevel"), field.attrs.get("level")) for field in selected}
+    return len(levels) > 1
+
+
 def open_grib2(
     fetched: FetchedAsset, select: Mapping[str, Any] | None = None, *, strict: bool = False
 ) -> Any:
@@ -306,6 +323,13 @@ def open_grib2(
     A file of several messages needs ``select``, unless its provenance says the
     fetch already selected them: a partial fetch concatenated the messages that
     were asked for, so all of them are wanted and ``select`` stays optional.
+
+    Variables take their ``shortName`` when every selected message shares one
+    type of level and level, and ``shortName_typeOfLevel_level`` for all of
+    them as soon as the selection spans more than one, so the names follow from
+    the select rather than from which short names happened to repeat.
+    ``attrs["usdata"]["messages"]`` maps each variable name to the message it
+    came from.
 
     A select value that matches none of the selected messages warns, or raises
     ``ValueError`` when ``strict``; a select that matches nothing always raises.
@@ -316,10 +340,9 @@ def open_grib2(
     options = {key: _options(key, wanted) for key, wanted in (select or {}).items()}
     matched: dict[str, set[int]] = {key: set() for key in options}
     present: dict[str, list[str]] = {key: [] for key in options}
-    fields: dict[str, tuple[Any, dict[str, Any]]] = {}
+    selected: list[_Field] = []
     grid: _Grid | None = None
     count = 0
-    names: list[str] = []
     needs_select = select is None and not fetched.provenance.is_partial
     for h in _messages(eccodes, fetched.path):
         count += 1
@@ -362,21 +385,27 @@ def open_grib2(
             stamp = _time(attrs.get(date_key), attrs.get(time_key))
             if stamp:
                 attrs[label] = stamp
-        short = _get(eccodes, h, "shortName", str)
+        message = {
+            "index": count - 1,
+            "shortName": _get(eccodes, h, "shortName", str),
+            "typeOfLevel": attrs.get("typeOfLevel"),
+            "level": attrs.get("level"),
+            "step": attrs.get("step"),
+        }
+        short = message["shortName"]
         if short in (None, "", "unknown", "~"):
             short = _product_name(fetched.asset.id) or (
                 f"parameter_{attrs.get('discipline')}_{attrs.get('parameterCategory')}"
                 f"_{attrs.get('parameterNumber')}"
             )
-        names.append(short)
-        fields[f"{short}#{len(names)}"] = (data, attrs)
+        selected.append(_Field(short=short, data=data, attrs=attrs, message=message))
     if count > 1 and needs_select:
         raise ValueError(
             f"{count} messages; pass select={{...}} with ecCodes keys to choose, "
             f"for example select={{'shortName': ..., 'typeOfLevel': ...}}. "
             f"Available (shortName, typeOfLevel, level): {_available(fetched.path)}"
         )
-    if grid is None or not fields:
+    if grid is None or not selected:
         if not count:
             raise ValueError("no GRIB2 messages found")
         raise ValueError(
@@ -388,14 +417,17 @@ def open_grib2(
             raise ValueError(report)
         warnings.warn(report, UserWarning, stacklevel=_caller_stacklevel())
     variables: dict[str, Any] = {}
-    duplicates = {name for name in names if names.count(name) > 1}
-    for (data, attrs), name in zip(fields.values(), names, strict=True):
-        label = name
-        if name in duplicates:
-            label = f"{name}_{attrs.get('typeOfLevel', 'level')}_{attrs.get('level', '')}"
+    messages: dict[str, dict[str, Any]] = {}
+    by_level = _spans_levels(selected)
+    for field in selected:
+        label = field.short
+        if by_level:
+            level_type = field.attrs.get("typeOfLevel", "level")
+            label = f"{field.short}_{level_type}_{field.attrs.get('level', '')}"
         if label in variables:
             label = f"{label}_{len(variables)}"
-        variables[label] = (grid.dims, data, attrs)
+        variables[label] = (grid.dims, field.data, field.attrs)
+        messages[label] = field.message
     dataset = xarray.Dataset(variables, coords=grid.coords)
     dataset.latitude.attrs["units"] = "degrees_north"
     dataset.longitude.attrs["units"] = "degrees_east"
@@ -403,6 +435,7 @@ def open_grib2(
     dataset.attrs["usdata"] = {
         "asset_id": fetched.asset.id,
         "provenance": fetched.provenance.model_dump(mode="json"),
+        "messages": messages,
     }
     fill_registry_attrs(fetched, dataset)
     return dataset
