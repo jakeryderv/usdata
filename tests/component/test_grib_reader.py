@@ -148,6 +148,15 @@ def test_regular_grid_coordinates_values_attrs_and_provenance(tmp_path) -> None:
     assert result.attrs["usdata"] == {
         "asset_id": "field.grib2",
         "provenance": fetched.provenance.model_dump(mode="json"),
+        "messages": {
+            "t": {
+                "index": 0,
+                "shortName": "t",
+                "typeOfLevel": "surface",
+                "level": 0,
+                "step": 0,
+            }
+        },
     }
 
 
@@ -202,6 +211,17 @@ def test_lambert_grid_has_two_dimensional_coordinates_and_projection(tmp_path) -
 
 
 @pytest.fixture
+def levels(tmp_path):
+    """Two short names at 500 hPa and one of them again at 850, all on one grid."""
+    parts = [
+        message(np.full(12, 500.0), level_type="isobaricInhPa", level=500),
+        message(np.full(12, 55.0), param=157, level_type="isobaricInhPa", level=500),
+        message(np.full(12, 850.0), level_type="isobaricInhPa", level=850),
+    ]
+    return item(tmp_path, b"".join(parts), name="levels.grib2")
+
+
+@pytest.fixture
 def multi(tmp_path):
     parts = [
         message(np.full(12, 500.0), level_type="isobaricInhPa", level=500),
@@ -228,6 +248,53 @@ def test_select_by_value_and_list_and_numeric_level(multi) -> None:
     assert list(text.data_vars) == ["t"]
     surface = multi.open(select={"shortName": "cape", "typeOfLevel": "entireAtmosphere"})
     assert list(surface.data_vars) == ["cape"]
+
+
+def test_one_level_keeps_bare_names_and_more_levels_suffix_every_variable(levels) -> None:
+    one = levels.open(select={"level": 500})
+    assert set(one.data_vars) == {"t", "r"}
+    spanning = levels.open(select={"shortName": ["t", "r"], "level": [500, 850]})
+    # 'r' occurs once and is suffixed anyway: the names follow the select, not the collisions.
+    assert set(spanning.data_vars) == {
+        "t_isobaricInhPa_500",
+        "r_isobaricInhPa_500",
+        "t_isobaricInhPa_850",
+    }
+
+
+def test_more_than_one_level_type_suffixes_distinct_short_names_too(multi) -> None:
+    result = multi.open(select={"shortName": ["t", "cape"], "level": [500, 0]})
+    assert set(result.data_vars) == {"t_isobaricInhPa_500", "cape_entireAtmosphere_0"}
+
+
+def test_messages_attribute_maps_every_variable_to_the_message_it_came_from(levels) -> None:
+    result = levels.open(select={"shortName": ["t", "r"], "level": [500, 850]})
+    assert result.attrs["usdata"]["messages"] == {
+        "t_isobaricInhPa_500": {
+            "index": 0,
+            "shortName": "t",
+            "typeOfLevel": "isobaricInhPa",
+            "level": 500,
+            "step": 0,
+        },
+        "r_isobaricInhPa_500": {
+            "index": 1,
+            "shortName": "r",
+            "typeOfLevel": "isobaricInhPa",
+            "level": 500,
+            "step": 0,
+        },
+        "t_isobaricInhPa_850": {
+            "index": 2,
+            "shortName": "t",
+            "typeOfLevel": "isobaricInhPa",
+            "level": 850,
+            "step": 0,
+        },
+    }
+    # The index numbers every message in the file, not just the selected ones.
+    bare = levels.open(select={"level": 850})
+    assert bare.attrs["usdata"]["messages"]["t"]["index"] == 2
 
 
 def test_select_without_match_or_with_bad_values_is_rejected(multi) -> None:
@@ -268,7 +335,7 @@ def test_fully_matched_select_neither_warns_nor_raises(multi) -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         result = multi.open(select={"shortName": ["t", "cape"], "level": [500, 0]}, strict=True)
-    assert set(result.data_vars) == {"t", "cape"}
+    assert set(result.data_vars) == {"t_isobaricInhPa_500", "cape_entireAtmosphere_0"}
 
 
 def test_mrms_products_are_named_from_the_asset_when_eccodes_has_no_name(tmp_path) -> None:
@@ -372,13 +439,30 @@ def test_a_partial_fetch_opens_with_and_without_select(tmp_path) -> None:
     fetched = item(tmp_path, b"".join(parts), name="part.grib2", messages=[71, 170])
     assert fetched.provenance.is_partial
     everything = fetched.open()
-    assert set(everything.data_vars) == {"2t", "cape"}
-    assert float(everything["2t"].values[0, 0]) == 288.0
+    # Two level types, so the same rule a select would follow suffixes both variables.
+    assert set(everything.data_vars) == {"2t_heightAboveGround_2", "cape_entireAtmosphere_0"}
+    assert float(everything["2t_heightAboveGround_2"].values[0, 0]) == 288.0
+    assert everything.attrs["usdata"]["messages"]["cape_entireAtmosphere_0"] == {
+        "index": 1,
+        "shortName": "cape",
+        "typeOfLevel": "entireAtmosphere",
+        "level": 0,
+        "step": 0,
+    }
     one = fetched.open(select={"shortName": "cape"})
     assert list(one.data_vars) == ["cape"]
     assert one.attrs["usdata"]["provenance"]["ranges"] == [
         {"start": 0, "end": fetched.path.stat().st_size - 1}
     ]
+
+
+def test_a_partial_fetch_of_one_level_keeps_bare_names(tmp_path) -> None:
+    parts = [
+        message(np.full(12, 500.0), level_type="isobaricInhPa", level=500),
+        message(np.full(12, 55.0), param=157, level_type="isobaricInhPa", level=500),
+    ]
+    fetched = item(tmp_path, b"".join(parts), name="level.grib2", messages=[12, 13])
+    assert set(fetched.open().data_vars) == {"t", "r"}
 
 
 def test_a_whole_file_of_the_same_bytes_still_demands_select(tmp_path) -> None:

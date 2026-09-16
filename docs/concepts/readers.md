@@ -148,10 +148,14 @@ A file with one message opens directly. A file with several needs `select`, a
 mapping of ecCodes key names to a value or list of values; without it the
 reader raises a `ValueError` listing every `(shortName, typeOfLevel, level)`
 rather than loading hundreds of fields. Strings match a key's text form and
-numbers its numeric form. Variables are named by `shortName`, with level type
-and value appended when several selected messages share one. ecCodes has no
-names for MRMS parameters, so those take the product from the file name, for
-example `RotationTrackML30min`, which the registry's
+numbers its numeric form. Variables are named by `shortName` when every
+selected message shares one `typeOfLevel` and level, and by
+`shortName_typeOfLevel_level` for all of them as soon as the selection spans
+more than one, so a select always returns the same names whatever else the file
+holds. `attrs["usdata"]["messages"]` maps each variable name back to the message
+it came from: its index in the file, `shortName`, `typeOfLevel`, `level`, and
+`step`. ecCodes has no names for MRMS parameters, so those take the product from
+the file name, for example `RotationTrackML30min`, which the registry's
 `RotationTrackML30min_00.50` entry then supplies the units for. Values marked
 missing by a bitmap become NaN; product sentinels such as MRMS `-999` and `-99`
 are kept because their meaning belongs to the product. Gzipped files are

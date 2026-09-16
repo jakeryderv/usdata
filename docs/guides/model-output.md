@@ -84,10 +84,13 @@ env = item.open(
 )
 ```
 
-Variables that share a `shortName` get the level appended to their names.
-Grids are Lambert conformal for HRRR, with two-dimensional latitude and
-longitude, and regular for GFS. Each dataset's guide lists verified keys for
-the common severe-weather fields.
+Every variable is named `shortName_typeOfLevel_level` as soon as the select
+spans more than one type of level or more than one level, and every variable
+keeps its bare `shortName` when they all share one;
+`attrs["usdata"]["messages"]` maps each name to its message. Grids are Lambert
+conformal for HRRR, with two-dimensional latitude and longitude, and regular for
+GFS. Each dataset's guide lists verified keys for the common severe-weather
+fields.
 
 The [HRRR environment example](https://usdata.dev/examples/hrrr-environment/)
 reads surface CAPE and 0–3 km helicity at the grid point nearest a tornado
