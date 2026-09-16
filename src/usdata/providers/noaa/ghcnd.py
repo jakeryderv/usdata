@@ -21,8 +21,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
-from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.http import HttpProvider
 from usdata.providers.params import StrList, choice
 
 SEARCH_URL = "https://www.ncei.noaa.gov/access/services/search/v1/data"
@@ -51,7 +51,7 @@ class GhcnDailyParams(BaseModel):
     )
 
 
-class GhcnDaily(_HttpProvider):
+class GhcnDaily(HttpProvider):
     """GHCN-Daily adapter. Params: ``stations`` (list or comma string), ``units``."""
 
     params_model = GhcnDailyParams

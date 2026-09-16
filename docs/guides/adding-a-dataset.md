@@ -112,7 +112,11 @@ no manual dataset navigation entry is needed. For a new agency, write access not
 
 ## 3. Adapter
 
-Create `src/usdata/providers/<agency>/<name>.py` with a `Provider` subclass:
+Create `src/usdata/providers/<agency>/<name>.py` with a `Provider` subclass.
+`usdata.providers` exports everything an adapter is written against -- `Provider`,
+`HttpProvider`, `QueryError`, `NotImplementedProvider`, `load_adapter`, and the
+parameter coercions -- and [ADR 0027](../adr/0027-provider-contract.md) says what
+of it is stable:
 
 ```python
 class GhcnDaily(Provider):
@@ -190,9 +194,10 @@ Rules:
 - Use `usdata.protocols.http`, `usdata.protocols.s3`, or `usdata.protocols.erddap` for transport. Take an
   optional `httpx.Client` in `__init__` so tests can inject one. Override
   `close()` to release internally owned resources; injected clients remain the
-  caller's responsibility. HTTP adapters may inherit the internal
-  `providers._http._HttpProvider` lifecycle instead of duplicating it.
-  Core uses adapters as context managers. Use
+  caller's responsibility. HTTP adapters inherit `usdata.providers.HttpProvider`
+  instead of duplicating that lifecycle: it creates the client on first use
+  behind `self._http()`, closes the one it owns, and leaves an injected one to
+  its caller. Core uses adapters as context managers. Use
   `http.get(url, client, params=...)` for metadata and `http.download` for bytes
   so retries cover both listing and downloads.
 - Give assets stable ids: they become cache filenames and lockfile keys.
@@ -209,12 +214,39 @@ Rules:
 - Apply the level and dependency rules in [Testing](../testing.md); mark local
   filesystem scenarios `l2` even within an adapter module.
 
-Add a representative scenario to `tests/adapters/test_contracts.py`. Its shared
-checks cover every available dataset: stable assets, dataset identity, explicit
-fetch destinations, exact bytes, no provider cache/sidecars, invalid-input
-rejection before client creation, owned/injected cleanup, and the entry's
-declared `capabilities` and `limits.max_window`. Source-specific
-query and pagination assertions remain in the adapter module.
+Add a representative scenario to `tests/adapters/test_contracts.py`: the dataset's
+`--param` values in `CASES`, plus whatever its listing needs from
+`contract_transport`. The checks themselves live in `usdata.testing` and cover
+every available dataset: stable assets, dataset identity, explicit fetch
+destinations, exact bytes, no provider cache/sidecars, invalid-input rejection
+before client creation, owned/injected cleanup, and the entry's declared
+`capabilities` and `limits.max_window`. Source-specific query and pagination
+assertions remain in the adapter module.
+
+The same checks run from outside this repository, so an adapter distributed
+separately is held to the same contract. Supply the `Dataset`, a factory that
+builds the adapter, a scenario query, and a client factory on a mock transport:
+
+```python
+from usdata.testing import check_provider_contract
+
+
+def test_my_adapter(tmp_path) -> None:
+    downloads: set[str] = set()
+    check_provider_contract(
+        MY_DATASET,
+        lambda client=None: MyProvider(MY_DATASET, client),
+        build_query(start="2024-05-06T12:00Z", end="2024-05-06T12:05Z"),
+        client_factory=lambda: httpx.Client(transport=my_transport(downloads)),
+        expected_bytes=DATA,
+        arm_download=downloads.add,
+        work_dir=tmp_path,
+    )
+```
+
+`check_provider_contract` runs every rule; the individual `check_*` functions it
+composes are exported too, for a suite that wants one test per rule. `pytest` is
+imported inside them, so it stays a development dependency.
 
 ## 5. Docs and changelog
 

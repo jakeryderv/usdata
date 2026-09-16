@@ -18,8 +18,8 @@ from pathlib import Path
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
 from usdata.protocols.listing import directory_entries
-from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.http import HttpProvider
 
 PAGE_URL = "https://www.spc.noaa.gov/wcm/"
 DATA_URL = "https://www.spc.noaa.gov/wcm/data/"
@@ -45,7 +45,7 @@ def file_years(href: str) -> tuple[str, int, int] | None:
     return match[1], first, last
 
 
-class SpcTornadoReports(_HttpProvider):
+class SpcTornadoReports(HttpProvider):
     """Resolve the whole tornado files covering each requested year; fetch exact bytes."""
 
     def list_assets(self, query: Query) -> list[Asset]:
