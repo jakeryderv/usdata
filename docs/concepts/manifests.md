@@ -127,3 +127,23 @@ and keeps the lockfile as it was. Accepting a change is a deliberate, selective
 step, described in [provenance and drift](provenance-and-drift.md).
 
 --8<-- "_snippets/upstream-revisions.md"
+
+## Cite what you used
+
+`usdata cite` turns a pinned manifest into the sentences a methods section
+needs. It reads the registry and the lockfile, and writes nothing.
+
+```sh
+usdata cite dataset.yaml
+usdata cite dataset.yaml --format bibtex
+```
+
+One citation comes out per dataset: the citation the agency asks for, its
+homepage, license and terms, and then what your lockfile actually pins for it,
+namely the retrieval dates, the number of checksummed assets and their total
+size, the usdata version that pinned them, and the manifest sources involved.
+An entry that states no citation falls back to `<Agency>, <Title>, accessed via
+usdata`. `usdata cite noaa:ghcn-daily` cites the registry entry alone, before
+anything is fetched, and `--json` emits the same records for a script to
+assemble. A manifest with no lockfile exits 2: pull it first, so the dates and
+checksums describe real files.

@@ -13,6 +13,7 @@ from usdata import __version__, build_query, default_registry
 from usdata._fetch import ChecksumMismatch
 from usdata._fetch import fetch as fetch_query
 from usdata._progress import batch
+from usdata.cli.cite import cite
 from usdata.cli.doctor import doctor
 from usdata.cli.progress import progress
 from usdata.manifest import lockfile_path
@@ -36,6 +37,7 @@ app = typer.Typer(
     help="Discover, fetch, and track provenance of U.S. public scientific data.",
     no_args_is_help=True,
 )
+app.command()(cite)
 
 
 _QUERY_FLAGS = {
