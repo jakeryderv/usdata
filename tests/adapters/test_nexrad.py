@@ -188,6 +188,8 @@ def test_fetch_downloads_via_https(tmp_path: Path, adapter: NexradLevel2) -> Non
         ({"nearest": 1.5}, "nearest must be a positive integer"),
         ({"nearest": True}, "nearest must be a positive integer"),
         ({"nearest": "two"}, "nearest must be a positive integer"),
+        # Non-ASCII digits read as a number to int() but are not what a CLI user typed.
+        ({"nearest": "\uff13"}, "nearest must be a positive integer"),
     ],
 )
 def test_rejects_invalid_provider_params(adapter: NexradLevel2, params, message) -> None:

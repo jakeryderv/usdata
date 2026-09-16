@@ -366,7 +366,13 @@ def pull(
             help="Asset or dataset id whose pin should follow current upstream bytes; repeatable."
         ),
     ] = None,
-    no_progress: Annotated[bool, typer.Option(help="Disable terminal progress.")] = False,
+    no_progress: Annotated[
+        bool, typer.Option("--no-progress", help="Disable terminal progress.")
+    ] = False,
+    quiet: Annotated[
+        bool,
+        typer.Option("--quiet", "-q", help="Print only the summary line, not one line per asset."),
+    ] = False,
 ) -> None:
     """Fetch every source in a manifest and write (or restore from) its lockfile."""
     try:
@@ -395,9 +401,10 @@ def pull(
         typer.secho(f"fetch failed: {e}", err=True, fg="red")
         raise typer.Exit(code=4) from None
     updated = set(result.updated)
-    for f in result.fetched:
-        tag = "updated" if f.asset.id in updated else "cached" if f.from_cache else "fetched"
-        typer.echo(f"{f.path}\t{tag}\t{f.provenance.size} bytes")
+    if not quiet:
+        for f in result.fetched:
+            tag = "updated" if f.asset.id in updated else "cached" if f.from_cache else "fetched"
+            typer.echo(f"{f.path}\t{tag}\t{f.provenance.size} bytes")
     if result.updated:
         mode = f"updated {len(result.updated)} pin(s) in"
     else:
