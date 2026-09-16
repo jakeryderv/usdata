@@ -62,6 +62,47 @@ flowchart TD
     Verify --> Report[Check manifest checksum and cached bytes]
 ```
 
+## Naming sources
+
+A source may carry a `name`: a short label of letters, digits, hyphens, and
+underscores, unique within one manifest. Names make a result addressable when
+indexing `fetched` by position would be fragile, which is the usual case once
+two sources read the same dataset.
+
+```yaml
+name: cedar-key-helene-surge
+sources:
+  - name: surge
+    dataset: noaa:coops-water-levels
+    start: 2024-09-25T00:00:00Z
+    end: 2024-09-28T00:00:00Z
+    params: { station: "8727520", datum: MLLW, units: metric }
+  - name: tide
+    dataset: noaa:coops-tide-predictions
+    start: 2024-09-25T00:00:00Z
+    end: 2024-09-28T00:00:00Z
+    params: { station: "8727520", datum: MLLW, units: metric, interval: "6" }
+```
+
+```python
+from pathlib import Path
+
+from usdata import pull
+
+result = pull(Path("dataset.yaml"))
+(observed,) = result.by_source["surge"]
+(predicted,) = result.by_source["tide"]
+```
+
+`fetched` holds every asset in manifest order, then in the order the adapter
+listed that source's assets. `by_source` holds the same objects grouped by
+source key, which is the `name` when a source has one and its one-based
+position (`"1"`, `"2"`) when it does not. The lockfile records the key beside
+each pinned asset, so a restore rebuilds the same grouping without re-resolving
+anything. Lockfiles written before keys existed still load; their entries group
+by dataset id in manifest order instead, so name the sources and re-run
+`pull --force` to refresh the mapping.
+
 ## Changing the manifest
 
 The lockfile stores a checksum of the manifest's exact bytes. Editing the
