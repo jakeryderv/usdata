@@ -32,6 +32,7 @@ __all__ = [
     "TimeRange",
     "__version__",
     "build_query",
+    "datasets",
     "default_registry",
     "fetch",
     "fetch_asset",
@@ -43,11 +44,47 @@ __all__ = [
 ]
 
 
+def datasets(
+    *,
+    provider: str | None = None,
+    domain: str | None = None,
+    format: str | None = None,
+    reader: str | None = None,
+    capability: str | None = None,
+    status: str = "available",
+) -> list[Dataset]:
+    """List curated registry datasets. Keyword arguments match ``Registry.list``."""
+    return default_registry().list(
+        provider=provider,
+        domain=domain,
+        format=format,
+        reader=reader,
+        capability=capability,
+        status=status,
+    )
+
+
 def search(
-    text: str | None = None, *, include_planned: bool = False, **kwargs: Any
+    text: str | None = None,
+    *,
+    include_planned: bool = False,
+    domain: str | None = None,
+    format: str | None = None,
+    reader: str | None = None,
+    capability: str | None = None,
+    status: str | None = None,
+    **kwargs: Any,
 ) -> list[SearchResult]:
-    """Search the curated registry. Keyword arguments match ``build_query``."""
-    return default_registry().search(build_query(text, **kwargs), include_planned=include_planned)
+    """Search the curated registry. Remaining keyword arguments match ``build_query``."""
+    return default_registry().search(
+        build_query(text, **kwargs),
+        include_planned=include_planned,
+        domain=domain,
+        format=format,
+        reader=reader,
+        capability=capability,
+        status=status,
+    )
 
 
 def get(dataset_id: str) -> Dataset:

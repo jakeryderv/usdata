@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Annotated
 
@@ -14,14 +15,20 @@ from usdata._fetch import fetch as fetch_query
 from usdata._progress import batch
 from usdata.cli.progress import progress
 from usdata.manifest import lockfile_path
-from usdata.models import Dataset, Status
+from usdata.models import READER_EXTRAS_TEXT, Dataset, Status
 from usdata.providers import load_adapter
 from usdata.providers.base import NotImplementedProvider
 from usdata.pull import EmptySource, ManifestChanged, UnknownDatasets, UpstreamChanged
 from usdata.pull import pull as pull_manifest
 from usdata.pull import verify as verify_manifest
 from usdata.query import UnknownPlace
-from usdata.registry import DatasetNotFound
+from usdata.registry import (
+    CAPABILITY_NAMES,
+    NO_READER,
+    STATUS_FILTERS,
+    DatasetNotFound,
+    SearchResult,
+)
 
 app = typer.Typer(
     name="usdata",
@@ -44,6 +51,53 @@ _QUERY_FLAGS = {
 }
 
 
+_STATUS_HELP = f"Support status to include: {', '.join(STATUS_FILTERS)}."
+
+_ProviderOption = Annotated[str | None, typer.Option(help="Restrict to one provider, e.g. noaa.")]
+_DomainOption = Annotated[
+    str | None, typer.Option(help="Restrict to one domain, e.g. weather-radar.")
+]
+_FormatOption = Annotated[
+    str | None, typer.Option(help="Delivered format, matched case-insensitively, e.g. csv.")
+]
+_ReaderOption = Annotated[
+    str | None,
+    typer.Option(help=f"Reader extra that opens the files ({READER_EXTRAS_TEXT}), or {NO_READER}."),
+]
+_CapabilityOption = Annotated[
+    str | None,
+    typer.Option(
+        help=f"Server-side capability the dataset declares ({', '.join(CAPABILITY_NAMES)})."
+    ),
+]
+_StatusOption = Annotated[str, typer.Option(help=_STATUS_HELP)]
+_SearchStatusOption = Annotated[
+    str | None, typer.Option(help=f"{_STATUS_HELP} Supersedes --planned.")
+]
+_JsonOption = Annotated[
+    bool, typer.Option("--json", help="Emit a JSON array of dataset records and nothing else.")
+]
+
+
+def _echo_dataset_table(matches: list[Dataset]) -> None:
+    """Print id, status, domain, formats, reader, and summary in aligned columns."""
+    rows = [
+        (
+            ds.id,
+            f"{ds.status.value} ({ds.version_label})",
+            ds.domain,
+            ", ".join(ds.formats) or "-",
+            ds.reader or NO_READER,
+            ds.summary or ds.title,
+        )
+        for ds in matches
+    ]
+    widths = [max(len(row[column]) for row in rows) for column in range(len(rows[0]) - 1)]
+    for row in rows:
+        padded = [f"{value:<{width}}" for value, width in zip(row, widths, strict=False)]
+        typer.echo("  ".join([*padded, row[-1]]))
+
+
 def _version_callback(value: bool) -> None:
     if value:
         typer.echo(f"usdata {__version__}")
@@ -62,11 +116,42 @@ def main(
 
 
 @app.command()
+def datasets(
+    provider: _ProviderOption = None,
+    domain: _DomainOption = None,
+    format: _FormatOption = None,
+    reader: _ReaderOption = None,
+    capability: _CapabilityOption = None,
+    status: _StatusOption = "available",
+    as_json: _JsonOption = False,
+) -> None:
+    """List the curated dataset registry, filtered."""
+    try:
+        matches = default_registry().list(
+            provider=provider,
+            domain=domain,
+            format=format,
+            reader=reader,
+            capability=capability,
+            status=status,
+        )
+    except ValueError as e:
+        typer.secho(str(e), err=True, fg="red")
+        raise typer.Exit(code=2) from None
+    if as_json:
+        typer.echo(json.dumps([ds.model_dump(mode="json") for ds in matches], indent=2))
+    elif matches:
+        _echo_dataset_table(matches)
+    else:
+        typer.echo("No datasets matched.")
+    if not matches:
+        raise typer.Exit(code=1)
+
+
+@app.command()
 def search(
     text: Annotated[str | None, typer.Argument(help="Free-text keywords.")] = None,
-    provider: Annotated[
-        str | None, typer.Option(help="Restrict to one provider, e.g. noaa.")
-    ] = None,
+    provider: _ProviderOption = None,
     state: Annotated[
         str | None,
         typer.Option("--location", "--state", help="State, 'County, ST', or quoted FIPS code."),
@@ -76,17 +161,41 @@ def search(
     planned: Annotated[
         bool, typer.Option("--planned", help="Include planned datasets that have no adapter yet.")
     ] = False,
+    domain: _DomainOption = None,
+    format: _FormatOption = None,
+    reader: _ReaderOption = None,
+    capability: _CapabilityOption = None,
+    status: _SearchStatusOption = None,
+    as_json: _JsonOption = False,
 ) -> None:
     """Search the curated dataset registry."""
     try:
         query = build_query(text, provider=provider, location=state, start=start, end=end)
+        results = default_registry().search(
+            query,
+            include_planned=planned,
+            domain=domain,
+            format=format,
+            reader=reader,
+            capability=capability,
+            status=status,
+        )
     except ValueError as e:
         typer.secho(str(e), err=True, fg="red")
         raise typer.Exit(code=2) from None
-    results = default_registry().search(query, include_planned=planned)
-    if not results:
+    if as_json:
+        records = [{**r.dataset.model_dump(mode="json"), "score": r.score} for r in results]
+        typer.echo(json.dumps(records, indent=2))
+    elif results:
+        _echo_search_results(results)
+    else:
         typer.echo("No datasets matched.")
+    if not results:
         raise typer.Exit(code=1)
+
+
+def _echo_search_results(results: list[SearchResult]) -> None:
+    """Print one line per hit: id, status, version label, and title."""
     width = max(len(r.dataset.id) for r in results)
     for r in results:
         ds = r.dataset

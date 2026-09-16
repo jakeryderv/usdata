@@ -15,9 +15,18 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, ConfigDict
 
-from usdata.models import LATER, Dataset, DomainInfo, ProviderInfo, Query, Status
+from usdata.models import LATER, Capabilities, Dataset, DomainInfo, ProviderInfo, Query, Status
 
 _TOKEN = re.compile(r"[a-z0-9]+")
+
+CAPABILITY_NAMES = tuple(Capabilities.model_fields)
+"""Server-side capability names a listing may filter on."""
+
+STATUS_FILTERS = (*(s.value for s in Status), "all")
+"""Accepted values of the ``status`` listing filter."""
+
+NO_READER = "none"
+"""The ``reader`` filter value that selects datasets delivering bytes only."""
 
 
 def version_key(version: str) -> tuple[int, ...]:
@@ -153,16 +162,82 @@ class Registry:
         targets = {ds.target for ds in self if ds.target and ds.target != LATER}
         return min(targets, key=version_key) if targets else None
 
-    def search(self, query: Query, *, include_planned: bool = False) -> list[SearchResult]:
+    def list(
+        self,
+        *,
+        provider: str | None = None,
+        domain: str | None = None,
+        format: str | None = None,
+        reader: str | None = None,
+        capability: str | None = None,
+        status: str = "available",
+    ) -> list[Dataset]:
+        """Datasets matching every filter given, in registry order.
+
+        ``provider`` and ``domain`` match an id exactly. ``format`` matches
+        case-insensitively anywhere in a declared format, so ``csv`` also finds
+        ``gzip CSV``. ``reader`` names the extra that opens the files, or
+        ``'none'`` for datasets delivering bytes only. ``capability`` names one
+        of ``CAPABILITY_NAMES`` and keeps datasets declaring it true.
+        ``status`` is ``'available'``, ``'planned'``, or ``'all'``.
+        """
+        if capability is not None and capability not in CAPABILITY_NAMES:
+            raise ValueError(
+                f"unknown capability {capability!r}; choose one of {', '.join(CAPABILITY_NAMES)}"
+            )
+        if status not in STATUS_FILTERS:
+            raise ValueError(
+                f"unknown status {status!r}; choose one of {', '.join(STATUS_FILTERS)}"
+            )
+        wanted_format = format.casefold() if format is not None else None
+        matches: list[Dataset] = []
+        for ds in self:
+            if status != "all" and ds.status.value != status:
+                continue
+            if provider is not None and ds.provider != provider:
+                continue
+            if domain is not None and ds.domain != domain:
+                continue
+            if wanted_format is not None and not any(
+                wanted_format in declared.casefold() for declared in ds.formats
+            ):
+                continue
+            if reader is not None and (ds.reader or NO_READER) != reader:
+                continue
+            if capability is not None and not ds.capabilities.model_dump()[capability]:
+                continue
+            matches.append(ds)
+        return matches
+
+    def search(
+        self,
+        query: Query,
+        *,
+        include_planned: bool = False,
+        provider: str | None = None,
+        domain: str | None = None,
+        format: str | None = None,
+        reader: str | None = None,
+        capability: str | None = None,
+        status: str | None = None,
+    ) -> list[SearchResult]:
         """Rank datasets by keyword match, filtered by provider, space, and time.
 
-        Planned datasets are left out unless ``include_planned`` is set.
+        The keyword arguments are the ``list`` filters, applied before scoring.
+        Planned datasets are left out unless ``include_planned`` is set;
+        ``status`` supersedes it when given.
         """
         terms = _tokens(query.text or "")
         results: list[SearchResult] = []
-        for ds in self:
-            if ds.status is Status.PLANNED and not include_planned:
-                continue
+        candidates = self.list(
+            provider=provider,
+            domain=domain,
+            format=format,
+            reader=reader,
+            capability=capability,
+            status=status if status is not None else "all" if include_planned else "available",
+        )
+        for ds in candidates:
             if query.provider and ds.provider != query.provider:
                 continue
             if query.bbox and ds.spatial_extent and not ds.spatial_extent.intersects(query.bbox):
