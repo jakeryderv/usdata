@@ -269,7 +269,7 @@ datasets:
     reader: netcdf
     guide: docs/providers/noaa-glm.md
     examples:
-      - examples/glm-flashes/README.md
+      - examples/glm-flashes/example.ipynb
       - examples/tornado-classification/example.ipynb
       - examples/severe-weather-case-study/example.ipynb
     resolution:
@@ -745,7 +745,7 @@ datasets:
     reader: grib
     guide: docs/providers/noaa-mrms.md
     examples:
-      - examples/mrms-rotation/README.md
+      - examples/mrms-rotation/example.ipynb
       - examples/tornado-classification/example.ipynb
       - examples/severe-weather-case-study/example.ipynb
     resolution:
@@ -869,7 +869,7 @@ datasets:
     reader: grib
     guide: docs/providers/noaa-hrrr.md
     examples:
-      - examples/hrrr-environment/README.md
+      - examples/hrrr-environment/example.ipynb
       - examples/severe-weather-case-study/example.ipynb
     resolution:
       spatial: "3 km Lambert conformal CONUS grid, 1799 x 1059 points"

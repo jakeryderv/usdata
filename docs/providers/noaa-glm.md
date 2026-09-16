@@ -36,28 +36,25 @@ The `netcdf` extra opens a file with `FetchedAsset.open()` as an xarray Dataset.
 Events, groups, and flashes are separate one-dimensional tables along
 `number_of_events`, `number_of_groups`, and `number_of_flashes`, linked by
 `event_parent_group_id` and `group_parent_flash_id`. To work with flashes as a
-pandas table, select the flash variables and drop the scalar coordinates:
+pandas table, select the flash variables and keep the flash position and
+time coordinates as columns:
 
 ```python
 from usdata import pull
 
 (item,) = pull("dataset.yaml").fetched
 detections = item.open()
-flashes = (
-    detections[
-        [
-            "flash_time_offset_of_first_event",
-            "flash_time_offset_of_last_event",
-            "flash_lat",
-            "flash_lon",
-            "flash_area",
-            "flash_energy",
-            "flash_quality_flag",
-        ]
-    ]
-    .reset_coords(drop=True)
-    .to_dataframe()
-)
+columns = [
+    "flash_time_offset_of_first_event",
+    "flash_time_offset_of_last_event",
+    "flash_lat",
+    "flash_lon",
+    "flash_area",
+    "flash_energy",
+    "flash_quality_flag",
+]
+# Positions and times are coordinates, so keep them as columns rather than dropping them.
+flashes = detections[columns].reset_coords()[columns].to_dataframe()
 nearby = flashes[flashes.flash_lat.between(33, 38) & flashes.flash_lon.between(-100, -94)]
 ```
 
