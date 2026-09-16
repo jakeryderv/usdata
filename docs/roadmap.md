@@ -90,10 +90,11 @@ settle before it moves to Now.
 
 - [PullResult.one and a promised order within a source](https://github.com/jakeryderv/usdata/issues/221),
   the remaining friction from the severe-weather case study.
-- [EPA AQS as the credentialed-provider probe](https://github.com/jakeryderv/usdata/issues/222):
-  the first source that needs a key, and the decision on where keys live and
-  what provenance records about them. It replaces the non-NOAA criterion for
-  1.0, which `usgs:water-daily` already met; see [versioning](versioning.md).
+
+Datasets stay anonymous-access for now. Every source added before 1.0 is one
+that needs no account or key, so the adapter, transport, cache, and reader
+boundaries settle on the simplest cases before a credential layer is shaped
+around them; see Later.
 
 Scope one dataset expansion around a concrete analysis use case. These are
 candidates to investigate, not selected implementations. Refine a candidate into
@@ -102,16 +103,27 @@ moving it to Now. Prefer additions that exercise a useful new access pattern or
 reuse an existing one while preserving the adapter, transport, cache/provenance,
 and optional-reader boundaries:
 
+- `usgs:earthquakes`: the ComCat query API returns GeoJSON, a response shape
+  the registry has not met, and the first USGS source beyond water.
+- RAP and NBM: the HRRR and GFS bucket layout and index files, so mostly
+  registry entries and a subclass.
+- Bulk directories and archives, such as IBTrACS, beside HURDAT2.
+- FEMA disaster declarations from OpenFEMA, which join to Storm Events by
+  county and date.
 - Further NCEI Access Data Service datasets, such as hourly normals.
-- Bulk directories and archives, such as IBTrACS.
 - Additional GOES ABI products and sectors, and CO-OPS currents.
 - Geospatial readers when a supported dataset and representative fixtures justify them.
 - A NEXRAD Level III reader, once the bytes-only adapter has a concrete decoding use case.
 
 ## Later
 
-- [NASA access through earthaccess](https://github.com/jakeryderv/usdata/issues/9):
-  establish credential ownership and authentication behavior first.
+- Sources that need credentials, deliberately after the anonymous surface has
+  stopped moving: [EPA AQS as the first probe](https://github.com/jakeryderv/usdata/issues/222),
+  which settles where keys live, what provenance records about them, and how
+  a manifest stays shareable without one, and then
+  [NASA access through earthaccess](https://github.com/jakeryderv/usdata/issues/9).
+  One such provider is a 1.0 criterion ([versioning](versioning.md)), so this
+  is the last workstream before 1.0, not a candidate for the next one.
 - [Remote cache backends](https://github.com/jakeryderv/usdata/issues/11):
   a general cache keyed by asset id still needs lookup, freshness, trusted
   upload ownership, and eviction defined. The content-addressed mirror of
