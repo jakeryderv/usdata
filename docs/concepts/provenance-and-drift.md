@@ -17,6 +17,38 @@ persistent record.
 A lockfile records the manifest's checksum, when it was generated, the usdata
 version, and for each asset its resolved URL, checksum, and provenance.
 
+### Files fetched as byte ranges
+
+An asset fetched as part of a larger object, today the HRRR and GFS `messages`
+parameter, records five more fields plus one line under `transformations`. The
+checksum and size still describe the local file, which is the selected GRIB2
+messages concatenated:
+
+| Field | Meaning |
+|---|---|
+| `index_url` | The `<key>.idx` sidecar the byte ranges were resolved through. |
+| `index_checksum` | `sha256:<hex>` of that index text as it arrived. |
+| `ranges` | The inclusive `start` and `end` byte pairs that were fetched, in order. |
+| `object_size` | Size of the whole object when the ranges were resolved. |
+| `object_etag` | The ETag that object carried, re-sent as `If-Match` on every later request. |
+| `transformations` | One entry, `grib2 messages 105,131 concatenated from <object url>`. |
+
+```json
+"ranges": [
+  { "start": 64292396, "end": 65005961 },
+  { "start": 96828629, "end": 97953522 }
+],
+"object_size": 150114757,
+"object_etag": "17ef4503533b3bd3b4c6338b7dddcf2c"
+```
+
+A whole-file sidecar is unchanged: the new fields are optional, an older
+sidecar loads with `ranges` empty and the rest unset, and the lockfile schema
+is the same. The asset's URL carries the selection as a fragment,
+`...wrfsfcf00.grib2#messages=105,131`, so the lockfile entry alone says which
+bytes were taken and from where. See
+[ADR 0028](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0028-partial-grib2-fetch-through-index-files.md).
+
 ## What a checksum can and cannot do
 
 A checksum proves that the bytes you have are the bytes that were pinned. It
@@ -30,9 +62,16 @@ a versioned archive.
 
 ## How drift is reported
 
-A locked restore downloads each pinned URL without repeating discovery. When
-the bytes differ from the pin, restoration continues through the remaining
-entries, then exits 4 listing every asset that changed. Assets that still match
+A locked restore downloads each pinned URL without repeating discovery. An
+entry with `ranges` re-issues exactly those ranges against the pinned ETag,
+one request per contiguous run, and never reads the index again, so a
+republished index cannot move a pin. When the bytes differ from the pin,
+restoration continues through the remaining entries, then exits 4 listing every
+asset that changed. A range request refused because the object was republished
+(HTTP 412) is reported the same way, as one changed asset. A server that
+answers a range request with the whole object, or with a `Content-Range` that
+does not match the request, fails the run before anything is written; that is a
+transport fault, not drift. Assets that still match
 are restored; changed ones keep whatever file was already at that path; the
 lockfile is not rewritten. In Python, `pull()` raises `UpstreamChanged`, whose
 `drift` lists each asset.
