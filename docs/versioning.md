@@ -37,7 +37,10 @@ release.
 
 - Manifest and lockfile formats have not changed for two consecutive minor releases.
 - The `Provider` interface has not changed for two consecutive minor releases.
-- At least one non-NOAA provider exists, proving the abstraction is not NOAA-shaped.
+- At least one provider that requires credentials exists, so the contract
+  covers how a key is supplied, where it is kept, and what provenance records
+  about it ([issue 222](https://github.com/jakeryderv/usdata/issues/222)).
+  `usgs:water-daily` already showed the abstraction is not NOAA-shaped.
 
 ## Deprecation
 

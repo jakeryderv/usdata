@@ -32,3 +32,5 @@ is described in the guides and reference pages.
 - [0026: One registry schema, verified against the adapters](0026-one-registry-schema.md)
 - [0027: The provider contract](0027-provider-contract.md)
 - [0028: Partial GRIB2 fetch through index files](0028-partial-grib2-fetch-through-index-files.md)
+- [0029: Committed example lockfiles, restored on a schedule](0029-committed-example-lockfiles.md)
+- [0030: A content-addressed mirror of pinned bytes](0030-content-addressed-mirror.md)

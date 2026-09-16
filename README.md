@@ -51,6 +51,20 @@ breaking changes.
 Twenty datasets are available today and twenty-five more are planned, grouped
 by agency and product family in the [catalog](docs/providers/README.md).
 
+## How this compares
+
+usdata resolves a place, a time window, and a few parameters to the exact
+files that satisfy them, then pins those files so the same inputs can be
+restored and verified later. Neighbouring tools each do part of that.
+
+| Tool | What it does | What usdata adds |
+| --- | --- | --- |
+| [pooch](https://www.fatiando.org/pooch/) | Downloads and verifies files from a registry of names, hashes, and a base URL you write | Discovery: the query resolves to the URLs, and the lockfile is written, not authored |
+| [intake](https://intake.readthedocs.io/) | Describes datasets in catalogs and opens them through drivers | Checksums, lockfiles, and provenance; usdata stops at handing a file to pandas or xarray |
+| [DVC](https://dvc.org/) | Versions data files and can track one URL by its ETag or hash | Knowing which URLs a scientific question needs, across agencies |
+| [Herbie](https://herbie.readthedocs.io/) | Deep access to model output, including subsetting GRIB2 through index files | One interface across observations, radar, satellite, and models, with a lockfile; usdata's index-file fetch reproduces Herbie's for that reason |
+| [dataretrieval](https://github.com/DOI-USGS/dataretrieval-python) | Full coverage of USGS water data | Cross-agency pinning; use dataretrieval for USGS breadth |
+
 ## Contributing
 
 Setup, commands, checks, and the release procedure are in

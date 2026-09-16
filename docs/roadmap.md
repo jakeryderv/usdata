@@ -42,82 +42,58 @@ belong in [CI](https://github.com/jakeryderv/usdata/actions/workflows/ci.yml) an
 
 The homepage at [usdata.dev](https://usdata.dev/) and current documentation at
 [docs.usdata.dev](https://docs.usdata.dev/) have separate automatic deployments.
-The R2 bucket is reserved for dataset storage at `data.usdata.dev`; connecting it
-does not implement an SDK remote cache. See
+The R2 bucket at `data.usdata.dev` is reserved for dataset storage; see
 [website operations](guides/website-operations.md) and
 [ADR 0015](adr/0015-separate-sites-and-data-storage.md).
 
-The tornado research workstream, tracked in
-[issue 118](https://github.com/jakeryderv/usdata/issues/118), shipped complete
-in v0.15.0: GLM lightning detections, SPC tornado reports, NEXRAD Level III
-products without a reader, a GRIB2 reader extra on ecCodes
-([ADR 0022](adr/0022-grib2-reader-backend.md)), MRMS gridded radar products,
-HRRR and GFS model output, and the
-[tornado classification example](https://usdata.dev/examples/tornado-classification/).
-The [worked examples](https://usdata.dev/examples/) are the usage record for a
+Shipped through v0.18.0: the tornado research inputs
+([issue 118](https://github.com/jakeryderv/usdata/issues/118)), one registry
+schema verified against the adapters
+([ADR 0026](adr/0026-one-registry-schema.md)), the published provider contract
+([ADR 0027](adr/0027-provider-contract.md)), partial GRIB2 fetch through index
+files ([ADR 0028](adr/0028-partial-grib2-fetch-through-index-files.md)),
+`doctor`, `cache`, `inspect`, and `cite`, named manifest sources, priced
+dry runs, and the
+[severe-weather case study](https://usdata.dev/examples/severe-weather-case-study/)
+that absorbs the smaller tornado examples. The
+[worked examples](https://usdata.dev/examples/) are the usage record for a
 release: each one states the question it answers and what was awkward while
 answering it ([ADR 0025](adr/0025-examples-as-usage-review.md)). The grib extra
 is still unchecked on macOS, where ecCodes must be installed separately.
 
-The selected workstream is one registry schema, verified against the adapters
-([ADR 0026](adr/0026-one-registry-schema.md)), in three PRs:
+The selected workstream is reproducible inputs in fact rather than in
+documentation: a committed lockfile that is restored on a schedule, and a
+mirror that can serve the pinned bytes after an agency stops serving them.
+Two decision records set the shape,
+[ADR 0029](adr/0029-committed-example-lockfiles.md) and
+[ADR 0030](adr/0030-content-addressed-mirror.md), and the work lands in this
+order:
 
-- [Fold the catalog block into dataset entries](https://github.com/jakeryderv/usdata/issues/160).
-  Done when the `catalog` block is gone, the generators read the model,
-  `usdata info` prints formats, reader, selection, and inputs, and the generated
-  catalog and website catalog are unchanged apart from field order.
-- [Dataset metadata fields](https://github.com/jakeryderv/usdata/issues/161):
-  resolution, update frequency, latency, citation, terms, variables, and limits.
-  Done when every available dataset fills the fields that apply, with the
-  upstream source of each value in the provider notes, and `info` and the
-  catalog pages render them.
-- [Contract test for capabilities and limits](https://github.com/jakeryderv/usdata/issues/162).
-  Done when a registry claim the adapter does not honour fails the offline
-  suite, and the MRMS entry is corrected
-  ([#158](https://github.com/jakeryderv/usdata/issues/158)).
-
-The [dataset browser](https://usdata.dev/datasets/) provides search, support
-and agency filters, selection rules, and links to examples, including the
-[2024 climate comparison](https://usdata.dev/examples/climate-anomalies/).
+- [Commit lockfiles for the archive-backed examples and restore them weekly](https://github.com/jakeryderv/usdata/issues/218).
+  Done when the six archive-only examples commit their lockfiles, the offline
+  gate validates each against its manifest, and the weekly workflow restores
+  every one into an empty cache and reports drift per example.
+- [A date-only end selects through the end of that day](https://github.com/jakeryderv/usdata/issues/220).
+  A breaking change to query, CLI, and manifest semantics that should land
+  before more lockfiles are committed against the old reading. Done when a
+  bare date means the last instant of its UTC day, the contract test covers
+  it, and the guides drop their midnight warnings.
+- [Content-addressed mirror of pinned bytes on R2](https://github.com/jakeryderv/usdata/issues/219).
+  Done when a restore whose upstream object was replaced completes from the
+  mirror and says so, the SDK never uploads, only the restore job writes, and
+  the provenance sidecar records which source served the bytes.
 
 ## Next
 
-These follow the schema work and are ordered by what each unblocks. Each has an
-issue with the scope to settle before it moves to Now.
+These follow the reproducibility work. Each has an issue with the scope to
+settle before it moves to Now.
 
-- Discovery: a [`datasets` listing and shared search filters with JSON output](https://github.com/jakeryderv/usdata/issues/163),
-  and [sizes on `--dry-run`](https://github.com/jakeryderv/usdata/issues/157).
-- Diagnostics: [`usdata doctor`](https://github.com/jakeryderv/usdata/issues/164),
-  [`usdata cache`](https://github.com/jakeryderv/usdata/issues/165), and
-  [`usdata inspect`](https://github.com/jakeryderv/usdata/issues/166) with a
-  GRIB2 inventory as data.
-- Readers: a [strict `select`](https://github.com/jakeryderv/usdata/issues/167)
-  and [units from registry variables](https://github.com/jakeryderv/usdata/issues/168).
-- Manifests: [named sources](https://github.com/jakeryderv/usdata/issues/169)
-  and [`usdata cite`](https://github.com/jakeryderv/usdata/issues/170).
-- Contract: a [public `HttpProvider`, a `usdata.testing` fixture, and an ADR naming the stable surface](https://github.com/jakeryderv/usdata/issues/171),
-  and the [registry `system` field](https://github.com/jakeryderv/usdata/issues/172).
-- One [flagship severe-weather case study](https://github.com/jakeryderv/usdata/issues/173)
-  with Storm Events in its manifest, absorbing the role of the seven small
-  tornado examples.
-- [Scope GRIB2 partial fetch through index files](https://github.com/jakeryderv/usdata/issues/174):
-  acquisition, not analysis, and the largest bandwidth win available for
-  model output. Scoping only until pinning and provenance are decided.
-- [Housekeeping from the first question-first notebooks](https://github.com/jakeryderv/usdata/issues/175).
-
-Investigate these bounded website additions before selecting
-implementation work:
-
-- One bounded exploration workflow backed by R2: publish an example's exact
-  inputs, manifest, provenance, checksums, and lightweight preview files. Show the
-  previews in the website and link to downloads and SDK instructions. Define
-  stable object identities and retention before publishing; reuse identical bytes
-  rather than duplicating files for every package release.
-
-These are unscheduled candidates without deadlines or release assignments.
-Published example inputs have stable retention and remain separate from disposable
-SDK cache entries and from mirroring entire sources. General remote caching stays
-in Later until lookup, freshness, upload ownership, and eviction are defined.
+- [PullResult.one and a promised order within a source](https://github.com/jakeryderv/usdata/issues/221),
+  the remaining friction from the severe-weather case study.
+- [EPA AQS as the credentialed-provider probe](https://github.com/jakeryderv/usdata/issues/222):
+  the first source that needs a key, and the decision on where keys live and
+  what provenance records about them. It replaces the non-NOAA criterion for
+  1.0, which `usgs:water-daily` already met; see [versioning](versioning.md).
 
 Scope one dataset expansion around a concrete analysis use case. These are
 candidates to investigate, not selected implementations. Refine a candidate into
@@ -137,8 +113,10 @@ and optional-reader boundaries:
 - [NASA access through earthaccess](https://github.com/jakeryderv/usdata/issues/9):
   establish credential ownership and authentication behavior first.
 - [Remote cache backends](https://github.com/jakeryderv/usdata/issues/11):
-  define lookup, freshness, trusted upload ownership, and eviction while preserving
-  checksum, provenance, restoration, and published-file retention contracts.
+  a general cache keyed by asset id still needs lookup, freshness, trusted
+  upload ownership, and eviction defined. The content-addressed mirror of
+  [ADR 0030](adr/0030-content-addressed-mirror.md) answers none of those for
+  it and does not preclude it.
 - NetCDF CDRs and static grids.
 - Geospatial severe-weather sources that share one blocker: NWS damage survey
   points and polygons (an ArcGIS REST service), the NWS watch and warning
