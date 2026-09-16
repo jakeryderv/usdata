@@ -55,7 +55,7 @@ def test_datasets_filters_by_format_reader_and_capability() -> None:
     result = runner.invoke(app, ["datasets", "--format", "csv", "--reader", "pandas"])
     assert result.exit_code == 0
     assert "noaa:storm-events" in result.stdout and "noaa:nexrad-level2" not in result.stdout
-    grib = runner.invoke(app, ["datasets", "--capability", "variable_subset", "--reader", "grib"])
+    grib = runner.invoke(app, ["datasets", "--capability", "temporal_subset", "--reader", "grib"])
     assert grib.exit_code == 0 and "noaa:mrms" in grib.stdout
 
 
@@ -158,6 +158,14 @@ def test_info_says_none_for_a_dataset_with_no_reader() -> None:
     assert result.exit_code == 0
     assert "formats:   NEXRAD Level III (no reader)" in result.stdout
     assert "reader:    none" in result.stdout
+
+
+def test_info_prints_only_the_subsetting_the_adapter_accepts() -> None:
+    """MRMS advertised spatial and variable subsetting its adapter rejects; HURDAT2 has none."""
+    mrms = runner.invoke(app, ["info", "noaa:mrms"])
+    assert mrms.exit_code == 0 and "  subsetting: temporal_subset\n" in mrms.stdout
+    hurdat2 = runner.invoke(app, ["info", "noaa:hurdat2"])
+    assert hurdat2.exit_code == 0 and "  subsetting: none\n" in hurdat2.stdout
 
 
 def test_info_describes_resolution_cadence_limits_and_variables() -> None:

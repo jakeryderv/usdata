@@ -11,8 +11,10 @@ year; December 31–January 1 selects both years. Asset time bounds label those
 whole file years, not precise coverage of local event timestamps. Dates before
 1950 and a missing requested year are errors, so a multi-year request cannot
 silently succeed with only some years. Location/bbox, variables, text, and all
-provider-specific params are rejected. `capabilities` are false because selecting
-an annual object does not perform server-side row subsetting.
+provider-specific params are rejected, so `spatial_subset` and
+`variable_subset` are false: selecting an annual object performs no server-side
+row subsetting. Only `temporal_subset` is true, because the requested dates
+choose which annual objects are returned.
 
 The directory lists filenames such as
 `StormEvents_details-ftp_v1.0_d2024_c20260728.csv.gz`: `d` identifies the data year

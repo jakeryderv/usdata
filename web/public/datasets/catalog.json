@@ -546,7 +546,7 @@
     {
       "id": "noaa:mrms",
       "title": "MRMS gridded radar products",
-      "description": "Gridded CONUS products merged from every radar plus other sensors: rotation tracks, reflectivity, hail size, echo tops, precipitation rate, and lightning probability as two-minute gzipped GRIB2 files in the public noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/. Select one product from the supported list and a file-stamp window of at most one day; each asset is a complete CONUS grid with no spatial subsetting.",
+      "description": "Gridded CONUS products merged from every radar plus other sensors: rotation tracks, reflectivity, hail size, echo tops, precipitation rate, and lightning probability as two-minute gzipped GRIB2 files in the public noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/. Select one product from the supported list and a file-stamp window of at most one day; each asset is a complete CONUS grid with no spatial or variable subsetting, and the product is the variable. The stated extent is the grid's coverage, not an offer to crop to a bounding box.",
       "provider": "NOAA",
       "domain": "Weather radar",
       "availability": "Released",

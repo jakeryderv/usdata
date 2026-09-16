@@ -25,8 +25,9 @@ does not reach.
 
 `products` is required, case-insensitive, and validated against the codes
 below; an unknown code is rejected by name before any request. Each code
-selects distinct whole files, which is why the dataset advertises variable
-subsetting. Ask in an issue to extend the list.
+selects distinct whole files; it is a parameter rather than a `variables`
+filter, so the adapter rejects `variables` and the entry declares
+`variable_subset: false`. Ask in an issue to extend the list.
 
 For the moment products the digit or letter after `N` selects the elevation
 slot: `0` is the lowest tilt, and `1`, `2`, `3`, `A`, and `B` are higher slots

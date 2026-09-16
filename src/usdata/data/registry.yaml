@@ -286,7 +286,7 @@ datasets:
     homepage: https://www.ncei.noaa.gov/access/storm-events-database/
     license: US Government Work (public domain)
     temporal_extent: { start: "1950-01-01T00:00:00Z" }
-    capabilities: { spatial_subset: false, temporal_subset: false, variable_subset: false }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
     summary: Storm Events details
     formats: [gzip CSV]
     selection: Whole annual archives; filter rows locally after downloading
@@ -334,7 +334,7 @@ datasets:
     homepage: https://www.spc.noaa.gov/wcm/#data
     license: US Government Work (public domain)
     temporal_extent: { start: "1950-01-01T00:00:00Z" }
-    capabilities: { spatial_subset: false, temporal_subset: false, variable_subset: false }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
     summary: SPC tornado database
     formats: [CSV]
     selection: Whole annual, half-decade, or decade files; filter rows locally after downloading
@@ -691,14 +691,16 @@ datasets:
       and lightning probability as two-minute gzipped GRIB2 files in the public
       noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/. Select one
       product from the supported list and a file-stamp window of at most one
-      day; each asset is a complete CONUS grid with no spatial subsetting.
+      day; each asset is a complete CONUS grid with no spatial or variable
+      subsetting, and the product is the variable. The stated extent is the
+      grid's coverage, not an offer to crop to a bounding box.
     keywords: [radar, mrms, rotation, azimuthal shear, hail, reflectivity, gridded, grib2, conus, tornado]
     protocol: s3
     homepage: https://registry.opendata.aws/noaa-mrms-pds/
     license: US Government Work (public domain)
     spatial_extent: { west: -130.0, south: 20.0, east: -60.0, north: 55.0 }
     temporal_extent: { start: "2020-10-14T00:00:00Z" }
-    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
     summary: MRMS gridded radar products
     formats: [GRIB2 (gzipped)]
     selection: Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day
@@ -760,7 +762,7 @@ datasets:
     license: US Government Work (public domain)
     spatial_extent: { west: -180.0, south: 15.0, east: -60.0, north: 72.0 }
     temporal_extent: { start: "2020-03-30T00:00:00Z" }
-    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
     summary: NEXRAD derived radar products
     formats: [NEXRAD Level III (no reader)]
     selection: Whole product files by site, product code, and inclusive UTC scan time since 2020-03-30

@@ -18,8 +18,10 @@ per-year file is preferred over any wider archive. Asset time bounds label the
 file's years, not precise event coverage. Dates before 1950 and a requested
 year with no linked file are errors, so a span cannot silently succeed with
 only some years. Location/bbox, variables, text, and all provider-specific
-params are rejected. `capabilities` are false because selecting a whole file
-does not perform server-side row subsetting.
+params are rejected, so `spatial_subset` and `variable_subset` are false:
+selecting a whole file performs no server-side row subsetting. Only
+`temporal_subset` is true, because the requested dates choose which files are
+returned.
 
 File names are stable and the bytes are revised in place: SPC refreshes prior
 years when NWS Storm Data is finalized, and the page shows an update date next
