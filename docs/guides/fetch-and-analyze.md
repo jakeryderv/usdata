@@ -62,6 +62,28 @@ On a terminal, fetch reports resolved counts, known sizes, download progress,
 and verified cache hits on stderr. `--no-progress` disables it, and redirecting
 output disables it automatically.
 
+## Manage the cache
+
+`usdata cache` shows and reclaims that space:
+
+```sh
+usdata cache path                       # where the cache is
+usdata cache list --dataset noaa:ghcn-daily
+usdata cache size
+usdata cache prune --older-than 30d --dry-run
+```
+
+`list` prints one line per cached file with its dataset, asset id, size, and
+the retrieval time from its sidecar; a file with no readable sidecar is listed
+as `unrecorded`. `--json` emits the same records for scripts.
+
+`prune` needs `--older-than` (`30d`, `12h`, or an ISO 8601 duration such as
+`P30D`), `--dataset`, or both, and removes each data file together with its
+sidecar. Files pinned by a `*.lock.json` beside a manifest in the current
+directory are kept and counted in the summary, so pruning never breaks a
+`usdata verify`; `--include-pinned` removes them too. Pair either with
+`--dry-run` to see what would go first.
+
 The [SST example](https://usdata.dev/examples/sst-analysis/) fetches a small
 gridded CSV and opens it with units;
 [monthly climate](https://usdata.dev/examples/monthly-climate/) does the same

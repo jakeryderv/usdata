@@ -1,0 +1,1 @@
+ADR 0027 records the provider contract: the names an adapter may depend on, what stays internal, and what changing either costs. The adding-a-dataset guide points at `HttpProvider` and shows how to run the shared checks from an outside test suite.

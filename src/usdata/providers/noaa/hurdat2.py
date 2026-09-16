@@ -23,8 +23,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
 from usdata.protocols.listing import directory_entries
-from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.http import HttpProvider
 
 DIRECTORY_URL = "https://www.nhc.noaa.gov/data/hurdat/"
 # hurdat2[-<basin>]-<first year>-<last year>-<revision>[<letter>].txt; the Atlantic
@@ -60,7 +60,7 @@ class Hurdat2Params(BaseModel):
         return basin
 
 
-class Hurdat2(_HttpProvider):
+class Hurdat2(HttpProvider):
     """Resolve one whole-basin best-track file; preserve the original text bytes."""
 
     params_model = Hurdat2Params

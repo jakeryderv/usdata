@@ -30,7 +30,17 @@ the end a time, or use the next day.
 HRRR `file=sfc` is the 150 MB surface set with CAPE, helicity, winds, and
 reflectivity; `prs` and `nat` are the 400 to 700 MB pressure and native sets.
 GFS `resolution=1p00` is about 40 MB, `0p25` about 500 MB. Always dry-run
-first; the listing reports exact sizes.
+first; the listing prints the exact size in bytes between the asset id and its
+href, and the total on stderr:
+
+```text
+hrrr.20240506.t20z.wrfsfcf00.grib2	150114757	s3://noaa-hrrr-bdp-pds/hrrr.20240506/conus/hrrr.t20z.wrfsfcf00.grib2
+1 asset(s) matched, 150114757 bytes
+```
+
+The column is `?` for the datasets whose service reports no size at listing
+time, and the summary then ends with `size unknown for N`. Add `--json` to get
+the same asset records as a JSON array instead of columns.
 
 ## Selecting fields
 

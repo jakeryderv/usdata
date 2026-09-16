@@ -19,8 +19,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from usdata.models import Asset, Query
 from usdata.protocols import s3
-from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.http import HttpProvider
 from usdata.providers.noaa.goes import list_scans
 from usdata.providers.params import int_range
 
@@ -42,7 +42,7 @@ class GlmParams(BaseModel):
     )
 
 
-class GoesGlm(_HttpProvider):
+class GoesGlm(HttpProvider):
     """Whole 20-second GLM detection files; params: satellite."""
 
     params_model = GlmParams

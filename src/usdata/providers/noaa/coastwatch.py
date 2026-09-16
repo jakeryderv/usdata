@@ -21,8 +21,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from usdata.models import Asset, BBox, Protocol, Query, TimeRange
 from usdata.protocols import erddap, http
-from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.http import HttpProvider
 
 BASE = "https://coastwatch.noaa.gov/erddap"
 DATASET = "noaacwBLENDEDsstDNDaily"
@@ -64,7 +64,7 @@ class CoastwatchSstParams(BaseModel):
         return value
 
 
-class CoastwatchSst(_HttpProvider):
+class CoastwatchSst(HttpProvider):
     """NOAA's 0.05-degree day/night analysis, including units and grid coordinates."""
 
     params_model = CoastwatchSstParams

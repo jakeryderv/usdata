@@ -13,6 +13,7 @@ from usdata import __version__, build_query, default_registry
 from usdata._fetch import ChecksumMismatch
 from usdata._fetch import fetch as fetch_query
 from usdata._progress import batch
+from usdata.cli.cache import cache_app
 from usdata.cli.cite import cite
 from usdata.cli.doctor import doctor
 from usdata.cli.inspect import inspect
@@ -38,6 +39,7 @@ app = typer.Typer(
     help="Discover, fetch, and track provenance of U.S. public scientific data.",
     no_args_is_help=True,
 )
+app.add_typer(cache_app, name="cache")
 app.command()(cite)
 
 
@@ -312,6 +314,10 @@ def fetch(
     dry_run: Annotated[
         bool, typer.Option(help="List matching assets without downloading.")
     ] = False,
+    as_json: Annotated[
+        bool,
+        typer.Option("--json", help="Emit a JSON array of records and nothing else on stdout."),
+    ] = False,
 ) -> None:
     """Resolve a query against one dataset and download the matching assets."""
     params: dict[str, str] = {}
@@ -358,9 +364,16 @@ def fetch(
         if dry_run:
             with load_adapter(ds) as adapter:
                 assets = adapter.list_assets(query)
-            for a in assets:
-                typer.echo(f"{a.id}\t{a.href}")
-            typer.echo(f"{len(assets)} asset(s) matched", err=True)
+            if as_json:
+                typer.echo(json.dumps([a.model_dump(mode="json") for a in assets], indent=2))
+            else:
+                for a in assets:
+                    typer.echo(f"{a.id}\t{a.size if a.size is not None else '?'}\t{a.href}")
+            known = [a.size for a in assets if a.size is not None]
+            summary = f"{len(assets)} asset(s) matched, {sum(known)} bytes"
+            if len(known) != len(assets):
+                summary += f"; size unknown for {len(assets) - len(known)}"
+            typer.echo(summary, err=True)
             with progress(disabled=no_progress):
                 batch([asset.size for asset in assets])
             return
@@ -378,6 +391,9 @@ def fetch(
     if not fetched:
         typer.echo("No assets matched.", err=True)
         raise typer.Exit(code=1)
+    if as_json:
+        typer.echo(json.dumps([f.model_dump(mode="json") for f in fetched], indent=2))
+        return
     for f in fetched:
         tag = "cached" if f.from_cache else "fetched"
         typer.echo(f"{f.path}\t{tag}\t{f.provenance.size} bytes")

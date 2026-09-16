@@ -21,8 +21,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import s3
-from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.http import HttpProvider
 
 BUCKET = "noaa-mrms-pds"
 DOMAIN = "CONUS"
@@ -101,7 +101,7 @@ class MrmsParams(BaseModel):
         return self
 
 
-class Mrms(_HttpProvider):
+class Mrms(HttpProvider):
     """Whole two-minute MRMS CONUS GRIB2 files; params: product."""
 
     params_model = MrmsParams

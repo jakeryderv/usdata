@@ -242,7 +242,7 @@ def test_cli_dry_run_and_rejected_geographic_filter() -> None:
         mock.get(PAGE_URL).respond(200, text=links("2024_torn.csv"))
         result = runner.invoke(app, [*args, "--dry-run"])
     assert result.exit_code == 0
-    assert result.stdout == f"2024_torn.csv\t{DATA_URL}2024_torn.csv\n"
+    assert result.stdout == f"2024_torn.csv\t?\t{DATA_URL}2024_torn.csv\n"
     with respx.mock() as mock:
         bad = runner.invoke(app, [*args, "--location", "OK"])
     assert bad.exit_code == 2 and "filter locally" in bad.output and not mock.calls

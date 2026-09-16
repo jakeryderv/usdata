@@ -31,6 +31,7 @@ fetching. They are selected by format, independently of the transport used.
 | `query` | Turns loose user input (state/county names, FIPS, ISO dates, lat/lon) into a normalized `Query`. Place lookup uses `data/places.csv`. |
 | `selection` | Pure start-time selection among supplied assets, with explicit temporal policy and match diagnostics. |
 | `providers` | One `Provider` subclass per dataset, loaded by dotted path from the registry entry. Translates `Query` to agency-specific listing and download. |
+| `testing` | The adapter contract as runnable checks: `check_provider_contract` holds any adapter, bundled or external, to the rules `providers` states. Imports pytest lazily. |
 | `protocols` | Transport clients with no dataset knowledge. `http.download` streams to disk atomically; `s3.list_objects` paginates ListObjectsV2 anonymously. |
 | `fetch` | Core loop: adapter resolves assets, cache is checked, bytes fetched, provenance written. |
 | `readers` | Local CSV, radar, and NetCDF4 opening behind optional extras; format dispatch, units and source metadata, no fetching or cache writes. |
@@ -101,10 +102,12 @@ reports resolved batches and verified assets; HTTP reports bytes per attempt.
 Providers and public SDK signatures are unchanged. Rendering is confined to the
 CLI and disabled for redirected streams. See [ADR 0007](adr/0007-scoped-cli-progress.md).
 
-HTTP-backed adapters share a small internal `_HttpProvider` lifecycle: clients
+HTTP-backed adapters share the public `providers.HttpProvider` lifecycle: clients
 are created lazily, owned clients are closed on context exit, and injected clients
 remain caller-owned. This helper carries no query, pagination, or dataset logic;
-the public `Provider` interface remains transport-independent.
+the public `Provider` interface remains transport-independent. `providers` exports
+the whole adapter contract, and `usdata.testing` checks an adapter against it;
+[ADR 0027](adr/0027-provider-contract.md) lists what is stable and what is not.
 
 ## Place table regeneration
 

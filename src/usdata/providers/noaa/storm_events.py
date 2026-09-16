@@ -14,14 +14,14 @@ from pathlib import Path
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
 from usdata.protocols.listing import directory_entries
-from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.http import HttpProvider
 
 DIRECTORY_URL = "https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/"
 DETAILS_NAME = re.compile(r"StormEvents_details-ftp_v1\.0_d(\d{4})_c(\d{8})\.csv\.gz", re.ASCII)
 
 
-class StormEvents(_HttpProvider):
+class StormEvents(HttpProvider):
     """Resolve whole-year details archives; preserve the original gzip bytes."""
 
     def list_assets(self, query: Query) -> list[Asset]:
