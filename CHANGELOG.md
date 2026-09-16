@@ -12,6 +12,58 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.17.0](https://github.com/jakeryderv/usdata/releases/tag/v0.17.0) - 2026-09-16
+
+
+### Breaking
+
+- The adapter contract is public. `usdata.providers` now exports `Provider`, `HttpProvider` (the HTTP client lifecycle previously named `providers._http._HttpProvider`), `QueryError`, `NotImplementedProvider`, `load_adapter`, and the parameter coercions, and the new `usdata.testing` module runs the contract checks -- listing, refusals before transport, exact bytes to an exact path, client ownership, and the entry's declared capabilities -- against any adapter, including one maintained outside this repository. `usdata.providers._http` is gone; import `HttpProvider` from `usdata.providers`. ([#171](https://github.com/jakeryderv/usdata/issues/171))
+
+
+### Added
+
+- Registry entries now carry spatial and temporal resolution, update frequency, latency, citation, terms of use, the variables a dataset delivers with their units, and the longest query window its adapter enforces. `usdata info` prints each of them when the entry states it, and the generated catalog pages gained a variables table and the same lines under their catalog reference. ([#161](https://github.com/jakeryderv/usdata/issues/161))
+- `usdata datasets` lists the curated registry as a table of id, status, domain, formats, reader, and summary, filtered by `--provider`, `--domain`, `--format`, `--reader`, `--capability`, and `--status`; `usdata search` takes the same filters, both accept `--json` for a machine-readable array, and the SDK gains `usdata.datasets()` and the matching keyword arguments on `Registry.list` and `Registry.search`. ([#163](https://github.com/jakeryderv/usdata/issues/163))
+- `usdata doctor` reports the interpreter, reader extras and the ecCodes library, the cache directory and its free space, the cache environment variables, and, with `--network`, whether the upstream hosts answer; it exits 1 when a check fails. ([#164](https://github.com/jakeryderv/usdata/issues/164))
+- `usdata cache` reports the cache directory, lists cached files with their size and retrieval time, totals the space they use, and prunes them by age or dataset. Prune removes each file with its provenance sidecar and keeps whatever a lockfile in the current directory pins unless `--include-pinned` is given. ([#165](https://github.com/jakeryderv/usdata/issues/165))
+- `usdata inspect <cache path | dataset id and asset id>` and `FetchedAsset.inspect()` summarize what a fetched file holds: provenance and size for any file, CSV columns and a capped row count with no extra installed, NetCDF4 variables with dims and units, and GRIB2 messages as a table of `shortName`, `typeOfLevel`, `level`, and step. A missing extra is reported as a note instead of an error, `--json` emits the summary, and the new `usdata.readers.inventory(path)` gives the GRIB2 message list that the reader's "pass select" error has been the only source of until now. ([#166](https://github.com/jakeryderv/usdata/issues/166))
+- `open()` now reports GRIB2 `select` values that match no message: a `UserWarning` by default, naming the key, the unmatched values, and what was available for that key, or a `ValueError` with `strict=True`. ([#167](https://github.com/jakeryderv/usdata/issues/167))
+- NetCDF4 and GRIB2 results now take `units` a file leaves missing or `unknown` and missing `long_name` values from the registry entry's variable table, never overwriting what the file provides; every fill is listed under `attrs["usdata"]["registry_attrs"]`. MRMS fields, which decode without the product's level suffix, gain the units the files omit. ([#168](https://github.com/jakeryderv/usdata/issues/168))
+- Manifest sources take an optional `name`, and a pull result groups what it fetched under `by_source`, keyed by that name or by the source's one-based position; `fetched` stays in manifest order, then adapter listing order. ([#169](https://github.com/jakeryderv/usdata/issues/169))
+- `usdata cite` prints how to cite a dataset, or the datasets a manifest's lockfile pins, as plain text, BibTeX, or JSON. Pinned citations carry the retrieval dates, checksummed asset count, total size, and the usdata version that pinned them; `cite_dataset` and `cite_lockfile` are available from the package root. ([#170](https://github.com/jakeryderv/usdata/issues/170))
+- Registry entries can name the product family or service behind them, declared in a new `systems:` table; the generated provider catalog pages and the website catalog group datasets by system. ([#172](https://github.com/jakeryderv/usdata/issues/172))
+
+### Changed
+
+- `usdata info` now prints what a dataset delivers and takes: its file formats, the optional extra that opens them (or `none` for formats with no bundled reader), the selection rule, the required inputs, and the worked examples that use it. ([#160](https://github.com/jakeryderv/usdata/issues/160))
+
+### Fixed
+
+- The GLM provider notes and the radar and satellite guide now show a flash-table snippet that keeps the position and time coordinates, and `usdata info` links the GLM, MRMS, and HRRR examples to their executed notebooks. ([#156](https://github.com/jakeryderv/usdata/issues/156))
+- `usdata fetch --dry-run` now prints each asset's size and a total, and `fetch --json` emits the asset or fetched records as JSON. ([#157](https://github.com/jakeryderv/usdata/issues/157))
+- Corrected the capabilities four registry entries declared: `noaa:mrms` and `noaa:nexrad-level3` no longer advertise variable subsetting their adapters reject, `noaa:storm-events` and `noaa:spc-tornado-reports` now declare the temporal subsetting they perform, and the MRMS entry says its extent is the grid's coverage rather than an offer to crop. ([#158](https://github.com/jakeryderv/usdata/issues/158))
+- The GFS environment example no longer calls its 00 UTC 2024-05-06 analysis "twenty hours before" Storm Events report 1184052. The gap is 28 hours 39 minutes, and the README now says so and states that a pre-convective analysis that old is not concurrent with the event. ([#159](https://github.com/jakeryderv/usdata/issues/159))
+- `usdata pull` takes `--quiet` to print only the summary line instead of one line per asset, and its `--no-progress` flag no longer advertises a `--no-no-progress` counterpart; NEXRAD's `nearest` now rejects non-ASCII digit strings like the other integer parameters do. ([#175](https://github.com/jakeryderv/usdata/issues/175))
+
+### Documentation
+
+- The severe-weather case study is the flagship example: one manifest with six named sources pins the 2024 Storm Events archive, the SPC 2024 tornado file, two KTLX Level II volumes, five MRMS mid-level rotation grids, twenty minutes of GOES-16 GLM detections, and the 04 UTC HRRR analysis, 216.3 MB in all. The notebook derives one tornado report's UTC time and position from the archive instead of hard-coding them, checks them against the SPC row, reports what each remote-sensing and model source held within 25 km of that point, and ends with `usdata cite` in text and BibTeX. The six smaller severe-weather examples are linked from it as deeper dives. ([#173](https://github.com/jakeryderv/usdata/issues/173))
+- ADR 0027 records the provider contract: the names an adapter may depend on, what stays internal, and what changing either costs. The adding-a-dataset guide points at `HttpProvider` and shows how to run the shared checks from an outside test suite.
+- Every implemented dataset's provider guide ends with a "Metadata sources" list naming the upstream page behind each catalog value, and says which fields the agency does not publish rather than filling them with an estimate.
+- Index the GLM flashes, MRMS rotation, and HRRR environment notebooks on the examples page with their sharpened questions, and point every example at the setup section on the examples index instead of a documentation page that no longer exists.
+- Record the plan for one registry schema verified against the adapters (ADR 0026) and restate the roadmap around it: discovery, diagnostics, reader, manifest, contract, and flagship-example candidates each have an issue.
+- Retire the per-release first-use review and record usage in the worked examples instead: each example README asks the question it answers and lists what was awkward while answering it. Existing review files remain as historical records. See ADR 0025.
+- The GLM lightning flashes example is now a runnable notebook. It counts GOES-16 GLM flashes minute by minute in a two-degree box around the 2024-05-06 Oklahoma City tornado report for the hour ending at the report, compares that series with a same-size control box and with the whole field of view, and plots both. Its manifest now pins that hour instead of an afternoon hour that contained no flashes near Oklahoma City.
+- The HRRR environment example now ships an executed notebook: it reads surface CAPE and 0-3 km storm-relative helicity from one 150 MB analysis file, compares the grid point nearest an Oklahoma tornado report with the largest values within 100 km, maps both fields, and states what an analysis is and is not.
+- Turn the MRMS rotation tracks example into a runnable notebook: it pins eleven two-minute mid-level rotation grids around the 2024-05-06 Oklahoma tornado report, reports the peak azimuthal shear and its position in each grid inside a stated search box and storm box, maps the positions those peaks trace against the reported path start, and states what a thirty-minute accumulated shear maximum does and does not say about a tornado.
+
+### Development
+
+- An adapter contract test probes every available dataset with a bbox, a variable, and a window before any transport, so a capability the registry declares but the adapter refuses now fails the offline suite; the declared `limits.max_window` checks moved beside it. ([#162](https://github.com/jakeryderv/usdata/issues/162))
+- The registry has one schema. The top-level `catalog` block is gone and its keys are typed, validated fields on `Dataset`: adapter authors declare `summary`, `formats`, `selection`, `inputs`, `reader` (the extra that opens the files, renamed from `reader_extra`, or null), `guide`, and `examples` on the dataset entry itself, and the documentation and website generators read the model. Loading a registry that still has a `catalog` key now fails with a message saying where the fields moved.
+- Walk the published package through the getting-started guide after each release: the publish workflow installs the new version from PyPI and runs the guide's own commands, extracted from the guide itself, against live services.
+- `just run-notebooks --notebook` accepts an example slug as well as a repository-relative path and names exactly what was typed when it matches nothing, and `npm run check` in `web/` builds `dist/` first so it passes on a clean checkout.
+
 ## [0.16.0](https://github.com/jakeryderv/usdata/releases/tag/v0.16.0) - 2026-09-15
 
 

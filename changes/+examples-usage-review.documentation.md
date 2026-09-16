@@ -1,1 +1,0 @@
-Retire the per-release first-use review and record usage in the worked examples instead: each example README asks the question it answers and lists what was awkward while answering it. Existing review files remain as historical records. See ADR 0025.

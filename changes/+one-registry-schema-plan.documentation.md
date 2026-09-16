@@ -1,1 +1,0 @@
-Record the plan for one registry schema verified against the adapters (ADR 0026) and restate the roadmap around it: discovery, diagnostics, reader, manifest, contract, and flagship-example candidates each have an issue.

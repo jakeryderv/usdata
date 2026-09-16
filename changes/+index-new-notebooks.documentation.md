@@ -1,1 +1,0 @@
-Index the GLM flashes, MRMS rotation, and HRRR environment notebooks on the examples page with their sharpened questions, and point every example at the setup section on the examples index instead of a documentation page that no longer exists.
