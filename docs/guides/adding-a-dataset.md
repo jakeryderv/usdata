@@ -22,6 +22,7 @@ Add to `src/usdata/data/registry.yaml`:
 ```yaml
   - id: noaa:ghcn-daily            # <provider>:<name>, stable forever
     provider: noaa                  # must appear under top-level `providers:`
+    system: noaa:ncei-access        # optional: one of the ids under top-level `systems:`
     domain: surface-weather         # one of the ids under top-level `domains:`
     status: available               # planned (no adapter) | available
     since: "0.2"                    # available: version it shipped in
@@ -75,7 +76,10 @@ generated reference, the website browser, and `usdata info` from the same place.
 A planned entry leaves them out; an implemented one must give a summary, at least
 one format, a selection rule, its required inputs, its own usage guide under
 `docs/providers/`, and at least one example that exists. `reader` names the extra
-that opens the files, or is `null` for a format with no bundled reader.
+that opens the files, or is `null` for a format with no bundled reader. `system`
+names the product family or service the dataset comes from, declared under
+top-level `systems:` for the same provider, and groups the generated catalog
+page; leave it out when the dataset belongs to no family.
 
 The same entry also describes the data itself, and every value must be
 traceable to an upstream page listed under **Metadata sources** at the end of

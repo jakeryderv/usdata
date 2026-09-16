@@ -10,24 +10,49 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 | Dataset | Availability | Files | What gets selected |
 |---|---|---|---|
+| <span id="noaastorm-events"></span>[Storm Events details](noaa/storm-events.md) | Released | gzip CSV | Whole annual archives; filter rows locally after downloading |
+| <span id="noaaspc-tornado-reports"></span>[SPC tornado database](noaa/spc-tornado-reports.md) | Released | CSV | Whole annual, half-decade, or decade files; filter rows locally after downloading |
+| <span id="noaamrms"></span>[MRMS gridded radar products](noaa/mrms.md) | Released | GRIB2 (gzipped) | Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day |
+| <span id="noaahurdat2"></span>[Tropical cyclone best tracks](noaa/hurdat2.md) | Released | HURDAT2 fixed-format text | The newest revision of one whole basin file; filter track points locally |
+| <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](noaa/coastwatch-sst.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
+
+### [NCEI Access Data Service](https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation)
+
+| Dataset | Availability | Files | What gets selected |
+|---|---|---|---|
 | <span id="noaaghcn-daily"></span>[Daily station weather](noaa/ghcn-daily.md) | Released | CSV | Station observations within inclusive calendar dates; selected elements |
 | <span id="noaagsom"></span>[Monthly station climate](noaa/gsom.md) | Released | CSV | Complete UTC calendar months touched by the query; station and element filters |
 | <span id="noaagsoy"></span>[Annual station climate](noaa/gsoy.md) | Released | CSV | Complete UTC calendar years touched by the query; station and element filters |
 | <span id="noaalcd"></span>[Hourly airport observations](noaa/lcd.md) | Released | CSV | Every report on whole calendar days per station; optional column filters |
-| <span id="noaastorm-events"></span>[Storm Events details](noaa/storm-events.md) | Released | gzip CSV | Whole annual archives; filter rows locally after downloading |
-| <span id="noaaspc-tornado-reports"></span>[SPC tornado database](noaa/spc-tornado-reports.md) | Released | CSV | Whole annual, half-decade, or decade files; filter rows locally after downloading |
+| <span id="noaaclimate-normals"></span>[30-year station climate normals](noaa/climate-normals.md) | Released | CSV | Monthly, daily, or annual/seasonal normals per station; optional month-day window for daily and monthly |
+
+### [Next Generation Weather Radar (NEXRAD)](https://www.ncei.noaa.gov/products/radar/next-generation-weather-radar)
+
+| Dataset | Availability | Files | What gets selected |
+|---|---|---|---|
 | <span id="noaanexrad-level2"></span>[NEXRAD radar scans](noaa/nexrad-level2.md) | Released | NEXRAD Level II | Whole radar scans by site and inclusive UTC scan-start time |
-| <span id="noaamrms"></span>[MRMS gridded radar products](noaa/mrms.md) | Released | GRIB2 (gzipped) | Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day |
 | <span id="noaanexrad-level3"></span>[NEXRAD derived radar products](noaa/nexrad-level3.md) | Released | NEXRAD Level III (no reader) | Whole product files by site, product code, and inclusive UTC scan time since 2020-03-30 |
+
+### [GOES-R Series](https://www.goes-r.gov/)
+
+| Dataset | Availability | Files | What gets selected |
+|---|---|---|---|
 | <span id="noaagoes-abi"></span>[GOES CONUS imagery](noaa/goes-abi.md) | Released | NetCDF4 | Whole single-channel CONUS scenes by inclusive UTC scan-start time |
 | <span id="noaagoes-glm"></span>[GOES lightning detections](noaa/goes-glm.md) | Released | NetCDF4 | Whole 20-second detection files by inclusive UTC file-start time, at most one day |
-| <span id="noaahurdat2"></span>[Tropical cyclone best tracks](noaa/hurdat2.md) | Released | HURDAT2 fixed-format text | The newest revision of one whole basin file; filter track points locally |
+
+### [NCEP model output](https://www.nco.ncep.noaa.gov/pmb/products/)
+
+| Dataset | Availability | Files | What gets selected |
+|---|---|---|---|
 | <span id="noaagfs"></span>[GFS model output](noaa/gfs.md) | Released | GRIB2 | Whole global files by run initialization window, cycle hour, forecast hours, and grid resolution, at most one day |
 | <span id="noaahrrr"></span>[HRRR model output](noaa/hrrr.md) | Released | GRIB2 | Whole CONUS files by run initialization window, cycle hour, forecast hours, and file variant, at most one day |
-| <span id="noaaclimate-normals"></span>[30-year station climate normals](noaa/climate-normals.md) | Released | CSV | Monthly, daily, or annual/seasonal normals per station; optional month-day window for daily and monthly |
+
+### [CO-OPS Data API](https://tidesandcurrents.noaa.gov/)
+
+| Dataset | Availability | Files | What gets selected |
+|---|---|---|---|
 | <span id="noaacoops-water-levels"></span>[Coastal water levels](noaa/coops-water-levels.md) | Released | CSV | Six-minute observations for one station and datum; at most 28 days |
 | <span id="noaacoops-tide-predictions"></span>[Coastal tide predictions](noaa/coops-tide-predictions.md) | Released | CSV | Predictions for one station and datum on a chosen interval; at most a year |
-| <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](noaa/coastwatch-sst.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
 
 ## Planned datasets
 
