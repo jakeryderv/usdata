@@ -52,6 +52,29 @@ def test_domains_declared_and_next_target(registry: Registry) -> None:
         Registry([ds.model_copy(update={"domain": "nope"})], domains=registry.domains())
 
 
+def test_systems_group_datasets_under_one_provider(registry: Registry) -> None:
+    noaa = registry.systems("noaa")
+    assert registry.systems() == noaa  # every declared system is NOAA's for now
+    assert registry.system("noaa:ncei-access").name == "NCEI Access Data Service"
+    assert {ds.system for ds in registry.list(provider="noaa")} > {None}
+    assert registry.systems("usgs") == []
+
+
+def test_every_declared_system_has_a_dataset(registry: Registry) -> None:
+    named = {ds.system for ds in registry if ds.system}
+    assert {system.id for system in registry.systems()} == named
+
+
+def test_unknown_or_foreign_systems_are_rejected(registry: Registry) -> None:
+    ds = registry.get("noaa:ghcn-daily")
+    systems = registry.systems()
+    with pytest.raises(ValueError, match="unknown system 'noaa:nope'"):
+        Registry([ds.model_copy(update={"system": "noaa:nope"})], systems=systems)
+    usgs = registry.get("usgs:water-daily").model_copy(update={"system": "noaa:ncei-access"})
+    with pytest.raises(ValueError, match="belongs to provider 'noaa'"):
+        Registry([usgs], systems=systems)
+
+
 def test_search_filters_by_provider_and_bbox(registry: Registry) -> None:
     assert registry.search(Query(provider="nope")) == []
     usgs = registry.search(Query(provider="usgs"), include_planned=True)

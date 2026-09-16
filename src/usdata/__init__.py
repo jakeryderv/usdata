@@ -11,6 +11,7 @@ except PackageNotFoundError:  # running from a source tree without an install
     __version__ = "0.0.0"
 
 from usdata._fetch import ChecksumMismatch, FetchedAsset, fetch, fetch_asset
+from usdata.cite import cite_dataset, cite_lockfile
 from usdata.models import Asset, BBox, Dataset, Provenance, Query, TemporalSelection, TimeRange
 from usdata.pull import pull, verify
 from usdata.query import build_query
@@ -32,6 +33,8 @@ __all__ = [
     "TimeRange",
     "__version__",
     "build_query",
+    "cite_dataset",
+    "cite_lockfile",
     "datasets",
     "default_registry",
     "fetch",

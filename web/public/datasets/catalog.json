@@ -7,6 +7,7 @@
       "description": "Global Historical Climatology Network daily summaries: temperature, precipitation, snow, and other elements from land surface stations, served by the NCEI Access Data Service with station and date filtering. Variables are NCEI element codes and the catalog lists the common ones; the delivered set is open and depends on the station.",
       "provider": "NOAA",
       "domain": "Surface weather",
+      "system": "NCEI Access Data Service",
       "availability": "Released",
       "since": "0.2",
       "keywords": [
@@ -77,6 +78,7 @@
       "description": "Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. Selects whole calendar months and explicit stations, or discovers stations through the companion search service. Variables are NCEI element codes and the catalog lists the common ones; the delivered set is open and depends on the station.",
       "provider": "NOAA",
       "domain": "Surface weather",
+      "system": "NCEI Access Data Service",
       "availability": "Released",
       "since": "0.7",
       "keywords": [
@@ -134,6 +136,7 @@
       "description": "Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. Selects complete UTC calendar years and explicit stations, or discovers stations through the search service. Variables are NCEI element codes and the catalog lists the common ones; the delivered set is open and depends on the station.",
       "provider": "NOAA",
       "domain": "Surface weather",
+      "system": "NCEI Access Data Service",
       "availability": "Released",
       "since": "0.10",
       "keywords": [
@@ -187,6 +190,7 @@
       "description": "Hourly, special, synoptic, and daily-summary reports from airport and first-order stations via the NCEI Access Data Service dataset local-climatological-data, addressed by eleven-digit station ids and timestamped in local standard time. Select whole days, stations or a location, and optional columns. Every row carries 125 columns; the catalog lists the ones the guide and example use.",
       "provider": "NOAA",
       "domain": "Surface weather",
+      "system": "NCEI Access Data Service",
       "availability": "Released",
       "since": "0.14",
       "keywords": [
@@ -262,6 +266,7 @@
       "description": "NCEI's significant-weather event details since 1950, with locations, impacts, and narratives. Anonymous whole-year gzipped CSV archives; select the latest creation-date revision for each requested year. No server-side row, location, or variable subsetting. Historical event coverage and reporting practices vary; fatalities and locations tables are separate products not included by this adapter. The catalog lists the identifying columns; the full column set is documented in the NCEI bulk format reference.",
       "provider": "NOAA",
       "domain": "Severe weather",
+      "system": null,
       "availability": "Released",
       "since": "0.8",
       "keywords": [
@@ -344,6 +349,7 @@
       "description": "The Storm Prediction Center's tornado database since 1950 as plain CSV: one row per tornado or state/county segment with date, local time, EF or F rating, injuries, fatalities, loss, start and end coordinates, path length and width, and FIPS codes. Whole files linked from the SPC page: annual from 2008, half-decade for 2000-2007, decade for 1950-1999. Stable names revised in place; no server-side row, location, or variable subsetting.",
       "provider": "NOAA",
       "domain": "Severe weather",
+      "system": null,
       "availability": "Released",
       "since": "0.15",
       "keywords": [
@@ -477,6 +483,7 @@
       "description": "Raw volume scans from the WSR-88D weather radar network, archived in the public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). One object per radar site per volume scan. No server-side subsetting; whole files are fetched. Select radars by site id, bbox, or nearest to a point. Moments vary by sweep and volume coverage pattern; the catalog lists the ones the radar example's lowest sweep carries.",
       "provider": "NOAA",
       "domain": "Weather radar",
+      "system": "Next Generation Weather Radar (NEXRAD)",
       "availability": "Released",
       "since": "0.2",
       "keywords": [
@@ -549,6 +556,7 @@
       "description": "Gridded CONUS products merged from every radar plus other sensors: rotation tracks, reflectivity, hail size, echo tops, precipitation rate, and lightning probability as two-minute gzipped GRIB2 files in the public noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/. Select one product from the supported list and a file-stamp window of at most one day; each asset is a complete CONUS grid with no spatial or variable subsetting, and the product is the variable. The stated extent is the grid's coverage, not an offer to crop to a bounding box.",
       "provider": "NOAA",
       "domain": "Weather radar",
+      "system": null,
       "availability": "Released",
       "since": "0.15",
       "keywords": [
@@ -699,6 +707,7 @@
       "description": "Derived single-radar products (super-resolution reflectivity and velocity, dual-polarization moments, mesocyclone and storm-track detections, echo tops, accumulations) in the public unidata-nexrad-level3 S3 bucket, with flat keys SITE_PRODUCT_YYYY_MM_DD_HH_MM_SS where the site id drops the first letter of its ICAO id. One object per product per volume scan since 2020-03-30; earlier products are archived at NCEI. Files are fetched whole and have no reader.",
       "provider": "NOAA",
       "domain": "Weather radar",
+      "system": "Next Generation Weather Radar (NEXRAD)",
       "availability": "Released",
       "since": "0.15",
       "keywords": [
@@ -854,6 +863,7 @@
       "description": "Single-channel CONUS Cloud and Moisture Imagery (ABI-L2-CMIPC) from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit satellite, channel, and scan-start interval; each asset is a complete NetCDF scene with no geographic or variable subsetting.",
       "provider": "NOAA",
       "domain": "Weather satellites",
+      "system": "GOES-R Series",
       "availability": "Released",
       "since": "0.8",
       "keywords": [
@@ -913,6 +923,7 @@
       "description": "Lightning flash, group, and event detections (GLM-L2-LCFA) from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit satellite and a file-start interval of at most one day; each asset is a complete 20-second NetCDF detection table with no geographic subsetting.",
       "provider": "NOAA",
       "domain": "Weather satellites",
+      "system": "GOES-R Series",
       "availability": "Released",
       "since": "0.15",
       "keywords": [
@@ -1030,6 +1041,7 @@
       "description": "National Hurricane Center best-track database: six-hourly position, intensity, pressure, and wind radii for Atlantic (since 1851) and northeast/north-central Pacific (since 1949) tropical cyclones. One fixed-format text file per basin, revised after each season; a basin parameter picks the file and the newest revision wins. There is no query interface, so dates and geographic filters are rejected and the local reader turns the whole file into one row per track point.",
       "provider": "NOAA",
       "domain": "Tropical cyclones",
+      "system": null,
       "availability": "Released",
       "since": "0.12",
       "keywords": [
@@ -1186,6 +1198,7 @@
       "description": "Global Forecast System forecasts in GRIB2 from the anonymous noaa-gfs-bdp-pds S3 bucket, one whole global file per run, forecast hour, and grid resolution. Select a run by initialization window and cycle hour (00, 06, 12, or 18 UTC), the forecast hours, and the 0.25, 0.5, or 1 degree grid. Files are 42 MB to 550 MB; fields are selected after download with the GRIB2 reader, not by the server. Each file holds hundreds of fields; the catalog lists the handful the guide and example select.",
       "provider": "NOAA",
       "domain": "Weather models",
+      "system": "NCEP model output",
       "availability": "Released",
       "since": "0.15",
       "keywords": [
@@ -1281,6 +1294,7 @@
       "description": "High-Resolution Rapid Refresh 3 km CONUS forecasts in GRIB2 from the anonymous noaa-hrrr-bdp-pds S3 bucket, one whole file per run and forecast hour. Select a run by initialization window and cycle hour, the forecast hours, and the surface, pressure-level, or native file variant. Files are 150 MB to 750 MB; fields are selected after download with the GRIB2 reader, not by the server. Each file holds hundreds of fields; the catalog lists the handful the guide and example select.",
       "provider": "NOAA",
       "domain": "Weather models",
+      "system": "NCEP model output",
       "availability": "Released",
       "since": "0.15",
       "keywords": [
@@ -1366,6 +1380,7 @@
       "description": "Daily, monthly, and annual/seasonal 30-year station normals via the NCEI Access Data Service datasets normals-daily-1991-2020, normals-monthly-1991-2020, and normals-annualseasonal-1991-2020, chosen with a period parameter. Dates are optional; daily and monthly normals accept a month-day window inside a placeholder year. Explicit stations or station discovery through the companion search service. Variables are NCEI data-type codes and the catalog lists the probed ones; the delivered set is the open NCEI normals list.",
       "provider": "NOAA",
       "domain": "Climate",
+      "system": "NCEI Access Data Service",
       "availability": "Released",
       "since": "0.11",
       "keywords": [
@@ -1463,6 +1478,7 @@
       "description": "Preliminary or verified six-minute observed water levels from the anonymous CO-OPS Data API. Select one station, an explicit vertical datum, units, and a UTC interval of at most 28 days. Raw CSV retains quality flags; predictions and station discovery are not included.",
       "provider": "NOAA",
       "domain": "Sea level and tides",
+      "system": "CO-OPS Data API",
       "availability": "Released",
       "since": "0.10",
       "keywords": [
@@ -1550,6 +1566,7 @@
       "description": "Astronomical tide predictions from the anonymous CO-OPS Data API for one station, an explicit vertical datum, and units, on a six-minute, other minute, hourly, or high/low interval spanning at most a year. Subtracting predictions from observed water levels isolates the non-tidal residual, such as storm surge.",
       "provider": "NOAA",
       "domain": "Sea level and tides",
+      "system": "CO-OPS Data API",
       "availability": "Released",
       "since": "0.14",
       "keywords": [
@@ -1609,6 +1626,7 @@
       "description": "NOAA geo-polar blended daily SST analysis (day and night) on a global 5 km grid, ERDDAP dataset noaacwBLENDEDsstDNDaily on the CoastWatch server, with server-side spatial, temporal, and variable subsetting. Raw CSV subsets retain grid coordinates and units without volatile NetCDF history.",
       "provider": "NOAA",
       "domain": "Satellite oceanography",
+      "system": null,
       "availability": "Released",
       "since": "0.5",
       "keywords": [
@@ -1673,6 +1691,7 @@
       "description": "Global hourly and sub-hourly surface observations, the successor to ISD. Published as per-station and per-year bulk files by NCEI; the exact access path has not been confirmed yet and must be verified before an adapter is built.",
       "provider": "NOAA",
       "domain": "Surface weather",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -1704,6 +1723,7 @@
       "description": "Integrated Global Radiosonde Archive version 2: observed upper-air soundings from 2,931 stations as one zipped fixed-width text file per station for its full period of record (about 81 MB for Norman, Oklahoma), plus year-to-date and derived-parameter directories, from an NCEI HTTPS directory. Needs a fixed-width sounding reader.",
       "provider": "NOAA",
       "domain": "Surface weather",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -1734,6 +1754,7 @@
       "description": "Every National Weather Service watch, warning, and advisory polygon with VTEC codes and issue, expiry, and update times, as one zipped shapefile per year. The maintained archive is the Iowa Environmental Mesonet's mirror of NWS products, not an NWS endpoint; the tornado and severe thunderstorm storm-based warnings for 2024 are 6.5 MB and all products 351 MB. Needs a shapefile reader.",
       "provider": "NOAA",
       "domain": "Severe weather",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -1765,6 +1786,7 @@
       "description": "International Best Track Archive for Climate Stewardship: merged best tracks from all agencies worldwide since 1842. CSV and NetCDF files by basin or period from an NCEI HTTPS directory (v04r01).",
       "provider": "NOAA",
       "domain": "Tropical cyclones",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -1796,6 +1818,7 @@
       "description": "Statistically blended forecast guidance in GRIB2 from the public noaa-nbm-grib2-pds S3 bucket, laid out as blend.YYYYMMDD/HH/core/ with files per region and forecast hour.",
       "provider": "NOAA",
       "domain": "Weather models",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -1826,6 +1849,7 @@
       "description": "Rapid Refresh 13 km hourly analyses and forecasts in GRIB2 from the public noaa-rap-pds S3 bucket, laid out as rap.YYYYMMDD/ with one file per cycle, forecast hour, and grid family (awp130 is the 13 km CONUS grid, about 18 MB per analysis). The bucket begins in December 2020; it is the environmental source for years HRRR's archive does not reach only where NCEI holds older runs. Same cycle and forecast-hour selection as HRRR.",
       "provider": "NOAA",
       "domain": "Weather models",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -1857,6 +1881,7 @@
       "description": "Monthly temperature, precipitation, and drought indices for U.S. climate divisions, states, and regions since 1895, as fixed-width text files in an NCEI monitoring-content directory refreshed monthly.",
       "provider": "NOAA",
       "domain": "Climate",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -1889,6 +1914,7 @@
       "description": "Daily and monthly Arctic and Antarctic sea ice extent and concentration (NOAA@NSIDC G02135) as CSV, GeoTIFF, and shapefiles in an HTTPS directory hosted by NSIDC.",
       "provider": "NOAA",
       "domain": "Snow and ice",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -1921,6 +1947,7 @@
       "description": "Extended Reconstructed SST v5: monthly global 2 degree analysis since 1854, one NetCDF per month in an NCEI HTTPS directory.",
       "provider": "NOAA",
       "domain": "Ocean physics",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -1953,6 +1980,7 @@
       "description": "Optimum Interpolation SST v2.1: daily global 0.25 degree analysis since September 1981 as one NetCDF per day, from the NOAA CDR S3 bucket (data/v2.1/avhrr/YYYYMM/) or the NCEI HTTPS mirror.",
       "provider": "NOAA",
       "domain": "Ocean physics",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -1984,6 +2012,7 @@
       "description": "Archived ocean carbon, pH, and related chemistry datasets (cruises, moorings, syntheses such as SOCAT and GLODAP) in an NCEI HTTPS directory organized by accession.",
       "provider": "NOAA",
       "domain": "Ocean chemistry",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -2016,6 +2045,7 @@
       "description": "Global topography and bathymetry at 15, 30, and 60 arc-seconds as NetCDF and GeoTIFF tiles, served through the NCEI THREDDS catalog with OPeNDAP access; the THREDDS pattern.",
       "provider": "NOAA",
       "domain": "Bathymetry and hydrography",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -2048,6 +2078,7 @@
       "description": "NCEI's list of U.S. disasters with CPI-adjusted and unadjusted costs, dates, and deaths since 1980, served as one CSV with two header comment lines from the NCEI access service (about 36 kB for all events).",
       "provider": "NOAA",
       "domain": "Natural hazards",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -2078,6 +2109,7 @@
       "description": "Tsunami source events and runup observations since 2100 BCE from NCEI, served as JSON by the HazEL hazard-service API with year, magnitude, and location filters.",
       "provider": "NOAA",
       "domain": "Natural hazards",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -2109,6 +2141,7 @@
       "description": "Proxy climate records (tree rings, ice cores, sediments, corals) with a JSON study-search API from NCEI that returns study metadata and data file URLs filtered by data type, region, and time span.",
       "provider": "NOAA",
       "domain": "Paleoclimate",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -2140,6 +2173,7 @@
       "description": "Planetary K index, solar wind, and other real-time indices as small JSON files from the Space Weather Prediction Center services host. Rolling recent windows only; historical archives live elsewhere.",
       "provider": "NOAA",
       "domain": "Space weather",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -2170,6 +2204,7 @@
       "description": "Daily global normalized difference vegetation index from AVHRR and VIIRS since 1981, one NetCDF per day in the public noaa-cdr-ndvi-pds S3 bucket laid out as data/YYYY/.",
       "provider": "NOAA",
       "domain": "Land and environment",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -2201,6 +2236,7 @@
       "description": "Daily statistics (streamflow, gage height, temperature) for USGS monitoring sites via the modern USGS Water Data OGC API. Anonymous, paginated CSV downloads filtered by site or bbox, dates, and parameter codes; daily mean by default, with units and quality metadata preserved. Variables are five-digit NWIS parameter codes and the catalog lists the common ones; the delivered set is open.",
       "provider": "USGS",
       "domain": "Water resources",
+      "system": null,
       "availability": "Released",
       "since": "0.5",
       "keywords": [
@@ -2259,6 +2295,7 @@
       "description": "Global earthquake events with location, magnitude, and depth from the ANSS Comprehensive Catalog via the FDSN event web service. Anonymous REST with bbox, time, and magnitude filters.",
       "provider": "USGS",
       "domain": "Natural hazards",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -2290,6 +2327,7 @@
       "description": "Seamless digital elevation models from the 3D Elevation Program (1/3 arc-second and 1 m where available). Tiled rasters on public cloud storage; spatial selection by tile.",
       "provider": "USGS",
       "domain": "Terrain and elevation",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -2321,6 +2359,7 @@
       "description": "Population, housing, income, and demographic estimates for every geography down to block group, via the Census Data API. Anonymous for light use; an API key lifts rate limits.",
       "provider": "Census Bureau",
       "domain": "Demographics",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -2352,6 +2391,7 @@
       "description": "Daily pollutant summaries (ozone, PM2.5, NO2, and others) from regulatory monitors via the AQS Data API. Requires a free API key issued by email.",
       "provider": "EPA",
       "domain": "Air quality",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -2383,6 +2423,7 @@
       "description": "Every federal disaster declaration since 1953, one row per declaration and designated area, with incident type, dates, programs declared, and county FIPS codes, from the OpenFEMA v2 JSON API (70,402 rows on 2026-09-14; OData filters and paging).",
       "provider": "FEMA",
       "domain": "Natural hazards",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -2413,6 +2454,7 @@
       "description": "Effective flood zones, base flood elevations, and related features from FEMA's flood insurance rate maps, available as county or state extracts and through ArcGIS services.",
       "provider": "FEMA",
       "domain": "Natural hazards",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -2444,6 +2486,7 @@
       "description": "Global half-hourly and daily merged satellite precipitation estimates. Discovered through NASA CMR and downloaded from GES DISC. Requires a free Earthdata Login; the first credentialed dataset.",
       "provider": "NASA",
       "domain": "Weather satellites",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [
@@ -2475,6 +2518,7 @@
       "description": "Annual 30 m raster of crop type across the contiguous United States from NASS, served through CropScape with bbox extraction.",
       "provider": "USDA",
       "domain": "Agriculture",
+      "system": null,
       "availability": "Planned",
       "since": null,
       "keywords": [

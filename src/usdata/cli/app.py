@@ -13,6 +13,8 @@ from usdata import __version__, build_query, default_registry
 from usdata._fetch import ChecksumMismatch
 from usdata._fetch import fetch as fetch_query
 from usdata._progress import batch
+from usdata.cli.cite import cite
+from usdata.cli.doctor import doctor
 from usdata.cli.progress import progress
 from usdata.manifest import lockfile_path
 from usdata.models import READER_EXTRAS_TEXT, Dataset, Status, describe_duration
@@ -35,6 +37,7 @@ app = typer.Typer(
     help="Discover, fetch, and track provenance of U.S. public scientific data.",
     no_args_is_help=True,
 )
+app.command()(cite)
 
 
 _QUERY_FLAGS = {
@@ -457,3 +460,6 @@ def verify(
         typer.secho(f"{len(drift)} asset(s) drifted from {lock.name}", err=True, fg="red")
         raise typer.Exit(code=1)
     typer.echo(f"all assets match {lock.name}", err=True)
+
+
+app.command()(doctor)
