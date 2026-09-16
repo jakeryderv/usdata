@@ -4,8 +4,10 @@
 
 U.S. agencies publish scientific data through different portals, protocols, and
 formats. usdata provides shared discovery, acquisition, and provenance so analyses
-can declare and preserve their inputs. Scientific transformation and downstream
-publishing remain the caller's responsibility.
+can declare and preserve their inputs: a manifest names them, a lockfile pins
+them, and the record of what was fetched is what a methods section cites.
+Scientific transformation and downstream publishing remain the caller's
+responsibility; data is handed to pandas, xarray, and their ecosystems.
 
 ## How we plan
 
@@ -57,14 +59,51 @@ release: each one states the question it answers and what was awkward while
 answering it ([ADR 0025](adr/0025-examples-as-usage-review.md)). The grib extra
 is still unchecked on macOS, where ecCodes must be installed separately.
 
-Choose a bounded candidate from Next when its user benefit, scope, exclusions,
-and acceptance criteria are ready.
+The selected workstream is one registry schema, verified against the adapters
+([ADR 0026](adr/0026-one-registry-schema.md)), in three PRs:
+
+- [Fold the catalog block into dataset entries](https://github.com/jakeryderv/usdata/issues/160).
+  Done when the `catalog` block is gone, the generators read the model,
+  `usdata info` prints formats, reader, selection, and inputs, and the generated
+  catalog and website catalog are unchanged apart from field order.
+- [Dataset metadata fields](https://github.com/jakeryderv/usdata/issues/161):
+  resolution, update frequency, latency, citation, terms, variables, and limits.
+  Done when every available dataset fills the fields that apply, with the
+  upstream source of each value in the provider notes, and `info` and the
+  catalog pages render them.
+- [Contract test for capabilities and limits](https://github.com/jakeryderv/usdata/issues/162).
+  Done when a registry claim the adapter does not honour fails the offline
+  suite, and the MRMS entry is corrected
+  ([#158](https://github.com/jakeryderv/usdata/issues/158)).
 
 The [dataset browser](https://usdata.dev/datasets/) provides search, support
 and agency filters, selection rules, and links to examples, including the
 [2024 climate comparison](https://usdata.dev/examples/climate-anomalies/).
 
 ## Next
+
+These follow the schema work and are ordered by what each unblocks. Each has an
+issue with the scope to settle before it moves to Now.
+
+- Discovery: a [`datasets` listing and shared search filters with JSON output](https://github.com/jakeryderv/usdata/issues/163),
+  and [sizes on `--dry-run`](https://github.com/jakeryderv/usdata/issues/157).
+- Diagnostics: [`usdata doctor`](https://github.com/jakeryderv/usdata/issues/164),
+  [`usdata cache`](https://github.com/jakeryderv/usdata/issues/165), and
+  [`usdata inspect`](https://github.com/jakeryderv/usdata/issues/166) with a
+  GRIB2 inventory as data.
+- Readers: a [strict `select`](https://github.com/jakeryderv/usdata/issues/167)
+  and [units from registry variables](https://github.com/jakeryderv/usdata/issues/168).
+- Manifests: [named sources](https://github.com/jakeryderv/usdata/issues/169)
+  and [`usdata cite`](https://github.com/jakeryderv/usdata/issues/170).
+- Contract: a [public `HttpProvider`, a `usdata.testing` fixture, and an ADR naming the stable surface](https://github.com/jakeryderv/usdata/issues/171),
+  and the [registry `system` field](https://github.com/jakeryderv/usdata/issues/172).
+- One [flagship severe-weather case study](https://github.com/jakeryderv/usdata/issues/173)
+  with Storm Events in its manifest, absorbing the role of the seven small
+  tornado examples.
+- [Scope GRIB2 partial fetch through index files](https://github.com/jakeryderv/usdata/issues/174):
+  acquisition, not analysis, and the largest bandwidth win available for
+  model output. Scoping only until pinning and provenance are decided.
+- [Housekeeping from the first question-first notebooks](https://github.com/jakeryderv/usdata/issues/175).
 
 Investigate these bounded website additions before selecting
 implementation work:
@@ -114,6 +153,11 @@ and optional-reader boundaries:
 - A hosted data API or substantial ingestion/analysis jobs when a concrete use
   case requires them. Reassess Railway for a conventional Python/container
   backend at that point; Cloudflare can continue hosting the sites, DNS, and R2.
+- Anything that is analysis rather than acquisition: nearest-grid-point and
+  concatenation helpers, CRS objects, plotting, and dataframe abstractions.
+  Examples document the pandas and xarray idioms instead.
+- Third-party adapters discovered through entry points, until the provider
+  contract is published and one adapter exists outside this repository.
 
 Deferred issues have no assigned release or date. A registry dataset target of
 `later` carries no release commitment; moving a candidate into Now does not
