@@ -7,6 +7,8 @@
 [![License](https://img.shields.io/github/license/jakeryderv/usdata)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-docs.usdata.dev-2f5bea)](https://docs.usdata.dev/)
 
+[![usdata.dev: public science, reproducible inputs](https://usdata.dev/og.png)](https://usdata.dev/)
+
 Reproducible acquisition of U.S. public scientific data. One Python SDK and
 CLI discovers curated NOAA and USGS datasets, fetches their files, and keeps a
 record of every input: a manifest names them, a lockfile pins them by checksum,
@@ -33,8 +35,6 @@ frame = items[0].open()  # pandas DataFrame, units and provenance in frame.attrs
 result = pull("dataset.yaml")  # every manifest source, pinned in dataset.lock.json
 print(result.fetched[0].provenance.checksum)  # what usdata cite reports
 ```
-
-[![usdata.dev: the dataset browser and worked examples](.github/readme/usdata-dev.png)](https://usdata.dev/)
 
 **Alpha.** Releases are tested and lockfiles are stable, but the Python API
 and CLI can change between minor versions; the [changelog](CHANGELOG.md) marks

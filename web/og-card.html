@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;width:1200px;height:630px;background:#0a0a0b;color:#fafafa;font-family:Inter,sans-serif;overflow:hidden}
+  .card{position:relative;box-sizing:border-box;width:1200px;height:630px;padding:56px 64px}
+  .brand{display:flex;align-items:center;gap:14px;font-weight:700;font-size:26px;letter-spacing:-.01em}
+  .brand svg{width:40px;height:40px}
+  .eyebrow{margin-top:40px;font-size:15px;font-weight:600;letter-spacing:.14em;color:#60a5fa}
+  h1{margin:12px 0 0;font-size:68px;line-height:1.02;font-weight:800;letter-spacing:-.035em}
+  p.sub{margin:18px 0 0;max-width:1040px;font-size:22px;line-height:1.4;color:#a1a1aa}
+  .term{position:absolute;left:64px;right:64px;bottom:56px;background:#161618;border:1px solid #303036;border-radius:14px;padding:22px 26px;font-family:"JetBrains Mono",monospace;font-size:18px;line-height:1.55}
+  .term .k{color:#71717a;font-family:Inter,sans-serif;font-size:12px;letter-spacing:.14em;font-weight:600;margin-bottom:8px}
+  .term .c{color:#60a5fa}
+  .url{position:absolute;right:64px;top:62px;color:#a1a1aa;font-size:20px;font-weight:500}
+  .glow{position:absolute;right:-140px;top:-160px;width:560px;height:560px;border-radius:50%;background:radial-gradient(closest-side,rgba(37,99,235,.28),rgba(37,99,235,0))}
+</style></head><body><div class="card"><div class="glow"></div>
+<div class="brand"><svg viewBox="0 0 40 40"><rect width="40" height="40" rx="9" fill="#2563eb"/><path d="M10 12v11c0 9 13 9 13 0V12m5 17 4-18" fill="none" stroke="#fafafa" stroke-width="4"/></svg>usdata</div>
+<div class="url">usdata.dev</div>
+<div class="eyebrow">OPEN DATA · PYTHON SDK + CLI</div>
+<h1>Public science.<br>Reproducible inputs.</h1>
+<p class="sub">Find NOAA and USGS datasets, fetch the exact files, pin them in a lockfile, and cite what you used.</p>
+<div class="term"><div class="k">YOUR TERMINAL</div>
+<div><span class="c">$</span> pip install "usdata[pandas]"</div>
+<div><span class="c">$</span> usdata search precipitation --location Oklahoma</div>
+<div><span class="c">$</span> usdata pull dataset.yaml &amp;&amp; usdata cite dataset.yaml</div></div>
+</div></body></html>
