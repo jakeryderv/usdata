@@ -6,6 +6,7 @@ docs/adr/0001-curated-registry-over-federated-search.md.
 
 from __future__ import annotations
 
+import os
 import re
 from collections.abc import Iterable, Iterator
 from functools import lru_cache
@@ -127,8 +128,9 @@ class Registry:
             )
 
     @classmethod
-    def from_yaml(cls, path: Path) -> Registry:
+    def from_yaml(cls, path: str | os.PathLike[str]) -> Registry:
         """Load from YAML with ``providers``, ``domains``, ``systems``, and ``datasets``."""
+        path = Path(path)
         raw = yaml.safe_load(path.read_text()) or {}
         if "catalog" in raw:
             raise ValueError(

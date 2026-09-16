@@ -5,16 +5,16 @@ from __future__ import annotations
 import csv
 import gzip
 import io
+import os
 import re
 from collections.abc import Mapping
 from importlib import import_module
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from usdata.models import Protocol, Variable
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from usdata._fetch import FetchedAsset
     from usdata.inspect import GribMessage
 
@@ -196,14 +196,15 @@ def derive_storm_events_utc(pandas: Any, frame: Any) -> None:
     frame.attrs["usdata"]["derived"] = derived
 
 
-def inventory(path: Path) -> list[GribMessage]:
+def inventory(path: str | os.PathLike[str]) -> list[GribMessage]:
     """List every message in a local GRIB2 file without decoding any values.
 
     This is the one inventory of a GRIB2 file: the reader's own "pass select"
     and "select matched no messages" errors list the same messages.
 
     Args:
-        path: A local GRIB2 file, gzipped or not. Nothing is fetched or written.
+        path: A local GRIB2 file, gzipped or not, written as a string or as any
+            ``os.PathLike``. Nothing is fetched or written.
 
     Returns:
         One entry per message in file order, carrying the ecCodes keys that
@@ -215,7 +216,7 @@ def inventory(path: Path) -> list[GribMessage]:
     """
     from usdata._grib import inventory as grib_inventory
 
-    return grib_inventory(path)
+    return grib_inventory(Path(path))
 
 
 def open_asset(

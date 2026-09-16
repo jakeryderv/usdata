@@ -124,6 +124,12 @@ def test_inspect_path_reads_the_sidecar_and_infers_the_format_from_the_name(
     assert summary.csv is not None and summary.csv.columns == ["time", "station", "value"]
 
 
+def test_inspect_path_accepts_the_string_the_cli_prints(tmp_path: Path) -> None:
+    """The CLI prints a plain path, so pasting one back in must not need a Path()."""
+    fetched = cached(tmp_path, "daily.csv", CSV)
+    assert inspect_path(str(fetched.path)) == inspect_path(fetched.path)
+
+
 def test_inspect_path_without_a_sidecar_raises(tmp_path: Path) -> None:
     fetched = cached(tmp_path, "daily.csv", CSV, sidecar=False)
     with pytest.raises(OSError):

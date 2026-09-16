@@ -12,6 +12,7 @@ from __future__ import annotations
 import csv
 import gzip
 import io
+import os
 from datetime import datetime
 from enum import StrEnum
 from pathlib import Path
@@ -136,11 +137,12 @@ def inspect_asset(fetched: FetchedAsset) -> Summary:
     )
 
 
-def inspect_path(path: Path) -> Summary:
+def inspect_path(path: str | os.PathLike[str]) -> Summary:
     """Summarize a cached file, reading the provenance sidecar written beside it.
 
     Args:
-        path: A cached file whose ``<name>.provenance.json`` sidecar exists.
+        path: A cached file whose ``<name>.provenance.json`` sidecar exists,
+            written as a string or as any ``os.PathLike``.
 
     Returns:
         The summary ``inspect_asset`` builds, with the format taken from the file
@@ -150,7 +152,8 @@ def inspect_path(path: Path) -> Summary:
         OSError: The file or its provenance sidecar is missing or unreadable.
         ValueError: The sidecar is not a provenance record.
     """
-    return _summarize(path, path.name, provenance.read(path), _detect(path.name, None))
+    local = Path(path)
+    return _summarize(local, local.name, provenance.read(local), _detect(local.name, None))
 
 
 def _summarize(path: Path, asset_id: str, record: Provenance, fmt: AssetFormat) -> Summary:

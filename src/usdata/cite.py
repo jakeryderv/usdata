@@ -7,6 +7,7 @@ Rendering is plain text for a methods section or BibTeX for a bibliography.
 
 from __future__ import annotations
 
+import os
 import re
 from collections.abc import Iterable
 from pathlib import Path
@@ -103,11 +104,14 @@ def cite_dataset(dataset: Dataset, *, registry: Registry | None = None) -> Citat
     )
 
 
-def cite_lockfile(manifest_path: Path, registry: Registry | None = None) -> list[Citation]:
+def cite_lockfile(
+    manifest_path: str | os.PathLike[str], registry: Registry | None = None
+) -> list[Citation]:
     """Cite every dataset a manifest's lockfile pins, one citation per dataset.
 
     Args:
-        manifest_path: The manifest whose lockfile records what was fetched.
+        manifest_path: The manifest whose lockfile records what was fetched,
+            written as a string or as any ``os.PathLike``.
         registry: Registry the pinned dataset ids are looked up in. The bundled
             registry by default.
 
@@ -121,6 +125,7 @@ def cite_lockfile(manifest_path: Path, registry: Registry | None = None) -> list
         DatasetNotFound: The lockfile pins a dataset the registry does not know.
     """
     reg = registry or default_registry()
+    manifest_path = Path(manifest_path)
     lock = Lockfile.load(lockfile_path(manifest_path))
     _check_manifest(manifest_path, lock)
     grouped: dict[str, list[LockedAsset]] = {}
