@@ -45,8 +45,9 @@ quality flags; masking on the flags is yours to do.
 GLM files are 20-second detection tables for the satellite's whole field of
 view, 180 an hour, so the window is at most one day and a few minutes around
 an event is the useful size. Open with the netcdf extra and flatten the flash
-table with `ds.reset_coords(drop=True).to_dataframe()`; then filter by
-latitude and longitude yourself.
+table with `ds[columns].reset_coords()[columns].to_dataframe()`, keeping the
+flash position and time coordinates as columns; then filter by latitude and
+longitude yourself.
 
 ## Choosing a file by time
 
