@@ -105,9 +105,18 @@ example `RotationTrackML30min`. Values marked missing by a bitmap become NaN;
 product sentinels such as MRMS `-999` and `-99` are kept because their meaning
 belongs to the product. Gzipped files are decompressed in memory.
 
+A select value that matches none of the selected messages is reported: by
+default the reader warns and returns the fields it did find, and `strict=True`
+raises instead, which is the safe setting for a script whose field list must be
+complete. HRRR carries `hlcy` only in layers above ground, so both level types
+have to be named for both fields to arrive.
+
 ```python
-env = item.open(select={"shortName": ["cape", "hlcy"], "typeOfLevel": "surface"})
-print(list(env.data_vars), env.cape.attrs["units"])
+env = item.open(
+    select={"shortName": ["cape", "hlcy"], "typeOfLevel": ["surface", "heightAboveGroundLayer"]},
+    strict=True,
+)
+print(list(env.data_vars), env["cape_surface_0"].attrs["units"])
 ```
 
 Lazy opening, regridding, reprojection, spatial subsetting, and GRIB1 are not

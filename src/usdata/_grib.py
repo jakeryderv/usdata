@@ -14,10 +14,12 @@ from __future__ import annotations
 
 import gzip
 import re
+import warnings
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from importlib import import_module
+from inspect import currentframe
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -129,24 +131,61 @@ def _get(eccodes: Any, h: int, key: str, ktype: type | None = None) -> Any:
         return None
 
 
-def _matches(eccodes: Any, h: int, select: Mapping[str, Any]) -> bool:
-    for key, wanted in select.items():
-        options = wanted if isinstance(wanted, list | tuple | set) else [wanted]
-        if not options:
-            raise ValueError(f"select[{key!r}] must not be empty")
-        text = _get(eccodes, h, key, str)
-        number = _get(eccodes, h, key, float) if text is not None else None
-        matched = False
-        for option in options:
-            if isinstance(option, bool) or not isinstance(option, int | float | str):
-                raise ValueError(f"select[{key!r}] values must be strings or numbers")
-            if isinstance(option, str):
-                matched |= text == option
-            elif number is not None:
-                matched |= number == option
-        if not matched:
-            return False
-    return True
+def _options(key: str, wanted: Any) -> list[Any]:
+    """One key's wanted values as a validated list, whether one value or several were given."""
+    options = list(wanted) if isinstance(wanted, list | tuple | set) else [wanted]
+    if not options:
+        raise ValueError(f"select[{key!r}] must not be empty")
+    for option in options:
+        if isinstance(option, bool) or not isinstance(option, int | float | str):
+            raise ValueError(f"select[{key!r}] values must be strings or numbers")
+    return options
+
+
+def _matched(eccodes: Any, h: int, key: str, options: list[Any]) -> set[int]:
+    """Positions in ``options`` that this message's value for ``key`` matches."""
+    text = _get(eccodes, h, key, str)
+    number = _get(eccodes, h, key, float) if text is not None else None
+    hits = set()
+    for index, option in enumerate(options):
+        if isinstance(option, str):
+            if text == option:
+                hits.add(index)
+        elif number is not None and number == option:
+            hits.add(index)
+    return hits
+
+
+def _unmatched_report(
+    options: Mapping[str, list[Any]],
+    matched: Mapping[str, set[int]],
+    present: Mapping[str, list[str]],
+) -> str:
+    """Text naming every select value that matched no message, with what was there instead."""
+    parts = []
+    for key, wanted in options.items():
+        missing = [option for index, option in enumerate(wanted) if index not in matched[key]]
+        if not missing:
+            continue
+        available = ", ".join(repr(value) for value in present[key]) or "none"
+        parts.append(
+            f"select[{key!r}] matched no message for "
+            f"{', '.join(repr(option) for option in missing)}; "
+            f"{key} values available with the other select keys: {available}."
+        )
+    return " ".join(parts)
+
+
+def _caller_stacklevel() -> int:
+    """Stack level of the first frame outside usdata, so a warning points at the caller."""
+    package = Path(__file__).resolve().parent
+    frame = currentframe()
+    frame = frame.f_back if frame is not None else None
+    level = 1
+    while frame is not None and Path(frame.f_code.co_filename).resolve().is_relative_to(package):
+        level += 1
+        frame = frame.f_back
+    return level
 
 
 def _summary(eccodes: Any, h: int) -> tuple[str, str, Any]:
@@ -227,11 +266,20 @@ class _Grid:
         return numpy.ascontiguousarray(grid)
 
 
-def open_grib2(fetched: FetchedAsset, select: Mapping[str, Any] | None = None) -> Any:
-    """Decode selected GRIB2 messages into one loaded xarray Dataset."""
+def open_grib2(
+    fetched: FetchedAsset, select: Mapping[str, Any] | None = None, *, strict: bool = False
+) -> Any:
+    """Decode selected GRIB2 messages into one loaded xarray Dataset.
+
+    A select value that matches none of the selected messages warns, or raises
+    ``ValueError`` when ``strict``; a select that matches nothing always raises.
+    """
     eccodes, xarray, numpy = _modules()
     if select is not None and not isinstance(select, Mapping):
         raise ValueError("select must be a mapping of ecCodes key names to values")
+    options = {key: _options(key, wanted) for key, wanted in (select or {}).items()}
+    matched: dict[str, set[int]] = {key: set() for key in options}
+    present: dict[str, list[str]] = {key: [] for key in options}
     fields: dict[str, tuple[Any, dict[str, Any]]] = {}
     grid: _Grid | None = None
     available: list[tuple[str, str, Any]] = []
@@ -240,8 +288,19 @@ def open_grib2(fetched: FetchedAsset, select: Mapping[str, Any] | None = None) -
         available.append(_summary(eccodes, h))
         if len(available) > 1 and select is None:
             continue
-        if select is not None and not _matches(eccodes, h, select):
+        hits = {key: _matched(eccodes, h, key, wanted) for key, wanted in options.items()}
+        missed = [key for key, indexes in hits.items() if not indexes]
+        for key in options:
+            # What this key could have been with the rest of the select held fixed.
+            if missed not in ([], [key]):
+                continue
+            value = _get(eccodes, h, key, str)
+            if value is not None and value not in present[key]:
+                present[key].append(value)
+        if missed:
             continue
+        for key, indexes in hits.items():
+            matched[key] |= indexes
         message_grid = _Grid(eccodes, numpy, h)
         if grid is None:
             grid = message_grid
@@ -288,6 +347,10 @@ def open_grib2(fetched: FetchedAsset, select: Mapping[str, Any] | None = None) -
         raise ValueError(
             f"select matched no messages. Available (shortName, typeOfLevel, level): {listing}"
         )
+    if report := _unmatched_report(options, matched, present):
+        if strict:
+            raise ValueError(report)
+        warnings.warn(report, UserWarning, stacklevel=_caller_stacklevel())
     variables: dict[str, Any] = {}
     duplicates = {name for name in names if names.count(name) > 1}
     for (data, attrs), name in zip(fields.values(), names, strict=True):

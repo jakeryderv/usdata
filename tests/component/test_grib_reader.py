@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import gzip
 import os
+import warnings
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
@@ -215,6 +216,36 @@ def test_select_without_match_or_with_bad_values_is_rejected(multi) -> None:
         multi.open(select=["shortName"])  # type: ignore[arg-type]
 
 
+def test_unmatched_select_value_warns_and_names_what_was_available(multi) -> None:
+    select = {"shortName": ["t", "nope"], "level": 500}
+    with pytest.warns(UserWarning) as record:
+        result = multi.open(select=select)
+    assert list(result.data_vars) == ["t"]
+    assert len(record) == 1
+    text = str(record[0].message)
+    assert "select['shortName'] matched no message for 'nope'" in text
+    assert "shortName values available with the other select keys: 't'" in text
+    # The warning names the caller, not a usdata frame, through either entry point.
+    assert Path(record[0].filename).resolve() == Path(__file__).resolve()
+    with pytest.warns(UserWarning) as direct:
+        open_asset(multi, select=select)
+    assert Path(direct[0].filename).resolve() == Path(__file__).resolve()
+
+
+def test_strict_raises_for_an_unmatched_value_and_keeps_the_no_match_error(multi) -> None:
+    with pytest.raises(ValueError, match=r"select\['shortName'\] matched no message for 'nope'"):
+        multi.open(select={"shortName": ["t", "nope"], "level": 500}, strict=True)
+    with pytest.raises(ValueError, match=r"matched no messages.*'cape'"):
+        multi.open(select={"shortName": "nope"}, strict=True)
+
+
+def test_fully_matched_select_neither_warns_nor_raises(multi) -> None:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        result = multi.open(select={"shortName": ["t", "cape"], "level": [500, 0]}, strict=True)
+    assert set(result.data_vars) == {"t", "cape"}
+
+
 def test_mrms_products_are_named_from_the_asset_when_eccodes_has_no_name(tmp_path) -> None:
     content = message(
         np.arange(12, dtype=float), discipline=209, parameterCategory=3, parameterNumber=14
@@ -238,6 +269,8 @@ def test_reader_options_are_scoped(tmp_path) -> None:
     csv_item = item(tmp_path, b"a,b\n1,2\n", name="table.csv", media_type="text/csv")
     with pytest.raises(ValueError, match="select applies only"):
         csv_item.open(select={"shortName": "t"})
+    with pytest.raises(ValueError, match="strict applies only"):
+        csv_item.open(strict=True)
 
 
 def test_grib1_and_truncated_messages_are_rejected(tmp_path) -> None:
