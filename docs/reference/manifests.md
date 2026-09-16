@@ -100,6 +100,7 @@ behaviour, units, and limits are in the [provider notes](../providers/README.md)
 | Command | Effect |
 |---|---|
 | `usdata pull dataset.yaml` | Resolve and download, writing `dataset.lock.json`; with a lockfile, restore its pins. |
+| `usdata pull dataset.yaml --dry-run [--json]` | List what every source would fetch, with a subtotal per source and a manifest total; downloads nothing and writes no lockfile. |
 | `usdata pull dataset.yaml --cache-dir DIR` | Use `DIR` instead of the default cache; restoration on another machine. |
 | `usdata pull dataset.yaml --update ID [--update ID]` | Accept new upstream bytes for the named asset or dataset ids only; rewrites only those pins. Exit 2 if a selector matches nothing, if combined with `--force`, or without a lockfile. |
 | `usdata pull dataset.yaml --force` | Re-resolve every source and replace the lockfile. Required after any edit to the manifest. |
