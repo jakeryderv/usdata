@@ -248,3 +248,55 @@ def test_coops_fixture_uses_generic_csv_workflow(pd, fetched) -> None:
     assert frame.attrs["usdata"]["provenance"] == item.provenance.model_dump(mode="json")
     assert "units" not in frame.attrs
     assert item.path.read_bytes() == original
+
+
+STORM_EVENTS_CSV = (
+    "EVENT_ID,STATE,BEGIN_DATE_TIME,END_DATE_TIME,CZ_TIMEZONE\n"
+    "1184052,OKLAHOMA,06-MAY-24 22:39:00,06-MAY-24 22:45:00,CST-6\n"
+    "1200001,WASHINGTON,16-NOV-24 02:30:00,16-NOV-24 03:00:00,PST-8\n"
+    "1200002,GUAM,01-JAN-24 00:00:00,01-JAN-24 06:00:00,GST10\n"
+    "1200003,TEXAS,02-FEB-24 03:00:00,02-FEB-24 04:00:00,CST\n"
+)
+
+
+def test_storm_events_gains_utc_columns_from_the_timezone_label(pd, fetched) -> None:
+    item = fetched(STORM_EVENTS_CSV, dataset="noaa:storm-events")
+    frame = item.open()
+    assert frame.BEGIN_UTC.tolist()[:3] == [
+        pd.Timestamp("2024-05-07T04:39:00Z"),
+        pd.Timestamp("2024-11-16T10:30:00Z"),
+        pd.Timestamp("2023-12-31T14:00:00Z"),
+    ]
+    assert frame.END_UTC.tolist()[:3] == [
+        pd.Timestamp("2024-05-07T04:45:00Z"),
+        pd.Timestamp("2024-11-16T11:00:00Z"),
+        pd.Timestamp("2023-12-31T20:00:00Z"),
+    ]
+    assert pd.isna(frame.BEGIN_UTC.iloc[3]) and pd.isna(frame.END_UTC.iloc[3])
+    assert str(frame.BEGIN_UTC.dtype).endswith("UTC]")
+    assert frame.BEGIN_DATE_TIME.tolist() == [
+        "06-MAY-24 22:39:00",
+        "16-NOV-24 02:30:00",
+        "01-JAN-24 00:00:00",
+        "02-FEB-24 03:00:00",
+    ]
+    assert frame.CZ_TIMEZONE.tolist() == ["CST-6", "PST-8", "GST10", "CST"]
+    derived = frame.attrs["usdata"]["derived"]
+    assert [entry["column"] for entry in derived] == ["BEGIN_UTC", "END_UTC"]
+    assert [entry["source"] for entry in derived] == ["BEGIN_DATE_TIME", "END_DATE_TIME"]
+    assert [entry["unparsed"] for entry in derived] == [1, 1]
+    assert all("CZ_TIMEZONE" in entry["rule"] for entry in derived)
+
+
+def test_storm_events_frame_without_the_three_columns_is_untouched(pd, fetched) -> None:
+    source = "EVENT_ID,STATE,BEGIN_DATE_TIME\n1184052,OKLAHOMA,06-MAY-24 22:39:00\n"
+    frame = fetched(source, dataset="noaa:storm-events").open()
+    assert frame.columns.tolist() == ["EVENT_ID", "STATE", "BEGIN_DATE_TIME"]
+    assert frame.BEGIN_DATE_TIME.tolist() == ["06-MAY-24 22:39:00"]
+    assert "derived" not in frame.attrs["usdata"]
+
+
+def test_only_storm_events_assets_get_the_utc_columns(pd, fetched) -> None:
+    frame = fetched(STORM_EVENTS_CSV, dataset="noaa:ghcn-daily").open()
+    assert "BEGIN_UTC" not in frame.columns
+    assert "derived" not in frame.attrs["usdata"]

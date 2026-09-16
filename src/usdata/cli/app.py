@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Annotated
 
@@ -22,7 +23,8 @@ from usdata.manifest import lockfile_path
 from usdata.models import READER_EXTRAS_TEXT, Dataset, Status, describe_duration
 from usdata.providers import load_adapter
 from usdata.providers.base import NotImplementedProvider
-from usdata.pull import EmptySource, ManifestChanged, UnknownDatasets, UpstreamChanged
+from usdata.pull import EmptySource, ManifestChanged, Plan, UnknownDatasets, UpstreamChanged
+from usdata.pull import plan as plan_manifest
 from usdata.pull import pull as pull_manifest
 from usdata.pull import verify as verify_manifest
 from usdata.query import UnknownPlace
@@ -55,6 +57,25 @@ _QUERY_FLAGS = {
     "text": None,
     "provider": None,
 }
+
+
+def _size_phrase(known_bytes: int, unknown: int, *, sources: Iterable[str] = ()) -> str:
+    """How many bytes a dry run would move, said honestly when some size is missing.
+
+    A bare total would read as a measurement; when an adapter reports no size for
+    an asset, the known bytes are a floor and the sources that withheld a size are
+    named instead.
+    """
+    if not unknown:
+        return f"{known_bytes} bytes"
+    phrase = f"at least {known_bytes} bytes; size unknown for {unknown} asset(s)"
+    named = ", ".join(sources)
+    return f"{phrase} from {named}" if named else phrase
+
+
+def _asset_line(asset_id: str, size: int | None, href: str) -> str:
+    """One dry-run row: id, size or '?' when the adapter reported none, and the href."""
+    return f"{asset_id}\t{size if size is not None else '?'}\t{href}"
 
 
 _STATUS_HELP = f"Support status to include: {', '.join(STATUS_FILTERS)}."
@@ -368,12 +389,11 @@ def fetch(
                 typer.echo(json.dumps([a.model_dump(mode="json") for a in assets], indent=2))
             else:
                 for a in assets:
-                    typer.echo(f"{a.id}\t{a.size if a.size is not None else '?'}\t{a.href}")
+                    typer.echo(_asset_line(a.id, a.size, a.href))
             known = [a.size for a in assets if a.size is not None]
-            summary = f"{len(assets)} asset(s) matched, {sum(known)} bytes"
-            if len(known) != len(assets):
-                summary += f"; size unknown for {len(assets) - len(known)}"
-            typer.echo(summary, err=True)
+            unknown = len(assets) - len(known)
+            sizes = _size_phrase(sum(known), unknown, sources=[ds.id] if unknown else [])
+            typer.echo(f"{len(assets)} asset(s) matched, {sizes}", err=True)
             with progress(disabled=no_progress):
                 batch([asset.size for asset in assets])
             return
@@ -399,6 +419,26 @@ def fetch(
         typer.echo(f"{f.path}\t{tag}\t{f.provenance.size} bytes")
 
 
+def _print_plan(plan: Plan, *, as_json: bool, quiet: bool) -> None:
+    """Report what a pull would fetch: assets, a subtotal per source, a total on stderr."""
+    if as_json:
+        typer.echo(plan.model_dump_json(indent=2))
+    else:
+        for source in plan.sources:
+            if not quiet:
+                for asset in source.assets:
+                    typer.echo(_asset_line(asset.id, asset.size, asset.href))
+            sizes = _size_phrase(source.known_bytes, source.unknown_sizes)
+            typer.echo(
+                f"{source.source} ({source.dataset_id}): {len(source.assets)} asset(s), {sizes}"
+            )
+    total = _size_phrase(plan.known_bytes, plan.unknown_sizes, sources=plan.unsized_sources)
+    typer.echo(
+        f"{len(plan.sources)} source(s), {plan.asset_count} asset(s), {total}; nothing downloaded",
+        err=True,
+    )
+
+
 @app.command()
 def pull(
     manifest: Annotated[Path, typer.Argument(exists=True, dir_okay=False)],
@@ -420,9 +460,29 @@ def pull(
         bool,
         typer.Option("--quiet", "-q", help="Print only the summary line, not one line per asset."),
     ] = False,
+    dry_run: Annotated[
+        bool,
+        typer.Option(help="List what every source would fetch, and its size, without downloading."),
+    ] = False,
+    as_json: Annotated[
+        bool, typer.Option("--json", help="With --dry-run, emit the plan as JSON on stdout.")
+    ] = False,
 ) -> None:
     """Fetch every source in a manifest and write (or restore from) its lockfile."""
+    if as_json and not dry_run:
+        typer.secho("--json applies to --dry-run only", err=True, fg="red")
+        raise typer.Exit(code=2)
+    if dry_run and update:
+        typer.secho(
+            "--dry-run prices a fresh resolve of every source; it cannot update pins",
+            err=True,
+            fg="red",
+        )
+        raise typer.Exit(code=2)
     try:
+        if dry_run:
+            _print_plan(plan_manifest(manifest), as_json=as_json, quiet=quiet)
+            return
         with progress(disabled=no_progress):
             result = pull_manifest(manifest, root=cache_dir, force=force, update=update or [])
     except EmptySource as e:

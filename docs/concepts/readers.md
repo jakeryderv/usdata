@@ -25,7 +25,10 @@ suffix, so `RotationTrackML30min` matches the entry's
 `RotationTrackML30min_00.50`. A value the file provides is never overwritten,
 no other attribute is touched, and the `registry_attrs` list under the `usdata`
 attribute names every variable and attribute filled, so a stamped value stays
-distinguishable from the file's own. The CSV readers are unchanged.
+distinguishable from the file's own. The CSV readers fill no units, but a Storm
+Events frame gains `BEGIN_UTC` and `END_UTC` beside its untouched local columns,
+derived from `CZ_TIMEZONE` under the rule listed in `attrs["usdata"]["derived"]`
+and described on [the provider page](../providers/noaa-storm-events.md).
 
 Readers are eager. The whole decoded object is in memory when `open()`
 returns, and file handles are closed before it does, so there is nothing for

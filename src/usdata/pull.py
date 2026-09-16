@@ -8,6 +8,10 @@ change. When upstream bytes no longer match a pin, restore reports every such
 asset at once; ``update`` accepts new bytes for selected assets or datasets and
 rewrites only those pins. ``verify`` re-hashes cached files against the lockfile
 without fetching anything.
+
+``plan`` prices a manifest without downloading anything: it validates every
+source and lists it through the same adapters, so the result says what a pull
+would fetch and how many of its bytes the adapters can measure.
 """
 
 from __future__ import annotations
@@ -17,12 +21,13 @@ from contextlib import ExitStack
 from datetime import UTC, datetime
 from pathlib import Path
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 from usdata import __version__, _progress, provenance
 from usdata._fetch import ChecksumMismatch, FetchedAsset, _fetch_asset, _fetch_with
 from usdata.cache import asset_path, sha256_file
 from usdata.manifest import LockedAsset, Lockfile, Manifest, lockfile_path
+from usdata.models import Asset
 from usdata.protocols.http import ObjectChanged
 from usdata.providers import Provider, load_adapter
 from usdata.registry import Registry, default_registry
@@ -180,6 +185,89 @@ def resolve(
         from_lockfile=False,
         by_source=_by_source(zip(locked, fetched, strict=True)),
     )
+
+
+class SourcePlan(BaseModel):
+    """What one manifest source would fetch, as its adapter listed it."""
+
+    source: str = Field(description="The source's manifest key: its name, or its position")
+    dataset_id: str
+    assets: list[Asset]
+
+    @computed_field(description="Bytes of the assets whose size the adapter reported")
+    @property
+    def known_bytes(self) -> int:
+        """Total size of the assets this source can measure."""
+        return sum(asset.size for asset in self.assets if asset.size is not None)
+
+    @computed_field(description="How many of this source's assets report no size")
+    @property
+    def unknown_sizes(self) -> int:
+        """How many assets their adapter gave no size for."""
+        return sum(1 for asset in self.assets if asset.size is None)
+
+
+class Plan(BaseModel):
+    """What pulling a manifest would fetch, priced as far as the adapters can measure.
+
+    An asset whose adapter reports no size contributes nothing to ``known_bytes``
+    and counts in ``unknown_sizes`` instead, so the total is a floor rather than
+    an estimate. A source that matched nothing is kept with no assets; pull would
+    fail on it unless the source sets ``allow_empty``.
+    """
+
+    manifest: str
+    sources: list[SourcePlan] = Field(description="One entry per manifest source, in order")
+
+    @computed_field(description="How many assets the whole manifest would fetch")
+    @property
+    def asset_count(self) -> int:
+        """How many assets the manifest resolves to."""
+        return sum(len(source.assets) for source in self.sources)
+
+    @computed_field(description="Bytes the manifest would fetch that adapters could measure")
+    @property
+    def known_bytes(self) -> int:
+        """Total measured size across every source."""
+        return sum(source.known_bytes for source in self.sources)
+
+    @computed_field(description="How many assets across the manifest report no size")
+    @property
+    def unknown_sizes(self) -> int:
+        """How many assets no adapter gave a size for."""
+        return sum(source.unknown_sizes for source in self.sources)
+
+    @computed_field(description="Keys of the sources holding at least one unsized asset")
+    @property
+    def unsized_sources(self) -> list[str]:
+        """The sources whose adapters left some size unreported, in manifest order."""
+        return [source.source for source in self.sources if source.unknown_sizes]
+
+
+def plan(manifest_path: Path, *, registry: Registry | None = None) -> Plan:
+    """List every source through its adapter and price the result; download nothing.
+
+    Validates the whole manifest first, exactly as ``resolve`` does, then makes
+    only the requests a listing makes: an S3 listing, or the index and HEAD
+    requests a partial-fetch source needs to work out its byte ranges.
+
+    Args:
+        manifest_path: Path of the manifest YAML file.
+        registry: Registry to resolve dataset ids against; the default one if omitted.
+
+    Returns:
+        A ``Plan`` holding each source's assets and the totals over them.
+    """
+    reg = registry or default_registry()
+    manifest = _load(manifest_path, reg)
+    sources: list[SourcePlan] = []
+    with ExitStack() as stack:
+        adapters = _checked_adapters(manifest, reg, stack)
+        for key, source in zip(manifest.source_keys(), manifest.sources, strict=True):
+            dataset = reg.get(source.dataset)
+            assets = adapters[dataset.id].list_assets(source.to_query())
+            sources.append(SourcePlan(source=key, dataset_id=dataset.id, assets=assets))
+    return Plan(manifest=manifest.name, sources=sources)
 
 
 def _selected(lock: Lockfile, update: Iterable[str]) -> set[str]:
@@ -347,10 +435,13 @@ __all__ = [
     "Drift",
     "EmptySource",
     "ManifestChanged",
+    "Plan",
     "PullResult",
+    "SourcePlan",
     "UnknownAssets",
     "UnknownDatasets",
     "UpstreamChanged",
+    "plan",
     "provenance",
     "pull",
     "resolve",

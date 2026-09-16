@@ -220,5 +220,7 @@ def test_dry_run_retains_records_and_reports_unknown_sizes_only_on_terminal(monk
     terminal = runner.invoke(app, [*ARGS, "--dry-run"])
     assert terminal.exit_code == redirected.exit_code == 0
     assert terminal.stdout == redirected.stdout
-    assert redirected.stderr == "1 asset(s) matched, 0 bytes; size unknown for 1\n"
+    assert redirected.stderr == (
+        "1 asset(s) matched, at least 0 bytes; size unknown for 1 asset(s) from noaa:ghcn-daily\n"
+    )
     assert "1 size(s) unknown" in terminal.stderr

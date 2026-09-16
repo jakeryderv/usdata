@@ -39,8 +39,9 @@ hrrr.20240506.t20z.wrfsfcf00.grib2	150114757	s3://noaa-hrrr-bdp-pds/hrrr.2024050
 ```
 
 The column is `?` for the datasets whose service reports no size at listing
-time, and the summary then ends with `size unknown for N`. Add `--json` to get
-the same asset records as a JSON array instead of columns.
+time; the summary then reads `at least M bytes` and names the source that
+withheld it, rather than implying a measured zero. Add `--json` to get the same
+asset records as a JSON array instead of columns.
 
 ## Fetching only the fields you need
 
@@ -63,7 +64,9 @@ The same run without `messages` reports 150,114,757 bytes, so the two fields
 cost about 1.2% of the file. The result is those messages concatenated, which
 is a valid GRIB2 file: `open()` reads it with `select` optional, since the
 fetch already selected. A manifest pins the byte ranges and the object's ETag
-and restores from them without re-reading the index. Each provider guide lists
+and restores from them without re-reading the index; because listing a
+`messages` source resolves its ranges, `usdata pull dataset.yaml --dry-run`
+prices such a source at the bytes the ranges cover, not at the whole object. Each provider guide lists
 verified selectors:
 [HRRR](../providers/noaa-hrrr.md#fetching-selected-messages),
 [GFS](../providers/noaa-gfs.md#fetching-selected-messages).

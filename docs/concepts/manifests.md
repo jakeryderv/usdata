@@ -32,6 +32,19 @@ legitimately resolve to nothing says so with `allow_empty: true`. Resolution
 checks that assets exist, not that a returned file contains every observation
 you hoped for.
 
+### Price it first
+
+`pull dataset.yaml --dry-run` lists every source through its adapter and
+downloads nothing, printing one line per asset in the same columns as
+`fetch --dry-run`, a subtotal per source, and the manifest total on stderr.
+Sizes come from the listings, so a source whose service reports none is counted
+as unknown rather than as zero: the totals then read `at least M bytes` and name
+the sources that withheld a size. `--json` emits the same plan as a record.
+
+```sh
+usdata pull dataset.yaml --dry-run
+```
+
 With a lockfile present, `pull` becomes a restore. It does not repeat
 discovery: it takes each pinned URL, checks whether the cached bytes match the
 pinned checksum, and downloads only what is missing or altered. Restoring into
