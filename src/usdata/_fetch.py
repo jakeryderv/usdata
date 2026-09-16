@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from collections.abc import Mapping
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -169,10 +170,29 @@ def _fetch_with(
     root: Path | None = None,
     force: bool = False,
 ) -> list[FetchedAsset]:
-    """Run the loop on an adapter the caller opened, so one adapter can serve many queries."""
-    assets = adapter.list_assets(query)
+    """Run the loop on an adapter the caller opened, so one adapter can serve many queries.
+
+    The listing is put in the order every result promises, by ``asset.time.start``
+    then id, so no adapter has to sort and no caller has to sort defensively.
+    """
+    assets = ordered(adapter.list_assets(query))
     _progress.batch([asset.size for asset in assets])
     return [_fetch_asset(dataset, a, adapter, root=root, force=force) for a in assets]
+
+
+def ordered(assets: list[Asset]) -> list[Asset]:
+    """``assets`` by start time, then id; assets without a start time come last, by id."""
+    return sorted(
+        assets,
+        key=lambda asset: (
+            asset.time is None or asset.time.start is None,
+            asset.time.start if asset.time is not None and asset.time.start is not None else _NEVER,
+            asset.id,
+        ),
+    )
+
+
+_NEVER = datetime.max.replace(tzinfo=UTC)
 
 
 def fetch(

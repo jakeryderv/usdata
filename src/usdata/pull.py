@@ -26,7 +26,7 @@ import httpx
 from pydantic import BaseModel, Field, computed_field
 
 from usdata import __version__, _progress, mirror, provenance
-from usdata._fetch import ChecksumMismatch, FetchedAsset, _fetch_asset, _fetch_with
+from usdata._fetch import ChecksumMismatch, FetchedAsset, _fetch_asset, _fetch_with, ordered
 from usdata._files import staged_path
 from usdata.cache import asset_path, sha256_file
 from usdata.manifest import LockedAsset, Lockfile, Manifest, lockfile_path
@@ -90,16 +90,17 @@ class UpstreamChanged(ChecksumMismatch):
 class PullResult(BaseModel):
     """What a pull did.
 
-    ``fetched`` keeps manifest order, and within a source the order its adapter
-    listed the assets; ``by_source`` holds the same objects grouped by source
-    key, which is a source's ``name`` when it has one and its one-based position
-    otherwise.
+    ``fetched`` keeps manifest order, and within a source the assets are ordered
+    by start time and then id; ``by_source`` holds the same objects grouped by
+    source key, which is a source's ``name`` when it has one and its one-based
+    position otherwise, in the same order. ``one`` is for a source that can only
+    ever resolve to one asset.
     """
 
     lockfile: Lockfile
     lockfile_path: Path
     fetched: list[FetchedAsset] = Field(
-        description="Every asset, in manifest order, then in the order its adapter listed it"
+        description="Every asset, in manifest order, then by start time and id within a source"
     )
     from_lockfile: bool
     updated: list[str] = Field(
@@ -117,12 +118,36 @@ class PullResult(BaseModel):
         description="The same assets grouped by source key, in manifest order",
     )
 
+    def one(self, source: str) -> FetchedAsset:
+        """The single asset a source resolved to.
+
+        Args:
+            source: The source key: its ``name``, or its one-based position as a string.
+
+        Returns:
+            That source's only asset.
+
+        Raises:
+            KeyError: No source in the result has that key.
+            ValueError: The source resolved to no asset, or to more than one.
+        """
+        if source not in self.by_source:
+            raise KeyError(f"no source {source!r}; sources are {', '.join(self.by_source)}")
+        items = self.by_source[source]
+        if len(items) != 1:
+            raise ValueError(
+                f"source {source!r} resolved to {len(items)} assets, not one; use by_source"
+            )
+        return items[0]
+
 
 def _by_source(pairs: Iterable[tuple[LockedAsset, FetchedAsset]]) -> dict[str, list[FetchedAsset]]:
     """Group fetched assets by the source key their lockfile entry records.
 
-    Keys come out in manifest order because lockfile entries are written in it.
-    A lockfile written before sources had keys records none; those entries fall
+    Keys come out in manifest order because lockfile entries are written in it,
+    and each group is ordered by start time and id, so a lockfile written before
+    the core ordered its listings groups the same way as one written after. A
+    lockfile written before sources had keys records none; those entries fall
     back to the one-based position of their dataset id among the datasets seen,
     which groups sources that share a dataset together until the manifest names
     them and a forced pull rewrites the lockfile.
@@ -134,6 +159,10 @@ def _by_source(pairs: Iterable[tuple[LockedAsset, FetchedAsset]]) -> dict[str, l
         if dataset_id not in positions:
             positions[dataset_id] = str(len(positions) + 1)
         grouped.setdefault(entry.source or positions[dataset_id], []).append(item)
+    by_id: dict[str, FetchedAsset] = {}
+    for items in grouped.values():
+        by_id.update({item.asset.id: item for item in items})
+        items[:] = [by_id[asset.id] for asset in ordered([item.asset for item in items])]
     return grouped
 
 
@@ -286,7 +315,7 @@ def plan(manifest_path: str | os.PathLike[str], *, registry: Registry | None = N
         adapters = _checked_adapters(manifest, reg, stack)
         for key, source in zip(manifest.source_keys(), manifest.sources, strict=True):
             dataset = reg.get(source.dataset)
-            assets = adapters[dataset.id].list_assets(source.to_query())
+            assets = ordered(adapters[dataset.id].list_assets(source.to_query()))
             sources.append(SourcePlan(source=key, dataset_id=dataset.id, assets=assets))
     return Plan(manifest=manifest.name, sources=sources)
 
