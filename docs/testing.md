@@ -93,7 +93,10 @@ example (repeat the flag for more). Executions retain partial notebooks, error
 traces, timings, and `summary.json` in ignored `reports/notebooks/`; use
 `--output-dir` to choose another report directory. A failed example does not
 prevent later selected examples from running. `--write` refreshes the selected
-committed notebooks only if every selected example succeeds.
+committed notebooks only if every selected example succeeds. `--cache DIR`, or
+`USDATA_NOTEBOOK_CACHE`, reuses one `USDATA_CACHE_DIR` across runs for local
+iteration and prints which notebooks use it; the default and the Integration
+workflow keep a fresh cache per run.
 
 Documentation is checked once in the static job: `just check-docs` checks generated
 catalogs and saved notebooks, then builds the site with strict internal link and

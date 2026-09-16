@@ -1,5 +1,8 @@
 import importlib.util
 import json
+import os
+import sys
+import types
 from pathlib import Path
 
 import pytest
@@ -43,7 +46,7 @@ def test_runner_retains_diagnostics_continues_and_refreshes_only_on_success(runn
         path.write_text(json.dumps(notebook("original")))
     called = []
 
-    def execute(source, output, kernel_dir):
+    def execute(source, output, kernel_dir, cache_dir):
         called.append(source.name)
         output.write_text(json.dumps(notebook("executed")))
         if fail and source.name == "1.ipynb":
@@ -63,6 +66,82 @@ def test_runner_retains_diagnostics_continues_and_refreshes_only_on_success(runn
     assert all((reports / r["output"]).exists() for r in summary)
     if fail:
         assert "simulated upstream failure" in (reports / summary[1]["error"]).read_text()
+
+
+def test_runner_gives_each_notebook_a_fresh_cache_unless_one_is_reused(runner, tmp_path, capsys):
+    paths = [tmp_path / f"{index}.ipynb" for index in range(2)]
+    for path in paths:
+        path.write_text(json.dumps(notebook("original")))
+    caches = []
+
+    def execute(source, output, kernel_dir, cache_dir):
+        assert cache_dir.is_dir()
+        caches.append(cache_dir)
+        output.write_text(json.dumps(notebook("executed")))
+
+    runner.run_notebooks(paths, tmp_path / "fresh", execute=execute)
+    assert len(set(caches)) == 2
+    assert "warm cache" not in capsys.readouterr().out
+
+    warm = tmp_path / "warm"
+    caches.clear()
+    runner.run_notebooks(paths, tmp_path / "reports", cache_dir=warm, execute=execute)
+    assert caches == [warm, warm]
+    printed = capsys.readouterr().out
+    assert printed.count(f"Reusing warm cache {warm}") == 2
+
+
+def test_runner_environment_points_the_notebook_at_the_resolved_cache(
+    runner, tmp_path, monkeypatch
+):
+    captured = {}
+
+    class FakeNotebook:
+        def __init__(self):
+            self.metadata = {}
+            self.cells = []
+
+    class FakeClient:
+        def __init__(self, notebook, **kwargs):
+            pass
+
+        def execute(self, **kwargs):
+            captured.update(kwargs["env"])
+
+    def module(name, **members):
+        made = types.ModuleType(name)
+        for key, value in members.items():
+            setattr(made, key, value)
+        monkeypatch.setitem(sys.modules, name, made)
+        return made
+
+    module("nbformat", read=lambda *a, **k: FakeNotebook(), write=lambda *a, **k: None)
+    module("nbclient", NotebookClient=FakeClient)
+    module("jupyter_client", KernelManager=lambda **kwargs: None)
+    module("jupyter_client.kernelspec", KernelSpecManager=lambda **kwargs: None)
+
+    cache = tmp_path / "warm"
+    runner.execute_notebook(
+        tmp_path / "example.ipynb", tmp_path / "out.ipynb", tmp_path / "kernels/python3", cache
+    )
+    assert captured["USDATA_CACHE_DIR"] == str(cache)
+    assert captured["PATH"] == os.environ["PATH"]
+
+
+def test_cache_resolution_prefers_the_option_then_the_environment(runner, tmp_path):
+    resolve = runner.resolve_cache_dir
+    variable = runner.CACHE_ENVIRONMENT_VARIABLE
+
+    assert resolve(None, {}) is None
+    assert resolve("", {variable: ""}) is None
+    assert resolve("   ", {}) is None
+    warm = tmp_path / "warm"
+    assert resolve(str(warm), {}) == warm.resolve()
+    assert resolve(None, {variable: str(warm)}) == warm.resolve()
+    other = tmp_path / "other"
+    assert resolve(str(warm), {variable: str(other)}) == warm.resolve()
+    # Nothing is created merely by resolving.
+    assert not warm.exists()
 
 
 def test_runner_does_not_report_stale_outputs_after_early_failure(runner, tmp_path):
