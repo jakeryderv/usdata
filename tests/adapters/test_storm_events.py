@@ -246,7 +246,7 @@ def test_cli_dry_run_and_rejected_geographic_filter() -> None:
     with respx.mock() as mock:
         mock.get(DIRECTORY_URL).respond(200, text=listing((NAME, "10508")))
         result = runner.invoke(app, args)
-    assert result.exit_code == 0 and result.stdout == f"{NAME}\t{URL}\n"
+    assert result.exit_code == 0 and result.stdout == f"{NAME}\t10508\t{URL}\n"
     with respx.mock() as mock:
         bad = runner.invoke(app, [*args, "--location", "OK"])
     assert bad.exit_code == 2 and "filter locally" in bad.output and not mock.calls

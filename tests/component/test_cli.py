@@ -2,12 +2,49 @@ import json
 from itertools import takewhile
 from pathlib import Path
 
+import respx
 from typer.testing import CliRunner
 
 from usdata.cli import app
+from usdata.providers.noaa.ghcnd import DATA_URL as GHCN_DATA_URL
+from usdata.providers.noaa.hrrr import BUCKET
 from usdata.registry import default_registry
 
 runner = CliRunner()
+HRRR_LIST_URL = f"https://{BUCKET}.s3.amazonaws.com/"
+HRRR_RUN = "hrrr.20240506/conus/hrrr.t20z."
+HRRR_ARGS = [
+    "fetch",
+    "noaa:hrrr",
+    "--start",
+    "2024-05-06T20:00Z",
+    "--end",
+    "2024-05-06T20:00Z",
+    "-p",
+    "cycle=20",
+    "-p",
+    "forecast_hour=0,1",
+    "--dry-run",
+]
+GHCN_ARGS = [
+    "fetch",
+    "noaa:ghcn-daily",
+    "-p",
+    "stations=USW00013967",
+    "--start",
+    "2024-05-06",
+    "--end",
+    "2024-05-07",
+]
+GHCN_DRY_RUN_ARGS = [*GHCN_ARGS, "--dry-run"]
+
+
+def _hrrr_listing(keys: list[tuple[str, int]]) -> str:
+    items = "".join(f"<Contents><Key>{k}</Key><Size>{s}</Size></Contents>" for k, s in keys)
+    return (
+        '<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">'
+        f"<IsTruncated>false</IsTruncated>{items}</ListBucketResult>"
+    )
 
 
 def test_version() -> None:
@@ -227,6 +264,57 @@ def test_fetch_dry_run_lists_assets() -> None:
     assert result.exit_code == 0
     assert "daily-summaries_2024-05-06_2024-05-07" in result.stdout
     assert "ncei.noaa.gov" in result.stdout
+
+
+def test_fetch_dry_run_prints_sizes_and_a_total() -> None:
+    keys = [(f"{HRRR_RUN}wrfsfcf{hour:02d}.grib2", 150_000_000 + hour) for hour in (0, 1)]
+    with respx.mock() as mock:
+        mock.get(HRRR_LIST_URL).respond(200, text=_hrrr_listing(keys))
+        result = runner.invoke(app, HRRR_ARGS)
+    assert result.exit_code == 0
+    assert result.stdout.splitlines() == [
+        f"hrrr.20240506.t20z.wrfsfcf0{hour}.grib2\t{150_000_000 + hour}\t"
+        f"s3://{BUCKET}/{HRRR_RUN}wrfsfcf0{hour}.grib2"
+        for hour in (0, 1)
+    ]
+    assert result.stderr == "2 asset(s) matched, 300000001 bytes\n"
+
+
+def test_fetch_dry_run_marks_assets_whose_size_the_service_withholds() -> None:
+    result = runner.invoke(app, GHCN_DRY_RUN_ARGS)
+    assert result.exit_code == 0
+    (line,) = result.stdout.splitlines()
+    assert line.split("\t")[1] == "?"
+    assert result.stderr == "1 asset(s) matched, 0 bytes; size unknown for 1\n"
+
+
+def test_fetch_dry_run_json_emits_only_asset_records() -> None:
+    keys = [(f"{HRRR_RUN}wrfsfcf{hour:02d}.grib2", 150_000_000 + hour) for hour in (0, 1)]
+    with respx.mock() as mock:
+        mock.get(HRRR_LIST_URL).respond(200, text=_hrrr_listing(keys))
+        result = runner.invoke(app, [*HRRR_ARGS, "--json"])
+    assert result.exit_code == 0
+    records = json.loads(result.stdout)
+    assert [r["id"] for r in records] == [
+        "hrrr.20240506.t20z.wrfsfcf00.grib2",
+        "hrrr.20240506.t20z.wrfsfcf01.grib2",
+    ]
+    assert records[0]["size"] == 150_000_000
+    assert records[0]["href"] == f"s3://{BUCKET}/{HRRR_RUN}wrfsfcf00.grib2"
+
+
+def test_fetch_json_emits_path_provenance_and_cache_state(tmp_path: Path) -> None:
+    args = [*GHCN_ARGS, "--cache-dir", str(tmp_path), "--json"]
+    with respx.mock() as mock:
+        mock.get(GHCN_DATA_URL).respond(200, content=b"STATION,PRCP\nUSW00013967,1.2\n")
+        fetched = runner.invoke(app, args)
+        cached = runner.invoke(app, args)
+    assert fetched.exit_code == cached.exit_code == 0
+    (record,) = json.loads(fetched.stdout)
+    assert Path(record["path"]).read_bytes().startswith(b"STATION")
+    assert record["provenance"]["dataset_id"] == "noaa:ghcn-daily"
+    assert record["provenance"]["size"] == 29 and record["from_cache"] is False
+    assert json.loads(cached.stdout)[0]["from_cache"] is True
 
 
 def test_fetch_rejects_invalid_point_without_contacting_provider() -> None:
