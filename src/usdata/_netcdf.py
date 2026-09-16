@@ -5,7 +5,7 @@ from __future__ import annotations
 from importlib import import_module
 from typing import TYPE_CHECKING, Any
 
-from usdata.readers import MissingReaderDependency
+from usdata.readers import MissingReaderDependency, fill_registry_attrs
 
 if TYPE_CHECKING:
     from usdata._fetch import FetchedAsset
@@ -33,4 +33,5 @@ def open_netcdf(fetched: FetchedAsset) -> Any:
         "asset_id": fetched.asset.id,
         "provenance": fetched.provenance.model_dump(mode="json"),
     }
+    fill_registry_attrs(fetched, dataset)
     return dataset

@@ -44,9 +44,11 @@ class FetchedAsset(BaseModel):
         ERDDAP units are kept in ``frame.attrs["units"]`` and source provenance
         in ``frame.attrs["usdata"]``. NEXRAD returns a xarray DataTree with provenance
         in ``radar.attrs["usdata"]``. NetCDF4 and GRIB2 return a loaded xarray Dataset
-        with matching provenance in its attributes. See ``usdata.readers.open_asset``
-        for options. Use ``sweep=0`` or ``sweep=[0, 2]`` to load selected zero-based
-        radar sweeps, and ``select={"shortName": "cape", "typeOfLevel": "surface"}``
+        with matching provenance in its attributes, and with units and long names
+        the file leaves unstated filled from the registry entry's variables. See
+        ``usdata.readers.open_asset`` for options. Use ``sweep=0`` or ``sweep=[0, 2]``
+        to load selected zero-based radar sweeps, and
+        ``select={"shortName": "cape", "typeOfLevel": "surface"}``
         to choose GRIB2 messages; ``strict=True`` raises instead of warning when a
         GRIB2 select value matches none of the selected messages. Cached files and
         provenance sidecars are never changed.
