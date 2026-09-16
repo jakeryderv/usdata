@@ -108,12 +108,19 @@ and CORS. It uses a unique `checks/github-<run>-<attempt>.txt` object and always
 attempts to delete that exact object. It does not upload any dataset or alter
 other objects. A failed cleanup must be resolved using the key shown in the run.
 
-The bucket is ready for data; SDK remote caching is not implemented.
-[ADR 0030](../adr/0030-content-addressed-mirror.md) settles what the first
-uploads are: objects keyed by their sha256, written only by the weekly restore
-job for the checksums that committed example lockfiles pin, and kept while any
-committed lockfile references them. The [roadmap](../roadmap.md) keeps general
-remote caching in Later without dates or release commitments.
+The bucket is the content-addressed mirror of
+[ADR 0030](../adr/0030-content-addressed-mirror.md). Every object lives at
+`sha256/<hex>`, the checksum a committed example lockfile pins, served
+immutably with a one-year cache lifetime. The weekly Integration `restore` job
+uploads, after its restore passes and only on `main`, the pinned objects the
+mirror lacks, through `scripts/mirror_pinned.py upload` and the AWS CLI against
+the bucket's S3 endpoint; it re-hashes each file before sending it. The manual
+**Prune data mirror** workflow lists the keys no committed lockfile pins and
+deletes them only when its `delete` input is set. `just mirror upload --cache
+DIR --dry-run` and `just mirror prune` plan the same operations locally; the
+plan needs no credentials for the upload and the bucket's for the prune.
+General SDK remote caching is not implemented; the [roadmap](../roadmap.md)
+keeps it in Later without dates or release commitments.
 
 ## Verification and recovery
 

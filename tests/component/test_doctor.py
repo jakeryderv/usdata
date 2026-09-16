@@ -47,6 +47,13 @@ def test_report_covers_runtime_extras_cache_and_environment() -> None:
     assert "cache" in names
     assert "env:USDATA_CACHE_DIR" in names
     assert "env:XDG_CACHE_HOME" not in names
+    assert "env:USDATA_MIRROR_URL" not in names
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setenv("USDATA_MIRROR_URL", "https://data.example.test")
+        assert _checks(diagnose(), "env:")["env:USDATA_MIRROR_URL"] == (
+            CheckStatus.OK,
+            "https://data.example.test",
+        )
     assert not any(name.startswith("host:") for name in names)
 
 

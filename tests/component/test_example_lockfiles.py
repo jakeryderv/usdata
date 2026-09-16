@@ -6,6 +6,7 @@ import hashlib
 import importlib
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -150,10 +151,27 @@ def test_restore_runner_treats_upstream_drift_as_a_result(scripts, tmp_path, mon
     assert restore.restore_pinned(tmp_path / "m.yaml", tmp_path / "cache") == [
         {"asset_id": "a", "problem": "upstream changed"}
     ]
-    monkeypatch.setattr(pull, "restore", lambda manifest, *, root: None)
+    monkeypatch.setattr(pull, "restore", lambda manifest, *, root: SimpleNamespace(mirrored=[]))
     monkeypatch.setattr(
         pull, "verify", lambda manifest, *, root: [drift.model_copy(update={"problem": "missing"})]
     )
     assert restore.restore_pinned(tmp_path / "m.yaml", tmp_path / "cache") == [
         {"asset_id": "a", "problem": "missing"}
     ]
+    # A mirror that stepped in is still drift for this job: the source no longer serves the pin.
+    monkeypatch.setattr(pull, "restore", lambda manifest, *, root: SimpleNamespace(mirrored=["b"]))
+    monkeypatch.setattr(pull, "verify", lambda manifest, *, root: [])
+    assert restore.restore_pinned(tmp_path / "m.yaml", tmp_path / "cache") == [
+        {"asset_id": "b", "problem": "upstream changed; restored from the mirror"}
+    ]
+
+
+def test_restore_runner_keeps_a_named_cache_for_the_upload(scripts, tmp_path):
+    restore = scripts["restore_lockfiles"]
+    manifest = write_pinned_example(tmp_path, "kept")
+    caches: list[Path] = []
+    keep = tmp_path / "keep"
+    assert not restore.restore_examples(
+        [manifest], tmp_path / "reports", cache=keep, restore=lambda m, c: caches.append(c) or []
+    )
+    assert caches == [keep]

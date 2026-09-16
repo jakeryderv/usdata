@@ -29,6 +29,7 @@ from pydantic import BaseModel
 from usdata import __version__
 from usdata._grib import LIBRARY_HINT
 from usdata.cache import ENV_VAR, cache_dir
+from usdata.mirror import ENV_VAR as MIRROR_ENV_VAR
 from usdata.models import READER_EXTRAS
 from usdata.protocols import http
 from usdata.registry import default_registry
@@ -39,7 +40,7 @@ READER_MODULES: dict[str, tuple[str, ...]] = {
     "netcdf": ("xarray", "h5netcdf"),
     "grib": ("eccodes", "xarray", "numpy"),
 }
-ENV_VARS = (ENV_VAR, "XDG_CACHE_HOME")
+ENV_VARS = (ENV_VAR, "XDG_CACHE_HOME", MIRROR_ENV_VAR)
 PROBE_TIMEOUT = 5.0
 MAX_PROBES = 8
 GIB = 1024**3
@@ -190,7 +191,7 @@ def _cache_checks() -> Iterator[Check]:
 
 
 def _environment_checks() -> Iterator[Check]:
-    """The environment variables that move the cache, reported only when set."""
+    """The environment variables that move the cache or name a mirror, reported only when set."""
     for name in ENV_VARS:
         value = os.environ.get(name)
         if value:

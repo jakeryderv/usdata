@@ -86,6 +86,32 @@ are restored; changed ones keep whatever file was already at that path; the
 lockfile is not rewritten. In Python, `pull()` raises `UpstreamChanged`, whose
 `drift` lists each asset.
 
+## Restoring from a mirror
+
+A checksum cannot recover bytes, but a mirror that stores bytes *by* their
+checksum can. Set `USDATA_MIRROR_URL` to the base URL of one, and a locked
+restore tries the mirror for each pinned URL that no longer reproduces its
+pin: it fetches `<mirror>/sha256/<hex>`, the hex of the checksum the lockfile
+already records, verifies the bytes against that same pin, and writes the file.
+Upstream is always tried first, so the mirror never hides a change; the
+command lists such assets as `mirrored`, says on stderr that the source moved
+on, and exits 0. In Python, `PullResult.mirrored` names them.
+
+The lockfile is untouched, because the pin still describes the source. The
+provenance sidecar written beside the file gains one field, `mirror`, holding
+the mirror object that served it, and a new `retrieved_at`; every other field
+is the pinned record. An asset the mirror cannot supply, or supplies with the
+wrong checksum, stays drift, reported with the reason appended:
+`upstream changed; not mirrored (404)`.
+
+The project mirror at `https://data.usdata.dev` holds exactly the objects the
+committed example lockfiles pin, written by the weekly restore job and kept
+while any committed lockfile references them, so it restores the shipped
+examples and nothing else. The layout is one directory of files named by
+hash, which any static host can serve; a manifest of your own gets the same
+guarantee from a mirror you run behind the same setting. The SDK never
+uploads. See [ADR 0030](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0030-content-addressed-mirror.md).
+
 ## Accepting a change
 
 Name the entries whose new bytes you accept, by asset id from the report or by

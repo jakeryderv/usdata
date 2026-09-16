@@ -79,7 +79,11 @@ A failed resolution leaves an existing lockfile untouched, although earlier
 successful downloads remain cached. Restore and verify both check the exact
 manifest checksum before trusting its lockfile. Restore reports every pinned URL
 whose bytes changed upstream in one run and rewrites pins only for entries the
-caller explicitly selects with `update`. See the
+caller explicitly selects with `update`. When `USDATA_MIRROR_URL` names a
+content-addressed mirror, restore fetches such an entry from
+`<mirror>/sha256/<checksum>` instead, verified against the same pin, and the
+sidecar records the mirror object; the SDK never uploads
+([ADR 0030](adr/0030-content-addressed-mirror.md)). See the
 [manifest reference](reference/manifests.md) for the reproducibility contract and
 [ADR 0018](adr/0018-selective-lockfile-updates.md) for the decision.
 

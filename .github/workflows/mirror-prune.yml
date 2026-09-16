@@ -1,0 +1,42 @@
+name: Prune data mirror
+
+# Lists, or deletes, mirror objects that no lockfile committed on main pins (ADR 0030).
+on:
+  workflow_dispatch:
+    inputs:
+      delete:
+        description: Delete the unreferenced objects (the default only lists them)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mirror-prune
+  cancel-in-progress: false
+
+jobs:
+  prune:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+      AWS_ENDPOINT_URL: https://d4e3fe7d69a3ac8f446d4c3de2ca051b.r2.cloudflarestorage.com
+      AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
+      AWS_RESPONSE_CHECKSUM_VALIDATION: WHEN_REQUIRED
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          python-version: "3.14"
+          enable-cache: true
+      - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4
+      - run: just setup
+      - env:
+          DELETE: ${{ inputs.delete && '--delete' || '' }}
+          UV_NO_SYNC: '1'
+        run: uv run python scripts/mirror_pinned.py prune ${DELETE:+--delete} | tee -a "$GITHUB_STEP_SUMMARY"

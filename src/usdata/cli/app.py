@@ -507,16 +507,28 @@ def pull(
     except (httpx.HTTPError, ChecksumMismatch) as e:
         typer.secho(f"fetch failed: {e}", err=True, fg="red")
         raise typer.Exit(code=4) from None
-    updated = set(result.updated)
+    updated, mirrored = set(result.updated), set(result.mirrored)
     if not quiet:
         for f in result.fetched:
-            tag = "updated" if f.asset.id in updated else "cached" if f.from_cache else "fetched"
+            if f.asset.id in updated:
+                tag = "updated"
+            elif f.asset.id in mirrored:
+                tag = "mirrored"
+            else:
+                tag = "cached" if f.from_cache else "fetched"
             typer.echo(f"{f.path}\t{tag}\t{f.provenance.size} bytes")
     if result.updated:
         mode = f"updated {len(result.updated)} pin(s) in"
     else:
         mode = "restored from" if result.from_lockfile else "wrote"
     typer.echo(f"{len(result.fetched)} asset(s); {mode} {result.lockfile_path}", err=True)
+    if result.mirrored:
+        typer.secho(
+            f"{len(result.mirrored)} asset(s) changed upstream and were restored from the "
+            "mirror; the lockfile still pins the source. Pass --update to accept new bytes.",
+            err=True,
+            fg="yellow",
+        )
 
 
 @app.command()

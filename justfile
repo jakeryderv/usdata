@@ -101,6 +101,11 @@ check-notebooks:
 restore-examples *args:
     uv run python scripts/restore_lockfiles.py "$@"
 
+# Plan or run mirror uploads and pruning; for example: just mirror upload --cache .cache --dry-run
+[positional-arguments]
+mirror *args:
+    uv run python scripts/mirror_pinned.py "$@"
+
 # Execute all notebooks against live services; --write refreshes committed outputs
 [positional-arguments]
 run-notebooks *args:

@@ -63,8 +63,10 @@ usdata pull dataset.yaml --cache-dir .data --update noaa:ghcn-daily
 
 That accepts the new bytes for that dataset only and rewrites only its pin.
 Use `--force` instead when the manifest itself changed or you want every
-source re-resolved. The full contract is in
-[provenance and drift](../concepts/provenance-and-drift.md).
+source re-resolved. To keep the old bytes instead, a mirror that stores files
+by checksum can serve them: `USDATA_MIRROR_URL` names one, and the shipped
+examples restore from the project's at `https://data.usdata.dev`. The full
+contract is in [provenance and drift](../concepts/provenance-and-drift.md).
 
 --8<-- "_snippets/upstream-revisions.md"
 
