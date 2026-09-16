@@ -11,7 +11,7 @@ path start. It does not detect a tornado in any of those products, it does not
 establish that any of these quantities precede tornadoes in general, and it is
 one case. See [examples setup](https://usdata.dev/examples/) to run it.
 
-Available from source for the unreleased v0.18.0, which adds fetching only the
+Available since v0.18.0, which adds fetching only the
 GRIB2 messages a source names, `usdata pull --dry-run`, the Storm Events
 `BEGIN_UTC` and `END_UTC` columns, and GRIB2 variable names that follow from the
 select rather than from which short names collided. The named manifest sources

@@ -12,7 +12,7 @@ whole workflows to single datasets.
 
 | Notebook | Demonstrates |
 |---|---|
-| [Severe-weather case study](https://usdata.dev/examples/severe-weather-case-study/) | One tornado report selected from the Storm Events archive, confirmed against SPC, then measured against NEXRAD, MRMS, GLM, and an HRRR analysis from one manifest with six named sources, ending in `usdata cite` (available from source for the unreleased v0.18.0) |
+| [Severe-weather case study](https://usdata.dev/examples/severe-weather-case-study/) | One tornado report selected from the Storm Events archive, confirmed against SPC, then measured against NEXRAD, MRMS, GLM, and an HRRR analysis from one manifest with six named sources, ending in `usdata cite` (available since v0.18.0) |
 | [Weather and streamflow](https://usdata.dev/examples/weather-and-streamflow/) | NOAA/USGS inputs, manifests, provenance, cache reuse, verification, and locked restoration |
 | [Sea-surface temperature](https://usdata.dev/examples/sst-analysis/) | A four-cell CoastWatch subset, pandas opening, ERDDAP units, and a spatial plot |
 | [Monthly climate](https://usdata.dev/examples/monthly-climate/) | GSOM monthly observations, whole-month selection, a two-panel plot, and manifest verification |
