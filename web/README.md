@@ -42,3 +42,13 @@ at `## Run interactively` in `../examples/README.md`. Links to other example pag
 use `https://usdata.dev/examples/<example>/`; same-folder notebook and manifest
 links point to downloads. `npm test` checks generated links/downloads, dataset
 relationships, and output rendering, including rejection of saved notebook errors.
+
+`public/og.png` is the Open Graph card every page declares, also used by the
+README and the GitHub social preview. Its source is `og-card.html`; to
+regenerate it, serve this directory and capture the page at 1200 by 630:
+
+```sh
+python -m http.server 8765 --bind 127.0.0.1 &
+playwright-cli open http://127.0.0.1:8765/og-card.html && playwright-cli resize 1200 630
+playwright-cli screenshot --filename=public/og.png && playwright-cli close
+```

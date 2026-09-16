@@ -25,6 +25,7 @@ function page(title, description, content, canonical) {
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="${escape(description)}"><meta name="color-scheme" content="dark light">
+<meta property="og:type" content="article"><meta property="og:site_name" content="usdata"><meta property="og:title" content="${escape(title)}"><meta property="og:description" content="${escape(description)}"><meta property="og:url" content="https://usdata.dev${canonical}"><meta property="og:image" content="https://usdata.dev/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">
 <title>${escape(title)} · usdata</title><link rel="canonical" href="https://usdata.dev${canonical}">
 <link rel="icon" href="/logo.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/examples.css">
 </head><body><a class="skip" href="#main">Skip to content</a>
