@@ -91,6 +91,10 @@ verification checks local bytes without network access. Use the same cache
 directory for both commands. An upstream revision can cause restoration to fail
 with a checksum mismatch.
 
+Once the inputs are pinned, `usdata cite dataset.yaml` prints the citation for
+every dataset in the lockfile, with the retrieval dates and checksummed asset
+counts a methods section needs (`--format bibtex` for a bibliography).
+
 Commit the manifest and lockfile and back up the cached bytes. Lockfiles detect
 changed data but cannot recover an upstream version that is no longer available.
 See [manifests and lockfiles](concepts/manifests.md) before intentionally refreshing inputs.
@@ -102,6 +106,7 @@ See [manifests and lockfiles](concepts/manifests.md) before intentionally refres
 | Choose a dataset | [Find a dataset](guides/find-a-dataset.md) |
 | Explore query options and the fetch loop | [Fetch and analyze](guides/fetch-and-analyze.md) |
 | Repeat an analysis with pinned inputs | [Pin inputs](guides/pin-inputs.md) |
+| Cite the inputs in a methods section | [Cite what you used](concepts/manifests.md#cite-what-you-used) |
 | Learn through saved data and plots | [Examples](https://usdata.dev/examples/) |
 | Understand a provider's query limits | [Provider notes](providers/README.md) |
 | Find an exact Python argument | [Python API](reference/api.md) |
