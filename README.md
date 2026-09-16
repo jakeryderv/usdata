@@ -5,12 +5,15 @@
 [![CI](https://github.com/jakeryderv/usdata/actions/workflows/ci.yml/badge.svg)](https://github.com/jakeryderv/usdata/actions/workflows/ci.yml)
 [![Live checks](https://github.com/jakeryderv/usdata/actions/workflows/integration.yml/badge.svg)](https://github.com/jakeryderv/usdata/actions/workflows/integration.yml)
 [![License](https://img.shields.io/github/license/jakeryderv/usdata)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-docs.usdata.dev-2f5bea)](https://docs.usdata.dev/)
 
 Reproducible acquisition of U.S. public scientific data. One Python SDK and
 CLI discovers curated NOAA and USGS datasets, fetches their files, and keeps a
 record of every input: a manifest names them, a lockfile pins them by checksum,
 and the record of what was fetched is what a methods section cites. Analysis
-stays in pandas and xarray; usdata only acquires.
+stays in pandas and xarray; usdata only acquires. If you need every product
+one agency publishes, that agency's own library is the better tool; usdata is
+for pinning inputs across sources and proving later that they have not changed.
 
 ```sh
 pip install "usdata[pandas]"
@@ -18,6 +21,20 @@ usdata search precipitation --location Oklahoma
 usdata fetch noaa:ghcn-daily -p stations=USW00013967 --start 2024-05-06 --end 2024-05-07
 usdata pull dataset.yaml && usdata cite dataset.yaml
 ```
+
+The same four steps from Python:
+
+```python
+from usdata import build_query, fetch, get, pull
+
+query = build_query(start="2024-05-06", end="2024-05-07", stations="USW00013967")
+items = fetch(get("noaa:ghcn-daily"), query)
+frame = items[0].open()  # pandas DataFrame, units and provenance in frame.attrs
+result = pull("dataset.yaml")  # every manifest source, pinned in dataset.lock.json
+print(result.fetched[0].provenance.checksum)  # what usdata cite reports
+```
+
+[![usdata.dev: the dataset browser and worked examples](.github/readme/usdata-dev.png)](https://usdata.dev/)
 
 **Alpha.** Releases are tested and lockfiles are stable, but the Python API
 and CLI can change between minor versions; the [changelog](CHANGELOG.md) marks
