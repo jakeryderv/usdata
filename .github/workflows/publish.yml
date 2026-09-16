@@ -97,4 +97,8 @@ jobs:
       - name: Walk the published package through the getting-started guide
         env:
           V: ${{ needs.publish.outputs.version }}
+          # The PyPI simple index lagged the v0.17.0 upload by more than three
+          # minutes; allow ten before calling the release broken.
+          USDATA_INSTALL_ATTEMPTS: "30"
+          USDATA_INSTALL_DELAY: "20"
         run: uv run --no-project python scripts/walkthrough.py --version "$V"
