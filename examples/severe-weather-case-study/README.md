@@ -11,9 +11,12 @@ path start. It does not detect a tornado in any of those products, it does not
 establish that any of these quantities precede tornadoes in general, and it is
 one case. See [examples setup](https://usdata.dev/examples/) to run it.
 
-Available since v0.17.0, which adds the named manifest
-sources this example is built on, `FetchedAsset.inspect()`, the strict GRIB2
-`select`, registry-filled units, and `usdata cite`. The retained
+Available from source for the unreleased v0.18.0, which adds fetching only the
+GRIB2 messages a source names, `usdata pull --dry-run`, the Storm Events
+`BEGIN_UTC` and `END_UTC` columns, and GRIB2 variable names that follow from the
+select rather than from which short names collided. The named manifest sources
+this example is built on, `FetchedAsset.inspect()`, registry-filled units, and
+`usdata cite` are available since v0.17.0. The retained
 [manifest](dataset.yaml) holds six named sources, and the notebook addresses each
 one through `result.by_source["..."]`:
 
@@ -24,33 +27,44 @@ one through `result.by_source["..."]`:
 | `radar` | `noaa:nexrad-level2` | Every KTLX volume scan between 04:34 and 04:46 UTC on 2024-05-07 | 2 | 39,708,043 |
 | `rotation` | `noaa:mrms` | `RotationTrackML30min_00.50` grids stamped 04:34 to 04:42 UTC | 5 | 926,976 |
 | `lightning` | `noaa:goes-glm` | GOES-16 GLM files starting 04:29:00 to 04:48:59 UTC | 60 | 29,536,150 |
-| `environment` | `noaa:hrrr` | Forecast hour 0 of the 04 UTC run, surface file | 1 | 133,253,838 |
+| `environment` | `noaa:hrrr` | The CAPE and 0-3 km helicity messages of forecast hour 0 of the 04 UTC run, surface file | 1 | 1,765,823 |
 
-That is **216,348,344 bytes, 216.3 MB, across 70 assets**. The live pull took
-20.2 seconds and the whole notebook ran in 41 seconds. Nothing is subsetted on
+That is **84,860,329 bytes, 84.9 MB, across 70 assets**. The live pull took
+16.5 seconds and the whole notebook ran in 36 seconds. Nothing is subsetted on
 the server: Storm Events and SPC arrive as whole annual tables, MRMS and GLM as
-whole CONUS and full-disk files, HRRR as a whole 3 km CONUS grid. Every spatial
-and variable narrowing happens locally.
+whole CONUS and full-disk files. Only the HRRR source is narrowed
+before it is downloaded, and that is the client asking S3 for two byte ranges it
+found in the object's index, not a service subsetting a file: the `messages`
+selectors `CAPE:surface` and `HLCY:3000-0 m above ground` cost 1,765,823 bytes of
+a 133,253,838 byte object, and both fields still arrive on the whole 3 km CONUS
+grid. Every spatial narrowing happens locally.
 
-`usdata fetch` with `--dry-run` lists what a query will download before anything
-is pulled, one source at a time:
+`usdata pull dataset.yaml --dry-run` prices the whole manifest before anything
+is pulled: one line per asset in the same columns `fetch --dry-run` uses, a
+subtotal per source, and the total on stderr. Downloading nothing, it reads the
+same YAML the pull reads, so the queries cannot drift from the ones being priced.
+Trimmed here to the six subtotals and three of the seventy asset lines:
 
-```sh
-usdata fetch noaa:storm-events --start 2024-05-06 --end 2024-05-06 --dry-run
-usdata fetch noaa:spc-tornado-reports --start 2024-01-01 --end 2024-12-31 --dry-run
-usdata fetch noaa:nexrad-level2 --start 2024-05-07T04:34:00Z --end 2024-05-07T04:46:00Z \
-    -p site=KTLX --dry-run
-usdata fetch noaa:mrms --start 2024-05-07T04:34:00Z --end 2024-05-07T04:42:00Z \
-    -p product=RotationTrackML30min_00.50 --dry-run
-usdata fetch noaa:goes-glm --start 2024-05-07T04:29:00Z --end 2024-05-07T04:48:59Z \
-    -p satellite=16 --dry-run
-usdata fetch noaa:hrrr --start 2024-05-07T04:00:00Z --end 2024-05-07T04:00:00Z \
-    -p cycle=4 -p forecast_hour=0 -p file=sfc --dry-run
+```text
+$ usdata pull dataset.yaml --dry-run
+StormEvents_details-ftp_v1.0_d2024_c20260728.csv.gz	12693243	https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/StormEvents_details-ftp_v1.0_d2024_c20260728.csv.gz
+reports (noaa:storm-events): 1 asset(s), 12693243 bytes
+2024_torn.csv	?	https://www.spc.noaa.gov/wcm/data/2024_torn.csv
+spc (noaa:spc-tornado-reports): 1 asset(s), at least 0 bytes; size unknown for 1 asset(s)
+radar (noaa:nexrad-level2): 2 asset(s), 39708043 bytes
+rotation (noaa:mrms): 5 asset(s), 926976 bytes
+lightning (noaa:goes-glm): 60 asset(s), 29536150 bytes
+hrrr.20240507.t04z.wrfsfcf00.part-13819cd0ccdf.grib2	1765823	s3://noaa-hrrr-bdp-pds/hrrr.20240507/conus/hrrr.t04z.wrfsfcf00.grib2#messages=105,131
+environment (noaa:hrrr): 1 asset(s), 1765823 bytes
+6 source(s), 70 asset(s), at least 84630235 bytes; size unknown for 1 asset(s) from spc; nothing downloaded
 ```
 
-Each prints one line per asset with its size and then a total, except the SPC
-file, which reports `1 asset(s) matched, 0 bytes; size unknown for 1` because the
-SPC page gives only approximate sizes.
+The HRRR line is the partial asset: a `.part-` digest of the resolved message
+numbers in the id, the byte total of those two ranges, and the object it was cut
+from with a `#messages=105,131` fragment. The `at least` in the total, and the
+named source after it, are the command reporting that the SPC page publishes no
+size for `2024_torn.csv`; its real 230,094 bytes are what separate the priced
+84,630,235 from the 84,860,329 the pull writes.
 
 Report 1184052 is the same Oklahoma County tornado the six smaller severe-weather
 examples use. Those examples paste its time and position in as constants to stay
@@ -69,8 +83,11 @@ The caveats that matter for the answer:
 - **Times come from three different clocks.** Storm Events timestamps are local,
   labelled by a `CZ_TIMEZONE` string, `CST-6` here. SPC rows are Central Standard
   Time for every tornado in the country, whatever zone it was in. Everything else
-  is UTC. The notebook converts both with an explicit fixed offset and checks the
-  timezone column before it does.
+  is UTC. The pandas reader derives `BEGIN_UTC` and `END_UTC` from the Storm
+  Events label and records the rule it used in
+  `attrs["usdata"]["derived"]`; the SPC file has no such column, so that one the
+  notebook still converts with an explicit fixed offset after checking the row's
+  `tz` code.
 - **The radar volume is chosen, not pinned.** The manifest asks KTLX for a twelve
   minute window, which resolves to two volume scans, and the notebook keeps the
   one whose scan start is nearest the derived report time. That scan begins 113
@@ -134,65 +151,50 @@ notebook pins:
 
 ## What was awkward
 
-- There is no way to price a manifest before pulling it. `usdata pull` has no
-  `--dry-run`, so the only way to learn that this manifest weighs 216.3 MB was to
-  retype all six sources as `usdata fetch` flag sets and add the totals by hand.
-  The YAML already says every one of those queries; the CLI cannot read it.
-- The one dry run that mattered most for the budget came back empty. The SPC
-  source prints `1 asset(s) matched, 0 bytes; size unknown for 1`, because the SPC
-  page publishes approximate sizes and the adapter records none. The real figure,
-  230,094 bytes, exists only after the download. A total assembled from dry runs
-  can therefore understate what a pull will fetch, and the summary line reads like
-  a zero-byte result rather than a missing measurement.
-- `usdata cite` exists only as a command. `cite_dataset` and `cite_lockfile` are
-  exported from the package root and appear in no page under `docs/`, including
-  the Python API reference, and nothing documents a way to render a `Citation` as
-  text or BibTeX from Python. A notebook that wants both renderings has to shell
-  out to the CLI.
-- Shelling out has no supported spelling either. `python -m usdata` fails with
-  `No module named usdata.__main__`, so the last cell has to guess the console
-  script's location from `Path(sys.executable).with_name("usdata")`. Inside the
-  notebook runner's kernel that is the only thing that reliably works.
-- Four of the six citations contain a literal `[date]` placeholder, for example
-  `NEXRAD on AWS was accessed on [date] from ...`. The real retrieval date is
-  printed two lines below in the text rendering, but in BibTeX the placeholder
-  lands inside `howpublished` and the date inside `note`, so anyone who pastes the
-  entry into a bibliography publishes the word `[date]`.
-- `inspect()` is documented in prose but not in a form you can type. The readers
-  page says a GRIB2 summary reports each message's `shortName`, `typeOfLevel`,
-  `level`, `step`, `units`, and shape, which are the ecCodes spellings; the object
-  actually exposes `summary.grib2.messages[i].short_name` and `.type_of_level`.
-  The attribute path itself appears nowhere, and `FetchedAsset.inspect`,
-  `inspect_asset`, and `inspect_path` are all missing from the Python API
-  reference, whose `FetchedAsset` member list stops at `open`. Finding the field
-  names meant printing the dataclass repr.
-- GRIB2 variable names still depend on what else the select matched. Asking for
-  `{"shortName": ["cape", "hlcy"], "typeOfLevel": ["surface",
-  "heightAboveGroundLayer"], "level": [0, 3000]}` returns `cape_surface_0`,
-  `cape_heightAboveGroundLayer_0`, and a bare `hlcy`, because the suffix is added
-  only to the short names that collided. The notebook ends up issuing two narrow
-  `open()` calls, each matching exactly one message, purely so the variable names
-  are predictable.
+- A manifest can be priced now, but it still cannot be priced exactly.
+  `pull --dry-run` reports `at least 84630235 bytes; size unknown for 1 asset(s)
+  from spc`, which is honest and names the source, and the per-source line for
+  SPC still reads `at least 0 bytes`. The real 230,094 bytes exist only after the
+  download, because the SPC page publishes approximate sizes and the adapter
+  records none, so the figure this README quotes had to come from the pull rather
+  than from the plan.
+- The two fields are named twice, in two vocabularies, and nothing connects them.
+  The manifest asks for `CAPE:surface` and `HLCY:3000-0 m above ground`, the
+  wgrib2 index spelling; the same messages come back as `cape_surface_0` and
+  `hlcy_heightAboveGroundLayer_3000`, the ecCodes spelling. The HRRR provider page
+  prints both tables, one under "Fetching selected messages" and one under
+  "Reading fields", but pairing a row of one with a row of the other is left to
+  the reader, and nothing in the package translates a `messages` selector into
+  the `select` or the variable name it will produce. A typo is caught, at least:
+  a selector that matches no message is an error naming the levels that short
+  name publishes.
+- The naming rule is written for a `select`, and a partial file is opened without
+  one. The [reader reference](https://docs.usdata.dev/reference/readers/) says
+  variables take `shortName_typeOfLevel_level` "as soon as the selection spans
+  more than one" level type or level, and the HRRR page says a file fetched with
+  `messages` "opens without `select`". Neither says what the selection is when
+  there is no `select`, so whether a two-message file would come back as `cape`
+  and `hlcy` or as the long names was settled by running it once.
+- Message numbers mean two things. The URL fragment and the provenance record the
+  messages as 105 and 131, their positions in the 170-message object;
+  `inspect()` and `attrs["usdata"]["messages"]` number the same two fields 0 and
+  1, their positions in the file that was fetched. Both are right, nothing is
+  mislabelled, and a student tracing a field back to the source object still has
+  to notice that the two numberings are not the same.
+- The derived Storm Events columns are pandas timestamps and asset times are
+  `datetime` objects. Subtracting one from the other gives a `Timedelta` that
+  prints as `0 days 00:39:00` where the notebook's other clocks print `0:39:00`,
+  so `REPORT_UTC` is taken through `.to_pydatetime()` to keep one type flowing
+  through the rest of the notebook. The provider page shows the column and its
+  rule but says nothing about its dtype.
 - `by_source` always hands back a list, so a source that can only ever resolve to
   one file is unpacked with `(item,) = result.by_source["reports"]` four times in
   this notebook. Within a source, the documented order is "the order the adapter
   listed that source's assets", which is not promised to be chronological, so
   anything that wants the earliest or latest asset sorts on
   `item.asset.time.start` defensively.
-- Converting a Storm Events timestamp is still hand work. `CZ_TIMEZONE` is the
-  string `CST-6`, which no Python timezone accepts, so every example that touches
-  this dataset builds `timezone(timedelta(hours=-6))` from the suffix itself and
-  checks the string first. Three notebooks in this repository now carry their own
-  copy of that conversion, and the provider page describes the column without
-  offering a rule for turning it into an offset.
-- The registry points at two different kinds of page for the same kind of example.
-  `usdata info noaa:hrrr`, `noaa:mrms`, and `noaa:goes-glm` list a `README.md`
-  under `examples:` although all three examples now ship executed notebooks, while
-  `noaa:storm-events` and `noaa:nexrad-level2` list `example.ipynb`. A student
-  following `usdata info` lands on a page or on a notebook depending on which
-  dataset they asked about.
-- Iterating on this example re-downloads it every time. `just run-notebooks` sets
-  `USDATA_CACHE_DIR` to a fresh directory per run, which is the right default for
-  checking that a notebook works from nothing, but it means each `--write` pulls
-  216 MB again and there is no flag or documented override to point one run at a
-  warm cache.
+- `usdata.inspect_path` wants a `pathlib.Path` and says so nowhere. The readers
+  page introduces it as `usdata.inspect_path(path)`; handed the string that
+  `usdata inspect` prints, it raises `AttributeError: 'str' object has no
+  attribute 'name'` from inside the package. The manifest reference states the
+  rule for `pull()` and `verify()`, and nothing states it here.

@@ -34,3 +34,4 @@ sources:
       cycle: 4
       forecast_hour: 0
       file: sfc
+      messages: "CAPE:surface,HLCY:3000-0 m above ground"
