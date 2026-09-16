@@ -66,6 +66,7 @@ def open_asset(
     nrows: int | None = None,
     sweep: int | list[int] | None = None,
     select: Mapping[str, Any] | None = None,
+    strict: bool = False,
 ) -> Any:
     """Open local CSV, NetCDF4, GRIB2, NEXRAD, or HURDAT2 data, retaining units and provenance.
 
@@ -79,7 +80,9 @@ def open_asset(
     the default opens the whole volume after checking sweep record alignment.
     GRIB2 accepts ``select``, a mapping of ecCodes key names to one value or a
     list of values, to choose messages from a multi-message file; a file with one
-    message needs none. Gzipped GRIB2 is decompressed in memory.
+    message needs none. A select value that matches none of the selected messages
+    warns, or raises ``ValueError`` when ``strict``; a select that matches nothing
+    raises either way. Gzipped GRIB2 is decompressed in memory.
     HURDAT2 best-track text is recognized by dataset or filename and returns one
     row per track point; it takes no CSV options.
     """
@@ -120,6 +123,8 @@ def open_asset(
         raise ValueError("sweep applies only to the NEXRAD reader")
     if select is not None and reader != "grib2":
         raise ValueError("select applies only to the GRIB2 reader")
+    if strict and reader != "grib2":
+        raise ValueError("strict applies only to the GRIB2 reader")
     if reader == "grib2":
         if any(value is not None for value in (dtype, parse_dates, usecols, nrows)):
             raise ValueError(
@@ -127,7 +132,7 @@ def open_asset(
             )
         from usdata._grib import open_grib2
 
-        return open_grib2(fetched, select=select)
+        return open_grib2(fetched, select=select, strict=strict)
     if reader == "netcdf":
         if any(value is not None for value in (dtype, parse_dates, usecols, nrows)):
             raise ValueError(
