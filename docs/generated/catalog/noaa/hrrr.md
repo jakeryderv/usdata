@@ -12,7 +12,7 @@ HRRR Forecast Model Output.
 - Selection: Whole CONUS files by run initialization window, cycle hour, forecast hours, and file variant, at most one day
 - Required inputs: Both timestamps, cycle, and forecast_hour
 - Open locally: `usdata[grib]` · [Reader guide](../../../reference/readers.md)
-- Examples: [hrrr environment](https://usdata.dev/examples/hrrr-environment/)
+- Examples: [hrrr environment](https://usdata.dev/examples/hrrr-environment/), [severe weather case study](https://usdata.dev/examples/severe-weather-case-study/)
 
 ## Parameters
 

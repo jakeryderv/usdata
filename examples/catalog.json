@@ -1,5 +1,10 @@
 [
   {
+    "slug": "severe-weather-case-study",
+    "title": "For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?",
+    "summary": "Take one tornado report's UTC time and position out of the 2024 Storm Events archive, check it against the SPC tornado file, and measure what the nearest NEXRAD volume, five MRMS rotation grids, twenty minutes of GOES-16 lightning, and the last HRRR analysis held within 25 km of it."
+  },
+  {
     "slug": "radar-products",
     "title": "Which derived radar products did KTLX publish around a tornado report?",
     "summary": "Pull thirty minutes of NEXRAD Level III mesocyclone, storm-track, and echo-top files, lock them, and see that they are stored without a reader."
