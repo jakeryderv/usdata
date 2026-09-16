@@ -63,6 +63,14 @@ The command takes a cache path or a dataset and asset id, prints the summary
 with a table for the detail, and exits 2 when the path has no sidecar or the id
 names nothing cached. `--json` emits the summary object and nothing else.
 
+The Python fields are the snake_case spellings of the ecCodes keys the CLI
+prints, so `shortName` is `short_name` and `typeOfLevel` is `type_of_level`:
+
+```python
+summary = item.inspect()
+print(summary.grib2.messages[0].short_name)
+```
+
 ## CSV and ERDDAP CSV
 
 The pandas extra returns a DataFrame. Identifier-like columns default to

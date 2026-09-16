@@ -138,6 +138,18 @@ usdata cite dataset.yaml
 usdata cite dataset.yaml --format bibtex
 ```
 
+The same citations come back as objects in Python, and each one renders itself:
+
+```python
+from pathlib import Path
+
+from usdata import cite_lockfile
+
+for citation in cite_lockfile(Path("dataset.yaml")):
+    print(citation.as_text())
+    print(citation.as_bibtex())
+```
+
 One citation comes out per dataset: the citation the agency asks for, its
 homepage, license and terms, and then what your lockfile actually pins for it,
 namely the retrieval dates, the number of checksummed assets and their total
@@ -147,3 +159,9 @@ usdata`. `usdata cite noaa:ghcn-daily` cites the registry entry alone, before
 anything is fetched, and `--json` emits the same records for a script to
 assemble. A manifest with no lockfile exits 2: pull it first, so the dates and
 checksums describe real files.
+
+Some agencies word their requested citation with a literal `[date]` where the
+access date belongs. Citing a lockfile fills it from the retrieval times, as one
+date or `between A and B` when they span days, so a pasted BibTeX entry never
+publishes the placeholder. Citing a dataset id alone keeps it and notes that a
+lockfile is what fills it.
