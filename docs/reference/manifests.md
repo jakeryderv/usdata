@@ -115,13 +115,17 @@ names the assets a configured mirror restored. Exit codes are listed in
 [how it works](../concepts/how-it-works.md#cli-exit-codes).
 
 `pull()` returns a `PullResult`. Its `fetched` list is in manifest order, then
-in the order each adapter listed that source's assets, and `by_source` groups
-the same objects by source key: a source's `name`, or its one-based position as
-a string when it has none.
+within a source by each asset's start time and then its id, whatever order the
+adapter listed them in; `by_source` groups the same objects by source key, a
+source's `name` or its one-based position as a string when it has none, in
+that same order. `one(source)` returns the single asset of a source that can
+only resolve to one and raises a `ValueError` naming the source and its count
+otherwise.
 
 ```python
 result = pull(Path("dataset.yaml"))
-(observed,) = result.by_source["surge"]
+observed = result.one("surge")
+earliest = result.by_source["lightning"][0]
 ```
 
 A lockfile written before source keys existed loads unchanged and records none;

@@ -30,7 +30,7 @@ one through `result.by_source["..."]`:
 | `environment` | `noaa:hrrr` | The CAPE and 0-3 km helicity messages of forecast hour 0 of the 04 UTC run, surface file | 1 | 1,765,823 |
 
 That is **84,860,329 bytes, 84.9 MB, across 70 assets**. The live pull took
-16.5 seconds and the whole notebook ran in 36 seconds. Nothing is subsetted on
+16.1 seconds and the whole notebook ran in 38 seconds. Nothing is subsetted on
 the server: Storm Events and SPC arrive as whole annual tables, MRMS and GLM as
 whole CONUS and full-disk files. Only the HRRR source is narrowed
 before it is downloaded, and that is the client asking S3 for two byte ranges it
@@ -164,9 +164,3 @@ notebook pins:
   so `REPORT_UTC` is taken through `.to_pydatetime()` to keep one type flowing
   through the rest of the notebook. The provider page shows the column and its
   rule but says nothing about its dtype.
-- `by_source` always hands back a list, so a source that can only ever resolve to
-  one file is unpacked with `(item,) = result.by_source["reports"]` four times in
-  this notebook. Within a source, the documented order is "the order the adapter
-  listed that source's assets", which is not promised to be chronological, so
-  anything that wants the earliest or latest asset sorts on
-  `item.asset.time.start` defensively.

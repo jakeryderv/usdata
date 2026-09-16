@@ -103,14 +103,15 @@ from pathlib import Path
 from usdata import pull
 
 result = pull(Path("dataset.yaml"))
-(observed,) = result.by_source["surge"]
-(predicted,) = result.by_source["tide"]
+observed = result.one("surge")
+predicted = result.one("tide")
 ```
 
-`fetched` holds every asset in manifest order, then in the order the adapter
-listed that source's assets. `by_source` holds the same objects grouped by
-source key, which is the `name` when a source has one and its one-based
-position (`"1"`, `"2"`) when it does not. The lockfile records the key beside
+`fetched` holds every asset in manifest order, then within a source by start
+time and id, so the first asset of a source is its earliest. `by_source` holds
+the same objects grouped by source key, which is the `name` when a source has
+one and its one-based position (`"1"`, `"2"`) when it does not, and `one`
+returns a source's only asset or says how many it has instead. The lockfile records the key beside
 each pinned asset, so a restore rebuilds the same grouping without re-resolving
 anything. Lockfiles written before keys existed still load; their entries group
 by dataset id in manifest order instead, so name the sources and re-run
