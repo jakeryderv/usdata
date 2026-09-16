@@ -12,7 +12,7 @@ SPC Tornado Reports.
 - Selection: Whole annual, half-decade, or decade files; filter rows locally after downloading
 - Required inputs: Both dates (selects the files covering those years)
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [spc tornadoes](https://usdata.dev/examples/spc-tornadoes/)
+- Examples: [spc tornadoes](https://usdata.dev/examples/spc-tornadoes/), [severe weather case study](https://usdata.dev/examples/severe-weather-case-study/)
 
 ## Parameters
 

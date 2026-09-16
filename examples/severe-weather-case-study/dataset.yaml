@@ -1,0 +1,36 @@
+name: oklahoma-tornado-1184052
+sources:
+  - name: reports
+    dataset: noaa:storm-events
+    start: 2024-05-06
+    end: 2024-05-06
+  - name: spc
+    dataset: noaa:spc-tornado-reports
+    start: 2024-01-01
+    end: 2024-12-31
+  - name: radar
+    dataset: noaa:nexrad-level2
+    start: 2024-05-07T04:34:00Z
+    end: 2024-05-07T04:46:00Z
+    params:
+      site: KTLX
+  - name: rotation
+    dataset: noaa:mrms
+    start: 2024-05-07T04:34:00Z
+    end: 2024-05-07T04:42:00Z
+    params:
+      product: RotationTrackML30min_00.50
+  - name: lightning
+    dataset: noaa:goes-glm
+    start: 2024-05-07T04:29:00Z
+    end: 2024-05-07T04:48:59Z
+    params:
+      satellite: 16
+  - name: environment
+    dataset: noaa:hrrr
+    start: 2024-05-07T04:00:00Z
+    end: 2024-05-07T04:00:00Z
+    params:
+      cycle: 4
+      forecast_hour: 0
+      file: sfc

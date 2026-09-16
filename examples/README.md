@@ -5,8 +5,14 @@ outputs and inspect the source datasets. The notebooks and manifests in this
 directory are the maintained sources; run them locally to change queries and
 inspect the results. The website renders saved content without running analyses.
 
+Start with the [severe-weather case study](https://usdata.dev/examples/severe-weather-case-study/),
+the flagship example: one tornado, six datasets, one manifest with named sources,
+one lockfile, and a citation block at the end. The rest of the table goes from
+whole workflows to single datasets.
+
 | Notebook | Demonstrates |
 |---|---|
+| [Severe-weather case study](https://usdata.dev/examples/severe-weather-case-study/) | One tornado report selected from the Storm Events archive, confirmed against SPC, then measured against NEXRAD, MRMS, GLM, and an HRRR analysis from one manifest with six named sources, ending in `usdata cite` (available from source for the unreleased v0.17.0) |
 | [Weather and streamflow](https://usdata.dev/examples/weather-and-streamflow/) | NOAA/USGS inputs, manifests, provenance, cache reuse, verification, and locked restoration |
 | [Sea-surface temperature](https://usdata.dev/examples/sst-analysis/) | A four-cell CoastWatch subset, pandas opening, ERDDAP units, and a spatial plot |
 | [Monthly climate](https://usdata.dev/examples/monthly-climate/) | GSOM monthly observations, whole-month selection, a two-panel plot, and manifest verification |

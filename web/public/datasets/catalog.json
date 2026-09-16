@@ -340,6 +340,10 @@
         {
           "title": "Tornado classification",
           "url": "https://usdata.dev/examples/tornado-classification/"
+        },
+        {
+          "title": "Severe weather case study",
+          "url": "https://usdata.dev/examples/severe-weather-case-study/"
         }
       ]
     },
@@ -474,6 +478,10 @@
         {
           "title": "Spc tornadoes",
           "url": "https://usdata.dev/examples/spc-tornadoes/"
+        },
+        {
+          "title": "Severe weather case study",
+          "url": "https://usdata.dev/examples/severe-weather-case-study/"
         }
       ]
     },
@@ -547,6 +555,10 @@
         {
           "title": "Tornado classification",
           "url": "https://usdata.dev/examples/tornado-classification/"
+        },
+        {
+          "title": "Severe weather case study",
+          "url": "https://usdata.dev/examples/severe-weather-case-study/"
         }
       ]
     },
@@ -698,6 +710,10 @@
         {
           "title": "Tornado classification",
           "url": "https://usdata.dev/examples/tornado-classification/"
+        },
+        {
+          "title": "Severe weather case study",
+          "url": "https://usdata.dev/examples/severe-weather-case-study/"
         }
       ]
     },
@@ -1032,6 +1048,10 @@
         {
           "title": "Tornado classification",
           "url": "https://usdata.dev/examples/tornado-classification/"
+        },
+        {
+          "title": "Severe weather case study",
+          "url": "https://usdata.dev/examples/severe-weather-case-study/"
         }
       ]
     },
@@ -1371,6 +1391,10 @@
         {
           "title": "Hrrr environment",
           "url": "https://usdata.dev/examples/hrrr-environment/"
+        },
+        {
+          "title": "Severe weather case study",
+          "url": "https://usdata.dev/examples/severe-weather-case-study/"
         }
       ]
     },

@@ -2,11 +2,13 @@
 
 Available since v0.15.0. The [manifest](dataset.yaml) requests the GFS 00 UTC
 1 degree analysis for 2024-05-06 through `noaa:gfs`: forecast hour 0 of the
-`pgrb2.1p00` file, valid at the initialization time, twenty hours before the
-Oklahoma Storm Events report used by the
+`pgrb2.1p00` file, valid at the initialization time, 28 hours 39 minutes
+(28.65 hours) before the Oklahoma Storm Events report used by the
 [event context example](https://usdata.dev/examples/event-context/) and the
 [HRRR example](https://usdata.dev/examples/hrrr-environment/) that reads the
-20 UTC analysis. The file is one whole global grid of 696 fields, about 42 MB;
+20 UTC analysis. A pre-convective analysis that old is not concurrent with the
+event: it describes the air mass the day before, and verifies nothing about the
+environment at 2024-05-07T04:39:00Z. The file is one whole global grid of 696 fields, about 42 MB;
 the manifest cannot subset it, so the snippet below selects fields after the
 download.
 
