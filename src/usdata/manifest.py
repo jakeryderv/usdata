@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,8 @@ from usdata.models import Asset, BBox, Provenance, Query
 from usdata.query import build_query
 from usdata.registry import Registry, default_registry
 
+_SOURCE_NAME = re.compile(r"^[A-Za-z0-9_-]+$")
+
 
 class SourceSpec(BaseModel):
     """One entry under ``sources:`` in a manifest."""
@@ -21,6 +24,9 @@ class SourceSpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     dataset: str
+    name: str | None = Field(
+        default=None, description="Optional label that keys this source in results and lockfiles"
+    )
     allow_empty: bool = False
     location: str | None = None
     bbox: BBox | None = None
@@ -57,6 +63,23 @@ class Manifest(BaseModel):
     version: str = "1.0"
     sources: list[SourceSpec] = Field(min_length=1)
 
+    @model_validator(mode="after")
+    def _distinct_source_keys(self) -> Manifest:
+        for source in self.sources:
+            if source.name is not None and not _SOURCE_NAME.match(source.name):
+                raise ValueError(
+                    f"source name {source.name!r} must use only letters, digits, "
+                    "hyphens, and underscores"
+                )
+        keys = self.source_keys()
+        if repeated := sorted({key for key in keys if keys.count(key) > 1}):
+            raise ValueError(f"duplicate source names: {', '.join(repeated)}")
+        return self
+
+    def source_keys(self) -> list[str]:
+        """Each source's key: its ``name`` when set, otherwise its one-based position."""
+        return [source.name or str(position) for position, source in enumerate(self.sources, 1)]
+
     @classmethod
     def load(cls, path: Path) -> Manifest:
         """Parse a manifest YAML file."""
@@ -77,6 +100,9 @@ class LockedAsset(BaseModel):
 
     asset: Asset
     provenance: Provenance
+    source: str | None = Field(
+        default=None, description="Key of the manifest source that resolved this asset"
+    )
 
     @model_validator(mode="after")
     def _consistent(self) -> LockedAsset:
