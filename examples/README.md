@@ -75,7 +75,10 @@ works without hidden state. Each notebook works from its own folder or the repo 
 To execute notebooks non-interactively, `just run-notebooks` takes `--notebook`,
 which names one example by slug (`glm-flashes`) or by repository-relative path
 and is repeatable. Add `--write` to refresh the selected notebooks' committed
-outputs, which happens only when every selected notebook passes.
+outputs, which happens only when every selected notebook passes. Each run
+caches downloads in a fresh directory; pass `--cache DIR` (or set
+`USDATA_NOTEBOOK_CACHE`) to reuse one directory across runs so iterating on a
+large example does not download it again.
 
 The first run needs access to NOAA and/or USGS. Interactive runs use the normal
 usdata cache (`USDATA_CACHE_DIR` overrides it). The manifest examples retain

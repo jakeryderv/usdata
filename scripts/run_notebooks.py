@@ -10,13 +10,30 @@ import sys
 import tempfile
 import time
 import traceback
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from pathlib import Path
 
 from check_notebooks import ROOT, check_notebook, notebook_paths
 
+CACHE_ENVIRONMENT_VARIABLE = "USDATA_NOTEBOOK_CACHE"
 
-def execute_notebook(source: Path, output: Path, kernel_dir: Path) -> None:
+
+def resolve_cache_dir(
+    option: str | None = None, environ: Mapping[str, str] | None = None
+) -> Path | None:
+    """The warm cache directory to reuse across runs, or ``None`` for a fresh one.
+
+    ``option`` is the ``--cache`` value and wins over the
+    ``USDATA_NOTEBOOK_CACHE`` environment variable; an empty or unset value from
+    either source selects the default of a fresh directory per run. The returned
+    path is absolute but is not created here.
+    """
+    environment = os.environ if environ is None else environ
+    name = option or environment.get(CACHE_ENVIRONMENT_VARIABLE, "")
+    return Path(name).expanduser().resolve() if name.strip() else None
+
+
+def execute_notebook(source: Path, output: Path, kernel_dir: Path, cache_dir: Path) -> None:
     import nbformat
     from jupyter_client import KernelManager
     from jupyter_client.kernelspec import KernelSpecManager
@@ -36,7 +53,7 @@ def execute_notebook(source: Path, output: Path, kernel_dir: Path) -> None:
             record_timing=False,
         ).execute(
             cleanup_kc=True,
-            env={**os.environ, "USDATA_CACHE_DIR": str(source.parent / "cache")},
+            env={**os.environ, "USDATA_CACHE_DIR": str(cache_dir)},
         )
     finally:
         # Preserve partial outputs and error cells even when execution raises.
@@ -51,8 +68,15 @@ def run_notebooks(
     output_dir: Path,
     *,
     write: bool = False,
-    execute: Callable[[Path, Path, Path], None] = execute_notebook,
+    cache_dir: Path | None = None,
+    execute: Callable[[Path, Path, Path, Path], None] = execute_notebook,
 ) -> list[str]:
+    """Execute ``paths``, writing diagnostics to ``output_dir`` and returning failures.
+
+    ``cache_dir``, when given, is reused as ``USDATA_CACHE_DIR`` by every
+    notebook so repeated runs do not re-download; the default gives each
+    notebook a fresh cache under a temporary working directory.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
     failures: list[str] = []
     results = []
@@ -73,6 +97,8 @@ def run_notebooks(
         )
         for index, path in enumerate(paths):
             print(f"Executing {path}", flush=True)
+            if cache_dir is not None:
+                print(f"Reusing warm cache {cache_dir} for {path}", flush=True)
             started = time.monotonic()
             working_dir = temporary / f"example-{index}"
             working_dir.mkdir()
@@ -86,7 +112,9 @@ def run_notebooks(
                 manifest = path.parent / "dataset.yaml"
                 if manifest.exists():
                     shutil.copy2(manifest, working_dir / manifest.name)
-                execute(working_dir / path.name, executed, kernel_dir)
+                cache = cache_dir if cache_dir is not None else working_dir / "cache"
+                cache.mkdir(parents=True, exist_ok=True)
+                execute(working_dir / path.name, executed, kernel_dir, cache)
                 errors = check_notebook(executed)
                 if errors:
                     raise ValueError("\n".join(errors))
@@ -157,6 +185,14 @@ def main() -> None:
         help="example slug (glm-flashes) or repository-relative path; repeatable",
     )
     parser.add_argument("--output-dir", type=Path, default=ROOT / "reports/notebooks")
+    parser.add_argument(
+        "--cache",
+        default=None,
+        help=(
+            "reuse this directory as USDATA_CACHE_DIR for every notebook instead of a fresh "
+            f"one per run; also settable as {CACHE_ENVIRONMENT_VARIABLE}"
+        ),
+    )
     args = parser.parse_args()
     paths = notebook_paths()
     if args.notebook:
@@ -166,7 +202,12 @@ def main() -> None:
             parser.error(str(exc))
     if not paths:
         parser.error("No example notebooks found")
-    failures = run_notebooks(paths, args.output_dir.resolve(), write=args.write)
+    failures = run_notebooks(
+        paths,
+        args.output_dir.resolve(),
+        write=args.write,
+        cache_dir=resolve_cache_dir(args.cache),
+    )
     if failures:
         sys.exit("\n".join(failures))
     action = "refreshed" if args.write else "executed (committed outputs unchanged)"
