@@ -83,9 +83,11 @@ The scheduled/manual Integration workflow discovers jobs from live test modules,
 example notebooks, and the pinned examples' committed lockfiles. Each dataset,
 example, and restore runs independently with fail-fast disabled and a job
 timeout. A restore pulls one lockfile into an empty cache and verifies it,
-never rewriting the pin; its summary lists every asset that drifted, so the
-workflow history records how often each archive republishes
-([ADR 0029](adr/0029-committed-example-lockfiles.md)). GOES live decoding explicitly uses the NetCDF extra;
+never rewriting the pin; its summary lists every asset that drifted, including
+one the project mirror restored, so the workflow history records how often
+each archive republishes ([ADR 0029](adr/0029-committed-example-lockfiles.md)).
+A passing restore on `main` then uploads any pinned object the mirror lacks
+([ADR 0030](adr/0030-content-addressed-mirror.md)). GOES live decoding explicitly uses the NetCDF extra;
 a core-only run reports that decoder test as skipped rather than silently omitting
 its assertions. The workflow also tests minimum direct runtime dependencies on
 Python 3.11 in a fresh environment, retaining the resolved versions. This probes

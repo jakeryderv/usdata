@@ -28,22 +28,35 @@ def restore_pinned(manifest: Path, cache: Path) -> list[dict[str, str]]:
     """Restore ``manifest``'s lockfile into ``cache`` and return every drifted asset.
 
     A restore that raises ``UpstreamChanged`` is not an error here: its drift
-    list is the result. Anything else propagates.
+    list is the result. An asset a configured mirror restored is drift too,
+    named as such, because the source no longer serves the pinned bytes and
+    that is what this job measures. Anything else propagates.
     """
     from usdata.pull import UpstreamChanged, restore, verify
 
     try:
-        restore(manifest, root=cache)
+        result = restore(manifest, root=cache)
     except UpstreamChanged as exc:
         return [{"asset_id": d.asset_id, "problem": d.problem} for d in exc.drift]
-    return [{"asset_id": d.asset_id, "problem": d.problem} for d in verify(manifest, root=cache)]
+    drift = [
+        {"asset_id": asset_id, "problem": "upstream changed; restored from the mirror"}
+        for asset_id in result.mirrored
+    ]
+    drift += [{"asset_id": d.asset_id, "problem": d.problem} for d in verify(manifest, root=cache)]
+    return drift
 
 
 def restore_examples(
-    manifests: list[Path], output_dir: Path, *, restore: Restore = restore_pinned
+    manifests: list[Path],
+    output_dir: Path,
+    *,
+    cache: Path | None = None,
+    restore: Restore = restore_pinned,
 ) -> list[str]:
-    """Restore each manifest's pins into its own empty cache; return the failures.
+    """Restore each manifest's pins into an empty cache; return the failures.
 
+    Each example gets its own temporary cache unless ``cache`` names one to
+    keep, which is how the mirror upload finds the restored bytes afterwards.
     Writes ``summary.json`` and, per example, a traceback file for anything that
     was not drift. Every example runs even after an earlier one fails.
     """
@@ -60,7 +73,7 @@ def restore_examples(
         status = "restored"
         with tempfile.TemporaryDirectory(prefix="usdata-restore-") as temp:
             try:
-                drift = restore(manifest, Path(temp) / "cache")
+                drift = restore(manifest, cache if cache is not None else Path(temp) / "cache")
             except Exception as exc:
                 status = "failed"
                 failures.append(f"{manifest}: {exc}")
@@ -113,6 +126,12 @@ def main() -> None:
         help="pinned example slug (glm-flashes) or repository-relative manifest path; repeatable",
     )
     parser.add_argument("--output-dir", type=Path, default=ROOT / "reports/restore")
+    parser.add_argument(
+        "--cache",
+        type=Path,
+        default=None,
+        help="keep the restored files in this cache instead of a temporary one per example",
+    )
     args = parser.parse_args()
     manifests = pinned_manifests()
     if args.manifest:
@@ -122,7 +141,11 @@ def main() -> None:
             parser.error(str(exc))
     if not manifests:
         parser.error("No pinned examples found")
-    failures = restore_examples(manifests, args.output_dir.resolve())
+    failures = restore_examples(
+        manifests,
+        args.output_dir.resolve(),
+        cache=None if args.cache is None else args.cache.resolve(),
+    )
     if failures:
         sys.exit("\n".join(failures))
     print(f"{len(manifests)} lockfiles restored and verified; reports: {args.output_dir}")

@@ -534,6 +534,10 @@ class Provenance(BaseModel):
     object_etag: str | None = Field(
         default=None, description="ETag that object carried, re-sent as ``If-Match`` on a restore"
     )
+    mirror: str | None = Field(
+        default=None,
+        description="Mirror object that served these bytes after the source stopped (ADR 0030)",
+    )
 
     @property
     def is_partial(self) -> bool:

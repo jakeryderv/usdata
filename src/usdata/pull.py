@@ -22,13 +22,16 @@ from contextlib import ExitStack
 from datetime import UTC, datetime
 from pathlib import Path
 
+import httpx
 from pydantic import BaseModel, Field, computed_field
 
-from usdata import __version__, _progress, provenance
+from usdata import __version__, _progress, mirror, provenance
 from usdata._fetch import ChecksumMismatch, FetchedAsset, _fetch_asset, _fetch_with
+from usdata._files import staged_path
 from usdata.cache import asset_path, sha256_file
 from usdata.manifest import LockedAsset, Lockfile, Manifest, lockfile_path
 from usdata.models import Asset
+from usdata.protocols import http
 from usdata.protocols.http import ObjectChanged
 from usdata.providers import Provider, load_adapter
 from usdata.registry import Registry, default_registry
@@ -64,7 +67,12 @@ class Drift(BaseModel):
     asset_id: str
     dataset_id: str
     path: Path
-    problem: str  # "missing", "checksum mismatch", or "upstream changed"
+    problem: str = Field(
+        description=(
+            "'missing', 'checksum mismatch', or 'upstream changed'; a restore that also tried "
+            "a mirror appends why the mirror did not help"
+        )
+    )
 
 
 class UpstreamChanged(ChecksumMismatch):
@@ -96,6 +104,13 @@ class PullResult(BaseModel):
     from_lockfile: bool
     updated: list[str] = Field(
         default_factory=list, description="Ids of assets whose pins were rewritten by update"
+    )
+    mirrored: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Ids of assets whose pinned URL no longer served their bytes and that the mirror "
+            "restored instead; their pins are unchanged and each sidecar names the mirror object"
+        ),
     )
     by_source: dict[str, list[FetchedAsset]] = Field(
         default_factory=dict,
@@ -303,6 +318,12 @@ def restore(
     ``UpstreamChanged`` listing them and the lockfile is left as it was. An entry
     pinning byte ranges re-issues exactly those ranges against the pinned ETag, so
     a republished object is reported as drift rather than silently re-resolved.
+
+    When ``USDATA_MIRROR_URL`` names a mirror, an entry whose pinned URL no longer
+    reproduces its pin is fetched from ``<mirror>/sha256/<checksum>`` instead and
+    verified against the same pin; the result lists it under ``mirrored`` and its
+    sidecar records the mirror object. Only an entry the mirror cannot supply is
+    drift. See ADR 0030.
     """
     reg = registry or default_registry()
     manifest_path = Path(manifest_path)
@@ -314,10 +335,13 @@ def restore(
     fetched: list[FetchedAsset] = []
     entries: list[LockedAsset] = []
     updated: list[str] = []
+    mirrored: list[str] = []
     drift: list[Drift] = []
     _progress.batch([entry.provenance.size for entry in lock.assets])
     adapters: dict[str, Provider] = {}
+    mirror_base = mirror.mirror_url()
     with ExitStack() as stack:
+        mirror_client: httpx.Client | None = None
         for entry in lock.assets:
             dataset = reg.get(entry.asset.dataset_id)
             path = asset_path(entry.asset, root)
@@ -366,12 +390,22 @@ def restore(
                 )
             # A republished object refuses the pinned ETag, which is drift by another name.
             except (ChecksumMismatch, ObjectChanged):
+                problem = "upstream changed"
+                if mirror_base is not None:
+                    if mirror_client is None:
+                        mirror_client = stack.enter_context(http.client())
+                    item, problem = _restore_from_mirror(entry, path, mirror_base, mirror_client)
+                    if item is not None:
+                        fetched.append(item)
+                        entries.append(entry)
+                        mirrored.append(entry.asset.id)
+                        continue
                 drift.append(
                     Drift(
                         asset_id=entry.asset.id,
                         dataset_id=entry.asset.dataset_id,
                         path=path,
-                        problem="upstream changed",
+                        problem=problem,
                     )
                 )
                 continue
@@ -387,8 +421,33 @@ def restore(
         fetched=fetched,
         from_lockfile=True,
         updated=updated,
+        mirrored=mirrored,
         by_source=_by_source(zip(entries, fetched, strict=True)),
     )
+
+
+def _restore_from_mirror(
+    entry: LockedAsset, path: Path, base: str, client: httpx.Client
+) -> tuple[FetchedAsset | None, str]:
+    """Fetch one pinned entry from the mirror, or say why the entry is still drift.
+
+    The pin is unchanged either way. On success the sidecar written beside the
+    file is the pinned record plus the mirror object that served it and a new
+    retrieval time, so the lockfile still describes the source and the sidecar
+    says where these bytes came from.
+    """
+    _progress.emit(_progress.AssetProgress(entry.asset.id, "start", entry.provenance.size))
+    try:
+        with staged_path(path) as tmp:
+            url = mirror.download(base, entry.provenance.checksum, tmp, client)
+    except httpx.HTTPStatusError as error:
+        return None, f"upstream changed; not mirrored ({error.response.status_code})"
+    except mirror.MirrorMismatch:
+        return None, "upstream changed; mirror mismatch"
+    prov = entry.provenance.model_copy(update={"retrieved_at": datetime.now(UTC), "mirror": url})
+    provenance.write(prov, path)
+    _progress.emit(_progress.AssetProgress(entry.asset.id, "fetched", prov.size))
+    return FetchedAsset(asset=entry.asset, path=path, provenance=prov, from_cache=False), ""
 
 
 def pull(

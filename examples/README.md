@@ -101,7 +101,13 @@ one into an empty cache and reports every asset that drifted
 ```sh
 just restore-examples                       # every pinned example, each into a fresh cache
 just restore-examples --manifest glm-flashes
+USDATA_MIRROR_URL=https://data.usdata.dev just restore-examples   # as the weekly job runs it
 ```
+
+The project mirror at `https://data.usdata.dev` holds the exact bytes these
+lockfiles pin, so with `USDATA_MIRROR_URL` set a pinned example restores even
+after its archive republishes an object; the restore still reports the change
+([ADR 0030](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0030-content-addressed-mirror.md)).
 
 Re-pin deliberately, never from the runner: after editing a pinned manifest
 run `usdata pull examples/<slug>/dataset.yaml --force`, or `--update <id>` to
