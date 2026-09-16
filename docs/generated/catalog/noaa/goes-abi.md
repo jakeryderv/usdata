@@ -24,6 +24,13 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `product` | ABI product; only ABI-L2-CMIPC is supported. |
 | `satellite` | Required GOES satellite number: 16, 17, 18, or 19. |
 
+## Variables
+
+| Variable | Units | Meaning |
+|---|---|---|
+| `CMI` | — | Cloud and moisture imagery; reflectance factor or brightness temperature by band |
+| `DQF` | — | Per-pixel data quality flags for CMI |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-goes.md).
@@ -32,6 +39,12 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 - Availability: since 0.8
 - Domain: Weather satellites
+- Spatial resolution: 0.5 km to 2 km at nadir, by ABI band
+- Temporal resolution: One CONUS scan every 5 minutes on average
+- Updates: New data is added as soon as it's available
+- Longest query window: 7 days
+- Terms of use: <https://www.noaa.gov/information-technology/open-data-dissemination>
+- Citation: NOAA Geostationary Operational Environmental Satellites (GOES) 16, 17, 18 & 19 was accessed on [date] from https://registry.opendata.aws/noaa-goes
 - Catalog date range: 2017-02-28 to open-ended
 - Coverage varies by station, product, and date; the range above does not guarantee observations.
 - [Upstream documentation](https://registry.opendata.aws/noaa-goes/)

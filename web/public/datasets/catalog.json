@@ -4,7 +4,7 @@
     {
       "id": "noaa:ghcn-daily",
       "title": "Daily station weather",
-      "description": "Global Historical Climatology Network daily summaries: temperature, precipitation, snow, and other elements from land surface stations, served by the NCEI Access Data Service with station and date filtering.",
+      "description": "Global Historical Climatology Network daily summaries: temperature, precipitation, snow, and other elements from land surface stations, served by the NCEI Access Data Service with station and date filtering. Variables are NCEI element codes and the catalog lists the common ones; the delivered set is open and depends on the station.",
       "provider": "NOAA",
       "domain": "Surface weather",
       "availability": "Released",
@@ -26,6 +26,42 @@
       "selection": "Station observations within inclusive calendar dates; selected elements",
       "inputs": "Both dates; station IDs or a geographic query",
       "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "Land surface stations; more than 100,000 stations in 180 countries and territories",
+        "temporal": "Daily"
+      },
+      "update_frequency": "Daily, reconstructed each weekend from more than 25 data source components",
+      "latency": "Real-time streams are replaced by archive-ready sources 45 to 60 days after the end of a month",
+      "citation": "Menne, M.J., I. Durre, R.S. Vose, B.E. Gleason, and T.G. Houston, 2012: An overview of the Global Historical Climatology Network-Daily Database. Journal of Atmospheric and Oceanic Technology, 29, 897-910, doi:10.1175/JTECH-D-11-00103.1",
+      "terms": "https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00861/html",
+      "variables": [
+        {
+          "name": "PRCP",
+          "units": "mm",
+          "description": "Precipitation total (metric units)"
+        },
+        {
+          "name": "TMAX",
+          "units": "degrees Celsius",
+          "description": "Maximum temperature (metric units)"
+        },
+        {
+          "name": "TMIN",
+          "units": "degrees Celsius",
+          "description": "Minimum temperature (metric units)"
+        },
+        {
+          "name": "SNOW",
+          "units": "mm",
+          "description": "Snowfall (metric units)"
+        },
+        {
+          "name": "SNWD",
+          "units": "mm",
+          "description": "Snow depth (metric units)"
+        }
+      ],
+      "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-ghcn/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/ghcn-daily/",
       "examples": [
@@ -38,7 +74,7 @@
     {
       "id": "noaa:gsom",
       "title": "Monthly station climate",
-      "description": "Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. Selects whole calendar months and explicit stations, or discovers stations through the companion search service.",
+      "description": "Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. Selects whole calendar months and explicit stations, or discovers stations through the companion search service. Variables are NCEI element codes and the catalog lists the common ones; the delivered set is open and depends on the station.",
       "provider": "NOAA",
       "domain": "Surface weather",
       "availability": "Released",
@@ -58,6 +94,27 @@
       "selection": "Complete UTC calendar months touched by the query; station and element filters",
       "inputs": "Both dates; station IDs or a geographic query",
       "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "Land surface stations, derived from GHCN-Daily",
+        "temporal": "Monthly"
+      },
+      "update_frequency": "Weekly",
+      "latency": null,
+      "citation": "Lawrimore, Jay H.; Ray, Ron; Applequist, Scott; Korzeniewski, Bryant; Menne, Matthew J. (2016): Global Summary of the Month (GSOM), Version 1. NOAA National Centers for Environmental Information. https://doi.org/10.7289/V5QV3JJ5",
+      "terms": "https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00946/html",
+      "variables": [
+        {
+          "name": "PRCP",
+          "units": "mm",
+          "description": "Monthly precipitation total (metric units)"
+        },
+        {
+          "name": "TAVG",
+          "units": "degrees Celsius",
+          "description": "Monthly mean temperature (metric units)"
+        }
+      ],
+      "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-gsom/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/gsom/",
       "examples": [
@@ -74,7 +131,7 @@
     {
       "id": "noaa:gsoy",
       "title": "Annual station climate",
-      "description": "Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. Selects complete UTC calendar years and explicit stations, or discovers stations through the search service.",
+      "description": "Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. Selects complete UTC calendar years and explicit stations, or discovers stations through the search service. Variables are NCEI element codes and the catalog lists the common ones; the delivered set is open and depends on the station.",
       "provider": "NOAA",
       "domain": "Surface weather",
       "availability": "Released",
@@ -94,6 +151,27 @@
       "selection": "Complete UTC calendar years touched by the query; station and element filters",
       "inputs": "Both dates; station IDs or a geographic query",
       "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "Land surface stations, derived from GHCN-Daily",
+        "temporal": "Annual"
+      },
+      "update_frequency": "Weekly",
+      "latency": null,
+      "citation": "Lawrimore, Jay H.; Ray, Ron; Applequist, Scott; Korzeniewski, Bryant; Menne, Matthew J. (2016): Global Summary of the Year (GSOY), Version 1. NOAA National Centers for Environmental Information. https://doi.org/10.7289/JWPF-Y430",
+      "terms": "https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00947/html",
+      "variables": [
+        {
+          "name": "PRCP",
+          "units": "mm",
+          "description": "Annual precipitation total (metric units)"
+        },
+        {
+          "name": "TAVG",
+          "units": "degrees Celsius",
+          "description": "Annual mean temperature (metric units)"
+        }
+      ],
+      "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-gsoy/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/gsoy/",
       "examples": [
@@ -106,7 +184,7 @@
     {
       "id": "noaa:lcd",
       "title": "Hourly airport observations",
-      "description": "Hourly, special, synoptic, and daily-summary reports from airport and first-order stations via the NCEI Access Data Service dataset local-climatological-data, addressed by eleven-digit station ids and timestamped in local standard time. Select whole days, stations or a location, and optional columns.",
+      "description": "Hourly, special, synoptic, and daily-summary reports from airport and first-order stations via the NCEI Access Data Service dataset local-climatological-data, addressed by eleven-digit station ids and timestamped in local standard time. Select whole days, stations or a location, and optional columns. Every row carries 125 columns; the catalog lists the ones the guide and example use.",
       "provider": "NOAA",
       "domain": "Surface weather",
       "availability": "Released",
@@ -128,6 +206,47 @@
       "selection": "Every report on whole calendar days per station; optional column filters",
       "inputs": "Both dates; eleven-digit station IDs or a geographic query",
       "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "Airport and first-order stations, addressed by eleven-digit station id",
+        "temporal": "Hourly, special, and synoptic reports, plus daily and monthly summaries"
+      },
+      "update_frequency": "Monthly",
+      "latency": null,
+      "citation": "NOAA National Centers for Environmental Information, U.S. Local Climatological Data, accessed via usdata",
+      "terms": "https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00684/html",
+      "variables": [
+        {
+          "name": "STATION",
+          "units": null,
+          "description": "Eleven-digit LCD station id"
+        },
+        {
+          "name": "DATE",
+          "units": null,
+          "description": "Report time in the station's local standard time, without an offset"
+        },
+        {
+          "name": "REPORT_TYPE",
+          "units": null,
+          "description": "FM-15 hourly, FM-16 special, FM-12 synoptic, SOD daily, SOM monthly"
+        },
+        {
+          "name": "HourlyDryBulbTemperature",
+          "units": "degrees Celsius",
+          "description": "Hourly dry-bulb temperature (metric units)"
+        },
+        {
+          "name": "HourlyPrecipitation",
+          "units": "mm",
+          "description": "Hourly precipitation; T marks a trace (metric units)"
+        },
+        {
+          "name": "DailyPrecipitation",
+          "units": "mm",
+          "description": "Daily summary precipitation (metric units)"
+        }
+      ],
+      "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-lcd/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/lcd/",
       "examples": [
@@ -140,7 +259,7 @@
     {
       "id": "noaa:storm-events",
       "title": "Storm Events details",
-      "description": "NCEI's significant-weather event details since 1950, with locations, impacts, and narratives. Anonymous whole-year gzipped CSV archives; select the latest creation-date revision for each requested year. No server-side row, location, or variable subsetting. Historical event coverage and reporting practices vary; fatalities and locations tables are separate products not included by this adapter.",
+      "description": "NCEI's significant-weather event details since 1950, with locations, impacts, and narratives. Anonymous whole-year gzipped CSV archives; select the latest creation-date revision for each requested year. No server-side row, location, or variable subsetting. Historical event coverage and reporting practices vary; fatalities and locations tables are separate products not included by this adapter. The catalog lists the identifying columns; the full column set is documented in the NCEI bulk format reference.",
       "provider": "NOAA",
       "domain": "Severe weather",
       "availability": "Released",
@@ -161,6 +280,47 @@
       "selection": "Whole annual archives; filter rows locally after downloading",
       "inputs": "Both dates (selects the containing years)",
       "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "One record per county, forecast zone, or marine zone touched by an event",
+        "temporal": "One record per reported event, timestamped in the reporting office's local time"
+      },
+      "update_frequency": "The current year's file is updated each month",
+      "latency": null,
+      "citation": "NOAA National Centers for Environmental Information, Storm Events Database, accessed via usdata",
+      "terms": "https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00510/html",
+      "variables": [
+        {
+          "name": "EVENT_ID",
+          "units": null,
+          "description": "Identifier of one event record"
+        },
+        {
+          "name": "EPISODE_ID",
+          "units": null,
+          "description": "Identifier grouping the events of one storm episode"
+        },
+        {
+          "name": "CZ_TYPE",
+          "units": null,
+          "description": "County (C), forecast zone (Z), or marine (M) record"
+        },
+        {
+          "name": "CZ_FIPS",
+          "units": null,
+          "description": "County or zone code; not always a county FIPS code"
+        },
+        {
+          "name": "CZ_TIMEZONE",
+          "units": null,
+          "description": "Time zone of the record's local timestamps"
+        },
+        {
+          "name": "TOR_F_SCALE",
+          "units": null,
+          "description": "Tornado rating as text, such as EF1"
+        }
+      ],
+      "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-storm-events/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/storm-events/",
       "examples": [
@@ -201,6 +361,107 @@
       "selection": "Whole annual, half-decade, or decade files; filter rows locally after downloading",
       "inputs": "Both dates (selects the files covering those years)",
       "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "One row per tornado or per state and county segment, with start and end coordinates",
+        "temporal": "One row per tornado, timestamped in Central Standard Time"
+      },
+      "update_frequency": "Files are revised in place as NWS Storm Data is finalized; the page shows an update date per file",
+      "latency": null,
+      "citation": "NOAA/NWS Storm Prediction Center, Severe Weather Database tornado files, accessed via usdata",
+      "terms": "https://www.weather.gov/disclaimer",
+      "variables": [
+        {
+          "name": "om",
+          "units": null,
+          "description": "Tornado number within the year, repeated across a tornado's segments"
+        },
+        {
+          "name": "date",
+          "units": null,
+          "description": "Touchdown date"
+        },
+        {
+          "name": "time",
+          "units": null,
+          "description": "Touchdown time"
+        },
+        {
+          "name": "tz",
+          "units": null,
+          "description": "Time-zone code: 3 is Central Standard Time, 9 is GMT, ? is unknown"
+        },
+        {
+          "name": "st",
+          "units": null,
+          "description": "Two-letter state"
+        },
+        {
+          "name": "stf",
+          "units": null,
+          "description": "State FIPS code"
+        },
+        {
+          "name": "mag",
+          "units": null,
+          "description": "F scale through January 2007 and EF scale afterwards; -9 is unknown"
+        },
+        {
+          "name": "inj",
+          "units": "count",
+          "description": "Injuries"
+        },
+        {
+          "name": "fat",
+          "units": "count",
+          "description": "Fatalities"
+        },
+        {
+          "name": "loss",
+          "units": null,
+          "description": "Property loss: a 0 to 9 category before 1996, millions of dollars from 1996"
+        },
+        {
+          "name": "closs",
+          "units": "millions of dollars",
+          "description": "Crop loss"
+        },
+        {
+          "name": "slat",
+          "units": "degrees_north",
+          "description": "Start latitude"
+        },
+        {
+          "name": "slon",
+          "units": "degrees_east",
+          "description": "Start longitude"
+        },
+        {
+          "name": "elat",
+          "units": "degrees_north",
+          "description": "End latitude"
+        },
+        {
+          "name": "elon",
+          "units": "degrees_east",
+          "description": "End longitude"
+        },
+        {
+          "name": "len",
+          "units": "miles",
+          "description": "Path length"
+        },
+        {
+          "name": "wid",
+          "units": "yards",
+          "description": "Path width"
+        },
+        {
+          "name": "sg",
+          "units": null,
+          "description": "Segment code: 1 a whole track, 2 a state segment, -9 extra county codes"
+        }
+      ],
+      "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-spc-tornado/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/spc-tornado-reports/",
       "examples": [
@@ -213,7 +474,7 @@
     {
       "id": "noaa:nexrad-level2",
       "title": "NEXRAD radar scans",
-      "description": "Raw volume scans from the WSR-88D weather radar network, archived in the public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). One object per radar site per volume scan. No server-side subsetting; whole files are fetched. Select radars by site id, bbox, or nearest to a point.",
+      "description": "Raw volume scans from the WSR-88D weather radar network, archived in the public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). One object per radar site per volume scan. No server-side subsetting; whole files are fetched. Select radars by site id, bbox, or nearest to a point. Moments vary by sweep and volume coverage pattern; the catalog lists the ones the radar example's lowest sweep carries.",
       "provider": "NOAA",
       "domain": "Weather radar",
       "availability": "Released",
@@ -234,6 +495,37 @@
       "selection": "Whole radar scans by site and inclusive UTC scan-start time",
       "inputs": "Both timestamps; radar IDs or a geographic query",
       "reader_extra": "radar",
+      "resolution": {
+        "spatial": null,
+        "temporal": "One volume scan every 4, 5, 6, or 10 minutes, set by the volume coverage pattern"
+      },
+      "update_frequency": "New Level II data is added as soon as it is available",
+      "latency": null,
+      "citation": "NEXRAD on AWS was accessed on [date] from https://registry.opendata.aws/noaa-nexrad",
+      "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "variables": [
+        {
+          "name": "DBZH",
+          "units": "dBZ",
+          "description": "Equivalent reflectivity factor H"
+        },
+        {
+          "name": "ZDR",
+          "units": "dB",
+          "description": "Log differential reflectivity H/V"
+        },
+        {
+          "name": "PHIDP",
+          "units": "degrees",
+          "description": "Differential phase HV"
+        },
+        {
+          "name": "RHOHV",
+          "units": "unitless",
+          "description": "Correlation coefficient HV"
+        }
+      ],
+      "max_window": "31 days",
       "guide": "https://docs.usdata.dev/providers/noaa-nexrad/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/nexrad-level2/",
       "examples": [
@@ -277,6 +569,117 @@
       "selection": "Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day",
       "inputs": "Product name and both timestamps",
       "reader_extra": "grib",
+      "resolution": {
+        "spatial": "0.01 degree CONUS grid (3,500 x 7,000 points); 0.005 degree for rotation tracks",
+        "temporal": "Two minutes; the two-hour rotation tracks are written hourly"
+      },
+      "update_frequency": "Data is delivered in real-time with a 2-minute update cycle",
+      "latency": null,
+      "citation": "NOAA Multi-Radar/Multi-Sensor System (MRMS) was accessed on [date] from https://registry.opendata.aws/noaa-mrms-pds",
+      "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "variables": [
+        {
+          "name": "RotationTrack30min_00.50",
+          "units": "0.001 s-1",
+          "description": "30-minute maximum low-level azimuthal shear"
+        },
+        {
+          "name": "RotationTrack60min_00.50",
+          "units": "0.001 s-1",
+          "description": "60-minute maximum low-level azimuthal shear"
+        },
+        {
+          "name": "RotationTrack120min_00.50",
+          "units": "0.001 s-1",
+          "description": "2-hour maximum low-level azimuthal shear, hourly files"
+        },
+        {
+          "name": "RotationTrackML30min_00.50",
+          "units": "0.001 s-1",
+          "description": "30-minute maximum mid-level azimuthal shear"
+        },
+        {
+          "name": "RotationTrackML60min_00.50",
+          "units": "0.001 s-1",
+          "description": "60-minute maximum mid-level azimuthal shear"
+        },
+        {
+          "name": "RotationTrackML120min_00.50",
+          "units": "0.001 s-1",
+          "description": "2-hour maximum mid-level azimuthal shear, hourly files"
+        },
+        {
+          "name": "MergedReflectivityQCComposite_00.50",
+          "units": "dBZ",
+          "description": "Quality-controlled composite reflectivity"
+        },
+        {
+          "name": "MergedReflectivityComposite_00.50",
+          "units": "dBZ",
+          "description": "Composite reflectivity without quality control"
+        },
+        {
+          "name": "ReflectivityAtLowestAltitude_00.50",
+          "units": "dBZ",
+          "description": "Reflectivity at the lowest altitude with data"
+        },
+        {
+          "name": "MergedBaseReflectivityQC_00.50",
+          "units": "dBZ",
+          "description": "Quality-controlled base reflectivity"
+        },
+        {
+          "name": "MESH_00.50",
+          "units": "mm",
+          "description": "Maximum estimated size of hail"
+        },
+        {
+          "name": "MESH_Max_30min_00.50",
+          "units": "mm",
+          "description": "30-minute maximum estimated hail size"
+        },
+        {
+          "name": "MESH_Max_60min_00.50",
+          "units": "mm",
+          "description": "60-minute maximum estimated hail size"
+        },
+        {
+          "name": "VIL_00.50",
+          "units": "kg m-2",
+          "description": "Vertically integrated liquid"
+        },
+        {
+          "name": "VIL_Density_00.50",
+          "units": "g m-3",
+          "description": "Vertically integrated liquid density"
+        },
+        {
+          "name": "EchoTop_18_00.50",
+          "units": "km",
+          "description": "18 dBZ echo top height"
+        },
+        {
+          "name": "EchoTop_30_00.50",
+          "units": "km",
+          "description": "30 dBZ echo top height"
+        },
+        {
+          "name": "EchoTop_50_00.50",
+          "units": "km",
+          "description": "50 dBZ echo top height"
+        },
+        {
+          "name": "PrecipRate_00.00",
+          "units": "mm h-1",
+          "description": "Radar precipitation rate"
+        },
+        {
+          "name": "LightningProbabilityNext30minGrid_scale_1",
+          "units": "%",
+          "description": "Probability of lightning in the next 30 minutes"
+        }
+      ],
+      "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-mrms/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/mrms/",
       "examples": [
@@ -315,6 +718,127 @@
       "selection": "Whole product files by site, product code, and inclusive UTC scan time since 2020-03-30",
       "inputs": "Both timestamps; product codes; radar IDs or a geographic query",
       "reader_extra": null,
+      "resolution": {
+        "spatial": null,
+        "temporal": "One file per product per volume scan; roughly 120 to 390 per product per day"
+      },
+      "update_frequency": "Files appear as the Unidata feed captures them, and coverage has gaps",
+      "latency": null,
+      "citation": "NEXRAD on AWS was accessed on [date] from https://registry.opendata.aws/noaa-nexrad",
+      "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "variables": [
+        {
+          "name": "N?B",
+          "units": null,
+          "description": "Base reflectivity, super-resolution (since 2022-02-18)"
+        },
+        {
+          "name": "N?G",
+          "units": null,
+          "description": "Base velocity, super-resolution (since 2022-02-18)"
+        },
+        {
+          "name": "N?Q",
+          "units": null,
+          "description": "Base reflectivity, 256 levels (retired 2022-09-08)"
+        },
+        {
+          "name": "N?U",
+          "units": null,
+          "description": "Base velocity, 256 levels (retired 2022-09-08)"
+        },
+        {
+          "name": "N?S",
+          "units": null,
+          "description": "Storm-relative mean radial velocity"
+        },
+        {
+          "name": "N?C",
+          "units": null,
+          "description": "Correlation coefficient"
+        },
+        {
+          "name": "N?X",
+          "units": null,
+          "description": "Differential reflectivity"
+        },
+        {
+          "name": "N?K",
+          "units": null,
+          "description": "Specific differential phase"
+        },
+        {
+          "name": "N?H",
+          "units": null,
+          "description": "Hydrometeor classification"
+        },
+        {
+          "name": "NCR",
+          "units": null,
+          "description": "Composite reflectivity"
+        },
+        {
+          "name": "EET",
+          "units": null,
+          "description": "Enhanced echo tops"
+        },
+        {
+          "name": "DVL",
+          "units": null,
+          "description": "Digital vertically integrated liquid"
+        },
+        {
+          "name": "NMD",
+          "units": null,
+          "description": "Mesocyclone detection"
+        },
+        {
+          "name": "NST",
+          "units": null,
+          "description": "Storm tracking information"
+        },
+        {
+          "name": "NTV",
+          "units": null,
+          "description": "Tornado vortex signature (retired 2022-05-24)"
+        },
+        {
+          "name": "NVW",
+          "units": null,
+          "description": "VAD wind profile"
+        },
+        {
+          "name": "DHR",
+          "units": null,
+          "description": "Digital hybrid-scan reflectivity"
+        },
+        {
+          "name": "HHC",
+          "units": null,
+          "description": "Hybrid hydrometeor classification"
+        },
+        {
+          "name": "DAA",
+          "units": null,
+          "description": "Digital one-hour precipitation accumulation"
+        },
+        {
+          "name": "DTA",
+          "units": null,
+          "description": "Digital storm-total precipitation accumulation"
+        },
+        {
+          "name": "DSP",
+          "units": null,
+          "description": "Digital storm-total precipitation"
+        },
+        {
+          "name": "OHA",
+          "units": null,
+          "description": "One-hour precipitation accumulation"
+        }
+      ],
+      "max_window": "31 days",
       "guide": "https://docs.usdata.dev/providers/noaa-nexrad-level3/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/nexrad-level3/",
       "examples": [
@@ -349,6 +873,27 @@
       "selection": "Whole single-channel CONUS scenes by inclusive UTC scan-start time",
       "inputs": "Satellite, channel, and both timestamps",
       "reader_extra": "netcdf",
+      "resolution": {
+        "spatial": "0.5 km to 2 km at nadir, by ABI band",
+        "temporal": "One CONUS scan every 5 minutes on average"
+      },
+      "update_frequency": "New data is added as soon as it's available",
+      "latency": null,
+      "citation": "NOAA Geostationary Operational Environmental Satellites (GOES) 16, 17, 18 & 19 was accessed on [date] from https://registry.opendata.aws/noaa-goes",
+      "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "variables": [
+        {
+          "name": "CMI",
+          "units": null,
+          "description": "Cloud and moisture imagery; reflectance factor or brightness temperature by band"
+        },
+        {
+          "name": "DQF",
+          "units": null,
+          "description": "Per-pixel data quality flags for CMI"
+        }
+      ],
+      "max_window": "7 days",
       "guide": "https://docs.usdata.dev/providers/noaa-goes/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/goes-abi/",
       "examples": [
@@ -385,6 +930,87 @@
       "selection": "Whole 20-second detection files by inclusive UTC file-start time, at most one day",
       "inputs": "Satellite and both timestamps",
       "reader_extra": "netcdf",
+      "resolution": {
+        "spatial": "8 to 14 km across the instrument's field of view",
+        "temporal": "One detection file every 20 seconds"
+      },
+      "update_frequency": "New data is added as soon as it's available",
+      "latency": null,
+      "citation": "NOAA Geostationary Operational Environmental Satellites (GOES) 16, 17, 18 & 19 was accessed on [date] from https://registry.opendata.aws/noaa-goes",
+      "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "variables": [
+        {
+          "name": "flash_lat",
+          "units": "degrees_north",
+          "description": "Flash centroid latitude"
+        },
+        {
+          "name": "flash_lon",
+          "units": "degrees_east",
+          "description": "Flash centroid longitude"
+        },
+        {
+          "name": "flash_area",
+          "units": "m2",
+          "description": "Flash footprint area"
+        },
+        {
+          "name": "flash_energy",
+          "units": "J",
+          "description": "Flash radiant energy"
+        },
+        {
+          "name": "flash_time_offset_of_first_event",
+          "units": "CF datetime",
+          "description": "Time of the flash's first event"
+        },
+        {
+          "name": "flash_time_offset_of_last_event",
+          "units": "CF datetime",
+          "description": "Time of the flash's last event"
+        },
+        {
+          "name": "flash_quality_flag",
+          "units": null,
+          "description": "The source's own screening flag for the flash"
+        },
+        {
+          "name": "group_lat",
+          "units": "degrees_north",
+          "description": "Group centroid latitude"
+        },
+        {
+          "name": "group_lon",
+          "units": "degrees_east",
+          "description": "Group centroid longitude"
+        },
+        {
+          "name": "group_area",
+          "units": "m2",
+          "description": "Group footprint area"
+        },
+        {
+          "name": "group_energy",
+          "units": "J",
+          "description": "Group radiant energy"
+        },
+        {
+          "name": "event_lat",
+          "units": "degrees_north",
+          "description": "Event latitude"
+        },
+        {
+          "name": "event_lon",
+          "units": "degrees_east",
+          "description": "Event longitude"
+        },
+        {
+          "name": "event_energy",
+          "units": "J",
+          "description": "Event radiant energy"
+        }
+      ],
+      "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-glm/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/goes-glm/",
       "examples": [
@@ -420,6 +1046,127 @@
       "selection": "The newest revision of one whole basin file; filter track points locally",
       "inputs": "Optional basin (atlantic or pacific); no dates or geographic filters",
       "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "Best-track positions in tenths of a degree",
+        "temporal": "Six-hourly synoptic times, plus asynoptic records for landfalls and extremes"
+      },
+      "update_frequency": "Annually, after each season's post-storm reanalysis; the 2025 season was added on 2026-02-27",
+      "latency": null,
+      "citation": "Landsea, C. W. and J. L. Franklin, 2013: Atlantic Hurricane Database Uncertainty and Presentation of a New Database Format. Mon. Wea. Rev., 141, 3576-3592",
+      "terms": "https://www.weather.gov/disclaimer",
+      "variables": [
+        {
+          "name": "storm_id",
+          "units": null,
+          "description": "ATCF-style basin, cyclone number, and year, such as AL042021"
+        },
+        {
+          "name": "name",
+          "units": null,
+          "description": "Storm name, or UNNAMED"
+        },
+        {
+          "name": "time",
+          "units": "UTC",
+          "description": "Track-point time"
+        },
+        {
+          "name": "record_identifier",
+          "units": null,
+          "description": "Landfall (L), intensity peak (I), pressure minimum (P), and the other codes"
+        },
+        {
+          "name": "status",
+          "units": null,
+          "description": "TD, TS, HU, EX, SD, SS, LO, WV, or DB"
+        },
+        {
+          "name": "latitude",
+          "units": "degrees_north",
+          "description": "Track-point latitude"
+        },
+        {
+          "name": "longitude",
+          "units": "degrees_east",
+          "description": "Track-point longitude in [-180, 180]"
+        },
+        {
+          "name": "max_wind_kt",
+          "units": "knots",
+          "description": "Maximum sustained 1-minute surface wind"
+        },
+        {
+          "name": "min_pressure_mb",
+          "units": "millibars",
+          "description": "Minimum central pressure"
+        },
+        {
+          "name": "r34_ne_nm",
+          "units": "nautical miles",
+          "description": "34 kt wind extent, northeast quadrant"
+        },
+        {
+          "name": "r34_se_nm",
+          "units": "nautical miles",
+          "description": "34 kt wind extent, southeast quadrant"
+        },
+        {
+          "name": "r34_sw_nm",
+          "units": "nautical miles",
+          "description": "34 kt wind extent, southwest quadrant"
+        },
+        {
+          "name": "r34_nw_nm",
+          "units": "nautical miles",
+          "description": "34 kt wind extent, northwest quadrant"
+        },
+        {
+          "name": "r50_ne_nm",
+          "units": "nautical miles",
+          "description": "50 kt wind extent, northeast quadrant"
+        },
+        {
+          "name": "r50_se_nm",
+          "units": "nautical miles",
+          "description": "50 kt wind extent, southeast quadrant"
+        },
+        {
+          "name": "r50_sw_nm",
+          "units": "nautical miles",
+          "description": "50 kt wind extent, southwest quadrant"
+        },
+        {
+          "name": "r50_nw_nm",
+          "units": "nautical miles",
+          "description": "50 kt wind extent, northwest quadrant"
+        },
+        {
+          "name": "r64_ne_nm",
+          "units": "nautical miles",
+          "description": "64 kt wind extent, northeast quadrant"
+        },
+        {
+          "name": "r64_se_nm",
+          "units": "nautical miles",
+          "description": "64 kt wind extent, southeast quadrant"
+        },
+        {
+          "name": "r64_sw_nm",
+          "units": "nautical miles",
+          "description": "64 kt wind extent, southwest quadrant"
+        },
+        {
+          "name": "r64_nw_nm",
+          "units": "nautical miles",
+          "description": "64 kt wind extent, northwest quadrant"
+        },
+        {
+          "name": "max_wind_radius_nm",
+          "units": "nautical miles",
+          "description": "Radius of maximum wind, best-tracked from 2021"
+        }
+      ],
+      "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-hurdat2/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/hurdat2/",
       "examples": [
@@ -436,7 +1183,7 @@
     {
       "id": "noaa:gfs",
       "title": "GFS model output",
-      "description": "Global Forecast System forecasts in GRIB2 from the anonymous noaa-gfs-bdp-pds S3 bucket, one whole global file per run, forecast hour, and grid resolution. Select a run by initialization window and cycle hour (00, 06, 12, or 18 UTC), the forecast hours, and the 0.25, 0.5, or 1 degree grid. Files are 42 MB to 550 MB; fields are selected after download with the GRIB2 reader, not by the server.",
+      "description": "Global Forecast System forecasts in GRIB2 from the anonymous noaa-gfs-bdp-pds S3 bucket, one whole global file per run, forecast hour, and grid resolution. Select a run by initialization window and cycle hour (00, 06, 12, or 18 UTC), the forecast hours, and the 0.25, 0.5, or 1 degree grid. Files are 42 MB to 550 MB; fields are selected after download with the GRIB2 reader, not by the server. Each file holds hundreds of fields; the catalog lists the handful the guide and example select.",
       "provider": "NOAA",
       "domain": "Weather models",
       "availability": "Released",
@@ -458,6 +1205,67 @@
       "selection": "Whole global files by run initialization window, cycle hour, forecast hours, and grid resolution, at most one day",
       "inputs": "Both timestamps, cycle, and forecast_hour",
       "reader_extra": "grib",
+      "resolution": {
+        "spatial": "0.25, 0.5, or 1 degree global latitude-longitude grid, chosen with resolution",
+        "temporal": "Hourly to 120 then three-hourly to 384 at 0p25; three-hourly at 0p50 and 1p00"
+      },
+      "update_frequency": "4 times a day, every 6 hours starting at midnight UTC",
+      "latency": null,
+      "citation": "NOAA Global Forecast System (GFS) was accessed on [date] from https://registry.opendata.aws/noaa-gfs-bdp-pds",
+      "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "variables": [
+        {
+          "name": "cape",
+          "units": "J/kg",
+          "description": "Convective available potential energy, surface or a ground layer"
+        },
+        {
+          "name": "cin",
+          "units": "J/kg",
+          "description": "Convective inhibition, surface or a ground layer"
+        },
+        {
+          "name": "hlcy",
+          "units": "m2/s2",
+          "description": "Storm-relative helicity over the 0-3 km layer"
+        },
+        {
+          "name": "refc",
+          "units": "dB",
+          "description": "Composite reflectivity"
+        },
+        {
+          "name": "10u",
+          "units": "m/s",
+          "description": "10 m eastward wind component"
+        },
+        {
+          "name": "10v",
+          "units": "m/s",
+          "description": "10 m northward wind component"
+        },
+        {
+          "name": "2t",
+          "units": "K",
+          "description": "2 m temperature"
+        },
+        {
+          "name": "2d",
+          "units": "K",
+          "description": "2 m dewpoint temperature"
+        },
+        {
+          "name": "prmsl",
+          "units": "Pa",
+          "description": "Mean sea-level pressure"
+        },
+        {
+          "name": "pwat",
+          "units": "kg/m2",
+          "description": "Precipitable water"
+        }
+      ],
+      "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-gfs/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/gfs/",
       "examples": [
@@ -470,7 +1278,7 @@
     {
       "id": "noaa:hrrr",
       "title": "HRRR model output",
-      "description": "High-Resolution Rapid Refresh 3 km CONUS forecasts in GRIB2 from the anonymous noaa-hrrr-bdp-pds S3 bucket, one whole file per run and forecast hour. Select a run by initialization window and cycle hour, the forecast hours, and the surface, pressure-level, or native file variant. Files are 150 MB to 750 MB; fields are selected after download with the GRIB2 reader, not by the server.",
+      "description": "High-Resolution Rapid Refresh 3 km CONUS forecasts in GRIB2 from the anonymous noaa-hrrr-bdp-pds S3 bucket, one whole file per run and forecast hour. Select a run by initialization window and cycle hour, the forecast hours, and the surface, pressure-level, or native file variant. Files are 150 MB to 750 MB; fields are selected after download with the GRIB2 reader, not by the server. Each file holds hundreds of fields; the catalog lists the handful the guide and example select.",
       "provider": "NOAA",
       "domain": "Weather models",
       "availability": "Released",
@@ -492,6 +1300,57 @@
       "selection": "Whole CONUS files by run initialization window, cycle hour, forecast hours, and file variant, at most one day",
       "inputs": "Both timestamps, cycle, and forecast_hour",
       "reader_extra": "grib",
+      "resolution": {
+        "spatial": "3 km Lambert conformal CONUS grid, 1799 x 1059 points",
+        "temporal": "Hourly runs; forecast hours to 18, or to 48 from the 00, 06, 12, and 18 UTC runs"
+      },
+      "update_frequency": "Hourly",
+      "latency": null,
+      "citation": "NOAA High-Resolution Rapid Refresh (HRRR) Model was accessed on [date] from https://registry.opendata.aws/noaa-hrrr-pds",
+      "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "variables": [
+        {
+          "name": "cape",
+          "units": "J/kg",
+          "description": "Convective available potential energy, surface or a ground layer"
+        },
+        {
+          "name": "cin",
+          "units": "J/kg",
+          "description": "Convective inhibition, surface or a ground layer"
+        },
+        {
+          "name": "hlcy",
+          "units": "m2/s2",
+          "description": "Storm-relative helicity over the 0-1 km and 0-3 km layers"
+        },
+        {
+          "name": "refc",
+          "units": "dBZ",
+          "description": "Composite reflectivity"
+        },
+        {
+          "name": "10u",
+          "units": "m/s",
+          "description": "10 m eastward wind component"
+        },
+        {
+          "name": "10v",
+          "units": "m/s",
+          "description": "10 m northward wind component"
+        },
+        {
+          "name": "2t",
+          "units": "K",
+          "description": "2 m temperature"
+        },
+        {
+          "name": "2d",
+          "units": "K",
+          "description": "2 m dewpoint temperature"
+        }
+      ],
+      "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-hrrr/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/hrrr/",
       "examples": [
@@ -504,7 +1363,7 @@
     {
       "id": "noaa:climate-normals",
       "title": "30-year station climate normals",
-      "description": "Daily, monthly, and annual/seasonal 30-year station normals via the NCEI Access Data Service datasets normals-daily-1991-2020, normals-monthly-1991-2020, and normals-annualseasonal-1991-2020, chosen with a period parameter. Dates are optional; daily and monthly normals accept a month-day window inside a placeholder year. Explicit stations or station discovery through the companion search service.",
+      "description": "Daily, monthly, and annual/seasonal 30-year station normals via the NCEI Access Data Service datasets normals-daily-1991-2020, normals-monthly-1991-2020, and normals-annualseasonal-1991-2020, chosen with a period parameter. Dates are optional; daily and monthly normals accept a month-day window inside a placeholder year. Explicit stations or station discovery through the companion search service. Variables are NCEI data-type codes and the catalog lists the probed ones; the delivered set is the open NCEI normals list.",
       "provider": "NOAA",
       "domain": "Climate",
       "availability": "Released",
@@ -524,6 +1383,67 @@
       "selection": "Monthly, daily, or annual/seasonal normals per station; optional month-day window for daily and monthly",
       "inputs": "Station IDs or a geographic query; dates optional",
       "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "U.S. land surface stations with 1991-2020 normals coverage",
+        "temporal": "Daily, monthly, or annual and seasonal normals, chosen with the period parameter"
+      },
+      "update_frequency": "As needed; the normals are republished about once a decade",
+      "latency": null,
+      "citation": "Palecki, Michael; Durre, Imke; Applequist, Scott; Arguez, Anthony; Lawrimore, Jay (2021). U.S. Climate Normals 2020 (1991-2020). NOAA National Centers for Environmental Information; cite the record for the period used",
+      "terms": "https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals",
+      "variables": [
+        {
+          "name": "MLY-TMAX-NORMAL",
+          "units": "degrees Celsius",
+          "description": "Monthly normal maximum temperature"
+        },
+        {
+          "name": "MLY-TMIN-NORMAL",
+          "units": "degrees Celsius",
+          "description": "Monthly normal minimum temperature"
+        },
+        {
+          "name": "MLY-PRCP-NORMAL",
+          "units": "mm",
+          "description": "Monthly normal precipitation total"
+        },
+        {
+          "name": "MLY-TAVG-NORMAL",
+          "units": "degrees Fahrenheit",
+          "description": "Monthly normal mean temperature; units=metric does not convert it"
+        },
+        {
+          "name": "MLY-DUTR-NORMAL",
+          "units": "degrees Fahrenheit",
+          "description": "Monthly normal diurnal temperature range; read it from units=standard"
+        },
+        {
+          "name": "MLY-TAVG-STDDEV",
+          "units": "degrees Fahrenheit",
+          "description": "Standard deviation of monthly mean temperature; read it from units=standard"
+        },
+        {
+          "name": "MLY-TMAX-STDDEV",
+          "units": "degrees Fahrenheit",
+          "description": "Standard deviation of monthly maximum temperature; read it from units=standard"
+        },
+        {
+          "name": "DLY-TAVG-NORMAL",
+          "units": "degrees Celsius",
+          "description": "Daily normal mean temperature"
+        },
+        {
+          "name": "DLY-PRCP-NORMAL",
+          "units": "mm",
+          "description": "Daily normal precipitation"
+        },
+        {
+          "name": "ANN-TAVG-NORMAL",
+          "units": "degrees Celsius",
+          "description": "Annual normal mean temperature"
+        }
+      ],
+      "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-normals/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/climate-normals/",
       "examples": [
@@ -560,6 +1480,57 @@
       "selection": "Six-minute observations for one station and datum; at most 28 days",
       "inputs": "Station, datum, and both minute-aligned timestamps",
       "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "One National Water Level Observation Network station per request",
+        "temporal": "Six minutes"
+      },
+      "update_frequency": "Six-minute observations as the station reports; NOAA verifies the past month's data monthly",
+      "latency": null,
+      "citation": "NOAA National Ocean Service, Center for Operational Oceanographic Products and Services, observed water levels, accessed via usdata",
+      "terms": "https://tidesandcurrents.noaa.gov/disclaimers.html",
+      "variables": [
+        {
+          "name": "Date Time",
+          "units": "UTC",
+          "description": "Observation time, requested with time_zone=gmt"
+        },
+        {
+          "name": "Water Level",
+          "units": "meters",
+          "description": "Observed water level on the requested datum (metric units)"
+        },
+        {
+          "name": "Sigma",
+          "units": "meters",
+          "description": "Standard deviation of the one-second samples in the interval"
+        },
+        {
+          "name": "O or I (for verified)",
+          "units": null,
+          "description": "Count of outliers, or the inference flag on verified data"
+        },
+        {
+          "name": "F",
+          "units": null,
+          "description": "Flat-tolerance limit flag"
+        },
+        {
+          "name": "R",
+          "units": null,
+          "description": "Rate-of-change limit flag"
+        },
+        {
+          "name": "L",
+          "units": null,
+          "description": "Inferred-value flag"
+        },
+        {
+          "name": "Quality",
+          "units": null,
+          "description": "p for preliminary or v for verified"
+        }
+      ],
+      "max_window": "28 days",
       "guide": "https://docs.usdata.dev/providers/noaa-coops/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-water-levels/",
       "examples": [
@@ -597,6 +1568,32 @@
       "selection": "Predictions for one station and datum on a chosen interval; at most a year",
       "inputs": "Station, datum, and both minute-aligned timestamps; optional interval",
       "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "One tide station per request",
+        "temporal": "Six minutes by default; 1, 5, 10, 15, 30, or 60 minute steps, hourly, or high/low"
+      },
+      "update_frequency": "Computed on request from the station's harmonic constituents, which NOAA revises occasionally",
+      "latency": null,
+      "citation": "NOAA National Ocean Service, Center for Operational Oceanographic Products and Services, tide predictions, accessed via usdata",
+      "terms": "https://tidesandcurrents.noaa.gov/disclaimers.html",
+      "variables": [
+        {
+          "name": "Date Time",
+          "units": "UTC",
+          "description": "Prediction time, requested with time_zone=gmt"
+        },
+        {
+          "name": "Prediction",
+          "units": "meters",
+          "description": "Predicted tide height on the requested datum (metric units)"
+        },
+        {
+          "name": "Type",
+          "units": null,
+          "description": "H or L, on the hilo interval only"
+        }
+      ],
+      "max_window": "366 days",
       "guide": "https://docs.usdata.dev/providers/noaa-coops-predictions/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-tide-predictions/",
       "examples": [
@@ -630,6 +1627,37 @@
       "selection": "Grid centers and timestamps inside the requested bounds; optional stride",
       "inputs": "BBox or location, and both timestamps",
       "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "0.05 degree global grid, about 5 km",
+        "temporal": "Daily"
+      },
+      "update_frequency": "Daily",
+      "latency": null,
+      "citation": "NOAA/NESDIS Office of Satellite Products and Operations, Geo-polar Blended Sea Surface Temperature Analysis (noaacwBLENDEDsstDNDaily), accessed via usdata",
+      "terms": "https://coastwatch.noaa.gov/erddap/info/noaacwBLENDEDsstDNDaily/index.html",
+      "variables": [
+        {
+          "name": "analysed_sst",
+          "units": "degree_C",
+          "description": "Analysed sea surface temperature"
+        },
+        {
+          "name": "analysis_error",
+          "units": "degree_C",
+          "description": "Estimated error of the analysis"
+        },
+        {
+          "name": "sea_ice_fraction",
+          "units": "1",
+          "description": "Sea ice area fraction"
+        },
+        {
+          "name": "mask",
+          "units": null,
+          "description": "Source mask flags; consult the source metadata for the codes"
+        }
+      ],
+      "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-coastwatch/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/coastwatch-sst/",
       "examples": [
@@ -659,6 +1687,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -682,6 +1717,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -706,6 +1748,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -730,6 +1779,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -753,6 +1809,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -777,6 +1840,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -802,6 +1872,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -827,6 +1904,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -852,6 +1936,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -876,6 +1967,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -901,6 +1999,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -926,6 +2031,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -949,6 +2061,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -973,6 +2092,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -997,6 +2123,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -1020,6 +2153,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -1044,6 +2184,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
       "examples": []
@@ -1051,7 +2198,7 @@
     {
       "id": "usgs:water-daily",
       "title": "Daily water observations",
-      "description": "Daily statistics (streamflow, gage height, temperature) for USGS monitoring sites via the modern USGS Water Data OGC API. Anonymous, paginated CSV downloads filtered by site or bbox, dates, and parameter codes; daily mean by default, with units and quality metadata preserved.",
+      "description": "Daily statistics (streamflow, gage height, temperature) for USGS monitoring sites via the modern USGS Water Data OGC API. Anonymous, paginated CSV downloads filtered by site or bbox, dates, and parameter codes; daily mean by default, with units and quality metadata preserved. Variables are five-digit NWIS parameter codes and the catalog lists the common ones; the delivered set is open.",
       "provider": "USGS",
       "domain": "Water resources",
       "availability": "Released",
@@ -1071,6 +2218,32 @@
       "selection": "Site observations for inclusive local calendar dates; parameter and statistic filters",
       "inputs": "Both dates; site IDs or a geographic query",
       "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "USGS monitoring locations, one site per record",
+        "temporal": "Daily"
+      },
+      "update_frequency": "Daily values are automatically calculated from the continuous data of the same parameter code",
+      "latency": null,
+      "citation": "U.S. Geological Survey, Water Data for the Nation daily values, accessed via usdata",
+      "terms": "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits",
+      "variables": [
+        {
+          "name": "00060",
+          "units": "cubic feet per second",
+          "description": "Discharge (streamflow)"
+        },
+        {
+          "name": "00065",
+          "units": "feet",
+          "description": "Gage height"
+        },
+        {
+          "name": "00010",
+          "units": "degrees Celsius",
+          "description": "Water temperature"
+        }
+      ],
+      "max_window": null,
       "guide": "https://docs.usdata.dev/providers/usgs-water-daily/",
       "reference": "https://docs.usdata.dev/generated/catalog/usgs/water-daily/",
       "examples": [
@@ -1100,6 +2273,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/usgs/",
       "examples": []
@@ -1124,6 +2304,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/usgs/",
       "examples": []
@@ -1148,6 +2335,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/census/",
       "examples": []
@@ -1172,6 +2366,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/epa/",
       "examples": []
@@ -1195,6 +2396,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/fema/",
       "examples": []
@@ -1219,6 +2427,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/fema/",
       "examples": []
@@ -1243,6 +2458,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/nasa/",
       "examples": []
@@ -1267,6 +2489,13 @@
       "selection": null,
       "inputs": null,
       "reader_extra": null,
+      "resolution": null,
+      "update_frequency": null,
+      "latency": null,
+      "citation": null,
+      "terms": null,
+      "variables": [],
+      "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/usda/",
       "examples": []

@@ -81,6 +81,23 @@ upstream probes and the
 [example manifest](https://usdata.dev/examples/spc-tornadoes/) for one year's
 tornado counts by rating.
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Resolution and variables: the [SPC format
+  specification](https://www.spc.noaa.gov/wcm/data/SPC_severe_database_description.pdf)
+  and the column notes above, including the Central Standard Time convention and the
+  1996 change in the `loss` units.
+- Updates: the [severe weather database page](https://www.spc.noaa.gov/wcm/#data), which
+  shows an update date beside each file as SPC revises prior years in place.
+- Terms: the [NWS disclaimer](https://www.weather.gov/disclaimer).
+- Citation: SPC publishes none, so the entry uses the agency, product, and access form.
+- Latency is empty: SPC states no lag between an event and its appearance in these
+  files.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/spc-tornado-reports.md#catalog-reference).

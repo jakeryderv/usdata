@@ -46,6 +46,25 @@ curl --get 'https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily/items' \
 ```
 
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Resolution and updates: the [OGC API
+  documentation](https://api.waterdata.usgs.gov/docs/ogcapi/), which says daily data are
+  automatically calculated from the continuous data of the same parameter code.
+- Variables: the parameter codes this guide names, with the units the CSV carries. Any
+  NWIS parameter code can appear, so the list is a sample.
+- Terms: the [USGS copyrights and credits
+  page](https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits),
+  which places USGS-produced data in the public domain and asks for credit.
+- Citation: USGS publishes no citation form for these records, so the entry uses the
+  agency, product, and access form.
+- Latency is empty: the API documentation states no lag between a day's end and its
+  daily value.
+
 [USGS access notes](usgs.md).
 
 [Catalog reference](../generated/catalog/usgs/water-daily.md#catalog-reference).

@@ -137,6 +137,7 @@ class Capabilities(BaseModel):
     spatial_subset: bool = False
     temporal_subset: bool = False
     variable_subset: bool = False
+    partial_fetch: bool = False
 
 
 READER_EXTRAS = ("pandas", "radar", "netcdf", "grib")
@@ -154,6 +155,67 @@ def _check_repo_path(value: str, field: str, parent: str, suffixes: set[str]) ->
         raise ValueError(f"{field} must be a repository-relative path inside {parent}")
     if path.suffix not in suffixes:
         raise ValueError(f"{field} must name a {' or '.join(sorted(suffixes))} file")
+
+
+def describe_duration(value: timedelta) -> str:
+    """A duration in words: '1 day', '28 days', '6 hours', down to whole seconds."""
+    seconds = int(value.total_seconds())
+    for unit, size in (("day", 86400), ("hour", 3600), ("minute", 60), ("second", 1)):
+        if seconds % size == 0:
+            count = seconds // size
+            return f"{count} {unit}" if count == 1 else f"{count} {unit}s"
+    return f"{value.total_seconds():g} seconds"
+
+
+class Resolution(BaseModel):
+    """How fine a dataset is in space and time, in the source's own words.
+
+    Free text on purpose: agencies describe grids, station spacing, and scan
+    cadence differently, and no filter needs the values structured yet.
+    """
+
+    spatial: str | None = Field(default=None, description="Grid spacing, footprint, or sampling")
+    temporal: str | None = Field(default=None, description="Spacing between successive values")
+
+    @model_validator(mode="after")
+    def _single_lines(self) -> Resolution:
+        _check_line(self.spatial, "resolution.spatial")
+        _check_line(self.temporal, "resolution.temporal")
+        return self
+
+
+class Variable(BaseModel):
+    """One variable a dataset delivers, named as the source names it."""
+
+    name: str
+    units: str | None = Field(default=None, description="Units as delivered, not as converted")
+    description: str | None = Field(default=None, description="What the variable measures")
+
+    @model_validator(mode="after")
+    def _single_lines(self) -> Variable:
+        _check_line(self.name, "variable name")
+        _check_line(self.units, "variable units")
+        _check_line(self.description, "variable description")
+        return self
+
+    @property
+    def label(self) -> str:
+        """'name (units)' where units are known, otherwise the bare name."""
+        return f"{self.name} ({self.units})" if self.units else self.name
+
+
+class Limits(BaseModel):
+    """Request limits the adapter enforces, declared here and verified by the adapter tests."""
+
+    max_window: timedelta | None = Field(
+        default=None, description="Longest query interval, as an ISO 8601 duration such as 'P1D'"
+    )
+
+    @model_validator(mode="after")
+    def _positive(self) -> Limits:
+        if self.max_window is not None and self.max_window <= timedelta(0):
+            raise ValueError("limits.max_window must be a positive duration")
+        return self
 
 
 class Dataset(BaseModel):
@@ -192,6 +254,29 @@ class Dataset(BaseModel):
     examples: list[str] = Field(
         default_factory=list,
         description="Repository-relative paths to worked examples using this dataset",
+    )
+    resolution: Resolution | None = Field(
+        default=None, description="How fine the data are in space and time"
+    )
+    update_frequency: str | None = Field(
+        default=None, description="How often the source publishes new data"
+    )
+    latency: str | None = Field(
+        default=None,
+        description="How far behind real time the source runs, as the agency states it",
+    )
+    citation: str | None = Field(
+        default=None, description="How the agency asks to be cited, in one line"
+    )
+    terms: str | None = Field(
+        default=None, description="https URL of the source's stated conditions of use"
+    )
+    variables: list[Variable] = Field(
+        default_factory=list,
+        description="Variables the dataset delivers; a sample where the set is open-ended",
+    )
+    limits: Limits | None = Field(
+        default=None, description="Request limits the adapter enforces, such as the longest window"
     )
     domain: str = Field(description="Id of a domain declared in the registry")
     status: Status
@@ -243,6 +328,19 @@ class Dataset(BaseModel):
             _check_repo_path(example, "examples entries", "examples", {".md", ".ipynb"})
         if self.status is Status.AVAILABLE and not (self.summary and self.formats):
             raise ValueError("available datasets need a summary and at least one format")
+        self._check_description()
+
+    def _check_description(self) -> None:
+        """Descriptive metadata: single lines, an https terms URL, and distinct variable names."""
+        _check_line(self.update_frequency, "update_frequency")
+        _check_line(self.latency, "latency")
+        _check_line(self.citation, "citation")
+        _check_line(self.terms, "terms")
+        if self.terms is not None and not self.terms.startswith("https://"):
+            raise ValueError("terms must be an https URL")
+        names = [variable.name for variable in self.variables]
+        if len(set(names)) != len(names):
+            raise ValueError("variables entries must have distinct names")
 
     @property
     def version_label(self) -> str:

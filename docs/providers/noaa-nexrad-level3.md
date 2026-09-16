@@ -89,6 +89,23 @@ dataset; only decoding is external.
 See the [service research notes](noaa-services.md#nexrad-level-iii-products)
 for dated upstream probes.
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Temporal resolution and updates: the file counts and feed gaps documented above,
+  measured from the bucket; the bucket holds what the Unidata feed captured.
+- Citation and terms: the [NODD registry
+  entry](https://registry.opendata.aws/noaa-nexrad/) and the [NOAA Open Data
+  Dissemination](https://www.noaa.gov/information-technology/open-data-dissemination)
+  statement it quotes.
+- Variables: the product-code table above, which is the exact list this adapter accepts.
+- Longest query window: `MAX_WINDOW` in `usdata.providers.noaa.nexrad_level3`.
+- Spatial resolution and latency are empty: no upstream page states a per-product grid
+  spacing or a lag for this bucket.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/nexrad-level3.md#catalog-reference).

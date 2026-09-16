@@ -24,6 +24,14 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `sites` | Several monitoring IDs, comma-separated or a list. |
 | `statistic_id` | Five-digit statistic code; default 00003 (daily mean). |
 
+## Variables
+
+| Variable | Units | Meaning |
+|---|---|---|
+| `00060` | cubic feet per second | Discharge (streamflow) |
+| `00065` | feet | Gage height |
+| `00010` | degrees Celsius | Water temperature |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/usgs-water-daily.md).
@@ -32,6 +40,11 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 - Availability: since 0.5
 - Domain: Water resources
+- Spatial resolution: USGS monitoring locations, one site per record
+- Temporal resolution: Daily
+- Updates: Daily values are automatically calculated from the continuous data of the same parameter code
+- Terms of use: <https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits>
+- Citation: U.S. Geological Survey, Water Data for the Nation daily values, accessed via usdata
 - Coverage: not specified in the catalog
 - Coverage varies by station, product, and date; the range above does not guarantee observations.
 - [Upstream documentation](https://api.waterdata.usgs.gov/)

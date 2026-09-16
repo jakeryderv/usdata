@@ -14,7 +14,7 @@ from usdata._fetch import fetch as fetch_query
 from usdata._progress import batch
 from usdata.cli.progress import progress
 from usdata.manifest import lockfile_path
-from usdata.models import Dataset, Status
+from usdata.models import Dataset, Status, describe_duration
 from usdata.providers import load_adapter
 from usdata.providers.base import NotImplementedProvider
 from usdata.pull import EmptySource, ManifestChanged, UnknownDatasets, UpstreamChanged
@@ -131,6 +131,7 @@ def info(
     else:
         typer.echo("  params:    none")
     _echo_usage(ds)
+    _echo_description(ds)
 
 
 def _echo_usage(ds: Dataset) -> None:
@@ -144,6 +145,29 @@ def _echo_usage(ds: Dataset) -> None:
         typer.echo(f"  inputs:    {ds.inputs}")
     if ds.examples:
         typer.echo(f"  examples:  {', '.join(ds.examples)}")
+
+
+def _echo_description(ds: Dataset) -> None:
+    """Resolution, cadence, limits, and provenance metadata, each line only when set."""
+    if ds.resolution:
+        parts = [p for p in (ds.resolution.spatial, ds.resolution.temporal) if p]
+        if parts:
+            typer.echo(f"  resolution: {'; '.join(parts)}")
+    if ds.update_frequency:
+        typer.echo(f"  updates:   {ds.update_frequency}")
+    if ds.latency:
+        typer.echo(f"  latency:   {ds.latency}")
+    if ds.limits and ds.limits.max_window:
+        typer.echo(f"  limits:    max window {describe_duration(ds.limits.max_window)}")
+    if ds.terms:
+        typer.echo(f"  terms:     {ds.terms}")
+    if ds.citation:
+        typer.echo(f"  citation:  {ds.citation}")
+    if ds.variables:
+        typer.echo("  variables:")
+        width = max(len(variable.label) for variable in ds.variables)
+        for variable in ds.variables:
+            typer.echo(f"    {variable.label:<{width}}  {variable.description or ''}".rstrip())
 
 
 @app.command()

@@ -25,6 +25,22 @@ See the [getting-started walkthrough](../getting-started.md) and
 
 --8<-- "_snippets/upstream-revisions.md"
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Resolution, updates, latency, and citation: the [NCEI GHCNd product
+  page](https://www.ncei.noaa.gov/products/land-based-station/global-historical-climatology-network-daily),
+  which states the station count, the weekend reconstruction, the 45-to-60-day
+  replacement of real-time streams, and the Menne et al. (2012) citation.
+- Terms: the [NCEI dataset
+  record](https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00861/html),
+  which carries the access and use constraints.
+- Variables: the element codes this guide names, with the units the Access Data Service
+  returns under `units=metric`. The element set is open and station-dependent.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/ghcn-daily.md#catalog-reference).

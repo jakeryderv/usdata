@@ -1,9 +1,17 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from pydantic import ValidationError
 
-from usdata.models import BBox, Dataset, Protocol, Status, TimeRange
+from usdata.models import (
+    BBox,
+    Dataset,
+    Protocol,
+    Status,
+    TimeRange,
+    Variable,
+    describe_duration,
+)
 
 
 def test_bbox_rejects_inverted_bounds() -> None:
@@ -155,3 +163,63 @@ def test_usage_fields_accept_the_shape_the_registry_uses() -> None:
     )
     assert ds.reader == "pandas" and ds.guide == "docs/providers/noaa-thing.md"
     assert _shipped(reader=None).reader is None
+
+
+@pytest.mark.parametrize(
+    "overrides, message",
+    [
+        ({"resolution": {"spatial": "a\nb"}}, "resolution.spatial must be a nonempty single line"),
+        ({"resolution": {"temporal": " "}}, "resolution.temporal must be a nonempty single line"),
+        ({"update_frequency": "a\nb"}, "update_frequency must be a nonempty single line"),
+        ({"latency": ""}, "latency must be a nonempty single line"),
+        ({"citation": "a\nb"}, "citation must be a nonempty single line"),
+        ({"terms": "http://example.gov/terms"}, "terms must be an https URL"),
+        ({"terms": "example.gov/terms"}, "terms must be an https URL"),
+        ({"variables": [{"name": " "}]}, "variable name must be a nonempty single line"),
+        ({"variables": [{"name": "t", "units": "a\nb"}]}, "variable units must be a nonempty"),
+        ({"variables": [{"name": "t"}, {"name": "t"}]}, "variables entries must have distinct"),
+        ({"limits": {"max_window": "one day"}}, "max_window"),
+        ({"limits": {"max_window": "PT0S"}}, "max_window must be a positive duration"),
+        ({"limits": {"max_window": "-P1D"}}, "max_window must be a positive duration"),
+    ],
+)
+def test_description_fields_are_validated(overrides: dict[str, object], message: str) -> None:
+    with pytest.raises(ValidationError, match=message):
+        _shipped(**overrides)
+
+
+def test_description_fields_accept_the_shape_the_registry_uses() -> None:
+    ds = _shipped(
+        resolution={"spatial": "3 km CONUS grid", "temporal": "Hourly runs"},
+        update_frequency="Hourly",
+        latency="About an hour behind the run",
+        citation="NOAA, A Thing, accessed via usdata",
+        terms="https://example.gov/terms",
+        variables=[{"name": "cape", "units": "J/kg", "description": "Potential energy"}],
+        limits={"max_window": "P1D"},
+    )
+    assert ds.resolution is not None and ds.resolution.spatial == "3 km CONUS grid"
+    assert ds.limits is not None and ds.limits.max_window == timedelta(days=1)
+    assert ds.variables[0].label == "cape (J/kg)"
+    assert Variable(name="mask").label == "mask"
+    assert _dataset().resolution is None and _dataset().variables == []
+    assert _dataset().limits is None and _dataset().terms is None
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (timedelta(days=1), "1 day"),
+        (timedelta(days=31), "31 days"),
+        (timedelta(hours=6), "6 hours"),
+        (timedelta(minutes=1), "1 minute"),
+        (timedelta(seconds=20), "20 seconds"),
+    ],
+)
+def test_describe_duration_reads_as_words(value: timedelta, expected: str) -> None:
+    assert describe_duration(value) == expected
+
+
+def test_capabilities_name_partial_fetch_and_default_to_whole_files() -> None:
+    assert _dataset().capabilities.partial_fetch is False
+    assert _shipped(capabilities={"partial_fetch": True}).capabilities.partial_fetch is True

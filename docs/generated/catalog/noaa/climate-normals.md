@@ -24,6 +24,21 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `stations` | Station ids, comma-separated or a list; otherwise a location selects them. |
 | `units` | metric (default) or standard. |
 
+## Variables
+
+| Variable | Units | Meaning |
+|---|---|---|
+| `MLY-TMAX-NORMAL` | degrees Celsius | Monthly normal maximum temperature |
+| `MLY-TMIN-NORMAL` | degrees Celsius | Monthly normal minimum temperature |
+| `MLY-PRCP-NORMAL` | mm | Monthly normal precipitation total |
+| `MLY-TAVG-NORMAL` | degrees Fahrenheit | Monthly normal mean temperature; units=metric does not convert it |
+| `MLY-DUTR-NORMAL` | degrees Fahrenheit | Monthly normal diurnal temperature range; read it from units=standard |
+| `MLY-TAVG-STDDEV` | degrees Fahrenheit | Standard deviation of monthly mean temperature; read it from units=standard |
+| `MLY-TMAX-STDDEV` | degrees Fahrenheit | Standard deviation of monthly maximum temperature; read it from units=standard |
+| `DLY-TAVG-NORMAL` | degrees Celsius | Daily normal mean temperature |
+| `DLY-PRCP-NORMAL` | mm | Daily normal precipitation |
+| `ANN-TAVG-NORMAL` | degrees Celsius | Annual normal mean temperature |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-normals.md).
@@ -32,6 +47,11 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 - Availability: since 0.11
 - Domain: Climate
+- Spatial resolution: U.S. land surface stations with 1991-2020 normals coverage
+- Temporal resolution: Daily, monthly, or annual and seasonal normals, chosen with the period parameter
+- Updates: As needed; the normals are republished about once a decade
+- Terms of use: <https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals>
+- Citation: Palecki, Michael; Durre, Imke; Applequist, Scott; Arguez, Anthony; Lawrimore, Jay (2021). U.S. Climate Normals 2020 (1991-2020). NOAA National Centers for Environmental Information; cite the record for the period used
 - Geographic bounds (WGS84): west -180°, south -90°, east 180°, north 90°
 - Catalog date range: 1991-01-01 to 2020-12-31
 - Coverage varies by station, product, and date; the range above does not guarantee observations.

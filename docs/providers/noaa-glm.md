@@ -84,6 +84,25 @@ access.
 See the [service research notes](noaa-services.md#goes-glm-lightning-detections)
 for dated upstream probes.
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Resolution: the [NCEI ABI and GLM product
+  page](https://www.ncei.noaa.gov/products/goes-terrestrial-weather-abi-glm), which
+  gives GLM a spatial resolution of 8 to 14 km; the 20-second file cadence is the
+  product's own.
+- Updates, citation, and terms: the [NODD registry
+  entry](https://registry.opendata.aws/noaa-goes/) and the [NOAA Open Data
+  Dissemination](https://www.noaa.gov/information-technology/open-data-dissemination)
+  statement it quotes.
+- Variables: the flash, group, and event tables described above, with the units the
+  files carry.
+- Longest query window: `MAX_WINDOW` in `usdata.providers.noaa.glm`.
+- Latency is empty: NODD states only that new data is added as soon as it is available.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/goes-glm.md#catalog-reference).

@@ -126,6 +126,23 @@ whole-file and reader contract.
 
 See the [service research notes](noaa-services.md#hurdat2-best-tracks) for dated upstream probes.
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Resolution and variables: the NHC
+  [Atlantic](https://www.nhc.noaa.gov/data/hurdat/hurdat2-format-atl-1851-2021.pdf) and
+  [northeast
+  Pacific](https://www.nhc.noaa.gov/data/hurdat/hurdat2-format-nencpac-1949-2021.pdf)
+  format references, read through the reader's column table above.
+- Updates and citation: the [NHC data page](https://www.nhc.noaa.gov/data/#hurdat),
+  which records the 2026-02-27 revision adding the 2025 season and asks that Landsea and
+  Franklin (2013) be referenced.
+- Terms: the [NWS disclaimer](https://www.weather.gov/disclaimer).
+- Latency is empty: HURDAT2 is a post-season reanalysis and the NHC states no lag.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/hurdat2.md#catalog-reference).

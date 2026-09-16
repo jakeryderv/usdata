@@ -40,6 +40,23 @@ revises LCD as reports are quality-controlled.
 
 See the [service research notes](noaa-services.md#local-climatological-data) for dated upstream probes.
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Updates, terms, and resolution: the [NCEI dataset
+  record](https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00684/html),
+  whose maintenance frequency is monthly and whose use constraint is only "cite this
+  dataset when used as a source", so the entry uses the agency, product, and access form
+  for `citation`.
+- Variables: the [LCD
+  documentation](https://www.ncei.noaa.gov/data/local-climatological-data/doc/LCD_documentation.pdf)
+  and the columns this guide names, with the units returned under `units=metric`. Every
+  row carries 125 columns, so the list is a sample.
+- Latency is empty: the record states no lag between a report and its appearance.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/lcd.md#catalog-reference).

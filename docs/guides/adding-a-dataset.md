@@ -44,6 +44,21 @@ Add to `src/usdata/data/registry.yaml`:
     guide: docs/providers/noaa-ghcn.md  # this dataset's own usage guide
     examples:                           # repository-relative example documents
       - examples/weather-and-streamflow/example.ipynb
+    resolution:                         # free text, in the source's own words
+      spatial: Land surface stations; more than 100,000 stations in 180 countries and territories
+      temporal: Daily
+    update_frequency: Daily, reconstructed each weekend from more than 25 data source components
+    latency: >-                         # omit unless the agency states a figure
+      Real-time streams are replaced by archive-ready sources 45 to 60 days after the end of a month
+    citation: >-
+      Menne, M.J., I. Durre, R.S. Vose, B.E. Gleason, and T.G. Houston, 2012: An overview of the
+      Global Historical Climatology Network-Daily Database. Journal of Atmospheric and Oceanic
+      Technology, 29, 897-910, doi:10.1175/JTECH-D-11-00103.1
+    terms: https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00861/html
+    variables:                          # what the files deliver, with units as delivered
+      - { name: PRCP, units: mm, description: "Precipitation total (metric units)" }
+      - { name: TMAX, units: "degrees Celsius", description: "Maximum temperature (metric units)" }
+    # limits: { max_window: P1D }       # only where the adapter enforces a window
     adapter: usdata.providers.noaa.ghcnd:GhcnDaily
 ```
 
@@ -60,8 +75,32 @@ generated reference, the website browser, and `usdata info` from the same place.
 A planned entry leaves them out; an implemented one must give a summary, at least
 one format, a selection rule, its required inputs, its own usage guide under
 `docs/providers/`, and at least one example that exists. `reader` names the extra
-that opens the files, or is `null` for a format with no bundled reader. The
-generated catalog links each reference to its usage guide and examples;
+that opens the files, or is `null` for a format with no bundled reader.
+
+The same entry also describes the data itself, and every value must be
+traceable to an upstream page listed under **Metadata sources** at the end of
+the dataset's guide:
+
+- `resolution.spatial` and `resolution.temporal` are single lines of free text
+  in the source's own words: a grid spacing, a station network, a scan cadence.
+- `update_frequency` says how often the source publishes, quoting the agency
+  where it states a cadence.
+- `latency` says how far behind real time the source runs. Use the agency's own
+  figure or a range the provider guide already documents; leave it out rather
+  than estimating one, and say in the guide that no figure is published.
+- `citation` is one line: the form the agency asks for, or an
+  "Agency, Product, accessed via usdata" form when it publishes none.
+- `terms` is the https URL of the page that states the conditions of use, which
+  is often not the homepage.
+- `variables` lists what the files deliver, with `units` as delivered rather
+  than as converted, and unique names. List the whole set where it is bounded;
+  where it is open, such as a GRIB2 file of hundreds of fields, list the handful
+  the guide and examples use and say in the entry's `description` that the
+  delivered set is open.
+- `limits.max_window` is an ISO 8601 duration such as `P1D`, and must equal the
+  window constant the adapter enforces; a registry test compares the two.
+
+The generated catalog links each reference to its usage guide and examples;
 no manual dataset navigation entry is needed. For a new agency, write access notes in
 `docs/providers/<provider>.md` and link its generated catalog. See the
 [documentation workflow](documentation.md) for source ownership and preview commands.

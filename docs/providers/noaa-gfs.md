@@ -104,6 +104,27 @@ describes the model and its GRIB2 field inventories.
 See the [service research notes](noaa-services.md#gfs-model-output) for dated
 upstream probes.
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Resolution: the [GFS product
+  page](https://www.emc.ncep.noaa.gov/emc/pages/numerical_forecast_systems/gfs.php) and
+  the resolution table above for the three grids and their forecast-hour schedules.
+- Updates, citation, and terms: the [NODD registry
+  entry](https://registry.opendata.aws/noaa-gfs-bdp-pds/) ("4 times a day, every 6 hours
+  starting at midnight UTC") and the [NOAA Open Data
+  Dissemination](https://www.noaa.gov/information-technology/open-data-dissemination)
+  statement it quotes.
+- Variables: the `select` table above. A file holds several hundred fields, so the entry
+  lists only the ones this guide and the example use.
+- Longest query window: `MAX_WINDOW` in `usdata.providers.noaa.hrrr`, which this adapter
+  shares through `ModelRuns`.
+- Latency is empty: NODD states no lag between a run's initialization and its
+  appearance.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/gfs.md#catalog-reference).

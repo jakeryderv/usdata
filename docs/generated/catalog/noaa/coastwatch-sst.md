@@ -22,6 +22,15 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 |---|---|
 | `stride` | Positive integer subsampling both spatial axes; default 1. |
 
+## Variables
+
+| Variable | Units | Meaning |
+|---|---|---|
+| `analysed_sst` | degree_C | Analysed sea surface temperature |
+| `analysis_error` | degree_C | Estimated error of the analysis |
+| `sea_ice_fraction` | 1 | Sea ice area fraction |
+| `mask` | — | Source mask flags; consult the source metadata for the codes |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-coastwatch.md).
@@ -30,6 +39,11 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 - Availability: since 0.5
 - Domain: Satellite oceanography
+- Spatial resolution: 0.05 degree global grid, about 5 km
+- Temporal resolution: Daily
+- Updates: Daily
+- Terms of use: <https://coastwatch.noaa.gov/erddap/info/noaacwBLENDEDsstDNDaily/index.html>
+- Citation: NOAA/NESDIS Office of Satellite Products and Operations, Geo-polar Blended Sea Surface Temperature Analysis (noaacwBLENDEDsstDNDaily), accessed via usdata
 - Geographic bounds (WGS84): west -179.975°, south -89.975°, east 179.975°, north 89.975°
 - Catalog date range: 2019-07-22 to open-ended
 - Coverage varies by station, product, and date; the range above does not guarantee observations.

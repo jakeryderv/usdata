@@ -1,0 +1,1 @@
+Every implemented dataset's provider guide ends with a "Metadata sources" list naming the upstream page behind each catalog value, and says which fields the agency does not publish rather than filling them with an estimate.

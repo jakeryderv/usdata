@@ -24,6 +24,19 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `station` | Required seven-digit CO-OPS station id, for example '8518750'. |
 | `units` | metric (default) or english. |
 
+## Variables
+
+| Variable | Units | Meaning |
+|---|---|---|
+| `Date Time` | UTC | Observation time, requested with time_zone=gmt |
+| `Water Level` | meters | Observed water level on the requested datum (metric units) |
+| `Sigma` | meters | Standard deviation of the one-second samples in the interval |
+| `O or I (for verified)` | — | Count of outliers, or the inference flag on verified data |
+| `F` | — | Flat-tolerance limit flag |
+| `R` | — | Rate-of-change limit flag |
+| `L` | — | Inferred-value flag |
+| `Quality` | — | p for preliminary or v for verified |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-coops.md).
@@ -32,6 +45,12 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 - Availability: since 0.10
 - Domain: Sea level and tides
+- Spatial resolution: One National Water Level Observation Network station per request
+- Temporal resolution: Six minutes
+- Updates: Six-minute observations as the station reports; NOAA verifies the past month's data monthly
+- Longest query window: 28 days
+- Terms of use: <https://tidesandcurrents.noaa.gov/disclaimers.html>
+- Citation: NOAA National Ocean Service, Center for Operational Oceanographic Products and Services, observed water levels, accessed via usdata
 - Coverage: not specified in the catalog
 - Coverage varies by station, product, and date; the range above does not guarantee observations.
 - [Upstream documentation](https://api.tidesandcurrents.noaa.gov/api/prod/)

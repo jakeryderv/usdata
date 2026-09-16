@@ -1,3 +1,4 @@
+from itertools import takewhile
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -46,7 +47,9 @@ def test_info() -> None:
 def test_info_lists_adapter_parameters() -> None:
     result = runner.invoke(app, ["info", "noaa:climate-normals"])
     assert result.exit_code == 0
-    listed = [line.strip() for line in result.stdout.splitlines() if line.startswith("    ")]
+    lines = result.stdout.splitlines()
+    body = lines[lines.index("  params:") + 1 :]
+    listed = [line.strip() for line in takewhile(lambda line: line.startswith("    "), body)]
     assert [line.split("  ", 1)[0] for line in listed] == ["period", "stations", "units"]
     assert all(len(line.split("  ", 1)) == 2 and line.split("  ", 1)[1].strip() for line in listed)
 
@@ -76,6 +79,28 @@ def test_info_says_none_for_a_dataset_with_no_reader() -> None:
     assert result.exit_code == 0
     assert "formats:   NEXRAD Level III (no reader)" in result.stdout
     assert "reader:    none" in result.stdout
+
+
+def test_info_describes_resolution_cadence_limits_and_variables() -> None:
+    result = runner.invoke(app, ["info", "noaa:mrms"])
+    assert result.exit_code == 0
+    assert "resolution: 0.01 degree CONUS grid" in result.stdout
+    assert "; Two minutes; the two-hour rotation tracks are written hourly" in result.stdout
+    assert "updates:   Data is delivered in real-time with a 2-minute update cycle" in result.stdout
+    assert "limits:    max window 1 day" in result.stdout
+    assert "terms:     https://www.noaa.gov/information-technology/open-data" in result.stdout
+    assert "citation:  NOAA Multi-Radar/Multi-Sensor System (MRMS) was accessed" in result.stdout
+    assert "variables:" in result.stdout
+    assert "MESH_00.50 (mm)" in result.stdout
+    assert "Maximum estimated size of hail" in result.stdout
+    assert "latency:" not in result.stdout  # NODD publishes no lag figure for MRMS.
+
+
+def test_info_prints_a_latency_the_agency_states() -> None:
+    result = runner.invoke(app, ["info", "noaa:ghcn-daily"])
+    assert result.exit_code == 0
+    assert "latency:   Real-time streams are replaced by archive-ready sources" in result.stdout
+    assert "limits:" not in result.stdout  # The adapter enforces no window.
 
 
 def test_info_omits_usage_lines_for_planned_datasets() -> None:

@@ -31,6 +31,23 @@ NetCDF responses; see [ADR 0004](https://github.com/jakeryderv/usdata/blob/main/
 
 See the [service research notes](noaa-services.md#coastwatch-sst) for dated upstream probes.
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Resolution, updates, and terms: the [ERDDAP dataset
+  metadata](https://coastwatch.noaa.gov/erddap/info/noaacwBLENDEDsstDNDaily/index.html),
+  whose `spatial_resolution` is 0.05 degree, whose time axis averages one day, and whose
+  `license` attribute states that the GHRSST protocol describes data use as free and
+  open.
+- Variables: the same metadata, as reproduced in the variable table above.
+- Citation: no citation is published for the ERDDAP dataset, so the entry uses the
+  agency, product, and access form, naming NOAA/NESDIS OSPO as the metadata's creator.
+- Latency is empty: the metadata publishes no lag figure. Its `testOutOfDate` threshold
+  is a staleness alarm for the ERDDAP server, not a stated latency.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/coastwatch-sst.md#catalog-reference).

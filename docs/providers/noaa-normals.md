@@ -61,6 +61,25 @@ Normals are republished about once a decade; the 1991-2020 files can still be
 corrected. Retain the cache as well as the manifest and lockfile. See the
 [service research notes](noaa-services.md#us-climate-normals) for dated probes.
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Resolution, updates, terms, and citation: the [NCEI U.S. Climate Normals product
+  page](https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals) and
+  the per-period dataset records it links, such as the [annual and seasonal
+  record](https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C01619/html),
+  whose maintenance frequency is "as needed" and whose use constraint is the Palecki et
+  al. (2021) citation. The entry points `terms` at the product page because the
+  constraints and DOI differ per period.
+- Variables: the [monthly normals
+  documentation](https://www.ncei.noaa.gov/data/normals-monthly/1991-2020/doc/Normals_MLY_Documentation_1991-2020.pdf)
+  for the data-type codes, with the units this guide's 2026-09-11 probe found, including
+  the codes `units=metric` does not convert. The code list is open.
+- Latency is empty: normals are 30-year averages, and NCEI publishes no lag for them.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/climate-normals.md#catalog-reference).
