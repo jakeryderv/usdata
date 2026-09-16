@@ -25,6 +25,28 @@ on Windows for CPython 3.13 and earlier. On macOS, and on Windows with Python
 See [readers and their limits](reference/readers.md) for what each reader
 returns.
 
+## Check your environment
+
+`usdata doctor` reports what it finds and fixes nothing: the interpreter, this
+install, each reader extra with its versions, the ecCodes library behind the
+`grib` extra, the cache directory with its free space, and any
+`USDATA_CACHE_DIR` or `XDG_CACHE_HOME` override.
+
+```console
+$ usdata doctor
+python        ok    3.13.7 (CPython) at /home/ada/.venvs/usdata/bin/python3
+platform      ok    Linux-6.8.0-x86_64-with-glibc2.39 on x86_64
+usdata        ok    0.16.0 from /home/ada/.venvs/usdata/lib/python3.13/site-packages/usdata
+extra:pandas  ok    pandas 2.3.1
+extra:grib    warn  not usable (No module named 'eccodes'); install: pip install "usdata[grib]"
+cache         ok    /home/ada/.cache/usdata: exists, writable, 91.4 GiB free
+```
+
+A missing extra is a warning: the core still fetches and pins. The command exits
+1 only when something is broken, such as a cache directory it cannot write. Add
+`--network` for one short request per upstream host family, and `--json` for the
+same report as a JSON object.
+
 ## Source installation
 
 These docs describe the current source checkout. A feature marked
