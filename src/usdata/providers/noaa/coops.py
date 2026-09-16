@@ -22,8 +22,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from usdata._files import staged_path
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
-from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.http import HttpProvider
 from usdata.providers.params import choice
 
 DATA_URL = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
@@ -148,7 +148,7 @@ class CoopsPredictionParams(CoopsParams):
         return token
 
 
-class _CoopsStation(_HttpProvider):
+class _CoopsStation(HttpProvider):
     """Shared window, request, and validation rules for CO-OPS station products."""
 
     product: ClassVar[str]

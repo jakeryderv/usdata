@@ -16,14 +16,20 @@ A breaking change is anything that alters documented behavior of:
 - The top-level `usdata` package exports listed in `usdata.__all__`, and the
   `usdata.manifest` and `usdata.providers.base` modules. The fetch workflow is
   public through the package root names, not through any submodule.
+- The provider contract an adapter is written against: the names
+  `usdata.providers` exports, the transport helpers in `usdata.protocols`, the
+  registry entry fields an adapter reads, and the checks in `usdata.testing`.
+  [ADR 0027](adr/0027-provider-contract.md) lists it exactly and says what
+  inside those modules stays internal.
 - CLI commands, their flags, output format, and exit codes.
 - The manifest and lockfile schemas.
 - The provenance sidecar schema.
 - Dataset ids in the registry. Removing or renaming one is breaking; adding one
   or updating its metadata is not.
 
-Everything else (internal modules, protocol clients, adapter internals, the
-exact contents of bundled data files) may change in any release.
+Everything else (internal modules, the adapter modules themselves and the
+constants in them, the exact contents of bundled data files) may change in any
+release.
 
 ## Path to 1.0
 

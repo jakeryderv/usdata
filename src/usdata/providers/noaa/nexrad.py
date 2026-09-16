@@ -21,8 +21,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import s3
-from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.http import HttpProvider
 from usdata.providers.noaa import sites
 from usdata.providers.params import OptionalUpperStrList, positive_int
 
@@ -70,7 +70,7 @@ class NexradParams(BaseModel):
         return self.sites if self.sites is not None else self.site
 
 
-class NexradLevel2(_HttpProvider):
+class NexradLevel2(HttpProvider):
     """NEXRAD Level II adapter. Params: ``site``/``sites`` (ICAO ids), ``nearest`` (int)."""
 
     params_model = NexradParams

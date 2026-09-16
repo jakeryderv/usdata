@@ -24,8 +24,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
-from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.http import HttpProvider
 from usdata.providers.params import StrList
 
 ITEMS_URL = "https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily/items"
@@ -73,7 +73,7 @@ class WaterDailyParams(BaseModel):
         return sorted({s if s.startswith("USGS-") else f"USGS-{s}" for s in requested or []})
 
 
-class WaterDaily(_HttpProvider):
+class WaterDaily(HttpProvider):
     """USGS daily statistics as paginated CSV assets, with anonymous access."""
 
     params_model = WaterDailyParams

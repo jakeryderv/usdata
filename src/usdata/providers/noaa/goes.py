@@ -22,8 +22,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import s3
-from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.http import HttpProvider
 from usdata.providers.params import int_range
 
 PRODUCT = "ABI-L2-CMIPC"
@@ -119,7 +119,7 @@ def list_scans(
     return sorted(assets.values(), key=lambda asset: asset.id)
 
 
-class GoesAbi(_HttpProvider):
+class GoesAbi(HttpProvider):
     """Single-channel CONUS ABI imagery; params: satellite, channel, product."""
 
     params_model = GoesAbiParams

@@ -26,8 +26,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import s3
-from usdata.providers._http import _HttpProvider
 from usdata.providers.base import QueryError
+from usdata.providers.http import HttpProvider
 from usdata.providers.params import choice, int_list, int_range
 
 BUCKET = "noaa-hrrr-bdp-pds"
@@ -111,7 +111,7 @@ def list_run_files(
     return found
 
 
-class ModelRuns(_HttpProvider):
+class ModelRuns(HttpProvider):
     """Shared listing for models that publish one whole GRIB2 file per run and forecast hour.
 
     Subclasses validate their own parameters in :meth:`resolve` and describe the
