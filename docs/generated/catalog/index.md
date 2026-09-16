@@ -26,6 +26,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | <span id="noaacoops-water-levels"></span>[Coastal water levels](noaa/coops-water-levels.md) | Released | CSV | Six-minute observations for one station and datum; at most 28 days |
 | <span id="noaacoops-tide-predictions"></span>[Coastal tide predictions](noaa/coops-tide-predictions.md) | Released | CSV | Predictions for one station and datum on a chosen interval; at most a year |
 | <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](noaa/coastwatch-sst.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
+| <span id="usgsearthquakes"></span>[Earthquake events](usgs/earthquakes.md) | Source only | CSV | Events inside an inclusive UTC window and optional box, magnitude, and depth bounds |
 | <span id="usgswater-daily"></span>[Daily water observations](usgs/water-daily.md) | Released | CSV | Site observations for inclusive local calendar dates; parameter and statistic filters |
 
 ## Browse by provider
@@ -33,7 +34,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | Provider | Released | Source only | Planned |
 |---|---:|---:|---:|
 | [NOAA](noaa.md) | 18 | 0 | 17 |
-| [USGS](usgs.md) | 1 | 0 | 2 |
+| [USGS](usgs.md) | 1 | 1 | 1 |
 | [Census Bureau](census.md) | 0 | 0 | 1 |
 | [EPA](epa.md) | 0 | 0 | 1 |
 | [FEMA](fema.md) | 0 | 0 | 2 |

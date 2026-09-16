@@ -8,6 +8,7 @@ would otherwise let through, notably booleans, floats, and non-ASCII digits.
 Use them as ``Annotated`` metadata on a field of a parameter model::
 
     cycle: Annotated[int, int_range(0, 23)]
+    min_magnitude: Annotated[float, number_range(-10, 10)]
     nearest: Annotated[int, positive_int()]
     forecast_hour: Annotated[list[int], int_list(0, 48)]
     file: Annotated[str, choice("sfc", "prs", "nat")]
@@ -18,6 +19,7 @@ Every message reads as the tail of a sentence about the field; the formatter in
 
 from __future__ import annotations
 
+import math
 from typing import Annotated
 
 from pydantic import BeforeValidator
@@ -60,6 +62,25 @@ def _text(value: object) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ValueError("must be text: one value, a list, or a comma-separated string")
     return value.strip()
+
+
+def _number(value: object, low: float, high: float) -> float:
+    """One finite number inside ``[low, high]``, read from an int, float, or numeric string."""
+    message = f"must be a number from {low:g} to {high:g}"
+    if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+        raise ValueError(message)
+    try:
+        number = float(str(value).strip())
+    except ValueError:
+        raise ValueError(message) from None
+    if not math.isfinite(number) or not low <= number <= high:
+        raise ValueError(message)
+    return number
+
+
+def number_range(low: float, high: float) -> BeforeValidator:
+    """Validate a decimal field such as a magnitude or depth, accepting the CLI's strings."""
+    return BeforeValidator(lambda value: _number(value, low, high))
 
 
 def int_range(low: int, high: int) -> BeforeValidator:
@@ -140,5 +161,6 @@ __all__ = [
     "choice",
     "int_list",
     "int_range",
+    "number_range",
     "positive_int",
 ]

@@ -1,0 +1,9 @@
+name: oklahoma-earthquakes
+sources:
+  - name: quakes
+    dataset: usgs:earthquakes
+    location: Oklahoma
+    start: 2024-05-06
+    end: 2024-05-07
+    params:
+      min_magnitude: 1.0

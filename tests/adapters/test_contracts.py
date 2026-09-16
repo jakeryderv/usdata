@@ -23,6 +23,7 @@ from usdata.providers.noaa.hurdat2 import DIRECTORY_URL as HURDAT_URL
 from usdata.providers.noaa.spc import PAGE_URL as SPC_PAGE
 from usdata.providers.noaa.storm_events import DIRECTORY_URL
 from usdata.providers.usgs.daily import ITEMS_URL
+from usdata.providers.usgs.earthquakes import COUNT_URL
 from usdata.query import build_query
 from usdata.registry import default_registry
 
@@ -48,6 +49,7 @@ CASES = {
     "noaa:spc-tornado-reports": {},
     "noaa:hurdat2": {"basin": "pacific"},
     "usgs:water-daily": {"sites": "07164500"},
+    "usgs:earthquakes": {"min_magnitude": "2.5"},
 }
 S3_KEYS = {
     "noaa:nexrad-level2": "2024/05/06/KTLX/KTLX20240506_120100_V06",
@@ -150,6 +152,8 @@ def contract_transport(
                 text=f'<table><tr><td><a href="{STORM_NAME}">{STORM_NAME}</a></td>'
                 f'<td>2026-03-23</td><td align="right">{len(data)}</td></tr></table>',
             )
+        if str(request.url).startswith(COUNT_URL):
+            return httpx.Response(200, text="1")
         if str(request.url).startswith(ITEMS_URL) and request.url.params.get("f") == "json":
             first = request.url.params.get("offset") == "0"
             return httpx.Response(200, json={"features": [{"id": "a"}] if first else []})

@@ -1,0 +1,1 @@
+`usgs:earthquakes` fetches events from the ANSS Comprehensive Catalog through the FDSN event service: a UTC window, an optional box, and magnitude and depth bounds resolve to CSV pages of at most 20,000 events, counted first and ordered by time, opened with the pandas reader. A manifest example pulls Oklahoma's events on the May 2024 tornado days.

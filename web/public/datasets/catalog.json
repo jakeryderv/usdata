@@ -2255,6 +2255,100 @@
       "examples": []
     },
     {
+      "id": "usgs:earthquakes",
+      "title": "Earthquake events",
+      "description": "Global earthquake events with origin time, epicenter, depth, magnitude, and review status from the ANSS Comprehensive Catalog through the FDSN event web service. Anonymous REST filtered by bounding box, time window, magnitude, and depth, served as CSV with fixed columns; the service caps a response at 20,000 events, so longer selections arrive as pages ordered by time. Events are revised as networks review them.",
+      "provider": "USGS",
+      "domain": "Natural hazards",
+      "system": null,
+      "availability": "Source only",
+      "since": "0.19",
+      "keywords": [
+        "earthquakes",
+        "seismic",
+        "geology",
+        "hazards",
+        "comcat",
+        "fdsn",
+        "anss"
+      ],
+      "formats": [
+        "CSV"
+      ],
+      "selection": "Events inside an inclusive UTC window and optional box, magnitude, and depth bounds",
+      "inputs": "Both timestamps; optionally a location or bbox and magnitude or depth bounds",
+      "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "Point epicenters in decimal degrees, as located by the contributing network",
+        "temporal": "Origin times to the millisecond"
+      },
+      "update_frequency": "Continuous; events post automatically from contributing networks and are superseded by reviewed versions",
+      "latency": null,
+      "citation": "U.S. Geological Survey, Earthquake Hazards Program, 2017, Advanced National Seismic System (ANSS) Comprehensive Catalog of Earthquake Events and Products, doi:10.5066/F7MS3QZH",
+      "terms": "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits",
+      "variables": [
+        {
+          "name": "time",
+          "units": "ISO 8601 UTC",
+          "description": "Origin time of the event"
+        },
+        {
+          "name": "latitude",
+          "units": "degrees north",
+          "description": "Epicenter latitude"
+        },
+        {
+          "name": "longitude",
+          "units": "degrees east",
+          "description": "Epicenter longitude"
+        },
+        {
+          "name": "depth",
+          "units": "km",
+          "description": "Hypocenter depth below sea level"
+        },
+        {
+          "name": "mag",
+          "units": "magnitude",
+          "description": "Magnitude on the scale magType names"
+        },
+        {
+          "name": "magType",
+          "units": null,
+          "description": "Magnitude scale, such as ml or mw"
+        },
+        {
+          "name": "place",
+          "units": null,
+          "description": "Nearby place and distance, as a phrase"
+        },
+        {
+          "name": "type",
+          "units": null,
+          "description": "Event type; earthquake unless otherwise"
+        },
+        {
+          "name": "status",
+          "units": null,
+          "description": "automatic or reviewed"
+        },
+        {
+          "name": "updated",
+          "units": "ISO 8601 UTC",
+          "description": "When the event was last revised"
+        }
+      ],
+      "max_window": null,
+      "guide": "https://docs.usdata.dev/providers/usgs-earthquakes/",
+      "reference": "https://docs.usdata.dev/generated/catalog/usgs/earthquakes/",
+      "examples": [
+        {
+          "title": "Earthquakes",
+          "url": "https://usdata.dev/examples/earthquakes/"
+        }
+      ]
+    },
+    {
       "id": "usgs:water-daily",
       "title": "Daily water observations",
       "description": "Daily statistics (streamflow, gage height, temperature) for USGS monitoring sites via the modern USGS Water Data OGC API. Anonymous, paginated CSV downloads filtered by site or bbox, dates, and parameter codes; daily mean by default, with units and quality metadata preserved. Variables are five-digit NWIS parameter codes and the catalog lists the common ones; the delivered set is open.",
@@ -2312,38 +2406,6 @@
           "url": "https://usdata.dev/examples/weather-and-streamflow/"
         }
       ]
-    },
-    {
-      "id": "usgs:earthquakes",
-      "title": "Earthquake Catalog (ComCat)",
-      "description": "Global earthquake events with location, magnitude, and depth from the ANSS Comprehensive Catalog via the FDSN event web service. Anonymous REST with bbox, time, and magnitude filters.",
-      "provider": "USGS",
-      "domain": "Natural hazards",
-      "system": null,
-      "availability": "Planned",
-      "since": null,
-      "keywords": [
-        "earthquakes",
-        "seismic",
-        "geology",
-        "hazards",
-        "comcat",
-        "fdsn"
-      ],
-      "formats": [],
-      "selection": null,
-      "inputs": null,
-      "reader_extra": null,
-      "resolution": null,
-      "update_frequency": null,
-      "latency": null,
-      "citation": null,
-      "terms": null,
-      "variables": [],
-      "max_window": null,
-      "guide": null,
-      "reference": "https://docs.usdata.dev/generated/catalog/usgs/",
-      "examples": []
     },
     {
       "id": "usgs:3dep-elevation",

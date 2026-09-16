@@ -30,7 +30,10 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`noaa:tsunami-events`](noaa.md#noaatsunami-events) Global Historical Tsunami Database · Planned
 - [`usda:cropland-data-layer`](usda.md#usdacropland-data-layer) Cropland Data Layer · Planned
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
-- [`usgs:earthquakes`](usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · Planned
+
+**Implemented, unreleased (planned 0.19)**
+
+- [`usgs:earthquakes`](usgs.md#usgsearthquakes) Earthquake Catalog (ComCat) · Source only
 
 **Included since 0.15**
 
