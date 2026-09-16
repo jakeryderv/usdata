@@ -1,1 +1,0 @@
-`just run-notebooks --notebook` accepts an example slug as well as a repository-relative path and names exactly what was typed when it matches nothing, and `npm run check` in `web/` builds `dist/` first so it passes on a clean checkout.

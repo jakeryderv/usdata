@@ -1,1 +1,0 @@
-Walk the published package through the getting-started guide after each release: the publish workflow installs the new version from PyPI and runs the guide's own commands, extracted from the guide itself, against live services.

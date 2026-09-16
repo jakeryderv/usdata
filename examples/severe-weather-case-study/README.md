@@ -11,7 +11,7 @@ path start. It does not detect a tornado in any of those products, it does not
 establish that any of these quantities precede tornadoes in general, and it is
 one case. See [examples setup](https://usdata.dev/examples/) to run it.
 
-Available from source for the unreleased v0.17.0, which adds the named manifest
+Available since v0.17.0, which adds the named manifest
 sources this example is built on, `FetchedAsset.inspect()`, the strict GRIB2
 `select`, registry-filled units, and `usdata cite`. The retained
 [manifest](dataset.yaml) holds six named sources, and the notebook addresses each
