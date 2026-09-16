@@ -8,6 +8,7 @@ would otherwise let through, notably booleans, floats, and non-ASCII digits.
 Use them as ``Annotated`` metadata on a field of a parameter model::
 
     cycle: Annotated[int, int_range(0, 23)]
+    nearest: Annotated[int, positive_int()]
     forecast_hour: Annotated[list[int], int_list(0, 48)]
     file: Annotated[str, choice("sfc", "prs", "nat")]
 
@@ -43,6 +44,17 @@ def _integer(value: object, low: int, high: int) -> int:
     return int(text)
 
 
+def _positive_integer(value: object) -> int:
+    """One integer of at least 1, read from an int or a digit string."""
+    message = "must be a positive integer"
+    if isinstance(value, bool) or not isinstance(value, (str, int)):
+        raise ValueError(message)
+    text = str(value).strip()
+    if not text.isascii() or not text.isdigit() or int(text) < 1:
+        raise ValueError(message)
+    return int(text)
+
+
 def _text(value: object) -> str:
     """One non-empty string, rejecting the numbers and booleans YAML may hand over."""
     if not isinstance(value, str) or not value.strip():
@@ -53,6 +65,11 @@ def _text(value: object) -> str:
 def int_range(low: int, high: int) -> BeforeValidator:
     """Validate an integer field, accepting the digit strings the CLI passes."""
     return BeforeValidator(lambda value: _integer(value, low, high))
+
+
+def positive_int() -> BeforeValidator:
+    """Validate a count field: an integer of at least 1, with no upper bound."""
+    return BeforeValidator(_positive_integer)
 
 
 def int_list(low: int, high: int) -> BeforeValidator:
@@ -123,4 +140,5 @@ __all__ = [
     "choice",
     "int_list",
     "int_range",
+    "positive_int",
 ]

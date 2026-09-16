@@ -6,13 +6,13 @@ there; Cloudflare serves them directly.
 
 ```sh
 npm ci
-npm run build
 npm run check
 npm run dev
 ```
 
-`npm run check` tests catalog search and example rendering, then validates asset
-deployment without publishing.
+`npm run check` builds `dist/` first, then tests catalog search and example
+rendering, then validates asset deployment without publishing; the dry run reads
+`dist/`, so a clean checkout needs no separate `npm run build`.
 `npm run deploy` publishes the homepage. No custom Worker script is needed.
 Docs content lives in `../docs/`, with configuration in `../mkdocs.yml` and
 hosting settings in `../infra/docs.wrangler.jsonc`.

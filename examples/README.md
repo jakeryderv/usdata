@@ -66,6 +66,11 @@ kernel. In an IDE, select this checkout's `.venv` interpreter after the environm
 has been installed. Use **Restart Kernel and Run All Cells** to check that a notebook
 works without hidden state. Each notebook works from its own folder or the repo root.
 
+To execute notebooks non-interactively, `just run-notebooks` takes `--notebook`,
+which names one example by slug (`glm-flashes`) or by repository-relative path
+and is repeatable. Add `--write` to refresh the selected notebooks' committed
+outputs, which happens only when every selected notebook passes.
+
 The first run needs access to NOAA and/or USGS. Interactive runs use the normal
 usdata cache (`USDATA_CACHE_DIR` overrides it). The manifest examples retain
 their `dataset.yaml` files; a first pull creates an ignored `dataset.lock.json`
