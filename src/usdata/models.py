@@ -132,7 +132,16 @@ class TimeRange(BaseModel):
 
 
 class Capabilities(BaseModel):
-    """What a source can do server-side. Anything False means usdata fetches whole files."""
+    """Which query dimensions a source honours when selecting what to fetch.
+
+    ``spatial_subset`` and ``variable_subset`` mean the request narrows the
+    bytes served, so a bbox or a variable list changes the files.
+    ``temporal_subset`` means the time window chooses which assets are fetched,
+    whether the source crops files to it or serves whole files that cover it.
+    ``partial_fetch`` means selected byte ranges of an object can be fetched on
+    their own. A false value means the adapter refuses that query field. The
+    adapter contract tests verify each declaration against the adapter.
+    """
 
     spatial_subset: bool = False
     temporal_subset: bool = False
