@@ -19,8 +19,9 @@ usdata fetch noaa:ghcn-daily -p stations=USW00013967 --start 2024-05-06 --end 20
 usdata pull dataset.yaml && usdata cite dataset.yaml
 ```
 
-**Pre-alpha.** The API can still change between minor versions; the
-[changelog](CHANGELOG.md) lists what each version contains.
+**Alpha.** Releases are tested and lockfiles are stable, but the Python API
+and CLI can change between minor versions; the [changelog](CHANGELOG.md) marks
+breaking changes.
 
 ## Where to look
 
