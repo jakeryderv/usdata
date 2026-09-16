@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from pathlib import Path
 
-from usdata.manifest import LockedAsset, Lockfile, Manifest, lockfile_path
+from usdata.manifest import LockedAsset, Lockfile, Manifest, SourceSpec, lockfile_path
 from usdata.models import Asset, Protocol, Provenance
 
 EXAMPLE = """
@@ -51,8 +51,20 @@ def test_lockfile_roundtrip(tmp_path: Path) -> None:
         manifest_checksum="sha256:" + "1" * 64,
         generated_at=datetime.now(UTC),
         usdata_version="0.3.0",
-        assets=[LockedAsset(asset=asset, provenance=prov)],
+        assets=[LockedAsset(asset=asset, provenance=prov, source="radar")],
     )
     path = tmp_path / "dataset.lock.json"
     lock.save(path)
     assert Lockfile.load(path) == lock
+    assert Lockfile.load(path).assets[0].source == "radar"
+
+
+def test_source_keys_use_names_and_fall_back_to_positions() -> None:
+    manifest = Manifest(
+        name="cedar-key-helene-surge",
+        sources=[
+            SourceSpec(dataset="noaa:coops-water-levels", name="surge"),
+            SourceSpec(dataset="noaa:coops-tide-predictions"),
+        ],
+    )
+    assert manifest.source_keys() == ["surge", "2"]

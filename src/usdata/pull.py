@@ -73,15 +73,46 @@ class UpstreamChanged(ChecksumMismatch):
 
 
 class PullResult(BaseModel):
-    """What a pull did."""
+    """What a pull did.
+
+    ``fetched`` keeps manifest order, and within a source the order its adapter
+    listed the assets; ``by_source`` holds the same objects grouped by source
+    key, which is a source's ``name`` when it has one and its one-based position
+    otherwise.
+    """
 
     lockfile: Lockfile
     lockfile_path: Path
-    fetched: list[FetchedAsset]
+    fetched: list[FetchedAsset] = Field(
+        description="Every asset, in manifest order, then in the order its adapter listed it"
+    )
     from_lockfile: bool
     updated: list[str] = Field(
         default_factory=list, description="Ids of assets whose pins were rewritten by update"
     )
+    by_source: dict[str, list[FetchedAsset]] = Field(
+        default_factory=dict,
+        description="The same assets grouped by source key, in manifest order",
+    )
+
+
+def _by_source(pairs: Iterable[tuple[LockedAsset, FetchedAsset]]) -> dict[str, list[FetchedAsset]]:
+    """Group fetched assets by the source key their lockfile entry records.
+
+    Keys come out in manifest order because lockfile entries are written in it.
+    A lockfile written before sources had keys records none; those entries fall
+    back to the one-based position of their dataset id among the datasets seen,
+    which groups sources that share a dataset together until the manifest names
+    them and a forced pull rewrites the lockfile.
+    """
+    grouped: dict[str, list[FetchedAsset]] = {}
+    positions: dict[str, str] = {}
+    for entry, item in pairs:
+        dataset_id = entry.asset.dataset_id
+        if dataset_id not in positions:
+            positions[dataset_id] = str(len(positions) + 1)
+        grouped.setdefault(entry.source or positions[dataset_id], []).append(item)
+    return grouped
 
 
 def _load(manifest_path: Path, registry: Registry) -> Manifest:
@@ -120,18 +151,18 @@ def resolve(
     locked: list[LockedAsset] = []
     with ExitStack() as stack:
         adapters = _checked_adapters(manifest, reg, stack)
-        for index, source in enumerate(manifest.sources, start=1):
+        for key, source in zip(manifest.source_keys(), manifest.sources, strict=True):
             dataset = reg.get(source.dataset)
             items = _fetch_with(adapters[dataset.id], dataset, source.to_query(), root=root)
             if not items and not source.allow_empty:
                 raise EmptySource(
-                    f"source {index} ({dataset.id}) matched no assets; "
+                    f"source {key} ({dataset.id}) matched no assets; "
                     "check the query or set allow_empty: true for this source"
                 )
             for item in items:
                 fetched.append(item)
                 pinned = item.asset.model_copy(update={"checksum": item.provenance.checksum})
-                locked.append(LockedAsset(asset=pinned, provenance=item.provenance))
+                locked.append(LockedAsset(asset=pinned, provenance=item.provenance, source=key))
     lock = Lockfile(
         manifest=manifest.name,
         manifest_checksum=sha256_file(manifest_path),
@@ -141,7 +172,13 @@ def resolve(
     )
     out = lockfile_path(manifest_path)
     lock.save(out)
-    return PullResult(lockfile=lock, lockfile_path=out, fetched=fetched, from_lockfile=False)
+    return PullResult(
+        lockfile=lock,
+        lockfile_path=out,
+        fetched=fetched,
+        from_lockfile=False,
+        by_source=_by_source(zip(locked, fetched, strict=True)),
+    )
 
 
 def _selected(lock: Lockfile, update: Iterable[str]) -> set[str]:
@@ -213,7 +250,9 @@ def restore(
                     entries.append(entry)  # Same bytes: keep the original pin and record.
                 else:
                     pinned = item.asset.model_copy(update={"checksum": item.provenance.checksum})
-                    entries.append(LockedAsset(asset=pinned, provenance=item.provenance))
+                    entries.append(
+                        LockedAsset(asset=pinned, provenance=item.provenance, source=entry.source)
+                    )
                     updated.append(entry.asset.id)
                 fetched.append(item)
                 continue
@@ -242,6 +281,7 @@ def restore(
         fetched=fetched,
         from_lockfile=True,
         updated=updated,
+        by_source=_by_source(zip(entries, fetched, strict=True)),
     )
 
 

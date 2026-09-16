@@ -1,4 +1,5 @@
 import importlib
+import json
 from pathlib import Path
 
 import httpx
@@ -26,6 +27,9 @@ sources:
 SECOND_SOURCE = (
     "  - dataset: noaa:ghcn-daily\n    start: 2024-05-06\n    end: 2024-05-07\n"
     "    params: { stations: USW00094728 }\n"
+)
+NAMED = MANIFEST.replace("  - dataset:", "  - name: okc\n    dataset:") + SECOND_SOURCE.replace(
+    "  - dataset:", "  - name: nyc\n    dataset:"
 )
 CSV_V1 = b'"DATE","STATION","PRCP"\n"2024-05-06","USW00013967","10.9"\n'
 CSV_V2 = b'"DATE","STATION","PRCP"\n"2024-05-06","USW00013967","99.9"\n'
@@ -264,3 +268,46 @@ def test_resolve_closes_the_shared_adapter_when_a_later_source_fails(
             pull(manifest, root=tmp_path)
     assert opened == ["noaa:ghcn-daily"] and closed == ["noaa:ghcn-daily"]
     assert not lockfile_path(manifest).exists()
+
+
+def test_named_sources_group_the_result_and_the_lockfile(tmp_path: Path) -> None:
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text(NAMED)
+    with respx.mock() as mock:
+        mock.get(DATA_URL).mock(return_value=httpx.Response(200, content=CSV_V1))
+        first = pull(manifest, root=tmp_path)
+    assert [entry.source for entry in first.lockfile.assets] == ["okc", "nyc"]
+    assert list(first.by_source) == ["okc", "nyc"]
+    assert first.by_source["okc"] == first.fetched[:1]
+    assert first.by_source["nyc"] == first.fetched[1:]
+    with respx.mock(assert_all_called=False) as mock:
+        data = mock.get(DATA_URL)
+        restored = pull(manifest, root=tmp_path)
+    assert restored.from_lockfile and not data.called
+    assert list(restored.by_source) == ["okc", "nyc"]
+    assert [f.asset.id for f in restored.by_source["nyc"]] == [
+        f.asset.id for f in first.by_source["nyc"]
+    ]
+
+
+def test_a_lockfile_without_source_keys_groups_by_dataset(tmp_path: Path) -> None:
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text(MANIFEST + SECOND_SOURCE)
+    with respx.mock() as mock:
+        mock.get(DATA_URL).mock(return_value=httpx.Response(200, content=CSV_V1))
+        first = pull(manifest, root=tmp_path)
+    assert list(first.by_source) == ["1", "2"]
+    lock_path = lockfile_path(manifest)
+    written = json.loads(lock_path.read_text())
+    for entry in written["assets"]:
+        del entry["source"]  # A lockfile from before sources carried keys.
+    lock_path.write_text(json.dumps(written))
+    assert [entry.source for entry in Lockfile.load(lock_path).assets] == [None, None]
+    with respx.mock(assert_all_called=False) as mock:
+        data = mock.get(DATA_URL)
+        restored = pull(manifest, root=tmp_path)
+    assert restored.from_lockfile and not data.called
+    # Both sources read the same dataset, so the fallback cannot tell them apart;
+    # naming them and pulling with force rewrites the keys.
+    assert list(restored.by_source) == ["1"]
+    assert restored.by_source["1"] == restored.fetched
