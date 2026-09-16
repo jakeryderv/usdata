@@ -57,3 +57,36 @@ def test_s3_url_helpers() -> None:
     assert s3.https_url("b", "a/b c") == "https://b.s3.amazonaws.com/a/b%20c"
     with pytest.raises(ValueError):
         s3.parse_s3_url("https://x")
+
+
+def test_object_url_maps_any_key_including_an_index_sidecar() -> None:
+    key = "hrrr.20260914/conus/hrrr.t12z.wrfsfcf01.grib2"
+    assert s3.object_url(f"s3://noaa-hrrr-bdp-pds/{key}") == (
+        f"https://noaa-hrrr-bdp-pds.s3.amazonaws.com/{key}"
+    )
+    assert s3.object_url(f"s3://noaa-hrrr-bdp-pds/{key}.idx").endswith(".grib2.idx")
+    with pytest.raises(ValueError):
+        s3.object_url("https://noaa-hrrr-bdp-pds.s3.amazonaws.com/x")
+
+
+def test_head_object_reads_size_and_unquoted_etag_without_the_body() -> None:
+    requests: list[httpx.Request] = []
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(
+            200,
+            headers={
+                "Content-Length": "151717165",
+                "ETag": '"81198a73ad430c73adfbe3335421ea99"',
+                "Last-Modified": "Sun, 14 Sep 2026 12:55:28 GMT",
+            },
+        )
+
+    with httpx.Client(transport=httpx.MockTransport(respond)) as client:
+        obj = s3.head_object("s3://noaa-hrrr-bdp-pds/hrrr.t12z.wrfsfcf01.grib2", client)
+        assert not client.is_closed
+    assert [request.method for request in requests] == ["HEAD"]
+    assert obj.size == 151_717_165
+    assert obj.etag == "81198a73ad430c73adfbe3335421ea99"
+    assert obj.last_modified is not None and obj.last_modified.hour == 12

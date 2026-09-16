@@ -56,6 +56,11 @@ def cached_path(dataset_id: str, asset_id: str, root: Path | None = None) -> Pat
     return path
 
 
+def sha256_bytes(data: bytes) -> str:
+    """Hex sha256 of a byte string, prefixed 'sha256:' as ``sha256_file`` prefixes a file's."""
+    return f"sha256:{hashlib.sha256(data).hexdigest()}"
+
+
 def sha256_file(path: Path) -> str:
     """Hex sha256 of a file, prefixed 'sha256:' to match Asset.checksum."""
     with path.open("rb") as f:

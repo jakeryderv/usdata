@@ -9,6 +9,7 @@ from __future__ import annotations
 import xml.etree.ElementTree as ET
 from collections.abc import Iterator
 from datetime import datetime
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 from urllib.parse import quote
 
@@ -40,6 +41,34 @@ def parse_s3_url(url: str) -> tuple[str, str]:
 def https_url(bucket: str, key: str = "") -> str:
     """The virtual-hosted HTTPS URL for a bucket key, with the key percent-encoded."""
     return f"https://{bucket}.s3.amazonaws.com/{quote(key)}"
+
+
+def object_url(url: str) -> str:
+    """The HTTPS URL for an ``s3://bucket/key`` object, for any request, not only a download.
+
+    Sidecars such as a GRIB2 ``<key>.idx`` index are ordinary keys, so they are
+    reached through the same anonymous mapping the objects themselves use.
+    """
+    return https_url(*parse_s3_url(url))
+
+
+def head_object(url: str, client: httpx.Client | None = None) -> S3Object:
+    """Size, ETag, and last-modified of one ``s3://bucket/key`` object, without its bytes."""
+    own = client is None
+    client = client or http.client()
+    try:
+        response = http.head(object_url(url), client)
+    finally:
+        if own:
+            client.close()
+    modified = response.headers.get("Last-Modified")
+    etag = response.headers.get("ETag")
+    return S3Object(
+        key=parse_s3_url(url)[1],
+        size=int(response.headers.get("Content-Length", 0)),
+        etag=etag.strip('"') if etag else None,
+        last_modified=parsedate_to_datetime(modified) if modified else None,
+    )
 
 
 def _text(el: ET.Element, tag: str) -> str | None:
@@ -97,5 +126,4 @@ def list_objects(
 
 def download(url: str, dest: Path, client: httpx.Client | None = None) -> Path:
     """Download an ``s3://bucket/key`` object anonymously."""
-    bucket, key = parse_s3_url(url)
-    return http.download(https_url(bucket, key), dest, client)
+    return http.download(object_url(url), dest, client)

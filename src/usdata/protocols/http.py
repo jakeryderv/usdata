@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+import re
+from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -13,13 +14,30 @@ import httpx
 
 from usdata import __version__, _progress
 from usdata._files import staged_path
+from usdata.models import ByteRange
 
 USER_AGENT = f"usdata/{__version__} (+https://github.com/jakeryderv/usdata)"
 DEFAULT_TIMEOUT = httpx.Timeout(10.0, read=120.0)
 MAX_ATTEMPTS = 3
 MAX_RETRY_DELAY = 30.0
 RETRY_STATUS = {429, 500, 502, 503, 504}
+PARTIAL_CONTENT = 206
+CONTENT_RANGE = re.compile(r"bytes (\d+)-(\d+)/(\d+)")
 T = TypeVar("T")
+
+
+class RangeNotHonored(httpx.HTTPError):
+    """A range request came back as something other than exactly the bytes asked for.
+
+    Serving the whole object instead of the requested interval, or answering with
+    a ``Content-Range`` that does not match the request, would silently produce a
+    file that is not the one the caller asked for, so it fails before any byte is
+    written and is never retried.
+    """
+
+
+class ObjectChanged(RangeNotHonored):
+    """The object was republished: its ETag no longer matches the one pinned (HTTP 412)."""
 
 
 def client(**kwargs: Any) -> httpx.Client:
@@ -74,6 +92,136 @@ def get(url: str | httpx.URL, http: httpx.Client, **kwargs: Any) -> httpx.Respon
         return response
 
     return _retry(request)
+
+
+def head(url: str | httpx.URL, http: httpx.Client, **kwargs: Any) -> httpx.Response:
+    """HEAD an object with the same bounded retries as ``get``; the caller owns the client."""
+
+    def request() -> httpx.Response:
+        response = http.head(url, **kwargs)
+        response.raise_for_status()
+        return response
+
+    return _retry(request)
+
+
+def contiguous_runs(ranges: Sequence[ByteRange], total: int) -> list[ByteRange]:
+    """Merge ascending, non-overlapping ranges into the fewest intervals that cover them.
+
+    Args:
+        ranges: Byte ranges in ascending order, none overlapping another.
+        total: Size of the object the ranges belong to; every range lies inside it.
+
+    Returns:
+        One range per contiguous run, in the same order.
+
+    Raises:
+        ValueError: The list is empty, out of order, overlapping, or past the object's end.
+    """
+    if not ranges:
+        raise ValueError("a range request needs at least one byte range")
+    runs: list[ByteRange] = []
+    for part in ranges:
+        if part.end >= total:
+            raise ValueError(f"byte range {part.header} lies past the {total} byte object")
+        if runs and part.start <= runs[-1].end:
+            raise ValueError("byte ranges must ascend and must not overlap")
+        if runs and part.start == runs[-1].end + 1:
+            runs[-1] = ByteRange(start=runs[-1].start, end=part.end)
+        else:
+            runs.append(part)
+    return runs
+
+
+def _honored(response: httpx.Response, run: ByteRange, total: int, url: str) -> None:
+    """Check a range response before a byte of it is written, or raise saying why not."""
+    if response.status_code == 412:
+        raise ObjectChanged(f"{url} was republished; the pinned ETag no longer matches")
+    if response.status_code != PARTIAL_CONTENT:
+        if response.status_code == 200:
+            raise RangeNotHonored(f"{url} ignored {run.header} and offered the whole object")
+        response.raise_for_status()
+        raise RangeNotHonored(f"{url} answered {run.header} with HTTP {response.status_code}")
+    reported = CONTENT_RANGE.fullmatch(response.headers.get("Content-Range", "").strip())
+    if reported is None or (int(reported[1]), int(reported[2]), int(reported[3])) != (
+        run.start,
+        run.end,
+        total,
+    ):
+        raise RangeNotHonored(
+            f"{url} answered {run.header} of {total} bytes with Content-Range "
+            f"{response.headers.get('Content-Range', '(absent)')!r}"
+        )
+
+
+def download_ranges(
+    url: str,
+    dest: Path,
+    ranges: Sequence[ByteRange],
+    *,
+    etag: str,
+    total: int,
+    http: httpx.Client | None = None,
+) -> Path:
+    """Download selected byte ranges of one object and concatenate them into ``dest``.
+
+    One GET per contiguous run, each carrying ``Range`` and ``If-Match``, with the
+    runs appended in the order they were given. A response that is not 206, whose
+    ``Content-Range`` disagrees with the request or the object's size, or whose
+    body is the wrong length, fails the whole download before ``dest`` is touched.
+
+    Args:
+        url: The object's URL; ``s3://`` callers map it with ``s3.object_url`` first.
+        dest: Path the concatenated bytes are moved to once every run has arrived.
+        ranges: Ascending, non-overlapping inclusive byte ranges to fetch.
+        etag: The object's ETag, sent as ``If-Match`` so a republished object fails.
+        total: The object's size, checked against every ``Content-Range``.
+        http: Client to use; one is created and closed here when it is omitted.
+
+    Returns:
+        ``dest``.
+
+    Raises:
+        ValueError: The ranges are empty, out of order, overlapping, or out of bounds.
+        ObjectChanged: The object was republished between listing and fetching.
+        RangeNotHonored: The server answered with something other than those bytes.
+    """
+    runs = contiguous_runs(ranges, total)
+    expected = sum(run.length for run in runs)
+    own = http is None
+    active = http or client()
+    attempt = 0
+    headers = {"If-Match": etag.strip('"')}
+
+    def request() -> Path:
+        nonlocal attempt
+        attempt += 1
+        _progress.emit(_progress.TransferProgress(0, expected, attempt))
+        completed = 0
+        with staged_path(dest) as tmp, tmp.open("wb") as out:
+            for run in runs:
+                with active.stream(
+                    "GET", url, headers={**headers, "Range": run.header}
+                ) as response:
+                    _honored(response, run, total, url)
+                    written = 0
+                    for chunk in response.iter_bytes():
+                        out.write(chunk)
+                        written += len(chunk)
+                        completed += len(chunk)
+                        _progress.emit(_progress.TransferProgress(completed, expected, attempt))
+                if written != run.length:
+                    raise RangeNotHonored(
+                        f"{url} answered {run.header} with {written} bytes, not {run.length}"
+                    )
+            out.flush()
+        return dest
+
+    try:
+        return _retry(request)
+    finally:
+        if own:
+            active.close()
 
 
 def download(url: str, dest: Path, http: httpx.Client | None = None) -> Path:
