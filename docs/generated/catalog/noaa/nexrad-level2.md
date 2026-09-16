@@ -24,6 +24,15 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `site` | One radar ICAO id, for example KTLX. |
 | `sites` | Several radar ICAO ids, comma-separated or a list. |
 
+## Variables
+
+| Variable | Units | Meaning |
+|---|---|---|
+| `DBZH` | dBZ | Equivalent reflectivity factor H |
+| `ZDR` | dB | Log differential reflectivity H/V |
+| `PHIDP` | degrees | Differential phase HV |
+| `RHOHV` | unitless | Correlation coefficient HV |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-nexrad.md).
@@ -32,6 +41,11 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 - Availability: since 0.2
 - Domain: Weather radar
+- Temporal resolution: One volume scan every 4, 5, 6, or 10 minutes, set by the volume coverage pattern
+- Updates: New Level II data is added as soon as it is available
+- Longest query window: 31 days
+- Terms of use: <https://www.noaa.gov/information-technology/open-data-dissemination>
+- Citation: NEXRAD on AWS was accessed on [date] from https://registry.opendata.aws/noaa-nexrad
 - Geographic bounds (WGS84): west -180°, south 15°, east -60°, north 72°
 - Catalog date range: 1991-06-01 to open-ended
 - Coverage varies by station, product, and date; the range above does not guarantee observations.

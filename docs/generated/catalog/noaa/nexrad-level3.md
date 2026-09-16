@@ -25,6 +25,33 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `site` | One radar ICAO id, for example KTLX. |
 | `sites` | Several radar ICAO ids, comma-separated or a list. |
 
+## Variables
+
+| Variable | Units | Meaning |
+|---|---|---|
+| `N?B` | — | Base reflectivity, super-resolution (since 2022-02-18) |
+| `N?G` | — | Base velocity, super-resolution (since 2022-02-18) |
+| `N?Q` | — | Base reflectivity, 256 levels (retired 2022-09-08) |
+| `N?U` | — | Base velocity, 256 levels (retired 2022-09-08) |
+| `N?S` | — | Storm-relative mean radial velocity |
+| `N?C` | — | Correlation coefficient |
+| `N?X` | — | Differential reflectivity |
+| `N?K` | — | Specific differential phase |
+| `N?H` | — | Hydrometeor classification |
+| `NCR` | — | Composite reflectivity |
+| `EET` | — | Enhanced echo tops |
+| `DVL` | — | Digital vertically integrated liquid |
+| `NMD` | — | Mesocyclone detection |
+| `NST` | — | Storm tracking information |
+| `NTV` | — | Tornado vortex signature (retired 2022-05-24) |
+| `NVW` | — | VAD wind profile |
+| `DHR` | — | Digital hybrid-scan reflectivity |
+| `HHC` | — | Hybrid hydrometeor classification |
+| `DAA` | — | Digital one-hour precipitation accumulation |
+| `DTA` | — | Digital storm-total precipitation accumulation |
+| `DSP` | — | Digital storm-total precipitation |
+| `OHA` | — | One-hour precipitation accumulation |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-nexrad-level3.md).
@@ -33,6 +60,11 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 - Availability: since 0.15
 - Domain: Weather radar
+- Temporal resolution: One file per product per volume scan; roughly 120 to 390 per product per day
+- Updates: Files appear as the Unidata feed captures them, and coverage has gaps
+- Longest query window: 31 days
+- Terms of use: <https://www.noaa.gov/information-technology/open-data-dissemination>
+- Citation: NEXRAD on AWS was accessed on [date] from https://registry.opendata.aws/noaa-nexrad
 - Geographic bounds (WGS84): west -180°, south 15°, east -60°, north 72°
 - Catalog date range: 2020-03-30 to open-ended
 - Coverage varies by station, product, and date; the range above does not guarantee observations.

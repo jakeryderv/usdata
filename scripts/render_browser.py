@@ -15,7 +15,7 @@ from render_registry import (
     example_url,
 )
 
-from usdata.models import Status
+from usdata.models import Status, describe_duration
 from usdata.registry import Registry
 
 OUTPUT = ROOT / "web/public/datasets/catalog.json"
@@ -51,6 +51,17 @@ def render() -> str:
                     "selection": dataset.selection,
                     "inputs": dataset.inputs,
                     "reader_extra": dataset.reader,
+                    "resolution": (dataset.resolution.model_dump() if dataset.resolution else None),
+                    "update_frequency": dataset.update_frequency,
+                    "latency": dataset.latency,
+                    "citation": dataset.citation,
+                    "terms": dataset.terms,
+                    "variables": [v.model_dump() for v in dataset.variables],
+                    "max_window": (
+                        describe_duration(dataset.limits.max_window)
+                        if dataset.limits and dataset.limits.max_window
+                        else None
+                    ),
                     "guide": docs_url(dataset.guide) if dataset.guide else None,
                     "reference": (
                         DOCS + f"generated/catalog/{dataset.provider}/{dataset.name}/"

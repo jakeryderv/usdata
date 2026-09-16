@@ -99,6 +99,24 @@ describes each product's algorithm, units, and grid.
 See the [service research notes](noaa-services.md#mrms-gridded-radar-products)
 for dated upstream probes.
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Updates, citation, and terms: the [NODD registry
+  entry](https://registry.opendata.aws/noaa-mrms-pds/) ("Data is delivered in real-time
+  with a 2-minute update cycle") and the [NOAA Open Data
+  Dissemination](https://www.noaa.gov/information-technology/open-data-dissemination)
+  statement it quotes.
+- Resolution and variables: the [MRMS product
+  guide](https://www.nssl.noaa.gov/projects/mrms/operational/tables.php) and the product
+  table above; the registry lists exactly the products this adapter supports, with their
+  units.
+- Longest query window: `MAX_WINDOW` in `usdata.providers.noaa.mrms`.
+- Latency is empty beyond the real-time claim already in the update cycle.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/mrms.md#catalog-reference).

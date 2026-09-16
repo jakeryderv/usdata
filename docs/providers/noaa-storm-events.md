@@ -45,6 +45,26 @@ describes historical coverage.
 
 See the [service research notes](noaa-services.md#storm-events-annual-details) for dated upstream probes.
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Updates: the [archive
+  README](https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/README), which
+  says the current yearly file is updated each month.
+- Resolution and variables: the [NCEI bulk format
+  reference](https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/Storm-Data-Bulk-csv-Format.pdf)
+  for the record granularity and the identifying columns this guide names. The full
+  column set is larger.
+- Terms and citation: the [NCEI dataset
+  record](https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00510/html),
+  whose use constraint is only "cite dataset when used as a source", so the entry uses
+  the agency, product, and access form.
+- Latency is empty: neither the README nor the dataset record states how far behind the
+  present the files run.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/storm-events.md#catalog-reference).

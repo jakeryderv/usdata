@@ -16,7 +16,7 @@ import tomllib
 from collections import Counter
 from pathlib import Path
 
-from usdata.models import LATER, Dataset, ProviderInfo, Status
+from usdata.models import LATER, Dataset, ProviderInfo, Status, describe_duration
 from usdata.providers import load_adapter
 from usdata.registry import Registry, version_key
 
@@ -228,6 +228,40 @@ def parameter_block(ds: Dataset) -> list[str]:
     ]
 
 
+def description_block(ds: Dataset) -> list[str]:
+    """Resolution, cadence, limits, terms, and citation, each line only when the entry states it."""
+    resolution = ds.resolution
+    window = ds.limits.max_window if ds.limits else None
+    stated = [
+        ("Spatial resolution", resolution.spatial if resolution else None),
+        ("Temporal resolution", resolution.temporal if resolution else None),
+        ("Updates", ds.update_frequency),
+        ("Latency", ds.latency),
+        ("Longest query window", describe_duration(window) if window else None),
+        ("Terms of use", f"<{ds.terms}>" if ds.terms else None),
+        ("Citation", ds.citation),
+    ]
+    return [f"- {label}: {value}" for label, value in stated if value]
+
+
+def variable_block(ds: Dataset) -> list[str]:
+    """The variables the entry declares, as the source names them."""
+    if not ds.variables:
+        return []
+    return [
+        "## Variables",
+        "",
+        "| Variable | Units | Meaning |",
+        "|---|---|---|",
+        *(
+            f"| `{cell(v.name)}` | {cell(v.units) if v.units else '—'} "
+            f"| {cell(v.description) if v.description else '—'} |"
+            for v in ds.variables
+        ),
+        "",
+    ]
+
+
 def dataset_path(ds: Dataset) -> Path:
     return Path("docs/generated/catalog") / ds.provider / f"{ds.name}.md"
 
@@ -277,6 +311,7 @@ def render_dataset(registry: Registry, ds: Dataset) -> str:
         "",
         *parameter_block(ds),
         "",
+        *variable_block(ds),
         "## Usage and limitations",
         "",
         usage_link(ds),
@@ -285,6 +320,7 @@ def render_dataset(registry: Registry, ds: Dataset) -> str:
         "",
         f"- Availability: {implementation_version(ds)}",
         f"- Domain: {registry.domain(ds.domain).name}",
+        *description_block(ds),
         *_extent(ds),
         "- Coverage varies by station, product, and date; "
         "the range above does not guarantee observations.",

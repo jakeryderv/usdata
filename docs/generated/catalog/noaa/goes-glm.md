@@ -22,6 +22,25 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 |---|---|
 | `satellite` | Required GOES satellite number: 16, 17, 18, or 19. |
 
+## Variables
+
+| Variable | Units | Meaning |
+|---|---|---|
+| `flash_lat` | degrees_north | Flash centroid latitude |
+| `flash_lon` | degrees_east | Flash centroid longitude |
+| `flash_area` | m2 | Flash footprint area |
+| `flash_energy` | J | Flash radiant energy |
+| `flash_time_offset_of_first_event` | CF datetime | Time of the flash's first event |
+| `flash_time_offset_of_last_event` | CF datetime | Time of the flash's last event |
+| `flash_quality_flag` | — | The source's own screening flag for the flash |
+| `group_lat` | degrees_north | Group centroid latitude |
+| `group_lon` | degrees_east | Group centroid longitude |
+| `group_area` | m2 | Group footprint area |
+| `group_energy` | J | Group radiant energy |
+| `event_lat` | degrees_north | Event latitude |
+| `event_lon` | degrees_east | Event longitude |
+| `event_energy` | J | Event radiant energy |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-glm.md).
@@ -30,6 +49,12 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 - Availability: since 0.15
 - Domain: Weather satellites
+- Spatial resolution: 8 to 14 km across the instrument's field of view
+- Temporal resolution: One detection file every 20 seconds
+- Updates: New data is added as soon as it's available
+- Longest query window: 1 day
+- Terms of use: <https://www.noaa.gov/information-technology/open-data-dissemination>
+- Citation: NOAA Geostationary Operational Environmental Satellites (GOES) 16, 17, 18 & 19 was accessed on [date] from https://registry.opendata.aws/noaa-goes
 - Catalog date range: 2018-02-13 to open-ended
 - Coverage varies by station, product, and date; the range above does not guarantee observations.
 - [Upstream documentation](https://registry.opendata.aws/noaa-goes/)

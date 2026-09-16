@@ -51,6 +51,27 @@ and rejecting intervals entirely before 2017-02-28.
 
 See the [service research notes](noaa-services.md#goes-abi-conus-imagery) for dated upstream probes.
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Resolution: the [NCEI ABI and GLM product
+  page](https://www.ncei.noaa.gov/products/goes-terrestrial-weather-abi-glm), which
+  gives 0.5 km to 2 km spatial resolution for the ABI radiances CMIP derives from and an
+  average five-minute scan frequency.
+- Updates, citation, and terms: the [NODD registry
+  entry](https://registry.opendata.aws/noaa-goes/) and the [NOAA Open Data
+  Dissemination](https://www.noaa.gov/information-technology/open-data-dissemination)
+  statement it quotes.
+- Variables: the CMIP file contents described on the NCEI page and carried by the
+  fetched scenes.
+- Longest query window: `MAX_WINDOW` in `usdata.providers.noaa.goes`.
+- Latency is empty: NODD says only that new data is added as soon as it is available,
+  and the NCEI page's 30-minutes-to-two-hours figure describes CLASS subscriptions
+  rather than this bucket.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/goes-abi.md#catalog-reference).

@@ -42,6 +42,23 @@ predictions from observations during Hurricane Helene.
 
 See the [service research notes](noaa-services.md#co-ops-tide-predictions) for dated upstream probes.
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Resolution, updates, and the longest window: the [Data API
+  documentation](https://api.tidesandcurrents.noaa.gov/api/prod/), which lists the
+  prediction intervals and limits non-`hilo` intervals to one year; the adapter's
+  `MAX_PREDICTION_INTERVAL` in `usdata.providers.noaa.coops` sets the declared 366 days.
+- Variables: the CSV header this adapter requests, including the `Type` column that only
+  `hilo` returns.
+- Terms: the [CO-OPS disclaimer](https://tidesandcurrents.noaa.gov/disclaimers.html).
+- Citation: CO-OPS publishes no citation form, so the entry uses the agency, product,
+  and access form.
+- Latency is empty: predictions are computed on request, so no lag applies.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/coops-tide-predictions.md#catalog-reference).

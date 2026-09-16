@@ -34,6 +34,26 @@ alongside the flags because their interpretation changes. See the
 
 See the [service research notes](noaa-services.md#co-ops-observed-water-levels) for dated upstream probes.
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Resolution, updates, and the longest window: the [Data API
+  documentation](https://api.tidesandcurrents.noaa.gov/api/prod/), which describes
+  six-minute water levels, monthly verification of the past month, and a one-month
+  retrieval limit; the adapter's `MAX_INTERVAL` in `usdata.providers.noaa.coops` sets
+  the declared 28 days inside it.
+- Variables: the CSV header this adapter requests and the [response
+  definitions](https://api.tidesandcurrents.noaa.gov/api/prod/responseHelp.html).
+- Terms: the [CO-OPS disclaimer](https://tidesandcurrents.noaa.gov/disclaimers.html),
+  which asks that NOS be acknowledged as the source.
+- Citation: CO-OPS publishes no citation form, so the entry uses the agency, product,
+  and access form.
+- Latency is empty: the API documentation states no lag between observation and
+  availability.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/coops-water-levels.md#catalog-reference).

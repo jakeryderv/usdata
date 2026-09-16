@@ -103,6 +103,25 @@ its GRIB2 field inventories.
 See the [service research notes](noaa-services.md#hrrr-model-output) for dated
 upstream probes.
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Resolution: the [HRRR product page](https://rapidrefresh.noaa.gov/hrrr/) for the 3 km
+  CONUS grid, with the grid size and forecast-hour schedule confirmed above.
+- Updates, citation, and terms: the [NODD registry
+  entry](https://registry.opendata.aws/noaa-hrrr-pds/), whose update frequency is
+  hourly, and the [NOAA Open Data
+  Dissemination](https://www.noaa.gov/information-technology/open-data-dissemination)
+  statement it quotes.
+- Variables: the `select` table above. A file holds hundreds of fields, so the entry
+  lists only the ones this guide and the example use.
+- Longest query window: `MAX_WINDOW` in `usdata.providers.noaa.hrrr`.
+- Latency is empty: NODD states no lag between a run's initialization and its
+  appearance.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/hrrr.md#catalog-reference).

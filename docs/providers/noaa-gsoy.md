@@ -28,6 +28,20 @@ change CSV bytes; retain the cache as well as the manifest and lockfile.
 
 See the [service research notes](noaa-services.md#global-summary-of-the-year) for dated upstream probes.
 
+## Metadata sources
+
+Every value in the catalog entry's resolution, cadence, citation, terms, variables, and
+limits comes from one of these pages. A field the agency does not publish is left empty
+rather than estimated.
+
+- Updates, citation, and terms: the [NCEI dataset
+  record](https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00947/html),
+  which states weekly updates and the Lawrimore et al. (2016) citation with its DOI.
+- Resolution and variables: the same record and the element codes this guide names, with
+  the units the Access Data Service returns under `units=metric`. The element set is
+  open and station-dependent.
+- Latency is empty: the record states no lag between a year's end and its summary.
+
 [All NOAA datasets](noaa.md).
 
 [Catalog reference](../generated/catalog/noaa/gsoy.md#catalog-reference).

@@ -25,6 +25,14 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `station` | Required seven-digit CO-OPS station id, for example '8518750'. |
 | `units` | metric (default) or english. |
 
+## Variables
+
+| Variable | Units | Meaning |
+|---|---|---|
+| `Date Time` | UTC | Prediction time, requested with time_zone=gmt |
+| `Prediction` | meters | Predicted tide height on the requested datum (metric units) |
+| `Type` | — | H or L, on the hilo interval only |
+
 ## Usage and limitations
 
 [Usage guide](../../../providers/noaa-coops-predictions.md).
@@ -33,6 +41,12 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 - Availability: since 0.14
 - Domain: Sea level and tides
+- Spatial resolution: One tide station per request
+- Temporal resolution: Six minutes by default; 1, 5, 10, 15, 30, or 60 minute steps, hourly, or high/low
+- Updates: Computed on request from the station's harmonic constituents, which NOAA revises occasionally
+- Longest query window: 366 days
+- Terms of use: <https://tidesandcurrents.noaa.gov/disclaimers.html>
+- Citation: NOAA National Ocean Service, Center for Operational Oceanographic Products and Services, tide predictions, accessed via usdata
 - Coverage: not specified in the catalog
 - Coverage varies by station, product, and date; the range above does not guarantee observations.
 - [Upstream documentation](https://api.tidesandcurrents.noaa.gov/api/prod/)
