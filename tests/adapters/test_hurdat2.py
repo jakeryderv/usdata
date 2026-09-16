@@ -312,7 +312,7 @@ def test_cli_dry_run_and_rejected_date_filter() -> None:
     with respx.mock() as mock:
         mock.get(DIRECTORY_URL).respond(200, text=listing(ATLANTIC, PACIFIC))
         result = runner.invoke(app, ["fetch", "noaa:hurdat2", "--dry-run"])
-    assert result.exit_code == 0 and result.stdout == f"{ATLANTIC}\t{URL}\n"
+    assert result.exit_code == 0 and result.stdout == f"{ATLANTIC}\t?\t{URL}\n"
     with respx.mock() as mock:
         bad = runner.invoke(app, ["fetch", "noaa:hurdat2", "--dry-run", "--start", "2021-01-01"])
     assert bad.exit_code == 2 and "complete basin" in bad.output and not mock.calls
