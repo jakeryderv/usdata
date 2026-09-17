@@ -52,6 +52,13 @@ recorded which messages it took; it is `None` for a whole file. Both appear on
 `GribMessage` and in `attrs["usdata"]["messages"]`, and `usdata inspect` prints
 the `object #` column only when the file has one.
 
+A GRIB2 message can hold several fields; RAP packs wind components that way,
+and its index numbers them `12.1` and `12.2`. The reader opens every field
+(ecCodes multi-field support is switched on for the process when the reader
+loads), and the fields of one message share its `file_index`, `object_index`,
+and `selector`. A gzip-compressed file, which is how MRMS arrives, is read one
+field per message.
+
 ## GRIB2 selectors and variable names
 
 A partial fetch also records the index `selector` each message was fetched for,

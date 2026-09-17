@@ -15,7 +15,7 @@ the concatenation of those messages, which is itself a valid GRIB2 file. See
 ADR 0028.
 
 The run-selection helpers (:func:`select_runs`, :func:`list_run_files`) and the
-:class:`ModelRuns` listing base are shared with the GFS adapter.
+:class:`ModelRuns` listing base are shared with the GFS, RAP, and NBM adapters.
 """
 
 from __future__ import annotations
@@ -250,6 +250,10 @@ class ModelRuns(HttpProvider):
         """How a missing run's files are named in errors, for example ``HRRR conus wrfsfcf``."""
         raise NotImplementedError
 
+    def key_pattern(self, variant: str) -> re.Pattern[str]:
+        """The pattern one run's ``variant`` files match; ``key_re`` unless the hour precedes it."""
+        return self.key_re
+
     def list_assets(self, query: Query) -> list[Asset]:
         """One asset per requested forecast hour of each run initialized inside the window."""
         self.reject(query, "bbox", "text", "variables", hint=self.hint)
@@ -272,7 +276,9 @@ class ModelRuns(HttpProvider):
         assets: list[Asset] = []
         for init in runs:
             prefix = self.run_prefix(init, variant)
-            found = list_run_files(self._http(), self.bucket, prefix, self.key_re, hours)
+            found = list_run_files(
+                self._http(), self.bucket, prefix, self.key_pattern(variant), hours
+            )
             if not found:
                 raise QueryError(
                     f"no {self.files_label(variant)} files for the {init:%Y-%m-%d %H}Z run; "

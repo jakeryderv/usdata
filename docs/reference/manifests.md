@@ -71,6 +71,8 @@ line.
 | `noaa:mrms` | Required `product`: one directory name from the allowlist, case-sensitive. | Whole two-minute CONUS grids selected by inclusive UTC stamp; at most one day; not before 2020-10-14. |
 | `noaa:hrrr` | Required `cycle` (0–23) and `forecast_hour` (integer, list, or comma-separated; 0–48 on the 00, 06, 12, and 18 UTC runs, 0–18 otherwise). `file`: `sfc` (default), `prs`, or `nat`. `messages`: GRIB2 messages to fetch instead of the whole file, as the object's `.idx` sidecar spells them. | The window selects runs by initialization time, inclusive, at most one day. |
 | `noaa:gfs` | Required `cycle` (0, 6, 12, or 18) and `forecast_hour` (0–384; hourly to 120 then every 3 hours at 0p25, every 3 hours at 0p50 and 1p00). `resolution`: `0p25` (default), `0p50`, or `1p00`. `messages`: as HRRR. | The window selects runs by initialization time, inclusive, at most one day. |
+| `noaa:rap` | Required `cycle` (0–23) and `forecast_hour` (0–21, or 0–51 on the 03, 09, 15, and 21 UTC runs). `file`: `awp130` (default), `awp130b`, `prs`, or `nat`. `messages`: as HRRR. | The window selects runs by initialization time, inclusive, at most one day. |
+| `noaa:nbm` | Required `cycle` (0–23) and `forecast_hour` (1–264; the schedule varies by cycle and an unpublished hour is named after the listing). `region`: `co` (default), `ak`, `hi`, `pr`, or `gu`. `messages`: as HRRR. | The window selects runs by initialization time, inclusive, at most one day. |
 | `noaa:coops-water-levels` | Required string `station` (seven digits) and `datum`; optional `units`: `metric` or `english`. | Six-minute observations. Both bounds required, UTC, minute precision, inclusive, at most 28 days. No geographic, text, or variable selection. No-data responses fail on fetch; `allow_empty` cannot suppress them. |
 | `noaa:coops-tide-predictions` | As water levels, plus `interval`: `6` (default), `1`, `5`, `10`, `15`, `30`, `60`, `h`, or `hilo`. | Both bounds required, UTC, minute precision, inclusive, at most 366 days. |
 | `noaa:storm-events` | None. | Both dates required; every UTC calendar year touched selects its latest annual details archive in full. Variable subsetting is rejected; filter rows locally. |
@@ -80,14 +82,19 @@ line.
 | `usgs:water-daily` | `site` or `sites`: quoted monitoring ids, mutually exclusive, or a geographic query; explicit sites and a geographic filter both apply. `statistic_id`: quoted five-digit code, default `"00003"` (daily mean). | Quoted parameter codes such as `"00060"`; inclusive local calendar dates. |
 
 `messages` takes one selector, a list, or a comma-separated string, each
-`SHORTNAME:level text` with an optional `:step text`, matched exactly and
-case-sensitively against the object's wgrib2 index: `CAPE:surface`,
-`HLCY:3000-0 m above ground`. This is the index's vocabulary, not the ecCodes
-names the reader's `select` takes. The asset is the named messages
-concatenated, its id gains a `.part-<digest>` tag, and its URL gains a
-`#messages=105,131` fragment; the lockfile pins the byte ranges and the
-object's ETag. A selector that matches nothing, and an object with no index,
-are errors rather than a whole-file download. See the
+`SHORTNAME:level text` with an optional `:step text` and then an optional
+further text, matched exactly and case-sensitively against the object's
+wgrib2 index: `CAPE:surface`, `HLCY:3000-0 m above ground`,
+`TMP:2 m above ground:1 hour fcst:ens std dev`. A selector without the further
+text names the plain field, not the ensemble or probability variants some
+products list beside it. This is the index's vocabulary, not the ecCodes names
+the reader's `select` takes. The asset is the named messages concatenated, its
+id gains a `.part-<digest>` tag, and its URL gains a `#messages=105,131`
+fragment; the lockfile pins the byte ranges and the object's ETag. A message
+holding several fields, which RAP's index numbers `12.1` and `12.2`, is
+fetched whole when any of its fields is named. A selector that matches
+nothing, and an object with no index, are errors rather than a whole-file
+download. See the
 [HRRR guide](../providers/noaa-hrrr.md#fetching-selected-messages).
 
 Plural `stations` and `sites` accept strings or lists of strings. CO-OPS

@@ -15,6 +15,8 @@ LIVE_EXTRAS = {
     "test_mrms_live": "grib",
     "test_hrrr_live": "grib",
     "test_gfs_live": "grib",
+    "test_rap_live": "grib",
+    "test_nbm_live": "grib",
 }
 
 
