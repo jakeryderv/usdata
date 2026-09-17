@@ -18,6 +18,8 @@ NOAA access is anonymous.
 | `goes-glm` | [GOES lightning detections](noaa-glm.md) (v0.15.0) | Whole 20-second detection files, at most a day |
 | `hrrr` | [HRRR model output](noaa-hrrr.md) (v0.15.0) | Whole CONUS GRIB2 files per run and forecast hour |
 | `gfs` | [GFS model output](noaa-gfs.md) (v0.15.0) | Whole global GRIB2 files per run, forecast hour, and resolution |
+| `rap` | [RAP model output](noaa-rap.md) (v0.20.0) | Whole 13 km GRIB2 files per run, forecast hour, and file family |
+| `nbm` | [NBM forecast guidance](noaa-nbm.md) (v0.20.0) | Whole regional GRIB2 core files per hourly run and forecast hour |
 | `storm-events` | [Storm Events](noaa-storm-events.md) | Whole annual details archives |
 | `spc-tornado-reports` | [SPC tornado reports](noaa-spc-tornado.md) (v0.15.0) | Whole annual, half-decade, or decade files |
 | `hurdat2` | [Tropical cyclone best tracks](noaa-hurdat2.md) (v0.12.0) | One whole basin file per revision |
@@ -57,6 +59,14 @@ See [HRRR model output](noaa-hrrr.md).
 ## GFS model output
 
 See [GFS model output](noaa-gfs.md).
+
+### RAP
+
+See [RAP model output](noaa-rap.md).
+
+### NBM
+
+See [NBM forecast guidance](noaa-nbm.md).
 
 ## Storm Events annual details
 

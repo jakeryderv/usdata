@@ -22,6 +22,8 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | <span id="noaahurdat2"></span>[Tropical cyclone best tracks](noaa/hurdat2.md) | Released | HURDAT2 fixed-format text | The newest revision of one whole basin file; filter track points locally |
 | <span id="noaagfs"></span>[GFS model output](noaa/gfs.md) | Released | GRIB2 | Global files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and grid resolution |
 | <span id="noaahrrr"></span>[HRRR model output](noaa/hrrr.md) | Released | GRIB2 | CONUS files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file variant |
+| <span id="noaanbm"></span>[NBM forecast guidance](noaa/nbm.md) | Source only | GRIB2 | Regional core files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and region |
+| <span id="noaarap"></span>[RAP model output](noaa/rap.md) | Source only | GRIB2 | Files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file family |
 | <span id="noaaclimate-normals"></span>[30-year station climate normals](noaa/climate-normals.md) | Released | CSV | Monthly, daily, or annual/seasonal normals per station; optional month-day window for daily and monthly |
 | <span id="noaacoops-water-levels"></span>[Coastal water levels](noaa/coops-water-levels.md) | Released | CSV | Six-minute observations for one station and datum; at most 28 days |
 | <span id="noaacoops-tide-predictions"></span>[Coastal tide predictions](noaa/coops-tide-predictions.md) | Released | CSV | Predictions for one station and datum on a chosen interval; at most a year |
@@ -33,7 +35,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 | Provider | Released | Source only | Planned |
 |---|---:|---:|---:|
-| [NOAA](noaa.md) | 18 | 0 | 17 |
+| [NOAA](noaa.md) | 18 | 2 | 15 |
 | [USGS](usgs.md) | 2 | 0 | 1 |
 | [Census Bureau](census.md) | 0 | 0 | 1 |
 | [EPA](epa.md) | 0 | 0 | 1 |

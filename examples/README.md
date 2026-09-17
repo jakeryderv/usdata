@@ -56,6 +56,16 @@ from the USGS catalog as one CSV and ranks them (available since v0.19.0).
 [Atlantic hurricane best tracks](https://usdata.dev/examples/hurdat2/) fetches the whole HURDAT2
 Atlantic file and reads it into one row per track point (available since v0.12.0).
 
+[RAP environment at 20 UTC](https://usdata.dev/examples/rap-environment/) fetches
+surface CAPE and 0–3 km helicity from one 13 km Rapid Refresh analysis as two
+byte ranges and reads them at the grid point nearest Oklahoma City (available
+since v0.20.0).
+
+[NBM evening temperatures](https://usdata.dev/examples/nbm-forecast/) fetches
+the 2 m temperature message from four hours of one National Blend run and
+prints the forecast at the nearest grid point per valid hour (available since
+v0.20.0).
+
 [Global model environment before a reported tornado](https://usdata.dev/examples/gfs-environment/) pulls
 the GFS 00 UTC 1-degree analysis for 2024-05-06 and reads surface CAPE and
 0–3 km helicity at the grid point nearest Oklahoma City (available since v0.15.0).

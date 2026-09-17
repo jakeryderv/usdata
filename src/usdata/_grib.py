@@ -81,6 +81,9 @@ def _modules() -> tuple[Any, Any, Any]:
     except (RuntimeError, OSError) as error:
         # eccodes imports, then findlibs fails to locate the shared library.
         raise MissingReaderDependency(f"{LIBRARY_HINT} ({error})") from error
+    # A GRIB2 message may hold several fields (RAP packs wind components that way);
+    # without this ecCodes yields only the first and silently drops the rest.
+    eccodes.codes_grib_multi_support_on()
     return eccodes, xarray, numpy
 
 
@@ -92,9 +95,15 @@ def _handle(eccodes: Any, handle: int) -> Iterator[int]:
         eccodes.codes_release(handle)
 
 
-def _messages_from_bytes(eccodes: Any, data: bytes) -> Iterator[int]:
-    """Handles for each message in an in-memory GRIB byte string, using section 0 lengths."""
+def _messages_from_bytes(eccodes: Any, data: bytes) -> Iterator[tuple[int, int]]:
+    """Message index and handle for each field in an in-memory GRIB byte string.
+
+    Messages are walked by their section 0 lengths; an in-memory message yields
+    its first field only, which is every field of the single-field products
+    that arrive compressed.
+    """
     offset = 0
+    index = 0
     while offset < len(data):
         if data[offset : offset + 4] != b"GRIB":
             raise ValueError(f"not a GRIB message at byte {offset}")
@@ -104,12 +113,18 @@ def _messages_from_bytes(eccodes: Any, data: bytes) -> Iterator[int]:
         if length < 16 or offset + length > len(data):
             raise ValueError(f"truncated GRIB message at byte {offset}")
         with _handle(eccodes, eccodes.codes_new_from_message(data[offset : offset + length])) as h:
-            yield h
+            yield index, h
         offset += length
+        index += 1
 
 
-def _messages(eccodes: Any, path: Path) -> Iterator[int]:
-    """Handles for each message, decompressing gzip in memory without changing cached bytes."""
+def _messages(eccodes: Any, path: Path) -> Iterator[tuple[int, int]]:
+    """Message index and handle for each field, decompressing gzip in memory.
+
+    The index counts GRIB2 messages from zero, so the fields of one message
+    that holds several share it; that is the number a partial fetch's record
+    pairs with, and the ``file_index`` the reader and ``inspect`` report.
+    """
     with path.open("rb") as probe:
         compressed = probe.read(2) == b"\x1f\x8b"
     if compressed:
@@ -117,12 +132,18 @@ def _messages(eccodes: Any, path: Path) -> Iterator[int]:
         yield from _messages_from_bytes(eccodes, data)
         return
     # ecCodes reads through the descriptor, so it gets a file object it alone positions.
+    index = -1
+    last_offset: int | None = None
     with path.open("rb") as raw:
         while (handle := eccodes.codes_grib_new_from_file(raw)) is not None:
             with _handle(eccodes, handle) as h:
                 if eccodes.codes_get(h, "edition") != 2:
                     raise ValueError("only GRIB edition 2 is supported")
-                yield h
+                offset = _get(eccodes, h, "offset", int)
+                if offset is None or offset != last_offset:
+                    index += 1
+                    last_offset = offset
+                yield index, h
 
 
 def _get(eccodes: Any, h: int, key: str, ktype: type | None = None) -> Any:
@@ -203,7 +224,7 @@ def inventory(path: Path) -> list[GribMessage]:
     """Every message in a local GRIB2 file, in file order, without decoding its values."""
     eccodes = _modules()[0]
     messages = []
-    for index, h in enumerate(_messages(eccodes, path)):
+    for index, h in _messages(eccodes, path):
         keys = {key: _get(eccodes, h, key, str) for key in INVENTORY_KEYS}
         messages.append(
             GribMessage(
@@ -373,7 +394,7 @@ def open_grib2(
     needs_select = select is None and not fetched.provenance.is_partial
     object_messages = fetched.provenance.object_messages
     selectors = fetched.provenance.selectors if object_messages else []
-    for h in _messages(eccodes, fetched.path):
+    for index, h in _messages(eccodes, fetched.path):
         count += 1
         if count > 1 and needs_select:
             continue
@@ -415,15 +436,15 @@ def open_grib2(
             if stamp:
                 attrs[label] = stamp
         message: dict[str, Any] = {
-            "file_index": count - 1,
-            "object_index": object_messages[count - 1] if object_messages else None,
+            "file_index": index,
+            "object_index": object_messages[index] if object_messages else None,
             "shortName": _get(eccodes, h, "shortName", str),
             "typeOfLevel": attrs.get("typeOfLevel"),
             "level": attrs.get("level"),
             "step": attrs.get("step"),
         }
         if selectors:
-            message["selector"] = selectors[count - 1]
+            message["selector"] = selectors[index]
         short = message["shortName"]
         if short in (None, "", "unknown", "~"):
             short = _product_name(fetched.asset.id) or (

@@ -197,7 +197,7 @@ def test_catalog_summary_separates_source_only_and_planned(monkeypatch):
     monkeypatch.setattr(module, "PACKAGE_VERSION", "0.9.0")
     bundled = Registry.bundled()
     registry = Registry(
-        [bundled.get(key) for key in ("noaa:ghcn-daily", "noaa:gsoy", "noaa:nbm")],
+        [bundled.get(key) for key in ("noaa:ghcn-daily", "noaa:gsoy", "noaa:oisst")],
         domains=bundled.domains(),
     )
     assert module.summary_table(registry, "").splitlines()[2].endswith("| 1 | 1 | 1 |")

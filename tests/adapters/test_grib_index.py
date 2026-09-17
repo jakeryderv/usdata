@@ -62,7 +62,7 @@ def test_blank_lines_and_trailing_fields_are_tolerated() -> None:
         ("not an index at all\n", "is not a wgrib2 index line"),
         ("1:x:d=2024050620:TMP:surface:anl:\n", "has no message number and offset"),
         ("a:0:d=2024050620:TMP:surface:anl:\n", "has no message number and offset"),
-        ("1:0:d=x:TMP:surface:anl:\n2:0:d=x:CAPE:surface:anl:\n", "is not inside the"),
+        ("1:0:d=x:TMP:surface:anl:\n2:0:d=x:CAPE:surface:anl:\n", "share offset 0"),
         ("1:900:d=x:TMP:surface:anl:\n2:400:d=x:CAPE:surface:anl:\n", "is not inside the"),
         ("1:9000:d=x:TMP:surface:anl:\n", "is not inside the"),
     ],
@@ -87,7 +87,7 @@ def test_selectors_take_a_short_name_a_level_and_an_optional_step(raw, expected)
     assert selector.text == ":".join(part for part in expected if part)
 
 
-@pytest.mark.parametrize("raw", ["TMP", "", ":", "TMP:", ":surface", "TMP:surface:anl:extra"])
+@pytest.mark.parametrize("raw", ["TMP", "", ":", "TMP:", ":surface", "TMP:surface:anl:x:y"])
 def test_a_malformed_selector_is_refused_with_the_spelling(raw: str) -> None:
     with pytest.raises(QueryError, match="must be 'VAR:level text'"):
         parse_selector(raw)
@@ -148,3 +148,48 @@ def test_an_unknown_short_name_lists_the_nearest_ones() -> None:
 def test_a_selector_matching_nothing_never_yields_the_whole_file() -> None:
     with pytest.raises(QueryError):
         resolve(entries(), selectors("TMP:2 m above ground", "PRES:nope"), url=URL)
+
+
+def test_fields_of_one_message_share_a_range_and_select_it_once() -> None:
+    """RAP packs wind components as fields 12.1 and 12.2 of one message at one offset."""
+    text = (
+        "11:0:d=x:VVEL:100 mb:anl:\n"
+        "12.1:100:d=x:UGRD:100 mb:anl:\n"
+        "12.2:100:d=x:VGRD:100 mb:anl:\n"
+        "13:250:d=x:HGT:125 mb:anl:\n"
+    )
+    parsed = parse_index(text, object_size=300, url=URL)
+    assert [(e.number, e.field, e.offset, e.length) for e in parsed] == [
+        (11, None, 0, 100),
+        (12, 1, 100, 150),
+        (12, 2, 100, 150),
+        (13, None, 250, 50),
+    ]
+    one = resolve(parsed, selectors("VGRD:100 mb"), url=URL)
+    assert [(s.entry.number, s.selector) for s in one] == [(12, "VGRD:100 mb")]
+    both = resolve(parsed, selectors("UGRD:100 mb", "VGRD:100 mb"), url=URL)
+    assert [(s.entry.number, s.entry.byte_range.start, s.selector) for s in both] == [
+        (12, 100, "UGRD:100 mb")
+    ]
+
+
+def test_a_further_index_text_is_named_to_be_selected_and_excluded_otherwise() -> None:
+    """NBM lines carry a fourth text for ensemble spread and probability thresholds."""
+    text = (
+        "1:0:d=x:TMP:2 m above ground:1 hour fcst:\n"
+        "2:100:d=x:TMP:2 m above ground:1 hour fcst:ens std dev\n"
+        "3:200:d=x:APCP:surface:0-1 hour acc fcst:prob >0.254:prob fcst 255/255\n"
+        "4:300:d=x:APCP:surface:0-1 hour acc fcst:\n"
+    )
+    parsed = parse_index(text, object_size=400, url=URL)
+    assert [e.extra for e in parsed] == ["", "ens std dev", "prob >0.254:prob fcst 255/255", ""]
+    plain = resolve(parsed, selectors("TMP:2 m above ground"), url=URL)
+    assert [s.entry.number for s in plain] == [1]
+    spread = resolve(parsed, selectors("TMP:2 m above ground:1 hour fcst:ens std dev"), url=URL)
+    assert [(s.entry.number, s.selector) for s in spread] == [
+        (2, "TMP:2 m above ground:1 hour fcst:ens std dev")
+    ]
+    assert [s.entry.number for s in resolve(parsed, selectors("APCP:surface"), url=URL)] == [4]
+    assert parsed[2].label == "APCP:surface:0-1 hour acc fcst:prob >0.254:prob fcst 255/255"
+    selector = parse_selector("TMP:2 m above ground:1 hour fcst:ens std dev")
+    assert (selector.step, selector.extra) == ("1 hour fcst", "ens std dev")

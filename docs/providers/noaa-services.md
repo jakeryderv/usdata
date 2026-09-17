@@ -223,6 +223,62 @@ files begins with the 12 UTC run of 2021-03-22 (GFS v16). The live test
 resolves and downloads `gfs.t00z.pgrb2.1p00.f000` for 2024-05-06, restores it
 through a lockfile, and opens surface CAPE when the `grib` extra is installed.
 
+## RAP model output
+
+Bounded listings on 2026-09-16 of `rap.20240506/` in `noaa-rap-pds` found,
+for every cycle, the `awp130pgrb`, `awp130bgrb`, `wrfprs`, `wrfnat`,
+`wrfmsl`, `awp252pgrb`, `awp252bgrb`, `awp236pgrb`, `awp242`, `awp243`,
+`awp200`, and `awip32` GRIB2 families with `.grib2.idx` sidecars, plus BUFR
+sounding archives. The 03, 09, 15, and 21 UTC runs carry forecast hours 00
+through 51 (52 files per family); every other cycle stops at 21. A
+reproducible listing probe is:
+
+```sh
+curl --get 'https://noaa-rap-pds.s3.amazonaws.com/' \
+  --data-urlencode 'list-type=2' \
+  --data-urlencode 'prefix=rap.20240506/rap.t20z.awp130pgrbf'
+```
+
+Sizes for the 20 UTC run on 2024-05-06: `awp130pgrbf00` 18,368,480 bytes;
+`awp130bgrbf00` 41,103,749; `wrfprsf00` 228,177,374; `wrfnatf00` 305,421,172.
+The 13 km analysis holds 355 GRIB2 messages on a 451 × 337 Lambert conformal
+grid, including surface CAPE and CIN, 0–1 km and 0–3 km storm-relative
+helicity, and mixed-layer and most-unstable CAPE on `mb above ground` layers.
+The bucket's day prefixes begin at `narre.20201201/`; the first `rap.` prefix
+is `rap.20210222/`, whose 00 UTC run holds `awp130pgrbf00`. The live test
+lists two hours with sizes, fetches surface CAPE and 0–3 km helicity as byte
+ranges, restores them through a lockfile, and opens them when the `grib`
+extra is installed.
+
+## NBM forecast guidance
+
+Bounded listings on 2026-09-16 of `blend.20240506/` in `noaa-nbm-grib2-pds`
+found every hourly cycle with `core/`, `qmd/`, and `text/` prefixes. Under
+`core/`, `blend.tHHz.core.fFFF.<region>.grib2` files exist for the `co`,
+`ak`, `hi`, `pr`, and `gu` regions with `.grib2.idx` sidecars, beginning at
+`f001`. The CONUS files of the 00 and 12 UTC runs are hourly to 36 and
+three-hourly to 192 (88 files); the 06 and 18 UTC runs add six-hourly files to
+264 (100 files); the 01 and 13 UTC runs are hourly to 173 and the 07 and 19
+UTC runs hourly to 152; the remaining cycles are hourly to 36 or 37,
+three-hourly to about 190, and six-hourly to about 262. A reproducible
+listing probe is:
+
+```sh
+curl --get 'https://noaa-nbm-grib2-pds.s3.amazonaws.com/' \
+  --data-urlencode 'list-type=2' \
+  --data-urlencode 'prefix=blend.20240506/20/core/blend.t20z.core.f001.'
+```
+
+Sizes for the 20 UTC run on 2024-05-06, forecast hour 1: `co` 171,059,531
+bytes, `ak` 52,257,699, `hi` 6,110,448, `gu` 633,902. The CONUS file holds
+300 GRIB2 messages on a 2345 × 1597 Lambert conformal grid at 2.54 km; index
+lines carry a fourth field for ensemble standard deviations and probability
+thresholds. Day prefixes begin at `blend.20200518/` in a `grib2/` layout of
+`master` files; the `core/` layout begins with the 12 UTC run of 2020-09-29.
+The live test lists two hours with sizes, fetches the 2 m temperature message
+as a byte range, restores it through a lockfile, and opens it when the `grib`
+extra is installed.
+
 ## Storm Events annual details
 
 Bounded live probes verified on 2026-09-09 UTC (1950 archive: 10,508 bytes):

@@ -50,6 +50,8 @@ CASES = {
     "noaa:hurdat2": {"basin": "pacific"},
     "usgs:water-daily": {"sites": "07164500"},
     "usgs:earthquakes": {"min_magnitude": "2.5"},
+    "noaa:rap": {"cycle": 12, "forecast_hour": 0},
+    "noaa:nbm": {"cycle": 12, "forecast_hour": 1},
 }
 S3_KEYS = {
     "noaa:nexrad-level2": "2024/05/06/KTLX/KTLX20240506_120100_V06",
@@ -62,6 +64,8 @@ S3_KEYS = {
     "MRMS_RotationTrackML30min_00.50_20240506-120000.grib2.gz",
     "noaa:hrrr": "hrrr.20240506/conus/hrrr.t12z.wrfsfcf00.grib2",
     "noaa:gfs": "gfs.20240506/12/atmos/gfs.t12z.pgrb2.1p00.f000",
+    "noaa:rap": "rap.20240506/rap.t12z.awp130pgrbf00.grib2",
+    "noaa:nbm": "blend.20240506/12/core/blend.t12z.core.f001.co.grib2",
 }
 STORM_NAME = "StormEvents_details-ftp_v1.0_d2024_c20260323.csv.gz"
 HURDAT_NAME = "hurdat2-nepac-1949-2025-02272026.txt"
@@ -77,8 +81,10 @@ WINDOW_CONSTANTS = {
     "noaa:goes-glm": ("usdata.providers.noaa.glm", "MAX_WINDOW"),
     "noaa:mrms": ("usdata.providers.noaa.mrms", "MAX_WINDOW"),
     "noaa:hrrr": ("usdata.providers.noaa.hrrr", "MAX_WINDOW"),
-    # GFS inherits its window from the shared ModelRuns base in the HRRR module.
+    # GFS, RAP, and NBM inherit their window from the shared ModelRuns base in the HRRR module.
     "noaa:gfs": ("usdata.providers.noaa.hrrr", "MAX_WINDOW"),
+    "noaa:rap": ("usdata.providers.noaa.hrrr", "MAX_WINDOW"),
+    "noaa:nbm": ("usdata.providers.noaa.hrrr", "MAX_WINDOW"),
     "noaa:coops-water-levels": ("usdata.providers.noaa.coops", "MAX_INTERVAL"),
     "noaa:coops-tide-predictions": ("usdata.providers.noaa.coops", "MAX_PREDICTION_INTERVAL"),
 }
@@ -259,7 +265,12 @@ def test_every_adapter_window_constant_is_declared_in_the_registry() -> None:
 def test_partial_fetch_is_declared_exactly_where_the_adapter_takes_messages() -> None:
     """The capability is a promise about a query surface, so the two must agree."""
     registry = default_registry()
-    assert {ds.id for ds in registry if ds.capabilities.partial_fetch} == {"noaa:hrrr", "noaa:gfs"}
+    assert {ds.id for ds in registry if ds.capabilities.partial_fetch} == {
+        "noaa:hrrr",
+        "noaa:gfs",
+        "noaa:rap",
+        "noaa:nbm",
+    }
     for dataset_id in CASES:
         with adapter_factory(dataset_id)() as adapter:
             declares = testing.PARTIAL_PARAM in adapter.accepted_params

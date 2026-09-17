@@ -119,5 +119,15 @@
     "slug": "earthquakes",
     "title": "Which earthquakes did Oklahoma record on the days of the May 2024 tornado outbreak?",
     "summary": "Pull every magnitude 1.0 or larger event inside Oklahoma on 6 and 7 May 2024 from the USGS catalog as one pinned CSV, then rank them by magnitude."
+  },
+  {
+    "slug": "rap-environment",
+    "title": "What did the 13 km RAP analysis say about the storm environment over Oklahoma City at 20 UTC?",
+    "summary": "Fetch surface CAPE and 0-3 km helicity from one Rapid Refresh analysis as two byte ranges of an 18 MB file and read them at the grid point nearest Oklahoma City."
+  },
+  {
+    "slug": "nbm-forecast",
+    "title": "How warm did the National Blend expect Oklahoma City to stay through the evening of 6 May 2024?",
+    "summary": "Fetch the 2 m temperature message from four hours of one National Blend run, 1.5 MB each of 171 MB files, and print the forecast at the nearest grid point per valid hour."
   }
 ]

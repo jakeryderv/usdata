@@ -1399,6 +1399,142 @@
       ]
     },
     {
+      "id": "noaa:nbm",
+      "title": "NBM forecast guidance",
+      "description": "NOAA's statistically blended, bias-corrected forecast guidance in GRIB2 from the anonymous noaa-nbm-grib2-pds S3 bucket, one whole core file per hourly run, forecast hour, and region. Select a run by initialization window and cycle hour, the forecast hours from 1 to 264, and the CONUS, Alaska, Hawaii, Puerto Rico, or Guam grid. The CONUS file is about 170 MB per hour; the server subsets nothing, so fields are chosen either by naming GRIB2 messages, which fetches their byte ranges through the object's index sidecar, or after download with the GRIB2 reader. Each file holds hundreds of fields; the catalog lists the handful the guide and example select.",
+      "provider": "NOAA",
+      "domain": "Weather models",
+      "system": "NCEP model output",
+      "availability": "Source only",
+      "since": "0.20",
+      "keywords": [
+        "forecast",
+        "blend",
+        "nbm",
+        "grib2",
+        "guidance",
+        "temperature",
+        "precipitation",
+        "nwp"
+      ],
+      "formats": [
+        "GRIB2"
+      ],
+      "selection": "Regional core files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and region",
+      "inputs": "Both timestamps, cycle, and forecast_hour",
+      "reader_extra": "grib",
+      "resolution": {
+        "spatial": "2.5 km Lambert conformal CONUS grid, 2345 x 1597 points; separate Alaska, Hawaii, Puerto Rico, and Guam grids",
+        "temporal": "Hourly runs; forecast hours hourly to 36, then every 3 hours to about 190, then every 6 hours to 264, on a schedule that varies by cycle"
+      },
+      "update_frequency": "Hourly",
+      "latency": null,
+      "citation": "NOAA National Blend of Models (NBM) was accessed on [date] from https://registry.opendata.aws/noaa-nbm",
+      "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "variables": [
+        {
+          "name": "2t",
+          "units": "K",
+          "description": "2 m temperature"
+        },
+        {
+          "name": "2d",
+          "units": "K",
+          "description": "2 m dewpoint temperature"
+        },
+        {
+          "name": "tp",
+          "units": "kg/m2",
+          "description": "Total precipitation accumulated over the step"
+        }
+      ],
+      "max_window": "1 day",
+      "guide": "https://docs.usdata.dev/providers/noaa-nbm/",
+      "reference": "https://docs.usdata.dev/generated/catalog/noaa/nbm/",
+      "examples": [
+        {
+          "title": "Nbm forecast",
+          "url": "https://usdata.dev/examples/nbm-forecast/"
+        }
+      ]
+    },
+    {
+      "id": "noaa:rap",
+      "title": "RAP model output",
+      "description": "Rapid Refresh 13 km hourly analyses and forecasts in GRIB2 from the anonymous noaa-rap-pds S3 bucket, one whole file per run, forecast hour, and grid family. Select a run by initialization window and cycle hour, the forecast hours, and the file family: the 13 km CONUS pressure-level grid (about 18 MB per file), its secondary fields, or the native-grid pressure and hybrid-level files. Runs reach 21 hours, or 51 from the 03, 09, 15, and 21 UTC runs. The server subsets nothing, so fields are chosen either by naming GRIB2 messages, which fetches their byte ranges through the object's index sidecar, or after download with the GRIB2 reader. Each file holds hundreds of fields; the catalog lists the handful the guide and example select.",
+      "provider": "NOAA",
+      "domain": "Weather models",
+      "system": "NCEP model output",
+      "availability": "Source only",
+      "since": "0.20",
+      "keywords": [
+        "forecast",
+        "model",
+        "rap",
+        "grib2",
+        "weather",
+        "nwp",
+        "cape",
+        "helicity",
+        "convective"
+      ],
+      "formats": [
+        "GRIB2"
+      ],
+      "selection": "Files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file family",
+      "inputs": "Both timestamps, cycle, and forecast_hour",
+      "reader_extra": "grib",
+      "resolution": {
+        "spatial": "13 km Lambert conformal CONUS grid, 451 x 337 points, for the awp130 family",
+        "temporal": "Hourly runs; forecast hours to 21, or to 51 from the 03, 09, 15, and 21 UTC runs"
+      },
+      "update_frequency": "Hourly",
+      "latency": null,
+      "citation": "NOAA Rapid Refresh (RAP) was accessed on [date] from https://registry.opendata.aws/noaa-rap",
+      "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "variables": [
+        {
+          "name": "cape",
+          "units": "J/kg",
+          "description": "Convective available potential energy, surface or a ground layer"
+        },
+        {
+          "name": "cin",
+          "units": "J/kg",
+          "description": "Convective inhibition, surface or a ground layer"
+        },
+        {
+          "name": "hlcy",
+          "units": "m2/s2",
+          "description": "Storm-relative helicity over the 0-1 km and 0-3 km layers"
+        },
+        {
+          "name": "refc",
+          "units": "dBZ",
+          "description": "Composite reflectivity"
+        },
+        {
+          "name": "2t",
+          "units": "K",
+          "description": "2 m temperature"
+        },
+        {
+          "name": "2d",
+          "units": "K",
+          "description": "2 m dewpoint temperature"
+        }
+      ],
+      "max_window": "1 day",
+      "guide": "https://docs.usdata.dev/providers/noaa-rap/",
+      "reference": "https://docs.usdata.dev/generated/catalog/noaa/rap/",
+      "examples": [
+        {
+          "title": "Rap environment",
+          "url": "https://usdata.dev/examples/rap-environment/"
+        }
+      ]
+    },
+    {
       "id": "noaa:climate-normals",
       "title": "30-year station climate normals",
       "description": "Daily, monthly, and annual/seasonal 30-year station normals via the NCEI Access Data Service datasets normals-daily-1991-2020, normals-monthly-1991-2020, and normals-annualseasonal-1991-2020, chosen with a period parameter. Dates are optional; daily and monthly normals accept a month-day window inside a placeholder year. Explicit stations or station discovery through the companion search service. Variables are NCEI data-type codes and the catalog lists the probed ones; the delivered set is the open NCEI normals list.",
@@ -1820,69 +1956,6 @@
         "best track",
         "ibtracs",
         "global"
-      ],
-      "formats": [],
-      "selection": null,
-      "inputs": null,
-      "reader_extra": null,
-      "resolution": null,
-      "update_frequency": null,
-      "latency": null,
-      "citation": null,
-      "terms": null,
-      "variables": [],
-      "max_window": null,
-      "guide": null,
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
-    },
-    {
-      "id": "noaa:nbm",
-      "title": "National Blend of Models",
-      "description": "Statistically blended forecast guidance in GRIB2 from the public noaa-nbm-grib2-pds S3 bucket, laid out as blend.YYYYMMDD/HH/core/ with files per region and forecast hour.",
-      "provider": "NOAA",
-      "domain": "Weather models",
-      "system": null,
-      "availability": "Planned",
-      "since": null,
-      "keywords": [
-        "forecast",
-        "blend",
-        "nbm",
-        "grib2",
-        "guidance"
-      ],
-      "formats": [],
-      "selection": null,
-      "inputs": null,
-      "reader_extra": null,
-      "resolution": null,
-      "update_frequency": null,
-      "latency": null,
-      "citation": null,
-      "terms": null,
-      "variables": [],
-      "max_window": null,
-      "guide": null,
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
-    },
-    {
-      "id": "noaa:rap",
-      "title": "RAP Model Output",
-      "description": "Rapid Refresh 13 km hourly analyses and forecasts in GRIB2 from the public noaa-rap-pds S3 bucket, laid out as rap.YYYYMMDD/ with one file per cycle, forecast hour, and grid family (awp130 is the 13 km CONUS grid, about 18 MB per analysis). The bucket begins in December 2020; it is the environmental source for years HRRR's archive does not reach only where NCEI holds older runs. Same cycle and forecast-hour selection as HRRR.",
-      "provider": "NOAA",
-      "domain": "Weather models",
-      "system": null,
-      "availability": "Planned",
-      "since": null,
-      "keywords": [
-        "forecast",
-        "model",
-        "rap",
-        "grib2",
-        "weather",
-        "nwp"
       ],
       "formats": [],
       "selection": null,

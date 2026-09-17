@@ -77,7 +77,10 @@ class GribMessage(BaseModel):
     ``selector``, the index selector the message was fetched for.
     """
 
-    file_index: int = Field(ge=0, description="Zero-based position in the local file")
+    file_index: int = Field(
+        ge=0,
+        description="Zero-based message position in the local file; fields of one message share it",
+    )
     object_index: int | None = Field(
         default=None,
         ge=1,
@@ -275,18 +278,23 @@ def _paired(messages: list[GribMessage], record: Provenance) -> list[GribMessage
     """Each message as the fetch that took it described it, where provenance says.
 
     The file itself carries neither number nor selector: a partial fetch recorded
-    one message number and one selector per range, so the lists pair up in order.
-    A whole file, or a record that does not pair, leaves both unset.
+    one message number and one selector per range, and ``file_index`` counts the
+    file's messages the same way, so the fields of a message that holds several
+    all pair with its number. A whole file, or a record that does not pair,
+    leaves both unset.
     """
     numbers = record.object_messages
-    if len(numbers) != len(messages):
+    if not numbers or any(message.file_index >= len(numbers) for message in messages):
         return messages
-    selectors = (
-        record.selectors if len(record.selectors) == len(messages) else [None] * len(messages)
-    )
+    selectors = record.selectors if len(record.selectors) == len(numbers) else []
     return [
-        message.model_copy(update={"object_index": number, "selector": selector})
-        for message, number, selector in zip(messages, numbers, selectors, strict=True)
+        message.model_copy(
+            update={
+                "object_index": numbers[message.file_index],
+                "selector": selectors[message.file_index] if selectors else None,
+            }
+        )
+        for message in messages
     ]
 
 

@@ -507,3 +507,63 @@ def test_a_whole_file_of_the_same_bytes_still_demands_select(tmp_path) -> None:
     whole = item(tmp_path, b"".join(parts), name="whole.grib2")
     with pytest.raises(ValueError, match=r"2 messages; pass select"):
         whole.open()
+
+
+def multi_field_message(tmp_path: Path, *parts: bytes) -> bytes:
+    """One GRIB2 message holding several fields, as RAP packs wind components."""
+    multi = ec.codes_grib_multi_new()
+    try:
+        for part in parts:
+            handle = ec.codes_new_from_message(part)
+            try:
+                ec.codes_grib_multi_append(handle, 4, multi)
+            finally:
+                ec.codes_release(handle)
+        target = tmp_path / "multi-field.grib2"
+        with target.open("wb") as out:  # ecCodes writes through a real descriptor.
+            ec.codes_grib_multi_write(multi, out)
+        return target.read_bytes()
+    finally:
+        ec.codes_grib_multi_release(multi)
+
+
+def test_a_message_holding_two_fields_yields_both_and_shares_one_index(tmp_path) -> None:
+    """RAP fields 12.1 and 12.2 arrive as one message: both open, both pair with message 12."""
+    packed = multi_field_message(
+        tmp_path,
+        message(np.full(12, 5.0), param=131, level_type="isobaricInhPa", level=100),
+        message(np.full(12, -3.0), param=132, level_type="isobaricInhPa", level=100),
+    )
+    single = message(np.full(12, 1500.0), param=59, level_type="surface", level=0)
+    assert len(message_ranges(packed + single)) == 2, "two GRIB2 messages, three fields"
+    fetched = item(
+        tmp_path,
+        packed + single,
+        name="packed.grib2",
+        messages=[12, 226],
+        selectors=["UGRD:100 mb", "CAPE:surface"],
+    )
+    everything = fetched.open()
+    assert set(everything.data_vars) == {
+        "u_isobaricInhPa_100",
+        "v_isobaricInhPa_100",
+        "cape_entireAtmosphere_0",
+    }
+    messages = everything.attrs["usdata"]["messages"]
+    assert {
+        name: (m["file_index"], m["object_index"], m["selector"]) for name, m in messages.items()
+    } == {
+        "u_isobaricInhPa_100": (0, 12, "UGRD:100 mb"),
+        "v_isobaricInhPa_100": (0, 12, "UGRD:100 mb"),
+        "cape_entireAtmosphere_0": (1, 226, "CAPE:surface"),
+    }
+    assert float(everything["v_isobaricInhPa_100"].values[0, 0]) == -3.0
+    from usdata import inspect_asset
+
+    summary = inspect_asset(fetched)
+    assert summary.grib2 is not None
+    assert [(m.file_index, m.object_index, m.short_name) for m in summary.grib2.messages] == [
+        (0, 12, "u"),
+        (0, 12, "v"),
+        (1, 226, "cape"),
+    ]

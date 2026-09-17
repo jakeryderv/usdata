@@ -46,6 +46,8 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 |---|---|---|---|
 | <span id="noaagfs"></span>[GFS model output](noaa/gfs.md) | Released | GRIB2 | Global files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and grid resolution |
 | <span id="noaahrrr"></span>[HRRR model output](noaa/hrrr.md) | Released | GRIB2 | CONUS files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file variant |
+| <span id="noaanbm"></span>[NBM forecast guidance](noaa/nbm.md) | Source only | GRIB2 | Regional core files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and region |
+| <span id="noaarap"></span>[RAP model output](noaa/rap.md) | Source only | GRIB2 | Files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file family |
 
 ### [CO-OPS Data API](https://tidesandcurrents.noaa.gov/)
 
@@ -93,24 +95,6 @@ International Best Track Archive for Climate Stewardship: merged best tracks fro
 
 [Upstream information](https://www.ncei.noaa.gov/products/international-best-track-archive)
 Domain: Tropical cyclones.
-
-### noaa:nbm
-
-**National Blend of Models** · Planned · target later
-
-Statistically blended forecast guidance in GRIB2 from the public noaa-nbm-grib2-pds S3 bucket, laid out as blend.YYYYMMDD/HH/core/ with files per region and forecast hour.
-
-[Upstream information](https://registry.opendata.aws/noaa-nbm/)
-Domain: Weather models.
-
-### noaa:rap
-
-**RAP Model Output** · Planned · target later
-
-Rapid Refresh 13 km hourly analyses and forecasts in GRIB2 from the public noaa-rap-pds S3 bucket, laid out as rap.YYYYMMDD/ with one file per cycle, forecast hour, and grid family (awp130 is the 13 km CONUS grid, about 18 MB per analysis). The bucket begins in December 2020; it is the environmental source for years HRRR's archive does not reach only where NCEI holds older runs. Same cycle and forecast-hour selection as HRRR.
-
-[Upstream information](https://registry.opendata.aws/noaa-rap/)
-Domain: Weather models.
 
 ### noaa:nclimdiv
 
