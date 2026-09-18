@@ -28,11 +28,11 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usda:cropland-data-layer`](usda.md#usdacropland-data-layer) Cropland Data Layer · Planned
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
 
-**Implemented, unreleased (planned 0.20)**
+**Included since 0.20**
 
-- [`noaa:ibtracs`](noaa.md#noaaibtracs) IBTrACS Global Tropical Cyclone Tracks · Source only
-- [`noaa:nbm`](noaa.md#noaanbm) National Blend of Models · Source only
-- [`noaa:rap`](noaa.md#noaarap) RAP Model Output · Source only
+- [`noaa:ibtracs`](noaa.md#noaaibtracs) IBTrACS Global Tropical Cyclone Tracks · Released
+- [`noaa:nbm`](noaa.md#noaanbm) National Blend of Models · Released
+- [`noaa:rap`](noaa.md#noaarap) RAP Model Output · Released
 
 **Included since 0.19**
 

@@ -1,1 +1,0 @@
-`Provider` gains an optional `fetch_partial(asset, dest, partial)`. The core now hands the byte ranges `prepare_fetch` settles straight to it, so fetching selected GRIB2 messages no longer depends on earlier calls to the same adapter instance, and `fetch` on a partial asset raises instead of risking a whole-object download. `fetch`, lockfiles, and fetched bytes are unchanged.

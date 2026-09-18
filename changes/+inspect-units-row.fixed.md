@@ -1,1 +1,0 @@
-`usdata inspect` and `FetchedAsset.inspect()` no longer count the units row of an ERDDAP or IBTrACS CSV as data, so `row_count` matches the rows `open()` returns, and the units are reported per column as `CsvSummary.units` and beside each column name in the CLI. A cached path learns which datasets lay a units row from the registry.

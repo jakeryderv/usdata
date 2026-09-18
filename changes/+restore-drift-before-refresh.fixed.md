@@ -1,1 +1,0 @@
-A `pull --update` run that ends in `UpstreamChanged` no longer replaces the cached files of the entries named for update. Unselected entries are now checked first, so a failed run leaves the cache matching the lockfile it did not rewrite.
