@@ -18,7 +18,7 @@ These entries are not implemented; they cannot fetch data.
 
 **American Community Survey 5-Year Estimates** · Planned · target later
 
-Population, housing, income, and demographic estimates for every geography down to block group, via the Census Data API. Anonymous for light use; an API key lifts rate limits.
+Population, housing, income, and demographic estimates for every geography down to block group, via the Census Data API, selected by state and county FIPS code rather than by box. Requires a free API key on every data request; only the dataset and variable metadata are served without one.
 
 [Upstream information](https://www.census.gov/data/developers/data-sets/acs-5year.html)
 Domain: Demographics.

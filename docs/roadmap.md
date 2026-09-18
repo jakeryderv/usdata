@@ -46,7 +46,7 @@ The R2 bucket at `data.usdata.dev` is reserved for dataset storage; see
 [website operations](guides/website-operations.md) and
 [ADR 0015](adr/0015-separate-sites-and-data-storage.md).
 
-Shipped through v0.19.0: the tornado research inputs
+Shipped through v0.21.0: the tornado research inputs
 ([issue 118](https://github.com/jakeryderv/usdata/issues/118)), one registry
 schema verified against the adapters
 ([ADR 0026](adr/0026-one-registry-schema.md)), the published provider contract
@@ -76,17 +76,27 @@ absent or matching it
 settled byte ranges are handed to the adapter rather than read back from it
 ([ADR 0032](adr/0032-fetch-partial.md)).
 
-The selected workstream is the first source keyed by place rather than by a
-box: [FEMA disaster declarations](https://github.com/jakeryderv/usdata/issues/241),
-whose rows carry state and county FIPS codes and no coordinates. It shipped in
-v0.21.0. A query now keeps the place a location resolved
+The first source keyed by place rather than by a box shipped in v0.21.0:
+[FEMA disaster declarations](https://github.com/jakeryderv/usdata/issues/241),
+whose rows carry state and county FIPS codes and no coordinates. A query now
+keeps the place a location resolved
 ([ADR 0034](adr/0034-query-keeps-the-resolved-place.md)), and the adapter's
 window and place rules are in
-[ADR 0035](adr/0035-openfema-window-and-place-rules.md). The issue planned to
-add the source to the severe-weather case study; the data said otherwise, since
-the county that study follows was not designated, so a
-[worked example](https://usdata.dev/examples/disaster-declarations/) of its own
-joins the whole evening's tornado counties to the declaration instead.
+[ADR 0035](adr/0035-openfema-window-and-place-rules.md). Its
+[worked example](https://usdata.dev/examples/disaster-declarations/) joins an
+evening's tornado counties to the declaration in force.
+
+The selected workstream fills out the severe-weather inputs with the sibling
+tables of two datasets already in the catalog, reusing their access patterns:
+
+- [Storm Events fatalities and locations tables](https://github.com/jakeryderv/usdata/issues/133).
+  Done when a `table` parameter selects `details`, `fatalities`, or
+  `locations` under the same year selection and revision rule, and the access
+  notes say how `EVENT_ID` joins them.
+- [SPC hail and wind report files](https://github.com/jakeryderv/usdata/issues/134).
+  Done when a `table` parameter selects `torn`, `hail`, or `wind`, the year
+  coverage of the hail and wind files is verified with dated probes, and the
+  notes record that `mag` is inches for hail and knots for wind.
 
 ## Next
 
@@ -102,9 +112,12 @@ moving it to Now. Prefer additions that exercise a useful new access pattern or
 reuse an existing one while preserving the adapter, transport, cache/provenance,
 and optional-reader boundaries:
 
-- [Storm Events fatalities and locations tables](https://github.com/jakeryderv/usdata/issues/133)
-  and [SPC hail and wind reports](https://github.com/jakeryderv/usdata/issues/134),
-  which reuse existing access patterns and fill out the severe-weather case study.
+- A second source selected by place, which is the test of whether
+  [ADR 0034](adr/0034-query-keeps-the-resolved-place.md) generalizes beyond the
+  one source it was written for. The obvious candidate, the Census Data API,
+  turned out to require a key on every data request when it was probed on
+  2026-09-18, so it waits with the credentialed sources under Later. An
+  anonymous candidate is still to be chosen.
 - Further NCEI Access Data Service datasets, such as hourly normals.
 - Additional GOES ABI products and sectors, and CO-OPS currents.
 - Geospatial readers when a supported dataset and representative fixtures justify them.
@@ -117,6 +130,8 @@ and optional-reader boundaries:
   which settles where keys live, what provenance records about them, and how
   a manifest stays shareable without one, and then
   [NASA access through earthaccess](https://github.com/jakeryderv/usdata/issues/9).
+  The [Census Data API](providers/census.md) belongs here too: it now requires a
+  key on every data request, and it is the natural second place-keyed source.
   One such provider is a 1.0 criterion ([versioning](versioning.md)), so this
   is the last workstream before 1.0, not a candidate for the next one.
 - [Remote cache backends](https://github.com/jakeryderv/usdata/issues/11):
