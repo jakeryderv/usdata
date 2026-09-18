@@ -116,6 +116,31 @@ def test_update_by_asset_rewrites_only_that_pin(locked: tuple[Path, Path]) -> No
     assert verify(manifest, root=root) == []
 
 
+def test_update_that_fails_on_drift_refreshes_nothing(tmp_path: Path) -> None:
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text(MANIFEST)
+    root = tmp_path / "cache"
+    with respx.mock() as mock:
+        serve(mock, V1, b"u1")
+        first, second, _ = pull(manifest, root=root).fetched
+    second.path.unlink()
+    before = lockfile_path(manifest).read_bytes()
+    with respx.mock(assert_all_called=False) as mock:
+        serve(mock, V2, b"u1")
+        with pytest.raises(UpstreamChanged) as caught:
+            pull(manifest, root=root, update=[first.asset.id])
+        assert [call.request.url.params["stations"] for call in mock.routes[0].calls] == [
+            "USW00003954"
+        ]
+    assert [d.asset_id for d in caught.value.drift] == [second.asset.id]
+    assert lockfile_path(manifest).read_bytes() == before
+    # The entry named for update still matched its pin, and a failed run left it matching.
+    assert first.path.read_bytes() == b"a1"
+    assert [(d.asset_id, d.problem) for d in verify(manifest, root=root)] == [
+        (second.asset.id, "missing")
+    ]
+
+
 def test_update_by_dataset_refreshes_its_entries_and_no_others(
     locked: tuple[Path, Path],
 ) -> None:

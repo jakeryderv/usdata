@@ -345,7 +345,8 @@ def restore(
 
     ``update`` names assets or datasets whose current upstream bytes replace their
     pins. Every other entry must still match; if any does not, the whole run raises
-    ``UpstreamChanged`` listing them and the lockfile is left as it was. An entry
+    ``UpstreamChanged`` listing them, before any named entry is refreshed, so the
+    lockfile is left as it was and no cached file holds bytes it does not pin. An entry
     pinning byte ranges re-issues exactly those ranges against the pinned ETag, so
     a republished object is reported as drift rather than silently re-resolved.
 
@@ -364,7 +365,7 @@ def restore(
     selected = _selected(lock, update)
     _progress.batch([entry.provenance.size for entry in lock.assets])
     adapters: dict[str, Provider] = {}
-    restored: list[_Restored] = []
+    restored: dict[int, _Restored] = {}
     drift: list[Drift] = []
     with ExitStack() as stack:
 
@@ -375,33 +376,40 @@ def restore(
 
         base = mirror.mirror_url()
         mirrored_from = None if base is None else (base, stack.enter_context(http.client()))
-        for entry in lock.assets:
-            outcome = _restore_entry(
-                entry,
-                reg.get(entry.asset.dataset_id),
-                root=root,
-                refresh=entry.asset.id in selected,
-                adapter_for=adapter_for,
-                mirrored_from=mirrored_from,
-            )
-            if isinstance(outcome, Drift):
-                drift.append(outcome)
-            else:
-                restored.append(outcome)
-    if drift:
-        raise UpstreamChanged(drift)
-    updated = [outcome.entry.asset.id for outcome in restored if outcome.updated]
+        # Pinned entries go first. A refresh accepts whatever upstream serves, so it can
+        # never drift; holding it back means a run that fails on drift has replaced no
+        # cached file with bytes the lockfile does not pin.
+        for refresh in (False, True):
+            for index, entry in enumerate(lock.assets):
+                if (entry.asset.id in selected) is not refresh:
+                    continue
+                outcome = _restore_entry(
+                    entry,
+                    reg.get(entry.asset.dataset_id),
+                    root=root,
+                    refresh=refresh,
+                    adapter_for=adapter_for,
+                    mirrored_from=mirrored_from,
+                )
+                if isinstance(outcome, Drift):
+                    drift.append(outcome)
+                else:
+                    restored[index] = outcome
+            if drift:
+                raise UpstreamChanged(drift)
+    outcomes = [restored[index] for index in sorted(restored)]  # back in lockfile order
+    updated = [outcome.entry.asset.id for outcome in outcomes if outcome.updated]
     if updated:
-        lock = lock.model_copy(update={"assets": [outcome.entry for outcome in restored]})
+        lock = lock.model_copy(update={"assets": [outcome.entry for outcome in outcomes]})
         lock.save(lock_path)
     return PullResult(
         lockfile=lock,
         lockfile_path=lock_path,
-        fetched=[outcome.item for outcome in restored],
+        fetched=[outcome.item for outcome in outcomes],
         from_lockfile=True,
         updated=updated,
-        mirrored=[outcome.entry.asset.id for outcome in restored if outcome.mirrored],
-        by_source=_by_source((outcome.entry, outcome.item) for outcome in restored),
+        mirrored=[outcome.entry.asset.id for outcome in outcomes if outcome.mirrored],
+        by_source=_by_source((outcome.entry, outcome.item) for outcome in outcomes),
     )
 
 
