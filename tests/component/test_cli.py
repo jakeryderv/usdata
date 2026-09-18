@@ -8,6 +8,7 @@ from typer.testing import CliRunner
 from usdata.cli import app
 from usdata.providers.noaa.ghcnd import DATA_URL as GHCN_DATA_URL
 from usdata.providers.noaa.hrrr import BUCKET
+from usdata.providers.noaa.storm_events import StormEvents
 from usdata.registry import default_registry
 
 runner = CliRunner()
@@ -170,7 +171,9 @@ def test_info_lists_adapter_parameters() -> None:
     assert all(len(line.split("  ", 1)) == 2 and line.split("  ", 1)[1].strip() for line in listed)
 
 
-def test_info_says_none_when_an_adapter_takes_no_parameters() -> None:
+def test_info_says_none_when_an_adapter_takes_no_parameters(monkeypatch) -> None:
+    # Declared on the class for the test, so no bundled dataset has to stay parameterless.
+    monkeypatch.setattr(StormEvents, "accepted_params", {})
     result = runner.invoke(app, ["info", "noaa:storm-events"])
     assert result.exit_code == 0 and "params:    none" in result.stdout
 

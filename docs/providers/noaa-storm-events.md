@@ -1,17 +1,41 @@
-# Storm Events annual details
+# Storm Events annual tables
 
-Available since v0.8 as `noaa:storm-events`. Anonymous NCEI bulk
-access returns whole annual **details** tables, compressed with gzip. The
-separate fatalities and locations tables are not included. The adapter supports
-schema `v1.0`; it does not guess how to interpret a newer schema.
+Available since v0.8 as `noaa:storm-events`. Anonymous NCEI bulk access returns
+whole annual tables, compressed with gzip. The default is the **details** table,
+one row per event. `-p table=fatalities` and `-p table=locations` select its two
+siblings, which NCEI publishes in the same directory under the same naming and
+revision scheme (unreleased; available from source for v0.22). The adapter
+supports schema `v1.0`; it does not guess how to interpret a newer schema.
+
+## The three tables
+
+| `table` | One row per | Columns |
+|---|---|---|
+| `details` (default) | event | the event record: type, place, times, impacts, narratives |
+| `fatalities` | death | `FAT_YEARMONTH`, `FAT_DAY`, `FAT_TIME`, `FATALITY_ID`, `EVENT_ID`, `FATALITY_TYPE`, `FATALITY_DATE`, `FATALITY_AGE`, `FATALITY_SEX`, `FATALITY_LOCATION` |
+| `locations` | point of an event | `YEARMONTH`, `EPISODE_ID`, `EVENT_ID`, `LOCATION_INDEX`, `RANGE`, `AZIMUTH`, `LOCATION`, `LATITUDE`, `LONGITUDE`, `LAT2`, `LON2` |
+
+`EVENT_ID` joins both to details; nothing is joined for you. An event has no
+fatalities row unless someone died, and may have several location rows, numbered
+by `LOCATION_INDEX`: the 6 May 2024 Osage County EF4 (event `1184254`) has two
+of each. A location is a named place with the `RANGE` in miles and `AZIMUTH`
+from it, plus the point itself in decimal degrees; `LAT2` and `LON2` repeat it
+in a packed degrees-and-minutes form. Those points partly fill the gap between
+the start and end coordinates on a details row and a surveyed damage path.
+
+Checked on 2026-09-18: all three tables have a file for every year from 1950 to
+2026. Fatalities rows exist throughout (11 in 1950). **The locations files hold
+rows only from 1996**; each earlier one is a header and nothing else, so an
+early-year request succeeds and opens as an empty frame rather than failing.
+The tables of one year are revised together and carry the same creation date.
 
 Both dates are required and interpreted in UTC for annual file selection.
 Every calendar year touched is returned in full: May 1–31 selects the complete
 year; December 31–January 1 selects both years. Asset time bounds label those
 whole file years, not precise coverage of local event timestamps. Dates before
 1950 and a missing requested year are errors, so a multi-year request cannot
-silently succeed with only some years. Location/bbox, variables, text, and all
-provider-specific params are rejected, so `spatial_subset` and
+silently succeed with only some years. Location/bbox, variables, and text are
+rejected, and `table` is the only parameter, so `spatial_subset` and
 `variable_subset` are false: selecting an annual object performs no server-side
 row subsetting. Only `temporal_subset` is true, because the requested dates
 choose which annual objects are returned.

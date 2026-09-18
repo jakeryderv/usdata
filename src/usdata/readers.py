@@ -103,6 +103,7 @@ IDENTIFIER_COLUMNS = {
     "parameter_code",
     "statistic_id",
     "event_id",
+    "fatality_id",
     "episode_id",
     "state_fips",
     "cz_fips",
