@@ -12,6 +12,24 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.22.0](https://github.com/jakeryderv/usdata/releases/tag/v0.22.0) - 2026-09-18
+
+
+### Breaking
+
+- `Place` now requires `state`, the two-letter postal code of the state or of the state a county lies in. `build_query` and `find_place` set it, so queries built from a `location` are unaffected; code that constructs a `Place` by hand must pass it.
+
+### Added
+
+- `noaa:storm-events` takes a `table` parameter: `details` (the default), `fatalities` (one row per death), or `locations` (points per event, with rows from 1996). All three follow the same year selection and revision rule and join on `EVENT_ID`, and the reader keeps `FATALITY_ID` as text. ([#133](https://github.com/jakeryderv/usdata/issues/133))
+- `noaa:spc-tornado-reports` takes a `table` parameter: `torn` (the default), `hail`, or `wind`. SPC publishes all three in one layout on one page; hail and wind start in 1955 where tornadoes start in 1950, and `mag` is the F or EF rating, the stone size in inches, or the wind speed in knots. The dataset keeps its id. ([#134](https://github.com/jakeryderv/usdata/issues/134))
+- `noaa:nws-vtec-events` fetches the National Weather Service watches, warnings, and advisories issued for one county, as CSV from the Iowa Environmental Mesonet's archive, which is the maintained one since the NWS API keeps none. `--location "Osage County, OK"` selects that county exactly and a bare `bbox` is refused; `ugc` names a code explicitly, which is the only way to reach a forecast zone, and `phenomena` with `significance` narrows to one event type. A window selects events by when they were issued, not by when they were in effect, and the guide gives the recipe for the second question. ([#252](https://github.com/jakeryderv/usdata/issues/252))
+
+### Documentation
+
+- The catalog entry for the planned `census:acs-5year` no longer says the Census Data API is anonymous for light use: probed on 2026-09-18, every data request is refused without a key, and only the metadata is served keyless. The entry now declares `place_subset` rather than `spatial_subset`, since its geography is a FIPS code. The roadmap records that Census waits with the credentialed sources.
+- The roadmap is current through this release: the Storm Events and SPC sibling tables and NWS watches and warnings by county are recorded as shipped, and no workstream is selected.
+
 ## [0.21.0](https://github.com/jakeryderv/usdata/releases/tag/v0.21.0) - 2026-09-18
 
 

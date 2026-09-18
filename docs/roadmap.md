@@ -46,7 +46,7 @@ The R2 bucket at `data.usdata.dev` is reserved for dataset storage; see
 [website operations](guides/website-operations.md) and
 [ADR 0015](adr/0015-separate-sites-and-data-storage.md).
 
-Shipped through v0.21.0: the tornado research inputs
+Shipped through v0.22.0: the tornado research inputs
 ([issue 118](https://github.com/jakeryderv/usdata/issues/118)), one registry
 schema verified against the adapters
 ([ADR 0026](adr/0026-one-registry-schema.md)), the published provider contract
@@ -86,14 +86,14 @@ window and place rules are in
 [worked example](https://usdata.dev/examples/disaster-declarations/) joins an
 evening's tornado counties to the declaration in force.
 
-The sibling tables of two datasets already in the catalog are implemented and
-unreleased, each chosen with a `table` parameter: the Storm Events
+The sibling tables of two datasets already in the catalog shipped in v0.22.0,
+each chosen with a `table` parameter: the Storm Events
 [fatalities and locations tables](https://github.com/jakeryderv/usdata/issues/133),
 which join to details on `EVENT_ID`, and the SPC
 [hail and wind databases](https://github.com/jakeryderv/usdata/issues/134),
 which start in 1955 where the tornado database starts in 1950.
 
-The second source selected by place is implemented and unreleased:
+The second source selected by place shipped in v0.22.0 too:
 [NWS watches and warnings by county](https://github.com/jakeryderv/usdata/issues/252),
 from the Iowa Environmental Mesonet's mirror of NWS products. Beside the Storm
 Events reports it answers a question the catalog cannot ask today, how long

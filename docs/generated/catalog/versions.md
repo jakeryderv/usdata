@@ -27,9 +27,9 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usda:cropland-data-layer`](usda.md#usdacropland-data-layer) Cropland Data Layer · Planned
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
 
-**Implemented, unreleased (planned 0.22)**
+**Included since 0.22**
 
-- [`noaa:nws-vtec-events`](noaa.md#noaanws-vtec-events) NWS Watch, Warning, and Advisory Events by County · Source only
+- [`noaa:nws-vtec-events`](noaa.md#noaanws-vtec-events) NWS Watch, Warning, and Advisory Events by County · Released
 
 **Included since 0.21**
 
