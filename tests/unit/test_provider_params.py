@@ -12,6 +12,7 @@ from usdata.providers.params import (
     StrList,
     UpperStrList,
     choice,
+    flag,
     int_list,
     int_range,
     number_range,
@@ -320,3 +321,21 @@ def test_place_of_refuses_a_box_that_names_no_place_in_the_same_words_for_every_
     with pytest.raises(QueryError) as hinted:
         adapter.place_of(Query(bbox=BOX), hint="pass state or fips")
     assert str(hinted.value).endswith("name a state or county with location, or pass state or fips")
+
+
+class Flagged(BaseModel):
+    on: Annotated[bool, flag()] = False
+
+
+@pytest.mark.parametrize(
+    "raw, expected",
+    [(True, True), (False, False), ("true", True), ("TRUE", True), (" false ", False)],
+)
+def test_a_flag_reads_a_boolean_or_the_text_the_cli_passes(raw, expected) -> None:
+    assert Flagged.model_validate({"on": raw}).on is expected
+
+
+@pytest.mark.parametrize("raw", ["yes", "1", "", 1, 0, None, ["true"]])
+def test_a_flag_refuses_anything_it_would_have_to_guess_at(raw) -> None:
+    with pytest.raises(ValidationError, match="must be true or false"):
+        Flagged.model_validate({"on": raw})

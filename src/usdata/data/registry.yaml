@@ -1598,21 +1598,26 @@ datasets:
 
   - id: fema:disaster-declarations
     provider: fema
-    status: planned
+    status: available
     domain: natural-hazards
-    target: later
+    since: "0.21"
     title: FEMA Disaster Declarations Summaries
     description: >-
-      Every federal disaster declaration since 1953, one row per declaration and
-      designated area, with incident type, dates, programs declared, and county
-      FIPS codes, from the OpenFEMA v2 JSON API (70,402 rows on 2026-09-14; OData
-      filters and paging).
+      Every federally declared disaster since 1953, major disaster, emergency, and fire
+      management declarations alike, one row per declaration and designated area, with the
+      incident type and period, the programs declared, and state and county FIPS codes, from
+      the OpenFEMA v2 API as CSV. Rows carry no coordinates, so selection is by named state or
+      county rather than by box, and a window selects declarations whose incident period
+      overlaps it. The dataset is rebuilt every twenty minutes and rows are revised as
+      incidents close.
     keywords:
       - fema
       - disasters
       - declarations
       - tornado
       - impacts
+      - counties
+      - openfema
     protocol: http
     homepage: https://www.fema.gov/openfema-data-page/disaster-declarations-summaries-v2
     license: US Government Work (public domain)
@@ -1620,5 +1625,59 @@ datasets:
       start: "1953-01-01T00:00:00Z"
     capabilities:
       spatial_subset: false
+      place_subset: true
       temporal_subset: true
-      variable_subset: true
+      variable_subset: false
+    summary: Federal disaster declarations by county
+    formats: [CSV]
+    selection: >-
+      Declarations whose incident period overlaps an inclusive UTC window, for a named state or
+      county; a county also returns its state's statewide designations
+    inputs: Both dates; optionally a state or county location, or state or fips, and type filters
+    reader: pandas
+    guide: docs/providers/fema-disaster-declarations.md
+    examples:
+      - examples/disaster-declarations/README.md
+    resolution:
+      spatial: "One row per designated area: a county or county equivalent, a tribal area, or a whole state"
+      temporal: "Calendar dates for the declaration and for the start and end of the incident"
+    update_frequency: Every twenty minutes (R/PT20M); a record's lastRefresh moves only when it changes
+    citation: >-
+      Federal Emergency Management Agency (FEMA), OpenFEMA Dataset: Disaster Declarations
+      Summaries - v2. Retrieved from
+      https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries on [date, time]. This
+      product uses the Federal Emergency Management Agency's OpenFEMA API, but is not endorsed
+      by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from
+      these data after the data have been retrieved from the Agency's website(s).
+    terms: https://www.fema.gov/about/openfema/terms-conditions
+    variables:
+      - { name: femaDeclarationString, description: "Declaration type, disaster number, and state code joined, such as DR-4393-NC" }
+      - { name: disasterNumber, description: "Sequentially assigned number designating the declared event" }
+      - { name: state, description: "Two-letter code of the state, district, or territory" }
+      - { name: declarationType, description: "DR major disaster, EM emergency, or FM fire management" }
+      - { name: declarationDate, units: "ISO 8601 UTC", description: "Date the disaster was declared" }
+      - { name: fyDeclared, description: "Fiscal year in which the disaster was declared" }
+      - { name: incidentType, description: "Primary type of incident, such as Fire or Flood" }
+      - { name: declarationTitle, description: "Title for the disaster" }
+      - { name: ihProgramDeclared, description: "Whether the Individuals and Households program was declared" }
+      - { name: iaProgramDeclared, description: "Whether the Individual Assistance program was declared" }
+      - { name: paProgramDeclared, description: "Whether the Public Assistance program was declared" }
+      - { name: hmProgramDeclared, description: "Whether the Hazard Mitigation program was declared" }
+      - { name: incidentBeginDate, units: "ISO 8601 UTC", description: "Date the incident itself began" }
+      - { name: incidentEndDate, units: "ISO 8601 UTC", description: "Date the incident itself ended; empty while open" }
+      - { name: disasterCloseoutDate, units: "ISO 8601 UTC", description: "Date all financial transactions for all programs are completed" }
+      - { name: tribalRequest, description: "Whether a Tribal Nation submitted the request directly to the President" }
+      - { name: fipsStateCode, description: "Two-digit FIPS code of the state, district, or territory" }
+      - { name: fipsCountyCode, description: "Three-digit FIPS code of the county; 000 for a statewide or tribal designation" }
+      - { name: placeCode, description: "FEMA's own location code, 99 plus the county code, covering areas with no FIPS county code" }
+      - { name: designatedArea, description: "Name of the geographic area included in the declaration" }
+      - { name: declarationRequestNumber, description: "Number assigned to the declaration request" }
+      - { name: declarationRequestDate, units: "ISO 8601 UTC", description: "Date the declaration request was made" }
+      - { name: lastIAFilingDate, units: "ISO 8601 UTC", description: "Last date Individual Assistance requests can be filed; after 1998 only" }
+      - { name: incidentId, description: "Identifier of the incident, which may or may not become a declared disaster" }
+      - { name: region, description: "FEMA region, 1 to 10, where the disaster occurred" }
+      - { name: designatedIncidentTypes, description: "Comma-separated codes of every incident type designated for the disaster" }
+      - { name: lastRefresh, units: "ISO 8601 UTC", description: "When the record was last updated in the API data store" }
+      - { name: hash, description: "MD5 hash of the record's fields and values" }
+      - { name: id, description: "Unique id assigned to the record" }
+    adapter: usdata.providers.fema.declarations:DisasterDeclarations

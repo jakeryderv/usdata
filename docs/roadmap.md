@@ -76,10 +76,17 @@ absent or matching it
 settled byte ranges are handed to the adapter rather than read back from it
 ([ADR 0032](adr/0032-fetch-partial.md)).
 
-No workstream is selected. The next one is a dataset expansion, scoped from
-the candidates under Next around a concrete analysis use case, and it moves
-here once its issue has a verified endpoint, a bounded example, and acceptance
-criteria.
+The selected workstream is the first source keyed by place rather than by a
+box: [FEMA disaster declarations](https://github.com/jakeryderv/usdata/issues/241),
+whose rows carry state and county FIPS codes and no coordinates. It is
+implemented and unreleased. A query now keeps the place a location resolved
+([ADR 0034](adr/0034-query-keeps-the-resolved-place.md)), and the adapter's
+window and place rules are in
+[ADR 0035](adr/0035-openfema-window-and-place-rules.md). The issue planned to
+add the source to the severe-weather case study; the data said otherwise, since
+the county that study follows was not designated, so a
+[worked example](https://usdata.dev/examples/disaster-declarations/) of its own
+joins the whole evening's tornado counties to the declaration instead.
 
 ## Next
 
@@ -95,8 +102,6 @@ moving it to Now. Prefer additions that exercise a useful new access pattern or
 reuse an existing one while preserving the adapter, transport, cache/provenance,
 and optional-reader boundaries:
 
-- FEMA disaster declarations from OpenFEMA, which join to Storm Events by
-  county and date.
 - [Storm Events fatalities and locations tables](https://github.com/jakeryderv/usdata/issues/133)
   and [SPC hail and wind reports](https://github.com/jakeryderv/usdata/issues/134),
   which reuse existing access patterns and fill out the severe-weather case study.

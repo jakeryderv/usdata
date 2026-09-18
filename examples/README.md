@@ -53,6 +53,11 @@ reader (available since v0.15).
 magnitude 1.0 or larger event inside the state on the two tornado-outbreak days
 from the USGS catalog as one CSV and ranks them (available since v0.19.0).
 
+[Disaster declarations](https://usdata.dev/examples/disaster-declarations/) pins
+FEMA's major disaster declarations in force in Oklahoma on the outbreak day and
+joins them to the Storm Events tornado reports by county FIPS code (unreleased;
+available from source for v0.21).
+
 [Atlantic hurricane best tracks](https://usdata.dev/examples/hurdat2/) fetches the whole HURDAT2
 Atlantic file and reads it into one row per track point (available since v0.12.0).
 

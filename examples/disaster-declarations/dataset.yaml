@@ -1,0 +1,13 @@
+name: oklahoma-tornado-declarations
+sources:
+  - name: declarations
+    dataset: fema:disaster-declarations
+    location: Oklahoma
+    start: 2024-05-06
+    end: 2024-05-06
+    params:
+      declaration_type: DR
+  - name: reports
+    dataset: noaa:storm-events
+    start: 2024-05-06
+    end: 2024-05-06

@@ -38,3 +38,4 @@ is described in the guides and reference pages.
 - [0032: Settled byte ranges are handed to `fetch_partial`](0032-fetch-partial.md)
 - [0033: Convert only the bare Storm Events timezone labels that name one offset](0033-bare-storm-events-timezone-labels.md)
 - [0034: A query keeps the place it resolved](0034-query-keeps-the-resolved-place.md)
+- [0035: OpenFEMA declarations select by incident period, exclude open incidents, and widen a county to its state's statewide rows](0035-openfema-window-and-place-rules.md)

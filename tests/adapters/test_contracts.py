@@ -18,6 +18,7 @@ import pytest
 from usdata import providers, testing
 from usdata.models import Query, Status
 from usdata.providers import Provider, load_adapter
+from usdata.providers.fema.declarations import SERVICE_URL as FEMA_URL
 from usdata.providers.noaa.coastwatch import BASE, DATASET
 from usdata.providers.noaa.hurdat2 import DIRECTORY_URL as HURDAT_URL
 from usdata.providers.noaa.ibtracs import DIRECTORY_URL as IBTRACS_URL
@@ -54,6 +55,7 @@ CASES = {
     "usgs:earthquakes": {"min_magnitude": "2.5"},
     "noaa:rap": {"cycle": 12, "forecast_hour": 0},
     "noaa:nbm": {"cycle": 12, "forecast_hour": 1},
+    "fema:disaster-declarations": {"state": "OK"},
 }
 S3_KEYS = {
     "noaa:nexrad-level2": "2024/05/06/KTLX/KTLX20240506_120100_V06",
@@ -173,6 +175,8 @@ def contract_transport(
             )
         if str(request.url).startswith(COUNT_URL):
             return httpx.Response(200, text="1")
+        if str(request.url).startswith(FEMA_URL) and "$inlinecount" in request.url.params:
+            return httpx.Response(200, json={"metadata": {"count": 1}})
         if str(request.url).startswith(ITEMS_URL) and request.url.params.get("f") == "json":
             first = request.url.params.get("offset") == "0"
             return httpx.Response(200, json={"features": [{"id": "a"}] if first else []})

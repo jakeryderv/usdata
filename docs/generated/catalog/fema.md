@@ -8,20 +8,13 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 ## Implemented datasets
 
-None implemented yet.
+| Dataset | Availability | Files | What gets selected |
+|---|---|---|---|
+| <span id="femadisaster-declarations"></span>[Federal disaster declarations by county](fema/disaster-declarations.md) | Source only | CSV | Declarations whose incident period overlaps an inclusive UTC window, for a named state or county; a county also returns its state's statewide designations |
 
 ## Planned datasets
 
 These entries are not implemented; they cannot fetch data.
-
-### fema:disaster-declarations
-
-**FEMA Disaster Declarations Summaries** · Planned · target later
-
-Every federal disaster declaration since 1953, one row per declaration and designated area, with incident type, dates, programs declared, and county FIPS codes, from the OpenFEMA v2 JSON API (70,402 rows on 2026-09-14; OData filters and paging).
-
-[Upstream information](https://www.fema.gov/openfema-data-page/disaster-declarations-summaries-v2)
-Domain: Natural hazards.
 
 ### fema:nfhl
 
