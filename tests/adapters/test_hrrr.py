@@ -324,7 +324,7 @@ def test_a_partial_fetch_concatenates_the_selected_messages(adapter, tmp_path: P
         (asset,) = adapter.list_assets(query(messages=SELECTED))
         route = mock.get(OBJECT_URL)
         route.side_effect = ranged()
-        assert adapter.fetch(asset, dest) == dest
+        assert adapter.fetch_partial(asset, dest, adapter.prepare_fetch(asset)) == dest
     assert dest.read_bytes() == PART
     assert route.call_count == 1
     assert route.calls[0].request.headers["Range"] == "bytes=40-119"
@@ -340,7 +340,7 @@ def test_disjoint_messages_use_one_request_per_run(adapter, tmp_path: Path) -> N
         )
         route = mock.get(OBJECT_URL)
         route.side_effect = ranged()
-        adapter.fetch(asset, dest)
+        adapter.fetch_partial(asset, dest, adapter.prepare_fetch(asset))
     assert asset.href.endswith("#messages=1,3") and asset.size == 80
     assert [call.request.headers["Range"] for call in route.calls] == ["bytes=0-39", "bytes=80-119"]
     assert dest.read_bytes() == OBJECT[0:40] + OBJECT[80:120]
@@ -376,17 +376,41 @@ def test_bad_message_selectors_fail_before_any_request(adapter, raw) -> None:
     assert not mock.calls
 
 
-def test_fetching_a_partial_asset_this_adapter_never_listed_is_refused(
-    adapter, tmp_path: Path
-) -> None:
+def test_preparing_a_partial_asset_this_adapter_never_listed_is_refused(adapter) -> None:
     with respx.mock() as mock:
         arm_partial(mock)
         (asset,) = adapter.list_assets(query(messages=SELECTED))
     with httpx.Client() as other_client:
         other = Hrrr(default_registry().get("noaa:hrrr"), client=other_client)
         with respx.mock() as mock, pytest.raises(QueryError, match="byte ranges"):
-            other.fetch(asset, tmp_path / "part.grib2")
+            other.prepare_fetch(asset)
         assert not mock.calls
+
+
+def test_fetch_refuses_a_partial_asset_rather_than_download_the_whole_object(
+    adapter, tmp_path: Path
+) -> None:
+    with respx.mock() as mock:
+        arm_partial(mock)
+        (asset,) = adapter.list_assets(query(messages=SELECTED))
+    dest = tmp_path / "part.grib2"
+    with respx.mock() as mock, pytest.raises(ValueError, match="fetch_partial"):
+        adapter.fetch(asset, dest)
+    assert not mock.calls and not dest.exists()
+
+
+def test_fetch_partial_reads_nothing_from_the_adapter_that_listed(tmp_path: Path) -> None:
+    dataset = default_registry().get("noaa:hrrr")
+    with httpx.Client() as client, respx.mock() as mock:
+        arm_partial(mock)
+        lister = Hrrr(dataset, client=client)
+        (asset,) = lister.list_assets(query(messages=SELECTED))
+        partial = lister.prepare_fetch(asset)
+        assert partial is not None
+        mock.get(OBJECT_URL).side_effect = ranged()
+        dest = tmp_path / "part.grib2"
+        assert Hrrr(dataset, client=client).fetch_partial(asset, dest, partial) == dest
+    assert dest.read_bytes() == PART
 
 
 @pytest.mark.l2
