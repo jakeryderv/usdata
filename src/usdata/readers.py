@@ -116,6 +116,22 @@ class Hurdat2FormatError(ValueError):
     """A fetched file does not follow the documented HURDAT2 layout."""
 
 
+def has_units_row(dataset_id: str, protocol: Protocol | None) -> bool:
+    """Whether a dataset's CSV lays a units row under its header.
+
+    ERDDAP responses do, and so does IBTrACS, which is served over plain HTTP.
+    ``open`` and ``inspect`` both ask here, so they agree on which row is data.
+
+    Args:
+        dataset_id: The ``provider:name`` id the file was fetched for.
+        protocol: The protocol its asset was served over, when known.
+
+    Returns:
+        True when the row under the header holds units rather than data.
+    """
+    return protocol is Protocol.ERDDAP or dataset_id == IBTRACS_DATASET
+
+
 def _name_tables(variables: list[Variable]) -> list[tuple[bool, dict[str, Variable]]]:
     """Lookup tables from most to least specific, each flagged as case-folded or not.
 
@@ -343,9 +359,7 @@ def open_asset(
         elif grib2:
             reader = "grib2"
         elif media_type in CSV_MEDIA_TYPES or gzip_csv:
-            units_row = fetched.asset.protocol is Protocol.ERDDAP or (
-                fetched.asset.dataset_id == IBTRACS_DATASET
-            )
+            units_row = has_units_row(fetched.asset.dataset_id, fetched.asset.protocol)
             reader = "erddap-csv" if units_row else "csv"
         else:
             raise UnsupportedFormat(

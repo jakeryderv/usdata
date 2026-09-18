@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING
 from pydantic import BaseModel, Field
 
 from usdata import provenance, readers
-from usdata.models import Provenance
+from usdata.models import Protocol, Provenance
 
 if TYPE_CHECKING:
     from usdata._fetch import FetchedAsset
@@ -47,7 +47,16 @@ class CsvSummary(BaseModel):
     """A delimited text file's header and how many data rows the scan counted."""
 
     columns: list[str] = Field(description="Header fields, in file order")
-    row_count: int = Field(ge=0, description="Data rows counted, excluding the header")
+    units: dict[str, str] = Field(
+        default_factory=dict,
+        description=(
+            "Units per column, from the units row an ERDDAP or IBTrACS CSV lays under its "
+            "header; empty for a CSV with no such row"
+        ),
+    )
+    row_count: int = Field(
+        ge=0, description="Data rows counted, excluding the header and any units row"
+    )
     row_limit: int = Field(gt=0, description="Rows the scan reads before it stops")
     truncated: bool = Field(description="The scan stopped early, so row_count is a lower bound")
 
@@ -189,6 +198,7 @@ def inspect_asset(fetched: FetchedAsset) -> Summary:
         fetched.asset.id,
         fetched.provenance,
         _detect(fetched.asset.id, fetched.asset.media_type),
+        fetched.asset.protocol,
     )
 
 
@@ -201,23 +211,39 @@ def inspect_path(path: str | os.PathLike[str]) -> Summary:
 
     Returns:
         The summary ``inspect_asset`` builds, with the format taken from the file
-        name because a sidecar records no media type.
+        name because a sidecar records no media type, and the protocol from the
+        registry entry of the dataset the sidecar names, for the same reason.
 
     Raises:
         OSError: The file or its provenance sidecar is missing or unreadable.
         ValueError: The sidecar is not a provenance record.
     """
     local = Path(path)
-    return _summarize(local, local.name, provenance.read(local), _detect(local.name, None))
+    record = provenance.read(local)
+    return _summarize(
+        local, local.name, record, _detect(local.name, None), _registered_protocol(record)
+    )
 
 
-def _summarize(path: Path, asset_id: str, record: Provenance, fmt: AssetFormat) -> Summary:
+def _registered_protocol(record: Provenance) -> Protocol | None:
+    """The protocol the registry gives the dataset a sidecar names, or None when it has none."""
+    from usdata.registry import DatasetNotFound, default_registry
+
+    try:
+        return default_registry().get(record.dataset_id).protocol
+    except DatasetNotFound:
+        return None
+
+
+def _summarize(
+    path: Path, asset_id: str, record: Provenance, fmt: AssetFormat, protocol: Protocol | None
+) -> Summary:
     """One summary, with the detail its format allows and a note where it allows none."""
     detail: CsvSummary | NetcdfSummary | Grib2Summary | None = None
     note: str | None = None
     if fmt is not AssetFormat.BYTES:
         try:
-            detail = _detail(path, fmt, record)
+            detail = _detail(path, fmt, record, protocol)
         except readers.MissingReaderDependency as error:
             note = str(error)
         # A cached file that no longer decodes is reported, not raised: a summary
@@ -262,11 +288,11 @@ def _detect(name: str, media_type: str | None) -> AssetFormat:
 
 
 def _detail(
-    path: Path, fmt: AssetFormat, record: Provenance
+    path: Path, fmt: AssetFormat, record: Provenance, protocol: Protocol | None
 ) -> CsvSummary | NetcdfSummary | Grib2Summary:
     """The detail for one recognized format, reading only what that format needs."""
     if fmt is AssetFormat.CSV:
-        return _csv_summary(path)
+        return _csv_summary(path, units_row=readers.has_units_row(record.dataset_id, protocol))
     if fmt is AssetFormat.NETCDF:
         from usdata._netcdf import variables
 
@@ -298,8 +324,15 @@ def _paired(messages: list[GribMessage], record: Provenance) -> list[GribMessage
     ]
 
 
-def _csv_summary(path: Path) -> CsvSummary:
-    """Header and data-row count through the standard library, stopping at ``ROW_LIMIT`` rows."""
+def _csv_summary(path: Path, *, units_row: bool = False) -> CsvSummary:
+    """Header and data-row count through the standard library, stopping at ``ROW_LIMIT`` rows.
+
+    With ``units_row`` the row under the header is read as units, as ``open``
+    reads it, rather than counted as data.
+
+    Raises:
+        ValueError: A units row was expected and does not match the header.
+    """
     with path.open("rb") as raw:
         compressed = raw.read(2) == b"\x1f\x8b"
         raw.seek(0)
@@ -307,13 +340,21 @@ def _csv_summary(path: Path) -> CsvSummary:
         with io.TextIOWrapper(binary, encoding="utf-8-sig", newline="") as stream:
             records = csv.reader(stream)
             columns = next(records, [])
+            units: dict[str, str] = {}
+            if units_row and columns:
+                values = next(records, [])
+                if len(values) != len(columns):
+                    raise ValueError("CSV must have a units row matching the header")
+                units = dict(zip(columns, (value.strip() for value in values), strict=True))
             rows = 0
             for _ in records:
                 rows += 1
                 if rows == ROW_LIMIT:
                     break
             truncated = next(records, None) is not None
-    return CsvSummary(columns=columns, row_count=rows, row_limit=ROW_LIMIT, truncated=truncated)
+    return CsvSummary(
+        columns=columns, units=units, row_count=rows, row_limit=ROW_LIMIT, truncated=truncated
+    )
 
 
 __all__ = [

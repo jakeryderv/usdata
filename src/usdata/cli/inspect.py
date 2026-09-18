@@ -94,7 +94,8 @@ def _echo_detail(summary: Summary, width: int) -> None:
         else:
             typer.echo("  columns:")
             for name in frame.columns:
-                typer.echo(f"    {name}")
+                unit = frame.units.get(name)
+                typer.echo(f"    {name} ({unit})" if unit else f"    {name}")
     if (scene := summary.netcdf) is not None:
         _echo_table(
             "variables",
