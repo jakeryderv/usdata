@@ -123,6 +123,24 @@ def choice(*allowed: str) -> BeforeValidator:
     return BeforeValidator(parse)
 
 
+def flag() -> BeforeValidator:
+    """Validate a boolean field, accepting the ``true`` and ``false`` the CLI passes as text.
+
+    A manifest hands over a real boolean and ``--param key=true`` a string, and
+    both are read; ``1``, ``yes``, and anything else are refused rather than
+    guessed at.
+    """
+
+    def parse(value: object) -> bool:
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str) and value.strip().lower() in {"true", "false"}:
+            return value.strip().lower() == "true"
+        raise ValueError("must be true or false")
+
+    return BeforeValidator(parse)
+
+
 def _strings(value: object) -> list[str]:
     """Distinct non-empty strings in request order, split on commas."""
     items = [_text(item) for item in _items(value)]
@@ -159,6 +177,7 @@ __all__ = [
     "StrList",
     "UpperStrList",
     "choice",
+    "flag",
     "int_list",
     "int_range",
     "number_range",

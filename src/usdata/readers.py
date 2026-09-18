@@ -107,6 +107,9 @@ IDENTIFIER_COLUMNS = {
     "state_fips",
     "cz_fips",
     "tor_other_cz_fips",
+    "fipsstatecode",
+    "fipscountycode",
+    "placecode",
 }
 
 

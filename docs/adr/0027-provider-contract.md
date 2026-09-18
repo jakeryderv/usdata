@@ -56,7 +56,7 @@ The adapter contract is a named, published surface. It is:
 - **The coercions in `usdata.providers.params`.** `int_range`, `positive_int`,
   `int_list`, and `choice`, and the annotated types `StrList`, `UpperStrList`,
   and `OptionalUpperStrList`, with the values they accept and the wording of the
-  messages they raise.
+  messages they raise. Added since: `flag`, for a boolean the CLI passes as text.
 - **`QueryError`**, raised for any query this dataset cannot satisfy, and
   **`NotImplementedProvider`**, raised for a registered dataset with no adapter.
 - **`load_adapter`**, which instantiates the `Provider` a `Dataset` names.
