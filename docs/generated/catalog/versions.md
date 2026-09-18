@@ -27,9 +27,9 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usda:cropland-data-layer`](usda.md#usdacropland-data-layer) Cropland Data Layer · Planned
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
 
-**Implemented, unreleased (planned 0.21)**
+**Included since 0.21**
 
-- [`fema:disaster-declarations`](fema.md#femadisaster-declarations) FEMA Disaster Declarations Summaries · Source only
+- [`fema:disaster-declarations`](fema.md#femadisaster-declarations) FEMA Disaster Declarations Summaries · Released
 
 **Included since 0.20**
 

@@ -1,1 +1,0 @@
-The release check now refuses a source-only notice that names no version, because it could never tell when such a notice went stale; three of them outlived their releases that way before v0.20.0. This guards the release procedure and changes nothing in the package.

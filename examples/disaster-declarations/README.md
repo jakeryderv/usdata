@@ -1,20 +1,24 @@
 # Which Oklahoma counties hit by a tornado on 6 May 2024 were under a federal disaster declaration?
 
-Unreleased; available from source for v0.21. The [manifest](dataset.yaml) pins
+Available since v0.21.0. The [manifest](dataset.yaml) pins
 two inputs: FEMA's major disaster declarations in force in Oklahoma on 6 May
 2024, one row per designated county, and the 2024 Storm Events archive, which
 holds that evening's tornado reports. Joining them by county answers the
 question, and shows why this source is selected by a named place rather than by
 a rectangle.
 
-In an activated Python 3.11+ virtual environment, install the package from
-[source](https://docs.usdata.dev/install/#source-installation) and run from
-`examples/disaster-declarations/`, using `uv run usdata` and `uv run python`:
+In an activated Python 3.11+ virtual environment, install the published package
+and save the [manifest](dataset.yaml) as `dataset.yaml` in a working directory.
+Run the commands from that directory:
 
 ```sh
+python -m pip install "usdata[pandas]"
 usdata pull dataset.yaml
 usdata verify dataset.yaml
 ```
+
+For a [source installation](https://docs.usdata.dev/install/#source-installation), run from
+`examples/disaster-declarations/` and use `uv run usdata` and `uv run python`.
 
 ```python
 from pathlib import Path
