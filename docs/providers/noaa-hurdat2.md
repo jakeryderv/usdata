@@ -113,8 +113,8 @@ than enumerating impacts. Continental U.S. landfalls are marked for 1851-1970 an
 1991 onward; international landfalls only for 1951-1970 and 1991 onward. Track
 points for `WV` and `DB` status give a lower-tropospheric vorticity center, not a
 surface center. The Pacific file covers the northeast and north-central Pacific
-only; it is not a global archive, and `noaa:ibtracs` remains the planned entry
-for merged worldwide tracks.
+only; it is not a global archive. [IBTrACS](noaa-ibtracs.md) merges these files
+with every other agency's tracks into one worldwide record.
 
 Field meanings, record codes, and era-by-era caveats are documented in the NHC
 [Atlantic format reference](https://www.nhc.noaa.gov/data/hurdat/hurdat2-format-atl-1851-2021.pdf)

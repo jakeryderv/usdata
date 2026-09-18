@@ -28,7 +28,7 @@
   {
     "slug": "climate-anomalies",
     "title": "Was 2024 warmer or wetter than normal?",
-    "summary": "Compare twelve months at Oklahoma City's airport with 1991–2020 station normals, including temperature-unit checks and monthly anomaly plots."
+    "summary": "Compare twelve months at Oklahoma City's airport with 1991\u20132020 station normals, including temperature-unit checks and monthly anomaly plots."
   },
   {
     "slug": "event-context",
@@ -74,7 +74,7 @@
   {
     "slug": "climate-normals",
     "title": "What is normal weather for a month at one station?",
-    "summary": "Read 1991–2020 monthly temperature and precipitation normals and select a month for comparison."
+    "summary": "Read 1991\u20132020 monthly temperature and precipitation normals and select a month for comparison."
   },
   {
     "slug": "coastal-water-levels",
@@ -129,5 +129,10 @@
     "slug": "nbm-forecast",
     "title": "How warm did the National Blend expect Oklahoma City to stay through the evening of 6 May 2024?",
     "summary": "Fetch the 2 m temperature message from four hours of one National Blend run, 1.5 MB each of 171 MB files, and print the forecast at the nearest grid point per valid hour."
+  },
+  {
+    "slug": "ibtracs",
+    "title": "Which tropical cyclones reached Category 4 or 5 worldwide in recent seasons?",
+    "summary": "Pull the IBTrACS file of the last three seasons for every basin, read it with its units row, separate final from provisional tracks, and rank the strongest storms by the U.S. agency's peak wind."
   }
 ]

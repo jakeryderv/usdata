@@ -103,11 +103,6 @@ moving it to Now. Prefer additions that exercise a useful new access pattern or
 reuse an existing one while preserving the adapter, transport, cache/provenance,
 and optional-reader boundaries:
 
-- `usgs:earthquakes`: the ComCat query API returns GeoJSON, a response shape
-  the registry has not met, and the first USGS source beyond water.
-- RAP and NBM: the HRRR and GFS bucket layout and index files, so mostly
-  registry entries and a subclass.
-- Bulk directories and archives, such as IBTrACS, beside HURDAT2.
 - FEMA disaster declarations from OpenFEMA, which join to Storm Events by
   county and date.
 - Further NCEI Access Data Service datasets, such as hourly normals.

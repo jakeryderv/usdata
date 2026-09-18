@@ -51,6 +51,15 @@ STORM_EVENTS_RULE = (
     "offset ending CZ_TIMEZONE (CST-6 is UTC-6, GST10 is UTC+10)"
 )
 
+IBTRACS_DATASET = "noaa:ibtracs"
+"""The dataset whose CSV lays a units row under the header, as ERDDAP does."""
+
+IBTRACS_MISSING = [" ", ""]
+"""What an IBTrACS CSV writes in a cell it has no value for: one space, never a word.
+
+pandas would otherwise read the North Atlantic basin code ``NA`` as missing.
+"""
+
 IDENTIFIER_COLUMNS = {
     "station",
     "station_id",
@@ -235,7 +244,11 @@ def open_asset(
 
     Gzip CSVs are decompressed locally without changing cached bytes.
     Infer ``csv`` or ``erddap-csv`` from media type and protocol, or use an
-    explicit reader for ambiguous metadata. Identifier columns default to pandas
+    explicit reader for ambiguous metadata. An IBTrACS CSV lays a units row
+    under its header as ERDDAP does, so it takes the ``erddap-csv`` reader; the
+    single space it writes for a missing value is read as missing, and nothing
+    else is, so the North Atlantic basin code ``NA`` stays text.
+    Identifier columns default to pandas
     strings; explicit dtype entries override those defaults. Dates are not parsed
     unless named in parse_dates; use dtype to preserve numeric-looking date labels
     as strings. No checksum verification or downloading occurs.
@@ -280,7 +293,10 @@ def open_asset(
         elif grib2:
             reader = "grib2"
         elif media_type in CSV_MEDIA_TYPES or gzip_csv:
-            reader = "erddap-csv" if fetched.asset.protocol is Protocol.ERDDAP else "csv"
+            units_row = fetched.asset.protocol is Protocol.ERDDAP or (
+                fetched.asset.dataset_id == IBTRACS_DATASET
+            )
+            reader = "erddap-csv" if units_row else "csv"
         else:
             raise UnsupportedFormat(
                 f"no reader for {fetched.asset.media_type!r}; supported formats are CSV, "
@@ -363,9 +379,10 @@ def open_asset(
                 values = next(records, [])
                 if len(values) != len(columns):
                     raise ValueError("ERDDAP CSV must have a units row matching the header")
-                units = dict(zip(columns, values, strict=True))
+                units = dict(zip(columns, (value.strip() for value in values), strict=True))
             types = {name: "string" for name in columns if name.casefold() in IDENTIFIER_COLUMNS}
             types.update(dtype or {})
+            ibtracs = fetched.asset.dataset_id == IBTRACS_DATASET
             frame = pandas.read_csv(
                 stream,
                 header=None,
@@ -374,6 +391,10 @@ def open_asset(
                 parse_dates=parse_dates,
                 usecols=usecols,
                 nrows=nrows,
+                na_values=IBTRACS_MISSING if ibtracs else None,
+                keep_default_na=not ibtracs,
+                # Agency code columns are blank for most of a long file; infer them whole.
+                low_memory=not ibtracs,
             )
     if units:
         frame.attrs["units"] = {name: units[name] for name in frame.columns}

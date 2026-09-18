@@ -473,21 +473,77 @@ datasets:
 
   - id: noaa:ibtracs
     provider: noaa
-    status: planned
+    status: available
     domain: tropical-cyclones
-    target: later
+    since: "0.20"
     title: IBTrACS Global Tropical Cyclone Tracks
     description: >-
-      International Best Track Archive for Climate Stewardship: merged best
-      tracks from all agencies worldwide since 1842. CSV and NetCDF files by
-      basin or period from an NCEI HTTPS directory (v04r01).
+      International Best Track Archive for Climate Stewardship: every agency's
+      tropical cyclone best tracks merged into one global record since 1842,
+      published by NCEI as whole files under an anonymous HTTPS directory. A
+      subset parameter names one of the eleven files NCEI builds (the complete
+      record, active storms, the last three years, everything since 1980, or
+      one of seven basins), a format parameter picks the CSV list or the
+      NetCDF file, and the newest product version wins unless one is pinned.
+      There is no query interface, so dates and geographic filters are
+      rejected; the files are rebuilt in place under unchanging names, so a
+      lockfile's checksum is what pins the bytes. The CSV opens with the units-row reader
+      and the NetCDF with xarray; filter the table locally.
     keywords: [tropical cyclone, hurricane, typhoon, best track, ibtracs, global]
     protocol: http
     homepage: https://www.ncei.noaa.gov/products/international-best-track-archive
     license: US Government Work (public domain)
-    temporal_extent: { start: "1842-01-01T00:00:00Z" }
+    temporal_extent: { start: "1842-10-25T03:00:00Z" }
     capabilities: { spatial_subset: false, temporal_subset: false, variable_subset: false }
-
+    summary: Global tropical cyclone best tracks
+    formats: [CSV with a units row, NetCDF4]
+    selection: One whole subset file per query, from the newest or a pinned product version
+    inputs: Required subset; optional format and version; no dates or geographic filters
+    reader: pandas
+    guide: docs/providers/noaa-ibtracs.md
+    examples:
+      - examples/ibtracs/README.md
+    resolution:
+      spatial: "Positions to a tenth of a degree"
+      temporal: "Three-hourly points, interpolated between the agencies' six-hourly best tracks"
+    update_frequency: >-
+      Files are rebuilt in place as agencies deliver best tracks, stamped with the build
+      date; the v04r01 change log records twenty-three additions and corrections between
+      2024-06-21 and 2026-07-31
+    citation: >-
+      Gahtan, J., K. R. Knapp, C. J. Schreck, H. J. Diamond, J. P. Kossin, and M. C. Kruk, 2024:
+      International Best Track Archive for Climate Stewardship (IBTrACS) Project, Version 4r01.
+      NOAA National Centers for Environmental Information, doi:10.25921/82ty-9e16. Knapp, K. R.,
+      M. C. Kruk, D. H. Levinson, H. J. Diamond, and C. J. Neumann, 2010: The International Best
+      Track Archive for Climate Stewardship (IBTrACS). Bull. Amer. Meteor. Soc., 91, 363-376
+    terms: https://www.ncei.noaa.gov/products/international-best-track-archive
+    variables:
+      - { name: "sid", description: "IBTrACS serial id, such as 2004086S29318; SID in the CSV" }
+      - { name: "season", units: "year", description: "Season the storm is assigned to" }
+      - { name: "number", description: "Storm number within the season" }
+      - { name: "basin", description: "Basin at this point: NA, EP, WP, NI, SI, SP, or SA" }
+      - { name: "subbasin", description: "Sub-basin at this point, or MM when none applies" }
+      - { name: "name", description: "Storm name, or UNNAMED" }
+      - { name: "time", units: "UTC", description: "Track-point time; ISO_TIME in the CSV" }
+      - { name: "nature", description: "Nature of the cyclone: TS, ET, SS, DS, NR, or MX" }
+      - { name: "lat", units: "degrees_north", description: "Track-point latitude" }
+      - { name: "lon", units: "degrees_east", description: "Track-point longitude in [-180, 180]" }
+      - { name: "wmo_wind", units: "knots", description: "Maximum sustained wind from the responsible WMO agency, in that agency's averaging period" }
+      - { name: "wmo_pres", units: "millibars", description: "Minimum central pressure from the responsible WMO agency" }
+      - { name: "wmo_agency", description: "The WMO agency responsible for the storm at this point" }
+      - { name: "track_type", description: "main, PROVISIONAL, or a spur track merged, split, or otherwise set aside" }
+      - { name: "dist2land", units: "km", description: "Distance to land at this point" }
+      - { name: "landfall", units: "km", description: "Minimum distance to land before the next point; 0 marks a landfall" }
+      - { name: "iflag", description: "One interpolation flag per agency: original, interpolated, or filled" }
+      - { name: "usa_wind", units: "knots", description: "Maximum sustained 1-minute wind from the U.S. agency" }
+      - { name: "usa_pres", units: "millibars", description: "Minimum central pressure from the U.S. agency" }
+      - { name: "usa_status", description: "U.S. agency status, such as TD, TS, HU, or EX" }
+      - { name: "usa_sshs", description: "Saffir-Simpson category from the U.S. wind; -5 to 5, with the negatives for non-hurricane statuses" }
+      - { name: "usa_rmw", units: "nautical miles", description: "Radius of maximum wind from the U.S. agency" }
+      - { name: "usa_r34", units: "nautical miles", description: "34 kt wind extent by quadrant; USA_R34_NE through USA_R34_NW in the CSV" }
+      - { name: "storm_speed", units: "knots", description: "Storm translation speed" }
+      - { name: "storm_dir", units: "degrees", description: "Storm translation direction" }
+    adapter: usdata.providers.noaa.ibtracs:Ibtracs
   - id: noaa:coops-water-levels
     provider: noaa
     status: available
