@@ -1,0 +1,1 @@
+A proposed decision record, ADR 0034, for keeping the place a `location` resolved to on the query, so sources keyed by state and county FIPS can honour `--location`. Nothing changes in the package yet.
