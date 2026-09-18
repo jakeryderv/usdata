@@ -4,13 +4,13 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 [Provider access notes](../../providers/fema.md).
 
-**Released** is included in usdata 0.20.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
+**Released** is included in usdata 0.21.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
 
 ## Implemented datasets
 
 | Dataset | Availability | Files | What gets selected |
 |---|---|---|---|
-| <span id="femadisaster-declarations"></span>[Federal disaster declarations by county](fema/disaster-declarations.md) | Source only | CSV | Declarations whose incident period overlaps an inclusive UTC window, for a named state or county; a county also returns its state's statewide designations |
+| <span id="femadisaster-declarations"></span>[Federal disaster declarations by county](fema/disaster-declarations.md) | Released | CSV | Declarations whose incident period overlaps an inclusive UTC window, for a named state or county; a county also returns its state's statewide designations |
 
 ## Planned datasets
 

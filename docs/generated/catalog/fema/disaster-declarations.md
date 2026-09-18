@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`fema:disaster-declarations` · **Source only** · Install from [source](../../../install.md#source-installation) to use this dataset.
+`fema:disaster-declarations` · **Released** · Included since usdata 0.21.
 
 FEMA Disaster Declarations Summaries.
 
@@ -66,7 +66,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.21
+- Availability: since 0.21
 - Domain: Natural hazards
 - Spatial resolution: One row per designated area: a county or county equivalent, a tribal area, or a whole state
 - Temporal resolution: Calendar dates for the declaration and for the start and end of the incident

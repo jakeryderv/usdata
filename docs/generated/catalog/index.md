@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-**Released** is included in usdata 0.20.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
+**Released** is included in usdata 0.21.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
 
 ## Implemented datasets
 
@@ -31,7 +31,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](noaa/coastwatch-sst.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
 | <span id="usgsearthquakes"></span>[Earthquake events](usgs/earthquakes.md) | Released | CSV | Events inside an inclusive UTC window and optional box, magnitude, and depth bounds |
 | <span id="usgswater-daily"></span>[Daily water observations](usgs/water-daily.md) | Released | CSV | Site observations for inclusive local calendar dates; parameter and statistic filters |
-| <span id="femadisaster-declarations"></span>[Federal disaster declarations by county](fema/disaster-declarations.md) | Source only | CSV | Declarations whose incident period overlaps an inclusive UTC window, for a named state or county; a county also returns its state's statewide designations |
+| <span id="femadisaster-declarations"></span>[Federal disaster declarations by county](fema/disaster-declarations.md) | Released | CSV | Declarations whose incident period overlaps an inclusive UTC window, for a named state or county; a county also returns its state's statewide designations |
 
 ## Browse by provider
 
@@ -39,7 +39,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 |---|---:|---:|---:|
 | [NOAA](noaa.md) | 21 | 0 | 14 |
 | [USGS](usgs.md) | 2 | 0 | 1 |
-| [FEMA](fema.md) | 0 | 1 | 1 |
+| [FEMA](fema.md) | 1 | 0 | 1 |
 | [Census Bureau](census.md) | 0 | 0 | 1 |
 | [EPA](epa.md) | 0 | 0 | 1 |
 | [NASA](nasa.md) | 0 | 0 | 1 |

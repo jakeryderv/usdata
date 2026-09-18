@@ -12,6 +12,22 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.21.0](https://github.com/jakeryderv/usdata/releases/tag/v0.21.0) - 2026-09-18
+
+
+### Added
+
+- A query built from a `location` now keeps the place it resolved, as `Query.place` with its FIPS code, beside the unchanged `bbox`, so a source keyed by state and county can honour `--location`; `usdata.query.find_place` returns both. `Capabilities` gains `place_subset`, `Provider` gains `place_of`, which refuses a box that names no place in the same words for every such source, and the contract checks hold the two together. Existing adapters, manifests, and lockfiles are unaffected.
+- `fema:disaster-declarations` fetches FEMA's Disaster Declarations Summaries from the OpenFEMA API as CSV: declarations whose incident period overlaps a window, for a named state or county, with incident and declaration type filters. It is the first source selected by place rather than by box, so `--location "Osage County, OK"` means that county exactly and a bare `bbox` is refused; a county also returns its state's statewide designations, and incidents with no end date are left out unless `include_open=true`. The reader keeps the FIPS columns as text. `usdata.providers.flag` validates a boolean parameter.
+
+### Fixed
+
+- Storm Events rows with a bare daylight label (`CDT`, `EDT`, `MDT`) now get `BEGIN_UTC` and `END_UTC`, read at the label's word as `CDT-5` already was. `AST`, `SST`, and `UNK` remain unconverted.
+
+### Documentation
+
+- ADR 0034 records the decision to keep the place a `location` resolved to on the query, so sources keyed by state and county FIPS can honour `--location`, and ADR 0035 records the OpenFEMA window and place rules with the evidence for each.
+
 ## [0.20.0](https://github.com/jakeryderv/usdata/releases/tag/v0.20.0) - 2026-09-18
 
 

@@ -78,8 +78,8 @@ settled byte ranges are handed to the adapter rather than read back from it
 
 The selected workstream is the first source keyed by place rather than by a
 box: [FEMA disaster declarations](https://github.com/jakeryderv/usdata/issues/241),
-whose rows carry state and county FIPS codes and no coordinates. It is
-implemented and unreleased. A query now keeps the place a location resolved
+whose rows carry state and county FIPS codes and no coordinates. It shipped in
+v0.21.0. A query now keeps the place a location resolved
 ([ADR 0034](adr/0034-query-keeps-the-resolved-place.md)), and the adapter's
 window and place rules are in
 [ADR 0035](adr/0035-openfema-window-and-place-rules.md). The issue planned to
