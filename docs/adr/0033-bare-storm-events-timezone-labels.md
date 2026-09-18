@@ -99,3 +99,23 @@ A label is still taken at its word. The 21 Arizona rows labelled `PST` convert
 as UTC−8 although Arizona keeps Mountain Standard Time; the local columns and
 the label stay in the frame, untouched, for anyone who needs to second-guess a
 row.
+
+## Amendment, 2026-09-18: bare daylight labels are converted
+
+The decision above left `CDT`, `EDT`, and `MDT` unconverted, on the ground that
+a bare daylight label contradicts the archive's documented standard time and
+states no offset to settle it. That reasoning did not survive a second look at
+what the reader already did. The provider note had always said of `CDT-5`,
+`EDT-4`, and `PDT-7` that "the trailing offset is still the one to use", so the
+reader already read a daylight label at its word whenever the offset was
+written out. A bare `CDT` carries the same claim, that this timestamp is
+daylight time, without the digit. Reading one as UTC−5 and refusing the other
+was an inconsistency, not caution.
+
+`CDT` −5, `EDT` −4, and `MDT` −6 join the table. Only daylight labels observed
+in the archive are listed; `PDT` and `ADT` were not seen bare and are added when
+they are, rather than by analogy. `AST` and `SST` stay unconverted because they
+name two offsets, which is a different problem from naming one that the
+documentation disputes, and `UNK` stays unconverted because it names none.
+
+Twenty-four rows across the fourteen sampled years are affected.

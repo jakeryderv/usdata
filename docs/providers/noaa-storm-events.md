@@ -47,15 +47,15 @@ Python timezone accepts these strings, and applying a named regional zone would
 add daylight saving the reports do not use.
 
 Files through 2006 write the label bare, with no offset: `CST`, not `CST-6`.
-Five bare labels name one offset wherever they appear in the archive and are
-converted with it: `CST` −6, `EST` −5, `MST` −7, `PST` −8, and `HST` −10. The
-rest are left unconverted rather than guessed
+Eight bare labels name one offset wherever they appear in the archive and are
+converted with it: `CST` −6, `EST` −5, `MST` −7, `PST` −8, and `HST` −10, and
+the daylight labels `CDT` −5, `EDT` −4, and `MDT` −6, a few rows a year, read at
+their word as `CDT-5` is. The rest are left unconverted rather than guessed
 ([ADR 0033](../adr/0033-bare-storm-events-timezone-labels.md)):
 
 - `AST` labels both Alaska (UTC−9) and Puerto Rico and the Virgin Islands (UTC−4).
 - `SST` labels both American Samoa (UTC−11) and Guam (UTC+10).
-- Bare daylight labels (`CDT`, `EDT`, `MDT`), a few rows a year, contradict the
-  documented local standard time and state no offset to settle it.
+- `UNK` says nothing.
 
 `STATE` tells the first two apart, so a caller who needs those rows can convert
 them by hand. The local timestamps carry two-digit years; `50` to `99` are read

@@ -59,21 +59,31 @@ nineteen years.
 CZ_TIMEZONE_OFFSET = re.compile(r"^[A-Za-z]+([+-]?\d{1,2})$")
 """A Storm Events timezone label, capturing the whole-hour UTC offset it ends with."""
 
-STORM_EVENTS_BARE_OFFSETS = {"CST": -6, "EST": -5, "MST": -7, "PST": -8, "HST": -10}
+STORM_EVENTS_BARE_OFFSETS = {
+    "CST": -6,
+    "EST": -5,
+    "MST": -7,
+    "PST": -8,
+    "HST": -10,
+    "CDT": -5,
+    "EDT": -4,
+    "MDT": -6,
+}
 """Bare labels, written through 2006, that name one offset wherever they appear.
 
-Two common bare labels are left out because they do not. ``AST`` labels both
-Alaska (UTC-9) and Puerto Rico and the Virgin Islands (UTC-4), and ``SST``
-labels both American Samoa (UTC-11) and Guam (UTC+10). Bare daylight labels
-such as ``CDT`` are left out because the archive documents local standard time
-and the label states no offset to settle the contradiction.
+The daylight labels are read at their word, as ``CDT-5`` already is when the
+label states its offset: a row labelled ``CDT`` says its timestamp is daylight
+time. Only the daylight labels seen in the archive are listed. Two common bare
+labels are left out because they name two offsets. ``AST`` labels both Alaska
+(UTC-9) and Puerto Rico and the Virgin Islands (UTC-4), and ``SST`` labels both
+American Samoa (UTC-11) and Guam (UTC+10).
 """
 
 STORM_EVENTS_RULE = (
     "local time parsed as %d-%b-%y %H:%M:%S, with years 50 to 99 read as 1950 to 1999, "
     "and shifted by the whole-hour UTC offset ending CZ_TIMEZONE (CST-6 is UTC-6, GST10 is "
-    "UTC+10) or, for a bare label, by CST -6, EST -5, MST -7, PST -8, or HST -10; any other "
-    "bare label is left unconverted"
+    "UTC+10) or, for a bare label, by CST -6, EST -5, MST -7, PST -8, HST -10, CDT -5, EDT -4, "
+    "or MDT -6; any other bare label is left unconverted"
 )
 
 IBTRACS_DATASET = "noaa:ibtracs"
