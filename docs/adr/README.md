@@ -35,3 +35,4 @@ is described in the guides and reference pages.
 - [0029: Committed example lockfiles, restored on a schedule](0029-committed-example-lockfiles.md)
 - [0030: A content-addressed mirror of pinned bytes](0030-content-addressed-mirror.md)
 - [0031: Stage refreshed files and commit the lockfile first](0031-staged-refresh-and-lockfile-first-commit.md)
+- [0032: Settled byte ranges are handed to `fetch_partial`](0032-fetch-partial.md)

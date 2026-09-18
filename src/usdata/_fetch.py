@@ -140,7 +140,10 @@ def _fetch_asset(
             return FetchedAsset(asset=asset, path=path, provenance=prov, from_cache=True)
     with staged_path(path) as tmp:
         partial = adapter.prepare_fetch(asset, pinned)
-        adapter.fetch(asset, tmp)
+        if partial is None:
+            adapter.fetch(asset, tmp)
+        else:
+            adapter.fetch_partial(asset, tmp, partial)
         prov = provenance.record(dataset, asset, tmp, partial)
         if asset.checksum and prov.checksum != asset.checksum:
             raise ChecksumMismatch(f"{asset.id}: expected {asset.checksum}, got {prov.checksum}")

@@ -190,16 +190,19 @@ class Provider(ABC):
         """Resolve a query to the concrete objects that satisfy it, without downloading."""
 
     def prepare_fetch(self, asset: Asset, pinned: Provenance | None = None) -> PartialFetch | None:
-        """Settle how one asset will be fetched, immediately before ``fetch`` writes it.
+        """Settle how one asset will be fetched, immediately before it is written.
 
         The core calls this once per fetch and records whatever it returns in the
         provenance sidecar, so an adapter that fetches selected byte ranges can
-        say which ones without the core knowing what they mean. ``pinned`` is the
-        provenance a lockfile holds for this asset, so a restore reproduces a
-        partial fetch from the record rather than by resolving the query again.
+        say which ones without the core knowing what they mean. It then calls
+        ``fetch`` when this returns ``None`` and ``fetch_partial`` with the
+        returned ranges otherwise, so neither has to look them up again.
+        ``pinned`` is the provenance a lockfile holds for this asset, so a restore
+        reproduces a partial fetch from the record rather than by resolving the
+        query again.
 
         Args:
-            asset: The asset ``fetch`` is about to be given.
+            asset: The asset about to be fetched.
             pinned: The provenance already pinned for it, when one is being restored.
 
         Returns:
@@ -212,7 +215,27 @@ class Provider(ABC):
 
     @abstractmethod
     def fetch(self, asset: Asset, dest: Path) -> Path:
-        """Download or materialize one asset to ``dest`` and return the written path."""
+        """Download or materialize one whole asset to ``dest`` and return the written path."""
+
+    def fetch_partial(self, asset: Asset, dest: Path, partial: PartialFetch) -> Path:
+        """Write the byte ranges ``prepare_fetch`` settled to ``dest`` and return the written path.
+
+        Only an adapter whose ``prepare_fetch`` can return ranges overrides this.
+        Everything it needs arrives as an argument, so it depends on no earlier
+        call to this adapter.
+
+        Args:
+            asset: The asset being fetched.
+            dest: Path to write the concatenated ranges to.
+            partial: What ``prepare_fetch`` returned for this asset.
+
+        Raises:
+            NotImplementedError: ``prepare_fetch`` returned ranges this adapter cannot fetch.
+        """
+        raise NotImplementedError(
+            f"{type(self).__name__}.prepare_fetch returned byte ranges for {asset.id}, "
+            "but the adapter does not implement fetch_partial"
+        )
 
 
 def load_adapter(dataset: Dataset) -> Provider:

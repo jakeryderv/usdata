@@ -386,7 +386,12 @@ def check_fetch_lifecycle(
                 if arm_download is not None:
                     arm_download(_download_url(asset.href))
                 dest = root / "chosen-output"
-                assert adapter.fetch(asset, dest) == dest
+                # As the core does: ranges settled by prepare_fetch go to fetch_partial.
+                partial = adapter.prepare_fetch(asset)
+                if partial is None:
+                    assert adapter.fetch(asset, dest) == dest
+                else:
+                    assert adapter.fetch_partial(asset, dest, partial) == dest
                 assert dest.read_bytes() == data
                 assert list(root.iterdir()) == [dest]  # No provider-owned sidecars.
                 assert len(clients) == 1

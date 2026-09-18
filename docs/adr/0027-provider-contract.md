@@ -41,7 +41,10 @@ The adapter contract is a named, published surface. It is:
   `parse_params`, `validate_params`, `reject`, and `utc_window`, and the two
   abstract methods `list_assets` and `fetch` with their documented meanings:
   listing resolves a query to assets without downloading, and `fetch` writes one
-  asset to the path it is given and returns it.
+  asset to the path it is given and returns it. Added since: the optional pair
+  `prepare_fetch` ([ADR 0028](0028-partial-grib2-fetch-through-index-files.md))
+  and `fetch_partial` ([ADR 0032](0032-fetch-partial.md)), for an adapter that
+  fetches selected byte ranges of an object.
 - **`usdata.providers.HttpProvider`.** The lifecycle HTTP-backed adapters
   inherit, renamed from `_HttpProvider` and moved to `usdata/providers/http.py`:
   the constructor's optional `client`, the `_http()` accessor subclasses call,

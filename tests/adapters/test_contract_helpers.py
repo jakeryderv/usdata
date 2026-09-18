@@ -6,13 +6,25 @@ from pathlib import Path
 import httpx
 import pytest
 
-from usdata.models import Asset, Capabilities, Dataset, Protocol, Query, Status, TimeRange, Variable
+from usdata.models import (
+    Asset,
+    ByteRange,
+    Capabilities,
+    Dataset,
+    PartialFetch,
+    Protocol,
+    Provenance,
+    Query,
+    Status,
+    TimeRange,
+    Variable,
+)
 from usdata.protocols import http
 from usdata.providers import HttpProvider, Provider
 from usdata.providers.noaa.storm_events import DIRECTORY_URL, StormEvents
 from usdata.query import build_query
 from usdata.registry import default_registry
-from usdata.testing import check_provider_contract
+from usdata.testing import check_fetch_lifecycle, check_provider_contract
 
 pytestmark = pytest.mark.l2
 
@@ -123,3 +135,44 @@ def test_an_adapter_that_writes_a_sidecar_is_rejected(tmp_path) -> None:
             arm_download=downloads.add,
             work_dir=tmp_path,
         )
+
+
+class RangeReader(SidecarWriter):
+    """An outside adapter that settles byte ranges, so its whole-object path must never run."""
+
+    def prepare_fetch(self, asset: Asset, pinned: Provenance | None = None) -> PartialFetch:
+        """Every asset of this source is a selection of one larger object."""
+        return PartialFetch(
+            object_url=asset.href,
+            object_size=len(DATA),
+            object_etag="etag",
+            index_url=f"{asset.href}.idx",
+            index_checksum="sha256:" + "0" * 64,
+            messages=[1],
+            ranges=[ByteRange(start=0, end=len(DATA) - 1)],
+        )
+
+    def fetch(self, asset: Asset, dest: Path) -> Path:
+        """Refuse, as an adapter must when the asset names a selection."""
+        raise AssertionError("ranges were settled, so the check must call fetch_partial")
+
+    def fetch_partial(self, asset: Asset, dest: Path, partial: PartialFetch) -> Path:
+        """Fetch what it was handed; the transport here serves the selection whole."""
+        return http.download(partial.object_url, dest, self._http())
+
+
+def test_the_lifecycle_check_fetches_settled_ranges_through_fetch_partial(tmp_path) -> None:
+    downloads: set[str] = set()
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        assert str(request.url) in downloads, request.url
+        return httpx.Response(200, content=DATA)
+
+    check_fetch_lifecycle(
+        lambda client=None: RangeReader(SYNTHETIC, client),
+        scenario_query(),
+        lambda: httpx.Client(transport=httpx.MockTransport(respond)),
+        expected_bytes=DATA,
+        arm_download=downloads.add,
+        work_dir=tmp_path,
+    )

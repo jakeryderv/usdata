@@ -6,7 +6,8 @@ import pytest
 
 from usdata import ChecksumMismatch, _fetch, build_query, fetch, fetch_asset, provenance
 from usdata.cache import sha256_file
-from usdata.models import Asset, Protocol
+from usdata.models import Asset, ByteRange, PartialFetch, Protocol
+from usdata.providers import Provider
 
 
 def _rewrite_after_sidecar(path: Path, data: bytes) -> None:
@@ -124,3 +125,68 @@ def test_copied_cache_with_identical_mtimes_is_trusted(
     (restored,) = fetch(ds, build_query(), root=copied_root)
     assert restored.from_cache and restored.path == copied
     assert state["fetches"] == 1
+
+
+PARTIAL = PartialFetch(
+    object_url="https://example.test/bytes",
+    object_size=100,
+    object_etag="etag",
+    index_url="https://example.test/bytes.idx",
+    index_checksum="sha256:" + "1" * 64,
+    messages=[2],
+    ranges=[ByteRange(start=10, end=17)],
+    selectors=["TMP:surface"],
+)
+
+
+def _ranged_source(monkeypatch: pytest.MonkeyPatch, fake_source, *, implemented: bool):
+    """The fake source, settled by ``prepare_fetch`` to byte ranges instead of a whole object."""
+    ds, state = fake_source
+
+    class Ranged(Provider):
+        def list_assets(self, query):
+            return []
+
+        def fetch(self, asset, dest):
+            state["fetches"] += 1
+            dest.write_bytes(b"original")
+            return dest
+
+        def prepare_fetch(self, asset, pinned=None):
+            return PARTIAL
+
+        if implemented:
+
+            def fetch_partial(self, asset, dest, partial):
+                state["partial"] = partial
+                dest.write_bytes(b"selected")
+                return dest
+
+    monkeypatch.setattr(_fetch, "load_adapter", Ranged)
+    asset = Asset(
+        id="data", dataset_id=ds.id, href="https://example.test/bytes", protocol=Protocol.HTTP
+    )
+    return ds, state, asset
+
+
+def test_ranges_settled_by_prepare_fetch_are_handed_to_fetch_partial(
+    tmp_path: Path, fake_source, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ds, state, asset = _ranged_source(monkeypatch, fake_source, implemented=True)
+    item = fetch_asset(ds, asset, root=tmp_path)
+    # The whole-object path never ran, and the adapter was given the very ranges it settled.
+    assert state["fetches"] == 0 and state["partial"] is PARTIAL
+    assert item.path.read_bytes() == b"selected"
+    assert item.provenance.ranges == PARTIAL.ranges
+    assert item.provenance.object_etag == "etag"
+
+
+def test_ranges_from_an_adapter_without_fetch_partial_fail_and_write_nothing(
+    tmp_path: Path, fake_source, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ds, state, asset = _ranged_source(monkeypatch, fake_source, implemented=False)
+    with pytest.raises(NotImplementedError, match="does not implement fetch_partial"):
+        fetch_asset(ds, asset, root=tmp_path)
+    # Falling back to the whole object would record ranges the file does not hold.
+    assert state["fetches"] == 0
+    assert [path for path in tmp_path.rglob("*") if path.is_file()] == []

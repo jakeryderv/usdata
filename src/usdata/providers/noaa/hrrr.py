@@ -216,10 +216,13 @@ class ModelRuns(HttpProvider):
     missing-file errors, and message selection are identical for HRRR and GFS.
 
     With ``messages``, listing reads each object's ``.idx`` sidecar and resolves
-    the selectors to byte ranges, which :meth:`fetch` then concatenates. Those
-    ranges live on the adapter instance, keyed by the asset href that names them;
-    a later process reaches them through the provenance sidecar instead, so see
-    :meth:`prepare_fetch`.
+    the selectors to byte ranges, which :meth:`fetch_partial` concatenates. The
+    ranges are resolved at listing, because an asset's id and size depend on
+    them, and are needed again at fetch; the adapter instance carries them
+    between the two, keyed by the asset href that names them. That is the only
+    state it keeps: :meth:`prepare_fetch` hands the ranges to the core, a later
+    process rebuilds them from the provenance record instead, and
+    :meth:`fetch_partial` is given them and reads nothing from the instance.
     """
 
     name: ClassVar[str]
@@ -396,10 +399,22 @@ class ModelRuns(HttpProvider):
         return partial
 
     def fetch(self, asset: Asset, dest: Path) -> Path:
-        """Download one whole GRIB2 object, or the messages it selects, to ``dest``."""
-        partial = self.prepare_fetch(asset)
-        if partial is None:
-            return s3.download(asset.href, dest, self._http())
+        """Download one whole GRIB2 object to ``dest``.
+
+        Raises:
+            ValueError: The asset selects messages. Its href names the whole
+                object, so downloading it here would silently write a file that
+                is not the one the asset describes.
+        """
+        if f"#{PARTIAL_FRAGMENT}=" in asset.href:
+            raise ValueError(
+                f"{asset.id} selects GRIB2 messages; fetch it through usdata.fetch or pull, "
+                "or pass what prepare_fetch returns to fetch_partial"
+            )
+        return s3.download(asset.href, dest, self._http())
+
+    def fetch_partial(self, asset: Asset, dest: Path, partial: PartialFetch) -> Path:
+        """Download the messages ``partial`` names and concatenate them into ``dest``."""
         return http.download_ranges(
             s3.object_url(partial.object_url),
             dest,
