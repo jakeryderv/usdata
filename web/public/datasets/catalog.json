@@ -1,5 +1,5 @@
 {
-  "version": "0.21.0",
+  "version": "0.22.0",
   "datasets": [
     {
       "id": "noaa:ghcn-daily",
@@ -499,7 +499,7 @@
       "provider": "NOAA",
       "domain": "Severe weather",
       "system": null,
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.22",
       "keywords": [
         "warnings",

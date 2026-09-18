@@ -13,7 +13,7 @@ and `all_tornadoes` dumps are not selected.
 
 SPC publishes its hail and wind databases on the same page in the same layout,
 and `-p table=hail` or `-p table=wind` selects them instead of the default
-`torn` (unreleased; available from source for v0.22). The dataset keeps its id.
+`torn` (available since v0.22.0). The dataset keeps its id.
 Checked on 2026-09-18, each table links 26 files: per-year files from 2008 to
 2025, `2000-2004`, `2005-2007`, the decades, and one all-years file, with the
 narrowest covering file chosen as for tornadoes. **Hail and wind start in 1955**,

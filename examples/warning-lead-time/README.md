@@ -1,20 +1,24 @@
 # How long before the 6 May 2024 Osage County tornado was a tornado warning issued?
 
-Unreleased; available from source for v0.22. The [manifest](dataset.yaml) pins
+Available since v0.22.0. The [manifest](dataset.yaml) pins
 two inputs: every NWS watch, warning, and advisory issued for Osage County,
 Oklahoma on the evening of 6 May 2024, and the 2024 Storm Events archive, which
 holds the report of the EF4 that struck the county that night. Setting the
 warning's issuance beside the report's start time gives a lead time, and shows
 what a county-level record can and cannot say about it.
 
-In an activated Python 3.11+ virtual environment, install the package from
-[source](https://docs.usdata.dev/install/#source-installation) and run from
-`examples/warning-lead-time/`, using `uv run usdata` and `uv run python`:
+In an activated Python 3.11+ virtual environment, install the published package
+and save the [manifest](dataset.yaml) as `dataset.yaml` in a working directory.
+Run the commands from that directory:
 
 ```sh
+python -m pip install "usdata[pandas]"
 usdata pull dataset.yaml
 usdata verify dataset.yaml
 ```
+
+For a [source installation](https://docs.usdata.dev/install/#source-installation), run from
+`examples/warning-lead-time/` and use `uv run usdata` and `uv run python`.
 
 ```python
 from pathlib import Path

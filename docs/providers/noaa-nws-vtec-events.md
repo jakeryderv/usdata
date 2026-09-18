@@ -1,6 +1,6 @@
 # NWS watches and warnings by county
 
-`noaa:nws-vtec-events` (unreleased; available from source for v0.22) uses the
+`noaa:nws-vtec-events`, available since v0.22.0, uses the
 [Iowa Environmental Mesonet](https://mesonet.agron.iastate.edu/info/datasets/vtec.html)
 archive of National Weather Service products, at
 `https://mesonet.agron.iastate.edu/json/vtec_events_byugc.py`, checked on

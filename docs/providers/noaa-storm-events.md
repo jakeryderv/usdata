@@ -4,7 +4,7 @@ Available since v0.8 as `noaa:storm-events`. Anonymous NCEI bulk access returns
 whole annual tables, compressed with gzip. The default is the **details** table,
 one row per event. `-p table=fatalities` and `-p table=locations` select its two
 siblings, which NCEI publishes in the same directory under the same naming and
-revision scheme (unreleased; available from source for v0.22). The adapter
+revision scheme (available since v0.22.0). The adapter
 supports schema `v1.0`; it does not guess how to interpret a newer schema.
 
 ## The three tables

@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`noaa:nws-vtec-events` · **Source only** · Install from [source](../../../install.md#source-installation) to use this dataset.
+`noaa:nws-vtec-events` · **Released** · Included since usdata 0.22.
 
 NWS Watch, Warning, and Advisory Events by County.
 
@@ -51,7 +51,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.22
+- Availability: since 0.22
 - Domain: Severe weather
 - Spatial resolution: One county, parish, or forecast zone per request, by NWS UGC code
 - Temporal resolution: Issuance and expiry to the minute
