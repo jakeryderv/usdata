@@ -227,6 +227,60 @@ def check_usage_metadata(registry: Registry, root: Path = ROOT) -> None:
         guides.add(guide)
 
 
+_ONES = [
+    "zero",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+    "thirteen",
+    "fourteen",
+    "fifteen",
+    "sixteen",
+    "seventeen",
+    "eighteen",
+    "nineteen",
+]
+_TENS = ["twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
+README_COUNTS = re.compile(r"(\S+) datasets are available today and (\S+) more are planned")
+
+
+def spelled(number: int) -> str:
+    """A count below one hundred as the README writes it: ``twenty-three``."""
+    if not 0 <= number < 100:
+        raise ValueError(f"cannot spell {number}; reword the README sentence and this check")
+    if number < 20:
+        return _ONES[number]
+    tens, ones = divmod(number, 10)
+    return _TENS[tens - 2] + (f"-{_ONES[ones]}" if ones else "")
+
+
+def check_readme_counts(registry: Registry, root: Path = ROOT) -> None:
+    """The README's available and planned counts are the registry's.
+
+    The README is handwritten and stays that way; this only refuses a sentence
+    the registry has outgrown, naming the words it should now hold.
+    """
+    available = sum(ds.status is Status.AVAILABLE for ds in registry)
+    expected = (spelled(available), spelled(len(registry) - available))
+    found = README_COUNTS.search((root / "README.md").read_text())
+    if found is None:
+        raise ValueError("README.md no longer states how many datasets are available and planned")
+    if (found[1].lower(), found[2].lower()) != expected:
+        raise ValueError(
+            f"README.md says {found[1]} datasets are available and {found[2]} planned; "
+            f"the registry has {expected[0]} and {expected[1]}"
+        )
+
+
 def parameter_block(ds: Dataset) -> list[str]:
     """The adapter's declared ``--param`` keys, read from the class that implements them."""
     with load_adapter(ds) as adapter:
@@ -360,6 +414,7 @@ AVAILABILITY_NOTE = (
 def render_all(registry: Registry) -> dict[Path, str]:
     """Generate only inside the owned catalog directory; never rewrite prose."""
     check_usage_metadata(registry)
+    check_readme_counts(registry)
     implemented = [
         ds
         for _, datasets in by_provider(registry)
