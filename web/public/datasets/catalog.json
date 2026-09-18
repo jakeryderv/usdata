@@ -493,6 +493,132 @@
       ]
     },
     {
+      "id": "noaa:nws-vtec-events",
+      "title": "NWS warnings and watches by county",
+      "description": "National Weather Service watch, warning, and advisory events issued for one county or forecast zone, one row per event with its issuance and expiry, VTEC phenomena and significance, issuing office, and product id, as CSV from the Iowa Environmental Mesonet's archive of NWS products; the NWS API itself keeps no archive. Rows carry no coordinates, so selection is by a named county rather than by box, and a window selects events by when they were issued, not by when they were in effect. A county reaches county-based products (tornado, severe thunderstorm, flash flood); zone-based products need an explicit UGC. Polygons are a separate product, noaa:nws-warnings.",
+      "provider": "NOAA",
+      "domain": "Severe weather",
+      "system": null,
+      "availability": "Source only",
+      "since": "0.22",
+      "keywords": [
+        "warnings",
+        "watches",
+        "advisories",
+        "vtec",
+        "nws",
+        "tornado warning",
+        "lead time",
+        "county",
+        "ugc"
+      ],
+      "formats": [
+        "CSV"
+      ],
+      "selection": "Events issued for one county or UGC inside an inclusive UTC window; optionally one event type",
+      "inputs": "Both timestamps; a county location or a ugc; optionally phenomena with significance",
+      "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "One county, parish, or forecast zone per request, by NWS UGC code",
+        "temporal": "Issuance and expiry to the minute"
+      },
+      "update_frequency": "Not stated by IEM, which processes the live NWS product stream; events before 2005 come from an NWS database dump rather than from VTEC",
+      "latency": null,
+      "citation": "National Weather Service watch, warning, and advisory products, as archived and served by the Iowa Environmental Mesonet of Iowa State University, accessed via usdata",
+      "terms": "https://mesonet.agron.iastate.edu/disclaimer.php",
+      "variables": [
+        {
+          "name": "vtec_year",
+          "units": null,
+          "description": "Year the event's VTEC event id belongs to"
+        },
+        {
+          "name": "iso_issued",
+          "units": "ISO 8601 UTC",
+          "description": "When the event was issued for this UGC"
+        },
+        {
+          "name": "issued",
+          "units": "UTC",
+          "description": "The same instant as YYYY-MM-DD HH:MM"
+        },
+        {
+          "name": "iso_expired",
+          "units": "ISO 8601 UTC",
+          "description": "When the event expired or was cancelled for this UGC"
+        },
+        {
+          "name": "expired",
+          "units": "UTC",
+          "description": "The same instant as YYYY-MM-DD HH:MM"
+        },
+        {
+          "name": "eventid",
+          "units": null,
+          "description": "VTEC event number, unique per office, phenomena, significance, and year; IEM-assigned before VTEC"
+        },
+        {
+          "name": "phenomena",
+          "units": null,
+          "description": "Two-letter VTEC phenomena code, such as TO or SV"
+        },
+        {
+          "name": "significance",
+          "units": null,
+          "description": "One-letter VTEC significance code, such as W warning, A watch, Y advisory"
+        },
+        {
+          "name": "hvtec_nwsli",
+          "units": null,
+          "description": "NWS location identifier of a hydrologic event's forecast point; empty otherwise"
+        },
+        {
+          "name": "wfo",
+          "units": null,
+          "description": "Issuing forecast office; the present-day office for events before 2005"
+        },
+        {
+          "name": "ugc",
+          "units": null,
+          "description": "The UGC code the row is for"
+        },
+        {
+          "name": "product_id",
+          "units": null,
+          "description": "IEM identifier of the issuing text product"
+        },
+        {
+          "name": "name",
+          "units": null,
+          "description": "Phenomena and significance in words, such as Tornado Warning"
+        },
+        {
+          "name": "ph_name",
+          "units": null,
+          "description": "Phenomena in words"
+        },
+        {
+          "name": "sig_name",
+          "units": null,
+          "description": "Significance in words"
+        },
+        {
+          "name": "url",
+          "units": null,
+          "description": "Path of the event's page on the IEM site"
+        }
+      ],
+      "max_window": null,
+      "guide": "https://docs.usdata.dev/providers/noaa-nws-vtec-events/",
+      "reference": "https://docs.usdata.dev/generated/catalog/noaa/nws-vtec-events/",
+      "examples": [
+        {
+          "title": "Warning lead time",
+          "url": "https://usdata.dev/examples/warning-lead-time/"
+        }
+      ]
+    },
+    {
       "id": "noaa:nexrad-level2",
       "title": "NEXRAD radar scans",
       "description": "Raw volume scans from the WSR-88D weather radar network, archived in the public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). One object per radar site per volume scan. No server-side subsetting; whole files are fetched. Select radars by site id, bbox, or nearest to a point. Moments vary by sweep and volume coverage pattern; the catalog lists the ones the radar example's lowest sweep carries.",

@@ -48,7 +48,7 @@ breaking changes.
 | [docs.usdata.dev](https://docs.usdata.dev/) | How to use it: [install](https://docs.usdata.dev/install/), [getting started](https://docs.usdata.dev/getting-started/), guides, dataset notes, and reference |
 | [Severe-weather case study](https://usdata.dev/examples/severe-weather-case-study/) | One tornado, six sources, one manifest and lockfile, ending in a citation |
 
-Twenty-four datasets are available today and twenty more are planned, grouped
+Twenty-five datasets are available today and twenty more are planned, grouped
 by agency and product family in the [catalog](docs/providers/README.md).
 
 ## How this compares

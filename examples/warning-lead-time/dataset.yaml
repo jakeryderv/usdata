@@ -1,0 +1,11 @@
+name: osage-tornado-warning-lead-time
+sources:
+  - name: warnings
+    dataset: noaa:nws-vtec-events
+    location: Osage County, OK
+    start: 2024-05-06T18:00Z
+    end: 2024-05-07T12:00Z
+  - name: reports
+    dataset: noaa:storm-events
+    start: 2024-05-06
+    end: 2024-05-06

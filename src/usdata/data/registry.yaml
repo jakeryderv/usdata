@@ -1546,6 +1546,68 @@ datasets:
       temporal_subset: false
       variable_subset: false
 
+  - id: noaa:nws-vtec-events
+    provider: noaa
+    status: available
+    domain: severe-weather
+    since: "0.22"
+    title: NWS Watch, Warning, and Advisory Events by County
+    description: >-
+      National Weather Service watch, warning, and advisory events issued for one county
+      or forecast zone, one row per event with its issuance and expiry, VTEC phenomena and
+      significance, issuing office, and product id, as CSV from the Iowa Environmental
+      Mesonet's archive of NWS products; the NWS API itself keeps no archive. Rows carry no
+      coordinates, so selection is by a named county rather than by box, and a window
+      selects events by when they were issued, not by when they were in effect. A county
+      reaches county-based products (tornado, severe thunderstorm, flash flood); zone-based
+      products need an explicit UGC. Polygons are a separate product, noaa:nws-warnings.
+    keywords: [warnings, watches, advisories, vtec, nws, tornado warning, lead time, county, ugc]
+    protocol: http
+    homepage: https://mesonet.agron.iastate.edu/info/datasets/vtec.html
+    license: Public domain (NWS products; IEM materials are public domain, attribution appreciated)
+    temporal_extent: { start: "1986-01-01T00:00:00Z" }
+    capabilities:
+      spatial_subset: false
+      place_subset: true
+      temporal_subset: true
+      variable_subset: false
+    summary: NWS warnings and watches by county
+    formats: [CSV]
+    selection: Events issued for one county or UGC inside an inclusive UTC window; optionally one event type
+    inputs: Both timestamps; a county location or a ugc; optionally phenomena with significance
+    reader: pandas
+    guide: docs/providers/noaa-nws-vtec-events.md
+    examples:
+      - examples/warning-lead-time/README.md
+    resolution:
+      spatial: "One county, parish, or forecast zone per request, by NWS UGC code"
+      temporal: "Issuance and expiry to the minute"
+    update_frequency: >-
+      Not stated by IEM, which processes the live NWS product stream; events before 2005
+      come from an NWS database dump rather than from VTEC
+    citation: >-
+      National Weather Service watch, warning, and advisory products, as archived and served
+      by the Iowa Environmental Mesonet of Iowa State University, accessed via usdata
+    terms: https://mesonet.agron.iastate.edu/disclaimer.php
+    variables:
+      - { name: vtec_year, description: "Year the event's VTEC event id belongs to" }
+      - { name: iso_issued, units: "ISO 8601 UTC", description: "When the event was issued for this UGC" }
+      - { name: issued, units: "UTC", description: "The same instant as YYYY-MM-DD HH:MM" }
+      - { name: iso_expired, units: "ISO 8601 UTC", description: "When the event expired or was cancelled for this UGC" }
+      - { name: expired, units: "UTC", description: "The same instant as YYYY-MM-DD HH:MM" }
+      - { name: eventid, description: "VTEC event number, unique per office, phenomena, significance, and year; IEM-assigned before VTEC" }
+      - { name: phenomena, description: "Two-letter VTEC phenomena code, such as TO or SV" }
+      - { name: significance, description: "One-letter VTEC significance code, such as W warning, A watch, Y advisory" }
+      - { name: hvtec_nwsli, description: "NWS location identifier of a hydrologic event's forecast point; empty otherwise" }
+      - { name: wfo, description: "Issuing forecast office; the present-day office for events before 2005" }
+      - { name: ugc, description: "The UGC code the row is for" }
+      - { name: product_id, description: "IEM identifier of the issuing text product" }
+      - { name: name, description: "Phenomena and significance in words, such as Tornado Warning" }
+      - { name: ph_name, description: "Phenomena in words" }
+      - { name: sig_name, description: "Significance in words" }
+      - { name: url, description: "Path of the event's page on the IEM site" }
+    adapter: usdata.providers.noaa.nws_vtec:NwsVtecEvents
+
   - id: noaa:nws-warnings
     provider: noaa
     status: planned

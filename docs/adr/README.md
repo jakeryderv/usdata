@@ -39,3 +39,4 @@ is described in the guides and reference pages.
 - [0033: Convert only the bare Storm Events timezone labels that name one offset](0033-bare-storm-events-timezone-labels.md)
 - [0034: A query keeps the place it resolved](0034-query-keeps-the-resolved-place.md)
 - [0035: OpenFEMA declarations select by incident period, exclude open incidents, and widen a county to its state's statewide rows](0035-openfema-window-and-place-rules.md)
+- [0036: NWS events are selected by issuance, one county at a time](0036-nws-events-by-issuance-and-county.md)

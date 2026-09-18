@@ -93,18 +93,17 @@ which join to details on `EVENT_ID`, and the SPC
 [hail and wind databases](https://github.com/jakeryderv/usdata/issues/134),
 which start in 1955 where the tornado database starts in 1950.
 
-The selected workstream is the second source selected by place:
+The second source selected by place is implemented and unreleased:
 [NWS watches and warnings by county](https://github.com/jakeryderv/usdata/issues/252),
 from the Iowa Environmental Mesonet's mirror of NWS products. Beside the Storm
 Events reports it answers a question the catalog cannot ask today, how long
 before a tornado its warning was issued. It is also the test of whether
 [ADR 0034](adr/0034-query-keeps-the-resolved-place.md) generalizes, and scoping
 it has already found a gap: a county's code there needs the state's postal
-code, which `Place` does not carry. The issue holds the verified endpoint, three
-service behaviours found by probing, and four decisions to settle before
-implementation. Done when its listed criteria are met, the first being that the
-Tornado Warning issued for Osage County at 01:34 UTC on 7 May 2024 comes back
-from a county location.
+code, which `Place` did not carry and now does. Its window and county rules are in
+[ADR 0036](adr/0036-nws-events-by-issuance-and-county.md), and its
+[worked example](https://usdata.dev/examples/warning-lead-time/) finds the
+warning in effect when the Osage County EF4 began. No workstream is selected.
 
 ## Next
 
