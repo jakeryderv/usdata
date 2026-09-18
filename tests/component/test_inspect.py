@@ -42,6 +42,7 @@ def cached(
     *,
     media_type: str | None = None,
     dataset_id: str = "noaa:ghcn-daily",
+    protocol: Protocol = Protocol.HTTP,
     sidecar: bool = True,
     messages: list[int] | None = None,
     selectors: list[str] | None = None,
@@ -74,7 +75,7 @@ def cached(
         id=name,
         dataset_id=dataset_id,
         href=href,
-        protocol=Protocol.HTTP,
+        protocol=protocol,
         media_type=media_type,
     )
     record = Provenance(
@@ -105,6 +106,53 @@ def test_csv_columns_and_row_count_need_no_extra(tmp_path: Path) -> None:
     assert summary.csv.columns == ["time", "station", "value"]
     assert (summary.csv.row_count, summary.csv.truncated) == (2, False)
     assert summary.note is None
+
+
+UNITS_CSV = b"time,latitude,sst\nUTC,degrees_north,degree_C\n2024-05-06T00:00:00Z,35.0,21.5\n"
+
+
+def test_a_units_row_is_reported_as_units_and_not_counted_as_data(tmp_path: Path) -> None:
+    served = cached(tmp_path, "sst.csv", UNITS_CSV, media_type="text/csv", protocol=Protocol.ERDDAP)
+    summary = served.inspect()
+    assert summary.csv is not None
+    assert summary.csv.units == {"time": "UTC", "latitude": "degrees_north", "sst": "degree_C"}
+    assert summary.csv.row_count == 1
+    # The same bytes over plain HTTP have no units row, so every line under the header is data.
+    plain = cached(tmp_path, "plain.csv", UNITS_CSV, media_type="text/csv").inspect()
+    assert plain.csv is not None and plain.csv.units == {} and plain.csv.row_count == 2
+
+
+def test_inspect_counts_the_rows_open_returns_for_ibtracs(tmp_path: Path) -> None:
+    pytest.importorskip("pandas")
+    content = (Path(__file__).parents[1] / "fixtures/ibtracs-na-excerpt.csv").read_bytes()
+    fetched = cached(
+        tmp_path, "ibtracs.csv", content, media_type="text/csv", dataset_id="noaa:ibtracs"
+    )
+    summary = fetched.inspect()
+    assert summary.csv is not None
+    assert summary.csv.row_count == len(fetched.open())
+    assert summary.csv.units["SEASON"] == "Year"
+
+
+def test_inspect_path_learns_the_units_row_from_the_registry(tmp_path: Path) -> None:
+    # A sidecar records no protocol; the dataset it names is served over ERDDAP.
+    cached(tmp_path, "sst.csv", UNITS_CSV, dataset_id="noaa:coastwatch-sst")
+    summary = inspect_path(tmp_path / "sst.csv")
+    assert summary.csv is not None
+    assert summary.csv.row_count == 1 and summary.csv.units["sst"] == "degree_C"
+    # A dataset the registry does not know is summarized as a plain CSV, not refused.
+    cached(tmp_path, "other.csv", UNITS_CSV, dataset_id="demo:unregistered")
+    other = inspect_path(tmp_path / "other.csv")
+    assert other.csv is not None and other.csv.row_count == 2 and other.note is None
+
+
+def test_a_units_row_that_does_not_match_the_header_is_noted_not_raised(tmp_path: Path) -> None:
+    broken = b"time,latitude,sst\nUTC,degrees_north\n"
+    summary = cached(
+        tmp_path, "broken.csv", broken, media_type="text/csv", protocol=Protocol.ERDDAP
+    ).inspect()
+    assert summary.csv is None and summary.note is not None
+    assert "units row" in summary.note
 
 
 def test_a_capped_csv_scan_reports_the_count_as_a_lower_bound(
@@ -428,6 +476,15 @@ def test_the_cli_says_a_capped_row_count_is_a_lower_bound(
     result = runner.invoke(app, ["inspect", str(fetched.path)])
     assert result.exit_code == 0
     assert "at least 1, scanned the first 1" in result.stdout
+
+
+def test_the_cli_prints_units_beside_the_columns_that_have_them(tmp_path: Path) -> None:
+    cached(tmp_path, "sst.csv", UNITS_CSV, dataset_id="noaa:coastwatch-sst")
+    result = runner.invoke(app, ["inspect", str(tmp_path / "sst.csv")])
+    assert result.exit_code == 0
+    assert "sst (degree_C)" in result.stdout and "time (UTC)" in result.stdout
+    rows = next(line for line in result.stdout.splitlines() if "rows:" in line)
+    assert rows.split()[-1] == "1"
 
 
 def test_the_cli_reports_an_empty_csv_as_no_columns(tmp_path: Path) -> None:
