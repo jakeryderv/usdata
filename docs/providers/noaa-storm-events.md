@@ -42,28 +42,46 @@ reported calendar dates and keeps timezone labels visible.
 offset, so `CST-6` is UTC−6 and Guam's `GST10`, which omits the sign, is UTC+10.
 The labels seen in the annual files are `CST-6`, `EST-5`, `MST-7`, `PST-8`,
 `AST-4`, `AKST-9`, `HST-10`, `SST-11`, and `GST10`, plus a few daylight spellings
-(`CDT-5`, `EDT-4`, `PDT-7`) whose trailing offset is still the one to use. Files
-before 2006 carry bare labels such as `CST` with no offset at all. No Python
-timezone accepts these strings, and applying a named regional zone would add
-daylight saving the reports do not use.
+(`CDT-5`, `EDT-4`, `PDT-7`) whose trailing offset is still the one to use. No
+Python timezone accepts these strings, and applying a named regional zone would
+add daylight saving the reports do not use.
+
+Files through 2006 write the label bare, with no offset: `CST`, not `CST-6`.
+Five bare labels name one offset wherever they appear in the archive and are
+converted with it: `CST` −6, `EST` −5, `MST` −7, `PST` −8, and `HST` −10. The
+rest are left unconverted rather than guessed
+([ADR 0033](../adr/0033-bare-storm-events-timezone-labels.md)):
+
+- `AST` labels both Alaska (UTC−9) and Puerto Rico and the Virgin Islands (UTC−4).
+- `SST` labels both American Samoa (UTC−11) and Guam (UTC+10).
+- Bare daylight labels (`CDT`, `EDT`, `MDT`), a few rows a year, contradict the
+  documented local standard time and state no offset to settle it.
+
+`STATE` tells the first two apart, so a caller who needs those rows can convert
+them by hand. The local timestamps carry two-digit years; `50` to `99` are read
+as 1950 to 1999, since the archive begins in 1950, where the usual pivot would
+put its first nineteen years a century late.
 
 When the frame keeps `BEGIN_DATE_TIME`, `END_DATE_TIME`, and `CZ_TIMEZONE`,
 `open()` adds `BEGIN_UTC` and `END_UTC` as timezone-aware UTC timestamps,
-leaving the original columns alone. A row whose label has no offset, or whose
-timestamp does not parse, gets `NaT`; the rule used and the count of such rows
-per derived column are listed under `frame.attrs["usdata"]["derived"]`.
+leaving the original columns alone. A row whose label yields no offset, or whose
+timestamp does not parse, gets `NaT`. `frame.attrs["usdata"]["derived"]` lists,
+per derived column, the rule used, the count of such rows as `unparsed`, and
+under `labels_without_offset` each label that gave no offset with how many rows
+carry it.
 
 ```python
 frame = item.open(usecols=["EVENT_ID", "BEGIN_DATE_TIME", "END_DATE_TIME", "CZ_TIMEZONE"])
 print(frame[["BEGIN_DATE_TIME", "CZ_TIMEZONE", "BEGIN_UTC", "END_UTC"]].head())
-print(frame.attrs["usdata"]["derived"])  # column, source, rule, unparsed rows
+print(frame.attrs["usdata"]["derived"])  # column, source, rule, unparsed, labels_without_offset
 hours = pd.to_numeric(frame.CZ_TIMEZONE.str.extract(r"^[A-Za-z]+([+-]?\d{1,2})$", expand=False))
 local = pd.to_datetime(frame.BEGIN_DATE_TIME, format="%d-%b-%y %H:%M:%S", errors="coerce")
 ```
 
-The last two lines are the manual form: subtract `pd.to_timedelta(hours, unit="h")`
-from `local` and call `.dt.tz_localize("UTC")` to get the same instants without
-the reader.
+The last two lines are the manual form for files from 2007 on: subtract
+`pd.to_timedelta(hours, unit="h")` from `local` and call `.dt.tz_localize("UTC")`
+to get the same instants without the reader. Earlier files also need the bare
+labels mapped and, before 1969, the century corrected, which `%y` gets wrong.
 
 Reported events, impacts, and damage ratings require care when aggregating:
 physical storms can span several records, historical reporting varies, and

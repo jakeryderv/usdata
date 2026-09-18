@@ -255,7 +255,7 @@ STORM_EVENTS_CSV = (
     "1184052,OKLAHOMA,06-MAY-24 22:39:00,06-MAY-24 22:45:00,CST-6\n"
     "1200001,WASHINGTON,16-NOV-24 02:30:00,16-NOV-24 03:00:00,PST-8\n"
     "1200002,GUAM,01-JAN-24 00:00:00,01-JAN-24 06:00:00,GST10\n"
-    "1200003,TEXAS,02-FEB-24 03:00:00,02-FEB-24 04:00:00,CST\n"
+    "1200003,PUERTO RICO,02-FEB-24 03:00:00,02-FEB-24 04:00:00,AST\n"
 )
 
 
@@ -280,12 +280,69 @@ def test_storm_events_gains_utc_columns_from_the_timezone_label(pd, fetched) -> 
         "01-JAN-24 00:00:00",
         "02-FEB-24 03:00:00",
     ]
-    assert frame.CZ_TIMEZONE.tolist() == ["CST-6", "PST-8", "GST10", "CST"]
+    assert frame.CZ_TIMEZONE.tolist() == ["CST-6", "PST-8", "GST10", "AST"]
     derived = frame.attrs["usdata"]["derived"]
     assert [entry["column"] for entry in derived] == ["BEGIN_UTC", "END_UTC"]
     assert [entry["source"] for entry in derived] == ["BEGIN_DATE_TIME", "END_DATE_TIME"]
     assert [entry["unparsed"] for entry in derived] == [1, 1]
+    assert [entry["labels_without_offset"] for entry in derived] == [{"AST": 1}, {"AST": 1}]
     assert all("CZ_TIMEZONE" in entry["rule"] for entry in derived)
+
+
+BARE_LABEL_CSV = (
+    "EVENT_ID,STATE,BEGIN_DATE_TIME,END_DATE_TIME,CZ_TIMEZONE\n"
+    "1,OKLAHOMA,28-APR-50 14:45:00,28-APR-50 14:45:00,CST\n"
+    "2,MARYLAND,31-DEC-68 23:30:00,01-JAN-69 00:30:00,EST\n"
+    "3,MONTANA,04-JUL-99 12:00:00,04-JUL-99 13:00:00,MST\n"
+    "4,CALIFORNIA,01-JAN-00 00:00:00,01-JAN-00 01:00:00,PST\n"
+    "5,HAWAII,15-MAR-06 08:00:00,15-MAR-06 09:00:00,HST\n"
+    "6,ALASKA,15-MAR-06 08:00:00,15-MAR-06 09:00:00,AST\n"
+    "7,GUAM,15-MAR-06 08:00:00,15-MAR-06 09:00:00,SST\n"
+    "8,WISCONSIN,15-JUN-06 08:00:00,15-JUN-06 09:00:00,CDT\n"
+    "9,TEXAS,15-JUN-06 08:00:00,15-JUN-06 09:00:00,UNK\n"
+    "10,TEXAS,15-JUN-06 08:00:00,15-JUN-06 09:00:00,\n"
+)
+
+
+def test_bare_labels_that_name_one_offset_everywhere_are_converted(pd, fetched) -> None:
+    frame = fetched(BARE_LABEL_CSV, dataset="noaa:storm-events").open()
+    assert frame.BEGIN_UTC.tolist()[:5] == [
+        pd.Timestamp("1950-04-28T20:45:00Z"),
+        pd.Timestamp("1969-01-01T04:30:00Z"),
+        pd.Timestamp("1999-07-04T19:00:00Z"),
+        pd.Timestamp("2000-01-01T08:00:00Z"),
+        pd.Timestamp("2006-03-15T18:00:00Z"),
+    ]
+    # An event that ends after midnight on New Year's Eve crosses the century pivot cleanly.
+    assert frame.END_UTC.iloc[1] == pd.Timestamp("1969-01-01T05:30:00Z")
+
+
+def test_bare_labels_that_are_ambiguous_or_contradictory_are_left_unconverted(pd, fetched) -> None:
+    frame = fetched(BARE_LABEL_CSV, dataset="noaa:storm-events").open()
+    # AST is Alaska and Puerto Rico, SST is Samoa and Guam, CDT contradicts standard time.
+    assert frame.BEGIN_UTC.iloc[5:].isna().all() and frame.END_UTC.iloc[5:].isna().all()
+    for entry in frame.attrs["usdata"]["derived"]:
+        assert entry["unparsed"] == 5
+        assert entry["labels_without_offset"] == {"AST": 1, "CDT": 1, "SST": 1, "UNK": 1}
+
+
+@pytest.mark.filterwarnings("ignore:Could not infer format")  # The caller chose parse_dates.
+def test_a_timestamp_column_the_caller_parsed_is_moved_back_to_the_archive_century(
+    pd, fetched
+) -> None:
+    item = fetched(BARE_LABEL_CSV, dataset="noaa:storm-events")
+    frame = item.open(parse_dates=["BEGIN_DATE_TIME", "END_DATE_TIME"])
+    assert frame.BEGIN_UTC.iloc[0] == pd.Timestamp("1950-04-28T20:45:00Z")
+    assert frame.BEGIN_UTC.iloc[4] == pd.Timestamp("2006-03-15T18:00:00Z")
+
+
+def test_the_1950_archive_file_lands_in_1950(pd, fetched) -> None:
+    source = (Path(__file__).parents[1] / "fixtures/storm-details-1950.csv").read_text()
+    frame = fetched(source, dataset="noaa:storm-events").open()
+    assert len(frame) > 0 and frame.BEGIN_UTC.notna().all()
+    assert set(frame.BEGIN_UTC.dt.year) == {1950}
+    assert frame.BEGIN_UTC.iloc[0] == pd.Timestamp("1950-04-28T20:45:00Z")
+    assert frame.attrs["usdata"]["derived"][0]["labels_without_offset"] == {}
 
 
 def test_storm_events_frame_without_the_three_columns_is_untouched(pd, fetched) -> None:
