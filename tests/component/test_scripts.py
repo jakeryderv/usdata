@@ -192,6 +192,42 @@ def test_release_check_keeps_future_plans_and_excludes_history(tmp_path) -> None
     assert len(errors) == 1 and errors[0].startswith("examples/weather/README.md:1:")
 
 
+@pytest.mark.parametrize(
+    "notice",
+    [
+        "| `hurdat2`, `ibtracs` (both available from source) |",
+        "`climate-normals` (available from source), `nclimdiv`",
+        "Available from\nsource.",
+        "available from source for a later release",
+    ],
+)
+def test_release_check_refuses_a_source_only_notice_that_names_no_version(notice) -> None:
+    module = script("check_release_docs")
+    assert [line for line, _ in module.unversioned_notices("# Title\n\n" + notice)] == [3]
+
+
+@pytest.mark.parametrize(
+    "notice",
+    [
+        "Available from source for v0.21.",
+        "available from source for the unreleased v0.21",
+        "Install with the right extras, or from source",
+        "Available since v0.20.0.",
+    ],
+)
+def test_release_check_accepts_a_notice_that_names_its_version(notice) -> None:
+    assert script("check_release_docs").unversioned_notices(notice) == []
+
+
+def test_release_check_reports_unversioned_notices_whatever_the_version(tmp_path) -> None:
+    module = script("check_release_docs")
+    (tmp_path / "pyproject.toml").write_text('[project]\nversion="0.5.0"\n')
+    (tmp_path / "README.md").write_text("Fine.\n`ibtracs` (available from source)\n")
+    (tmp_path / "examples").mkdir()
+    errors = module.check(tmp_path)
+    assert len(errors) == 1 and errors[0].startswith("README.md:2: names no version")
+
+
 def test_catalog_summary_separates_source_only_and_planned(monkeypatch):
     module = script("render_registry")
     monkeypatch.setattr(module, "PACKAGE_VERSION", "0.9.0")

@@ -133,7 +133,10 @@ The release recipe also regenerates registry docs after changing the version.
 
 `just check` also runs `scripts/check_release_docs.py`. It rejects known versioned
 source-only notices and roadmap `Now` headings at or below the declared package
-version. On a release PR, update those handwritten notes to shipped wording;
+version. It also rejects a source-only notice that names no version at all:
+the check reads the version a notice names, so one that stops at "from source"
+could never be flagged, and three such notices outlived their releases that
+way. Write the whole form, "available from source for v0.21". On a release PR, update those handwritten notes to shipped wording;
 generated registry sections still come from `just docs`. Prefer explicit wording
 that names the target minor version for upcoming implemented features so
 the check can detect the transition. It scans README, maintained docs, example READMEs, `mkdocs.yml`, and notebook
