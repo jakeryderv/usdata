@@ -1,0 +1,10 @@
+name: recent-global-tracks
+sources:
+  - name: tracks
+    dataset: noaa:ibtracs
+    # One whole file: the last three seasons and the current one, every basin.
+    # IBTrACS has no query interface, so dates and geographic filters are
+    # rejected; filter the parsed table locally. The file is rebuilt in place
+    # as agencies deliver best tracks, so the lockfile's checksum is the pin.
+    params:
+      subset: last3years

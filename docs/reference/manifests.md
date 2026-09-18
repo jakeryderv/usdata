@@ -78,6 +78,7 @@ line.
 | `noaa:storm-events` | None. | Both dates required; every UTC calendar year touched selects its latest annual details archive in full. Variable subsetting is rejected; filter rows locally. |
 | `noaa:spc-tornado-reports` | None. | Both dates required; every year touched selects the narrowest file covering it (annual from 2008, half-decade and decade files before). |
 | `noaa:hurdat2` | `basin`: `atlantic` (default) or `pacific`, case-insensitive. No geographic selection. | The newest revision of one whole basin file. Dates are rejected; filter track points locally. |
+| `noaa:ibtracs` | Required `subset`: `all`, `active`, `last3years`, `since1980`, or a basin `na`, `ep`, `wp`, `ni`, `si`, `sp`, `sa`, case-insensitive. `format`: `csv` (default) or `netcdf`. `version`: a product version such as `v04r01`; the newest by default. No geographic selection. | One whole file from the chosen version. Dates are rejected; choose a period subset and filter track points locally. |
 | `noaa:coastwatch-sst` | Requires a bbox or location. `stride`: positive integer, default 1, subsamples both spatial axes. At most 1,000,000 grid rows per request. | `analysed_sst` (default), `analysis_error`, `sea_ice_fraction`, `mask`. Inclusive UTC timestamps. |
 | `usgs:water-daily` | `site` or `sites`: quoted monitoring ids, mutually exclusive, or a geographic query; explicit sites and a geographic filter both apply. `statistic_id`: quoted five-digit code, default `"00003"` (daily mean). | Quoted parameter codes such as `"00060"`; inclusive local calendar dates. |
 

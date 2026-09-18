@@ -44,6 +44,25 @@ def test_cached_asset_honors_new_checksum_and_preserves_old_file(
     assert not list(tmp_path.rglob("*.part"))
 
 
+def test_a_listed_size_that_differs_from_the_cached_copy_is_a_miss(
+    tmp_path: Path, fake_source
+) -> None:
+    """A source that rebuilds a file under the same name announces it through the size."""
+    ds, state = fake_source
+    asset = Asset(
+        id="data", dataset_id=ds.id, href="https://example.test/bytes", protocol=Protocol.HTTP
+    )
+    original = fetch_asset(ds, asset, root=tmp_path)
+    same = fetch_asset(
+        ds, asset.model_copy(update={"size": original.provenance.size}), root=tmp_path
+    )
+    assert same.from_cache and state["fetches"] == 1
+    rebuilt = fetch_asset(
+        ds, asset.model_copy(update={"size": original.provenance.size + 1}), root=tmp_path
+    )
+    assert not rebuilt.from_cache and state["fetches"] == 2
+
+
 def test_core_cache_and_cleanup_use_only_provider_contract(tmp_path: Path, fake_source) -> None:
     ds, state = fake_source
     (first,) = fetch(ds, build_query(), root=tmp_path)

@@ -56,6 +56,10 @@ from the USGS catalog as one CSV and ranks them (available since v0.19.0).
 [Atlantic hurricane best tracks](https://usdata.dev/examples/hurdat2/) fetches the whole HURDAT2
 Atlantic file and reads it into one row per track point (available since v0.12.0).
 
+[Recent global tropical cyclones](https://usdata.dev/examples/ibtracs/) pulls the
+IBTrACS file of the last three seasons for every basin, separates final from
+provisional tracks, and ranks the strongest storms (available since v0.20.0).
+
 [RAP environment at 20 UTC](https://usdata.dev/examples/rap-environment/) fetches
 surface CAPE and 0–3 km helicity from one 13 km Rapid Refresh analysis as two
 byte ranges and reads them at the grid point nearest Oklahoma City (available

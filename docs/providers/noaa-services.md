@@ -84,7 +84,7 @@ added once a concrete, anonymously accessible dataset has been verified.
 | Severe weather | Tornadoes, hail, damaging wind, storm events, damage reports | Storm Events Database, Storm Data | `storm-events` |
 | Weather radar | Reflectivity, radial velocity, dual-pol variables, derived products | NEXRAD Level II, NEXRAD Level III, MRMS | `nexrad-level2`, `nexrad-level3`, `mrms` |
 | Weather satellites | Visible/IR imagery, clouds, lightning, fire, volcanic ash | GOES-R ABI, GOES GLM, POES, JPSS | `goes-abi`, `goes-glm` |
-| Tropical cyclones | Best tracks, intensity, pressure, wind radii | HURDAT2, IBTrACS, HURSAT | `hurdat2` (available from source), `ibtracs` |
+| Tropical cyclones | Best tracks, intensity, pressure, wind radii | HURDAT2, IBTrACS, HURSAT | `hurdat2`, `ibtracs` (both available from source) |
 | Weather models | Forecasts, analyses, reanalyses | GFS, HRRR, RAP, NAM, GEFS, National Blend of Models | `hrrr`, `gfs`, `nbm` |
 | Climate | Normals, long-term records, divisional averages, indices | Climate Normals, nClimDiv, Climate Data Records | `climate-normals` (available from source), `nclimdiv` |
 | Snow and ice | Snow cover and depth, sea ice concentration and extent | Sea Ice Index (NOAA@NSIDC), IMS snow cover | `sea-ice-index` |
@@ -372,6 +372,62 @@ sentinel is documented as a 1967 convention but appears 57 times in the current
 Atlantic file, all on `TD` records from 1971 through 1987, and never in the
 Pacific file. The [design decision](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0020-hurdat2-whole-file-and-format-reader.md)
 records the whole-file and reader contract.
+
+## IBTrACS global best tracks
+
+Probes on 2026-09-17 UTC listed the NCEI archive directory, its version
+directories, and the per-format listings, and fetched the smallest subset in
+each format:
+
+```sh
+BASE='https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs'
+curl --fail "$BASE/"
+curl --fail "$BASE/v04r01/access/csv/"
+curl --fail --output /tmp/ibtracs-sa.csv "$BASE/v04r01/access/csv/ibtracs.SA.list.v04r01.csv"
+curl --fail --output /tmp/ibtracs-sa.nc "$BASE/v04r01/access/netcdf/IBTrACS.SA.v04r01.nc"
+```
+
+The archive root lists three version directories, `v03r09`, `v04r00`, and
+`v04r01`. From v4 each holds `access/csv/`, `access/netcdf/`, and
+`access/shapefile/`, and each of those holds one file per subset: `ALL`,
+`ACTIVE`, `last3years`, `since1980`, and the basins `NA`, `EP`, `WP`, `NI`,
+`SI`, `SP`, and `SA`, named `ibtracs.<subset>.list.v04r01.csv` and
+`IBTrACS.<subset>.v04r01.nc`, beside a serial-number-to-name mapping. `v03r09`
+instead publishes one NetCDF file per storm, so the adapter refuses versions
+before v4. Listings give exact byte sizes and a minute-precision modified
+stamp; the stamp matched the `Last-Modified` header (`09:02 GMT`) so it is
+read as UTC. On 2026-09-17 the CSVs ran from 56,442 bytes (`SA`) through
+57,169,545 (`NA`) to 331,542,080 (`ALL`), and the NetCDF files from 688,651
+(`SA`) to 23,379,578 (`ALL`); `last3years` was 10,426,557 bytes of CSV. The
+CSV is served as `text/csv` and the NetCDF as `application/x-netcdf`; the
+latter is HDF5-based NetCDF4 with `storm` by `date_time` arrays (360 time
+slots) and a `quadrant` axis for the wind radii.
+
+Every file carried that morning's build stamp, and `v04r01/archive/` held
+one tarball per format named for the build,
+`ibtracs_v04r01_csv_s18421025_e20260917_c20260917.tar.gz`, with no earlier
+builds beside it: files are rebuilt in place under unchanging names, and
+superseded bytes are not kept upstream. The
+[change log](https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/doc/IBTrACS_v04r01_change_log.txt)
+records twenty-three data additions and corrections between 2024-06-21 and
+2026-07-31, most adding one agency's season. The `s18421025` in the tarball
+name and the files' `time_coverage_start` attribute both give 1842-10-25T03:00
+as the archive's first record; the North Atlantic file begins in 1851 and the
+northeast Pacific in 1876.
+
+The CSV has 174 columns and, like ERDDAP, a units row under the header
+(`degrees_north`, `kts`, `mb`, `nmile`; a single space for text columns). A
+missing value is written as a single space, not an empty field, and the North
+Atlantic basin and sub-basin code is the literal `NA`, which pandas reads as
+missing by default; the reader therefore treats only a space or an empty field
+as missing. Points are three-hourly (123,264 of the 124,946 consecutive steps in the
+North Atlantic file), with `IFLAG` marking each agency's value as original (`O`),
+interpolated (`P`), or otherwise filled. A basin file holds every storm that
+entered the basin, whole, so the North Atlantic file also carries `EP` and
+`NI` points from crossing storms. `TRACK_TYPE` separates `main` tracks from
+`PROVISIONAL` and `US-PROVISIONAL` operational ones: in the `last3years` file
+every 2023 and 2024 storm was `main`, 46 of 115 2025 storms were, and no 2026
+storm was. In v04r00 an unnamed storm is `NOT_NAMED`; v04r01 writes `UNNAMED`.
 
 ## Global Summary of the Month
 

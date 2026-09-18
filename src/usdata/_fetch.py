@@ -130,6 +130,8 @@ def _fetch_asset(
             and prov.provider == dataset.provider
             and prov.source_url == asset.href
             and prov.size == path.stat().st_size
+            # A listing that now reports another size describes a rebuilt file.
+            and (asset.size is None or prov.size == asset.size)
             and (asset.checksum is None or prov.checksum == asset.checksum)
             # Trust an untouched cached file; hash whenever anything is unclear.
             and (_sidecar_not_older(path) or sha256_file(path) == prov.checksum)

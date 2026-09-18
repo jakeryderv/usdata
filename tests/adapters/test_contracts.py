@@ -20,6 +20,7 @@ from usdata.models import Query, Status
 from usdata.providers import Provider, load_adapter
 from usdata.providers.noaa.coastwatch import BASE, DATASET
 from usdata.providers.noaa.hurdat2 import DIRECTORY_URL as HURDAT_URL
+from usdata.providers.noaa.ibtracs import DIRECTORY_URL as IBTRACS_URL
 from usdata.providers.noaa.spc import PAGE_URL as SPC_PAGE
 from usdata.providers.noaa.storm_events import DIRECTORY_URL
 from usdata.providers.usgs.daily import ITEMS_URL
@@ -48,6 +49,7 @@ CASES = {
     "noaa:storm-events": {},
     "noaa:spc-tornado-reports": {},
     "noaa:hurdat2": {"basin": "pacific"},
+    "noaa:ibtracs": {"subset": "sa"},
     "usgs:water-daily": {"sites": "07164500"},
     "usgs:earthquakes": {"min_magnitude": "2.5"},
     "noaa:rap": {"cycle": 12, "forecast_hour": 0},
@@ -69,8 +71,9 @@ S3_KEYS = {
 }
 STORM_NAME = "StormEvents_details-ftp_v1.0_d2024_c20260323.csv.gz"
 HURDAT_NAME = "hurdat2-nepac-1949-2025-02272026.txt"
-# HURDAT2 publishes the complete record per basin, so it rejects a time filter.
-UNTIMED = {"noaa:hurdat2"}
+IBTRACS_NAME = "ibtracs.SA.list.v04r01.csv"
+# HURDAT2 and IBTrACS publish the complete record per file, so they reject a time filter.
+UNTIMED = {"noaa:hurdat2", "noaa:ibtracs"}
 WINDOW = {"start": "2024-05-06T12:00Z", "end": "2024-05-06T12:05Z"}
 # The window each adapter enforces, named where the adapter defines or imports it. Reading
 # the constants is why this module imports provider packages, as the adapter tests do.
@@ -146,6 +149,16 @@ def contract_transport(
         if str(request.url) == HURDAT_URL:
             return httpx.Response(
                 200, text=f'<table><tr><td><a href="{HURDAT_NAME}">x</a></td></tr></table>'
+            )
+        if str(request.url) == IBTRACS_URL:
+            return httpx.Response(
+                200, text='<table><tr><td><a href="v04r01">x</a></td></tr></table>'
+            )
+        if str(request.url) == f"{IBTRACS_URL}v04r01/access/csv/":
+            return httpx.Response(
+                200,
+                text=f'<table><tr><td><a href="{IBTRACS_NAME}">{IBTRACS_NAME}</a></td>'
+                f'<td>2026-09-17 09:02</td><td align="right">{len(data)}</td></tr></table>',
             )
         if str(request.url) == SPC_PAGE:
             return httpx.Response(

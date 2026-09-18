@@ -1,23 +1,42 @@
-"""Read file names and byte sizes from Apache-style HTML directory indexes."""
+"""Read file names, byte sizes, and modified stamps from Apache-style HTML directory indexes."""
 
 from __future__ import annotations
 
 import re
+from datetime import datetime
 from html.parser import HTMLParser
+from typing import NamedTuple
+
+MODIFIED = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}")
+"""The minute-precision stamp Apache prints in a listing's "Last modified" column."""
+
+
+class Entry(NamedTuple):
+    """One file in a directory index: its name, byte size, and modified stamp, when listed.
+
+    The stamp is naive: Apache prints it in the server's own timezone, which
+    the caller knows and the listing does not say.
+    """
+
+    name: str
+    size: int | None
+    modified: datetime | None
 
 
 class _Index(HTMLParser):
-    """Collect (name, size) for anchors whose href is a literal local file name.
+    """Collect entries for anchors whose href is a literal local file name.
 
     Only hrefs matching ``pattern`` in full are kept, so a listing can never
     steer a download to an arbitrary link. The size is the first all-digit
-    table cell after the anchor's cell in the same row, or None.
+    table cell after the anchor's cell in the same row, and the modified
+    stamp the first cell there holding a date and minute; either is None when
+    the row has no such cell.
     """
 
     def __init__(self, pattern: re.Pattern[str]) -> None:
         super().__init__()
         self.pattern = pattern
-        self.entries: list[tuple[str, int | None]] = []
+        self.entries: list[Entry] = []
         self._in_row = False
         self._in_cell = False
         self._cells: list[str] = []
@@ -39,7 +58,7 @@ class _Index(HTMLParser):
             if self._in_row:
                 self._name, self._name_cell = href, len(self._cells) - 1
             else:
-                self.entries.append((href, None))
+                self.entries.append(Entry(href, None, None))
 
     def handle_data(self, data: str) -> None:
         if self._in_cell and self._cells:
@@ -53,14 +72,21 @@ class _Index(HTMLParser):
 
     def _end_row(self) -> None:
         if self._in_row and self._name is not None:
-            later = self._cells[(self._name_cell or 0) + 1 :]
-            sizes = [c.strip() for c in later if c.strip().isascii() and c.strip().isdigit()]
-            self.entries.append((self._name, int(sizes[0]) if sizes else None))
+            later = [c.strip() for c in self._cells[(self._name_cell or 0) + 1 :]]
+            sizes = [c for c in later if c.isascii() and c.isdigit()]
+            stamps = [m[0] for c in later if (m := MODIFIED.fullmatch(c))]
+            modified = datetime.strptime(stamps[0], "%Y-%m-%d %H:%M") if stamps else None
+            self.entries.append(Entry(self._name, int(sizes[0]) if sizes else None, modified))
         self._in_row, self._name = False, None
+
+
+def directory_listing(html: str, pattern: re.Pattern[str]) -> list[Entry]:
+    """Files matching ``pattern`` in a directory index, with size and modified stamp when listed."""
+    index = _Index(pattern)
+    index.feed(html)
+    return index.entries
 
 
 def directory_entries(html: str, pattern: re.Pattern[str]) -> list[tuple[str, int | None]]:
     """File names matching ``pattern`` in a directory index, with byte sizes when listed."""
-    index = _Index(pattern)
-    index.feed(html)
-    return index.entries
+    return [(entry.name, entry.size) for entry in directory_listing(html, pattern)]

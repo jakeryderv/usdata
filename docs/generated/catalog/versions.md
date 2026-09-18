@@ -16,7 +16,6 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`noaa:ersst`](noaa.md#noaaersst) ERSST Monthly Sea Surface Temperature · Planned
 - [`noaa:etopo`](noaa.md#noaaetopo) ETOPO 2022 Global Relief · Planned
 - [`noaa:ghcn-hourly`](noaa.md#noaaghcn-hourly) GHCN-Hourly Station Observations · Planned
-- [`noaa:ibtracs`](noaa.md#noaaibtracs) IBTrACS Global Tropical Cyclone Tracks · Planned
 - [`noaa:igra`](noaa.md#noaaigra) IGRA Radiosonde Observations · Planned
 - [`noaa:nclimdiv`](noaa.md#noaanclimdiv) nClimDiv Climate Divisional Data · Planned
 - [`noaa:nws-warnings`](noaa.md#noaanws-warnings) NWS Watch, Warning, and Advisory Archive · Planned
@@ -31,6 +30,7 @@ Move a dataset between phases by editing its `target` in the registry.
 
 **Implemented, unreleased (planned 0.20)**
 
+- [`noaa:ibtracs`](noaa.md#noaaibtracs) IBTrACS Global Tropical Cyclone Tracks · Source only
 - [`noaa:nbm`](noaa.md#noaanbm) National Blend of Models · Source only
 - [`noaa:rap`](noaa.md#noaarap) RAP Model Output · Source only
 

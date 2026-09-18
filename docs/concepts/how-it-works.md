@@ -44,6 +44,8 @@ SDK, and ERDDAP coordinate subsets.
 `USDATA_CACHE_DIR`, each with a provenance sidecar. Only the core writes
 there. A second fetch of the same asset is a cache hit checked against that
 sidecar, and re-hashed only when the file has been touched since it was written.
+A listing that reports a different size for the same URL is a miss, since a
+source that rebuilds a file under an unchanging name announces it that way.
 
 **Readers** open a cached file into pandas or xarray behind optional extras.
 Without the extra you still have the file, its path, and its provenance.

@@ -8,7 +8,7 @@ This page lists what to install, what is inferred, and what `open()` accepts.
 | Reader | Extra | Returns | Inferred for |
 |---|---|---|---|
 | `csv` | `pandas` | pandas DataFrame | `text/csv`, `application/csv` (charset parameters allowed); `application/gzip` or `application/x-gzip` when the id ends in `.csv.gz` |
-| `erddap-csv` | `pandas` | pandas DataFrame with `attrs["units"]` | CSV media types on an asset whose protocol is ERDDAP |
+| `erddap-csv` | `pandas` | pandas DataFrame with `attrs["units"]` | CSV media types on an asset whose protocol is ERDDAP, and `noaa:ibtracs` CSV assets, whose units row has the same layout; for IBTrACS only a single space or an empty field is missing, so the basin code `NA` stays text |
 | `hurdat2` | `pandas` | pandas DataFrame, one row per track point | `noaa:hurdat2` assets, or ids `hurdat2-*.txt` |
 | `nexrad-level2` | `radar` | xarray DataTree | `noaa:nexrad-level2` assets |
 | `netcdf` | `netcdf` | xarray Dataset | `application/x-netcdf`, `application/netcdf`, `application/x-netcdf4` |

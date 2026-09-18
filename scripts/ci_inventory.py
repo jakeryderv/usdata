@@ -12,6 +12,7 @@ from check_notebooks import ROOT, notebook_paths, pinned_manifests
 LIVE_EXTRAS = {
     "test_goes_live": "netcdf",
     "test_glm_live": "netcdf",
+    "test_ibtracs_live": "netcdf",
     "test_mrms_live": "grib",
     "test_hrrr_live": "grib",
     "test_gfs_live": "grib",
