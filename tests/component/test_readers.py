@@ -317,13 +317,33 @@ def test_bare_labels_that_name_one_offset_everywhere_are_converted(pd, fetched) 
     assert frame.END_UTC.iloc[1] == pd.Timestamp("1969-01-01T05:30:00Z")
 
 
-def test_bare_labels_that_are_ambiguous_or_contradictory_are_left_unconverted(pd, fetched) -> None:
+def test_a_bare_daylight_label_is_read_at_its_word_like_one_that_states_its_offset(
+    pd, fetched
+) -> None:
+    source = (
+        "EVENT_ID,STATE,BEGIN_DATE_TIME,END_DATE_TIME,CZ_TIMEZONE\n"
+        "1,WISCONSIN,15-JUN-06 08:00:00,15-JUN-06 09:00:00,CDT\n"
+        "2,WISCONSIN,15-JUN-06 08:00:00,15-JUN-06 09:00:00,CDT-5\n"
+        "3,VIRGINIA,15-JUN-06 08:00:00,15-JUN-06 09:00:00,EDT\n"
+        "4,MONTANA,15-JUN-06 08:00:00,15-JUN-06 09:00:00,MDT\n"
+    )
+    frame = fetched(source, dataset="noaa:storm-events").open()
+    assert frame.BEGIN_UTC.iloc[0] == frame.BEGIN_UTC.iloc[1] == pd.Timestamp("2006-06-15T13:00Z")
+    assert frame.BEGIN_UTC.iloc[2] == pd.Timestamp("2006-06-15T12:00Z")
+    assert frame.BEGIN_UTC.iloc[3] == pd.Timestamp("2006-06-15T14:00Z")
+    assert frame.attrs["usdata"]["derived"][0]["labels_without_offset"] == {}
+
+
+def test_bare_labels_that_name_two_offsets_or_none_are_left_unconverted(pd, fetched) -> None:
     frame = fetched(BARE_LABEL_CSV, dataset="noaa:storm-events").open()
-    # AST is Alaska and Puerto Rico, SST is Samoa and Guam, CDT contradicts standard time.
-    assert frame.BEGIN_UTC.iloc[5:].isna().all() and frame.END_UTC.iloc[5:].isna().all()
+    # AST is Alaska and Puerto Rico, SST is Samoa and Guam, and UNK says nothing.
+    unconverted = frame[frame.CZ_TIMEZONE.isin(["AST", "SST", "UNK"]) | frame.CZ_TIMEZONE.isna()]
+    assert len(unconverted) == 4
+    assert unconverted.BEGIN_UTC.isna().all() and unconverted.END_UTC.isna().all()
+    assert frame.BEGIN_UTC.notna().sum() == len(frame) - 4
     for entry in frame.attrs["usdata"]["derived"]:
-        assert entry["unparsed"] == 5
-        assert entry["labels_without_offset"] == {"AST": 1, "CDT": 1, "SST": 1, "UNK": 1}
+        assert entry["unparsed"] == 4
+        assert entry["labels_without_offset"] == {"AST": 1, "SST": 1, "UNK": 1}
 
 
 @pytest.mark.filterwarnings("ignore:Could not infer format")  # The caller chose parse_dates.
