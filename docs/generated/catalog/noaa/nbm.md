@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`noaa:nbm` · **Source only** · Install from [source](../../../install.md#source-installation) to use this dataset.
+`noaa:nbm` · **Released** · Included since usdata 0.20.
 
 National Blend of Models.
 
@@ -39,7 +39,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.20
+- Availability: since 0.20
 - Domain: Weather models
 - Spatial resolution: 2.5 km Lambert conformal CONUS grid, 2345 x 1597 points; separate Alaska, Hawaii, Puerto Rico, and Guam grids
 - Temporal resolution: Hourly runs; forecast hours hourly to 36, then every 3 hours to about 190, then every 6 hours to 264, on a schedule that varies by cycle

@@ -1,1 +1,0 @@
-Restore now settles each lockfile entry in one function that returns a single outcome, replacing five lists kept in step by hand. Behavior, results, and lockfiles are unchanged, so there is nothing to announce.

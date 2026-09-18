@@ -12,6 +12,31 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.20.0](https://github.com/jakeryderv/usdata/releases/tag/v0.20.0) - 2026-09-18
+
+
+### Added
+
+- `Provider` gains an optional `fetch_partial(asset, dest, partial)`. The core now hands the byte ranges `prepare_fetch` settles straight to it, so fetching selected GRIB2 messages no longer depends on earlier calls to the same adapter instance, and `fetch` on a partial asset raises instead of risking a whole-object download. `fetch`, lockfiles, and fetched bytes are unchanged.
+- `noaa:ibtracs` fetches one whole IBTrACS file, the global tropical cyclone best-track archive NCEI merges from every agency: a required subset names the complete record, the active storms, the last three seasons, everything since 1980, or one of seven basins, a format picks the CSV list or the NetCDF file, and the newest product version wins unless one is pinned. The CSV opens with the units-row reader, which reads the file's single-space missing cells as missing and keeps the North Atlantic basin code `NA` as text. A manifest example ranks the strongest recent storms with provisional tracks labelled. Directory listings now also yield the modified stamp, which IBTrACS assets carry as their end bound. A cached file whose listed size has changed upstream is fetched again rather than served stale.
+- `noaa:rap` and `noaa:nbm` join HRRR and GFS on the shared model-run listing: the 13 km Rapid Refresh by run, forecast hour, and file family, and the National Blend of Models core files by run, forecast hour, and region, both whole or by named GRIB2 message through the index sidecar. Two manifest examples read them at the grid point nearest Oklahoma City. The index selector grammar gained the further text NBM adds for ensemble spread and probability thresholds, and RAP's two-field wind messages are fetched whole and opened field by field.
+
+### Changed
+
+- `pull --update` now stages refreshed files under `<cache root>/.staging/` and moves them into the cache only after the lockfile is saved. A pull that fails for any reason, including a network error partway through an update, leaves the lockfile as it was and every cached file either absent or matching it, so it can simply be run again.
+
+### Fixed
+
+- A `pull --update` run that ends in `UpstreamChanged` no longer replaces the cached files of the entries named for update. Unselected entries are now checked first, so a failed run leaves the cache matching the lockfile it did not rewrite.
+- Partial GRIB2 fetches send `If-Match` as a quoted entity-tag, as HTTP specifies, rather than the bare value that only S3 tolerates. Lockfiles and provenance records are unchanged.
+- Storm Events frames from files through 2006 now get `BEGIN_UTC` and `END_UTC`. Those files write the timezone label bare, and the five bare labels that name one offset everywhere (`CST`, `EST`, `MST`, `PST`, `HST`) are converted; `AST`, `SST`, and bare daylight labels are ambiguous or contradictory and stay `NaT`, listed with row counts under a new `labels_without_offset` key. Two-digit years 50 to 99 are read as 1950 to 1999, where they were previously a century late.
+- `usdata inspect` and `FetchedAsset.inspect()` no longer count the units row of an ERDDAP or IBTrACS CSV as data, so `row_count` matches the rows `open()` returns, and the units are reported per column as `CsvSummary.units` and beside each column name in the CLI. A cached path learns which datasets lay a units row from the registry.
+
+### Documentation
+
+- The README states the current number of available and planned datasets, and `just check` now fails when that sentence falls behind the registry.
+- The roadmap no longer lists finished work as selected: the reproducible-inputs workstream is recorded as complete, no workstream is selected, and the open Storm Events and SPC dataset issues join the candidates under Next.
+
 ## [0.19.0](https://github.com/jakeryderv/usdata/releases/tag/v0.19.0) - 2026-09-16
 
 

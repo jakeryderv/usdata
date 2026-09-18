@@ -84,9 +84,9 @@ added once a concrete, anonymously accessible dataset has been verified.
 | Severe weather | Tornadoes, hail, damaging wind, storm events, damage reports | Storm Events Database, Storm Data | `storm-events` |
 | Weather radar | Reflectivity, radial velocity, dual-pol variables, derived products | NEXRAD Level II, NEXRAD Level III, MRMS | `nexrad-level2`, `nexrad-level3`, `mrms` |
 | Weather satellites | Visible/IR imagery, clouds, lightning, fire, volcanic ash | GOES-R ABI, GOES GLM, POES, JPSS | `goes-abi`, `goes-glm` |
-| Tropical cyclones | Best tracks, intensity, pressure, wind radii | HURDAT2, IBTrACS, HURSAT | `hurdat2`, `ibtracs` (both available from source) |
-| Weather models | Forecasts, analyses, reanalyses | GFS, HRRR, RAP, NAM, GEFS, National Blend of Models | `hrrr`, `gfs`, `nbm` |
-| Climate | Normals, long-term records, divisional averages, indices | Climate Normals, nClimDiv, Climate Data Records | `climate-normals` (available from source), `nclimdiv` |
+| Tropical cyclones | Best tracks, intensity, pressure, wind radii | HURDAT2, IBTrACS, HURSAT | `hurdat2`, `ibtracs` |
+| Weather models | Forecasts, analyses, reanalyses | GFS, HRRR, RAP, NAM, GEFS, National Blend of Models | `hrrr`, `gfs`, `rap`, `nbm` |
+| Climate | Normals, long-term records, divisional averages, indices | Climate Normals, nClimDiv, Climate Data Records | `climate-normals`, `nclimdiv` |
 | Snow and ice | Snow cover and depth, sea ice concentration and extent | Sea Ice Index (NOAA@NSIDC), IMS snow cover | `sea-ice-index` |
 | Ocean physics | SST, salinity, currents, waves, profiles | OISST, ERSST, World Ocean Database | `oisst`, `ersst` |
 | Sea level and tides | Water levels, tides, currents, sea-level trends | CO-OPS NWLON, PORTS | `coops-water-levels` |

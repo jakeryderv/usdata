@@ -1,5 +1,5 @@
 {
-  "version": "0.19.0",
+  "version": "0.20.0",
   "datasets": [
     {
       "id": "noaa:ghcn-daily",
@@ -1219,7 +1219,7 @@
       "provider": "NOAA",
       "domain": "Tropical cyclones",
       "system": null,
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.20",
       "keywords": [
         "tropical cyclone",
@@ -1574,7 +1574,7 @@
       "provider": "NOAA",
       "domain": "Weather models",
       "system": "NCEP model output",
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.20",
       "keywords": [
         "forecast",
@@ -1634,7 +1634,7 @@
       "provider": "NOAA",
       "domain": "Weather models",
       "system": "NCEP model output",
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.20",
       "keywords": [
         "forecast",

@@ -4,7 +4,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 [Provider access notes](../../providers/noaa.md).
 
-**Released** is included in usdata 0.19.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
+**Released** is included in usdata 0.20.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
 
 ## Implemented datasets
 
@@ -14,7 +14,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | <span id="noaaspc-tornado-reports"></span>[SPC tornado database](noaa/spc-tornado-reports.md) | Released | CSV | Whole annual, half-decade, or decade files; filter rows locally after downloading |
 | <span id="noaamrms"></span>[MRMS gridded radar products](noaa/mrms.md) | Released | GRIB2 (gzipped) | Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day |
 | <span id="noaahurdat2"></span>[Tropical cyclone best tracks](noaa/hurdat2.md) | Released | HURDAT2 fixed-format text | The newest revision of one whole basin file; filter track points locally |
-| <span id="noaaibtracs"></span>[Global tropical cyclone best tracks](noaa/ibtracs.md) | Source only | CSV with a units row, NetCDF4 | One whole subset file per query, from the newest or a pinned product version |
+| <span id="noaaibtracs"></span>[Global tropical cyclone best tracks](noaa/ibtracs.md) | Released | CSV with a units row, NetCDF4 | One whole subset file per query, from the newest or a pinned product version |
 | <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](noaa/coastwatch-sst.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
 
 ### [NCEI Access Data Service](https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation)
@@ -47,8 +47,8 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 |---|---|---|---|
 | <span id="noaagfs"></span>[GFS model output](noaa/gfs.md) | Released | GRIB2 | Global files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and grid resolution |
 | <span id="noaahrrr"></span>[HRRR model output](noaa/hrrr.md) | Released | GRIB2 | CONUS files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file variant |
-| <span id="noaanbm"></span>[NBM forecast guidance](noaa/nbm.md) | Source only | GRIB2 | Regional core files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and region |
-| <span id="noaarap"></span>[RAP model output](noaa/rap.md) | Source only | GRIB2 | Files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file family |
+| <span id="noaanbm"></span>[NBM forecast guidance](noaa/nbm.md) | Released | GRIB2 | Regional core files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and region |
+| <span id="noaarap"></span>[RAP model output](noaa/rap.md) | Released | GRIB2 | Files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file family |
 
 ### [CO-OPS Data API](https://tidesandcurrents.noaa.gov/)
 

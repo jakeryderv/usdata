@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`noaa:rap` · **Source only** · Install from [source](../../../install.md#source-installation) to use this dataset.
+`noaa:rap` · **Released** · Included since usdata 0.20.
 
 RAP Model Output.
 
@@ -42,7 +42,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.20
+- Availability: since 0.20
 - Domain: Weather models
 - Spatial resolution: 13 km Lambert conformal CONUS grid, 451 x 337 points, for the awp130 family
 - Temporal resolution: Hourly runs; forecast hours to 21, or to 51 from the 03, 09, 15, and 21 UTC runs

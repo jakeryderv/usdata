@@ -1,1 +1,0 @@
-The roadmap no longer lists finished work as selected: the reproducible-inputs workstream is recorded as complete, no workstream is selected, and the open Storm Events and SPC dataset issues join the candidates under Next.
