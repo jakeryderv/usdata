@@ -385,6 +385,55 @@ def test_usage_metadata_accepts_the_bundled_registry(tmp_path):
     module.check_usage_metadata(registry)
 
 
+def test_readme_counts_match_the_bundled_registry():
+    script("render_registry").check_readme_counts(Registry.bundled())
+
+
+@pytest.mark.parametrize(
+    "sentence, message",
+    [
+        ("Two datasets are available today and one more are planned.", "registry has"),
+        ("The catalog lists every dataset.", "no longer states"),
+    ],
+)
+def test_readme_counts_reject_a_stale_or_missing_sentence(tmp_path, sentence, message):
+    module = script("render_registry")
+    (tmp_path / "README.md").write_text(sentence)
+    with pytest.raises(ValueError, match=message):
+        module.check_readme_counts(Registry.bundled(), tmp_path)
+
+
+def test_readme_counts_accept_any_capitalization(tmp_path):
+    module = script("render_registry")
+    bundled = Registry.bundled()
+    available = sum(ds.status.value == "available" for ds in bundled)
+    words = (module.spelled(available).capitalize(), module.spelled(len(bundled) - available))
+    (tmp_path / "README.md").write_text(
+        f"{words[0]} datasets are available today and {words[1]} more are planned."
+    )
+    module.check_readme_counts(bundled, tmp_path)
+
+
+@pytest.mark.parametrize(
+    "number, words",
+    [
+        (0, "zero"),
+        (9, "nine"),
+        (19, "nineteen"),
+        (20, "twenty"),
+        (23, "twenty-three"),
+        (99, "ninety-nine"),
+    ],
+)
+def test_spelled_counts(number, words):
+    assert script("render_registry").spelled(number) == words
+
+
+def test_spelled_refuses_counts_the_sentence_cannot_carry():
+    with pytest.raises(ValueError, match="reword the README"):
+        script("render_registry").spelled(100)
+
+
 def test_usage_metadata_rejects_paths_in_dataset_ids():
     module = script("render_registry")
     bundled = Registry.bundled()
