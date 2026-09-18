@@ -42,13 +42,38 @@ STORM_EVENTS_UTC_COLUMNS = {"BEGIN_DATE_TIME": "BEGIN_UTC", "END_DATE_TIME": "EN
 """Each Storm Events local timestamp column and the derived UTC column beside it."""
 
 STORM_EVENTS_TIMEZONE_COLUMN = "CZ_TIMEZONE"
-STORM_EVENTS_LOCAL_FORMAT = "%d-%b-%y %H:%M:%S"
+STORM_EVENTS_LOCAL_FORMAT = "%d-%b-%Y %H:%M:%S"
+"""The local timestamp layout once its two-digit year has been given a century."""
+
+STORM_EVENTS_LOCAL_LAYOUT = re.compile(r"^\d{2}-[A-Za-z]{3}-(\d{2}) ")
+"""A Storm Events local timestamp, capturing the two-digit year after ``DD-MON-``."""
+
+STORM_EVENTS_FIRST_YEAR = 1950
+"""The archive's first year, which settles the century a two-digit year belongs to.
+
+``50`` to ``99`` are 1950 to 1999 and ``00`` to ``49`` are 2000 to 2049. The
+usual pivot reads ``50`` as 2050, a century late for the archive's first
+nineteen years.
+"""
+
 CZ_TIMEZONE_OFFSET = re.compile(r"^[A-Za-z]+([+-]?\d{1,2})$")
 """A Storm Events timezone label, capturing the whole-hour UTC offset it ends with."""
 
+STORM_EVENTS_BARE_OFFSETS = {"CST": -6, "EST": -5, "MST": -7, "PST": -8, "HST": -10}
+"""Bare labels, written through 2006, that name one offset wherever they appear.
+
+Two common bare labels are left out because they do not. ``AST`` labels both
+Alaska (UTC-9) and Puerto Rico and the Virgin Islands (UTC-4), and ``SST``
+labels both American Samoa (UTC-11) and Guam (UTC+10). Bare daylight labels
+such as ``CDT`` are left out because the archive documents local standard time
+and the label states no offset to settle the contradiction.
+"""
+
 STORM_EVENTS_RULE = (
-    "local time parsed as %d-%b-%y %H:%M:%S and shifted by the whole-hour UTC "
-    "offset ending CZ_TIMEZONE (CST-6 is UTC-6, GST10 is UTC+10)"
+    "local time parsed as %d-%b-%y %H:%M:%S, with years 50 to 99 read as 1950 to 1999, "
+    "and shifted by the whole-hour UTC offset ending CZ_TIMEZONE (CST-6 is UTC-6, GST10 is "
+    "UTC+10) or, for a bare label, by CST -6, EST -5, MST -7, PST -8, or HST -10; any other "
+    "bare label is left unconverted"
 )
 
 IBTRACS_DATASET = "noaa:ibtracs"
@@ -178,10 +203,23 @@ def fill_registry_attrs(fetched: FetchedAsset, data: Any) -> None:
 
 
 def _local_timestamps(pandas: Any, values: Any) -> Any:
-    """Storm Events local timestamps as tz-naive datetimes, unparsable strings as NaT."""
+    """Storm Events local timestamps as tz-naive datetimes, unparsable strings as NaT.
+
+    The century comes from ``STORM_EVENTS_FIRST_YEAR`` either way: a string is
+    given its four-digit year before parsing, and a column the caller already
+    parsed, which pandas will have read under the usual pivot, is moved back a
+    century where it landed past it.
+    """
+    pivot = STORM_EVENTS_FIRST_YEAR % 100
     if pandas.api.types.is_datetime64_any_dtype(values):
-        return values.dt.tz_localize(None) if values.dt.tz is not None else values
-    return pandas.to_datetime(values, format=STORM_EVENTS_LOCAL_FORMAT, errors="coerce")
+        local = values.dt.tz_localize(None) if values.dt.tz is not None else values
+        late = local.dt.year >= STORM_EVENTS_FIRST_YEAR + 100
+        return local.where(~late, local - pandas.DateOffset(years=100))
+    text = values.astype("string").str.strip()
+    year = pandas.to_numeric(text.str.extract(STORM_EVENTS_LOCAL_LAYOUT, expand=False))
+    century = (year >= pivot).map({True: "19", False: "20"})
+    dated = text.str.slice(0, 7) + century + text.str.slice(7)
+    return pandas.to_datetime(dated, format=STORM_EVENTS_LOCAL_FORMAT, errors="coerce")
 
 
 def derive_storm_events_utc(pandas: Any, frame: Any) -> None:
@@ -190,9 +228,13 @@ def derive_storm_events_utc(pandas: Any, frame: Any) -> None:
     Storm Events rows are stamped in local standard time with a ``CZ_TIMEZONE``
     label such as ``CST-6`` that no Python timezone accepts. The trailing signed
     integer is the whole-hour UTC offset, so each local timestamp is shifted by
-    it and labelled UTC. Original columns are never modified, a row whose label
-    or timestamp does not parse gets ``NaT``, and each derived column, its
-    source, the rule, and that row count are listed under
+    it and labelled UTC. Files through 2006 write the label bare, as ``CST``;
+    the bare labels that name one offset wherever they appear take it from
+    ``STORM_EVENTS_BARE_OFFSETS``, and the rest are left unconverted rather than
+    guessed. Original columns are never modified, a row whose label or
+    timestamp does not yield an instant gets ``NaT``, and each derived column,
+    its source, the rule, that row count, and the labels that gave no offset
+    with how many rows carry each are listed under
     ``frame.attrs["usdata"]["derived"]``. A frame missing any of the three
     source columns is left alone.
 
@@ -204,8 +246,14 @@ def derive_storm_events_utc(pandas: Any, frame: Any) -> None:
     if not required.issubset(frame.columns):
         return
     labels = frame[STORM_EVENTS_TIMEZONE_COLUMN].astype("string").str.strip()
-    hours = pandas.to_numeric(labels.str.extract(CZ_TIMEZONE_OFFSET, expand=False), errors="coerce")
+    stated = pandas.to_numeric(
+        labels.str.extract(CZ_TIMEZONE_OFFSET, expand=False), errors="coerce"
+    )
+    bare = pandas.to_numeric(labels.str.upper().map(STORM_EVENTS_BARE_OFFSETS), errors="coerce")
+    hours = stated.fillna(bare)
     offsets = pandas.to_timedelta(hours, unit="h")
+    without_offset = labels[hours.isna() & labels.notna()].value_counts()
+    unconverted = {str(label): int(count) for label, count in sorted(without_offset.items())}
     derived = []
     for source, column in STORM_EVENTS_UTC_COLUMNS.items():
         local = _local_timestamps(pandas, frame[source])
@@ -216,6 +264,7 @@ def derive_storm_events_utc(pandas: Any, frame: Any) -> None:
                 "source": source,
                 "rule": STORM_EVENTS_RULE,
                 "unparsed": int(frame[column].isna().sum()),
+                "labels_without_offset": unconverted,
             }
         )
     frame.attrs["usdata"]["derived"] = derived
@@ -279,8 +328,9 @@ def open_asset(
     row per track point; it takes no CSV options.
     A Storm Events CSV gains ``BEGIN_UTC`` and ``END_UTC`` when the frame keeps
     ``BEGIN_DATE_TIME``, ``END_DATE_TIME``, and ``CZ_TIMEZONE``: the local
-    timestamp shifted by the whole-hour offset ending the timezone label, with
-    unparsable rows left ``NaT`` and counted under ``attrs["usdata"]["derived"]``.
+    timestamp shifted by the whole-hour offset ending the timezone label, or by
+    the one offset a bare label such as ``CST`` names, with every other row left
+    ``NaT`` and counted under ``attrs["usdata"]["derived"]``.
     NetCDF4 and GRIB2 results have units the file leaves missing or ``unknown``
     and missing long names filled from the registry entry's variables, listed
     under ``attrs["usdata"]["registry_attrs"]``.
