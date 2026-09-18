@@ -79,7 +79,12 @@ A failed resolution leaves an existing lockfile untouched, although earlier
 successful downloads remain cached. Restore and verify both check the exact
 manifest checksum before trusting its lockfile. Restore reports every pinned URL
 whose bytes changed upstream in one run and rewrites pins only for entries the
-caller explicitly selects with `update`. When `USDATA_MIRROR_URL` names a
+caller explicitly selects with `update`. Those refreshes are staged under
+`<cache root>/.staging/` and committed only after every entry has succeeded,
+lockfile first, so a failed pull leaves no cached file holding bytes the
+lockfile does not pin
+([ADR 0031](adr/0031-staged-refresh-and-lockfile-first-commit.md)). When
+`USDATA_MIRROR_URL` names a
 content-addressed mirror, restore fetches such an entry from
 `<mirror>/sha256/<checksum>` instead, verified against the same pin, and the
 sidecar records the mirror object; the SDK never uploads

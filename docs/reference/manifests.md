@@ -120,8 +120,10 @@ In Python, `pull()` and `verify()` take `pathlib.Path` manifest arguments, not
 strings; `pull(update=[...])` selects entries and raises `UpstreamChanged`
 with a `drift` list when unaccepted changes remain, and `PullResult.mirrored`
 names the assets a configured mirror restored. Every unselected entry is checked
-before any selected entry is refreshed, so a run that ends in `UpstreamChanged`
-has rewritten neither the lockfile nor any cached file the lockfile pins. Exit codes are listed in
+before any selected entry is refreshed, and refreshed files wait in
+`<cache root>/.staging/` until the lockfile is saved, so a `pull` that fails for
+any reason leaves the lockfile as it was and every cached file either absent or
+matching it. A failed `update` can simply be run again. Exit codes are listed in
 [how it works](../concepts/how-it-works.md#cli-exit-codes).
 
 `pull()` returns a `PullResult`. Its `fetched` list is in manifest order, then

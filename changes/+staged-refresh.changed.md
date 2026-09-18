@@ -1,0 +1,1 @@
+`pull --update` now stages refreshed files under `<cache root>/.staging/` and moves them into the cache only after the lockfile is saved. A pull that fails for any reason, including a network error partway through an update, leaves the lockfile as it was and every cached file either absent or matching it, so it can simply be run again.
