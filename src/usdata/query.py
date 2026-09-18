@@ -40,7 +40,7 @@ def _places() -> tuple[dict[str, set[str]], dict[str, tuple[Place, BBox]]]:
             row["name"] if row["kind"] == "state" else f"{row['qualified_name']}, {row['state']}"
         )
         kind = "state" if row["kind"] == "state" else "county"
-        places[geoid] = (Place(kind=kind, geoid=geoid, label=label), box)
+        places[geoid] = (Place(kind=kind, geoid=geoid, label=label, state=row["state"]), box)
         add(geoid, geoid)
         if row["kind"] == "state":
             add(row["name"], geoid)

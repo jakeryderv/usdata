@@ -302,7 +302,7 @@ def test_number_fields_reject_text_booleans_and_out_of_range_values(raw) -> None
 
 
 BOX = BBox(west=-97.7, south=35.2, east=-97.2, north=35.7)
-PLACE = Place(kind="county", geoid="40027", label="Cleveland County, OK")
+PLACE = Place(kind="county", geoid="40027", label="Cleveland County, OK", state="OK")
 
 
 def test_place_of_returns_the_named_place_and_nothing_for_no_spatial_filter() -> None:

@@ -1,0 +1,1 @@
+`Place` now requires `state`, the two-letter postal code of the state or of the state a county lies in. `build_query` and `find_place` set it, so queries built from a `location` are unaffected; code that constructs a `Place` by hand must pass it.
