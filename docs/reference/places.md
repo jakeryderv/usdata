@@ -5,6 +5,13 @@ What a place lookup returns and why it is a rectangle is explained in
 manifest `location`, and CLI `--location` (also `--state`) share one bundled
 offline table.
 
+A location resolves to two things, both kept on the query: `query.bbox`, the
+rectangle, and `query.place`, the state or county itself with its FIPS code
+(`place.geoid`, `place.state_fips`, `place.county_fips`). A `bbox` or a
+`lat`/`lon` sets only the rectangle, since a box names no place.
+`usdata.query.find_place(name)` returns both; `resolve_place(name)` returns the
+rectangle alone.
+
 ## Input forms
 
 | Input | Meaning |

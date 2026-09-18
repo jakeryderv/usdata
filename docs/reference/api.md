@@ -68,6 +68,7 @@ See [fetch and analyze](../guides/fetch-and-analyze.md) for complete workflows.
 
 ::: usdata.Asset
 ::: usdata.BBox
+::: usdata.Place
 ::: usdata.TimeRange
 ::: usdata.Dataset
 ::: usdata.Query

@@ -24,7 +24,11 @@ from usdata.providers import HttpProvider, Provider
 from usdata.providers.noaa.storm_events import DIRECTORY_URL, StormEvents
 from usdata.query import build_query
 from usdata.registry import default_registry
-from usdata.testing import check_fetch_lifecycle, check_provider_contract
+from usdata.testing import (
+    check_declared_capabilities,
+    check_fetch_lifecycle,
+    check_provider_contract,
+)
 
 pytestmark = pytest.mark.l2
 
@@ -176,3 +180,46 @@ def test_the_lifecycle_check_fetches_settled_ranges_through_fetch_partial(tmp_pa
         arm_download=downloads.add,
         work_dir=tmp_path,
     )
+
+
+class PlaceKeyed(SidecarWriter):
+    """A source keyed by FIPS code: it honours a named place and refuses a bare box."""
+
+    def list_assets(self, query: Query) -> list[Asset]:
+        """Refuse a box that names no place, then list as the parent does."""
+        self.place_of(query, hint="pass state or fips")
+        return super().list_assets(query.model_copy(update={"bbox": None, "place": None}))
+
+
+def _keyed(*, place_subset: bool) -> Dataset:
+    capabilities = Capabilities(temporal_subset=True, place_subset=place_subset)
+    return SYNTHETIC.model_copy(update={"capabilities": capabilities})
+
+
+def test_a_place_keyed_adapter_passes_when_it_declares_place_subset() -> None:
+    dataset = _keyed(place_subset=True)
+    check_declared_capabilities(
+        dataset, lambda client=None: PlaceKeyed(dataset, client), scenario_query(), scenario_query()
+    )
+
+
+def test_a_place_keyed_adapter_that_does_not_declare_place_subset_is_rejected() -> None:
+    dataset = _keyed(place_subset=False)
+    with pytest.raises(AssertionError, match="declares place_subset=False and refuses"):
+        check_declared_capabilities(
+            dataset,
+            lambda client=None: PlaceKeyed(dataset, client),
+            scenario_query(),
+            scenario_query(),
+        )
+
+
+def test_declaring_place_subset_without_refusing_a_bare_box_is_rejected() -> None:
+    dataset = _keyed(place_subset=True)
+    with pytest.raises(AssertionError, match="declares place_subset=True and does not refuse"):
+        check_declared_capabilities(
+            dataset,
+            lambda client=None: SidecarWriter(dataset, client),
+            scenario_query(),
+            scenario_query(),
+        )

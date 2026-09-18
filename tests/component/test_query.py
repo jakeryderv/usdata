@@ -3,7 +3,7 @@ from datetime import UTC, date, datetime
 import pytest
 
 from usdata.models import BBox, TimeRange
-from usdata.query import UnknownPlace, build_query, parse_datetime, resolve_place
+from usdata.query import UnknownPlace, build_query, find_place, parse_datetime, resolve_place
 
 
 def test_resolve_place_by_name_and_alias() -> None:
@@ -113,3 +113,26 @@ def test_census_coverage_and_conservative_antimeridian_boxes() -> None:
     for name in ("Alaska", "Aleutians West Census Area, AK"):
         box = resolve_place(name)
         assert box.east - box.west > 350
+
+
+def test_a_location_keeps_the_place_it_resolved_beside_its_box() -> None:
+    county = build_query(location="Osage County, OK")
+    assert county.place is not None
+    assert (county.place.kind, county.place.geoid) == ("county", "40113")
+    assert (county.place.state_fips, county.place.county_fips) == ("40", "113")
+    assert county.place.label == "Osage County, OK"
+    assert county.bbox == resolve_place("40113")
+    state = build_query(location="ok")
+    assert state.place is not None
+    assert (state.place.kind, state.place.geoid, state.place.label) == ("state", "40", "Oklahoma")
+    assert (state.place.state_fips, state.place.county_fips) == ("40", None)
+    # However the place was spelled, it is the same place.
+    assert build_query(location="40113").place == county.place
+    assert find_place("Osage, Oklahoma") == (county.place, county.bbox)
+
+
+def test_a_box_or_a_point_names_no_place() -> None:
+    osage = resolve_place("Osage County, OK")
+    assert build_query(bbox=osage).place is None
+    assert build_query(lat=36.6, lon=-96.4).place is None
+    assert build_query("rain").place is None

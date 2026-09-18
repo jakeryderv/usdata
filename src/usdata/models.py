@@ -149,6 +149,9 @@ class Capabilities(BaseModel):
 
     ``spatial_subset`` and ``variable_subset`` mean the request narrows the
     bytes served, so a bbox or a variable list changes the files.
+    ``place_subset`` means a named state or county selects what is served, which
+    is a separate question: a source keyed by FIPS code honours a place and
+    must refuse a bare rectangle, which names no place (ADR 0034).
     ``temporal_subset`` means the time window chooses which assets are fetched,
     whether the source crops files to it or serves whole files that cover it.
     ``partial_fetch`` means selected byte ranges of an object can be fetched on
@@ -157,6 +160,7 @@ class Capabilities(BaseModel):
     """
 
     spatial_subset: bool = False
+    place_subset: bool = False
     temporal_subset: bool = False
     variable_subset: bool = False
     partial_fetch: bool = False
@@ -381,17 +385,65 @@ class Dataset(BaseModel):
         return self.id.split(":", 1)[1]
 
 
+class Place(BaseModel):
+    """The state or county a ``location`` named, as the bundled Census table identifies it.
+
+    A rectangle cannot be turned back into the place it was drawn around, so a
+    query keeps this beside its ``bbox`` for the sources that are keyed by FIPS
+    code rather than by coordinates. See ADR 0034.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    kind: Literal["state", "county"]
+    geoid: str = Field(
+        pattern=r"^\d{2}(\d{3})?$",
+        description="Census GEOID: the two-digit state FIPS code, or the five-digit county one",
+    )
+    label: str = Field(description="The place as the table names it, such as 'Osage County, OK'")
+
+    @model_validator(mode="after")
+    def _kind_matches_geoid(self) -> Place:
+        if (self.kind == "state") is not (len(self.geoid) == 2):
+            raise ValueError(f"a {self.kind} geoid cannot be {self.geoid!r}")
+        return self
+
+    @property
+    def state_fips(self) -> str:
+        """The two-digit FIPS code of the state, or of the state a county lies in."""
+        return self.geoid[:2]
+
+    @property
+    def county_fips(self) -> str | None:
+        """The three-digit county FIPS code within its state, or None for a state."""
+        return self.geoid[2:] or None
+
+
 class Query(BaseModel):
     """Normalized, provider-agnostic request. Providers translate this into their own terms."""
 
     text: str | None = None
     provider: str | None = None
     bbox: BBox | None = None
+    place: Place | None = Field(
+        default=None,
+        description=(
+            "The state or county the spatial filter named, set only when it was given as a "
+            "location; bbox still holds that place's rectangle"
+        ),
+    )
     time: TimeRange | None = None
     variables: list[str] = Field(default_factory=list)
     params: dict[str, Any] = Field(
         default_factory=dict, description="Provider-specific passthrough parameters"
     )
+
+    @model_validator(mode="after")
+    def _place_has_its_box(self) -> Query:
+        # Most adapters read only bbox, so a place without one would select nothing for them.
+        if self.place is not None and self.bbox is None:
+            raise ValueError("a query naming a place must carry that place's bbox")
+        return self
 
 
 class Asset(BaseModel):
