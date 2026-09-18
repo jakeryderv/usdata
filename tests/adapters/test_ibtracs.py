@@ -173,10 +173,17 @@ def test_subset_is_required(adapter) -> None:
         adapter.parse_params(Query(params={}), IbtracsParams)
 
 
-@pytest.mark.parametrize("raw", ["shapefile", "CSV", "", 1])
+@pytest.mark.parametrize("raw", ["shapefile", "", 1, None])
 def test_format_names_the_two_readers_cover(adapter, raw) -> None:
     with pytest.raises(QueryError, match="format must be csv or netcdf"):
         adapter.parse_params(Query(params={"subset": "na", "format": raw}), IbtracsParams)
+
+
+def test_format_folds_case_and_an_explicit_null_version_keeps_the_default(adapter) -> None:
+    params = adapter.parse_params(
+        Query(params={"subset": "na", "format": " NetCDF ", "version": None}), IbtracsParams
+    )
+    assert params.format == "netcdf" and params.version is None
 
 
 @pytest.mark.parametrize(

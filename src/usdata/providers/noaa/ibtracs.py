@@ -80,8 +80,15 @@ def _subset(value: object) -> str:
     return key
 
 
-def _version(value: object) -> str:
-    """A product version directory name, folded to lower case."""
+def _format(value: object) -> object:
+    """Fold case and surrounding space before the fixed choice; other types fail there."""
+    return value.strip().casefold() if isinstance(value, str) else value
+
+
+def _version(value: object) -> str | None:
+    """A product version directory name, folded to lower case; None keeps the default."""
+    if value is None:
+        return None
     text = value.strip().lower() if isinstance(value, str) else ""
     match = VERSION.fullmatch(text)
     if match is None:
@@ -123,8 +130,8 @@ class IbtracsParams(BaseModel):
         description="Required subset: all, active, last3years, since1980, or a basin "
         "(na, ep, wp, ni, si, sp, or sa), case-insensitive."
     )
-    format: Annotated[str, choice(*FORMATS)] = Field(
-        default="csv", description="File format: csv (default) or netcdf."
+    format: Annotated[str, choice(*FORMATS), BeforeValidator(_format)] = Field(
+        default="csv", description="File format: csv (default) or netcdf, case-insensitive."
     )
     version: Annotated[str | None, BeforeValidator(_version)] = Field(
         default=None,

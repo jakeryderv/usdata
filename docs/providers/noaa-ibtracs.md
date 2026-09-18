@@ -45,7 +45,9 @@ record: `since1980` starts on 1980-01-01, `last3years` on 1 January three years
 before the build, and the others at the archive's first record,
 1842-10-25T03:00Z. The end is the file's build stamp from the directory
 listing, read as UTC (it matched the `Last-Modified` header on 2026-09-17),
-which every record in the file necessarily precedes.
+which every record in the file necessarily precedes. Should a listing ever
+omit the stamp, the end is left open and `last3years` falls back to the
+archive start.
 
 ## Builds, versions, and lockfiles
 
@@ -62,7 +64,9 @@ lockfile downloads the pinned URL, finds different bytes, and stops with an
 upstream-change error rather than quietly replacing the data. Pass
 `--update noaa:ibtracs` to accept the current build, or `--force` to
 re-resolve, which also moves to a newer product version once NCEI publishes
-one. A build that has been superseded cannot be fetched again from NCEI, so
+one. A plain `fetch` without a lockfile also notices a rebuild: the listing
+reports the new file's size, and a cached copy of another size is fetched
+again rather than served stale. A build that has been superseded cannot be fetched again from NCEI, so
 keep the cache with the manifest and lockfile; a pinned example restores from
 the [mirror](../concepts/provenance-and-drift.md#restoring-from-a-mirror)
 instead. The complete filename is the stable asset ID, and the URL, original

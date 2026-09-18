@@ -20,7 +20,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 | Parameter | Meaning |
 |---|---|
-| `format` | File format: csv (default) or netcdf. |
+| `format` | File format: csv (default) or netcdf, case-insensitive. |
 | `subset` | Required subset: all, active, last3years, since1980, or a basin (na, ep, wp, ni, si, sp, or sa), case-insensitive. |
 | `version` | Product version such as v04r01; the newest published one by default. |
 
