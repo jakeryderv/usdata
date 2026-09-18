@@ -17,8 +17,9 @@ would fetch and how many of its bytes the adapters can measure.
 from __future__ import annotations
 
 import os
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from contextlib import ExitStack
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -30,7 +31,7 @@ from usdata._fetch import ChecksumMismatch, FetchedAsset, _fetch_asset, _fetch_w
 from usdata._files import staged_path
 from usdata.cache import asset_path, sha256_file
 from usdata.manifest import LockedAsset, Lockfile, Manifest, lockfile_path
-from usdata.models import Asset
+from usdata.models import Asset, Dataset
 from usdata.protocols import http
 from usdata.protocols.http import ObjectChanged
 from usdata.providers import Provider, load_adapter
@@ -361,98 +362,116 @@ def restore(
     lock = Lockfile.load(lock_path)
     _check_manifest(manifest_path, lock)
     selected = _selected(lock, update)
-    fetched: list[FetchedAsset] = []
-    entries: list[LockedAsset] = []
-    updated: list[str] = []
-    mirrored: list[str] = []
-    drift: list[Drift] = []
     _progress.batch([entry.provenance.size for entry in lock.assets])
     adapters: dict[str, Provider] = {}
-    mirror_base = mirror.mirror_url()
+    restored: list[_Restored] = []
+    drift: list[Drift] = []
     with ExitStack() as stack:
-        mirror_client: httpx.Client | None = None
-        for entry in lock.assets:
-            dataset = reg.get(entry.asset.dataset_id)
-            path = asset_path(entry.asset, root)
-            refresh = entry.asset.id in selected
-            if path.is_file() and not refresh:
-                _progress.emit(
-                    _progress.AssetProgress(entry.asset.id, "start", entry.provenance.size)
-                )
-            if path.is_file() and not refresh and sha256_file(path) == entry.provenance.checksum:
-                provenance.write(entry.provenance, path)
-                _progress.emit(
-                    _progress.AssetProgress(entry.asset.id, "cached", entry.provenance.size)
-                )
-                fetched.append(
-                    FetchedAsset(
-                        asset=entry.asset, path=path, provenance=entry.provenance, from_cache=True
-                    )
-                )
-                entries.append(entry)
-                continue
+
+        def adapter_for(dataset: Dataset) -> Provider:
             if dataset.id not in adapters:
                 adapters[dataset.id] = stack.enter_context(load_adapter(dataset))
-            adapter = adapters[dataset.id]
-            if refresh:
-                # Fetch unpinned so whatever upstream serves now becomes the new pin.
-                unpinned = entry.asset.model_copy(update={"checksum": None})
-                item = _fetch_asset(
-                    dataset, unpinned, adapter, root=root, force=True, pinned=entry.provenance
-                )
-                if item.provenance.checksum == entry.provenance.checksum:
-                    entries.append(entry)  # Same bytes: keep the original pin and record.
-                else:
-                    pinned = item.asset.model_copy(update={"checksum": item.provenance.checksum})
-                    entries.append(
-                        LockedAsset(asset=pinned, provenance=item.provenance, source=entry.source)
-                    )
-                    updated.append(entry.asset.id)
-                fetched.append(item)
-                continue
-            pinned = entry.asset.model_copy(update={"checksum": entry.provenance.checksum})
-            try:
-                fetched.append(
-                    _fetch_asset(
-                        dataset, pinned, adapter, root=root, force=True, pinned=entry.provenance
-                    )
-                )
-            # A republished object refuses the pinned ETag, which is drift by another name.
-            except (ChecksumMismatch, ObjectChanged):
-                problem = "upstream changed"
-                if mirror_base is not None:
-                    if mirror_client is None:
-                        mirror_client = stack.enter_context(http.client())
-                    item, problem = _restore_from_mirror(entry, path, mirror_base, mirror_client)
-                    if item is not None:
-                        fetched.append(item)
-                        entries.append(entry)
-                        mirrored.append(entry.asset.id)
-                        continue
-                drift.append(
-                    Drift(
-                        asset_id=entry.asset.id,
-                        dataset_id=entry.asset.dataset_id,
-                        path=path,
-                        problem=problem,
-                    )
-                )
-                continue
-            entries.append(entry)
+            return adapters[dataset.id]
+
+        base = mirror.mirror_url()
+        mirrored_from = None if base is None else (base, stack.enter_context(http.client()))
+        for entry in lock.assets:
+            outcome = _restore_entry(
+                entry,
+                reg.get(entry.asset.dataset_id),
+                root=root,
+                refresh=entry.asset.id in selected,
+                adapter_for=adapter_for,
+                mirrored_from=mirrored_from,
+            )
+            if isinstance(outcome, Drift):
+                drift.append(outcome)
+            else:
+                restored.append(outcome)
     if drift:
         raise UpstreamChanged(drift)
+    updated = [outcome.entry.asset.id for outcome in restored if outcome.updated]
     if updated:
-        lock = lock.model_copy(update={"assets": entries})
+        lock = lock.model_copy(update={"assets": [outcome.entry for outcome in restored]})
         lock.save(lock_path)
     return PullResult(
         lockfile=lock,
         lockfile_path=lock_path,
-        fetched=fetched,
+        fetched=[outcome.item for outcome in restored],
         from_lockfile=True,
         updated=updated,
-        mirrored=mirrored,
-        by_source=_by_source(zip(entries, fetched, strict=True)),
+        mirrored=[outcome.entry.asset.id for outcome in restored if outcome.mirrored],
+        by_source=_by_source((outcome.entry, outcome.item) for outcome in restored),
     )
+
+
+@dataclass(frozen=True)
+class _Restored:
+    """One lockfile entry brought back: the entry to pin from now on, and its file."""
+
+    entry: LockedAsset
+    item: FetchedAsset
+    updated: bool = False
+    mirrored: bool = False
+
+
+def _restore_entry(
+    entry: LockedAsset,
+    dataset: Dataset,
+    *,
+    root: Path | None,
+    refresh: bool,
+    adapter_for: Callable[[Dataset], Provider],
+    mirrored_from: tuple[str, httpx.Client] | None,
+) -> _Restored | Drift:
+    """Bring back one lockfile entry, or say how it drifted; the lockfile is not touched here.
+
+    An entry takes the first of four paths that applies: ``refresh`` accepts
+    whatever upstream serves now; its cached file still matches the pin; the
+    pinned URL reproduces the pin; or the mirror supplies the pinned bytes. An
+    adapter is opened only for an entry that needs a fetch.
+    """
+    path = asset_path(entry.asset, root)
+    if refresh:
+        return _refresh_entry(entry, dataset, adapter_for(dataset), root)
+    if path.is_file():
+        _progress.emit(_progress.AssetProgress(entry.asset.id, "start", entry.provenance.size))
+        if sha256_file(path) == entry.provenance.checksum:
+            provenance.write(entry.provenance, path)
+            _progress.emit(_progress.AssetProgress(entry.asset.id, "cached", entry.provenance.size))
+            item = FetchedAsset(
+                asset=entry.asset, path=path, provenance=entry.provenance, from_cache=True
+            )
+            return _Restored(entry, item)
+    pinned = entry.asset.model_copy(update={"checksum": entry.provenance.checksum})
+    try:
+        item = _fetch_asset(
+            dataset, pinned, adapter_for(dataset), root=root, force=True, pinned=entry.provenance
+        )
+    # A republished object refuses the pinned ETag, which is drift by another name.
+    except (ChecksumMismatch, ObjectChanged):
+        problem = "upstream changed"
+        if mirrored_from is not None:
+            item, problem = _restore_from_mirror(entry, path, *mirrored_from)
+            if item is not None:
+                return _Restored(entry, item, mirrored=True)
+        return Drift(
+            asset_id=entry.asset.id, dataset_id=entry.asset.dataset_id, path=path, problem=problem
+        )
+    return _Restored(entry, item)
+
+
+def _refresh_entry(
+    entry: LockedAsset, dataset: Dataset, adapter: Provider, root: Path | None
+) -> _Restored:
+    """Fetch an entry unpinned, so whatever upstream serves now becomes the new pin."""
+    unpinned = entry.asset.model_copy(update={"checksum": None})
+    item = _fetch_asset(dataset, unpinned, adapter, root=root, force=True, pinned=entry.provenance)
+    if item.provenance.checksum == entry.provenance.checksum:
+        return _Restored(entry, item)  # Same bytes: keep the original pin and record.
+    pinned = item.asset.model_copy(update={"checksum": item.provenance.checksum})
+    repinned = LockedAsset(asset=pinned, provenance=item.provenance, source=entry.source)
+    return _Restored(repinned, item, updated=True)
 
 
 def _restore_from_mirror(
