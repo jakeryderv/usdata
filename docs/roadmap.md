@@ -86,17 +86,25 @@ window and place rules are in
 [worked example](https://usdata.dev/examples/disaster-declarations/) joins an
 evening's tornado counties to the declaration in force.
 
-The selected workstream fills out the severe-weather inputs with the sibling
-tables of two datasets already in the catalog, reusing their access patterns:
+The sibling tables of two datasets already in the catalog are implemented and
+unreleased, each chosen with a `table` parameter: the Storm Events
+[fatalities and locations tables](https://github.com/jakeryderv/usdata/issues/133),
+which join to details on `EVENT_ID`, and the SPC
+[hail and wind databases](https://github.com/jakeryderv/usdata/issues/134),
+which start in 1955 where the tornado database starts in 1950.
 
-- [Storm Events fatalities and locations tables](https://github.com/jakeryderv/usdata/issues/133).
-  Done when a `table` parameter selects `details`, `fatalities`, or
-  `locations` under the same year selection and revision rule, and the access
-  notes say how `EVENT_ID` joins them.
-- [SPC hail and wind report files](https://github.com/jakeryderv/usdata/issues/134).
-  Done when a `table` parameter selects `torn`, `hail`, or `wind`, the year
-  coverage of the hail and wind files is verified with dated probes, and the
-  notes record that `mag` is inches for hail and knots for wind.
+The selected workstream is the second source selected by place:
+[NWS watches and warnings by county](https://github.com/jakeryderv/usdata/issues/252),
+from the Iowa Environmental Mesonet's mirror of NWS products. Beside the Storm
+Events reports it answers a question the catalog cannot ask today, how long
+before a tornado its warning was issued. It is also the test of whether
+[ADR 0034](adr/0034-query-keeps-the-resolved-place.md) generalizes, and scoping
+it has already found a gap: a county's code there needs the state's postal
+code, which `Place` does not carry. The issue holds the verified endpoint, three
+service behaviours found by probing, and four decisions to settle before
+implementation. Done when its listed criteria are met, the first being that the
+Tornado Warning issued for Osage County at 01:34 UTC on 7 May 2024 comes back
+from a county location.
 
 ## Next
 
@@ -112,12 +120,6 @@ moving it to Now. Prefer additions that exercise a useful new access pattern or
 reuse an existing one while preserving the adapter, transport, cache/provenance,
 and optional-reader boundaries:
 
-- A second source selected by place, which is the test of whether
-  [ADR 0034](adr/0034-query-keeps-the-resolved-place.md) generalizes beyond the
-  one source it was written for. The obvious candidate, the Census Data API,
-  turned out to require a key on every data request when it was probed on
-  2026-09-18, so it waits with the credentialed sources under Later. An
-  anonymous candidate is still to be chosen.
 - Further NCEI Access Data Service datasets, such as hourly normals.
 - Additional GOES ABI products and sectors, and CO-OPS currents.
 - Geospatial readers when a supported dataset and representative fixtures justify them.
