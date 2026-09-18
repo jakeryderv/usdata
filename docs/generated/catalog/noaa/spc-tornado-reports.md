@@ -1,4 +1,4 @@
-# SPC tornado database
+# SPC tornado, hail, and wind databases
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
@@ -9,14 +9,18 @@ SPC Tornado Reports.
 ## At a glance
 
 - Files: CSV
-- Selection: Whole annual, half-decade, or decade files; filter rows locally after downloading
-- Required inputs: Both dates (selects the files covering those years)
+- Selection: Whole annual, half-decade, or decade files of one table; filter rows locally after downloading
+- Required inputs: Both dates (selects the files covering those years); optionally table
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
 - Examples: [spc tornadoes](https://usdata.dev/examples/spc-tornadoes/), [severe weather case study](https://usdata.dev/examples/severe-weather-case-study/)
 
 ## Parameters
 
-This dataset accepts no provider-specific parameters.
+Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
+
+| Parameter | Meaning |
+|---|---|
+| `table` | Report table: torn (default, from 1950), hail (from 1955), or wind (from 1955); mag is the F/EF rating, inches, or knots respectively. |
 
 ## Variables
 
@@ -28,7 +32,7 @@ This dataset accepts no provider-specific parameters.
 | `tz` | — | Time-zone code: 3 is Central Standard Time, 9 is GMT, ? is unknown |
 | `st` | — | Two-letter state |
 | `stf` | — | State FIPS code |
-| `mag` | — | F scale through January 2007 and EF scale afterwards; -9 is unknown |
+| `mag` | — | Tornado: F scale through January 2007 and EF scale afterwards, -9 unknown. Hail: size in inches. Wind: speed in knots |
 | `inj` | count | Injuries |
 | `fat` | count | Fatalities |
 | `loss` | — | Property loss: a 0 to 9 category before 1996, millions of dollars from 1996 |
@@ -40,6 +44,7 @@ This dataset accepts no provider-specific parameters.
 | `len` | miles | Path length |
 | `wid` | yards | Path width |
 | `sg` | — | Segment code: 1 a whole track, 2 a state segment, -9 extra county codes |
+| `mt` | — | Wind only, from 2006: EG estimated gust, MG measured gust, MS measured sustained, ES estimated sustained |
 
 ## Usage and limitations
 

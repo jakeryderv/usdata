@@ -138,6 +138,57 @@ def test_ignores_other_tables_archives_and_nonlocal_links(adapter) -> None:
     assert [a.id for a in assets] == ["2024_torn.csv"]
 
 
+@pytest.mark.parametrize("table", ["torn", "hail", "wind"])
+def test_table_selects_its_own_files_under_the_same_selection_rules(adapter, table) -> None:
+    names = [
+        f"data/{years}_{other}.csv"
+        for other in ("torn", "hail", "wind")
+        for years in ("90-99", "2005-2007", "2023", "2024")
+    ]
+    with respx.mock() as mock:
+        mock.get(PAGE_URL).respond(200, text=page(*names))
+        one = adapter.list_assets(build_query(start="2024-01-01", end="2024-12-31", table=table))
+        old = adapter.list_assets(build_query(start="1995-01-01", end="1995-12-31", table=table))
+    assert [a.id for a in one] == [f"2024_{table}.csv"]
+    assert one[0].href == DATA_URL + f"2024_{table}.csv" and one[0].media_type == "text/csv"
+    assert [a.id for a in old] == [f"90-99_{table}.csv"]
+    assert old[0].time.start.year == 1990 and old[0].time.end.year == 1999
+
+
+def test_torn_is_the_default_table(adapter) -> None:
+    with respx.mock() as mock:
+        mock.get(PAGE_URL).respond(200, text=page("data/2024_torn.csv", "data/2024_wind.csv"))
+        default = adapter.list_assets(build_query(start="2024-01-01", end="2024-12-31"))
+        named = adapter.list_assets(build_query(start="2024-01-01", end="2024-12-31", table="torn"))
+    assert default == named and [a.id for a in default] == ["2024_torn.csv"]
+
+
+def test_hail_and_wind_start_in_1955_and_tornado_in_1950(adapter) -> None:
+    with respx.mock() as mock:
+        mock.get(PAGE_URL).respond(
+            200, text=page("data/50-59_torn.csv", "data/55-59_hail.csv", "data/50-54_hail.csv")
+        )
+        torn = adapter.list_assets(build_query(start="1950-01-01", end="1950-12-31"))
+        hail = adapter.list_assets(build_query(start="1955-01-01", end="1955-12-31", table="hail"))
+    assert [a.id for a in torn] == ["50-59_torn.csv"]
+    # A hail file claiming years before 1955 is not one SPC publishes, so it is never chosen.
+    assert [a.id for a in hail] == ["55-59_hail.csv"]
+    with pytest.raises(QueryError, match="SPC hail reports start in 1955"), respx.mock():
+        adapter.list_assets(build_query(start="1954-01-01", end="1954-12-31", table="hail"))
+
+
+def test_a_year_missing_from_the_chosen_table_names_that_table(adapter) -> None:
+    with respx.mock() as mock:
+        mock.get(PAGE_URL).respond(200, text=page("data/2024_torn.csv"))
+        with pytest.raises(QueryError, match=r"no SPC wind file for year\(s\): 2024"):
+            adapter.list_assets(build_query(start="2024-01-01", end="2024-12-31", table="wind"))
+
+
+def test_table_is_declared_for_info_and_the_catalog(adapter) -> None:
+    assert list(adapter.accepted_params) == ["table"]
+    assert "inches, or knots" in adapter.accepted_params["table"]
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -149,7 +200,12 @@ def test_ignores_other_tables_archives_and_nonlocal_links(adapter) -> None:
         {"variables": ["mag"]},
         {"text": "tornado"},
         {"year": 2024},
-        {"table": "hail"},
+        {"table": "tornado"},
+        {"table": "HAIL"},
+        {"table": ["hail", "wind"]},
+        {"table": True},
+        {"table": "hail", "start": "1954-12-31", "end": "1955-01-01"},
+        {"table": "wind", "start": "1950-01-01", "end": "1950-12-31"},
         {"segments": "actual"},
     ],
 )

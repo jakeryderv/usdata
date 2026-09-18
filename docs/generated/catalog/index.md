@@ -13,7 +13,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | <span id="noaagsoy"></span>[Annual station climate](noaa/gsoy.md) | Released | CSV | Complete UTC calendar years touched by the query; station and element filters |
 | <span id="noaalcd"></span>[Hourly airport observations](noaa/lcd.md) | Released | CSV | Every report on whole calendar days per station; optional column filters |
 | <span id="noaastorm-events"></span>[Storm Events details, fatalities, and locations](noaa/storm-events.md) | Released | gzip CSV | Whole annual archives of one table; filter rows locally after downloading |
-| <span id="noaaspc-tornado-reports"></span>[SPC tornado database](noaa/spc-tornado-reports.md) | Released | CSV | Whole annual, half-decade, or decade files; filter rows locally after downloading |
+| <span id="noaaspc-tornado-reports"></span>[SPC tornado, hail, and wind databases](noaa/spc-tornado-reports.md) | Released | CSV | Whole annual, half-decade, or decade files of one table; filter rows locally after downloading |
 | <span id="noaanexrad-level2"></span>[NEXRAD radar scans](noaa/nexrad-level2.md) | Released | NEXRAD Level II | Whole radar scans by site and inclusive UTC scan-start time |
 | <span id="noaamrms"></span>[MRMS gridded radar products](noaa/mrms.md) | Released | GRIB2 (gzipped) | Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day |
 | <span id="noaanexrad-level3"></span>[NEXRAD derived radar products](noaa/nexrad-level3.md) | Released | NEXRAD Level III (no reader) | Whole product files by site, product code, and inclusive UTC scan time since 2020-03-30 |

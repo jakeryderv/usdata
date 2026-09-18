@@ -45,3 +45,21 @@ def test_annual_file_schema_ratings_and_locked_restore(tmp_path: Path) -> None:
     if find_spec("pandas") is not None:
         frame = restored.fetched[0].open(parse_dates=["date"])
         assert len(frame) == len(rows) and frame["mag"].between(-9, 5).all()
+
+
+def test_the_hail_table_reports_stone_sizes_in_inches(tmp_path: Path) -> None:
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text(
+        MANIFEST.replace(
+            "    end: 2024-12-31\n", "    end: 2024-12-31\n    params: {table: hail}\n"
+        )
+    )
+    (item,) = pull(manifest, root=tmp_path / "cache").fetched
+    assert item.asset.id == "2024_hail.csv"
+    with item.path.open(newline="", encoding="utf-8") as stream:
+        rows = list(csv.DictReader(stream))
+    sizes = [float(row["mag"]) for row in rows]
+    # Inches, not an F scale and not knots: nothing negative, nothing the size of a wind speed.
+    assert len(rows) > 1000 and all(0 < size < 10 for size in sizes)
+    assert "fc" not in rows[0] and "mt" not in rows[0]
+    assert verify(manifest, root=tmp_path / "cache") == []

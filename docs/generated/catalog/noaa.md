@@ -11,7 +11,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | Dataset | Availability | Files | What gets selected |
 |---|---|---|---|
 | <span id="noaastorm-events"></span>[Storm Events details, fatalities, and locations](noaa/storm-events.md) | Released | gzip CSV | Whole annual archives of one table; filter rows locally after downloading |
-| <span id="noaaspc-tornado-reports"></span>[SPC tornado database](noaa/spc-tornado-reports.md) | Released | CSV | Whole annual, half-decade, or decade files; filter rows locally after downloading |
+| <span id="noaaspc-tornado-reports"></span>[SPC tornado, hail, and wind databases](noaa/spc-tornado-reports.md) | Released | CSV | Whole annual, half-decade, or decade files of one table; filter rows locally after downloading |
 | <span id="noaamrms"></span>[MRMS gridded radar products](noaa/mrms.md) | Released | GRIB2 (gzipped) | Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day |
 | <span id="noaahurdat2"></span>[Tropical cyclone best tracks](noaa/hurdat2.md) | Released | HURDAT2 fixed-format text | The newest revision of one whole basin file; filter track points locally |
 | <span id="noaaibtracs"></span>[Global tropical cyclone best tracks](noaa/ibtracs.md) | Released | CSV with a units row, NetCDF4 | One whole subset file per query, from the newest or a pinned product version |
