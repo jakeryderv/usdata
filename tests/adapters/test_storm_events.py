@@ -92,6 +92,49 @@ def test_calendar_year_normalization_and_duplicate_rows(adapter) -> None:
     assert a == b and len(a) == 1 and a[0].size == 10508
 
 
+@pytest.mark.parametrize("table", ["details", "fatalities", "locations"])
+def test_table_selects_its_own_files_under_the_same_year_and_revision_rules(adapter, table) -> None:
+    name = NAME.replace("details", table)
+    older = name.replace("20260323", "20250301")
+    others = [NAME.replace("details", other) for other in ("details", "fatalities", "locations")]
+    with respx.mock() as mock:
+        mock.get(DIRECTORY_URL).respond(
+            200, text=listing((older, "1"), *((other, "10508") for other in others))
+        )
+        (asset,) = adapter.list_assets(
+            build_query(start="1950-04-01", end="1950-04-30", table=table)
+        )
+    # The asset keeps the file's own name, so the three tables never share a cache path.
+    assert asset.id == name and asset.href == DIRECTORY_URL + name and asset.size == 10508
+    assert asset.time.start.isoformat() == "1950-01-01T00:00:00+00:00"
+
+
+def test_details_is_the_default_table(adapter) -> None:
+    with respx.mock() as mock:
+        mock.get(DIRECTORY_URL).respond(
+            200, text=listing((NAME, "1"), (NAME.replace("details", "locations"), "2"))
+        )
+        default = adapter.list_assets(build_query(start="1950-04-01", end="1950-04-30"))
+        named = adapter.list_assets(
+            build_query(start="1950-04-01", end="1950-04-30", table="details")
+        )
+    assert default == named and [asset.id for asset in default] == [NAME]
+
+
+def test_a_year_missing_from_the_chosen_table_names_that_table(adapter) -> None:
+    with respx.mock() as mock:
+        mock.get(DIRECTORY_URL).respond(200, text=listing((NAME, "10508")))
+        with pytest.raises(QueryError, match=r"no supported Storm Events locations file.*1950"):
+            adapter.list_assets(
+                build_query(start="1950-04-01", end="1950-04-30", table="locations")
+            )
+
+
+def test_table_is_declared_for_info_and_the_catalog(adapter) -> None:
+    assert list(adapter.accepted_params) == ["table"]
+    assert "EVENT_ID joins them" in adapter.accepted_params["table"]
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -103,7 +146,10 @@ def test_calendar_year_normalization_and_duplicate_rows(adapter) -> None:
         {"variables": ["EVENT_TYPE"]},
         {"text": "tornado"},
         {"year": 1950},
-        {"table": "fatalities"},
+        {"table": "deaths"},
+        {"table": "Details"},
+        {"table": ["details", "fatalities"]},
+        {"table": True},
         {"event_type": "Tornado"},
         {"revision": "20260323"},
     ],

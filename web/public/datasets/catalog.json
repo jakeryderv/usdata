@@ -262,8 +262,8 @@
     },
     {
       "id": "noaa:storm-events",
-      "title": "Storm Events details",
-      "description": "NCEI's significant-weather event details since 1950, with locations, impacts, and narratives. Anonymous whole-year gzipped CSV archives; select the latest creation-date revision for each requested year. No server-side row, location, or variable subsetting. Historical event coverage and reporting practices vary; fatalities and locations tables are separate products not included by this adapter. The catalog lists the identifying columns; the full column set is documented in the NCEI bulk format reference.",
+      "title": "Storm Events details, fatalities, and locations",
+      "description": "NCEI's significant-weather event details since 1950, with locations, impacts, and narratives. Anonymous whole-year gzipped CSV archives; select the latest creation-date revision for each requested year. No server-side row, location, or variable subsetting. Historical event coverage and reporting practices vary. The default is the details table; the fatalities table (one row per death) and the locations table (points per event, with rows from 1996) are chosen with the table parameter and join to details on EVENT_ID. The catalog lists the identifying columns; the full column set is documented in the NCEI bulk format reference.",
       "provider": "NOAA",
       "domain": "Severe weather",
       "system": null,
@@ -282,8 +282,8 @@
       "formats": [
         "gzip CSV"
       ],
-      "selection": "Whole annual archives; filter rows locally after downloading",
-      "inputs": "Both dates (selects the containing years)",
+      "selection": "Whole annual archives of one table; filter rows locally after downloading",
+      "inputs": "Both dates (selects the containing years); optionally table",
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "One record per county, forecast zone, or marine zone touched by an event",

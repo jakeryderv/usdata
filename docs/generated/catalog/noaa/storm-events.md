@@ -1,4 +1,4 @@
-# Storm Events details
+# Storm Events details, fatalities, and locations
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
@@ -9,14 +9,18 @@ Storm Events Database.
 ## At a glance
 
 - Files: gzip CSV
-- Selection: Whole annual archives; filter rows locally after downloading
-- Required inputs: Both dates (selects the containing years)
+- Selection: Whole annual archives of one table; filter rows locally after downloading
+- Required inputs: Both dates (selects the containing years); optionally table
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
 - Examples: [storm events](https://usdata.dev/examples/storm-events/), [event context](https://usdata.dev/examples/event-context/), [tornado classification](https://usdata.dev/examples/tornado-classification/), [severe weather case study](https://usdata.dev/examples/severe-weather-case-study/)
 
 ## Parameters
 
-This dataset accepts no provider-specific parameters.
+Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
+
+| Parameter | Meaning |
+|---|---|
+| `table` | Annual table: details (default, one row per event), fatalities (one row per death), or locations (points per event, from 1996); EVENT_ID joins them. |
 
 ## Variables
 
