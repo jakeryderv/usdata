@@ -2873,7 +2873,7 @@
     {
       "id": "census:acs-5year",
       "title": "American Community Survey 5-Year Estimates",
-      "description": "Population, housing, income, and demographic estimates for every geography down to block group, via the Census Data API. Anonymous for light use; an API key lifts rate limits.",
+      "description": "Population, housing, income, and demographic estimates for every geography down to block group, via the Census Data API, selected by state and county FIPS code rather than by box. Requires a free API key on every data request; only the dataset and variable metadata are served without one.",
       "provider": "Census Bureau",
       "domain": "Demographics",
       "system": null,
