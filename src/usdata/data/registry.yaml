@@ -360,18 +360,20 @@ datasets:
       or F rating, injuries, fatalities, loss, start and end coordinates, path
       length and width, and FIPS codes. Whole files linked from the SPC page:
       annual from 2008, half-decade for 2000-2007, decade for 1950-1999.
-      Stable names revised in place; no server-side row, location, or
-      variable subsetting.
-    keywords: [tornado, spc, severe weather, storm reports, tracks, ef scale, fujita]
+      The table parameter selects SPC's hail and wind databases instead, which
+      share the layout and start in 1955; mag is then the stone diameter in
+      inches or the wind speed in knots. Stable names revised in place; no
+      server-side row, location, or variable subsetting.
+    keywords: [tornado, hail, wind, spc, severe weather, storm reports, tracks, ef scale, fujita]
     protocol: http
     homepage: https://www.spc.noaa.gov/wcm/#data
     license: US Government Work (public domain)
     temporal_extent: { start: "1950-01-01T00:00:00Z" }
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
-    summary: SPC tornado database
+    summary: SPC tornado, hail, and wind databases
     formats: [CSV]
-    selection: Whole annual, half-decade, or decade files; filter rows locally after downloading
-    inputs: Both dates (selects the files covering those years)
+    selection: Whole annual, half-decade, or decade files of one table; filter rows locally after downloading
+    inputs: Both dates (selects the files covering those years); optionally table
     reader: pandas
     guide: docs/providers/noaa-spc-tornado.md
     examples:
@@ -395,7 +397,7 @@ datasets:
       - { name: "tz", description: "Time-zone code: 3 is Central Standard Time, 9 is GMT, ? is unknown" }
       - { name: "st", description: "Two-letter state" }
       - { name: "stf", description: "State FIPS code" }
-      - { name: "mag", description: "F scale through January 2007 and EF scale afterwards; -9 is unknown" }
+      - { name: "mag", description: "Tornado: F scale through January 2007 and EF scale afterwards, -9 unknown. Hail: size in inches. Wind: speed in knots" }
       - { name: "inj", units: "count", description: "Injuries" }
       - { name: "fat", units: "count", description: "Fatalities" }
       - { name: "loss", description: "Property loss: a 0 to 9 category before 1996, millions of dollars from 1996" }
@@ -407,6 +409,7 @@ datasets:
       - { name: "len", units: "miles", description: "Path length" }
       - { name: "wid", units: "yards", description: "Path width" }
       - { name: "sg", description: "Segment code: 1 a whole track, 2 a state segment, -9 extra county codes" }
+      - { name: "mt", description: "Wind only, from 2006: EG estimated gust, MG measured gust, MS measured sustained, ES estimated sustained" }
     adapter: usdata.providers.noaa.spc:SpcTornadoReports
 
   - id: noaa:hurdat2

@@ -6,8 +6,32 @@ Center publishes its tornado database as plain CSV files linked from its
 per year from 2008 onward, half-decade files for 2000–2004 and 2005–2007, and
 decade files for 1950–1999. The adapter reads that page, keeps only local links
 named `<years>_torn.csv`, and returns each whole file whose year range touches
-the requested interval. Hail and wind files, the zipped all-years archive, and the
-`actual_tornadoes` and `all_tornadoes` dumps are not selected.
+the requested interval. The zipped all-years archive and the `actual_tornadoes`
+and `all_tornadoes` dumps are not selected.
+
+## Hail and wind
+
+SPC publishes its hail and wind databases on the same page in the same layout,
+and `-p table=hail` or `-p table=wind` selects them instead of the default
+`torn` (unreleased; available from source for v0.22). The dataset keeps its id.
+Checked on 2026-09-18, each table links 26 files: per-year files from 2008 to
+2025, `2000-2004`, `2005-2007`, the decades, and one all-years file, with the
+narrowest covering file chosen as for tornadoes. **Hail and wind start in 1955**,
+with `55-59_hail.csv` and `55-59_wind.csv`, where tornadoes start in 1950; an
+earlier hail or wind year is refused.
+
+The columns are shared, and `mag` changes meaning with the table, as SPC's format
+specification states:
+
+| `table` | `mag` | Extra column |
+|---|---|---|
+| `torn` | F scale through January 2007 and EF scale afterwards; `-9` is unknown | `fc`: `1` where an unknown rating from 1953 to 1982 was estimated |
+| `hail` | stone size in inches (0.25 to 7.02 in the 2024 file) | none |
+| `wind` | speed in knots; 1 knot is 1.15 mph (up to 104 in the 2024 file) | `mt`, from 2006: `EG` estimated gust, `MG` measured gust, `MS` measured sustained, `ES` estimated sustained |
+
+The 2024 files hold 1,873 tornado rows, 8,881 hail rows, and 20,081 wind rows.
+Mixing tables in one frame needs the table kept as a column of your own, since
+no column in the files says which database a row came from.
 
 Both dates are required and interpreted in UTC for year selection. Every file
 covering a requested year is returned in full: May 1–31, 2024 selects
@@ -17,8 +41,8 @@ file. When several linked files cover a year, the narrowest one wins, so a
 per-year file is preferred over any wider archive. Asset time bounds label the
 file's years, not precise event coverage. Dates before 1950 and a requested
 year with no linked file are errors, so a span cannot silently succeed with
-only some years. Location/bbox, variables, text, and all provider-specific
-params are rejected, so `spatial_subset` and `variable_subset` are false:
+only some years. Location/bbox, variables, and text are rejected, and `table` is
+the only parameter, so `spatial_subset` and `variable_subset` are false:
 selecting a whole file performs no server-side row subsetting. Only
 `temporal_subset` is true, because the requested dates choose which files are
 returned.
