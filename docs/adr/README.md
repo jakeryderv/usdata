@@ -34,3 +34,4 @@ is described in the guides and reference pages.
 - [0028: Partial GRIB2 fetch through index files](0028-partial-grib2-fetch-through-index-files.md)
 - [0029: Committed example lockfiles, restored on a schedule](0029-committed-example-lockfiles.md)
 - [0030: A content-addressed mirror of pinned bytes](0030-content-addressed-mirror.md)
+- [0031: Stage refreshed files and commit the lockfile first](0031-staged-refresh-and-lockfile-first-commit.md)

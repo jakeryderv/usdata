@@ -1,5 +1,6 @@
 """Restore reports every upstream change at once; update rewrites only selected pins."""
 
+import sys
 from pathlib import Path
 
 import httpx
@@ -7,12 +8,12 @@ import pytest
 import respx
 from typer.testing import CliRunner
 
-from usdata import ChecksumMismatch
+from usdata import ChecksumMismatch, cache_ops
 from usdata.cli import app
 from usdata.manifest import Lockfile, lockfile_path
 from usdata.providers.noaa.ghcnd import DATA_URL
 from usdata.providers.usgs.daily import ITEMS_URL
-from usdata.pull import UnknownAssets, UpstreamChanged, pull, verify
+from usdata.pull import STAGING_DIR, UnknownAssets, UpstreamChanged, pull, verify
 
 MANIFEST = """
 name: drift
@@ -139,6 +140,89 @@ def test_update_that_fails_on_drift_refreshes_nothing(tmp_path: Path) -> None:
     assert [(d.asset_id, d.problem) for d in verify(manifest, root=root)] == [
         (second.asset.id, "missing")
     ]
+
+
+def staged_files(root: Path) -> list[Path]:
+    return [path for path in (root / STAGING_DIR).rglob("*") if path.is_file()]
+
+
+def test_update_lands_refreshed_files_in_the_cache_and_empties_staging(
+    locked: tuple[Path, Path],
+) -> None:
+    manifest, root = locked
+    with respx.mock(assert_all_called=False) as mock:
+        serve(mock, V2, b"u1")
+        result = pull(manifest, root=root, update=[GHCN])
+    refreshed = [item for item in result.fetched if item.asset.dataset_id == GHCN]
+    assert [item.path.read_bytes() for item in refreshed] == [b"a2", b"b2"]
+    assert all(item.path.is_relative_to(root / "noaa" / "ghcn-daily") for item in refreshed)
+    assert staged_files(root) == [] and verify(manifest, root=root) == []
+    # The committed pair keeps the data file no newer than its sidecar, so fetch trusts it.
+    with respx.mock(assert_all_called=False) as mock:
+        serve(mock, V2, b"u1")
+        assert all(item.from_cache for item in pull(manifest, root=root).fetched)
+        assert not mock.calls
+
+
+def test_update_that_fails_partway_through_refreshing_changes_nothing(tmp_path: Path) -> None:
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text(MANIFEST)
+    root = tmp_path / "cache"
+    with respx.mock() as mock:
+        serve(mock, V1, b"u1")
+        pull(manifest, root=root)
+    before = lockfile_path(manifest).read_bytes()
+
+    def second_station_fails(request: httpx.Request) -> httpx.Response:
+        if request.url.params["stations"] == "USW00003954":
+            return httpx.Response(404)
+        return httpx.Response(200, content=b"a2")
+
+    with respx.mock() as mock:
+        mock.get(DATA_URL).mock(side_effect=second_station_fails)
+        with pytest.raises(httpx.HTTPStatusError):
+            pull(manifest, root=root, update=[GHCN])
+    # The first station was refreshed successfully, but the run did not succeed.
+    assert lockfile_path(manifest).read_bytes() == before
+    assert staged_files(root) == [] and verify(manifest, root=root) == []
+
+
+def test_a_crash_after_the_lockfile_is_saved_is_repaired_by_the_next_pull(
+    locked: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest, root = locked
+
+    def crash(outcomes: object) -> None:
+        raise KeyboardInterrupt
+
+    with respx.mock(assert_all_called=False) as mock:
+        serve(mock, V2, b"u1")
+        with monkeypatch.context() as patched:
+            # ``usdata.pull`` as an attribute is the function; the module is in sys.modules.
+            patched.setattr(sys.modules["usdata.pull"], "_commit_staged", crash)
+            with pytest.raises(KeyboardInterrupt):
+                pull(manifest, root=root, update=[GHCN])
+        # The lockfile already pins the new bytes and the cache is merely stale.
+        assert staged_files(root) == []
+        assert {d.problem for d in verify(manifest, root=root)} == {"missing"}
+        result = pull(manifest, root=root)
+    assert not result.updated and verify(manifest, root=root) == []
+    assert [item.path.read_bytes() for item in result.fetched[:2]] == [b"a2", b"b2"]
+
+
+def test_cache_listing_ignores_a_staging_directory_a_killed_run_left_behind(
+    locked: tuple[Path, Path],
+) -> None:
+    manifest, root = locked
+    with respx.mock(assert_all_called=False) as mock:
+        serve(mock, V1, b"u1")
+        pull(manifest, root=root)
+    leftover = root / STAGING_DIR / "tmpkilled" / "noaa" / "ghcn-daily" / "orphan.csv"
+    leftover.parent.mkdir(parents=True)
+    leftover.write_bytes(b"orphan")
+    listed = cache_ops.entries(root)
+    assert len(listed) == 3 and leftover not in [entry.path for entry in listed]
+    assert leftover not in [entry.path for entry in cache_ops.prune(root, dry_run=True)]
 
 
 def test_update_by_dataset_refreshes_its_entries_and_no_others(

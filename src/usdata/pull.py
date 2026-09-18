@@ -22,6 +22,7 @@ from contextlib import ExitStack
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import httpx
 from pydantic import BaseModel, Field, computed_field
@@ -29,7 +30,7 @@ from pydantic import BaseModel, Field, computed_field
 from usdata import __version__, _progress, mirror, provenance
 from usdata._fetch import ChecksumMismatch, FetchedAsset, _fetch_asset, _fetch_with, ordered
 from usdata._files import staged_path
-from usdata.cache import asset_path, sha256_file
+from usdata.cache import asset_path, cache_dir, sha256_file
 from usdata.manifest import LockedAsset, Lockfile, Manifest, lockfile_path
 from usdata.models import Asset, Dataset
 from usdata.protocols import http
@@ -345,8 +346,10 @@ def restore(
 
     ``update`` names assets or datasets whose current upstream bytes replace their
     pins. Every other entry must still match; if any does not, the whole run raises
-    ``UpstreamChanged`` listing them, before any named entry is refreshed, so the
-    lockfile is left as it was and no cached file holds bytes it does not pin. An entry
+    ``UpstreamChanged`` listing them, before any named entry is refreshed. Refreshed
+    files are staged beside the cache and moved into it only after the lockfile is
+    saved, so a run that fails for any reason leaves the lockfile as it was and no
+    cached file holding bytes it does not pin (ADR 0031). An entry
     pinning byte ranges re-issues exactly those ranges against the pinned ETag, so
     a republished object is reported as drift rather than silently re-resolved.
 
@@ -376,9 +379,10 @@ def restore(
 
         base = mirror.mirror_url()
         mirrored_from = None if base is None else (base, stack.enter_context(http.client()))
+        staging = _staging(root, stack) if selected else None
         # Pinned entries go first. A refresh accepts whatever upstream serves, so it can
-        # never drift; holding it back means a run that fails on drift has replaced no
-        # cached file with bytes the lockfile does not pin.
+        # never drift; holding it back means a run that fails on drift has fetched nothing
+        # it would have to throw away.
         for refresh in (False, True):
             for index, entry in enumerate(lock.assets):
                 if (entry.asset.id in selected) is not refresh:
@@ -387,7 +391,7 @@ def restore(
                     entry,
                     reg.get(entry.asset.dataset_id),
                     root=root,
-                    refresh=refresh,
+                    staging=staging if refresh else None,
                     adapter_for=adapter_for,
                     mirrored_from=mirrored_from,
                 )
@@ -397,11 +401,14 @@ def restore(
                     restored[index] = outcome
             if drift:
                 raise UpstreamChanged(drift)
-    outcomes = [restored[index] for index in sorted(restored)]  # back in lockfile order
-    updated = [outcome.entry.asset.id for outcome in outcomes if outcome.updated]
-    if updated:
-        lock = lock.model_copy(update={"assets": [outcome.entry for outcome in outcomes]})
-        lock.save(lock_path)
+        outcomes = [restored[index] for index in sorted(restored)]  # back in lockfile order
+        updated = [outcome.entry.asset.id for outcome in outcomes if outcome.updated]
+        # The lockfile moves first. A crash before the files follow leaves a stale cache,
+        # which the next restore repairs; the other order leaves bytes that nothing pins.
+        if updated:
+            lock = lock.model_copy(update={"assets": [outcome.entry for outcome in outcomes]})
+            lock.save(lock_path)
+        _commit_staged(outcomes)
     return PullResult(
         lockfile=lock,
         lockfile_path=lock_path,
@@ -413,6 +420,32 @@ def restore(
     )
 
 
+STAGING_DIR = ".staging"
+"""Directory under the cache root where refreshed files wait to be committed."""
+
+
+def _staging(root: Path | None, stack: ExitStack) -> Path:
+    """A staging root inside the cache, removed with whatever it still holds when ``stack`` exits.
+
+    It sits under the cache root so that committing a file is a rename on one
+    filesystem, and its name cannot be a provider's, so nothing that walks the
+    cache as ``<provider>/<name>/<asset id>`` mistakes a staged file for a cached one.
+    """
+    parent = (root or cache_dir()).expanduser() / STAGING_DIR
+    parent.mkdir(parents=True, exist_ok=True)
+    return Path(stack.enter_context(TemporaryDirectory(dir=parent)))
+
+
+def _commit_staged(outcomes: Iterable[_Restored]) -> None:
+    """Move every staged file into the cache, data before sidecar as a fetch writes them."""
+    for outcome in outcomes:
+        if outcome.staged is None:
+            continue
+        outcome.item.path.parent.mkdir(parents=True, exist_ok=True)
+        outcome.staged.replace(outcome.item.path)
+        provenance.sidecar_path(outcome.staged).replace(provenance.sidecar_path(outcome.item.path))
+
+
 @dataclass(frozen=True)
 class _Restored:
     """One lockfile entry brought back: the entry to pin from now on, and its file."""
@@ -421,6 +454,8 @@ class _Restored:
     item: FetchedAsset
     updated: bool = False
     mirrored: bool = False
+    staged: Path | None = None
+    """Where the file waits until the run commits; ``item.path`` is where it will live."""
 
 
 def _restore_entry(
@@ -428,20 +463,22 @@ def _restore_entry(
     dataset: Dataset,
     *,
     root: Path | None,
-    refresh: bool,
+    staging: Path | None,
     adapter_for: Callable[[Dataset], Provider],
     mirrored_from: tuple[str, httpx.Client] | None,
 ) -> _Restored | Drift:
     """Bring back one lockfile entry, or say how it drifted; the lockfile is not touched here.
 
-    An entry takes the first of four paths that applies: ``refresh`` accepts
-    whatever upstream serves now; its cached file still matches the pin; the
-    pinned URL reproduces the pin; or the mirror supplies the pinned bytes. An
-    adapter is opened only for an entry that needs a fetch.
+    An entry takes the first of four paths that applies: given a ``staging``
+    root, it is refreshed there with whatever upstream serves now; its cached
+    file still matches the pin; the pinned URL reproduces the pin; or the mirror
+    supplies the pinned bytes. Only a refresh is staged, because every other
+    path writes bytes the lockfile already pins. An adapter is opened only for
+    an entry that needs a fetch.
     """
     path = asset_path(entry.asset, root)
-    if refresh:
-        return _refresh_entry(entry, dataset, adapter_for(dataset), root)
+    if staging is not None:
+        return _refresh_entry(entry, dataset, adapter_for(dataset), path, staging)
     if path.is_file():
         _progress.emit(_progress.AssetProgress(entry.asset.id, "start", entry.provenance.size))
         if sha256_file(path) == entry.provenance.checksum:
@@ -470,16 +507,24 @@ def _restore_entry(
 
 
 def _refresh_entry(
-    entry: LockedAsset, dataset: Dataset, adapter: Provider, root: Path | None
+    entry: LockedAsset, dataset: Dataset, adapter: Provider, path: Path, staging: Path
 ) -> _Restored:
-    """Fetch an entry unpinned, so whatever upstream serves now becomes the new pin."""
+    """Fetch an entry unpinned into ``staging``, so whatever upstream serves can become the pin.
+
+    The cache is not touched here. The result names ``path`` as the file's home
+    and the staged copy that ``_commit_staged`` moves there once the run succeeds.
+    """
     unpinned = entry.asset.model_copy(update={"checksum": None})
-    item = _fetch_asset(dataset, unpinned, adapter, root=root, force=True, pinned=entry.provenance)
+    staged = _fetch_asset(
+        dataset, unpinned, adapter, root=staging, force=True, pinned=entry.provenance
+    )
+    item = staged.model_copy(update={"path": path})
     if item.provenance.checksum == entry.provenance.checksum:
-        return _Restored(entry, item)  # Same bytes: keep the original pin and record.
+        # Same bytes: keep the original pin and record.
+        return _Restored(entry, item, staged=staged.path)
     pinned = item.asset.model_copy(update={"checksum": item.provenance.checksum})
     repinned = LockedAsset(asset=pinned, provenance=item.provenance, source=entry.source)
-    return _Restored(repinned, item, updated=True)
+    return _Restored(repinned, item, updated=True, staged=staged.path)
 
 
 def _restore_from_mirror(
