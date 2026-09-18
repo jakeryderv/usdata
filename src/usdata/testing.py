@@ -60,7 +60,7 @@ ClientFactory = Callable[..., httpx.Client]
 PROBE_BBOX = BBox(west=-97.7, south=35.2, east=-97.2, north=35.7)
 """The bounding box the capability probes ask for, small enough to name one place."""
 
-PROBE_PLACE = Place(kind="county", geoid="40027", label="Cleveland County, OK")
+PROBE_PLACE = Place(kind="county", geoid="40027", label="Cleveland County, OK", state="OK")
 """The place the capability probes name, the county ``PROBE_BBOX`` lies in."""
 
 REFUSED: dict[QueryField, str] = {

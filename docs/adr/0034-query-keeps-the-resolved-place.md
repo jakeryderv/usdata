@@ -135,3 +135,32 @@ that ignores `place`; it would declare `spatial_subset` and leave
 
 `Query` refuses a `place` without a `bbox`, since most adapters read only the
 box and would otherwise select nothing.
+
+## Amendment, 2026-09-18: a place carries its state's postal code
+
+`Place` gains `state`, the two-letter postal code of the state, or of the state
+a county lies in. It is required, and `find_place` sets it from the `state`
+column the place table has always had.
+
+The decision above kept `kind`, `geoid`, and `label`, which is exactly what the
+one source it was written for needed: OpenFEMA filters on `fipsStateCode` and
+`fipsCountyCode`. Scoping the second place-keyed source,
+[NWS watches and warnings by county](https://github.com/jakeryderv/usdata/issues/252),
+showed what that left out before any code was written. A county's code there is
+`OKC113`: the postal code, `C`, and the county FIPS. `Place` could say `40` and
+`113` and could not say `OK`, short of parsing it out of `label` or giving the
+adapter a FIPS-to-postal table that duplicates the one the lookup reads. FEMA's
+own `state` parameter takes the same postal code, so this is the second source
+to want it, not the first.
+
+It is required rather than optional because a place always comes from the
+table, where every row has one, the District and the five territories included.
+An optional field would make every adapter that reads it handle an absence that
+cannot happen for a place the lookup produced. The cost is that `Place` was
+published in v0.21.0 with three fields, so code constructing one by hand must
+now pass a fourth; nothing that gets its places from `build_query` or
+`find_place` changes.
+
+The lesson is the one ADR 0034 was always going to be tested on: an abstraction
+drawn from one source records that source's needs. The second source is where
+it finds out which of them were general.

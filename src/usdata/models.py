@@ -401,6 +401,13 @@ class Place(BaseModel):
         description="Census GEOID: the two-digit state FIPS code, or the five-digit county one",
     )
     label: str = Field(description="The place as the table names it, such as 'Osage County, OK'")
+    state: str = Field(
+        pattern=r"^[A-Z]{2}$",
+        description=(
+            "Two-letter postal code of the state, or of the state a county lies in, such as OK; "
+            "some sources key places by it rather than by the state FIPS code"
+        ),
+    )
 
     @model_validator(mode="after")
     def _kind_matches_geoid(self) -> Place:

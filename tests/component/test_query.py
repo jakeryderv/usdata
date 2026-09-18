@@ -120,12 +120,17 @@ def test_a_location_keeps_the_place_it_resolved_beside_its_box() -> None:
     assert county.place is not None
     assert (county.place.kind, county.place.geoid) == ("county", "40113")
     assert (county.place.state_fips, county.place.county_fips) == ("40", "113")
+    assert county.place.state == "OK"
     assert county.place.label == "Osage County, OK"
     assert county.bbox == resolve_place("40113")
     state = build_query(location="ok")
     assert state.place is not None
     assert (state.place.kind, state.place.geoid, state.place.label) == ("state", "40", "Oklahoma")
     assert (state.place.state_fips, state.place.county_fips) == ("40", None)
+    assert state.place.state == "OK"
+    # Every place the table holds carries a postal code, territories and the District included.
+    assert find_place("Puerto Rico")[0].state == "PR"
+    assert find_place("District of Columbia")[0].state == "DC"
     # However the place was spelled, it is the same place.
     assert build_query(location="40113").place == county.place
     assert find_place("Osage, Oklahoma") == (county.place, county.bbox)

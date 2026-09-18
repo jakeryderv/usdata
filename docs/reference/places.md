@@ -7,7 +7,8 @@ offline table.
 
 A location resolves to two things, both kept on the query: `query.bbox`, the
 rectangle, and `query.place`, the state or county itself with its FIPS code
-(`place.geoid`, `place.state_fips`, `place.county_fips`). A `bbox` or a
+(`place.geoid`, `place.state_fips`, `place.county_fips`) and its state's postal
+code (`place.state`). A `bbox` or a
 `lat`/`lon` sets only the rectangle, since a box names no place.
 `usdata.query.find_place(name)` returns both; `resolve_place(name)` returns the
 rectangle alone.

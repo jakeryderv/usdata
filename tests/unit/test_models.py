@@ -229,16 +229,24 @@ def test_capabilities_name_partial_fetch_and_default_to_whole_files() -> None:
 
 
 def test_a_place_holds_a_state_or_county_geoid_of_the_matching_length() -> None:
-    county = Place(kind="county", geoid="40113", label="Osage County, OK")
-    assert (county.state_fips, county.county_fips) == ("40", "113")
-    assert Place(kind="state", geoid="40", label="Oklahoma").county_fips is None
+    county = Place(kind="county", geoid="40113", label="Osage County, OK", state="OK")
+    assert (county.state_fips, county.county_fips, county.state) == ("40", "113", "OK")
+    assert Place(kind="state", geoid="40", label="Oklahoma", state="OK").county_fips is None
     for kind, geoid in (("state", "40113"), ("county", "40"), ("county", "4011"), ("state", "OK")):
         with pytest.raises(ValidationError):
-            Place.model_validate({"kind": kind, "geoid": geoid, "label": "x"})
+            Place.model_validate({"kind": kind, "geoid": geoid, "label": "x", "state": "OK"})
+
+
+@pytest.mark.parametrize("state", ["ok", "Oklahoma", "O", "40", "", None])
+def test_a_place_needs_its_states_two_letter_postal_code(state) -> None:
+    with pytest.raises(ValidationError):
+        Place.model_validate({"kind": "state", "geoid": "40", "label": "Oklahoma", "state": state})
+    with pytest.raises(ValidationError, match="state"):
+        Place.model_validate({"kind": "state", "geoid": "40", "label": "Oklahoma"})
 
 
 def test_a_query_naming_a_place_must_carry_its_box() -> None:
-    place = Place(kind="state", geoid="40", label="Oklahoma")
+    place = Place(kind="state", geoid="40", label="Oklahoma", state="OK")
     with pytest.raises(ValidationError, match="must carry that place's bbox"):
         Query(place=place)
     box = BBox(west=-103.0, south=33.6, east=-94.4, north=37.0)
