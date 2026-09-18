@@ -40,7 +40,7 @@ def ranged(content: bytes = OBJECT, *, status: int = 206, etag: str = ETAG):
     """Answer a range request the way the bucket does."""
 
     def respond(request: httpx.Request) -> httpx.Response:
-        if request.headers.get("If-Match") != etag:
+        if request.headers.get("If-Match") != f'"{etag}"':
             return httpx.Response(412)
         start, end = (int(value) for value in request.headers["Range"][6:].split("-"))
         if status == 200:
@@ -328,7 +328,7 @@ def test_a_partial_fetch_concatenates_the_selected_messages(adapter, tmp_path: P
     assert dest.read_bytes() == PART
     assert route.call_count == 1
     assert route.calls[0].request.headers["Range"] == "bytes=40-119"
-    assert route.calls[0].request.headers["If-Match"] == ETAG
+    assert route.calls[0].request.headers["If-Match"] == f'"{ETAG}"'
 
 
 def test_disjoint_messages_use_one_request_per_run(adapter, tmp_path: Path) -> None:

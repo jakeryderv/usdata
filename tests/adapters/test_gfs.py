@@ -35,7 +35,7 @@ def ranged(content: bytes = OBJECT, *, etag: str = ETAG):
     """Answer a range request the way the bucket does."""
 
     def respond(request: httpx.Request) -> httpx.Response:
-        if request.headers.get("If-Match") != etag:
+        if request.headers.get("If-Match") != f'"{etag}"':
             return httpx.Response(412)
         start, end = (int(value) for value in request.headers["Range"][6:].split("-"))
         return httpx.Response(

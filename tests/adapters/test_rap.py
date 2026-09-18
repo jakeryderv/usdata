@@ -45,7 +45,7 @@ def run_listing(variant="awp130pgrb", hours: Iterable[int] = range(22), size=18_
 
 def ranged(content: bytes = OBJECT, *, etag: str = ETAG):
     def respond(request: httpx.Request) -> httpx.Response:
-        if request.headers.get("If-Match") != etag:
+        if request.headers.get("If-Match") != f'"{etag}"':
             return httpx.Response(412)
         start, end = (int(value) for value in request.headers["Range"][6:].split("-"))
         return httpx.Response(

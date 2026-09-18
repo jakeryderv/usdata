@@ -30,7 +30,7 @@ def serve_ranges(
     """Answer a range request the way S3 does, or in one of the ways it must not."""
 
     def respond(request: httpx.Request) -> httpx.Response:
-        if request.headers.get("If-Match") != etag:
+        if request.headers.get("If-Match") != f'"{etag}"':
             return httpx.Response(412)
         start, end = (int(value) for value in request.headers["Range"][6:].split("-"))
         chunk = OBJECT if status == 200 else OBJECT[start : end + 1]
@@ -60,7 +60,21 @@ def test_one_get_per_run_with_range_and_if_match(tmp_path: Path) -> None:
         "bytes=0-19",
         "bytes=60-79",
     ]
-    assert {call.request.headers["If-Match"] for call in route.calls} == {ETAG}
+    assert {call.request.headers["If-Match"] for call in route.calls} == {f'"{ETAG}"'}
+
+
+@pytest.mark.l2
+@pytest.mark.parametrize("etag", [ETAG, f'"{ETAG}"'])
+def test_if_match_is_one_quoted_entity_tag_however_the_etag_arrives(
+    tmp_path: Path, etag: str
+) -> None:
+    with respx.mock() as mock, http.client() as client:
+        route = mock.get(URL)
+        route.side_effect = serve_ranges()
+        http.download_ranges(
+            URL, tmp_path / "part.grib2", parts((0, 19)), etag=etag, total=TOTAL, http=client
+        )
+    assert route.calls[0].request.headers["If-Match"] == f'"{ETAG}"'
 
 
 @pytest.mark.l2
