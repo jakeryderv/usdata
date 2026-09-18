@@ -37,4 +37,4 @@ is described in the guides and reference pages.
 - [0031: Stage refreshed files and commit the lockfile first](0031-staged-refresh-and-lockfile-first-commit.md)
 - [0032: Settled byte ranges are handed to `fetch_partial`](0032-fetch-partial.md)
 - [0033: Convert only the bare Storm Events timezone labels that name one offset](0033-bare-storm-events-timezone-labels.md)
-- [0034: A query keeps the place it resolved](0034-query-keeps-the-resolved-place.md) (proposed)
+- [0034: A query keeps the place it resolved](0034-query-keeps-the-resolved-place.md)

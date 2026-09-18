@@ -5,8 +5,11 @@ from pydantic import ValidationError
 
 from usdata.models import (
     BBox,
+    Capabilities,
     Dataset,
+    Place,
     Protocol,
+    Query,
     Status,
     TimeRange,
     Variable,
@@ -223,3 +226,27 @@ def test_describe_duration_reads_as_words(value: timedelta, expected: str) -> No
 def test_capabilities_name_partial_fetch_and_default_to_whole_files() -> None:
     assert _dataset().capabilities.partial_fetch is False
     assert _shipped(capabilities={"partial_fetch": True}).capabilities.partial_fetch is True
+
+
+def test_a_place_holds_a_state_or_county_geoid_of_the_matching_length() -> None:
+    county = Place(kind="county", geoid="40113", label="Osage County, OK")
+    assert (county.state_fips, county.county_fips) == ("40", "113")
+    assert Place(kind="state", geoid="40", label="Oklahoma").county_fips is None
+    for kind, geoid in (("state", "40113"), ("county", "40"), ("county", "4011"), ("state", "OK")):
+        with pytest.raises(ValidationError):
+            Place.model_validate({"kind": kind, "geoid": geoid, "label": "x"})
+
+
+def test_a_query_naming_a_place_must_carry_its_box() -> None:
+    place = Place(kind="state", geoid="40", label="Oklahoma")
+    with pytest.raises(ValidationError, match="must carry that place's bbox"):
+        Query(place=place)
+    box = BBox(west=-103.0, south=33.6, east=-94.4, north=37.0)
+    assert Query(place=place, bbox=box).place == place
+    assert Query(bbox=box).place is None
+
+
+def test_place_subset_is_a_separate_capability_that_defaults_to_false() -> None:
+    assert Capabilities().place_subset is False
+    keyed = Capabilities(place_subset=True)
+    assert keyed.place_subset and not keyed.spatial_subset

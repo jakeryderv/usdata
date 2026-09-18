@@ -13,7 +13,7 @@ from typing import Any, ClassVar, Literal, Self, TypeVar
 from pydantic import BaseModel, ValidationError
 from pydantic_core import ErrorDetails
 
-from usdata.models import Asset, Dataset, PartialFetch, Provenance, Query
+from usdata.models import Asset, Dataset, PartialFetch, Place, Provenance, Query
 
 QueryField = Literal["text", "bbox", "variables", "time"]
 Params = TypeVar("Params", bound=BaseModel)
@@ -23,6 +23,10 @@ _LABELS: dict[QueryField, str] = {
     "variables": "variables",
     "time": "start/end",
 }
+
+
+BARE_BOX = "bbox or lat/lon"
+"""How ``Provider.place_of`` names the spatial filter a place-keyed source refuses."""
 
 
 class NotImplementedProvider(NotImplementedError):
@@ -178,6 +182,29 @@ class Provider(ABC):
         if present:
             message = f"{self.dataset.id} does not support {', '.join(present)}"
             raise QueryError(f"{message}; {hint}" if hint else message)
+
+    def place_of(self, query: Query, hint: str = "") -> Place | None:
+        """The state or county a query names, for a source keyed by place rather than by box.
+
+        Such a source cannot honour a rectangle: its rows carry FIPS codes and no
+        coordinates, and a box cannot be turned back into the places it covers.
+        A query whose spatial filter was a ``bbox`` or a ``lat``/``lon`` is
+        therefore refused, in the same words for every such source.
+
+        Args:
+            query: The query being listed.
+            hint: What to do instead, usually naming the adapter's own place parameters.
+
+        Returns:
+            The place, or None when the query sets no spatial filter at all.
+
+        Raises:
+            QueryError: The query carries a box that names no place.
+        """
+        if query.place is None and query.bbox is not None:
+            message = f"{self.dataset.id} does not support {BARE_BOX}; name a state or county"
+            raise QueryError(f"{message} with location, or {hint}" if hint else message)
+        return query.place
 
     def utc_window(self, query: Query) -> tuple[datetime, datetime]:
         """Both time bounds, required, in UTC. Naive bounds are read as UTC."""

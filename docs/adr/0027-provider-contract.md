@@ -44,7 +44,10 @@ The adapter contract is a named, published surface. It is:
   asset to the path it is given and returns it. Added since: the optional pair
   `prepare_fetch` ([ADR 0028](0028-partial-grib2-fetch-through-index-files.md))
   and `fetch_partial` ([ADR 0032](0032-fetch-partial.md)), for an adapter that
-  fetches selected byte ranges of an object.
+  fetches selected byte ranges of an object; and `place_of`, with the
+  `Query.place` it reads and the `place_subset` capability the checks hold it
+  to ([ADR 0034](0034-query-keeps-the-resolved-place.md)), for a source keyed
+  by state and county rather than by coordinates.
 - **`usdata.providers.HttpProvider`.** The lifecycle HTTP-backed adapters
   inherit, renamed from `_HttpProvider` and moved to `usdata/providers/http.py`:
   the constructor's optional `client`, the `_http()` accessor subclasses call,

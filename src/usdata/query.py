@@ -10,7 +10,7 @@ from functools import lru_cache
 from importlib import resources
 from typing import Any
 
-from usdata.models import BBox, Query, TimeRange
+from usdata.models import BBox, Place, Query, TimeRange
 
 
 class UnknownPlace(ValueError):
@@ -24,11 +24,11 @@ class AmbiguousPlace(UnknownPlace):
 
 
 @lru_cache(maxsize=1)
-def _places() -> tuple[dict[str, set[str]], dict[str, tuple[str, BBox]]]:
+def _places() -> tuple[dict[str, set[str]], dict[str, tuple[Place, BBox]]]:
     data = (resources.files("usdata.data") / "places.csv").read_text(encoding="utf-8")
     rows = list(csv.DictReader(io.StringIO(data)))
     aliases: dict[str, set[str]] = {}
-    places: dict[str, tuple[str, BBox]] = {}
+    places: dict[str, tuple[Place, BBox]] = {}
 
     def add(alias: str, geoid: str) -> None:
         aliases.setdefault(alias.casefold(), set()).add(geoid)
@@ -39,7 +39,8 @@ def _places() -> tuple[dict[str, set[str]], dict[str, tuple[str, BBox]]]:
         label = (
             row["name"] if row["kind"] == "state" else f"{row['qualified_name']}, {row['state']}"
         )
-        places[geoid] = (label, box)
+        kind = "state" if row["kind"] == "state" else "county"
+        places[geoid] = (Place(kind=kind, geoid=geoid, label=label), box)
         add(geoid, geoid)
         if row["kind"] == "state":
             add(row["name"], geoid)
@@ -59,18 +60,35 @@ def _places() -> tuple[dict[str, set[str]], dict[str, tuple[str, BBox]]]:
 
 
 def resolve_place(name: str) -> BBox:
-    """Resolve a state, qualified county name, or quoted two/five-digit FIPS code."""
+    """Resolve a state, qualified county name, or quoted two/five-digit FIPS code to its box."""
+    return find_place(name)[1]
+
+
+def find_place(name: str) -> tuple[Place, BBox]:
+    """Resolve a location to the place the table identifies and the rectangle enclosing it.
+
+    Args:
+        name: A state name or postal code, ``'County, ST'``, or a quoted two- or
+            five-digit FIPS code.
+
+    Returns:
+        The place, which keeps the FIPS code a rectangle cannot give back, and its box.
+
+    Raises:
+        UnknownPlace: The table holds no such place.
+        AmbiguousPlace: A bare county name matches more than one state's county.
+    """
     key = ", ".join(" ".join(part.split()) for part in name.split(",")).casefold()
     aliases, places = _places()
     candidates = aliases.get(key, set())
     if not candidates:
         raise UnknownPlace(f"unknown place: {name!r}; use a state, 'County, ST', or quoted FIPS")
     if len(candidates) > 1:
-        labels = sorted(places[geoid][0] for geoid in candidates)
+        labels = sorted(places[geoid][0].label for geoid in candidates)
         examples = "; ".join(labels[:5])
         suffix = "; ..." if len(labels) > 5 else ""
         raise AmbiguousPlace(f"ambiguous place {name!r}: {examples}{suffix}; use state or FIPS")
-    return places[next(iter(candidates))][1]
+    return places[next(iter(candidates))]
 
 
 LAST_INSTANT = time(23, 59, 59, 999999)
@@ -118,6 +136,8 @@ def build_query(
     """Normalize user-facing arguments into a ``Query``.
 
     Exactly one of ``location``, ``bbox``, or ``lat``/``lon`` may set the spatial filter.
+    A ``location`` sets both the query's ``bbox`` and its ``place``, the state or
+    county it named; a ``bbox`` or a ``lat``/``lon`` names no place.
     """
     spatial = [x is not None for x in (location, bbox, lat)]
     if sum(spatial) > 1:
@@ -126,8 +146,9 @@ def build_query(
         raise ValueError("lat and lon must be given together")
 
     box: BBox | None = None
+    place: Place | None = None
     if location is not None:
-        box = resolve_place(location)
+        place, box = find_place(location)
     elif bbox is not None:
         box = (
             bbox
@@ -144,6 +165,7 @@ def build_query(
         text=text,
         provider=provider,
         bbox=box,
+        place=place,
         time=time,
         variables=list(variables or []),
         params=params,

@@ -56,6 +56,14 @@ else inside the box, and providers apply their own selection rules to it:
 NEXRAD falls back to the nearest radar when none lies inside. For exact
 selection, name stations or sites.
 
+The query also keeps the place itself, with its FIPS code, beside the
+rectangle. Most sources never look at it. A source whose records are keyed by
+state and county rather than by coordinates reads the place and selects exactly
+that state or county, and refuses a bare `bbox` or `lat`/`lon`, which names no
+place; its registry entry declares `place_subset`. So a location means a
+rectangle to a grid, a way to choose stations to GHCN, and an exact county to a
+place-keyed source ([ADR 0034](../adr/0034-query-keeps-the-resolved-place.md)).
+
 The rectangle cannot wrap across the antimeridian. Alaska and Aleutians West
 therefore get conservative envelopes spanning more than 350 degrees of
 longitude and can select far more than intended; prefer a local bbox or

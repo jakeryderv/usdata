@@ -5,7 +5,7 @@ from typing import Annotated, Any, ClassVar
 import pytest
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
-from usdata.models import Asset, Dataset, Protocol, Query, Status
+from usdata.models import Asset, BBox, Dataset, Place, Protocol, Query, Status
 from usdata.providers.base import Provider, QueryError, described_params, params_error
 from usdata.providers.params import (
     OptionalUpperStrList,
@@ -298,3 +298,25 @@ def test_number_fields_accept_the_shapes_the_cli_and_manifests_send(raw, expecte
 def test_number_fields_reject_text_booleans_and_out_of_range_values(raw) -> None:
     with pytest.raises(ValidationError, match="must be a number from -10 to 10"):
         Sample.model_validate({"cycle": 0, "hours": 0, "magnitude": raw})
+
+
+BOX = BBox(west=-97.7, south=35.2, east=-97.2, north=35.7)
+PLACE = Place(kind="county", geoid="40027", label="Cleveland County, OK")
+
+
+def test_place_of_returns_the_named_place_and_nothing_for_no_spatial_filter() -> None:
+    adapter = Sampler(DATASET)
+    assert adapter.place_of(Query(bbox=BOX, place=PLACE)) == PLACE
+    assert adapter.place_of(Query()) is None
+
+
+def test_place_of_refuses_a_box_that_names_no_place_in_the_same_words_for_every_source() -> None:
+    adapter = Sampler(DATASET)
+    with pytest.raises(QueryError) as plain:
+        adapter.place_of(Query(bbox=BOX))
+    assert str(plain.value) == (
+        f"{DATASET.id} does not support bbox or lat/lon; name a state or county"
+    )
+    with pytest.raises(QueryError) as hinted:
+        adapter.place_of(Query(bbox=BOX), hint="pass state or fips")
+    assert str(hinted.value).endswith("name a state or county with location, or pass state or fips")

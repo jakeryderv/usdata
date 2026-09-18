@@ -46,10 +46,10 @@ from pathlib import Path
 
 import httpx
 
-from usdata.models import BBox, Dataset, Query, TimeRange
+from usdata.models import BBox, Dataset, Place, Query, TimeRange
 from usdata.protocols import http, s3
 from usdata.providers import Provider, QueryError
-from usdata.providers.base import QueryField
+from usdata.providers.base import BARE_BOX, QueryField
 
 AdapterFactory = Callable[..., Provider]
 """Builds the adapter: no argument for an owned client, ``client=`` for an injected one."""
@@ -59,6 +59,9 @@ ClientFactory = Callable[..., httpx.Client]
 
 PROBE_BBOX = BBox(west=-97.7, south=35.2, east=-97.2, north=35.7)
 """The bounding box the capability probes ask for, small enough to name one place."""
+
+PROBE_PLACE = Place(kind="county", geoid="40027", label="Cleveland County, OK")
+"""The place the capability probes name, the county ``PROBE_BBOX`` lies in."""
 
 REFUSED: dict[QueryField, str] = {
     "bbox": "location/bbox",
@@ -149,6 +152,17 @@ def _refuses(adapter: Provider, probe: Query, field: QueryField) -> bool:
         return message.startswith(f"{adapter.dataset.id} does not support") and (
             REFUSED[field] in message
         )
+    except TransportReached:
+        return False
+    return False
+
+
+def _refuses_bare_box(adapter: Provider, probe: Query) -> bool:
+    """Whether ``adapter`` refuses a box that names no place, in ``Provider.place_of``'s words."""
+    try:
+        adapter.list_assets(probe)
+    except QueryError as error:
+        return str(error).startswith(f"{adapter.dataset.id} does not support {BARE_BOX}")
     except TransportReached:
         return False
     return False
@@ -280,6 +294,16 @@ def check_declared_capabilities(
     adapters are held to the refusal direction alone: refusing a bbox still
     means ``spatial_subset`` is false, while accepting one may be either.
 
+    A place is a third thing. A source keyed by state and county FIPS codes
+    honours a named place and must refuse a bare box, which names none, so
+    ``place_subset`` is read from that refusal: the adapter that makes it through
+    ``Provider.place_of`` declares ``place_subset``, and no other adapter does.
+    Such a refusal counts as refusing the bbox, so ``spatial_subset`` is false
+    for it too, and an adapter that declares ``place_subset`` must accept the
+    same box once it names a place. An adapter that ignores ``place`` answers a
+    place query exactly as it answers that box, which is every adapter here
+    before this flag existed.
+
     ``temporal_subset`` is false only where the window plays no part, which
     HURDAT2 shows by refusing start/end. Such a dataset must not require a
     window either, having nothing to select with it.
@@ -300,7 +324,11 @@ def check_declared_capabilities(
     variable = dataset.variables[0].name
     with _patched_client(unexpected_client), adapter_factory() as adapter:
         base = scenario_query
-        bbox_refused = _refuses(adapter, base.model_copy(update={"bbox": PROBE_BBOX}), "bbox")
+        boxed = base.model_copy(update={"bbox": PROBE_BBOX})
+        placed = boxed.model_copy(update={"place": PROBE_PLACE})
+        bare_box_refused = _refuses_bare_box(adapter, boxed)
+        bbox_refused = bare_box_refused or _refuses(adapter, boxed, "bbox")
+        place_refused = _refuses_bare_box(adapter, placed) or _refuses(adapter, placed, "bbox")
         variables_refused = _refuses(
             adapter, base.model_copy(update={"variables": [variable]}), "variables"
         )
@@ -323,6 +351,12 @@ def check_declared_capabilities(
         f"{dataset_id} declares partial_fetch={declared.partial_fetch} and "
         f"{'declares' if selects_parts else 'declares no'} {PARTIAL_PARAM!r} parameter"
     )
+    assert bare_box_refused is declared.place_subset, (
+        f"{dataset_id} declares place_subset={declared.place_subset} and "
+        f"{'refuses' if bare_box_refused else 'does not refuse'} a box that names no place"
+    )
+    if declared.place_subset:
+        assert not place_refused, f"{dataset_id} declares a place its adapter refuses"
     if bbox_refused:
         assert not declared.spatial_subset, f"{dataset_id} declares a bbox its adapter refuses"
     elif not selects_by_site:
@@ -464,6 +498,7 @@ def check_provider_contract(
 __all__ = [
     "PARTIAL_PARAM",
     "PROBE_BBOX",
+    "PROBE_PLACE",
     "REFUSED",
     "SELECTORS",
     "AdapterFactory",

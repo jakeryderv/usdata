@@ -1,6 +1,6 @@
 # 0034: A query keeps the place it resolved
 
-Status: proposed. Date: 2026-09-18. Extends
+Status: accepted. Date: 2026-09-18. Extends
 [ADR 0005](0005-generated-census-place-envelopes.md).
 
 ## Context
@@ -118,3 +118,20 @@ A county place selects that county's rows and nothing else. Whether a county
 query should also return a declaration designated statewide is a question
 about FEMA's data, not about this model, and belongs to the adapter and its
 provider note.
+
+## As implemented
+
+The capability check reads `place_subset` from one observable fact: whether the
+adapter refuses a box that names no place, in `Provider.place_of`'s words. An
+adapter that does declares `place_subset`, and no other adapter may; one that
+declares it must also accept the same box once a place is named. That refusal
+counts as refusing the bbox, so `spatial_subset` is false for such a source.
+
+This holds the flag in both directions for a source that is keyed by place
+alone, which is every such source known. A source that honoured a place and a
+rectangle alike would refuse neither, so the check could not tell it from one
+that ignores `place`; it would declare `spatial_subset` and leave
+`place_subset` false until the check learns to see the difference. None exists.
+
+`Query` refuses a `place` without a `bbox`, since most adapters read only the
+box and would otherwise select nothing.

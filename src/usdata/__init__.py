@@ -13,7 +13,16 @@ except PackageNotFoundError:  # running from a source tree without an install
 from usdata._fetch import ChecksumMismatch, FetchedAsset, fetch, fetch_asset
 from usdata.cite import Citation, cite_dataset, cite_lockfile
 from usdata.inspect import inspect_asset, inspect_path
-from usdata.models import Asset, BBox, Dataset, Provenance, Query, TemporalSelection, TimeRange
+from usdata.models import (
+    Asset,
+    BBox,
+    Dataset,
+    Place,
+    Provenance,
+    Query,
+    TemporalSelection,
+    TimeRange,
+)
 from usdata.pull import pull, verify
 from usdata.query import build_query
 from usdata.registry import DatasetNotFound, Registry, SearchResult, default_registry
@@ -27,6 +36,7 @@ __all__ = [
     "Dataset",
     "DatasetNotFound",
     "FetchedAsset",
+    "Place",
     "Provenance",
     "Query",
     "Registry",
