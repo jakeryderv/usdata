@@ -46,7 +46,7 @@ The R2 bucket at `data.usdata.dev` is reserved for dataset storage; see
 [website operations](guides/website-operations.md) and
 [ADR 0015](adr/0015-separate-sites-and-data-storage.md).
 
-Shipped through v0.18.0: the tornado research inputs
+Shipped through v0.19.0: the tornado research inputs
 ([issue 118](https://github.com/jakeryderv/usdata/issues/118)), one registry
 schema verified against the adapters
 ([ADR 0026](adr/0026-one-registry-schema.md)), the published provider contract
@@ -61,35 +61,27 @@ release: each one states the question it answers and what was awkward while
 answering it ([ADR 0025](adr/0025-examples-as-usage-review.md)). The grib extra
 is still unchecked on macOS, where ecCodes must be installed separately.
 
-The selected workstream is reproducible inputs in fact rather than in
-documentation: a committed lockfile that is restored on a schedule, and a
-mirror that can serve the pinned bytes after an agency stops serving them.
-Two decision records set the shape,
-[ADR 0029](adr/0029-committed-example-lockfiles.md) and
-[ADR 0030](adr/0030-content-addressed-mirror.md), and the work lands in this
-order:
+The last workstream, reproducible inputs in fact rather than in documentation,
+is complete. The six archive-backed examples commit their lockfiles and a
+weekly job restores each into an empty cache
+([ADR 0029](adr/0029-committed-example-lockfiles.md)); a content-addressed
+mirror serves pinned bytes after an agency stops serving them
+([ADR 0030](adr/0030-content-addressed-mirror.md)); a date alone as an `end`
+means the whole UTC day; and `PullResult.one` with a promised order within a
+source closed the remaining friction from the case study. The review that
+followed tightened the same contract from the other side: a `pull` that fails
+for any reason now leaves the lockfile as it was and every cached file either
+absent or matching it
+([ADR 0031](adr/0031-staged-refresh-and-lockfile-first-commit.md)), and
+settled byte ranges are handed to the adapter rather than read back from it
+([ADR 0032](adr/0032-fetch-partial.md)).
 
-- [Commit lockfiles for the archive-backed examples and restore them weekly](https://github.com/jakeryderv/usdata/issues/218).
-  Done when the six archive-only examples commit their lockfiles, the offline
-  gate validates each against its manifest, and the weekly workflow restores
-  every one into an empty cache and reports drift per example.
-- [A date-only end selects through the end of that day](https://github.com/jakeryderv/usdata/issues/220).
-  A breaking change to query, CLI, and manifest semantics that should land
-  before more lockfiles are committed against the old reading. Done when a
-  bare date means the last instant of its UTC day, the contract test covers
-  it, and the guides drop their midnight warnings.
-- [Content-addressed mirror of pinned bytes on R2](https://github.com/jakeryderv/usdata/issues/219).
-  Done when a restore whose upstream object was replaced completes from the
-  mirror and says so, the SDK never uploads, only the restore job writes, and
-  the provenance sidecar records which source served the bytes.
+No workstream is selected. The next one is a dataset expansion, scoped from
+the candidates under Next around a concrete analysis use case, and it moves
+here once its issue has a verified endpoint, a bounded example, and acceptance
+criteria.
 
 ## Next
-
-These follow the reproducibility work. Each has an issue with the scope to
-settle before it moves to Now.
-
-- [PullResult.one and a promised order within a source](https://github.com/jakeryderv/usdata/issues/221),
-  the remaining friction from the severe-weather case study.
 
 Datasets stay anonymous-access for now. Every source added before 1.0 is one
 that needs no account or key, so the adapter, transport, cache, and reader
@@ -105,6 +97,9 @@ and optional-reader boundaries:
 
 - FEMA disaster declarations from OpenFEMA, which join to Storm Events by
   county and date.
+- [Storm Events fatalities and locations tables](https://github.com/jakeryderv/usdata/issues/133)
+  and [SPC hail and wind reports](https://github.com/jakeryderv/usdata/issues/134),
+  which reuse existing access patterns and fill out the severe-weather case study.
 - Further NCEI Access Data Service datasets, such as hourly normals.
 - Additional GOES ABI products and sectors, and CO-OPS currents.
 - Geospatial readers when a supported dataset and representative fixtures justify them.
