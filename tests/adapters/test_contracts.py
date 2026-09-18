@@ -56,6 +56,7 @@ CASES = {
     "noaa:rap": {"cycle": 12, "forecast_hour": 0},
     "noaa:nbm": {"cycle": 12, "forecast_hour": 1},
     "fema:disaster-declarations": {"state": "OK"},
+    "noaa:nws-vtec-events": {"ugc": "OKC113"},
 }
 S3_KEYS = {
     "noaa:nexrad-level2": "2024/05/06/KTLX/KTLX20240506_120100_V06",

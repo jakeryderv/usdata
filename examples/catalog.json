@@ -121,6 +121,11 @@
     "summary": "Pull every magnitude 1.0 or larger event inside Oklahoma on 6 and 7 May 2024 from the USGS catalog as one pinned CSV, then rank them by magnitude."
   },
   {
+    "slug": "warning-lead-time",
+    "title": "How long before the 6 May 2024 Osage County tornado was a tornado warning issued?",
+    "summary": "Pin the NWS watches and warnings issued for one county that evening beside the Storm Events report of its EF4, find the warning in effect when the tornado began, and see what a county-level record can and cannot say about lead time."
+  },
+  {
     "slug": "disaster-declarations",
     "title": "Which Oklahoma counties hit by a tornado on 6 May 2024 were under a federal disaster declaration?",
     "summary": "Pin FEMA's major disaster declarations in force in Oklahoma that day and the Storm Events tornado reports, then join them by state and county FIPS code to see which tornado counties were designated."

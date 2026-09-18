@@ -53,6 +53,11 @@ reader (available since v0.15).
 magnitude 1.0 or larger event inside the state on the two tornado-outbreak days
 from the USGS catalog as one CSV and ranks them (available since v0.19.0).
 
+[Warning lead time](https://usdata.dev/examples/warning-lead-time/) pins the NWS
+watches and warnings issued for Osage County on the outbreak evening beside the
+Storm Events report of its EF4, and finds the warning in effect when the tornado
+began (unreleased; available from source for v0.22).
+
 [Disaster declarations](https://usdata.dev/examples/disaster-declarations/) pins
 FEMA's major disaster declarations in force in Oklahoma on the outbreak day and
 joins them to the Storm Events tornado reports by county FIPS code (available
