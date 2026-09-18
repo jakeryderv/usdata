@@ -174,7 +174,8 @@ def download_ranges(
         url: The object's URL; ``s3://`` callers map it with ``s3.object_url`` first.
         dest: Path the concatenated bytes are moved to once every run has arrived.
         ranges: Ascending, non-overlapping inclusive byte ranges to fetch.
-        etag: The object's ETag, sent as ``If-Match`` so a republished object fails.
+        etag: The object's ETag, bare or quoted, sent as a quoted ``If-Match`` so a
+            republished object fails.
         total: The object's size, checked against every ``Content-Range``.
         http: Client to use; one is created and closed here when it is omitted.
 
@@ -191,7 +192,8 @@ def download_ranges(
     own = http is None
     active = http or client()
     attempt = 0
-    headers = {"If-Match": etag.strip('"')}
+    # An entity-tag is a quoted string (RFC 9110); records keep the bare value.
+    headers = {"If-Match": '"' + etag.strip('"') + '"'}
 
     def request() -> Path:
         nonlocal attempt
