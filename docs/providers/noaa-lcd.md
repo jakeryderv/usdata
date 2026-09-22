@@ -36,6 +36,10 @@ The [hourly observations example](https://usdata.dev/examples/hourly-observation
 compares hourly readings with the daily summary for the same station. NCEI
 revises LCD as reports are quality-controlled.
 
+The [hourly anomalies example](https://usdata.dev/examples/hourly-anomalies/)
+compares routine reports with hourly normals in local standard time, using an
+explicit ten-minute matching tolerance rather than treating reports as hourly means.
+
 --8<-- "_snippets/upstream-revisions.md"
 
 See the [service research notes](noaa-services.md#local-climatological-data) for dated upstream probes.

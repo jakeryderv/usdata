@@ -105,6 +105,14 @@ code, which `Place` did not carry and now does. Its window and county rules are 
 [worked example](https://usdata.dev/examples/warning-lead-time/) finds the
 warning in effect when the Osage County EF4 began. No workstream is selected.
 
+Available from source for the unreleased v0.23.0: hourly normals through `period: hourly` on
+`noaa:climate-normals`, with a one-airport
+[hourly temperature comparison](https://usdata.dev/examples/hourly-anomalies/).
+The extension preserves calendar-day selection and local-standard-time labels
+([ADR 0037](adr/0037-hourly-normals-calendar-days.md)); the example makes its
+ten-minute observation matching tolerance explicit and verifies restoration
+into an empty cache.
+
 ## Next
 
 Datasets stay anonymous-access for now. Every source added before 1.0 is one
@@ -119,7 +127,7 @@ moving it to Now. Prefer additions that exercise a useful new access pattern or
 reuse an existing one while preserving the adapter, transport, cache/provenance,
 and optional-reader boundaries:
 
-- Further NCEI Access Data Service datasets, such as hourly normals.
+- Further NCEI Access Data Service datasets, when a concrete comparison needs them.
 - Additional GOES ABI products and sectors, and CO-OPS currents.
 - Geospatial readers when a supported dataset and representative fixtures justify them.
 - A NEXRAD Level III reader, once the bytes-only adapter has a concrete decoding use case.

@@ -1,16 +1,17 @@
 # U.S. Climate Normals 1991-2020
 
 Available since v0.11.0 as `noaa:climate-normals`.
-Normals are 30-year averages of daily, monthly, and annual/seasonal station
+Normals are 30-year averages of hourly, daily, monthly, and annual/seasonal station
 statistics, served by the anonymous NCEI Access Data Service datasets
 `normals-monthly-1991-2020`, `normals-daily-1991-2020`, and
-`normals-annualseasonal-1991-2020`. The adapter reuses GHCN station discovery,
+`normals-annualseasonal-1991-2020`, plus `normals-hourly-1991-2020`. The adapter reuses GHCN station discovery,
 transport, and 50-station CSV chunks. Choose the dataset with `period`:
-`monthly` (default), `daily`, or `annualseasonal`. Pass either `stations` or a
+`monthly` (default), `daily`, `annualseasonal`, or `hourly`. Hourly support is
+available from source for the unreleased v0.23.0. Pass either `stations` or a
 location/bbox, not both. `units` is `metric` (default) or `standard`; unknown
 parameters and text queries are rejected.
 
-Dates are optional because normals are not observations. For `daily` and
+Dates are optional because normals are not observations. For `hourly`, `daily`, and
 `monthly`, an optional `start`/`end` pair selects a calendar window by month
 and day; the year is ignored and sent as the placeholder 2020, a leap year so
 February 29 is valid. Without dates the whole year is requested. Datetimes with
@@ -19,6 +20,37 @@ whose start falls after its end in the calendar (crossing the new year) is
 rejected: split it into two sources. `annualseasonal` accepts no dates. Assets
 carry the 1991-2020 normals period as their time bounds, not the calendar window;
 the window is part of the asset id and URL.
+
+## Hourly normals
+
+`period: hourly` returns every hour of the selected calendar days, not an
+instant range. The same UTC normalization of query dates applies before the
+month and day are selected; use plain dates to avoid a timezone shift changing
+the day. Returned `DATE` labels are `MM-DDTHH:MM:SS` in the station's **local
+standard time**, without a year or offset. They are not UTC and do not follow
+daylight saving time. Keep them as text with `item.open(dtype={"DATE": "string"})`
+and align them explicitly with observations.
+
+Hourly normals have **no February 29 values**. A February 28–March 1 request
+returns 48 hours; a February 29-only request has no hourly values. The adapter
+does not interpolate missing days. NCEI computes each normal from a 15-day
+window around that calendar day across 30 years, rather than only that date's
+30 observations. See the [hourly documentation](https://www.ncei.noaa.gov/pub/data/cdo/documentation/normals-hourly-1991-2020_documentation.pdf).
+
+```sh
+usdata fetch noaa:climate-normals -p period=hourly -p stations=USW00013967 \
+  --start 2024-05-06 --end 2024-05-06 --vars HLY-TEMP-NORMAL
+```
+
+`HLY-TEMP-NORMAL` was checked in both unit systems on 2026-09-21: all 24
+values for May 6 at `USW00013967` converted correctly from Fahrenheit to
+Celsius under `units=metric`. This does not establish conversion correctness
+for other hourly variables. NCEI documents `-9999` as missing or insufficient
+data; mask it before arithmetic. The [hourly anomalies example](https://usdata.dev/examples/hourly-anomalies/)
+matches routine LCD observations to the nearest normal within ten minutes,
+reports unmatched values, and verifies restoration into a fresh cache.
+
+## Station discovery and values
 
 Geographic discovery searches the selected period's dataset for stations with
 normals coverage over 1991-2020 inside the box. Not every GHCN station has

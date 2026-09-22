@@ -9,10 +9,10 @@ U.S. Climate Normals 1991-2020.
 ## At a glance
 
 - Files: CSV
-- Selection: Monthly, daily, or annual/seasonal normals per station; optional month-day window for daily and monthly
+- Selection: Hourly, daily, monthly, or annual/seasonal normals per station; optional month-day window except annual/seasonal; hourly returns whole days
 - Required inputs: Station IDs or a geographic query; dates optional
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [climate normals](https://usdata.dev/examples/climate-normals/), [climate anomalies](https://usdata.dev/examples/climate-anomalies/)
+- Examples: [climate normals](https://usdata.dev/examples/climate-normals/), [climate anomalies](https://usdata.dev/examples/climate-anomalies/), [hourly anomalies](https://usdata.dev/examples/hourly-anomalies/)
 
 ## Parameters
 
@@ -20,7 +20,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 | Parameter | Meaning |
 |---|---|
-| `period` | monthly (default), daily, or annualseasonal. |
+| `period` | monthly (default), daily, annualseasonal, or hourly. |
 | `stations` | Station ids, comma-separated or a list; otherwise a location selects them. |
 | `units` | metric (default) or standard. |
 
@@ -28,6 +28,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 | Variable | Units | Meaning |
 |---|---|---|
+| `HLY-TEMP-NORMAL` | degrees Celsius | Hourly normal mean temperature (metric units); local standard time |
 | `MLY-TMAX-NORMAL` | degrees Celsius | Monthly normal maximum temperature |
 | `MLY-TMIN-NORMAL` | degrees Celsius | Monthly normal minimum temperature |
 | `MLY-PRCP-NORMAL` | mm | Monthly normal precipitation total |
@@ -48,7 +49,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - Availability: since 0.11
 - Domain: Climate
 - Spatial resolution: U.S. land surface stations with 1991-2020 normals coverage
-- Temporal resolution: Daily, monthly, or annual and seasonal normals, chosen with the period parameter
+- Temporal resolution: Hourly, daily, monthly, or annual and seasonal normals, chosen with the period parameter
 - Updates: As needed; the normals are republished about once a decade
 - Terms of use: <https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals>
 - Citation: Palecki, Michael; Durre, Imke; Applequist, Scott; Arguez, Anthony; Lawrimore, Jay (2021). U.S. Climate Normals 2020 (1991-2020). NOAA National Centers for Environmental Information; cite the record for the period used

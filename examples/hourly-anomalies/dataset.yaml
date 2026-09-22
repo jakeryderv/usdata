@@ -1,0 +1,19 @@
+name: okc-hourly-anomalies
+sources:
+  - name: observations
+    dataset: noaa:lcd
+    start: 2024-05-06
+    end: 2024-05-06
+    variables: [HourlyDryBulbTemperature]
+    params:
+      stations: "72353013967"
+      units: metric
+  - name: normals
+    dataset: noaa:climate-normals
+    start: 2024-05-06
+    end: 2024-05-07
+    variables: [HLY-TEMP-NORMAL]
+    params:
+      stations: USW00013967
+      period: hourly
+      units: metric
