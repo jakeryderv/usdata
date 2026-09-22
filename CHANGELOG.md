@@ -12,6 +12,17 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.23.0](https://github.com/jakeryderv/usdata/releases/tag/v0.23.0) - 2026-09-22
+
+
+### Added
+
+- Select 1991–2020 hourly climate normals with `period: hourly`, using whole-day calendar windows, and compare them with airport observations in a new worked example that verifies locked restoration.
+
+### Documentation
+
+- Include the manifest in the README quick start so the CLI and Python examples can be followed without an existing dataset.yaml file.
+
 ## [0.22.0](https://github.com/jakeryderv/usdata/releases/tag/v0.22.0) - 2026-09-18
 
 
