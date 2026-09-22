@@ -1,5 +1,5 @@
 {
-  "version": "0.23.0",
+  "version": "0.24.0",
   "datasets": [
     {
       "id": "noaa:ghcn-daily",
@@ -1955,7 +1955,7 @@
       "provider": "NOAA",
       "domain": "Ocean physics",
       "system": "CO-OPS Data API",
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.24",
       "keywords": [
         "currents",

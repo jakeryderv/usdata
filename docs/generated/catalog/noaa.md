@@ -4,7 +4,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 [Provider access notes](../../providers/noaa.md).
 
-**Released** is included in usdata 0.23.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
+**Released** is included in usdata 0.24.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
 
 ## Implemented datasets
 
@@ -55,7 +55,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 | Dataset | Availability | Files | What gets selected |
 |---|---|---|---|
-| <span id="noaacoops-currents"></span>[Coastal current speed and direction](noaa/coops-currents.md) | Source only | CSV | Native six-minute observations for one station and explicit bin; at most 28 days |
+| <span id="noaacoops-currents"></span>[Coastal current speed and direction](noaa/coops-currents.md) | Released | CSV | Native six-minute observations for one station and explicit bin; at most 28 days |
 | <span id="noaacoops-water-levels"></span>[Coastal water levels](noaa/coops-water-levels.md) | Released | CSV | Six-minute observations for one station and datum; at most 28 days |
 | <span id="noaacoops-tide-predictions"></span>[Coastal tide predictions](noaa/coops-tide-predictions.md) | Released | CSV | Predictions for one station and datum on a chosen interval; at most a year |
 

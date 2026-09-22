@@ -12,6 +12,13 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.24.0](https://github.com/jakeryderv/usdata/releases/tag/v0.24.0) - 2026-09-22
+
+
+### Added
+
+- Fetch observed CO-OPS current speed and direction with `noaa:coops-currents`, selecting one station and explicit bin in UTC. A Cape Henry worked example reports gaps, preserves dated depth metadata, and verifies byte-for-byte restoration into an empty cache. ([#264](https://github.com/jakeryderv/usdata/issues/264))
+
 ## [0.23.0](https://github.com/jakeryderv/usdata/releases/tag/v0.23.0) - 2026-09-22
 
 

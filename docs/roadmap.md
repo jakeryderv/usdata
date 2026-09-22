@@ -46,7 +46,7 @@ The R2 bucket at `data.usdata.dev` is reserved for dataset storage; see
 [website operations](guides/website-operations.md) and
 [ADR 0015](adr/0015-separate-sites-and-data-storage.md).
 
-Shipped through v0.23.0: the tornado research inputs
+Shipped through v0.24.0: the tornado research inputs
 ([issue 118](https://github.com/jakeryderv/usdata/issues/118)), one registry
 schema verified against the adapters
 ([ADR 0026](adr/0026-one-registry-schema.md)), the published provider contract
@@ -113,7 +113,7 @@ The extension preserves calendar-day selection and local-standard-time labels
 ten-minute observation matching tolerance explicit and verifies restoration
 into an empty cache.
 
-Available from source for the unreleased v0.24.0: CO-OPS observed currents
+Shipped in v0.24.0: CO-OPS observed currents
 ([issue 264](https://github.com/jakeryderv/usdata/issues/264)), with one
 explicit station and bin and a [Cape Henry example](https://usdata.dev/examples/coastal-currents/)
 that reports gaps and verifies restoration. Bin depth is dated metadata context,

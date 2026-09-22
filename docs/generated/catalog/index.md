@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-**Released** is included in usdata 0.23.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
+**Released** is included in usdata 0.24.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
 
 ## Implemented datasets
 
@@ -27,7 +27,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 | <span id="noaanbm"></span>[NBM forecast guidance](noaa/nbm.md) | Released | GRIB2 | Regional core files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and region |
 | <span id="noaarap"></span>[RAP model output](noaa/rap.md) | Released | GRIB2 | Files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file family |
 | <span id="noaaclimate-normals"></span>[30-year station climate normals](noaa/climate-normals.md) | Released | CSV | Hourly, daily, monthly, or annual/seasonal normals per station; optional month-day window except annual/seasonal; hourly returns whole days |
-| <span id="noaacoops-currents"></span>[Coastal current speed and direction](noaa/coops-currents.md) | Source only | CSV | Native six-minute observations for one station and explicit bin; at most 28 days |
+| <span id="noaacoops-currents"></span>[Coastal current speed and direction](noaa/coops-currents.md) | Released | CSV | Native six-minute observations for one station and explicit bin; at most 28 days |
 | <span id="noaacoops-water-levels"></span>[Coastal water levels](noaa/coops-water-levels.md) | Released | CSV | Six-minute observations for one station and datum; at most 28 days |
 | <span id="noaacoops-tide-predictions"></span>[Coastal tide predictions](noaa/coops-tide-predictions.md) | Released | CSV | Predictions for one station and datum on a chosen interval; at most a year |
 | <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](noaa/coastwatch-sst.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
@@ -39,7 +39,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 | Provider | Released | Source only | Planned |
 |---|---:|---:|---:|
-| [NOAA](noaa.md) | 22 | 1 | 14 |
+| [NOAA](noaa.md) | 23 | 0 | 14 |
 | [USGS](usgs.md) | 2 | 0 | 1 |
 | [FEMA](fema.md) | 1 | 0 | 1 |
 | [Census Bureau](census.md) | 0 | 0 | 1 |

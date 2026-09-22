@@ -1,6 +1,6 @@
 # CO-OPS observed currents
 
-`noaa:coops-currents` is available from source for the unreleased v0.24.0.
+`noaa:coops-currents` is available since v0.24.0.
 It fetches native six-minute observed current speed and direction for one
 explicit station and bin from the anonymous
 [CO-OPS Data API](https://api.tidesandcurrents.noaa.gov/api/prod/).
