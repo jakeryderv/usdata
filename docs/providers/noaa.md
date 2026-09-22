@@ -14,7 +14,7 @@ NOAA access is anonymous.
 | `nexrad-level2` | [Radar scans](noaa-nexrad.md) | Whole Level II scans |
 | `nexrad-level3` | [Derived radar products](noaa-nexrad-level3.md) (v0.15) | Whole Level III product files, no reader |
 | `mrms` | [MRMS gridded radar products](noaa-mrms.md) (v0.15.0) | Whole two-minute CONUS grids of one product, at most a day |
-| `goes-abi` | [GOES imagery](noaa-goes.md) | Whole single-channel CONUS scenes |
+| `goes-abi` | [GOES imagery](noaa-goes.md) | Whole single-channel CONUS or explicit M1/M2 scenes (mesoscale available from source for v0.25.0) |
 | `goes-glm` | [GOES lightning detections](noaa-glm.md) (v0.15.0) | Whole 20-second detection files, at most a day |
 | `hrrr` | [HRRR model output](noaa-hrrr.md) (v0.15.0) | Whole CONUS GRIB2 files per run and forecast hour |
 | `gfs` | [GFS model output](noaa-gfs.md) (v0.15.0) | Whole global GRIB2 files per run, forecast hour, and resolution |
@@ -47,9 +47,9 @@ See [NEXRAD Level III products](noaa-nexrad-level3.md).
 
 See [MRMS gridded radar products](noaa-mrms.md).
 
-## GOES ABI CONUS imagery
+## GOES ABI CONUS and mesoscale imagery
 
-See [GOES ABI CONUS imagery](noaa-goes.md).
+See [GOES ABI CONUS and mesoscale imagery](noaa-goes.md).
 
 ## GOES GLM lightning detections
 

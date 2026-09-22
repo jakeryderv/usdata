@@ -1,8 +1,9 @@
-"""GOES ABI CONUS Cloud and Moisture Imagery from anonymous NOAA S3 buckets.
+"""GOES ABI Cloud and Moisture Imagery from anonymous NOAA S3 buckets.
 
 Require ``satellite`` (16, 17, 18, or 19), ``channel`` (1--16 or C01--C16), and
-both timestamps at most seven days apart. The optional ``product`` must be
-``ABI-L2-CMIPC``. Select whole single-channel NetCDF files by inclusive
+both timestamps at most seven days apart. ``product`` defaults to CONUS
+``ABI-L2-CMIPC``; ``ABI-L2-CMIPM`` requires ``sector=M1`` or ``M2``.
+Select whole single-channel NetCDF files by inclusive
 scan-start time, never by scan overlap.
 Geographic and variable subsetting are not available for these archived files.
 ``list_scans`` is shared with the GLM adapter, which selects files under the
@@ -12,10 +13,10 @@ same bucket layout by the same inclusive start-time rule.
 from __future__ import annotations
 
 import re
-from collections.abc import Callable, Mapping
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Self
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -24,13 +25,15 @@ from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import s3
 from usdata.providers.base import QueryError
 from usdata.providers.http import HttpProvider
-from usdata.providers.params import int_range
+from usdata.providers.params import choice, int_range
 
 PRODUCT = "ABI-L2-CMIPC"
+MESOSCALE_PRODUCT = "ABI-L2-CMIPM"
 PUBLIC_START = datetime(2017, 2, 28, tzinfo=UTC)
 MAX_WINDOW = timedelta(days=7)
 KEY_RE = re.compile(
-    r"OR_ABI-L2-CMIPC-M[346]C(?P<channel>0[1-9]|1[0-6])_G(?P<satellite>1[6-9])"
+    r"OR_ABI-L2-CMIP(?P<sector>C|M[12])-M[346]C(?P<channel>0[1-9]|1[0-6])"
+    r"_G(?P<satellite>1[6-9])"
     r"_s(?P<start>\d{14})_e(?P<end>\d{14})_c\d{14}\.nc"
 )
 
@@ -54,7 +57,14 @@ class GoesAbiParams(BaseModel):
     channel: Annotated[int, int_range(1, 16)] = Field(
         description="Required ABI channel, 1 to 16 or C01 to C16."
     )
-    product: str = Field(default=PRODUCT, description=f"ABI product; only {PRODUCT} is supported.")
+    product: Annotated[str, choice(PRODUCT, MESOSCALE_PRODUCT)] = Field(
+        default=PRODUCT,
+        description="ABI-L2-CMIPC (CONUS, default) or ABI-L2-CMIPM (mesoscale).",
+    )
+    sector: Annotated[str, choice("M1", "M2")] | None = Field(
+        default=None,
+        description="Required for ABI-L2-CMIPM: M1 or M2. Omit for CONUS.",
+    )
 
     @field_validator("channel", mode="before")
     @classmethod
@@ -63,13 +73,13 @@ class GoesAbiParams(BaseModel):
         text = value.strip() if isinstance(value, str) else value
         return text[1:] if isinstance(text, str) and text.startswith("C") else text
 
-    @model_validator(mode="before")
-    @classmethod
-    def _one_supported_product(cls, data: object) -> object:
-        """This adapter serves one ABI product, so name it rather than list the rest."""
-        if isinstance(data, Mapping) and data.get("product", PRODUCT) != PRODUCT:
-            raise ValueError(f"only product={PRODUCT} is supported")
-        return data
+    @model_validator(mode="after")
+    def _sector_matches_product(self) -> Self:
+        if self.product == MESOSCALE_PRODUCT and self.sector is None:
+            raise ValueError("sector=M1 or M2 is required for product=ABI-L2-CMIPM")
+        if self.product == PRODUCT and self.sector is not None:
+            raise ValueError("sector is only supported with product=ABI-L2-CMIPM")
+        return self
 
 
 def list_scans(
@@ -120,7 +130,7 @@ def list_scans(
 
 
 class GoesAbi(HttpProvider):
-    """Single-channel CONUS ABI imagery; params: satellite, channel, product."""
+    """Single-channel CONUS or mesoscale ABI imagery with explicit sector selection."""
 
     params_model = GoesAbiParams
 
@@ -139,16 +149,20 @@ class GoesAbi(HttpProvider):
             raise QueryError("GOES requests must span at most 7 days; split longer intervals")
         satellite, channel = params.satellite, params.channel
         if end < PUBLIC_START:
-            raise QueryError("GOES CMIPC public observations begin on 2017-02-28")
+            raise QueryError("GOES ABI public observations begin on 2017-02-28")
         start = max(start, PUBLIC_START)
         return list_scans(
             self._http(),
             f"noaa-goes{satellite}",
-            PRODUCT,
+            params.product,
             start,
             end,
             KEY_RE,
-            lambda m: int(m["satellite"]) == satellite and int(m["channel"]) == channel,
+            lambda m: (
+                int(m["satellite"]) == satellite
+                and int(m["channel"]) == channel
+                and m["sector"] == (params.sector or "C")
+            ),
             self.dataset.id,
         )
 

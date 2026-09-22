@@ -77,6 +77,12 @@
     "pinned": true
   },
   {
+    "slug": "goes-mesoscale",
+    "title": "How did central Plains infrared cloud patterns change over fifteen minutes?",
+    "summary": "Compare fifteen minutes of GOES-16 M1 channel-13 imagery over a fixed region, report timing and quality gaps, and restore every pinned scene into an empty cache.",
+    "pinned": true
+  },
+  {
     "slug": "annual-climate",
     "title": "How warm and wet was a year at one airport?",
     "summary": "Fetch complete-year station summaries and read annual temperature and precipitation with a reproducible manifest."

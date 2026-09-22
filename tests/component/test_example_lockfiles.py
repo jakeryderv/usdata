@@ -56,6 +56,7 @@ def test_committed_lockfiles_match_their_manifests(scripts):
     pinned = check.pinned_manifests()
     assert {m.parent.name for m in pinned} == {
         "goes-imagery",
+        "goes-mesoscale",
         "glm-flashes",
         "hrrr-environment",
         "mrms-rotation",
