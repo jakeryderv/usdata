@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`noaa:coops-currents` · **Source only** · Install from [source](../../../install.md#source-installation) to use this dataset.
+`noaa:coops-currents` · **Released** · Included since usdata 0.24.
 
 CO-OPS Observed Currents.
 
@@ -39,7 +39,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.24
+- Availability: since 0.24
 - Domain: Ocean physics
 - Spatial resolution: One current-meter station and bin per request; bin depths depend on deployment
 - Temporal resolution: Six-minute observations

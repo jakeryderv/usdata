@@ -6,9 +6,8 @@ speed and direction at Cape Henry LB 2CH (`cb0102`), bin 4. The
 cm/s. Missing samples remain visible, and the final step restores the pinned
 CSV byte-for-byte into a fresh cache.
 
-CO-OPS currents support is available from source for the unreleased v0.24.0.
-Follow the [source installation instructions](https://docs.usdata.dev/install/#source-installation)
-and [examples setup](https://usdata.dev/examples/#run-examples), then open
+CO-OPS currents support is available since v0.24.0.
+Follow the [examples setup](https://usdata.dev/examples/#run-examples), then open
 `examples/coastal-currents/example.ipynb`.
 
 The execution on 2026-09-22 returned 239 observations, with one missing
