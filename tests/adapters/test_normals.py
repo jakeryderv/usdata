@@ -45,6 +45,11 @@ def test_monthly_is_default_and_requests_the_whole_placeholder_year(adapter) -> 
         ("daily", "2024-02-27", "2024-03-01", "2020-02-27", "2020-03-01"),
         ("daily", "2024-02-29", "2024-02-29", "2020-02-29", "2020-02-29"),
         ("daily", None, None, "2020-01-01", "2020-12-31"),
+        ("hourly", None, None, "2020-01-01", "2020-12-31"),
+        ("hourly", "2024-05-06", "2024-05-06", "2020-05-06", "2020-05-06"),
+        ("hourly", "2024-02-28", "2024-03-01", "2020-02-28", "2020-03-01"),
+        ("hourly", "2024-05-06T12:30Z", "2024-05-06T13:30Z", "2020-05-06", "2020-05-06"),
+        ("hourly", "2024-05-06T23:30-02:00", "2024-05-07T02:30Z", "2020-05-07", "2020-05-07"),
         ("monthly", "1999-03-15", "2001-04-02", "2020-03-15", "2020-04-02"),
         ("monthly", "2024-03-01T00:30+02:00", "2024-06-30T23:30-02:00", "2020-02-29", "2020-07-01"),
     ],
@@ -80,10 +85,11 @@ def test_annualseasonal_sends_no_dates(adapter) -> None:
     assert asset.id.startswith("normals-annualseasonal-1991-2020_")
 
 
-def test_geographic_discovery_searches_the_normals_period(adapter) -> None:
-    query = build_query(
-        bbox=(-97.62, 35.38, -97.58, 35.40), period="daily", variables=["DLY-TMAX-NORMAL"]
-    )
+@pytest.mark.parametrize(
+    ("period", "variable"), [("daily", "DLY-TMAX-NORMAL"), ("hourly", "HLY-TEMP-NORMAL")]
+)
+def test_geographic_discovery_searches_the_normals_period(adapter, period, variable) -> None:
+    query = build_query(bbox=(-97.62, 35.38, -97.58, 35.40), period=period, variables=[variable])
     with respx.mock() as mock:
         route = mock.get(SEARCH_URL).respond(
             200, json={"count": 1, "results": [{"stations": [{"id": "USW00013967"}]}]}
@@ -92,9 +98,9 @@ def test_geographic_discovery_searches_the_normals_period(adapter) -> None:
         (asset,) = adapter.list_assets(query)
     for call in route.calls:
         params = call.request.url.params
-        assert params["dataset"] == "normals-daily-1991-2020"
+        assert params["dataset"] == f"normals-{period}-1991-2020"
         assert params["startDate"] == "1991-01-01" and params["endDate"] == "2020-12-31"
-        assert params["dataTypes"] == "DLY-TMAX-NORMAL"
+        assert params["dataTypes"] == variable
         assert params["bbox"] == "35.4,-97.62,35.38,-97.58"
     params = httpx.URL(asset.href).params
     assert params["stations"] == "USW00013967" and "bbox" not in params
@@ -120,8 +126,11 @@ def test_period_extends_the_shared_station_declaration(adapter) -> None:
     assert adapter.parse_params(Query(params={"period": "daily"}), ClimateNormalsParams).period == (
         "daily"
     )
-    assert message(period="hourly") == "period must be monthly, daily, or annualseasonal"
-    assert message(period=1) == "period must be monthly, daily, or annualseasonal"
+    assert adapter.parse_params(
+        Query(params={"period": "hourly"}), ClimateNormalsParams
+    ).period == ("hourly")
+    assert message(period="weekly") == "period must be monthly, daily, annualseasonal, or hourly"
+    assert message(period=1) == "period must be monthly, daily, annualseasonal, or hourly"
     assert message(stations=[]) == "stations must not be empty"
     assert message(units="kelvin") == "units must be metric or standard"
 
@@ -132,7 +141,9 @@ def test_period_extends_the_shared_station_declaration(adapter) -> None:
         {"start": "2024-01-01"},
         {"end": "2024-01-01"},
         {"period": "annualseasonal", "start": "2024-01-01", "end": "2024-12-31"},
-        {"period": "hourly"},
+        {"period": "weekly"},
+        {"period": "hourly", "start": "2024-05-06"},
+        {"period": "hourly", "start": "2024-12-31", "end": "2025-01-01"},
         {"stations": ""},
         {"stations": []},
         {"stations": [123]},
@@ -177,3 +188,31 @@ def test_normals_example_uses_existing_csv_reader(tmp_path: Path) -> None:
     assert frame.attrs["usdata"]["provenance"] == item.provenance.model_dump(mode="json")
     assert item.path.read_bytes() == source
     assert verify(manifest, root=tmp_path / "cache") == []
+
+
+@pytest.mark.l2
+def test_hourly_normals_preserve_labels_and_restore_exact_bytes(tmp_path: Path) -> None:
+    pytest.importorskip("pandas")
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text(
+        "name: hourly-normals\nsources:\n  - dataset: noaa:climate-normals\n"
+        "    start: 2024-05-06\n    end: 2024-05-06\n"
+        "    variables: [HLY-TEMP-NORMAL]\n"
+        "    params: {stations: USW00013967, period: hourly, units: metric}\n"
+    )
+    source = (Path(__file__).parents[1] / "fixtures/hourly-normals.csv").read_bytes()
+    with respx.mock() as mock:
+        route = mock.get(DATA_URL).respond(200, content=source)
+        first = pull(manifest, root=tmp_path / "cache")
+        (item,) = first.fetched
+        assert route.calls[0].request.url.params["dataset"] == "normals-hourly-1991-2020"
+        frame = item.open(dtype={"DATE": "string"})
+        assert frame["DATE"].tolist() == [f"05-06T{hour:02}:00:00" for hour in range(24)]
+        assert frame["HLY-TEMP-NORMAL"].iloc[0] == 16.1
+        assert item.path.read_bytes() == source
+        restored = pull(manifest, root=tmp_path / "restored")
+    assert restored.from_lockfile and not restored.fetched[0].from_cache
+    assert restored.lockfile == first.lockfile
+    assert restored.fetched[0].path.read_bytes() == source
+    assert route.calls[1].request.url == route.calls[0].request.url
+    assert verify(manifest, root=tmp_path / "restored") == []

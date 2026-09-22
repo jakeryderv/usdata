@@ -257,6 +257,10 @@
         {
           "title": "Hourly observations",
           "url": "https://usdata.dev/examples/hourly-observations/"
+        },
+        {
+          "title": "Hourly anomalies",
+          "url": "https://usdata.dev/examples/hourly-anomalies/"
         }
       ]
     },
@@ -1839,7 +1843,7 @@
     {
       "id": "noaa:climate-normals",
       "title": "30-year station climate normals",
-      "description": "Daily, monthly, and annual/seasonal 30-year station normals via the NCEI Access Data Service datasets normals-daily-1991-2020, normals-monthly-1991-2020, and normals-annualseasonal-1991-2020, chosen with a period parameter. Dates are optional; daily and monthly normals accept a month-day window inside a placeholder year. Explicit stations or station discovery through the companion search service. Variables are NCEI data-type codes and the catalog lists the probed ones; the delivered set is the open NCEI normals list.",
+      "description": "Hourly, daily, monthly, and annual/seasonal 30-year station normals via the NCEI Access Data Service datasets normals-hourly-1991-2020, normals-daily-1991-2020, normals-monthly-1991-2020, and normals-annualseasonal-1991-2020, chosen with a period parameter. Dates are optional; hourly, daily, and monthly normals accept a month-day window inside a placeholder year. Hourly labels use local standard time, with no February 29 values. Explicit stations or station discovery through the companion search service. Variables are NCEI data-type codes and the catalog lists the probed ones; the delivered set is the open NCEI normals list.",
       "provider": "NOAA",
       "domain": "Climate",
       "system": "NCEI Access Data Service",
@@ -1852,23 +1856,29 @@
         "stations",
         "temperature",
         "precipitation",
+        "hourly",
         "ncei"
       ],
       "formats": [
         "CSV"
       ],
-      "selection": "Monthly, daily, or annual/seasonal normals per station; optional month-day window for daily and monthly",
+      "selection": "Hourly, daily, monthly, or annual/seasonal normals per station; optional month-day window except annual/seasonal; hourly returns whole days",
       "inputs": "Station IDs or a geographic query; dates optional",
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "U.S. land surface stations with 1991-2020 normals coverage",
-        "temporal": "Daily, monthly, or annual and seasonal normals, chosen with the period parameter"
+        "temporal": "Hourly, daily, monthly, or annual and seasonal normals, chosen with the period parameter"
       },
       "update_frequency": "As needed; the normals are republished about once a decade",
       "latency": null,
       "citation": "Palecki, Michael; Durre, Imke; Applequist, Scott; Arguez, Anthony; Lawrimore, Jay (2021). U.S. Climate Normals 2020 (1991-2020). NOAA National Centers for Environmental Information; cite the record for the period used",
       "terms": "https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals",
       "variables": [
+        {
+          "name": "HLY-TEMP-NORMAL",
+          "units": "degrees Celsius",
+          "description": "Hourly normal mean temperature (metric units); local standard time"
+        },
         {
           "name": "MLY-TMAX-NORMAL",
           "units": "degrees Celsius",
@@ -1931,6 +1941,10 @@
         {
           "title": "Climate anomalies",
           "url": "https://usdata.dev/examples/climate-anomalies/"
+        },
+        {
+          "title": "Hourly anomalies",
+          "url": "https://usdata.dev/examples/hourly-anomalies/"
         }
       ]
     },

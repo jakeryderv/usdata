@@ -1,14 +1,16 @@
 """U.S. Climate Normals 1991-2020 through the NCEI Access Data Service.
 
-Params: ``period`` (``monthly`` by default, ``daily``, or ``annualseasonal``),
+Params: ``period`` (``monthly`` by default, ``daily``, ``annualseasonal``, or ``hourly``),
 ``stations`` (list or comma string), and ``units`` (metric or standard).
 
-Normals are 30-year averages, not observations, so dates are optional. For daily
-and monthly normals an optional ``start``/``end`` pair selects a calendar window
+Normals are 30-year averages, not observations, so dates are optional. For hourly,
+daily, and monthly normals an optional ``start``/``end`` pair selects a calendar window
 by month and day; the year is ignored and sent as the placeholder 2020, a leap
 year so February 29 is valid. Windows cannot cross the new year. Without dates
 the whole year is requested. Annual/seasonal normals accept no dates. Assets
 carry the 1991-2020 normals period as their time bounds.
+Hourly normals return all hours of each selected day, labeled in local standard
+time as ``MM-DDTHH:MM:SS``. They have no February 29 values.
 """
 
 from __future__ import annotations
@@ -29,6 +31,7 @@ PERIODS = {
     "monthly": "normals-monthly-1991-2020",
     "daily": "normals-daily-1991-2020",
     "annualseasonal": "normals-annualseasonal-1991-2020",
+    "hourly": "normals-hourly-1991-2020",
 }
 PLACEHOLDER_YEAR = 2020
 NORMALS_PERIOD = TimeRange(
@@ -41,7 +44,7 @@ class ClimateNormalsParams(GhcnDailyParams):
     """A normals query also names which averaging period it wants."""
 
     period: Annotated[str, choice(*PERIODS)] = Field(
-        default="monthly", description="monthly (default), daily, or annualseasonal."
+        default="monthly", description="monthly (default), daily, annualseasonal, or hourly."
     )
 
 

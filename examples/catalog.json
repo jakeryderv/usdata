@@ -21,6 +21,11 @@
     "summary": "Pull three days of Local Climatological Data for one airport, separate report types, and compare hourly extremes with NCEI's daily summary."
   },
   {
+    "slug": "hourly-anomalies",
+    "title": "How warm was Oklahoma City on 6 May 2024 compared with its hourly normals?",
+    "summary": "Compare routine airport temperatures with 1991\u20132020 hourly normals in local standard time, make the matching tolerance explicit, and restore both pinned inputs into an empty cache."
+  },
+  {
     "slug": "spc-tornadoes",
     "title": "How many tornadoes did 2024 bring, by rating?",
     "summary": "Pull the Storm Prediction Center's 2024 tornado file, keep one row per tornado, and count them by EF rating with the longest paths."

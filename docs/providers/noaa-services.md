@@ -479,6 +479,41 @@ exercise discovery and checksum-verified restoration.
 
 ## U.S. Climate Normals
 
+### Hourly extension probe (2026-09-21)
+
+The hourly dataset `normals-hourly-1991-2020` supports the same anonymous
+station search and CSV endpoint. A box around Will Rogers World Airport
+(`35.4,-97.62,35.38,-97.58` in NCEI's order) returned `USW00013967` when
+searched over 1991–2020. A one-day query returned 24 `MM-DDTHH:MM:SS` labels,
+00:00 through 23:00, in local standard time. Substituting 2024 for 2020 in
+the request returned identical bytes. February 28–March 1 returned 48 rows,
+omitting February 29 as the
+[hourly documentation](https://www.ncei.noaa.gov/pub/data/cdo/documentation/normals-hourly-1991-2020_documentation.pdf)
+specifies.
+
+```sh
+curl --get 'https://www.ncei.noaa.gov/access/services/data/v1' \
+  --data-urlencode 'dataset=normals-hourly-1991-2020' \
+  --data-urlencode 'stations=USW00013967' \
+  --data-urlencode 'startDate=2020-05-06' --data-urlencode 'endDate=2020-05-06' \
+  --data-urlencode 'dataTypes=HLY-TEMP-NORMAL' --data-urlencode 'units=metric' \
+  --data-urlencode 'format=csv' --data-urlencode 'includeStationLocation=1'
+```
+
+Repeating with `units=standard` confirmed all 24 Fahrenheit-to-Celsius
+conversions within rounding precision. At midnight the pair was 61.0 F and
+16.1 C; the day's range was 14.2–23.4 C. This probe does not establish
+conversion correctness for any other hourly variable. The unchanged metric
+response is `tests/fixtures/hourly-normals.csv`.
+
+LCD's `72353013967` query for May 6, 2024, restricted to
+`HourlyDryBulbTemperature`, returned 60 reports, including 24 routine `FM-15`
+reports at `:52`. This is why the hourly comparison uses a stated ten-minute
+nearest-normal tolerance, requests the next midnight as well, and reports
+invalid values and unmatched observations.
+
+### Original period probes (2026-09-11)
+
 Direct probes on 2026-09-11 against the Access Data Service: the search
 `datasets` endpoint lists monthly, daily, annual/seasonal, and hourly normals
 for 1991-2020, 2006-2020, and 1981-2010. Monthly and annual/seasonal requests

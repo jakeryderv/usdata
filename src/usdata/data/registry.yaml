@@ -731,14 +731,15 @@ datasets:
     since: "0.11"
     title: U.S. Climate Normals 1991-2020
     description: >-
-      Daily, monthly, and annual/seasonal 30-year station normals via the NCEI Access Data
-      Service datasets normals-daily-1991-2020, normals-monthly-1991-2020, and
-      normals-annualseasonal-1991-2020, chosen with a period parameter. Dates are optional;
-      daily and monthly normals accept a month-day window inside a placeholder year. Explicit
+      Hourly, daily, monthly, and annual/seasonal 30-year station normals via the NCEI Access Data
+      Service datasets normals-hourly-1991-2020, normals-daily-1991-2020, normals-monthly-1991-2020,
+      and normals-annualseasonal-1991-2020, chosen with a period parameter. Dates are optional;
+      hourly, daily, and monthly normals accept a month-day window inside a placeholder year.
+      Hourly labels use local standard time, with no February 29 values. Explicit
       stations or station discovery through the companion search service. Variables are NCEI
       data-type codes and the catalog lists the probed ones; the delivered set is the open NCEI
       normals list.
-    keywords: [climate, normals, averages, stations, temperature, precipitation, ncei]
+    keywords: [climate, normals, averages, stations, temperature, precipitation, hourly, ncei]
     protocol: http
     homepage: https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals
     license: US Government Work (public domain)
@@ -747,17 +748,18 @@ datasets:
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: true }
     summary: 30-year station climate normals
     formats: [CSV]
-    selection: Monthly, daily, or annual/seasonal normals per station; optional month-day window for daily and monthly
+    selection: Hourly, daily, monthly, or annual/seasonal normals per station; optional month-day window except annual/seasonal; hourly returns whole days
     inputs: Station IDs or a geographic query; dates optional
     reader: pandas
     guide: docs/providers/noaa-normals.md
     examples:
       - examples/climate-normals/README.md
       - examples/climate-anomalies/example.ipynb
+      - examples/hourly-anomalies/example.ipynb
     resolution:
       spatial: "U.S. land surface stations with 1991-2020 normals coverage"
       temporal: >-
-        Daily, monthly, or annual and seasonal normals, chosen with the period parameter
+        Hourly, daily, monthly, or annual and seasonal normals, chosen with the period parameter
     update_frequency: "As needed; the normals are republished about once a decade"
     citation: >-
       Palecki, Michael; Durre, Imke; Applequist, Scott; Arguez, Anthony; Lawrimore, Jay (2021).
@@ -765,6 +767,7 @@ datasets:
       Information; cite the record for the period used
     terms: https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals
     variables:
+      - { name: "HLY-TEMP-NORMAL", units: "degrees Celsius", description: "Hourly normal mean temperature (metric units); local standard time" }
       - { name: "MLY-TMAX-NORMAL", units: "degrees Celsius", description: "Monthly normal maximum temperature" }
       - { name: "MLY-TMIN-NORMAL", units: "degrees Celsius", description: "Monthly normal minimum temperature" }
       - { name: "MLY-PRCP-NORMAL", units: "mm", description: "Monthly normal precipitation total" }
@@ -1144,6 +1147,7 @@ datasets:
     guide: docs/providers/noaa-lcd.md
     examples:
       - examples/hourly-observations/README.md
+      - examples/hourly-anomalies/example.ipynb
     resolution:
       spatial: "Airport and first-order stations, addressed by eleven-digit station id"
       temporal: "Hourly, special, and synoptic reports, plus daily and monthly summaries"

@@ -21,10 +21,29 @@ for pinning inputs across sources and proving later that they have not changed.
 pip install "usdata[pandas]"
 usdata search precipitation --location Oklahoma
 usdata fetch noaa:ghcn-daily -p stations=USW00013967 --start 2024-05-06 --end 2024-05-07
+```
+
+Save the same station query as `dataset.yaml` in your working directory:
+
+```yaml
+name: first-station
+sources:
+  - dataset: noaa:ghcn-daily
+    start: 2024-05-06
+    end: 2024-05-07
+    params:
+      stations: USW00013967
+```
+
+Then fetch and pin its inputs, and print their citation:
+
+```sh
 usdata pull dataset.yaml && usdata cite dataset.yaml
 ```
 
-The same four steps from Python:
+The first pull writes `dataset.lock.json`; later pulls restore its pinned assets.
+
+From Python, using the same `dataset.yaml`:
 
 ```python
 from usdata import build_query, fetch, get, pull

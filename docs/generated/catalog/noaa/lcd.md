@@ -12,7 +12,7 @@ Local Climatological Data.
 - Selection: Every report on whole calendar days per station; optional column filters
 - Required inputs: Both dates; eleven-digit station IDs or a geographic query
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [hourly observations](https://usdata.dev/examples/hourly-observations/)
+- Examples: [hourly observations](https://usdata.dev/examples/hourly-observations/), [hourly anomalies](https://usdata.dev/examples/hourly-anomalies/)
 
 ## Parameters
 
