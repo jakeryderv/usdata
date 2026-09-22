@@ -1,0 +1,10 @@
+name: cape-henry-currents
+sources:
+  - name: currents
+    dataset: noaa:coops-currents
+    start: 2025-05-06
+    end: 2025-05-06
+    params:
+      station: cb0102
+      bin: 4
+      units: metric

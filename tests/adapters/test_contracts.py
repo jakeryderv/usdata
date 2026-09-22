@@ -35,6 +35,7 @@ CASES = {
     "noaa:ghcn-daily": {"stations": "USW00013967"},
     "noaa:coops-water-levels": {"station": "8518750", "datum": "MLLW"},
     "noaa:coops-tide-predictions": {"station": "8518750", "datum": "MLLW"},
+    "noaa:coops-currents": {"station": "cb0102", "bin": 4},
     "noaa:gsom": {"stations": "USW00013967"},
     "noaa:gsoy": {"stations": "USW00013967"},
     "noaa:climate-normals": {"stations": "USW00013967"},
@@ -93,6 +94,7 @@ WINDOW_CONSTANTS = {
     "noaa:nbm": ("usdata.providers.noaa.hrrr", "MAX_WINDOW"),
     "noaa:coops-water-levels": ("usdata.providers.noaa.coops", "MAX_INTERVAL"),
     "noaa:coops-tide-predictions": ("usdata.providers.noaa.coops", "MAX_PREDICTION_INTERVAL"),
+    "noaa:coops-currents": ("usdata.providers.noaa.coops", "MAX_INTERVAL"),
 }
 
 
@@ -121,6 +123,8 @@ def adapter_factory(dataset_id: str) -> testing.AdapterFactory:
 
 
 def contract_data(dataset_id: str) -> bytes:
+    if dataset_id == "noaa:coops-currents":
+        return b"Date Time, Speed, Direction, Bin \n2024-05-06 12:02,17.3,285,4\n"
     if dataset_id == "noaa:coops-tide-predictions":
         return b"Date Time, Prediction\n2024-05-06 12:00,0.719\n"
     if dataset_id == "noaa:coops-water-levels":
