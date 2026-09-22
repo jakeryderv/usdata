@@ -62,7 +62,7 @@ answering it ([ADR 0025](adr/0025-examples-as-usage-review.md)). The grib extra
 is still unchecked on macOS, where ecCodes must be installed separately.
 
 The last workstream, reproducible inputs in fact rather than in documentation,
-is complete. The six archive-backed examples commit their lockfiles and a
+is complete. The archive-backed examples commit their lockfiles and a
 weekly job restores each into an empty cache
 ([ADR 0029](adr/0029-committed-example-lockfiles.md)); a content-addressed
 mirror serves pinned bytes after an agency stops serving them
@@ -103,7 +103,7 @@ it has already found a gap: a county's code there needs the state's postal
 code, which `Place` did not carry and now does. Its window and county rules are in
 [ADR 0036](adr/0036-nws-events-by-issuance-and-county.md), and its
 [worked example](https://usdata.dev/examples/warning-lead-time/) finds the
-warning in effect when the Osage County EF4 began. No workstream is selected.
+warning in effect when the Osage County EF4 began.
 
 Shipped in v0.23.0: hourly normals through `period: hourly` on
 `noaa:climate-normals`, with a one-airport
@@ -118,6 +118,12 @@ Shipped in v0.24.0: CO-OPS observed currents
 explicit station and bin and a [Cape Henry example](https://usdata.dev/examples/coastal-currents/)
 that reports gaps and verifies restoration. Bin depth is dated metadata context,
 not inferred from the bin number.
+
+Implemented: [GOES mesoscale imagery](https://github.com/jakeryderv/usdata/issues/267),
+with explicit M1/M2 selection and a fifteen-minute central Plains infrared
+comparison. The implementation and executed example are **Unreleased**; available
+from source for v0.25.0. The example commits its archive lockfile and checks
+timing, quality flags, a fixed footprint, and empty-cache restoration.
 
 ## Next
 

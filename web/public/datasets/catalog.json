@@ -1012,8 +1012,8 @@
     },
     {
       "id": "noaa:goes-abi",
-      "title": "GOES CONUS imagery",
-      "description": "Single-channel CONUS Cloud and Moisture Imagery (ABI-L2-CMIPC) from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit satellite, channel, and scan-start interval; each asset is a complete NetCDF scene with no geographic or variable subsetting.",
+      "title": "GOES CONUS and mesoscale imagery",
+      "description": "Single-channel CONUS (ABI-L2-CMIPC) and mesoscale (ABI-L2-CMIPM) imagery from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit satellite, channel, scan-start interval, and M1 or M2 for mesoscale; each asset is a complete NetCDF scene with no geographic or variable subsetting.",
       "provider": "NOAA",
       "domain": "Weather satellites",
       "system": "GOES-R Series",
@@ -1028,17 +1028,18 @@
         "infrared",
         "reflectance",
         "netcdf",
-        "conus"
+        "conus",
+        "mesoscale"
       ],
       "formats": [
         "NetCDF4"
       ],
-      "selection": "Whole single-channel CONUS scenes by inclusive UTC scan-start time",
-      "inputs": "Satellite, channel, and both timestamps",
+      "selection": "Whole single-channel scenes by inclusive UTC scan-start time and explicit mesoscale sector",
+      "inputs": "Satellite, channel, both timestamps; product and sector for mesoscale",
       "reader_extra": "netcdf",
       "resolution": {
         "spatial": "0.5 km to 2 km at nadir, by ABI band",
-        "temporal": "One CONUS scan every 5 minutes on average"
+        "temporal": "CONUS every 5 minutes; two mesoscale sectors every 60 seconds or one every 30 seconds"
       },
       "update_frequency": "New data is added as soon as it's available",
       "latency": null,
@@ -1063,6 +1064,10 @@
         {
           "title": "Goes imagery",
           "url": "https://usdata.dev/examples/goes-imagery/"
+        },
+        {
+          "title": "Goes mesoscale",
+          "url": "https://usdata.dev/examples/goes-mesoscale/"
         },
         {
           "title": "Event context",

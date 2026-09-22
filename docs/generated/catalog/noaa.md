@@ -39,7 +39,7 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 | Dataset | Availability | Files | What gets selected |
 |---|---|---|---|
-| <span id="noaagoes-abi"></span>[GOES CONUS imagery](noaa/goes-abi.md) | Released | NetCDF4 | Whole single-channel CONUS scenes by inclusive UTC scan-start time |
+| <span id="noaagoes-abi"></span>[GOES CONUS and mesoscale imagery](noaa/goes-abi.md) | Released | NetCDF4 | Whole single-channel scenes by inclusive UTC scan-start time and explicit mesoscale sector |
 | <span id="noaagoes-glm"></span>[GOES lightning detections](noaa/goes-glm.md) | Released | NetCDF4 | Whole 20-second detection files by inclusive UTC file-start time, at most one day |
 
 ### [NCEP model output](https://www.nco.ncep.noaa.gov/pmb/products/)

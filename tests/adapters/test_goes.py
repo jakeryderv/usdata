@@ -135,6 +135,14 @@ def test_hours_cross_year_and_all_scan_modes(adapter):
         {"channel": [6]},
         {"channel": "\uff11"},
         {"product": "ABI-L2-CMIPF"},
+        {"product": "ABI-L2-CMIPM"},
+        {"product": "ABI-L2-CMIPM", "sector": None},
+        {"product": "ABI-L2-CMIPM", "sector": "M3"},
+        {"product": "ABI-L2-CMIPM", "sector": "C"},
+        {"product": "ABI-L2-CMIPM", "sector": ""},
+        {"product": "ABI-L2-CMIPM", "sector": ["M1", "M2"]},
+        {"product": "ABI-L2-CMIPM", "sector": True},
+        {"sector": "M1"},
         {"channels": "6,13"},
         {"location": "ok"},
         {"variables": ["CMI"]},
@@ -156,22 +164,76 @@ def test_reject_non_leap_day_366(adapter):
         assert adapter.list_assets(query(start="2023-12-31T12:00", end="2023-12-31T12:05")) == []
 
 
+@pytest.mark.parametrize("sector", ["M1", "M2"])
+def test_mesoscale_shared_prefix_filters_sector_across_pages(adapter, sector):
+    prefix = "ABI-L2-CMIPM/2024/127/22/"
+    name = f"OR_ABI-L2-CMIP{sector}-M6C13_G16_s20241272200280_e20241272200349_c20241272200404.nc"
+    key = prefix + name
+    other = "M2" if sector == "M1" else "M1"
+    invalid = [
+        key.replace(f"CMIP{sector}-", f"CMIP{other}-"),
+        key.replace(f"CMIP{sector}-", "CMIPC-"),
+        key.replace("C13_G16", "C06_G16"),
+        key.replace("G16", "G18"),
+        key.replace("CMIPM/", "CMIPC/"),
+        key.replace("s20241272200280", "s20241272200279"),
+        key.replace("s20241272200280", "s20241272200281"),
+    ]
+    with respx.mock() as mock:
+        route = mock.get("https://noaa-goes16.s3.amazonaws.com/")
+        route.side_effect = [
+            httpx.Response(200, text=listing([(k, 10) for k in invalid], "page2")),
+            httpx.Response(200, text=listing([(key, 329131), (key, 329131)])),
+        ]
+        (asset,) = adapter.list_assets(
+            query(
+                satellite=16,
+                channel=13,
+                product="ABI-L2-CMIPM",
+                sector=sector,
+                start="2024-05-06T22:00:28Z",
+                end="2024-05-06T22:00:28Z",
+            )
+        )
+    assert [call.request.url.params["prefix"] for call in route.calls] == [prefix, prefix]
+    assert route.calls[1].request.url.params["continuation-token"] == "page2"
+    assert asset.id == name and asset.href == f"s3://noaa-goes16/{key}"
+    assert asset.size == 329131
+    assert asset.time.start == datetime(2024, 5, 6, 22, 0, 28, tzinfo=UTC)
+    assert asset.time.end == datetime(2024, 5, 6, 22, 0, 34, 900000, tzinfo=UTC)
+
+
+def test_explicit_null_sector_preserves_conus_default(adapter):
+    with respx.mock() as mock:
+        mock.get(LIST_URL).respond(200, text=listing([(KEY, 100)]))
+        assert len(adapter.list_assets(query(sector=None))) == 1
+
+
 @pytest.mark.l2
-def test_manifest_restore_does_not_relist_and_checks_bytes(tmp_path: Path):
+@pytest.mark.parametrize("sector", [None, "M1", "M2"])
+def test_manifest_restore_does_not_relist_and_checks_bytes(tmp_path: Path, sector):
+    key = (
+        KEY
+        if sector is None
+        else KEY.replace("CMIPC/", "CMIPM/").replace("CMIPC-", f"CMIP{sector}-")
+    )
+    params = "satellite: 18, channel: 6"
+    if sector is not None:
+        params += f", product: ABI-L2-CMIPM, sector: {sector}"
     manifest = tmp_path / "dataset.yaml"
-    manifest.write_text("""name: goes-scene
+    manifest.write_text(f"""name: goes-scene
 sources:
   - dataset: noaa:goes-abi
     start: 2024-05-06T12:00Z
     end: 2024-05-06T12:05Z
-    params: {satellite: 18, channel: 6}
+    params: {{{params}}}
 """)
     with respx.mock() as mock:
-        listed = mock.get(LIST_URL).respond(200, text=listing([(KEY, len(DATA))]))
-        downloaded = mock.get(s3.https_url("noaa-goes18", KEY)).respond(200, content=DATA)
+        listed = mock.get(LIST_URL).respond(200, text=listing([(key, len(DATA))]))
+        downloaded = mock.get(s3.https_url("noaa-goes18", key)).respond(200, content=DATA)
         first = pull(manifest, root=tmp_path / "cache")
         item = first.fetched[0]
-        assert item.provenance.source_url == f"s3://noaa-goes18/{KEY}"
+        assert item.provenance.source_url == f"s3://noaa-goes18/{key}"
         assert item.path.read_bytes() == DATA
         assert pull(manifest, root=tmp_path / "cache").fetched[0].from_cache
         item.path.unlink()
@@ -181,5 +243,5 @@ sources:
     assert verify(manifest, root=tmp_path / "cache") == []
     item.path.unlink()
     with respx.mock() as mock, pytest.raises(ChecksumMismatch):
-        mock.get(s3.https_url("noaa-goes18", KEY)).respond(200, content=b"revised bytes")
+        mock.get(s3.https_url("noaa-goes18", key)).respond(200, content=b"revised bytes")
         pull(manifest, root=tmp_path / "cache")

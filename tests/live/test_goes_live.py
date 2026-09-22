@@ -39,6 +39,29 @@ def test_goes18_small_scene_restore(tmp_path: Path) -> None:
     restored_scene(tmp_path)
 
 
+def test_goes16_mesoscale_scene_restore(tmp_path: Path) -> None:
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text("""name: small-goes-mesoscale-scene
+sources:
+  - dataset: noaa:goes-abi
+    start: 2024-05-06T22:00:28Z
+    end: 2024-05-06T22:00:28Z
+    params: {satellite: 16, channel: 13, product: ABI-L2-CMIPM, sector: M1}
+""")
+    result = pull(manifest, root=tmp_path / "first")
+    (item,) = result.fetched
+    assert item.asset.id == (
+        "OR_ABI-L2-CMIPM1-M6C13_G16_s20241272200280_e20241272200349_c20241272200404.nc"
+    )
+    assert item.path.stat().st_size == item.asset.size
+    assert item.path.read_bytes().startswith(b"\x89HDF\r\n\x1a\n")
+    restored = pull(manifest, root=tmp_path / "empty")
+    assert restored.from_lockfile and not restored.fetched[0].from_cache
+    assert restored.lockfile == result.lockfile
+    assert restored.fetched[0].path.read_bytes() == item.path.read_bytes()
+    assert verify(manifest, root=tmp_path / "empty") == []
+
+
 @pytest.mark.netcdf
 def test_goes18_scene_decodes_with_netcdf_reader(tmp_path: Path) -> None:
     for dependency in ("xarray", "h5netcdf", "h5py"):

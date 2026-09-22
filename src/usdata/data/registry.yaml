@@ -209,30 +209,31 @@ datasets:
     system: noaa:goes-r
     domain: weather-satellites
     since: "0.8"
-    title: GOES-R ABI CONUS Cloud and Moisture Imagery
+    title: GOES-R ABI Cloud and Moisture Imagery
     description: >-
-      Single-channel CONUS Cloud and Moisture Imagery (ABI-L2-CMIPC) from
+      Single-channel CONUS (ABI-L2-CMIPC) and mesoscale (ABI-L2-CMIPM) imagery from
       GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit
-      satellite, channel, and scan-start interval; each asset is a complete
+      satellite, channel, scan-start interval, and M1 or M2 for mesoscale; each asset is a complete
       NetCDF scene with no geographic or variable subsetting.
-    keywords: [satellite, imagery, goes, abi, clouds, infrared, reflectance, netcdf, conus]
+    keywords: [satellite, imagery, goes, abi, clouds, infrared, reflectance, netcdf, conus, mesoscale]
     protocol: s3
     homepage: https://registry.opendata.aws/noaa-goes/
     license: US Government Work (public domain)
     temporal_extent: { start: "2017-02-28T00:00:00Z" }
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
-    summary: GOES CONUS imagery
+    summary: GOES CONUS and mesoscale imagery
     formats: [NetCDF4]
-    selection: Whole single-channel CONUS scenes by inclusive UTC scan-start time
-    inputs: Satellite, channel, and both timestamps
+    selection: Whole single-channel scenes by inclusive UTC scan-start time and explicit mesoscale sector
+    inputs: Satellite, channel, both timestamps; product and sector for mesoscale
     reader: netcdf
     guide: docs/providers/noaa-goes.md
     examples:
       - examples/goes-imagery/example.ipynb
+      - examples/goes-mesoscale/example.ipynb
       - examples/event-context/example.ipynb
     resolution:
       spatial: "0.5 km to 2 km at nadir, by ABI band"
-      temporal: "One CONUS scan every 5 minutes on average"
+      temporal: "CONUS every 5 minutes; two mesoscale sectors every 60 seconds or one every 30 seconds"
     update_frequency: "New data is added as soon as it's available"
     citation: >-
       NOAA Geostationary Operational Environmental Satellites (GOES) 16, 17, 18 & 19 was

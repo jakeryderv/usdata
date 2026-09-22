@@ -12,6 +12,7 @@ examples/**/*.lock.json
 !examples/gfs-environment/dataset.lock.json
 !examples/glm-flashes/dataset.lock.json
 !examples/goes-imagery/dataset.lock.json
+!examples/goes-mesoscale/dataset.lock.json
 !examples/hrrr-environment/dataset.lock.json
 !examples/mrms-rotation/dataset.lock.json
 !examples/radar-products/dataset.lock.json

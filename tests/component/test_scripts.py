@@ -484,7 +484,7 @@ def test_catalog_uses_explicit_file_selection_and_supports_datasets_without_read
     registry = Registry.bundled()
     goes = registry.get("noaa:goes-abi")
     content = module.render_dataset(registry, goes)
-    assert "Files: NetCDF4" in content and "Whole single-channel CONUS scenes" in content
+    assert "Files: NetCDF4" in content and "Whole single-channel scenes" in content
     assert "Server-side subsetting" not in content
     no_reader = goes.model_copy(update={"reader": None})
     assert "no bundled reader" in module.render_dataset(registry, no_reader)

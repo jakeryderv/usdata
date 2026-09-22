@@ -147,6 +147,29 @@ The small channel-6 filename was
 then restores through a lockfile without relisting. Archive revisions still
 correctly fail restoration if the bytes no longer match the original checksum.
 
+Mesoscale probes on 2026-09-22 followed both listing pages under
+`ABI-L2-CMIPM/2024/127/22/` in `noaa-goes16`. This hour contains 120
+channel-13 files, split between M1 and M2; the shared directory does not select
+a sector. A reproducible first-page probe is:
+
+```sh
+curl --get 'https://noaa-goes16.s3.amazonaws.com/' \
+  --data-urlencode 'list-type=2' \
+  --data-urlencode 'prefix=ABI-L2-CMIPM/2024/127/22/' \
+  --data-urlencode 'max-keys=1000'
+```
+
+Follow `NextContinuationToken` with `continuation-token` for the remaining
+objects. The first M1 channel-13 scene is
+`OR_ABI-L2-CMIPM1-M6C13_G16_s20241272200280_e20241272200349_c20241272200404.nc`,
+329,131 bytes, with a 500 × 500 grid. Its reported geographic bounds are
+110.37°W–91.05°W, 29.72°N–43.40°N. The fifteen-minute example pins 15 scenes
+(4,925,644 bytes), with one start in every minute and intervals of 57.1–62.9
+seconds. Coordinates, projection, and metadata extent agree across these scans;
+this is measured coverage for this window, not a permanent location for M1.
+The live mesoscale test fetches the first scene and restores it into an empty
+cache, comparing exact bytes.
+
 ## GOES GLM lightning detections
 
 Bounded probes on 2026-09-14 listed 180 `GLM-L2-LCFA` files in one hour for
