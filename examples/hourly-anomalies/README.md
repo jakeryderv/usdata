@@ -5,9 +5,8 @@ temperature reports at Will Rogers World Airport with 1991–2020 hourly normals
 It plots the observed temperatures and their departures, reports missing and
 unmatched values, and restores the two pinned files into an empty cache.
 
-Hourly normals support is available from source for the unreleased v0.23.0. Follow the
-[source installation instructions](https://docs.usdata.dev/install/#source-installation)
-and [examples setup](https://usdata.dev/examples/#run-examples), then open
+Hourly normals support is available in usdata v0.23.0 and later. Follow the
+[examples setup](https://usdata.dev/examples/#run-examples), then open
 `examples/hourly-anomalies/example.ipynb`. The [manifest](dataset.yaml) names
 LCD observations (`72353013967`) and normals (`USW00013967`) for the same airport.
 Both request metric temperatures.

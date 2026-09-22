@@ -7,7 +7,7 @@ statistics, served by the anonymous NCEI Access Data Service datasets
 `normals-annualseasonal-1991-2020`, plus `normals-hourly-1991-2020`. The adapter reuses GHCN station discovery,
 transport, and 50-station CSV chunks. Choose the dataset with `period`:
 `monthly` (default), `daily`, `annualseasonal`, or `hourly`. Hourly support is
-available from source for the unreleased v0.23.0. Pass either `stations` or a
+available since v0.23.0. Pass either `stations` or a
 location/bbox, not both. `units` is `metric` (default) or `standard`; unknown
 parameters and text queries are rejected.
 
