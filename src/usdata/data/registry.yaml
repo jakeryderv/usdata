@@ -641,6 +641,47 @@ datasets:
     limits: { max_window: P366D }
     adapter: usdata.providers.noaa.coops:CoopsTidePredictions
 
+  - id: noaa:coops-currents
+    provider: noaa
+    status: available
+    system: noaa:coops
+    domain: ocean-physics
+    since: "0.24"
+    title: CO-OPS Observed Currents
+    description: >-
+      Native six-minute current speed and direction from the anonymous CO-OPS
+      Data API. Select one alphanumeric station, a positive bin, units, and a
+      UTC interval of at most 28 days. Raw CSV preserves gaps and blank values.
+      Bin depths can change between deployments; the CSV carries bin number,
+      not depth or a verification-quality flag. Predictions, all-bin queries,
+      station discovery, and resampling are not included.
+    keywords: [currents, current speed, current direction, coastal, ocean, coops, ports, stations, bin]
+    protocol: http
+    homepage: https://api.tidesandcurrents.noaa.gov/api/prod/
+    license: US Government Work (public domain)
+    capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+    summary: Coastal current speed and direction
+    formats: [CSV]
+    selection: Native six-minute observations for one station and explicit bin; at most 28 days
+    inputs: Alphanumeric station, positive bin, and both minute-aligned timestamps
+    reader: pandas
+    guide: docs/providers/noaa-coops-currents.md
+    examples:
+      - examples/coastal-currents/example.ipynb
+    resolution:
+      spatial: One current-meter station and bin per request; bin depths depend on deployment
+      temporal: Six-minute observations
+    citation: >-
+      NOAA National Ocean Service, CO-OPS observed currents, accessed via usdata
+    terms: https://tidesandcurrents.noaa.gov/disclaimers.html
+    variables:
+      - { name: "Date Time", units: "UTC", description: "Observation time, requested with time_zone=gmt" }
+      - { name: "Speed", units: "cm/s", description: "Observed current speed in metric units; knots with english units" }
+      - { name: "Direction", units: "degrees", description: "Observed current direction" }
+      - { name: "Bin", description: "Requested bin number, not a depth measurement" }
+    limits: { max_window: P28D }
+    adapter: usdata.providers.noaa.coops:CoopsCurrents
+
   - id: noaa:gsom
     provider: noaa
     status: available

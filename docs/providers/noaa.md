@@ -27,6 +27,7 @@ NOAA access is anonymous.
 | `ibtracs` | [Global tropical cyclone best tracks](noaa-ibtracs.md) (v0.20.0) | One whole subset file, CSV or NetCDF, from the newest or a pinned version |
 | `coastwatch-sst` | [Sea-surface temperature](noaa-coastwatch.md) | Spatial and temporal CSV subsets |
 | `coops-water-levels` | [Observed coastal water levels](noaa-coops.md) (v0.10.0) | One station and datum, at most 28 days |
+| `coops-currents` | [Observed current speed and direction](noaa-coops-currents.md) (Unreleased) | One station and explicit bin, at most 28 days |
 | `coops-tide-predictions` | [Tide predictions](noaa-coops-predictions.md) (v0.14.0) | One station, datum, and interval, at most a year |
 
 See the [generated catalog](../generated/catalog/noaa.md) for status,

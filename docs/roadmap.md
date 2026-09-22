@@ -113,6 +113,12 @@ The extension preserves calendar-day selection and local-standard-time labels
 ten-minute observation matching tolerance explicit and verifies restoration
 into an empty cache.
 
+Available from source for the unreleased v0.24.0: CO-OPS observed currents
+([issue 264](https://github.com/jakeryderv/usdata/issues/264)), with one
+explicit station and bin and a [Cape Henry example](https://usdata.dev/examples/coastal-currents/)
+that reports gaps and verifies restoration. Bin depth is dated metadata context,
+not inferred from the bin number.
+
 ## Next
 
 Datasets stay anonymous-access for now. Every source added before 1.0 is one
@@ -128,7 +134,7 @@ reuse an existing one while preserving the adapter, transport, cache/provenance,
 and optional-reader boundaries:
 
 - Further NCEI Access Data Service datasets, when a concrete comparison needs them.
-- Additional GOES ABI products and sectors, and CO-OPS currents.
+- Additional GOES ABI products and sectors.
 - Geospatial readers when a supported dataset and representative fixtures justify them.
 - A NEXRAD Level III reader, once the bytes-only adapter has a concrete decoding use case.
 

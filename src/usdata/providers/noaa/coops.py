@@ -1,17 +1,21 @@
-"""CO-OPS observed water levels and tide predictions as raw CSV.
+"""CO-OPS observed water levels, currents, and tide predictions as raw CSV.
 
-Both datasets share one station model: one seven-digit ``station``, an explicit
+Water levels and tide predictions share one station model: one seven-digit ``station``, an explicit
 ``datum``, optional ``units`` (metric or english), and both timestamps at minute
 precision, requested in UTC; a bare end date means 23:59 on that day.
 Observations span at most 28 days; predictions
 span at most a year on any ``interval`` (six-minute by default, another minute
 step, hourly, or high/low), within NOAA's own limits.
+Currents instead name an alphanumeric station and explicit positive bin, with
+no datum or interval selector. Their native six-minute observations share the
+28-day window and use cm/s (metric) or knots (english).
 """
 
 from __future__ import annotations
 
 import csv
 import hashlib
+import math
 from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -25,7 +29,7 @@ from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
 from usdata.providers.base import QueryError
 from usdata.providers.http import HttpProvider
-from usdata.providers.params import choice
+from usdata.providers.params import choice, positive_int
 from usdata.query import LAST_INSTANT
 
 DATA_URL = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
@@ -44,6 +48,7 @@ OBSERVATION_COLUMNS = {
     "Quality",
 }
 PREDICTION_COLUMNS = {"Date Time", "Prediction"}
+CURRENTS_COLUMNS = {"Date Time", "Speed", "Direction", "Bin"}
 
 
 def _rows(path: Path, asset: Asset, required: set[str]) -> Iterator[dict[str, str]]:
@@ -148,6 +153,29 @@ class CoopsPredictionParams(CoopsParams):
         if token not in INTERVALS:
             raise ValueError(message)
         return token
+
+
+class CoopsCurrentsParams(BaseModel):
+    """One current-meter station and bin; a bin is not a permanent depth."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    station: str = Field(
+        description="Required alphanumeric CO-OPS currents station id, for example 'cb0102'."
+    )
+    bin: Annotated[int, positive_int()] = Field(
+        description="Required positive bin number; 0 (all bins) is not supported."
+    )
+    units: Annotated[str, choice("metric", "english")] = Field(
+        default="metric", description="metric (default, cm/s) or english (knots)."
+    )
+
+    @field_validator("station", mode="before")
+    @classmethod
+    def _one_station_id(cls, value: object) -> object:
+        if not isinstance(value, str) or not value.isascii() or not value.isalnum():
+            raise ValueError("must be an alphanumeric string, for example 'cb0102'")
+        return value
 
 
 class _CoopsStation(HttpProvider):
@@ -255,3 +283,38 @@ class CoopsTidePredictions(_CoopsStation):
     def _validate(self, path: Path, asset: Asset) -> None:
         interval = httpx.URL(asset.href).params.get("interval", "6")
         _validate_predictions(path, asset, interval)
+
+
+class CoopsCurrents(_CoopsStation):
+    """One station's observed current speed and direction at an explicit bin."""
+
+    product = "currents"
+    label = "current"
+    params_model = CoopsCurrentsParams
+
+    def list_assets(self, query: Query) -> list[Asset]:
+        """Describe one native-interval CSV request; check availability on fetch."""
+        params = self.parse_params(query, CoopsCurrentsParams)
+        self.reject(query, "bbox", "text", "variables", hint="CO-OPS requires an explicit station")
+        start, end = self._window(query, MAX_INTERVAL)
+        request = {"bin": str(params.bin), "units": params.units}
+        return [self._asset(params.station, start, end, request)]
+
+    def _validate(self, path: Path, asset: Asset) -> None:
+        expected_bin = int(httpx.URL(asset.href).params["bin"])
+        count = 0
+        for row in _rows(path, asset, CURRENTS_COLUMNS):
+            token = row["Bin"]
+            if not token.isascii() or not token.isdigit() or int(token) != expected_bin:
+                raise ValueError("record does not match the requested bin")
+            # Preserve blank measurements and missing timestamps, not invented values.
+            for field in ("Speed", "Direction"):
+                if row[field]:
+                    value = float(row[field])
+                    if not math.isfinite(value) or value < 0:
+                        raise ValueError(f"invalid current {field.lower()}")
+                    if field == "Direction" and value > 360:
+                        raise ValueError("current direction must be between 0 and 360 degrees")
+            count += 1
+        if not count:
+            raise ValueError("no current observations returned")

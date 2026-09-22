@@ -1949,6 +1949,72 @@
       ]
     },
     {
+      "id": "noaa:coops-currents",
+      "title": "Coastal current speed and direction",
+      "description": "Native six-minute current speed and direction from the anonymous CO-OPS Data API. Select one alphanumeric station, a positive bin, units, and a UTC interval of at most 28 days. Raw CSV preserves gaps and blank values. Bin depths can change between deployments; the CSV carries bin number, not depth or a verification-quality flag. Predictions, all-bin queries, station discovery, and resampling are not included.",
+      "provider": "NOAA",
+      "domain": "Ocean physics",
+      "system": "CO-OPS Data API",
+      "availability": "Source only",
+      "since": "0.24",
+      "keywords": [
+        "currents",
+        "current speed",
+        "current direction",
+        "coastal",
+        "ocean",
+        "coops",
+        "ports",
+        "stations",
+        "bin"
+      ],
+      "formats": [
+        "CSV"
+      ],
+      "selection": "Native six-minute observations for one station and explicit bin; at most 28 days",
+      "inputs": "Alphanumeric station, positive bin, and both minute-aligned timestamps",
+      "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "One current-meter station and bin per request; bin depths depend on deployment",
+        "temporal": "Six-minute observations"
+      },
+      "update_frequency": null,
+      "latency": null,
+      "citation": "NOAA National Ocean Service, CO-OPS observed currents, accessed via usdata",
+      "terms": "https://tidesandcurrents.noaa.gov/disclaimers.html",
+      "variables": [
+        {
+          "name": "Date Time",
+          "units": "UTC",
+          "description": "Observation time, requested with time_zone=gmt"
+        },
+        {
+          "name": "Speed",
+          "units": "cm/s",
+          "description": "Observed current speed in metric units; knots with english units"
+        },
+        {
+          "name": "Direction",
+          "units": "degrees",
+          "description": "Observed current direction"
+        },
+        {
+          "name": "Bin",
+          "units": null,
+          "description": "Requested bin number, not a depth measurement"
+        }
+      ],
+      "max_window": "28 days",
+      "guide": "https://docs.usdata.dev/providers/noaa-coops-currents/",
+      "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-currents/",
+      "examples": [
+        {
+          "title": "Coastal currents",
+          "url": "https://usdata.dev/examples/coastal-currents/"
+        }
+      ]
+    },
+    {
       "id": "noaa:coops-water-levels",
       "title": "Coastal water levels",
       "description": "Preliminary or verified six-minute observed water levels from the anonymous CO-OPS Data API. Select one station, an explicit vertical datum, units, and a UTC interval of at most 28 days. Raw CSV retains quality flags; predictions and station discovery are not included.",

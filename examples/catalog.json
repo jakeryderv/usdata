@@ -16,6 +16,11 @@
     "summary": "Subtract CO-OPS tide predictions from observed water levels to isolate the surge, find its peak, and time it against the HURDAT2 landfall."
   },
   {
+    "slug": "coastal-currents",
+    "title": "How did currents change at Cape Henry on 6 May 2025?",
+    "summary": "Plot one day of observed current speed and direction for an explicit bin, report missing readings, preserve dated depth metadata, and restore the pinned CSV into an empty cache."
+  },
+  {
     "slug": "hourly-observations",
     "title": "Do hourly airport observations reproduce the daily summary?",
     "summary": "Pull three days of Local Climatological Data for one airport, separate report types, and compare hourly extremes with NCEI's daily summary."
