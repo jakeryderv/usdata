@@ -3,8 +3,10 @@
 Available since v0.12.0. The [manifest](dataset.yaml)
 requests the complete Atlantic HURDAT2 best-track file through `noaa:hurdat2`.
 The National Hurricane Center publishes one fixed-format text file per basin and
-revises it after each season, so the manifest names a basin and nothing else:
-dates and geographic filters are rejected rather than silently ignored.
+revises it after each season, so the manifest names a basin and a revision
+date: dates and geographic filters are rejected rather than silently ignored.
+It names the 2026-02-27 revision because the newest one, 2026-09-12, has two
+upstream typos the reader will not guess at.
 
 In an activated Python 3.11+ virtual environment, install the package and save
 the [manifest](dataset.yaml) as `dataset.yaml` in a working directory. Run the

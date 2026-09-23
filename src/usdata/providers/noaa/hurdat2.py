@@ -3,7 +3,9 @@
 The NHC publishes the complete best-track database as one fixed-format text file
 per basin and revises it after each season. There is no query interface, so the
 only sensible asset is the whole file: ``basin`` selects ``atlantic`` (default)
-or ``pacific``, and the newest revision in the directory listing wins.
+or ``pacific``, and the newest revision in the directory listing wins unless
+``revision`` names one by its date. Naming one is how a first pull avoids a
+revision the reader cannot parse; a lockfile already pins the file it restores.
 
 Dates, geographic filters, variables, text queries, and unknown params are
 rejected rather than silently ignored: every revision contains the complete
@@ -49,6 +51,11 @@ class Hurdat2Params(BaseModel):
     basin: str = Field(
         default="atlantic", description="Best-track basin: 'atlantic' (default) or 'pacific'."
     )
+    revision: date | None = Field(
+        default=None,
+        description="Revision date of the file to select, such as 2026-02-27; "
+        "the newest revision by default.",
+    )
 
     @field_validator("basin", mode="before")
     @classmethod
@@ -59,6 +66,19 @@ class Hurdat2Params(BaseModel):
             raise ValueError(f"must be 'atlantic' (default) or 'pacific', not {value!r}")
         return basin
 
+    @field_validator("revision", mode="before")
+    @classmethod
+    def _revision_date(cls, value: object) -> object:
+        """A calendar date, typed or ISO text, as a manifest or ``--param`` gives it."""
+        if value is None or (isinstance(value, date) and not isinstance(value, datetime)):
+            return value
+        if isinstance(value, str):
+            try:
+                return date.fromisoformat(value.strip())
+            except ValueError:
+                pass
+        raise ValueError(f"must be a revision date like 2026-02-27, not {value!r}")
+
 
 class Hurdat2(HttpProvider):
     """Resolve one whole-basin best-track file; preserve the original text bytes."""
@@ -67,7 +87,8 @@ class Hurdat2(HttpProvider):
 
     def list_assets(self, query: Query) -> list[Asset]:
         """Select the newest revision of the requested basin's complete database."""
-        basin = self.parse_params(query, Hurdat2Params).basin
+        params = self.parse_params(query, Hurdat2Params)
+        basin = params.basin
         self.reject(
             query,
             "bbox",
@@ -94,6 +115,15 @@ class Hurdat2(HttpProvider):
             candidates.append(((last, revised, name), first, last, size))
         if not candidates:
             raise QueryError(f"no HURDAT2 {basin} best-track file in the NHC directory listing")
+        if params.revision is not None:
+            listed = sorted({revised for (_, revised, _), *_ in candidates}, reverse=True)
+            candidates = [c for c in candidates if c[0][1] == params.revision]
+            if not candidates:
+                recent = ", ".join(revised.isoformat() for revised in listed[:5])
+                raise QueryError(
+                    f"no HURDAT2 {basin} revision dated {params.revision.isoformat()} in the "
+                    f"NHC directory listing; the newest are {recent}"
+                )
         (_, _, name), first, last, size = max(candidates)
         return [
             Asset(

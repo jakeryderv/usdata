@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from datetime import date, datetime
 from pathlib import Path
 
 import httpx
@@ -16,6 +17,7 @@ from usdata.providers.base import QueryError
 from usdata.providers.noaa.hurdat2 import DIRECTORY_URL, Hurdat2, Hurdat2Params
 from usdata.pull import pull, verify
 from usdata.query import build_query
+from usdata.readers import Hurdat2FormatError
 from usdata.registry import default_registry
 
 pytestmark = pytest.mark.l2
@@ -120,6 +122,8 @@ def test_basin_selects_a_different_file_and_span(adapter) -> None:
         {"basin": 1},
         {"year": 2021},
         {"storm": "AL092021"},
+        {"revision": "2026-13-01"},
+        {"revision": "latest"},
     ],
 )
 def test_rejects_unsupported_queries_before_network(adapter, kwargs) -> None:
@@ -147,6 +151,13 @@ def test_basin_names_the_two_the_nhc_publishes_and_echoes_the_rejected_value(ada
     assert str(raised.value) == f"basin must be 'atlantic' (default) or 'pacific', not {raw!r}"
 
 
+@pytest.mark.parametrize("raw", ["latest", "2026-13-01", 20260227, datetime(2026, 2, 27)])
+def test_revision_must_be_a_calendar_date_and_echoes_the_rejected_value(adapter, raw) -> None:
+    with pytest.raises(QueryError) as raised:
+        adapter.parse_params(Query(params={"revision": raw}), Hurdat2Params)
+    assert str(raised.value) == f"revision must be a revision date like 2026-02-27, not {raw!r}"
+
+
 def test_rejected_dates_explain_that_the_file_is_complete(adapter) -> None:
     with pytest.raises(QueryError, match="complete basin"):
         adapter.list_assets(build_query(start="2021-01-01", end="2021-12-31"))
@@ -161,6 +172,27 @@ def test_missing_basin_file_is_an_error_not_a_silent_fallback(adapter) -> None:
         mock.get(DIRECTORY_URL).respond(200, text="<html>unavailable</html>")
         with pytest.raises(QueryError, match="atlantic"):
             adapter.list_assets(build_query())
+
+
+@pytest.mark.parametrize("revision", ["2026-02-27", " 2026-02-27", date(2026, 2, 27)])
+def test_revision_selects_an_older_file_of_the_basin(adapter, revision) -> None:
+    newer = "hurdat2-1851-2025-091226.txt"
+    with respx.mock() as mock:
+        mock.get(DIRECTORY_URL).respond(200, text=listing(ATLANTIC, newer, PACIFIC))
+        (latest,) = adapter.list_assets(build_query())
+        (named,) = adapter.list_assets(build_query(revision=revision))
+    assert latest.id == newer and named.id == ATLANTIC and named.href == URL
+
+
+def test_an_unlisted_revision_names_the_newest_and_does_not_fall_back(adapter) -> None:
+    with respx.mock() as mock:
+        mock.get(DIRECTORY_URL).respond(200, text=listing(LEGACY, ATLANTIC, PACIFIC))
+        with pytest.raises(QueryError) as raised:
+            adapter.list_assets(build_query(basin="atlantic", revision="2026-03-01"))
+    assert str(raised.value) == (
+        "no HURDAT2 atlantic revision dated 2026-03-01 in the NHC directory listing; "
+        "the newest are 2026-02-27, 2022-02-09"
+    )
 
 
 def test_listing_http_errors_surface(adapter) -> None:
@@ -282,6 +314,15 @@ def test_an_archived_pre_2021_revision_opens_with_longitudes_past_greenwich(
     # counts degrees west the long way round, so 358.0W is the point 2.0E.
     assert list(frame.longitude.tail(5)) == [-3.3, 2.0, 7.5, 13.0, 18.0]
     assert frame.longitude.between(-180.0, 180.0).all()
+
+
+def test_an_unparseable_revision_names_the_file_and_the_revision_parameter(tracks) -> None:
+    tracks.path.write_bytes(TEXT.replace(b"28.0N,  94.8W", b"28.0N   94.8W", 1))
+    with pytest.raises(Hurdat2FormatError) as raised:
+        tracks.open()
+    message = str(raised.value)
+    assert message.startswith(f"{ATLANTIC}: line 2: expected a latitude")
+    assert "'revision' parameter" in message
 
 
 def test_reader_rejects_csv_options(tracks) -> None:

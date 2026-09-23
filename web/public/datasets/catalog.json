@@ -1200,7 +1200,7 @@
     {
       "id": "noaa:hurdat2",
       "title": "Tropical cyclone best tracks",
-      "description": "National Hurricane Center best-track database: six-hourly position, intensity, pressure, and wind radii for Atlantic (since 1851) and northeast/north-central Pacific (since 1949) tropical cyclones. One fixed-format text file per basin, revised after each season; a basin parameter picks the file and the newest revision wins. There is no query interface, so dates and geographic filters are rejected and the local reader turns the whole file into one row per track point.",
+      "description": "National Hurricane Center best-track database: six-hourly position, intensity, pressure, and wind radii for Atlantic (since 1851) and northeast/north-central Pacific (since 1949) tropical cyclones. One fixed-format text file per basin, revised after each season; a basin parameter picks the file and the newest revision wins unless a revision date names another. There is no query interface, so dates and geographic filters are rejected and the local reader turns the whole file into one row per track point.",
       "provider": "NOAA",
       "domain": "Tropical cyclones",
       "system": null,
@@ -1217,8 +1217,8 @@
       "formats": [
         "HURDAT2 fixed-format text"
       ],
-      "selection": "The newest revision of one whole basin file; filter track points locally",
-      "inputs": "Optional basin (atlantic or pacific); no dates or geographic filters",
+      "selection": "The newest or a named revision of one whole basin file; filter track points locally",
+      "inputs": "Optional basin (atlantic or pacific) and revision date; no dates or geographic filters",
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "Best-track positions in tenths of a degree",

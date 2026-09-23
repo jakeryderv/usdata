@@ -160,7 +160,14 @@ def open_hurdat2(fetched: FetchedAsset) -> Any:
             '(or uv add "usdata[pandas]")'
         ) from error
     # Reading a fetched asset is strictly local; the source file is never rewritten.
-    columns = parse(fetched.path.read_text(encoding="utf-8"))
+    try:
+        columns = parse(fetched.path.read_text(encoding="utf-8"))
+    except Hurdat2FormatError as error:
+        # NHC typos come and go between revisions, so name the way to pick another.
+        raise Hurdat2FormatError(
+            f"{fetched.asset.id}: {error}; an upstream typo is usually absent from the "
+            "neighbouring revisions, so select one with the 'revision' parameter"
+        ) from error
     data: dict[str, Any] = {
         name: pandas.array(columns[name], dtype="string") for name in TEXT_COLUMNS
     }
