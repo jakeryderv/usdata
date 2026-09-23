@@ -12,6 +12,13 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.25.0](https://github.com/jakeryderv/usdata/releases/tag/v0.25.0) - 2026-09-23
+
+
+### Added
+
+- Select GOES ABI mesoscale imagery with `product: ABI-L2-CMIPM` and explicit `sector: M1` or `M2`. A fifteen-minute central Plains example checks scan timing, footprint stability, and quality flags, and restores its committed scene lockfile into an empty cache. ([#267](https://github.com/jakeryderv/usdata/issues/267))
+
 ## [0.24.0](https://github.com/jakeryderv/usdata/releases/tag/v0.24.0) - 2026-09-22
 
 

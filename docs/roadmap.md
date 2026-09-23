@@ -46,7 +46,7 @@ The R2 bucket at `data.usdata.dev` is reserved for dataset storage; see
 [website operations](guides/website-operations.md) and
 [ADR 0015](adr/0015-separate-sites-and-data-storage.md).
 
-Shipped through v0.24.0: the tornado research inputs
+Shipped through v0.25.0: the tornado research inputs
 ([issue 118](https://github.com/jakeryderv/usdata/issues/118)), one registry
 schema verified against the adapters
 ([ADR 0026](adr/0026-one-registry-schema.md)), the published provider contract
@@ -119,10 +119,9 @@ explicit station and bin and a [Cape Henry example](https://usdata.dev/examples/
 that reports gaps and verifies restoration. Bin depth is dated metadata context,
 not inferred from the bin number.
 
-Implemented: [GOES mesoscale imagery](https://github.com/jakeryderv/usdata/issues/267),
+Shipped in v0.25.0: [GOES mesoscale imagery](https://github.com/jakeryderv/usdata/issues/267),
 with explicit M1/M2 selection and a fifteen-minute central Plains infrared
-comparison. The implementation and executed example are **Unreleased**; available
-from source for v0.25.0. The example commits its archive lockfile and checks
+comparison. The example commits its archive lockfile and checks
 timing, quality flags, a fixed footprint, and empty-cache restoration.
 
 ## Next

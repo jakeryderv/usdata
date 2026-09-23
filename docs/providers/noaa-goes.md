@@ -4,7 +4,7 @@ Available since v0.8 as `noaa:goes-abi`. The initial product is
 single-channel CONUS Cloud and Moisture Imagery, `ABI-L2-CMIPC`. Files are
 NetCDF4/HDF5 scenes from the anonymous `noaa-goes16`, `noaa-goes17`,
 `noaa-goes18`, and `noaa-goes19` buckets. No AWS credentials or SDK are needed.
-Mesoscale imagery is **Unreleased**; available from source for v0.25.0. Select
+Mesoscale imagery is available since v0.25.0. Select
 `product=ABI-L2-CMIPM` and explicitly name `sector=M1` or `sector=M2`.
 Full-disk imagery and other ABI products remain unsupported.
 

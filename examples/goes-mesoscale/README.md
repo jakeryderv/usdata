@@ -7,7 +7,7 @@ a fixed **34–38°N, 100–96°W** region locally after checking every scene's
 projection, coordinates, and reported footprint. It does not track an individual
 storm or infer tornado intensity.
 
-Mesoscale support is **Unreleased**; available from source for v0.25.0 using the
+Mesoscale support is available since v0.25.0. Follow the
 [examples setup](https://usdata.dev/examples/#run-examples). Open
 `examples/goes-mesoscale/example.ipynb`. The existing example environment supplies
 NetCDF reading, plotting, and pyproj for this notebook's geographic mask;
