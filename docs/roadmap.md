@@ -124,6 +124,19 @@ with explicit M1/M2 selection and a fifteen-minute central Plains infrared
 comparison. The example commits its archive lockfile and checks
 timing, quality flags, a fixed footprint, and empty-cache restoration.
 
+Selected next: the first source that needs credentials,
+[EPA AQS daily summaries](https://github.com/jakeryderv/usdata/issues/222), and
+the last workstream before 1.0 ([versioning](versioning.md)). The anonymous
+surface has stopped moving: v0.23.0 through v0.25.0 changed neither the
+manifest, the lockfile, nor the `Provider` interface. Adding credentials will
+change that interface, so the two-release clock for 1.0 starts after it ships.
+[ADR 0039](adr/0039-credentialed-sources.md) proposes the rules: keys come from
+the environment, the core checks them before any request, and no key reaches an
+asset, a lockfile, provenance, cached bytes, or an error message. Probing the
+service showed its responses echo the key and vary between identical requests,
+so the adapter writes a canonical form. Accept the ADR before starting the
+adapter.
+
 ## Next
 
 Datasets stay anonymous-access for now. Every source added before 1.0 is one
@@ -145,15 +158,11 @@ and optional-reader boundaries:
 
 ## Later
 
-- Sources that need credentials, deliberately after the anonymous surface has
-  stopped moving: [EPA AQS as the first probe](https://github.com/jakeryderv/usdata/issues/222),
-  which settles where keys live, what provenance records about them, and how
-  a manifest stays shareable without one, and then
-  [NASA access through earthaccess](https://github.com/jakeryderv/usdata/issues/9).
-  The [Census Data API](providers/census.md) belongs here too: it now requires a
-  key on every data request, and it is the natural second place-keyed source.
-  One such provider is a 1.0 criterion ([versioning](versioning.md)), so this
-  is the last workstream before 1.0, not a candidate for the next one.
+- Further sources that need credentials, once
+  [ADR 0039](adr/0039-credentialed-sources.md) has shipped with EPA AQS:
+  [NASA access through earthaccess](https://github.com/jakeryderv/usdata/issues/9),
+  and the [Census Data API](providers/census.md), which now requires a key on
+  every data request and is the natural second place-keyed source.
 - [Remote cache backends](https://github.com/jakeryderv/usdata/issues/11):
   a general cache keyed by asset id still needs lookup, freshness, trusted
   upload ownership, and eviction defined. The content-addressed mirror of

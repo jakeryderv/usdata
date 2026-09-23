@@ -1,0 +1,1 @@
+ADR 0039 proposes how sources that need credentials work, starting with EPA AQS: keys come from environment variables, are checked before any request, and never appear in assets, lockfiles, provenance, cached bytes, or error messages. The roadmap selects that workstream as the last one before 1.0.

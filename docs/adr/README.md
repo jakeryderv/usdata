@@ -42,3 +42,4 @@ is described in the guides and reference pages.
 - [0036: NWS events are selected by issuance, one county at a time](0036-nws-events-by-issuance-and-county.md)
 - [0037: Hourly normals select calendar days and retain local-standard-time labels](0037-hourly-normals-calendar-days.md)
 - [0038: A HURDAT2 query can name a revision, and the reader stays strict](0038-named-hurdat2-revisions.md)
+- [0039: Credentials come from the environment and never reach a pin](0039-credentialed-sources.md)
