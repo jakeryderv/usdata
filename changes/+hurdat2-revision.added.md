@@ -1,0 +1,1 @@
+`noaa:hurdat2` accepts a `revision` date to select a revision other than the newest, and an unreadable HURDAT2 file now names itself and that parameter in its error. The newest Atlantic revision, 2026-09-12, has two upstream typos, so the examples read 2026-02-27.

@@ -18,3 +18,5 @@ sources:
   - dataset: noaa:hurdat2
     params:
       basin: atlantic
+      # The 2026-09-12 revision has two upstream typos the reader refuses to guess at.
+      revision: 2026-02-27

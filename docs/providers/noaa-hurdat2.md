@@ -10,8 +10,9 @@ in the reader rather than the query.
 
 ## Selecting a basin
 
-`basin` is the only parameter: `atlantic` (the default) or `pacific`, matched
-case-insensitively. Any other parameter, a location or bbox, `variables`, and
+`basin` is `atlantic` (the default) or `pacific`, matched case-insensitively.
+`revision` optionally names one revision by its date, such as `2026-02-27`; see
+[below](#revisions-and-filenames). Any other parameter, a location or bbox, `variables`, and
 text queries are rejected with an error rather than silently ignored, because
 none of them can change which bytes are downloaded.
 
@@ -38,6 +39,13 @@ revision order: within the 1851-2020 span, `020922` is 2022-02-09 and `052921` i
 2021-05-29, so the newer file sorts below the one it supersedes. The newest data
 span wins first, then the newest revision of that span; names that are not real
 dates, files for the other basin, and non-local links are ignored.
+
+`revision` replaces "newest" with one revision date, compared after parsing, so
+`2026-02-27` selects `hurdat2-1851-2025-02272026.txt` for the Atlantic basin. A
+date that no listed file of the basin carries is an error naming the newest
+revisions, never a fallback to another file. Name a revision when the newest one
+cannot be read (see [opening the file](#opening-the-file)), or to make a first
+pull choose the same file every time; after that the lockfile pins it anyway.
 
 The complete filename is the stable asset ID, and the URL, original bytes,
 size, and checksum are preserved. The directory reports approximate sizes
@@ -91,10 +99,14 @@ the 2021 season carry 20 values and a terminating comma instead of 21, so
 `max_wind_radius_nm` is NaN. And some revisions write a position east of
 Greenwich in the unwrapped 0-360 west convention, continuing a track from `3.3W`
 to `358.0W`; the reader normalizes that to `2.0`, the value the NHC itself
-published for the same point in a later revision. Of the 41 files listed on
-2026-09-12, 39 parse; two carry an upstream typo (a missing comma between
-latitude and longitude, and a date written `C0091018`) that the next revision of
-the same span corrects, and those raise rather than parse silently.
+published for the same point in a later revision. Of the 43 files listed on
+2026-09-23, 41 parse. The Pacific revision of 2023-04-27 has a date written
+`C0091018`, which the next revision corrects. The newest Atlantic revision,
+2026-09-12, has two typos its predecessor did not: a missing comma
+(`63.3N    7.5E`) and a latitude written `38.83`, which could be `38.8N` or
+`38.3N`. Both raise rather than parse to a guess, and the error names the file
+and the `revision` parameter; `revision: 2026-02-27` reads the previous
+Atlantic revision, which the examples pin until the NHC corrects the file.
 
 CSV options (`dtype`, `parse_dates`, `usecols`, `nrows`) do not apply and are
 rejected. Opening is local: it never re-fetches, decompresses into the cache, or

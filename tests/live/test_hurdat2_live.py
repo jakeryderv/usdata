@@ -12,8 +12,12 @@ from usdata.registry import default_registry
 
 pytestmark = pytest.mark.live
 
+# The newest Atlantic revision, 2026-09-12, carries two upstream typos the reader
+# refuses to guess at; parse the one before it until the NHC corrects the file.
+READABLE = "2026-02-27"
 
-def test_whole_atlantic_file_downloads_and_parses(tmp_path: Path) -> None:
+
+def test_newest_atlantic_revision_resolves_and_downloads(tmp_path: Path) -> None:
     (item,) = fetch(
         default_registry().get("noaa:hurdat2"),
         build_query(basin="atlantic"),
@@ -23,7 +27,18 @@ def test_whole_atlantic_file_downloads_and_parses(tmp_path: Path) -> None:
     assert item.provenance.checksum == sha256_file(item.path)
     span = item.asset.time
     assert span is not None and span.start is not None and span.end is not None
-    assert span.start.year == 1851
+    assert span.start.year == 1851 and span.end.year >= 2025
+
+
+def test_named_atlantic_revision_downloads_and_parses(tmp_path: Path) -> None:
+    (item,) = fetch(
+        default_registry().get("noaa:hurdat2"),
+        build_query(basin="atlantic", revision=READABLE),
+        root=tmp_path,
+    )
+    assert item.asset.id == "hurdat2-1851-2025-02272026.txt"
+    span = item.asset.time
+    assert span is not None and span.end is not None
 
     columns = parse(item.path.read_text(encoding="utf-8"))
     assert set(columns) == set(COLUMNS)
@@ -39,7 +54,7 @@ def test_reader_infers_hurdat2_and_signs_coordinates(tmp_path: Path) -> None:
     pytest.importorskip("pandas")
     (item,) = fetch(
         default_registry().get("noaa:hurdat2"),
-        build_query(basin="atlantic"),
+        build_query(basin="atlantic", revision=READABLE),
         root=tmp_path,
     )
     frame = item.open()
