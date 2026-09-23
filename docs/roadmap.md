@@ -130,12 +130,13 @@ the last workstream before 1.0 ([versioning](versioning.md)). The anonymous
 surface has stopped moving: v0.23.0 through v0.25.0 changed neither the
 manifest, the lockfile, nor the `Provider` interface. Adding credentials will
 change that interface, so the two-release clock for 1.0 starts after it ships.
-[ADR 0039](adr/0039-credentialed-sources.md) proposes the rules: keys come from
-the environment, the core checks them before any request, and no key reaches an
-asset, a lockfile, provenance, cached bytes, or an error message. Probing the
-service showed its responses echo the key and vary between identical requests,
-so the adapter writes a canonical form. Accept the ADR before starting the
-adapter.
+[ADR 0039](adr/0039-credentialed-sources.md) sets the rules. Keys come from
+the environment, and the core checks them before any request. No key reaches an
+asset, a lockfile, provenance, cached bytes, or an error message. A pinned entry
+restores from the mirror without a key. Probing the service showed its responses
+echo the key and vary between identical requests, so the adapter writes a
+canonical form. The contract changes and their checks come first, then the
+`epa:aqs-daily` adapter, then one example.
 
 ## Next
 

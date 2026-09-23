@@ -1,7 +1,8 @@
 # 0039: Credentials come from the environment and never reach a pin
 
-Status: proposed. Date: 2026-09-23. Extends
-[ADR 0027](0027-provider-contract.md).
+Status: accepted. Date: 2026-09-23. Extends
+[ADR 0027](0027-provider-contract.md) and
+[ADR 0030](0030-content-addressed-mirror.md).
 
 ## Context
 
@@ -40,9 +41,10 @@ environment variable it reports.
 `USDATA_<SYSTEM>_<FIELD>`: `USDATA_AQS_EMAIL` and `USDATA_AQS_KEY`. A manifest
 never holds one; an adapter's parameter model has no field for them, so
 `-p key=…` or `params: {key: …}` is the usual unknown-parameter error, with a
-hint naming the variable. A credentials file, keyring support, or
-`.env` loading is left to the user's shell or tooling for now. Any of them can be
-added later in the core without changing an adapter.
+hint naming the variable. A credentials file, keyring support, and `.env`
+loading are left to the user's shell or secret manager: `op run`, direnv, and
+CI secrets all deliver environment variables already. Because the core
+resolves credentials, a file can be added later without changing an adapter.
 
 **The registry declares them.** A dataset entry gains an optional `credentials`
 block: the variable names it requires and the URL where a key is issued. The
@@ -63,6 +65,20 @@ or empty, `load_adapter` raises `MissingCredentials`, a `QueryError` subclass
 `pull` checks every source that will contact its service before fetching any
 source, as it already does for parameters. A locked restore that the cache
 satisfies contacts nothing and needs no key.
+
+**A pinned entry can restore from the mirror without a key.** When a locked
+restore reaches an entry the cache cannot supply, its source's credentials are
+missing, and `USDATA_MIRROR_URL` is set, restore skips the source and fetches
+`<mirror>/sha256/<checksum>` directly. It verifies the object against the same
+pin and reports it under `mirrored`, as ADR 0030 does for a source that no longer
+serves its bytes. Only an entry the mirror also lacks raises
+`MissingCredentials`. Resolution, `--update`, and `--force` always need the key,
+since they must ask the service. The key authorizes contact with the service,
+not the data: the data is public domain, and the pinned bytes are credential-free
+and checksummed. Without a key, restore cannot check whether upstream has
+changed, which is the drift ADR 0030 refused to hide by serving the mirror
+first. The result therefore says those entries were not checked against their
+source.
 
 **Credentials never reach a pin, a file, or a message.** Four rules follow, and
 the contract checks in `usdata.testing` verify all of them for any adapter whose
@@ -86,9 +102,14 @@ and raised exception for those values:
    changes the canonical bytes, and still surfaces as drift.
 3. Transport errors are re-raised with credentials redacted from the URL and the
    message, inside the adapter, before they leave `list_assets` or `fetch`.
-4. `Provenance` gains `credentials: list[str]`: the names of the variables a
-   fetch used, never their values. Empty for anonymous sources, so earlier
-   lockfiles and sidecars read unchanged.
+4. `Provenance` gains `credentials: list[str]`: the names of the variables
+   the source requires to fetch this file, never their values. The names are
+   fixed by convention and identical for every user, so they reveal nothing
+   about who fetched the file. They tell a reader of one standalone sidecar
+   what they would need to fetch it again, even if the registry later changes.
+   The list is the same whether the bytes came from the service or the mirror.
+   It is empty for anonymous sources, so earlier lockfiles and sidecars read
+   unchanged.
 
 **Diagnostics.** `doctor` reports each declared credential variable as set or
 unset for the datasets that need it, and never prints its value. `cite` needs no
@@ -114,9 +135,16 @@ most ten per minute, with a pause between them.
 - **Convert AQS responses to CSV.** It would reuse the CSV reader, but it is a
   format normalization the roadmap keeps out of scope. The canonical JSON stays
   what the service sent, minus two header fields.
-- **A credentials file or keyring from the start.** A second source of truth and,
-  for keyring, a dependency. Environment variables work with every secret
-  manager and CI system, and a file can be layered on later in the core alone.
+- **A credentials file or keyring from the start.** A file needs a format, a
+  default location, permission checks, and rules for which source wins: a
+  second source of truth. Keyring adds a dependency. Environment variables work
+  with every secret manager and CI system, and a file can be added later in the
+  core alone.
+- **Fail a keyless restore instead of using the mirror.** Stricter, but it would
+  make the AQS example the only one a reader cannot restore without
+  registering, for bytes that are public and already verified by checksum.
+- **Record a boolean in provenance.** Smaller, but its only advantage was
+  revealing less about local setup, and fixed variable names reveal nothing.
 
 ## Consequences
 
@@ -125,10 +153,11 @@ published contract (ADR 0027). The versioning page's "two minor releases
 without contract changes" clock for 1.0 starts after it. Anonymous adapters are
 unaffected: `credentials` defaults to empty, and their bytes stay exact.
 
-A shared manifest and lockfile stay useful to someone without a key. Anyone
-holding the cache can restore every pinned file, and so could the mirror if a
-later decision lets a missing key fall back to it. Only contacting the service
-needs a key of one's own.
+A shared manifest and lockfile stay useful to someone without a key: the cache,
+or the mirror for the objects it holds, restores every pinned file. The project
+mirror holds what the committed example lockfiles pin, so the AQS example and
+the weekly restore job need no key to restore. Only contacting the service needs
+a key of one's own.
 
 The canonical-bytes rule is the first time the core accepts bytes an adapter
 reshaped for a reason other than subsetting. It is limited to what cannot be
@@ -138,16 +167,3 @@ parses the same way as the service's, not the service's exact text.
 Census (a key on every request) and NASA (earthaccess) are expected to fit these
 rules. If one does not, that is a later amendment, not a reason to widen this
 one in advance.
-
-## Open questions for review
-
-1. **Mirror fallback without a key.** Should a locked restore with no key fall
-   back to a configured mirror for entries it cannot restore from the cache,
-   rather than failing with `MissingCredentials`? That would make ADR 0030's
-   fallback serve a new purpose; this record leaves the answer as "fail" until
-   decided.
-2. **Provenance detail.** Recording variable names (proposed) versus a single
-   `authenticated: true`. Names tell a reader of one standalone sidecar what
-   they would need; a boolean is smaller and leaks less about local setup.
-3. **Environment only.** Whether a credentials file belongs in the first
-   release after all, for users who do not manage environment variables.
