@@ -2950,12 +2950,12 @@
       "guide": "https://docs.usdata.dev/providers/usgs-earthquakes/",
       "reference": "https://docs.usdata.dev/generated/catalog/usgs/earthquakes/",
       "page": "https://usdata.dev/datasets/usgs/earthquakes/",
-      "walkthrough": "examples/datasets/usgs-earthquakes/README.md",
+      "walkthrough": "examples/datasets/usgs-earthquakes/usgs-earthquakes.ipynb",
       "studies": [],
       "quickstart": {
-        "cli": "usdata fetch usgs:earthquakes \\\n  --location Oklahoma \\\n  --start 2024-05-06 \\\n  --end 2024-05-07 \\\n  -p min_magnitude=1.0",
-        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"usgs:earthquakes\"),\n    build_query(\n        location=\"Oklahoma\",\n        start=\"2024-05-06\",\n        end=\"2024-05-07\",\n        min_magnitude=1.0,\n    ),\n)\ndata = items[0].open()\n",
-        "manifest": "name: oklahoma-earthquakes\nsources:\n  - name: quakes\n    dataset: usgs:earthquakes\n    location: Oklahoma\n    start: 2024-05-06\n    end: 2024-05-07\n    params:\n      min_magnitude: 1.0\n"
+        "cli": "usdata fetch usgs:earthquakes \\\n  --location Oklahoma \\\n  --start 2000-01-01 \\\n  --end 2024-12-31 \\\n  -p min_magnitude=3.0",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"usgs:earthquakes\"),\n    build_query(\n        location=\"Oklahoma\",\n        start=\"2000-01-01\",\n        end=\"2024-12-31\",\n        min_magnitude=3.0,\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: oklahoma-earthquakes\nsources:\n  - name: quakes\n    dataset: usgs:earthquakes\n    # Oklahoma's bounding box, so the edges of Kansas, Texas, and Arkansas count too.\n    location: Oklahoma\n    start: 2000-01-01\n    end: 2024-12-31\n    params:\n      min_magnitude: 3.0\n"
       }
     },
     {

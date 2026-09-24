@@ -1392,7 +1392,7 @@ datasets:
     reader: pandas
     guide: docs/providers/usgs-earthquakes.md
     examples:
-      - examples/datasets/usgs-earthquakes/README.md
+      - examples/datasets/usgs-earthquakes/usgs-earthquakes.ipynb
     resolution:
       spatial: "Point epicenters in decimal degrees, as located by the contributing network"
       temporal: "Origin times to the millisecond"
