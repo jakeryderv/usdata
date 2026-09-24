@@ -3027,11 +3027,15 @@
       "guide": "https://docs.usdata.dev/providers/usgs-water-daily/",
       "reference": "https://docs.usdata.dev/providers/usgs-water-daily/#reference",
       "page": "https://usdata.dev/datasets/usgs/water-daily/",
-      "walkthrough": null,
+      "walkthrough": "examples/datasets/usgs-water-daily/usgs-water-daily.ipynb",
       "studies": [
         "weather-and-streamflow"
       ],
-      "quickstart": null
+      "quickstart": {
+        "cli": "usdata fetch usgs:water-daily \\\n  --start 2023-10-01 \\\n  --end 2024-09-30 \\\n  --vars 00060 \\\n  -p sites=07164500 \\\n  -p statistic_id=00003",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"usgs:water-daily\"),\n    build_query(\n        start=\"2023-10-01\",\n        end=\"2024-09-30\",\n        variables=[\"00060\"],\n        sites=\"07164500\",\n        statistic_id=\"00003\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: tulsa-streamflow\nsources:\n  - dataset: usgs:water-daily\n    start: 2023-10-01\n    end: 2024-09-30\n    variables: [\"00060\"]\n    params:\n      sites: \"07164500\"\n      statistic_id: \"00003\"\n"
+      }
     },
     {
       "id": "usgs:3dep-elevation",
