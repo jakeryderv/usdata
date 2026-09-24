@@ -54,9 +54,9 @@ schema verified against the adapters
 files ([ADR 0028](adr/0028-partial-grib2-fetch-through-index-files.md)),
 `doctor`, `cache`, `inspect`, and `cite`, named manifest sources, priced
 dry runs, and the
-[severe-weather case study](https://usdata.dev/examples/severe-weather-case-study/)
+[severe-weather case study](https://usdata.dev/studies/severe-weather-case-study/)
 that absorbs the smaller tornado examples. The
-[worked examples](https://usdata.dev/examples/) are the usage record for a
+[worked examples](https://usdata.dev/studies/) are the usage record for a
 release: each one states the question it answers and what was awkward while
 answering it ([ADR 0025](adr/0025-examples-as-usage-review.md)). The grib extra
 is still unchecked on macOS, where ecCodes must be installed separately.
@@ -83,7 +83,7 @@ keeps the place a location resolved
 ([ADR 0034](adr/0034-query-keeps-the-resolved-place.md)), and the adapter's
 window and place rules are in
 [ADR 0035](adr/0035-openfema-window-and-place-rules.md). Its
-[worked example](https://usdata.dev/examples/disaster-declarations/) joins an
+[worked example](https://usdata.dev/studies/disaster-declarations/) joins an
 evening's tornado counties to the declaration in force.
 
 The sibling tables of two datasets already in the catalog shipped in v0.22.0,
@@ -102,12 +102,12 @@ before a tornado its warning was issued. It is also the test of whether
 it has already found a gap: a county's code there needs the state's postal
 code, which `Place` did not carry and now does. Its window and county rules are in
 [ADR 0036](adr/0036-nws-events-by-issuance-and-county.md), and its
-[worked example](https://usdata.dev/examples/warning-lead-time/) finds the
+[worked example](https://usdata.dev/studies/warning-lead-time/) finds the
 warning in effect when the Osage County EF4 began.
 
 Shipped in v0.23.0: hourly normals through `period: hourly` on
 `noaa:climate-normals`, with a one-airport
-[hourly temperature comparison](https://usdata.dev/examples/hourly-anomalies/).
+[hourly temperature comparison](https://usdata.dev/studies/hourly-anomalies/).
 The extension preserves calendar-day selection and local-standard-time labels
 ([ADR 0037](adr/0037-hourly-normals-calendar-days.md)); the example makes its
 ten-minute observation matching tolerance explicit and verifies restoration
@@ -115,7 +115,7 @@ into an empty cache.
 
 Shipped in v0.24.0: CO-OPS observed currents
 ([issue 264](https://github.com/jakeryderv/usdata/issues/264)), with one
-explicit station and bin and a [Cape Henry example](https://usdata.dev/examples/coastal-currents/)
+explicit station and bin and a [Cape Henry example](https://usdata.dev/datasets/noaa/coops-currents/)
 that reports gaps and verifies restoration. Bin depth is dated metadata context,
 not inferred from the bin number.
 
@@ -133,7 +133,7 @@ asset, a lockfile, provenance, cached bytes, or an error message, and a pinned
 entry restores from the mirror without a key. AQS responses echo the key and
 vary between identical requests, so the adapter writes a canonical form
 ([ADR 0040](adr/0040-aqs-daily-selection.md)). The
-[wildfire-smoke example](https://usdata.dev/examples/wildfire-smoke/) pins New
+[wildfire-smoke example](https://usdata.dev/studies/wildfire-smoke/) pins New
 York City's PM2.5 through the June 2023 smoke. The same release lets
 `noaa:hurdat2` name a revision, since the newest Atlantic file has upstream
 typos ([ADR 0038](adr/0038-named-hurdat2-revisions.md)).

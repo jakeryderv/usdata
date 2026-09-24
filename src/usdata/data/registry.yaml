@@ -94,10 +94,10 @@ datasets:
     reader: radar
     guide: docs/providers/noaa-nexrad.md
     examples:
-      - examples/radar-reflectivity/example.ipynb
-      - examples/event-context/example.ipynb
-      - examples/tornado-classification/example.ipynb
-      - examples/severe-weather-case-study/example.ipynb
+      - examples/datasets/noaa-nexrad-level2/noaa-nexrad-level2.ipynb
+      - examples/studies/event-context/event-context.ipynb
+      - examples/studies/tornado-classification/tornado-classification.ipynb
+      - examples/studies/severe-weather-case-study/severe-weather-case-study.ipynb
     resolution:
       temporal: >-
         One volume scan every 4, 5, 6, or 10 minutes, set by the volume coverage pattern
@@ -139,7 +139,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-ghcn.md
     examples:
-      - examples/weather-and-streamflow/example.ipynb
+      - examples/studies/weather-and-streamflow/weather-and-streamflow.ipynb
     resolution:
       spatial: >-
         Land surface stations; more than 100,000 stations in 180 countries and territories
@@ -187,7 +187,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-coastwatch.md
     examples:
-      - examples/sst-analysis/example.ipynb
+      - examples/datasets/noaa-coastwatch-sst/noaa-coastwatch-sst.ipynb
     resolution:
       spatial: "0.05 degree global grid, about 5 km"
       temporal: "Daily"
@@ -228,9 +228,9 @@ datasets:
     reader: netcdf
     guide: docs/providers/noaa-goes.md
     examples:
-      - examples/goes-imagery/example.ipynb
-      - examples/goes-mesoscale/example.ipynb
-      - examples/event-context/example.ipynb
+      - examples/datasets/noaa-goes-abi/noaa-goes-abi.ipynb
+      - examples/studies/goes-mesoscale/goes-mesoscale.ipynb
+      - examples/studies/event-context/event-context.ipynb
     resolution:
       spatial: "0.5 km to 2 km at nadir, by ABI band"
       temporal: "CONUS every 5 minutes; two mesoscale sectors every 60 seconds or one every 30 seconds"
@@ -270,9 +270,9 @@ datasets:
     reader: netcdf
     guide: docs/providers/noaa-glm.md
     examples:
-      - examples/glm-flashes/example.ipynb
-      - examples/tornado-classification/example.ipynb
-      - examples/severe-weather-case-study/example.ipynb
+      - examples/datasets/noaa-goes-glm/noaa-goes-glm.ipynb
+      - examples/studies/tornado-classification/tornado-classification.ipynb
+      - examples/studies/severe-weather-case-study/severe-weather-case-study.ipynb
     resolution:
       spatial: "8 to 14 km across the instrument's field of view"
       temporal: "One detection file every 20 seconds"
@@ -327,10 +327,12 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-storm-events.md
     examples:
-      - examples/storm-events/example.ipynb
-      - examples/event-context/example.ipynb
-      - examples/tornado-classification/example.ipynb
-      - examples/severe-weather-case-study/example.ipynb
+      - examples/datasets/noaa-storm-events/noaa-storm-events.ipynb
+      - examples/studies/event-context/event-context.ipynb
+      - examples/studies/tornado-classification/tornado-classification.ipynb
+      - examples/studies/severe-weather-case-study/severe-weather-case-study.ipynb
+      - examples/studies/warning-lead-time/README.md
+      - examples/studies/disaster-declarations/README.md
     resolution:
       spatial: "One record per county, forecast zone, or marine zone touched by an event"
       temporal: >-
@@ -378,8 +380,8 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-spc-tornado.md
     examples:
-      - examples/spc-tornadoes/README.md
-      - examples/severe-weather-case-study/example.ipynb
+      - examples/datasets/noaa-spc-tornado-reports/README.md
+      - examples/studies/severe-weather-case-study/severe-weather-case-study.ipynb
     resolution:
       spatial: >-
         One row per tornado or per state and county segment, with start and end coordinates
@@ -441,8 +443,8 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-hurdat2.md
     examples:
-      - examples/hurdat2/README.md
-      - examples/storm-surge/example.ipynb
+      - examples/datasets/noaa-hurdat2/README.md
+      - examples/studies/storm-surge/storm-surge.ipynb
     resolution:
       spatial: "Best-track positions in tenths of a degree"
       temporal: "Six-hourly synoptic times, plus asynoptic records for landfalls and extremes"
@@ -509,7 +511,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-ibtracs.md
     examples:
-      - examples/ibtracs/README.md
+      - examples/datasets/noaa-ibtracs/README.md
     resolution:
       spatial: "Positions to a tenth of a degree"
       temporal: "Three-hourly points, interpolated between the agencies' six-hourly best tracks"
@@ -575,8 +577,8 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-coops.md
     examples:
-      - examples/coastal-water-levels/README.md
-      - examples/storm-surge/example.ipynb
+      - examples/datasets/noaa-coops-water-levels/README.md
+      - examples/studies/storm-surge/storm-surge.ipynb
     resolution:
       spatial: "One National Water Level Observation Network station per request"
       temporal: "Six minutes"
@@ -624,7 +626,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-coops-predictions.md
     examples:
-      - examples/storm-surge/example.ipynb
+      - examples/studies/storm-surge/storm-surge.ipynb
     resolution:
       spatial: "One tide station per request"
       temporal: >-
@@ -669,7 +671,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-coops-currents.md
     examples:
-      - examples/coastal-currents/example.ipynb
+      - examples/datasets/noaa-coops-currents/noaa-coops-currents.ipynb
     resolution:
       spatial: One current-meter station and bin per request; bin depths depend on deployment
       temporal: Six-minute observations
@@ -709,8 +711,8 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-gsom.md
     examples:
-      - examples/monthly-climate/example.ipynb
-      - examples/climate-anomalies/example.ipynb
+      - examples/datasets/noaa-gsom/noaa-gsom.ipynb
+      - examples/studies/climate-anomalies/climate-anomalies.ipynb
     spatial_extent: { west: -180.0, south: -90.0, east: 180.0, north: 90.0 }
     resolution:
       spatial: "Land surface stations, derived from GHCN-Daily"
@@ -750,7 +752,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-gsoy.md
     examples:
-      - examples/annual-climate/README.md
+      - examples/datasets/noaa-gsoy/README.md
     spatial_extent: { west: -180.0, south: -90.0, east: 180.0, north: 90.0 }
     resolution:
       spatial: "Land surface stations, derived from GHCN-Daily"
@@ -796,9 +798,9 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-normals.md
     examples:
-      - examples/climate-normals/README.md
-      - examples/climate-anomalies/example.ipynb
-      - examples/hourly-anomalies/example.ipynb
+      - examples/datasets/noaa-climate-normals/README.md
+      - examples/studies/climate-anomalies/climate-anomalies.ipynb
+      - examples/studies/hourly-anomalies/hourly-anomalies.ipynb
     resolution:
       spatial: "U.S. land surface stations with 1991-2020 normals coverage"
       temporal: >-
@@ -852,9 +854,9 @@ datasets:
     reader: grib
     guide: docs/providers/noaa-mrms.md
     examples:
-      - examples/mrms-rotation/example.ipynb
-      - examples/tornado-classification/example.ipynb
-      - examples/severe-weather-case-study/example.ipynb
+      - examples/datasets/noaa-mrms/noaa-mrms.ipynb
+      - examples/studies/tornado-classification/tornado-classification.ipynb
+      - examples/studies/severe-weather-case-study/severe-weather-case-study.ipynb
     resolution:
       spatial: "0.01 degree CONUS grid (3,500 x 7,000 points); 0.005 degree for rotation tracks"
       temporal: "Two minutes; the two-hour rotation tracks are written hourly"
@@ -916,7 +918,7 @@ datasets:
     reader: null
     guide: docs/providers/noaa-nexrad-level3.md
     examples:
-      - examples/radar-products/README.md
+      - examples/datasets/noaa-nexrad-level3/README.md
     resolution:
       temporal: "One file per product per volume scan; roughly 120 to 390 per product per day"
     update_frequency: "Files appear as the Unidata feed captures them, and coverage has gaps"
@@ -977,8 +979,8 @@ datasets:
     reader: grib
     guide: docs/providers/noaa-hrrr.md
     examples:
-      - examples/hrrr-environment/example.ipynb
-      - examples/severe-weather-case-study/example.ipynb
+      - examples/datasets/noaa-hrrr/noaa-hrrr.ipynb
+      - examples/studies/severe-weather-case-study/severe-weather-case-study.ipynb
     resolution:
       spatial: "3 km Lambert conformal CONUS grid, 1799 x 1059 points"
       temporal: >-
@@ -1028,7 +1030,7 @@ datasets:
     reader: grib
     guide: docs/providers/noaa-gfs.md
     examples:
-      - examples/gfs-environment/README.md
+      - examples/datasets/noaa-gfs/README.md
     resolution:
       spatial: "0.25, 0.5, or 1 degree global latitude-longitude grid, chosen with resolution"
       temporal: "Hourly to 120 then three-hourly to 384 at 0p25; three-hourly at 0p50 and 1p00"
@@ -1080,7 +1082,7 @@ datasets:
     reader: grib
     guide: docs/providers/noaa-nbm.md
     examples:
-      - examples/nbm-forecast/README.md
+      - examples/datasets/noaa-nbm/README.md
     resolution:
       spatial: "2.5 km Lambert conformal CONUS grid, 2345 x 1597 points; separate Alaska, Hawaii, Puerto Rico, and Guam grids"
       temporal: >-
@@ -1189,8 +1191,8 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-lcd.md
     examples:
-      - examples/hourly-observations/README.md
-      - examples/hourly-anomalies/example.ipynb
+      - examples/datasets/noaa-lcd/README.md
+      - examples/studies/hourly-anomalies/hourly-anomalies.ipynb
     resolution:
       spatial: "Airport and first-order stations, addressed by eleven-digit station id"
       temporal: "Hourly, special, and synoptic reports, plus daily and monthly summaries"
@@ -1348,7 +1350,7 @@ datasets:
     reader: pandas
     guide: docs/providers/usgs-water-daily.md
     examples:
-      - examples/weather-and-streamflow/example.ipynb
+      - examples/studies/weather-and-streamflow/weather-and-streamflow.ipynb
     resolution:
       spatial: "USGS monitoring locations, one site per record"
       temporal: "Daily"
@@ -1390,7 +1392,7 @@ datasets:
     reader: pandas
     guide: docs/providers/usgs-earthquakes.md
     examples:
-      - examples/earthquakes/README.md
+      - examples/datasets/usgs-earthquakes/README.md
     resolution:
       spatial: "Point epicenters in decimal degrees, as located by the contributing network"
       temporal: "Origin times to the millisecond"
@@ -1478,7 +1480,7 @@ datasets:
     reader: pandas
     guide: docs/providers/epa-aqs-daily.md
     examples:
-      - examples/wildfire-smoke/README.md
+      - examples/studies/wildfire-smoke/README.md
     resolution:
       spatial: Regulatory monitoring sites operated by state, local, and tribal agencies
       temporal: Daily summaries of each monitor's samples, one row per pollutant standard
@@ -1608,7 +1610,7 @@ datasets:
     reader: grib
     guide: docs/providers/noaa-rap.md
     examples:
-      - examples/rap-environment/README.md
+      - examples/datasets/noaa-rap/README.md
     resolution:
       spatial: "13 km Lambert conformal CONUS grid, 451 x 337 points, for the awp130 family"
       temporal: >-
@@ -1687,7 +1689,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-nws-vtec-events.md
     examples:
-      - examples/warning-lead-time/README.md
+      - examples/studies/warning-lead-time/README.md
     resolution:
       spatial: "One county, parish, or forecast zone per request, by NWS UGC code"
       temporal: "Issuance and expiry to the minute"
@@ -1814,7 +1816,7 @@ datasets:
     reader: pandas
     guide: docs/providers/fema-disaster-declarations.md
     examples:
-      - examples/disaster-declarations/README.md
+      - examples/studies/disaster-declarations/README.md
     resolution:
       spatial: "One row per designated area: a county or county equivalent, a tribal area, or a whole state"
       temporal: "Calendar dates for the declaration and for the start and end of the incident"

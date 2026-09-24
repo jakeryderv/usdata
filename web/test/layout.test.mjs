@@ -6,7 +6,7 @@ import { NAV, nav } from "../layout.mjs";
 const links = html => [...html.matchAll(/<nav aria-label="Main navigation">([\s\S]*?)<\/nav>/g)].map(match => [...match[1].matchAll(/<a href="([^"]+)"[^>]*>([^<]+)<\/a>/g)].map(link => [link[2], link[1]]));
 
 test("handwritten pages share the generated pages' navigation, tokens, and fonts", async () => {
-  for (const name of ["index.html", "404.html", "datasets/index.html"]) {
+  for (const name of ["index.html", "404.html"]) {
     const html = await readFile(new URL(`../public/${name}`, import.meta.url), "utf8");
     assert.deepEqual(links(html), [NAV], name);
     assert.match(html, /href="\/tokens\.css"/, `${name}: tokens.css`);

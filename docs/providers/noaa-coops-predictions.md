@@ -37,7 +37,7 @@ timezone remain explicit in the provenance source URL. Predictions are computed
 from harmonic constituents, not observed, so they carry no quality flags and
 never contain gaps. NOAA occasionally revises a station's constituents, after
 which the same request returns different bytes. The
-[storm-surge notebook](https://usdata.dev/examples/storm-surge/) subtracts
+[storm-surge notebook](https://usdata.dev/studies/storm-surge/) subtracts
 predictions from observations during Hurricane Helene.
 
 See the [service research notes](noaa-services.md#co-ops-tide-predictions) for dated upstream probes.

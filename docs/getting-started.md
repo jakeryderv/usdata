@@ -107,7 +107,7 @@ See [manifests and lockfiles](concepts/manifests.md) before intentionally refres
 | Explore query options and the fetch loop | [Fetch and analyze](guides/fetch-and-analyze.md) |
 | Repeat an analysis with pinned inputs | [Pin inputs](guides/pin-inputs.md) |
 | Cite the inputs in a methods section | [Cite what you used](concepts/manifests.md#cite-what-you-used) |
-| Learn through saved data and plots | [Examples](https://usdata.dev/examples/) |
+| Learn through saved data and plots | [Examples](https://usdata.dev/studies/) |
 | Understand a provider's query limits | [Provider notes](providers/README.md) |
 | Find an exact Python argument | [Python API](reference/api.md) |
 

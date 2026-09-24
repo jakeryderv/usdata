@@ -104,7 +104,7 @@ coordinates, not a shared identifier.
 
 See the [service research notes](noaa-services.md#spc-tornado-reports) for dated
 upstream probes and the
-[example manifest](https://usdata.dev/examples/spc-tornadoes/) for one year's
+[example manifest](https://usdata.dev/datasets/noaa/spc-tornado-reports/) for one year's
 tornado counts by rating.
 
 ## Metadata sources

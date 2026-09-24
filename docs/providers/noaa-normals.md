@@ -46,7 +46,7 @@ usdata fetch noaa:climate-normals -p period=hourly -p stations=USW00013967 \
 values for May 6 at `USW00013967` converted correctly from Fahrenheit to
 Celsius under `units=metric`. This does not establish conversion correctness
 for other hourly variables. NCEI documents `-9999` as missing or insufficient
-data; mask it before arithmetic. The [hourly anomalies example](https://usdata.dev/examples/hourly-anomalies/)
+data; mask it before arithmetic. The [hourly anomalies example](https://usdata.dev/studies/hourly-anomalies/)
 matches routine LCD observations to the nearest normal within ten minutes,
 reports unmatched values, and verifies restoration into a fresh cache.
 
@@ -73,7 +73,7 @@ Celsius. Two failures were reproduced on 2026-09-11 at `USW00013967` and
 - **`MLY-TAVG-NORMAL` is not converted at all.** It returns the same
   space-padded degrees-Fahrenheit value under both `units=metric` and
   `units=standard`. Convert it yourself before comparing it with Celsius
-  observations, as the [anomalies notebook](https://usdata.dev/examples/climate-anomalies/)
+  observations, as the [anomalies notebook](https://usdata.dev/studies/climate-anomalies/)
   does.
 - **Derived temperature quantities are converted as absolute temperatures.**
   The diurnal range `*-DUTR-*` and the `*-STDDEV` codes are differences in

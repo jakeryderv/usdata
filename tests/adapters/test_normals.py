@@ -169,7 +169,9 @@ def test_invalid_queries_rejected_before_client_creation(kwargs, monkeypatch) ->
 @pytest.mark.l2
 def test_normals_example_uses_existing_csv_reader(tmp_path: Path) -> None:
     pytest.importorskip("pandas")
-    example = Path(__file__).resolve().parents[2] / "examples/climate-normals/dataset.yaml"
+    example = (
+        Path(__file__).resolve().parents[2] / "examples/datasets/noaa-climate-normals/dataset.yaml"
+    )
     manifest = tmp_path / "dataset.yaml"
     manifest.write_bytes(example.read_bytes())
     source = (

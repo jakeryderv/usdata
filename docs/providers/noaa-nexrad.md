@@ -25,7 +25,7 @@ See [archive and station metadata notes](noaa-services.md#access-notes).
 The optional `usdata[radar]` reader opens local scans with xradar; an explicit
 zero-based `sweep` chooses a sweep. See [reader limits](../reference/readers.md),
 [temporal selection](../reference/selection.md), and the
-[executed radar example](https://usdata.dev/examples/radar-reflectivity/).
+[executed radar example](https://usdata.dev/datasets/noaa/nexrad-level2/).
 
 ## Metadata sources
 
@@ -43,7 +43,7 @@ rather than estimated.
   Dissemination](https://www.noaa.gov/information-technology/open-data-dissemination)
   statement it quotes.
 - Variables: the sweep field table in the [executed radar
-  example](https://usdata.dev/examples/radar-reflectivity/), as the `radar` reader names
+  example](https://usdata.dev/datasets/noaa/nexrad-level2/), as the `radar` reader names
   the moments.
 - Longest query window: `MAX_WINDOW` in `usdata.providers.noaa.nexrad`.
 - Spatial resolution and latency are empty: the NCEI page refers gate and azimuth

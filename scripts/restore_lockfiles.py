@@ -123,7 +123,7 @@ def main() -> None:
         "--manifest",
         action="append",
         default=[],
-        help="pinned example slug (glm-flashes) or repository-relative manifest path; repeatable",
+        help="pinned example folder (noaa-goes-glm) or repository-relative manifest; repeatable",
     )
     parser.add_argument("--output-dir", type=Path, default=ROOT / "reports/restore")
     parser.add_argument(

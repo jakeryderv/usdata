@@ -12,7 +12,8 @@ GOES-R ABI Cloud and Moisture Imagery.
 - Selection: Whole single-channel scenes by inclusive UTC scan-start time and explicit mesoscale sector
 - Required inputs: Satellite, channel, both timestamps; product and sector for mesoscale
 - Open locally: `usdata[netcdf]` · [Reader guide](../../../reference/readers.md)
-- Examples: [What did a satellite see in infrared?](https://usdata.dev/examples/goes-imagery/); [How did central Plains infrared cloud patterns change over fifteen minutes?](https://usdata.dev/examples/goes-mesoscale/); [What did radar and satellites show around a reported tornado?](https://usdata.dev/examples/event-context/)
+- On usdata.dev: [GOES CONUS and mesoscale imagery](https://usdata.dev/datasets/noaa/goes-abi/), with a walkthrough
+- Studies: [How did central Plains infrared cloud patterns change over fifteen minutes?](https://usdata.dev/studies/goes-mesoscale/); [What did radar and satellites show around a reported tornado?](https://usdata.dev/studies/event-context/)
 
 ## Parameters
 

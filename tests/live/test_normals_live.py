@@ -39,7 +39,9 @@ def test_daily_window_ignores_the_year(tmp_path: Path) -> None:
 
 
 def test_monthly_example_restore(tmp_path: Path) -> None:
-    example = Path(__file__).resolve().parents[2] / "examples/climate-normals/dataset.yaml"
+    example = (
+        Path(__file__).resolve().parents[2] / "examples/datasets/noaa-climate-normals/dataset.yaml"
+    )
     manifest = tmp_path / "dataset.yaml"
     manifest.write_bytes(example.read_bytes())
     result = pull(manifest, root=tmp_path / "cache")
@@ -57,7 +59,7 @@ def test_monthly_example_restore(tmp_path: Path) -> None:
 
 
 def test_hourly_example_restore(tmp_path: Path) -> None:
-    example = Path(__file__).resolve().parents[2] / "examples/hourly-anomalies/dataset.yaml"
+    example = Path(__file__).resolve().parents[2] / "examples/studies/hourly-anomalies/dataset.yaml"
     manifest = tmp_path / "dataset.yaml"
     manifest.write_bytes(example.read_bytes())
     first = pull(manifest, root=tmp_path / "cache")

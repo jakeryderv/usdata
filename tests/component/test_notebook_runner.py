@@ -168,10 +168,10 @@ def test_live_inventory_discovers_new_examples_and_excludes_checkpoints(monkeypa
     live.mkdir(parents=True)
     (live / "test_new_live.py").touch()
     (live / "test_mrms_live.py").touch()
-    example = tmp_path / "examples/new/example.ipynb"
+    example = tmp_path / "examples/studies/new/new.ipynb"
     example.parent.mkdir(parents=True)
     example.touch()
-    checkpoint = example.parent / ".ipynb_checkpoints/example.ipynb"
+    checkpoint = example.parent / ".ipynb_checkpoints/new.ipynb"
     checkpoint.parent.mkdir()
     checkpoint.touch()
     data = ci_inventory.inventory(tmp_path)
@@ -179,13 +179,18 @@ def test_live_inventory_discovers_new_examples_and_excludes_checkpoints(monkeypa
         {"id": "test_mrms_live", "path": "tests/live/test_mrms_live.py", "extra": "grib"},
         {"id": "test_new_live", "path": "tests/live/test_new_live.py", "extra": "core"},
     ]
-    assert data["notebooks"] == [{"id": "example-0", "path": "examples/new/example.ipynb"}]
+    assert data["notebooks"] == [{"id": "example-0", "path": "examples/studies/new/new.ipynb"}]
     assert data["restores"] == []
     (tmp_path / "examples/catalog.json").write_text(
-        json.dumps([{"slug": "new", "title": "Q?", "summary": "A.", "pinned": True}])
+        json.dumps(
+            {
+                "studies": [{"slug": "new", "title": "Q?", "summary": "A."}],
+                "pinned": ["studies/new"],
+            }
+        )
     )
     assert ci_inventory.inventory(tmp_path)["restores"] == [
-        {"id": "new", "path": "examples/new/dataset.yaml"}
+        {"id": "new", "path": "examples/studies/new/dataset.yaml"}
     ]
 
 
@@ -199,11 +204,11 @@ def test_inventory_focus_rejects_unknown_and_ambiguous_targets(monkeypatch):
     assert focused["notebooks"] == []
     assert select_inventory(data, "all") == data
     assert select_inventory(data, "minimum") == {"live": [], "notebooks": [], "restores": []}
-    notebook = select_inventory(data, "notebooks", "sst-analysis")
+    notebook = select_inventory(data, "notebooks", "noaa-coastwatch-sst")
     assert len(notebook["notebooks"]) == 1 and not notebook["live"] and not notebook["restores"]
-    restore = select_inventory(data, "restores", "glm-flashes")
+    restore = select_inventory(data, "restores", "noaa-goes-glm")
     assert restore["restores"] == [
-        {"id": "glm-flashes", "path": "examples/glm-flashes/dataset.yaml"}
+        {"id": "noaa-goes-glm", "path": "examples/datasets/noaa-goes-glm/dataset.yaml"}
     ]
     assert not restore["live"] and not restore["notebooks"]
     for scope, target in [("all", "coops"), ("minimum", "coops"), ("live", "$(echo x)")]:
@@ -216,24 +221,26 @@ def test_inventory_focus_rejects_unknown_and_ambiguous_targets(monkeypatch):
 
 def test_notebook_selection_accepts_slugs_and_paths_and_names_what_was_typed(runner, tmp_path):
     paths = [
-        tmp_path / "examples/glm-flashes/glm-flashes.ipynb",
-        tmp_path / "examples/sst-analysis/sst-analysis.ipynb",
+        tmp_path / "examples/datasets/noaa-goes-glm/noaa-goes-glm.ipynb",
+        tmp_path / "examples/studies/storm-surge/storm-surge.ipynb",
     ]
     for path in paths:
         path.parent.mkdir(parents=True)
         path.touch()
     resolve = runner.resolve_notebooks
 
-    assert resolve(["glm-flashes"], paths, root=tmp_path) == [paths[0]]
-    assert resolve(["examples/sst-analysis/sst-analysis.ipynb"], paths, root=tmp_path) == [paths[1]]
+    assert resolve(["noaa-goes-glm"], paths, root=tmp_path) == [paths[0]]
+    assert resolve(["examples/studies/storm-surge/storm-surge.ipynb"], paths, root=tmp_path) == [
+        paths[1]
+    ]
     # Repeats collapse and results keep inventory order, not the order typed.
-    assert resolve(["sst-analysis", "glm-flashes", "sst-analysis"], paths, root=tmp_path) == paths
+    assert resolve(["storm-surge", "noaa-goes-glm", "storm-surge"], paths, root=tmp_path) == paths
 
     with pytest.raises(ValueError) as raised:
-        resolve(["glm_flashes"], paths, root=tmp_path)
+        resolve(["goes_glm"], paths, root=tmp_path)
     message = str(raised.value)
-    assert "glm_flashes" in message
-    assert "slug" in message and "examples/glm-flashes/glm-flashes.ipynb" in message
+    assert "goes_glm" in message
+    assert "folder" in message and "examples/datasets/noaa-goes-glm/noaa-goes-glm.ipynb" in message
 
 
 def test_runner_carries_a_committed_lockfile_only_for_pinned_examples(runner, tmp_path):

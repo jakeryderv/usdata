@@ -12,7 +12,8 @@ SPC Tornado Reports.
 - Selection: Whole annual, half-decade, or decade files of one table; filter rows locally after downloading
 - Required inputs: Both dates (selects the files covering those years); optionally table
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [How many tornadoes did 2024 bring, by rating?](https://usdata.dev/examples/spc-tornadoes/); [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/examples/severe-weather-case-study/)
+- On usdata.dev: [SPC tornado, hail, and wind databases](https://usdata.dev/datasets/noaa/spc-tornado-reports/), with a walkthrough
+- Studies: [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/studies/severe-weather-case-study/)
 
 ## Parameters
 

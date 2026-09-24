@@ -151,11 +151,11 @@ def run_notebooks(
 
 
 def resolve_notebooks(names: list[str], paths: list[Path], *, root: Path = ROOT) -> list[Path]:
-    """The subset of ``paths`` that ``names`` selects, by example slug or by path.
+    """The subset of ``paths`` that ``names`` selects, by example folder or by path.
 
-    A slug is an example folder name, such as ``glm-flashes``, and selects every
+    A folder name, such as ``noaa-goes-glm`` or ``storm-surge``, selects the
     notebook in it; a path is repository-relative, such as
-    ``examples/glm-flashes/glm-flashes.ipynb``. Results keep the order of
+    ``examples/datasets/noaa-goes-glm/noaa-goes-glm.ipynb``. Results keep the order of
     ``paths`` and repeats collapse. A name that selects nothing raises
     ``ValueError`` quoting exactly what was typed.
     """
@@ -177,8 +177,8 @@ def resolve_notebooks(names: list[str], paths: list[Path], *, root: Path = ROOT)
     if unknown:
         raise ValueError(
             f"unknown example notebook(s): {', '.join(unknown)}; "
-            "name an example slug (glm-flashes) or a repository-relative path "
-            "(examples/glm-flashes/glm-flashes.ipynb)"
+            "name an example folder (noaa-goes-glm) or a repository-relative path "
+            "(examples/datasets/noaa-goes-glm/noaa-goes-glm.ipynb)"
         )
     return [path for path in paths if path in selected]
 
@@ -192,7 +192,7 @@ def main() -> None:
         "--notebook",
         action="append",
         default=[],
-        help="example slug (glm-flashes) or repository-relative path; repeatable",
+        help="example folder (noaa-goes-glm) or repository-relative path; repeatable",
     )
     parser.add_argument("--output-dir", type=Path, default=ROOT / "reports/notebooks")
     parser.add_argument(

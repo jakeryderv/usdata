@@ -12,7 +12,7 @@ CO-OPS Observed Currents.
 - Selection: Native six-minute observations for one station and explicit bin; at most 28 days
 - Required inputs: Alphanumeric station, positive bin, and both minute-aligned timestamps
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [How did currents change at Cape Henry on 6 May 2025?](https://usdata.dev/examples/coastal-currents/)
+- On usdata.dev: [Coastal current speed and direction](https://usdata.dev/datasets/noaa/coops-currents/), with a walkthrough
 
 ## Parameters
 

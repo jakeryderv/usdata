@@ -84,7 +84,7 @@ directory are kept and counted in the summary, so pruning never breaks a
 `usdata verify`; `--include-pinned` removes them too. Pair either with
 `--dry-run` to see what would go first.
 
-The [SST example](https://usdata.dev/examples/sst-analysis/) fetches a small
+The [SST example](https://usdata.dev/datasets/noaa/coastwatch-sst/) fetches a small
 gridded CSV and opens it with units;
-[monthly climate](https://usdata.dev/examples/monthly-climate/) does the same
+[monthly climate](https://usdata.dev/datasets/noaa/gsom/) does the same
 for station summaries.

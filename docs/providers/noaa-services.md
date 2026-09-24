@@ -496,7 +496,7 @@ curl --get 'https://www.ncei.noaa.gov/access/services/data/v1' \
 
 The search probe used the same annual bounds, `dataTypes=PRCP,TAVG`,
 `bbox=35.40,-97.62,35.38,-97.58`, `limit=1`, and `offset=0`; it found
-`USW00013967`. The [annual climate example](https://usdata.dev/examples/annual-climate/)
+`USW00013967`. The [annual climate example](https://usdata.dev/datasets/noaa/gsoy/)
 provides a small manifest and local CSV analysis. Live checks independently
 exercise discovery and checksum-verified restoration.
 
@@ -571,7 +571,7 @@ curl --get 'https://www.ncei.noaa.gov/access/services/data/v1' \
   --data-urlencode 'includeStationLocation=1'
 ```
 
-The [climate normals example](https://usdata.dev/examples/climate-normals/) provides
+The [climate normals example](https://usdata.dev/datasets/noaa/climate-normals/) provides
 a small manifest and local CSV analysis. Live checks exercise discovery, a
 daily window that spans February 29, and checksum-verified restoration.
 

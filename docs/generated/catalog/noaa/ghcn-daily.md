@@ -12,7 +12,8 @@ GHCN-Daily Station Observations.
 - Selection: Station observations within inclusive calendar dates; selected elements
 - Required inputs: Both dates; station IDs or a geographic query
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [How can I preserve weather and streamflow inputs together?](https://usdata.dev/examples/weather-and-streamflow/)
+- On usdata.dev: [Daily station weather](https://usdata.dev/datasets/noaa/ghcn-daily/)
+- Studies: [How can I preserve weather and streamflow inputs together?](https://usdata.dev/studies/weather-and-streamflow/)
 
 ## Parameters
 

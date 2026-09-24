@@ -119,7 +119,7 @@ def test_no_matching_stations_is_empty(adapter) -> None:
 @pytest.mark.l2
 def test_annual_example_uses_existing_csv_reader(tmp_path: Path) -> None:
     pytest.importorskip("pandas")
-    example = Path(__file__).resolve().parents[2] / "examples/annual-climate/dataset.yaml"
+    example = Path(__file__).resolve().parents[2] / "examples/datasets/noaa-gsoy/dataset.yaml"
     manifest = tmp_path / "dataset.yaml"
     manifest.write_bytes(example.read_bytes())
     source = b'"STATION","DATE","PRCP","TAVG"\n"USW00013967","2024","900.0","18.0"\n'

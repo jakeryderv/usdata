@@ -12,7 +12,7 @@ NEXRAD Level III Products.
 - Selection: Whole product files by site, product code, and inclusive UTC scan time since 2020-03-30
 - Required inputs: Both timestamps; product codes; radar IDs or a geographic query
 - Open locally: Local files; no bundled reader for this format
-- Examples: [Which derived radar products did KTLX publish around a tornado report?](https://usdata.dev/examples/radar-products/)
+- On usdata.dev: [NEXRAD derived radar products](https://usdata.dev/datasets/noaa/nexrad-level3/), with a walkthrough
 
 ## Parameters
 

@@ -94,7 +94,7 @@ Python 3.11 in a fresh environment, retaining the resolved versions. This probes
 core lower bounds with current compatible transitive dependencies; it does not
 claim minimum-version coverage for optional scientific stacks.
 
-`just run-notebooks --notebook examples/goes-imagery/example.ipynb` selects one
+`just run-notebooks --notebook examples/datasets/noaa-goes-abi/noaa-goes-abi.ipynb` selects one
 example (repeat the flag for more). Executions retain partial notebooks, error
 traces, timings, and `summary.json` in ignored `reports/notebooks/`; use
 `--output-dir` to choose another report directory. A failed example does not
@@ -127,8 +127,8 @@ whole selected scope. Examples from a checkout with the GitHub CLI:
 
 ```sh
 gh workflow run integration.yml -f scope=live -f target=coops
-gh workflow run integration.yml -f scope=notebooks -f target=sst-analysis
-gh workflow run integration.yml -f scope=restores -f target=glm-flashes
+gh workflow run integration.yml -f scope=notebooks -f target=noaa-coastwatch-sst
+gh workflow run integration.yml -f scope=restores -f target=noaa-goes-glm
 gh workflow run integration.yml -f scope=minimum
 gh workflow run integration.yml -f scope=all
 ```

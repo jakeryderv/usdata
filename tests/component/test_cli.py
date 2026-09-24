@@ -190,7 +190,10 @@ def test_info_shows_what_a_dataset_delivers_and_needs() -> None:
     assert "reader:    usdata[pandas]" in result.stdout
     assert "selection: Station observations within inclusive calendar dates" in result.stdout
     assert "inputs:    Both dates; station IDs or a geographic query" in result.stdout
-    assert "examples:  examples/weather-and-streamflow/example.ipynb" in result.stdout
+    assert (
+        "examples:  examples/studies/weather-and-streamflow/weather-and-streamflow.ipynb"
+        in result.stdout
+    )
 
 
 def test_info_says_none_for_a_dataset_with_no_reader() -> None:

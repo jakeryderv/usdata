@@ -14,7 +14,7 @@ pytestmark = pytest.mark.live
 
 def test_lcd_reports_and_daily_summaries_restore(tmp_path: Path) -> None:
     manifest = tmp_path / "dataset.yaml"
-    example = Path(__file__).resolve().parents[2] / "examples/hourly-observations/dataset.yaml"
+    example = Path(__file__).resolve().parents[2] / "examples/datasets/noaa-lcd/dataset.yaml"
     manifest.write_bytes(example.read_bytes())
     result = pull(manifest, root=tmp_path / "cache")
     (item,) = result.fetched

@@ -15,7 +15,9 @@ import re
 import sys
 import tomllib
 from collections import Counter
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+
+import yaml
 
 from usdata.models import LATER, Dataset, ProviderInfo, Status, describe_duration
 from usdata.providers import adapter_class
@@ -240,6 +242,7 @@ def check_usage_metadata(registry: Registry, root: Path = ROOT) -> None:
         if guide in guides:
             raise ValueError(f"{ds.id}: each dataset needs its own usage guide")
         guides.add(guide)
+    check_example_relationships(registry, root)
 
 
 _ONES = [
@@ -354,23 +357,111 @@ def usage_link(ds: Dataset) -> str:
     return f"[Usage guide]({relative})."
 
 
+WEBSITE = "https://usdata.dev/"
+EXAMPLE_KINDS = ("datasets", "studies")
+
+
+def example_folder(path: str) -> tuple[str, str]:
+    """The kind (``datasets`` or ``studies``) and folder name of an example file (ADR 0041)."""
+    parts = PurePosixPath(path).parts
+    if len(parts) != 4 or parts[0] != "examples" or parts[1] not in EXAMPLE_KINDS:
+        raise ValueError(f"{path}: examples live in examples/datasets/ or examples/studies/")
+    return parts[1], parts[2]
+
+
+def walkthrough_folder(ds: Dataset) -> str:
+    """The one folder a dataset's walkthrough can live in."""
+    return f"{ds.provider}-{ds.name}"
+
+
+def dataset_page_url(ds: Dataset) -> str:
+    """The website page for an implemented dataset."""
+    return f"{WEBSITE}datasets/{ds.provider}/{ds.name}/"
+
+
 def example_url(path: str) -> str:
     """Each maintained example folder has one canonical website page."""
-    return f"https://usdata.dev/examples/{Path(path).parent.name}/"
+    kind, folder = example_folder(path)
+    if kind == "studies":
+        return f"{WEBSITE}studies/{folder}/"
+    provider, _, name = folder.partition("-")
+    return f"{WEBSITE}datasets/{provider}/{name}/"
 
 
-def example_title(path: str, root: Path = ROOT) -> str:
-    """The title the examples index gives the folder holding ``path``."""
-    slug = Path(path).parent.name
-    catalog = json.loads((root / "examples/catalog.json").read_text(encoding="utf-8"))
-    for entry in catalog:
+def load_catalog(root: Path = ROOT) -> dict[str, list]:
+    return json.loads((root / "examples/catalog.json").read_text(encoding="utf-8"))
+
+
+def study_title(slug: str, root: Path = ROOT) -> str:
+    """The question a study's catalog entry asks."""
+    for entry in load_catalog(root)["studies"]:
         if entry["slug"] == slug:
             return entry["title"]
-    raise ValueError(f"{path}: example folder {slug!r} is not in examples/catalog.json")
+    raise ValueError(f"study {slug!r} is not in examples/catalog.json")
+
+
+def walkthrough_of(ds: Dataset) -> str | None:
+    """The dataset's walkthrough file, which the registry lists first, if it has one."""
+    first = ds.examples[0] if ds.examples else None
+    return first if first and example_folder(first)[0] == "datasets" else None
+
+
+def studies_of(ds: Dataset) -> list[str]:
+    """The study folders whose manifests use this dataset, in registry order."""
+    return [example_folder(path)[1] for path in ds.examples if example_folder(path)[0] == "studies"]
+
+
+def check_example_relationships(registry: Registry, root: Path = ROOT) -> None:
+    """The registry, the example folders, and each study's manifest agree (ADR 0041).
+
+    A dataset lists only its own walkthrough, first, and must list it once the
+    folder exists; it lists every study whose manifest names it and no other.
+    """
+    catalog = load_catalog(root)
+    studies = [entry["slug"] for entry in catalog["studies"]]
+    folders = {
+        kind: sorted(p.name for p in (root / "examples" / kind).iterdir() if p.is_dir())
+        for kind in EXAMPLE_KINDS
+    }
+    if sorted(studies) != folders["studies"] or len(set(studies)) != len(studies):
+        raise ValueError("examples/catalog.json must list every study folder exactly once")
+    for folder in catalog["pinned"]:
+        if not (root / "examples" / folder / "dataset.yaml").is_file():
+            raise ValueError(f"pinned example {folder!r} has no dataset.yaml")
+    listed: dict[str, set[str]] = {slug: set() for slug in studies}
+    implemented = {walkthrough_folder(ds): ds for ds in registry if ds.status is Status.AVAILABLE}
+    for folder in folders["datasets"]:
+        if folder not in implemented:
+            raise ValueError(f"examples/datasets/{folder}: no implemented dataset has this folder")
+    for ds in implemented.values():
+        kinds = [example_folder(path) for path in ds.examples]
+        own = walkthrough_folder(ds)
+        walkthroughs = [folder for kind, folder in kinds if kind == "datasets"]
+        if walkthroughs and (walkthroughs != [own] or kinds[0] != ("datasets", own)):
+            raise ValueError(
+                f"{ds.id}: list only its own walkthrough, examples/datasets/{own}/, first"
+            )
+        if own in folders["datasets"] and not walkthroughs:
+            raise ValueError(f"{ds.id}: examples/datasets/{own}/ exists but is not listed")
+        for kind, folder in kinds:
+            if kind == "studies":
+                if folder not in listed:
+                    raise ValueError(f"{ds.id}: study {folder!r} is not in examples/catalog.json")
+                listed[folder].add(ds.id)
+    for slug in studies:
+        manifest = yaml.safe_load((root / "examples/studies" / slug / "dataset.yaml").read_text())
+        used = {source["dataset"] for source in manifest["sources"]}
+        if used != listed[slug]:
+            raise ValueError(
+                f"study {slug}: its manifest uses {sorted(used)} but the registry links "
+                f"{sorted(listed[slug])}; list the study under exactly the datasets it uses"
+            )
 
 
 def render_dataset(registry: Registry, ds: Dataset) -> str:
-    examples = "; ".join(f"[{example_title(path)}]({example_url(path)})" for path in ds.examples)
+    studies = "; ".join(
+        f"[{study_title(slug)}]({WEBSITE}studies/{slug}/)" for slug in studies_of(ds)
+    )
     reader = (
         f"`usdata[{ds.reader}]` · [Reader guide](../../../reference/readers.md)"
         if ds.reader
@@ -397,7 +488,9 @@ def render_dataset(registry: Registry, ds: Dataset) -> str:
         f"- Required inputs: {required(ds, 'inputs')}",
         *_credentials_line(ds),
         f"- Open locally: {reader}",
-        f"- Examples: {examples}",
+        f"- On usdata.dev: [{required(ds, 'summary')}]({dataset_page_url(ds)})"
+        + (", with a walkthrough" if walkthrough_of(ds) else ""),
+        *([f"- Studies: {studies}"] if studies else []),
         "",
         "## Parameters",
         "",

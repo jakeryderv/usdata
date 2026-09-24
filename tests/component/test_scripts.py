@@ -29,9 +29,20 @@ def test_website_catalog_matches_registry_and_release_availability(monkeypatch) 
     registry = Registry.bundled()
     assert records.keys() == {dataset.id for dataset in registry}
     assert records["noaa:hurdat2"]["availability"] == "Released"
-    assert records["noaa:hurdat2"]["examples"][0]["url"].endswith("/examples/hurdat2/")
+    hurdat2 = records["noaa:hurdat2"]
+    assert hurdat2["page"] == "https://usdata.dev/datasets/noaa/hurdat2/"
+    assert hurdat2["walkthrough"].startswith("examples/datasets/noaa-hurdat2/")
+    assert "storm-surge" in hurdat2["studies"]
+    # The quick start is the walkthrough's own manifest, never an invented query.
+    assert (
+        hurdat2["quickstart"]["manifest"]
+        == (ROOT / "examples/datasets/noaa-hurdat2/dataset.yaml").read_text()
+    )
+    assert hurdat2["quickstart"]["cli"].startswith("usdata fetch noaa:hurdat2 -p basin=atlantic")
+    assert 'get("noaa:hurdat2")' in hurdat2["quickstart"]["python"]
     assert records["nasa:gpm-imerg"]["availability"] == "Planned"
-    assert records["nasa:gpm-imerg"]["examples"] == []
+    assert records["nasa:gpm-imerg"]["page"] is None
+    assert records["nasa:gpm-imerg"]["studies"] == []
     # A checkout implementing a future dataset must not advertise it as released.
     renderer = importlib.import_module("render_registry")
     monkeypatch.setattr(renderer, "PACKAGE_VERSION", "0.11.0")
@@ -374,12 +385,17 @@ def test_catalog_generator_owns_only_generated_directory():
 
 
 def _checkout(root, registry):
-    """A tree holding just the guide and example files the registry entries name."""
+    """A tree holding the guide and example files the registry names, the example
+    index, and every example manifest, which the relationship check reads."""
     for dataset in registry:
         for name in [*dataset.examples, *([dataset.guide] if dataset.guide else [])]:
             path = root / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("placeholder\n")
+    for source in [ROOT / "examples/catalog.json", *(ROOT / "examples").glob("*/*/dataset.yaml")]:
+        target = root / source.relative_to(ROOT)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(source.read_bytes())
 
 
 def _with(dataset_id, **updates):
@@ -401,6 +417,27 @@ def _with(dataset_id, **updates):
         ("noaa:gsom", {"guide": "docs/providers/noaa-ghcn.md"}, "own usage guide"),
         ("noaa:gsom", {"guide": "docs/providers/./noaa-ghcn.md"}, "own usage guide"),
         ("nasa:gpm-imerg", {"summary": "Planned rainfall"}, "only for implemented datasets"),
+        (
+            "noaa:gsom",
+            {
+                "examples": [
+                    "examples/studies/climate-anomalies/climate-anomalies.ipynb",
+                    "examples/datasets/noaa-gsom/noaa-gsom.ipynb",
+                ]
+            },
+            "only its own walkthrough",
+        ),
+        (
+            "noaa:ghcn-daily",
+            {"examples": ["examples/datasets/noaa-gsom/noaa-gsom.ipynb"]},
+            "only its own walkthrough",
+        ),
+        (
+            "noaa:hurdat2",
+            {"examples": ["examples/datasets/noaa-hurdat2/README.md"]},
+            "study storm-surge: its manifest uses",
+        ),
+        ("noaa:gsoy", {"examples": ["examples/studies/storm-surge/storm-surge.ipynb"]}, "exists"),
     ],
 )
 def test_usage_metadata_rejects_undocumented_or_missing_files(

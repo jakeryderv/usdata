@@ -12,7 +12,8 @@ GOES Geostationary Lightning Mapper.
 - Selection: Whole 20-second detection files by inclusive UTC file-start time, at most one day
 - Required inputs: Satellite and both timestamps
 - Open locally: `usdata[netcdf]` · [Reader guide](../../../reference/readers.md)
-- Examples: [Did lightning near the storm pick up before the Oklahoma City tornado report?](https://usdata.dev/examples/glm-flashes/); [Which severe reports came with rotation and lightning?](https://usdata.dev/examples/tornado-classification/); [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/examples/severe-weather-case-study/)
+- On usdata.dev: [GOES lightning detections](https://usdata.dev/datasets/noaa/goes-glm/), with a walkthrough
+- Studies: [Which severe reports came with rotation and lightning?](https://usdata.dev/studies/tornado-classification/); [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/studies/severe-weather-case-study/)
 
 ## Parameters
 

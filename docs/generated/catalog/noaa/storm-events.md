@@ -12,7 +12,8 @@ Storm Events Database.
 - Selection: Whole annual archives of one table; filter rows locally after downloading
 - Required inputs: Both dates (selects the containing years); optionally table
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [What severe weather was reported in Oklahoma?](https://usdata.dev/examples/storm-events/); [What did radar and satellites show around a reported tornado?](https://usdata.dev/examples/event-context/); [Which severe reports came with rotation and lightning?](https://usdata.dev/examples/tornado-classification/); [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/examples/severe-weather-case-study/)
+- On usdata.dev: [Storm Events details, fatalities, and locations](https://usdata.dev/datasets/noaa/storm-events/), with a walkthrough
+- Studies: [What did radar and satellites show around a reported tornado?](https://usdata.dev/studies/event-context/); [Which severe reports came with rotation and lightning?](https://usdata.dev/studies/tornado-classification/); [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/studies/severe-weather-case-study/); [How long before the 6 May 2024 Osage County tornado was a tornado warning issued?](https://usdata.dev/studies/warning-lead-time/); [Which Oklahoma counties hit by a tornado on 6 May 2024 were under a federal disaster declaration?](https://usdata.dev/studies/disaster-declarations/)
 
 ## Parameters
 

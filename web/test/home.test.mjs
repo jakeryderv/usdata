@@ -15,7 +15,7 @@ test("the homepage only links to and embeds files that exist on the built site",
     await buildSite(output);
     const html = await readFile(join(root, "web/public/index.html"), "utf8");
     assert.equal((html.match(/<h1[ >]/g) ?? []).length, 1);
-    assert.match(html, /<img[^>]+src="\/examples\/[^"]+\.png"/);
+    assert.match(html, /<img[^>]+src="\/studies\/[^"]+\.png"/);
     for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
       const url = new URL(match[1], "https://usdata.dev/");
       if (url.origin !== "https://usdata.dev") continue;

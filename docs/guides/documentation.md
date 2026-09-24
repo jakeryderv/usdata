@@ -58,8 +58,8 @@ MkDocs configuration. Final HTML lives in ignored `.build/docs-site/`.
 | Dataset facts | `src/usdata/data/registry.yaml`; run `just docs` afterward |
 | API signatures and descriptions | Python code and docstrings selected by `docs/reference/api.md` |
 | CLI reference | Typer app in `src/usdata/cli/` |
-| Runnable examples and saved plots | `examples/`, published on `usdata.dev/examples/` |
-| Example index questions and summaries | `examples/catalog.json` |
+| Walkthroughs, studies, and saved plots | `examples/datasets/` and `examples/studies/`, published on `usdata.dev` |
+| Study questions and summaries, and the pinned list | `examples/catalog.json` |
 | Upcoming changes | Release-note fragments under `changes/` |
 
 `docs/generated/catalog/` is committed generated Markdown. Never add prose to it.
@@ -69,26 +69,29 @@ selection rules, required inputs, the reader extra, and example sources.
 
 `scripts/generate_docs.py` regenerates only the catalog, CLI reference, and
 upcoming changes. It removes the former disposable `docs/examples/` output so
-existing checkouts cannot accidentally republish it. All examples now have one
-canonical page at `https://usdata.dev/examples/<example>/`.
+existing checkouts cannot accidentally republish it. A walkthrough is shown on
+its dataset's page, `https://usdata.dev/datasets/<provider>/<name>/`, and a
+study has its own page, `https://usdata.dev/studies/<slug>/`
+([ADR 0041](../adr/0041-dataset-walkthroughs-and-studies.md)).
 
-The main website build reads the maintained example READMEs and saved notebooks,
-renders their tables and plots, and copies notebook and manifest downloads into
-`web/dist/examples/`. Notebook pages include the README as expandable run
-instructions; manifest-only pages show it directly. No notebook cells execute
-during a site build, and source outputs, manifests, and lockfiles stay untouched.
+The main website build reads the saved notebooks, renders their tables and
+plots, and copies notebook, manifest, and pinned lockfile downloads beside each
+page. No notebook cells execute during a site build, and source outputs,
+manifests, and lockfiles stay untouched.
 
 Root README, contribution, security, license, and changelog files stay on
 GitHub and are not copied into documentation.
 
 ## Examples
 
-An example is written question-first. Its README title is the question a
-student or analyst would ask, decided before touching the tool, and the
-notebook or manifest answers it. The same question is the example's entry in
-`examples/catalog.json`.
+Every released dataset has one walkthrough, in
+`examples/datasets/<provider>-<name>/`, following the template in
+[`examples/README.md`](https://github.com/jakeryderv/usdata/blob/main/examples/README.md#writing-a-walkthrough-or-a-study).
+A study is written question-first: its title is the question a student or
+analyst would ask, decided before touching the tool, and the notebook answers
+it. The same question is the study's entry in `examples/catalog.json`.
 
-Each README ends with a short section titled "What was awkward", listing the
+Each notebook ends with a short section titled "What was awkward", listing the
 places the author had to work around the tool or the data while answering the
 question. Every entry there is an issue candidate. This is where usage friction
 is recorded, in place of the retired per-release first-use review
@@ -99,16 +102,17 @@ then guards it.
 ## Links and validation
 
 Use normal relative Markdown links between docs pages. Links to repository files
-outside `docs/` should use their GitHub URLs, or canonical `https://usdata.dev/examples/`
-pages for examples. In example READMEs and notebook Markdown, use absolute
-`https://docs.usdata.dev/` URLs for documentation and `https://usdata.dev/examples/`
-URLs for other example pages so links work in both the source checkout and the
-website. Same-folder `dataset.yaml` and `example.ipynb` links are downloads.
+outside `docs/` should use their GitHub URLs, or canonical `https://usdata.dev/studies/`
+pages for examples. In notebook Markdown, use absolute
+`https://docs.usdata.dev/` URLs for documentation and `https://usdata.dev/`
+dataset and study URLs for other examples, so links work in both the source
+checkout and the website. Same-folder `dataset.yaml` and notebook links are
+downloads.
 
 Strict builds check local links and anchors. They do not fetch external links.
 Keep Mermaid diagrams in fenced blocks next to their explanation; inspect them
 and notebook images in a browser after changes.
 
-See the [example refresh workflow](https://usdata.dev/examples/) for updating saved
+See the [example refresh workflow](https://usdata.dev/studies/) for updating saved
 outputs, [versioning](../versioning.md) for releases, and
 [website operations](website-operations.md) for deployment.

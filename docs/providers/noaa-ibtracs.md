@@ -126,7 +126,7 @@ aircraft reconnaissance flew: counting storms per decade in the Indian Ocean
 measures observing systems more than climate. A Southern Hemisphere `SEASON`
 is the year it ends in: the 2025 South Indian season runs from late 2024.
 
-The [manifest example](https://usdata.dev/examples/ibtracs/) pulls the
+The [manifest example](https://usdata.dev/datasets/noaa/ibtracs/) pulls the
 `last3years` file and ranks the strongest recent storms with the provisional
 tracks labelled. See the [service research notes](noaa-services.md#ibtracs-global-best-tracks)
 for dated upstream probes.

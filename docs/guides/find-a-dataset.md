@@ -78,7 +78,7 @@ Three things to read before fetching a dataset for the first time:
 
 --8<-- "_snippets/planned-datasets.md"
 
-The [SPC tornadoes example](https://usdata.dev/examples/spc-tornadoes/) is a
+The [SPC tornadoes example](https://usdata.dev/datasets/noaa/spc-tornado-reports/) is a
 one-file dataset with no parameters; the
-[MRMS rotation example](https://usdata.dev/examples/mrms-rotation/) shows a
+[MRMS rotation example](https://usdata.dev/datasets/noaa/mrms/) shows a
 product parameter and a tight window.

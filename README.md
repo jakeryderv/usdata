@@ -64,9 +64,9 @@ breaking changes.
 
 | | |
 | --- | --- |
-| [usdata.dev](https://usdata.dev/) | What it is for: the [dataset browser](https://usdata.dev/datasets/) and [worked examples](https://usdata.dev/examples/) with saved results |
+| [usdata.dev](https://usdata.dev/) | What it is for: the [dataset browser](https://usdata.dev/datasets/) and [worked examples](https://usdata.dev/studies/) with saved results |
 | [docs.usdata.dev](https://docs.usdata.dev/) | How to use it: [install](https://docs.usdata.dev/install/), [getting started](https://docs.usdata.dev/getting-started/), guides, dataset notes, and reference |
-| [Severe-weather case study](https://usdata.dev/examples/severe-weather-case-study/) | One tornado, six sources, one manifest and lockfile, ending in a citation |
+| [Severe-weather case study](https://usdata.dev/studies/severe-weather-case-study/) | One tornado, six sources, one manifest and lockfile, ending in a citation |
 
 Twenty-seven datasets are available today and nineteen more are planned, grouped
 by agency and product family in the [catalog](docs/providers/README.md).
