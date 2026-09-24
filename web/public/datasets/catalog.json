@@ -456,12 +456,12 @@
         {
           "name": "loss",
           "units": null,
-          "description": "Property loss: a 0 to 9 category before 1996, millions of dollars from 1996"
+          "description": "Property loss: a 0 to 9 category before 1996, millions of dollars 1996 to 2015, whole dollars from 2016"
         },
         {
           "name": "closs",
-          "units": "millions of dollars",
-          "description": "Crop loss"
+          "units": null,
+          "description": "Crop loss: millions of dollars through 2015, whole dollars from 2016"
         },
         {
           "name": "slat",

@@ -36,8 +36,8 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `mag` | — | Tornado: F scale through January 2007 and EF scale afterwards, -9 unknown. Hail: size in inches. Wind: speed in knots |
 | `inj` | count | Injuries |
 | `fat` | count | Fatalities |
-| `loss` | — | Property loss: a 0 to 9 category before 1996, millions of dollars from 1996 |
-| `closs` | millions of dollars | Crop loss |
+| `loss` | — | Property loss: a 0 to 9 category before 1996, millions of dollars 1996 to 2015, whole dollars from 2016 |
+| `closs` | — | Crop loss: millions of dollars through 2015, whole dollars from 2016 |
 | `slat` | degrees_north | Start latitude |
 | `slon` | degrees_east | Start longitude |
 | `elat` | degrees_north | End latitude |
