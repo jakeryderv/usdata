@@ -1,21 +1,19 @@
-# SPC tornado, hail, and wind databases
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:spc-tornado-reports` · **Released** · Included since usdata 0.15.
+## Reference
 
-SPC Tornado Reports.
+`noaa:spc-tornado-reports` · **Released** · Included since usdata 0.15. SPC Tornado Reports.
 
-## At a glance
+### At a glance
 
 - Files: CSV
 - Selection: Whole annual, half-decade, or decade files of one table; filter rows locally after downloading
 - Required inputs: Both dates (selects the files covering those years); optionally table
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [SPC tornado, hail, and wind databases](https://usdata.dev/datasets/noaa/spc-tornado-reports/), with a walkthrough
 - Studies: [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/studies/severe-weather-case-study/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -23,7 +21,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 |---|---|
 | `table` | Report table: torn (default, from 1950), hail (from 1955), or wind (from 1955); mag is the F/EF rating, inches, or knots respectively. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -36,8 +34,8 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `mag` | — | Tornado: F scale through January 2007 and EF scale afterwards, -9 unknown. Hail: size in inches. Wind: speed in knots |
 | `inj` | count | Injuries |
 | `fat` | count | Fatalities |
-| `loss` | — | Property loss: a 0 to 9 category before 1996, millions of dollars from 1996 |
-| `closs` | millions of dollars | Crop loss |
+| `loss` | — | Property loss: a 0 to 9 category before 1996, millions of dollars 1996 to 2015, whole dollars from 2016 |
+| `closs` | — | Crop loss: millions of dollars through 2015, whole dollars from 2016 |
 | `slat` | degrees_north | Start latitude |
 | `slon` | degrees_east | Start longitude |
 | `elat` | degrees_north | End latitude |
@@ -47,11 +45,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `sg` | — | Segment code: 1 a whole track, 2 a state segment, -9 extra county codes |
 | `mt` | — | Wind only, from 2006: EG estimated gust, MG measured gust, MS measured sustained, ES estimated sustained |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-spc-tornado.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.15
 - Domain: Severe weather
@@ -66,5 +60,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `http`
 - Adapter: `usdata.providers.noaa.spc:SpcTornadoReports`
-
-[All NOAA datasets](../noaa.md).

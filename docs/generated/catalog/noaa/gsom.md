@@ -1,21 +1,19 @@
-# Monthly station climate
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:gsom` · **Released** · Included since usdata 0.7.
+## Reference
 
-Global Summary of the Month.
+`noaa:gsom` · **Released** · Included since usdata 0.7. Global Summary of the Month.
 
-## At a glance
+### At a glance
 
 - Files: CSV
 - Selection: Complete UTC calendar months touched by the query; station and element filters
 - Required inputs: Both dates; station IDs or a geographic query
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [Monthly station climate](https://usdata.dev/datasets/noaa/gsom/), with a walkthrough
 - Studies: [Was 2024 warmer or wetter than normal?](https://usdata.dev/studies/climate-anomalies/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -24,18 +22,14 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `stations` | Station ids, comma-separated or a list; otherwise a location selects them. |
 | `units` | metric (default) or standard. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
 | `PRCP` | mm | Monthly precipitation total (metric units) |
 | `TAVG` | degrees Celsius | Monthly mean temperature (metric units) |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-gsom.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.7
 - Domain: Surface weather
@@ -50,5 +44,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `http`
 - Adapter: `usdata.providers.noaa.gsom:GlobalSummaryMonthly`
-
-[All NOAA datasets](../noaa.md).
