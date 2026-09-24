@@ -1,18 +1,7 @@
 :root {
-  color-scheme: dark;
-  --bg: #0a0a0b;
-  --surface: #161618;
-  --elevated: #242428;
-  --line: #303036;
-  --primary: #2563eb;
-  --primary-hover: #3b82f6;
-  --accent: #60a5fa;
-  --text: #fafafa;
-  --muted: #a1a1aa;
-  --dim: #71717a;
-  font-family: Inter, sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  font-family: var(--us-font-sans);
+  background: var(--us-bg);
+  color: var(--us-text);
 }
 * {
   box-sizing: border-box;
@@ -22,14 +11,14 @@ body {
   line-height: 1.65;
 }
 a {
-  color: var(--accent);
+  color: var(--us-accent);
   text-underline-offset: 0.22em;
 }
 a:hover {
   text-decoration: underline;
 }
 a:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--us-accent);
   outline-offset: 5px;
 }
 .wrap {
@@ -41,7 +30,7 @@ a:focus-visible {
   justify-content: space-between;
   align-items: center;
   padding-block: 24px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--us-line);
 }
 .brand {
   display: flex;
@@ -49,7 +38,7 @@ a:focus-visible {
   gap: 12px;
   font-weight: 750;
   font-size: 1.2rem;
-  color: var(--text);
+  color: var(--us-text);
   text-decoration: none;
 }
 nav {
@@ -59,7 +48,17 @@ nav {
 }
 nav a {
   text-decoration: none;
-  color: var(--muted);
+  color: var(--us-muted);
+}
+nav a:hover,
+nav [aria-current="page"] {
+  color: var(--us-text);
+}
+nav [aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-color: var(--us-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.5em;
 }
 .hero {
   padding: 84px 0 56px;
@@ -70,7 +69,7 @@ nav a {
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.15em;
-  color: var(--accent);
+  color: var(--us-accent);
 }
 h1 {
   font-size: clamp(2.6rem, 5.7vw, 4.6rem);
@@ -82,7 +81,7 @@ h1 {
 .intro {
   max-width: 720px;
   font-size: 1.15rem;
-  color: var(--muted);
+  color: var(--us-muted);
 }
 .actions {
   display: flex;
@@ -92,24 +91,24 @@ h1 {
 }
 .button {
   padding: 12px 20px;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--us-accent);
   border-radius: 5px;
   text-decoration: none;
   font-weight: 600;
 }
 .button.primary {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #fafafa;
+  background: var(--us-primary);
+  border-color: var(--us-primary);
+  color: var(--us-on-primary);
 }
 .button.primary:hover,
 .button.primary:focus-visible {
-  background: var(--primary-hover);
-  border-color: var(--primary-hover);
+  background: var(--us-primary-hover);
+  border-color: var(--us-primary-hover);
   text-decoration: none;
 }
 .button:not(.primary):hover {
-  border-color: var(--primary-hover);
+  border-color: var(--us-primary-hover);
   text-decoration: none;
 }
 .button span {
@@ -117,12 +116,12 @@ h1 {
 }
 .terminal {
   padding: 20px 24px;
-  background: var(--elevated);
-  border: 1px solid var(--line);
+  background: var(--us-elevated);
+  border: 1px solid var(--us-line);
   border-radius: 6px;
 }
 .terminal-label {
-  color: var(--dim);
+  color: var(--us-dim);
   font-size: 0.65rem;
 }
 pre {
@@ -131,7 +130,7 @@ pre {
   font-size: 0.9rem;
 }
 code {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--us-font-mono);
 }
 .cards {
   display: grid;
@@ -139,8 +138,8 @@ code {
   gap: 20px;
 }
 .cards article {
-  border: 1px solid var(--line);
-  background: var(--surface);
+  border: 1px solid var(--us-line);
+  background: var(--us-surface);
   padding: 28px;
   border-radius: 6px;
 }
@@ -149,7 +148,7 @@ code {
   margin: 16px 0 10px;
 }
 .cards p {
-  color: var(--muted);
+  color: var(--us-muted);
   font-size: 0.94rem;
 }
 .cards a {
@@ -169,14 +168,14 @@ code {
   margin: 12px 0;
 }
 .examples p {
-  color: var(--muted);
+  color: var(--us-muted);
 }
 .examples ul {
   list-style: none;
   padding: 0;
 }
 .examples li {
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--us-line);
 }
 .examples a {
   display: flex;
@@ -191,7 +190,7 @@ code {
   align-items: start;
   margin-block: 24px 72px;
   padding-top: 56px;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--us-line);
 }
 .result h2 {
   font-size: 1.7rem;
@@ -199,7 +198,7 @@ code {
   margin: 12px 0 16px;
 }
 .result p {
-  color: var(--muted);
+  color: var(--us-muted);
 }
 .figures {
   display: grid;
@@ -210,11 +209,11 @@ code {
   display: grid;
   grid-template-columns: 9rem 1fr;
   gap: 12px;
-  border-left: 2px solid var(--accent);
+  border-left: 2px solid var(--us-accent);
   padding-left: 14px;
 }
 .figures dt {
-  color: var(--muted);
+  color: var(--us-muted);
   font-size: 0.85rem;
 }
 .figures dd {
@@ -223,8 +222,8 @@ code {
 }
 .evidence {
   padding: 16px 20px;
-  background: var(--elevated);
-  border: 1px solid var(--line);
+  background: var(--us-elevated);
+  border: 1px solid var(--us-line);
   border-radius: 6px;
   font-size: 0.8rem;
   margin: 20px 0;
@@ -235,54 +234,39 @@ code {
 .result img {
   width: 100%;
   height: auto;
-  border: 1px solid var(--line);
+  border: 1px solid var(--us-line);
   border-radius: 6px;
-  background: #fff;
+  background: var(--us-figure);
 }
 .result figcaption {
-  color: var(--dim);
+  color: var(--us-dim);
   font-size: 0.82rem;
   margin-top: 10px;
 }
 .status {
-  color: var(--dim);
+  color: var(--us-dim);
   font-size: 0.82rem;
   padding: 20px 0 40px;
   max-width: 850px;
 }
 footer {
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--us-line);
   padding-block: 26px;
   display: flex;
   justify-content: space-between;
   gap: 20px;
   font-size: 0.78rem;
-  color: var(--dim);
+  color: var(--us-dim);
 }
 .skip {
   position: absolute;
   top: -80px;
   left: 24px;
   padding: 12px;
-  background: var(--surface);
+  background: var(--us-surface);
 }
 .skip:focus {
   top: 8px;
-}
-@media (prefers-color-scheme: light) {
-  :root {
-    color-scheme: light;
-    --bg: #fafafa;
-    --surface: #f4f4f5;
-    --elevated: #ffffff;
-    --line: #e4e4e7;
-    --primary: #2563eb;
-    --primary-hover: #1d4ed8;
-    --accent: #1d4ed8;
-    --text: #0a0a0b;
-    --muted: #52525b;
-    --dim: #71717a;
-  }
 }
 @media (max-width: 680px) {
   .header {

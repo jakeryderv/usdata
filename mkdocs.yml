@@ -90,6 +90,7 @@ exclude_docs: |
   reviews/
   _snippets/
 extra_css:
+- assets/tokens.css
 - assets/usdata.css
 plugins:
 - search

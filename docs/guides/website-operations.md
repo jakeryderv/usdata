@@ -15,6 +15,8 @@ assets and 404 pages directly. Neither website reads R2 or packages HTML in the
 Python distribution. Documentation generation uses the Python docs dependency
 group; `infra/` contains only its pinned Wrangler deployment tooling and config.
 The homepage has its own Node build and deployment commands in `web/`.
+Both sites take colours, fonts, and radii from `docs/assets/tokens.css`;
+the homepage build copies it, so a colour is changed in one place.
 
 ## Build and preview
 
