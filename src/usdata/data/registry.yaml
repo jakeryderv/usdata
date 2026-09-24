@@ -918,7 +918,7 @@ datasets:
     reader: null
     guide: docs/providers/noaa-nexrad-level3.md
     examples:
-      - examples/datasets/noaa-nexrad-level3/README.md
+      - examples/datasets/noaa-nexrad-level3/noaa-nexrad-level3.ipynb
     resolution:
       temporal: "One file per product per volume scan; roughly 120 to 390 per product per day"
     update_frequency: "Files appear as the Unidata feed captures them, and coverage has gaps"
