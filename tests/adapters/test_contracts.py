@@ -17,7 +17,9 @@ import pytest
 
 from usdata import providers, testing
 from usdata.models import Query, Status
-from usdata.providers import Provider, load_adapter
+from usdata.providers import Credentials, Provider, adapter_class
+from usdata.providers.epa.aqs import SERVICE_URL as AQS_URL
+from usdata.providers.epa.aqs import canonical
 from usdata.providers.fema.declarations import SERVICE_URL as FEMA_URL
 from usdata.providers.noaa.coastwatch import BASE, DATASET
 from usdata.providers.noaa.hurdat2 import DIRECTORY_URL as HURDAT_URL
@@ -58,6 +60,7 @@ CASES = {
     "noaa:nbm": {"cycle": 12, "forecast_hour": 1},
     "fema:disaster-declarations": {"state": "OK"},
     "noaa:nws-vtec-events": {"ugc": "OKC113"},
+    "epa:aqs-daily": {"parameters": "88101", "sites": "36-081-0124"},
 }
 S3_KEYS = {
     "noaa:nexrad-level2": "2024/05/06/KTLX/KTLX20240506_120100_V06",
@@ -109,20 +112,47 @@ def timed_query(dataset_id: str) -> Query:
 
 
 def adapter_factory(dataset_id: str) -> testing.AdapterFactory:
-    """Build the adapter with its own client, or with one the caller supplies."""
+    """Build the adapter with its own client, or with one the caller supplies.
 
-    def build(client: httpx.Client | None = None) -> Provider:
+    A dataset that needs credentials gets the sentinel values unless the caller
+    passes others, so no offline test reads a real key from the environment.
+    """
+
+    def build(
+        client: httpx.Client | None = None, credentials: Credentials | None = None
+    ) -> Provider:
         dataset = default_registry().get(dataset_id)
-        adapter = load_adapter(dataset)
-        if client is None:
-            return adapter
-        constructor = cast(Callable[..., Provider], type(adapter))
-        return constructor(dataset, client=client)
+        constructor = cast(Callable[..., Provider], adapter_class(dataset))
+        options: dict[str, object] = {} if client is None else {"client": client}
+        if dataset.credentials is not None:
+            sentinels = testing.sentinel_credentials(dataset)
+            options["credentials"] = credentials if credentials is not None else sentinels
+        return constructor(dataset, **options)
 
     return build
 
 
+AQS_ROW = {"state_code": "36", "county_code": "081", "site_number": "0124", "poc": 1}
+
+
+def aqs_body(url: str) -> dict[str, object]:
+    """What the AQS service answers: the rows, with the whole request, key and all, echoed."""
+    return {
+        "Header": [
+            {
+                "status": "Success",
+                "request_time": "2026-09-23T00:00:00-04:00",
+                "url": url,
+                "rows": 1,
+            }
+        ],
+        "Data": [AQS_ROW],
+    }
+
+
 def contract_data(dataset_id: str) -> bytes:
+    if dataset_id == "epa:aqs-daily":
+        return canonical(aqs_body("https://aqs.epa.gov/data/api/dailyData/bySite"))
     if dataset_id == "noaa:coops-currents":
         return b"Date Time, Speed, Direction, Bin \n2024-05-06 12:02,17.3,285,4\n"
     if dataset_id == "noaa:coops-tide-predictions":
@@ -143,6 +173,12 @@ def contract_transport(
 
     def respond(request: httpx.Request) -> httpx.Response:
         assert request.method == "GET"
+        if str(request.url).startswith(AQS_URL):
+            # Credentials ride in the query string, so the request never equals the armed href.
+            if "param" not in request.url.params:
+                failed = {"status": "Failed", "error": ["param is missing"]}
+                return httpx.Response(400, json={"Header": [failed]})
+            return httpx.Response(503 if fail else 200, json=aqs_body(str(request.url)))
         if str(request.url) in downloads:
             return httpx.Response(503 if fail else 200, content=data)
         if dataset_id in S3_KEYS and request.url.params.get("list-type") == "2":
@@ -297,3 +333,19 @@ def test_partial_fetch_is_declared_exactly_where_the_adapter_takes_messages() ->
         with adapter_factory(dataset_id)() as adapter:
             declares = testing.PARTIAL_PARAM in adapter.accepted_params
             assert declares is registry.get(dataset_id).capabilities.partial_fetch, dataset_id
+
+
+@pytest.mark.parametrize(
+    "dataset_id", sorted(i for i in CASES if default_registry().get(i).credentials)
+)
+def test_keyed_adapters_refuse_a_missing_key_and_keep_theirs_in(dataset_id, tmp_path) -> None:
+    dataset = default_registry().get(dataset_id)
+    testing.check_credentials_required(dataset, adapter_factory(dataset_id))
+    testing.check_credentials_contained(
+        dataset,
+        adapter_factory(dataset_id),
+        query(dataset_id),
+        client_factory(dataset_id, set()),
+        failing_client_factory=client_factory(dataset_id, set(), fail=True),
+        work_dir=tmp_path,
+    )

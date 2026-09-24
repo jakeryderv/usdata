@@ -5,7 +5,7 @@ import pytest
 
 import usdata
 from usdata.models import READER_EXTRAS, BBox, Query, Status
-from usdata.providers import Provider, load_adapter
+from usdata.providers import MissingCredentials, Provider, adapter_class, load_adapter
 from usdata.providers.base import NotImplementedProvider
 from usdata.registry import DatasetNotFound, Registry, default_registry
 
@@ -86,10 +86,19 @@ def test_search_filters_by_provider_and_bbox(registry: Registry) -> None:
     assert "noaa:ghcn-daily" in ids
 
 
-def test_every_adapter_resolves_to_a_provider(registry: Registry) -> None:
+def test_every_adapter_resolves_to_a_provider(
+    registry: Registry, monkeypatch: pytest.MonkeyPatch
+) -> None:
     for ds in registry:
         if ds.status is Status.PLANNED:
             with pytest.raises(NotImplementedProvider, match="planned"):
+                load_adapter(ds)
+        elif ds.credentials is not None:
+            # Offline tests hold no key: the class resolves, and building it is refused.
+            assert issubclass(adapter_class(ds), Provider)
+            for name in ds.credentials.variables:
+                monkeypatch.delenv(name, raising=False)
+            with pytest.raises(MissingCredentials):
                 load_adapter(ds)
         else:
             assert isinstance(load_adapter(ds), Provider)

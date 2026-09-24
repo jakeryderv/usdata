@@ -35,6 +35,12 @@ PRODUCT_LEVEL = re.compile(r"^(?P<product>.+?)_\d{2}\.\d{2}$")
 UNSET_UNITS = {"", "unknown"}
 """Unit strings that state nothing, so the registry may fill them."""
 
+AQS_DATASET = "epa:aqs-daily"
+"""The dataset whose canonical JSON the ``aqs`` reader opens."""
+
+AQS_PREFIX = "aqs-daily_"
+"""How an ``epa:aqs-daily`` asset id begins, so a copied file is still recognized."""
+
 STORM_EVENTS_DATASET = "noaa:storm-events"
 """The dataset whose local timestamps the CSV reader pairs with UTC columns."""
 
@@ -339,7 +345,8 @@ def open_asset(
     warns, or raises ``ValueError`` when ``strict``; a select that matches nothing
     raises either way. Gzipped GRIB2 is decompressed in memory.
     HURDAT2 best-track text is recognized by dataset or filename and returns one
-    row per track point; it takes no CSV options.
+    row per track point; it takes no CSV options. AQS daily-summary JSON is
+    recognized the same way and returns one row per monitor, day, and standard.
     A Storm Events CSV gains ``BEGIN_UTC`` and ``END_UTC`` when the frame keeps
     ``BEGIN_DATE_TIME``, ``END_DATE_TIME``, and ``CZ_TIMEZONE``: the local
     timestamp shifted by the whole-hour offset ending the timezone label, or by
@@ -359,6 +366,9 @@ def open_asset(
         hurdat2 = fetched.asset.dataset_id == "noaa:hurdat2" or (
             name.startswith("hurdat2-") and name.endswith(".txt")
         )
+        aqs = fetched.asset.dataset_id == AQS_DATASET or (
+            name.startswith(AQS_PREFIX) and name.endswith(".json")
+        )
         if fetched.asset.dataset_id == "noaa:nexrad-level3":
             raise UnsupportedFormat(
                 "NEXRAD Level III products have no usdata reader; open fetched.path with "
@@ -368,6 +378,8 @@ def open_asset(
             reader = "nexrad-level2"
         elif hurdat2:
             reader = "hurdat2"
+        elif aqs:
+            reader = "aqs"
         elif media_type in NETCDF_MEDIA_TYPES:
             reader = "netcdf"
         elif grib2:
@@ -378,7 +390,8 @@ def open_asset(
         else:
             raise UnsupportedFormat(
                 f"no reader for {fetched.asset.media_type!r}; supported formats are CSV, "
-                "ERDDAP CSV, NetCDF4, GRIB2, NEXRAD Level II, and HURDAT2 best tracks. "
+                "ERDDAP CSV, NetCDF4, GRIB2, NEXRAD Level II, HURDAT2 best tracks, "
+                "and AQS daily JSON. "
                 "For a known CSV with ambiguous metadata, "
                 "pass reader='csv' "
                 "or reader='erddap-csv'; otherwise use fetched.path with a format-specific reader"
@@ -423,10 +436,16 @@ def open_asset(
         from usdata._hurdat2 import open_hurdat2
 
         return open_hurdat2(fetched)
+    if reader == "aqs":
+        if any(value is not None for value in (dtype, parse_dates, usecols, nrows)):
+            raise ValueError("dtype, parse_dates, usecols, and nrows apply only to CSV readers")
+        from usdata._aqs import open_aqs
+
+        return open_aqs(fetched)
     if reader not in {"csv", "erddap-csv"}:
         raise UnsupportedFormat(
             f"unsupported reader {reader!r}; use 'csv', 'erddap-csv', 'netcdf', 'grib2', "
-            "'nexrad-level2', or 'hurdat2'"
+            "'nexrad-level2', 'hurdat2', or 'aqs'"
         )
     try:
         pandas = import_module("pandas")

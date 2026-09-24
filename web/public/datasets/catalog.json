@@ -2908,6 +2908,218 @@
       "examples": []
     },
     {
+      "id": "epa:aqs-daily",
+      "title": "Daily air pollutant summaries from regulatory monitors",
+      "description": "Daily summaries of regulatory air monitoring data from EPA's Air Quality System through the AQS Data API: one row per monitor, local day, and pollutant standard, for one to five AQS parameter codes such as PM2.5 and ozone, over named sites, a state or county, or a box. Each request covers at most one calendar year, so a window becomes one JSON file per year. Requires a free key issued by email; the response is stored in a canonical form without the echoed request.",
+      "provider": "EPA",
+      "domain": "Air quality",
+      "system": null,
+      "availability": "Source only",
+      "since": "0.26",
+      "keywords": [
+        "air quality",
+        "pollution",
+        "ozone",
+        "pm2.5",
+        "monitors",
+        "aqs",
+        "smoke",
+        "epa"
+      ],
+      "formats": [
+        "JSON"
+      ],
+      "selection": "Local days within inclusive UTC calendar dates for one to five pollutants; one file per year",
+      "inputs": "Both dates; one to five parameter codes; site ids, a state or county, or a box",
+      "credentials": {
+        "variables": [
+          "USDATA_AQS_EMAIL",
+          "USDATA_AQS_KEY"
+        ],
+        "signup": "https://aqs.epa.gov/aqsweb/documents/data_api.html#signup"
+      },
+      "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "Regulatory monitoring sites operated by state, local, and tribal agencies",
+        "temporal": "Daily summaries of each monitor's samples, one row per pollutant standard"
+      },
+      "update_frequency": "As monitoring agencies submit each quarter (40 CFR 58.16) and certify the previous year by May 1 (40 CFR 58.15); submitted values can be revised later",
+      "latency": "Agencies must submit each calendar quarter's data within 90 days after it ends (40 CFR 58.16)",
+      "citation": "U.S. Environmental Protection Agency, Air Quality System (AQS) daily summary data, AQS Data API, accessed via usdata",
+      "terms": "https://aqs.epa.gov/aqsweb/documents/data_api.html#terms",
+      "variables": [
+        {
+          "name": "state_code",
+          "units": null,
+          "description": "FIPS code of the state the monitor is in; 80 for Mexico, CC for Canada at border sites"
+        },
+        {
+          "name": "county_code",
+          "units": null,
+          "description": "FIPS code of the county, parish, or independent city within the state"
+        },
+        {
+          "name": "site_number",
+          "units": null,
+          "description": "Four-digit site number, unique within the county"
+        },
+        {
+          "name": "parameter_code",
+          "units": null,
+          "description": "AQS code of the parameter measured"
+        },
+        {
+          "name": "poc",
+          "units": null,
+          "description": "Parameter occurrence code distinguishing instruments measuring the same parameter at one site"
+        },
+        {
+          "name": "latitude",
+          "units": "degrees_north",
+          "description": "Site latitude, WGS84"
+        },
+        {
+          "name": "longitude",
+          "units": "degrees_east",
+          "description": "Site longitude, WGS84"
+        },
+        {
+          "name": "datum",
+          "units": null,
+          "description": "Datum of the coordinates, always WGS84"
+        },
+        {
+          "name": "parameter",
+          "units": null,
+          "description": "Name of the parameter measured"
+        },
+        {
+          "name": "sample_duration_code",
+          "units": null,
+          "description": "Code of the sample duration"
+        },
+        {
+          "name": "sample_duration",
+          "units": null,
+          "description": "Averaging period: observed, such as 1 HOUR or 24 HOUR, or calculated, such as 24-HR BLK AVG"
+        },
+        {
+          "name": "pollutant_standard",
+          "units": null,
+          "description": "National ambient air quality standard the row's statistics are calculated for; empty for none"
+        },
+        {
+          "name": "date_local",
+          "units": null,
+          "description": "Day the sample was taken, in local standard time"
+        },
+        {
+          "name": "units_of_measure",
+          "units": null,
+          "description": "Units of every statistic on the row"
+        },
+        {
+          "name": "event_type",
+          "units": null,
+          "description": "Whether exceptional-event data are included: No Events, Events Included, Events Excluded, or Concurred Events Excluded"
+        },
+        {
+          "name": "observation_count",
+          "units": null,
+          "description": "Number of observations in the averaging period"
+        },
+        {
+          "name": "observation_percent",
+          "units": "percent",
+          "description": "Share of scheduled values for the day that were reported"
+        },
+        {
+          "name": "validity_indicator",
+          "units": null,
+          "description": "Y where the value meets all completeness criteria"
+        },
+        {
+          "name": "arithmetic_mean",
+          "units": null,
+          "description": "Mean of the day's values, in units_of_measure"
+        },
+        {
+          "name": "first_max_value",
+          "units": null,
+          "description": "Highest value at the row's duration or standard, in units_of_measure"
+        },
+        {
+          "name": "first_max_hour",
+          "units": null,
+          "description": "Hour of the day, 24-hour local standard time, of the highest value"
+        },
+        {
+          "name": "aqi",
+          "units": null,
+          "description": "Air Quality Index for the day, where the pollutant has one"
+        },
+        {
+          "name": "method_code",
+          "units": null,
+          "description": "Three-digit measurement method code, unique within a parameter"
+        },
+        {
+          "name": "method",
+          "units": null,
+          "description": "Collection and analysis method"
+        },
+        {
+          "name": "local_site_name",
+          "units": null,
+          "description": "Site name in the operating agency's own nomenclature"
+        },
+        {
+          "name": "site_address",
+          "units": null,
+          "description": "Approximate street address of the site"
+        },
+        {
+          "name": "county",
+          "units": null,
+          "description": "Name of the county the site is in"
+        },
+        {
+          "name": "state",
+          "units": null,
+          "description": "Name of the state the site is in"
+        },
+        {
+          "name": "city",
+          "units": null,
+          "description": "Incorporated city the site is in, if any"
+        },
+        {
+          "name": "cbsa_code",
+          "units": null,
+          "description": "Code of the core-based statistical (metropolitan) area"
+        },
+        {
+          "name": "cbsa",
+          "units": null,
+          "description": "Name of the core-based statistical (metropolitan) area"
+        },
+        {
+          "name": "date_of_last_change",
+          "units": null,
+          "description": "Date the underlying data were last changed in AQS"
+        }
+      ],
+      "max_window": null,
+      "guide": "https://docs.usdata.dev/providers/epa-aqs-daily/",
+      "reference": "https://docs.usdata.dev/generated/catalog/epa/aqs-daily/",
+      "examples": [
+        {
+          "title": "Wildfire smoke",
+          "url": "https://usdata.dev/examples/wildfire-smoke/"
+        }
+      ]
+    },
+    {
       "id": "fema:disaster-declarations",
       "title": "Federal disaster declarations by county",
       "description": "Every federally declared disaster since 1953, major disaster, emergency, and fire management declarations alike, one row per declaration and designated area, with the incident type and period, the programs declared, and state and county FIPS codes, from the OpenFEMA v2 API as CSV. Rows carry no coordinates, so selection is by named state or county rather than by box, and a window selects declarations whose incident period overlaps it. The dataset is rebuilt every twenty minutes and rows are revised as incidents close.",
@@ -3161,45 +3373,6 @@
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/census/",
-      "examples": []
-    },
-    {
-      "id": "epa:aqs-daily",
-      "title": "Air Quality System Daily Summaries",
-      "description": "Daily pollutant summaries (ozone, PM2.5, NO2, and others) from regulatory monitors via the AQS Data API. Requires a free API key issued by email.",
-      "provider": "EPA",
-      "domain": "Air quality",
-      "system": null,
-      "availability": "Planned",
-      "since": null,
-      "keywords": [
-        "air quality",
-        "pollution",
-        "ozone",
-        "pm2.5",
-        "monitors",
-        "aqs"
-      ],
-      "formats": [],
-      "selection": null,
-      "inputs": null,
-      "credentials": {
-        "variables": [
-          "USDATA_AQS_EMAIL",
-          "USDATA_AQS_KEY"
-        ],
-        "signup": "https://aqs.epa.gov/aqsweb/documents/data_api.html#signup"
-      },
-      "reader_extra": null,
-      "resolution": null,
-      "update_frequency": null,
-      "latency": null,
-      "citation": null,
-      "terms": null,
-      "variables": [],
-      "max_window": null,
-      "guide": null,
-      "reference": "https://docs.usdata.dev/generated/catalog/epa/",
       "examples": []
     },
     {

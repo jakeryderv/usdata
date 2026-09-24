@@ -62,6 +62,7 @@ def test_committed_lockfiles_match_their_manifests(scripts):
         "mrms-rotation",
         "gfs-environment",
         "radar-products",
+        "wildfire-smoke",
     }
     assert [error for manifest in pinned for error in check.check_lockfile(manifest)] == []
     unpinned = {m.parent.name for m in (ROOT / "examples").glob("*/dataset.yaml")} - {

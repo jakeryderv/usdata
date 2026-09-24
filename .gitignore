@@ -37,3 +37,6 @@ infra/node_modules/
 
 # Local browser previews
 .playwright-cli/
+# Local credentials: a 1Password-mounted .env pipe and the direnv file that points uv at it.
+.env
+.envrc

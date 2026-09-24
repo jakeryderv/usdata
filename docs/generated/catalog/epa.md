@@ -8,18 +8,10 @@ Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by ha
 
 ## Implemented datasets
 
-None implemented yet.
+| Dataset | Availability | Files | What gets selected |
+|---|---|---|---|
+| <span id="epaaqs-daily"></span>[Daily air pollutant summaries from regulatory monitors](epa/aqs-daily.md) | Source only | JSON | Local days within inclusive UTC calendar dates for one to five pollutants; one file per year |
 
 ## Planned datasets
 
-These entries are not implemented; they cannot fetch data.
-
-### epa:aqs-daily
-
-**Air Quality System Daily Summaries** · Planned · target later
-
-Daily pollutant summaries (ozone, PM2.5, NO2, and others) from regulatory monitors via the AQS Data API. Requires a free API key issued by email.
-
-[Upstream information](https://aqs.epa.gov/aqsweb/documents/data_api.html)
-Domain: Air quality.
-Credentials: `USDATA_AQS_EMAIL`, `USDATA_AQS_KEY` in the environment ([request a key](https://aqs.epa.gov/aqsweb/documents/data_api.html#signup)).
+No planned datasets for this provider.

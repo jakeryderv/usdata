@@ -98,6 +98,12 @@
     "summary": "Inspect three six-minute coastal observations, their reference datum, quality flags, and source provenance."
   },
   {
+    "slug": "wildfire-smoke",
+    "title": "How far above the daily PM2.5 standard did Canadian wildfire smoke push New York City's air in June 2023?",
+    "summary": "Pin two weeks of EPA AQS daily PM2.5 summaries for the city's regulatory monitors, choose one row per monitor-day from the several AQS writes, and count the monitor-days above 35 ug/m3.",
+    "pinned": true
+  },
+  {
     "slug": "hurdat2",
     "title": "How can I inspect Atlantic hurricane tracks?",
     "summary": "Read the whole Atlantic best-track file, identify hurricane-intensity landfall records, and inspect peak winds and historical coverage limits."

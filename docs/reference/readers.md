@@ -10,6 +10,7 @@ This page lists what to install, what is inferred, and what `open()` accepts.
 | `csv` | `pandas` | pandas DataFrame | `text/csv`, `application/csv` (charset parameters allowed); `application/gzip` or `application/x-gzip` when the id ends in `.csv.gz` |
 | `erddap-csv` | `pandas` | pandas DataFrame with `attrs["units"]` | CSV media types on an asset whose protocol is ERDDAP, and `noaa:ibtracs` CSV assets, whose units row has the same layout; for IBTrACS only a single space or an empty field is missing, so the basin code `NA` stays text |
 | `hurdat2` | `pandas` | pandas DataFrame, one row per track point | `noaa:hurdat2` assets, or ids `hurdat2-*.txt` |
+| `aqs` | `pandas` | pandas DataFrame, one row per monitor, local day, and pollutant standard; `date_local` and `date_of_last_change` as naive dates, the header in `attrs["usdata"]["header"]` | `epa:aqs-daily` assets, or ids `aqs-daily_*.json` |
 | `nexrad-level2` | `radar` | xarray DataTree | `noaa:nexrad-level2` assets |
 | `netcdf` | `netcdf` | xarray Dataset | `application/x-netcdf`, `application/netcdf`, `application/x-netcdf4` |
 | `grib2` | `grib` | xarray Dataset | `application/x-grib2`, `application/grib2`, `application/x-grib`, `application/wmo-grib2`; ids ending `.grib2`, `.grb2`, or their `.gz` forms when the media type is missing, generic, or gzip |
@@ -22,7 +23,7 @@ This page lists what to install, what is inferred, and what `open()` accepts.
 
 | Option | Applies to | Behavior |
 |---|---|---|
-| `reader` | all | Overrides inference: `"csv"`, `"erddap-csv"`, `"hurdat2"`, `"nexrad-level2"`, `"netcdf"`, or `"grib2"`. Use it for ambiguous media metadata. |
+| `reader` | all | Overrides inference: `"csv"`, `"erddap-csv"`, `"hurdat2"`, `"aqs"`, `"nexrad-level2"`, `"netcdf"`, or `"grib2"`. Use it for ambiguous media metadata. |
 | `dtype` | CSV readers | Mapping of column names to pandas dtype strings; overrides the identifier defaults below. |
 | `parse_dates` | CSV readers | Columns to parse as dates. Nothing is parsed by default; `dtype={"DATE": "string"}` keeps numeric-looking labels as text. |
 | `usecols` | CSV readers | Columns to read, in pandas order. |

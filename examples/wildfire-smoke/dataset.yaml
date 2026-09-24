@@ -1,0 +1,10 @@
+name: nyc-wildfire-smoke
+sources:
+  - name: pm25
+    dataset: epa:aqs-daily
+    # The five boroughs and their edges. A box, not a county: New York City is five counties.
+    bbox: {west: -74.26, south: 40.49, east: -73.70, north: 40.92}
+    start: 2023-06-01
+    end: 2023-06-15
+    params:
+      parameters: 88101
