@@ -51,9 +51,9 @@ No resampling, vector averaging, predictions, automatic station discovery,
 or detailed echo/correlation fields are included.
 
 The [Cape Henry notebook](https://usdata.dev/datasets/noaa/coops-currents/)
-plots one UTC day, counts gaps and missing values, gives dated bin/deployment
-context, and restores its pinned CSV into an empty cache. Query responses may
-be revised; a successful restore establishes equality at execution time.
+plots one UTC day as an along-channel current, counts gaps and missing values,
+gives dated bin/deployment context, and verifies its pinned CSV. Query responses
+may be revised; a successful verify establishes equality at execution time.
 
 ## Source probe, 2026-09-22
 

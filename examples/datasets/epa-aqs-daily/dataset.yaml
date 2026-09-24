@@ -1,0 +1,9 @@
+name: queens-college-pm25-2023
+sources:
+  - name: pm25
+    dataset: epa:aqs-daily
+    start: 2023-01-01
+    end: 2023-12-31
+    params:
+      parameters: 88101
+      sites: 36-081-0124
