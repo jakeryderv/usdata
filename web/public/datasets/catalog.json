@@ -1562,7 +1562,7 @@
       "guide": "https://docs.usdata.dev/providers/noaa-ibtracs/",
       "reference": "https://docs.usdata.dev/providers/noaa-ibtracs/#reference",
       "page": "https://usdata.dev/datasets/noaa/ibtracs/",
-      "walkthrough": "examples/datasets/noaa-ibtracs/README.md",
+      "walkthrough": "examples/datasets/noaa-ibtracs/noaa-ibtracs.ipynb",
       "studies": [],
       "quickstart": {
         "cli": "usdata fetch noaa:ibtracs -p subset=last3years",
