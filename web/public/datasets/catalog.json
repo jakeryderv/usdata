@@ -3466,11 +3466,15 @@
       "guide": "https://docs.usdata.dev/providers/fema-disaster-declarations/",
       "reference": "https://docs.usdata.dev/generated/catalog/fema/disaster-declarations/",
       "page": "https://usdata.dev/datasets/fema/disaster-declarations/",
-      "walkthrough": null,
+      "walkthrough": "examples/datasets/fema-disaster-declarations/fema-disaster-declarations.ipynb",
       "studies": [
         "disaster-declarations"
       ],
-      "quickstart": null
+      "quickstart": {
+        "cli": "usdata fetch fema:disaster-declarations \\\n  --location Oklahoma \\\n  --start 2000-01-01 \\\n  --end 2024-12-31",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"fema:disaster-declarations\"),\n    build_query(\n        location=\"Oklahoma\",\n        start=\"2000-01-01\",\n        end=\"2024-12-31\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: oklahoma-declarations\nsources:\n  - name: declarations\n    dataset: fema:disaster-declarations\n    # Declarations whose incident period overlaps the window, in any Oklahoma area.\n    location: Oklahoma\n    start: 2000-01-01\n    end: 2024-12-31\n"
+      }
     },
     {
       "id": "fema:nfhl",
