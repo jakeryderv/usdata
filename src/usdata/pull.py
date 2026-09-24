@@ -208,36 +208,52 @@ def resolve(
     root: str | os.PathLike[str] | None = None,
     registry: Registry | None = None,
 ) -> PullResult:
-    """Resolve every source through its adapter, fetch, and write a fresh lockfile."""
+    """Resolve every source through its adapter, fetch, and write a fresh lockfile.
+
+    When a lockfile already exists, downloads are staged beside the cache and
+    moved into it only after the new lockfile is saved, so a run that fails
+    leaves every file the old lockfile pins as it was (ADR 0031). Without one
+    there is nothing to protect, and downloads go straight into the cache so a
+    failed first pull keeps what it fetched.
+    """
     reg = registry or default_registry()
     manifest_path = Path(manifest_path)
     root = None if root is None else Path(root)
     manifest = _load(manifest_path, reg)
+    out = lockfile_path(manifest_path)
     fetched: list[FetchedAsset] = []
     locked: list[LockedAsset] = []
+    moves: list[tuple[Path, Path]] = []
     with ExitStack() as stack:
         adapters = _checked_adapters(manifest, reg, stack)
+        staging = _staging(root, stack) if out.exists() else None
         for key, source in zip(manifest.source_keys(), manifest.sources, strict=True):
             dataset = reg.get(source.dataset)
-            items = _fetch_with(adapters[dataset.id], dataset, source.to_query(), root=root)
+            items = _fetch_with(
+                adapters[dataset.id], dataset, source.to_query(), root=root, staging=staging
+            )
             if not items and not source.allow_empty:
                 raise EmptySource(
                     f"source {key} ({dataset.id}) matched no assets; "
                     "check the query or set allow_empty: true for this source"
                 )
             for item in items:
+                home = asset_path(item.asset, root)
+                if item.path != home:
+                    moves.append((item.path, home))
+                    item = item.model_copy(update={"path": home})
                 fetched.append(item)
                 pinned = item.asset.model_copy(update={"checksum": item.provenance.checksum})
                 locked.append(LockedAsset(asset=pinned, provenance=item.provenance, source=key))
-    lock = Lockfile(
-        manifest=manifest.name,
-        manifest_checksum=sha256_file(manifest_path),
-        generated_at=datetime.now(UTC),
-        usdata_version=__version__,
-        assets=locked,
-    )
-    out = lockfile_path(manifest_path)
-    lock.save(out)
+        lock = Lockfile(
+            manifest=manifest.name,
+            manifest_checksum=sha256_file(manifest_path),
+            generated_at=datetime.now(UTC),
+            usdata_version=__version__,
+            assets=locked,
+        )
+        lock.save(out)
+        _commit_staged(moves)
     return PullResult(
         lockfile=lock,
         lockfile_path=out,
@@ -427,7 +443,9 @@ def restore(
         if updated:
             lock = lock.model_copy(update={"assets": [outcome.entry for outcome in outcomes]})
             lock.save(lock_path)
-        _commit_staged(outcomes)
+        _commit_staged(
+            (outcome.staged, outcome.item.path) for outcome in outcomes if outcome.staged
+        )
     return PullResult(
         lockfile=lock,
         lockfile_path=lock_path,
@@ -456,14 +474,16 @@ def _staging(root: Path | None, stack: ExitStack) -> Path:
     return Path(stack.enter_context(TemporaryDirectory(dir=parent)))
 
 
-def _commit_staged(outcomes: Iterable[_Restored]) -> None:
-    """Move every staged file into the cache, data before sidecar as a fetch writes them."""
-    for outcome in outcomes:
-        if outcome.staged is None:
-            continue
-        outcome.item.path.parent.mkdir(parents=True, exist_ok=True)
-        outcome.staged.replace(outcome.item.path)
-        provenance.sidecar_path(outcome.staged).replace(provenance.sidecar_path(outcome.item.path))
+def _commit_staged(moves: Iterable[tuple[Path, Path]]) -> None:
+    """Move each staged file to its home in the cache, data before sidecar as a fetch writes them.
+
+    Sources that resolve to the same asset stage it at the same path, so each
+    staged file is moved once.
+    """
+    for staged, home in dict(moves).items():
+        home.parent.mkdir(parents=True, exist_ok=True)
+        staged.replace(home)
+        provenance.sidecar_path(staged).replace(provenance.sidecar_path(home))
 
 
 @dataclass(frozen=True)

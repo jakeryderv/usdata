@@ -75,9 +75,12 @@ sources plus pinned, provenance-tracked inputs.
 ## Failure boundaries
 
 A manifest source must resolve to assets unless it sets `allow_empty: true`.
-A failed resolution leaves an existing lockfile untouched, although earlier
-successful downloads remain cached. Restore and verify both check the exact
-manifest checksum before trusting its lockfile. Restore reports every pinned URL
+A failed resolution leaves an existing lockfile untouched. When there is one,
+a forced re-resolve stages its downloads under `<cache root>/.staging/` and
+moves them into the cache only after the new lockfile is saved, so a failure
+leaves every file the old lockfile pins as it was; a first pull has nothing to
+protect, and its earlier successful downloads remain cached. Restore and
+verify both check the exact manifest checksum before trusting its lockfile. Restore reports every pinned URL
 whose bytes changed upstream in one run and rewrites pins only for entries the
 caller explicitly selects with `update`. Those refreshes are staged under
 `<cache root>/.staging/` and committed only after every entry has succeeded,
