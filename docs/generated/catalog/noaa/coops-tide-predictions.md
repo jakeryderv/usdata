@@ -1,21 +1,19 @@
-# Coastal tide predictions
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:coops-tide-predictions` · **Released** · Included since usdata 0.14.
+## Reference
 
-CO-OPS Tide Predictions.
+`noaa:coops-tide-predictions` · **Released** · Included since usdata 0.14. CO-OPS Tide Predictions.
 
-## At a glance
+### At a glance
 
 - Files: CSV
 - Selection: Predictions for one station and datum on a chosen interval; at most a year
 - Required inputs: Station, datum, and both minute-aligned timestamps; optional interval
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [Coastal tide predictions](https://usdata.dev/datasets/noaa/coops-tide-predictions/), with a walkthrough
 - Studies: [How high was Hurricane Helene's storm surge at Cedar Key?](https://usdata.dev/studies/storm-surge/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -26,7 +24,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `station` | Required seven-digit CO-OPS station id, for example '8518750'. |
 | `units` | metric (default) or english. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -34,11 +32,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `Prediction` | meters | Predicted tide height on the requested datum (metric units) |
 | `Type` | — | H or L, on the hilo interval only |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-coops-predictions.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.14
 - Domain: Sea level and tides
@@ -54,5 +48,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `http`
 - Adapter: `usdata.providers.noaa.coops:CoopsTidePredictions`
-
-[All NOAA datasets](../noaa.md).

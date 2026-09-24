@@ -1,20 +1,18 @@
-# Global tropical cyclone best tracks
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:ibtracs` · **Released** · Included since usdata 0.20.
+## Reference
 
-IBTrACS Global Tropical Cyclone Tracks.
+`noaa:ibtracs` · **Released** · Included since usdata 0.20. IBTrACS Global Tropical Cyclone Tracks.
 
-## At a glance
+### At a glance
 
 - Files: CSV with a units row, NetCDF4
 - Selection: One whole subset file per query, from the newest or a pinned product version
 - Required inputs: Required subset; optional format and version; no dates or geographic filters
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [Global tropical cyclone best tracks](https://usdata.dev/datasets/noaa/ibtracs/), with a walkthrough
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -24,7 +22,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `subset` | Required subset: all, active, last3years, since1980, or a basin (na, ep, wp, ni, si, sp, or sa), case-insensitive. |
 | `version` | Product version such as v04r01; the newest published one by default. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -54,11 +52,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `storm_speed` | knots | Storm translation speed |
 | `storm_dir` | degrees | Storm translation direction |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-ibtracs.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.20
 - Domain: Tropical cyclones
@@ -73,5 +67,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `http`
 - Adapter: `usdata.providers.noaa.ibtracs:Ibtracs`
-
-[All NOAA datasets](../noaa.md).

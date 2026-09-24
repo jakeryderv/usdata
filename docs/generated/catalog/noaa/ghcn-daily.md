@@ -1,21 +1,19 @@
-# Daily station weather
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:ghcn-daily` · **Released** · Included since usdata 0.2.
+## Reference
 
-GHCN-Daily Station Observations.
+`noaa:ghcn-daily` · **Released** · Included since usdata 0.2. GHCN-Daily Station Observations.
 
-## At a glance
+### At a glance
 
 - Files: CSV
 - Selection: Station observations within inclusive calendar dates; selected elements
 - Required inputs: Both dates; station IDs or a geographic query
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [Daily station weather](https://usdata.dev/datasets/noaa/ghcn-daily/), with a walkthrough
 - Studies: [How can I preserve weather and streamflow inputs together?](https://usdata.dev/studies/weather-and-streamflow/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -24,7 +22,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `stations` | Station ids, comma-separated or a list; otherwise a location selects them. |
 | `units` | metric (default) or standard. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -34,11 +32,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `SNOW` | mm | Snowfall (metric units) |
 | `SNWD` | mm | Snow depth (metric units) |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-ghcn.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.2
 - Domain: Surface weather
@@ -55,5 +49,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `http`
 - Adapter: `usdata.providers.noaa.ghcnd:GhcnDaily`
-
-[All NOAA datasets](../noaa.md).

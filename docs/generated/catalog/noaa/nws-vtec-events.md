@@ -1,21 +1,19 @@
-# NWS warnings and watches by county
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:nws-vtec-events` · **Released** · Included since usdata 0.22.
+## Reference
 
-NWS Watch, Warning, and Advisory Events by County.
+`noaa:nws-vtec-events` · **Released** · Included since usdata 0.22. NWS Watch, Warning, and Advisory Events by County.
 
-## At a glance
+### At a glance
 
 - Files: CSV
 - Selection: Events issued for one county or UGC inside an inclusive UTC window; optionally one event type
 - Required inputs: Both timestamps; a county location or a ugc; optionally phenomena with significance
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [NWS warnings and watches by county](https://usdata.dev/datasets/noaa/nws-vtec-events/)
 - Studies: [How long before the 6 May 2024 Osage County tornado was a tornado warning issued?](https://usdata.dev/studies/warning-lead-time/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -25,7 +23,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `significance` | One-letter VTEC significance such as W, A, or Y; requires phenomena. |
 | `ugc` | One NWS UGC code in place of a location: a county such as OKC113, or a forecast zone such as OKZ054, which is the only way to reach zone-based products. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -46,11 +44,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `sig_name` | — | Significance in words |
 | `url` | — | Path of the event's page on the IEM site |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-nws-vtec-events.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.22
 - Domain: Severe weather
@@ -65,5 +59,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: Public domain (NWS products; IEM materials are public domain, attribution appreciated)
 - Transport: `http`
 - Adapter: `usdata.providers.noaa.nws_vtec:NwsVtecEvents`
-
-[All NOAA datasets](../noaa.md).

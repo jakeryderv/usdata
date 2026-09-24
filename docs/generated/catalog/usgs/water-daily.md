@@ -1,21 +1,19 @@
-# Daily water observations
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`usgs:water-daily` · **Released** · Included since usdata 0.5.
+## Reference
 
-Streamflow and Water Daily Values.
+`usgs:water-daily` · **Released** · Included since usdata 0.5. Streamflow and Water Daily Values.
 
-## At a glance
+### At a glance
 
 - Files: CSV
 - Selection: Site observations for inclusive local calendar dates; parameter and statistic filters
 - Required inputs: Both dates; site IDs or a geographic query
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [Daily water observations](https://usdata.dev/datasets/usgs/water-daily/)
 - Studies: [How can I preserve weather and streamflow inputs together?](https://usdata.dev/studies/weather-and-streamflow/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -25,7 +23,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `sites` | Several monitoring IDs, comma-separated or a list. |
 | `statistic_id` | Five-digit statistic code; default 00003 (daily mean). |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -33,11 +31,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `00065` | feet | Gage height |
 | `00010` | degrees Celsius | Water temperature |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/usgs-water-daily.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.5
 - Domain: Water resources
@@ -52,5 +46,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `http`
 - Adapter: `usdata.providers.usgs.daily:WaterDaily`
-
-[All USGS datasets](../usgs.md).
