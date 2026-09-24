@@ -1350,6 +1350,7 @@ datasets:
     reader: pandas
     guide: docs/providers/usgs-water-daily.md
     examples:
+      - examples/datasets/usgs-water-daily/usgs-water-daily.ipynb
       - examples/studies/weather-and-streamflow/weather-and-streamflow.ipynb
     resolution:
       spatial: "USGS monitoring locations, one site per record"

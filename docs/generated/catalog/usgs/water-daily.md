@@ -12,7 +12,7 @@ Streamflow and Water Daily Values.
 - Selection: Site observations for inclusive local calendar dates; parameter and statistic filters
 - Required inputs: Both dates; site IDs or a geographic query
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- On usdata.dev: [Daily water observations](https://usdata.dev/datasets/usgs/water-daily/)
+- On usdata.dev: [Daily water observations](https://usdata.dev/datasets/usgs/water-daily/), with a walkthrough
 - Studies: [How can I preserve weather and streamflow inputs together?](https://usdata.dev/studies/weather-and-streamflow/)
 
 ## Parameters
