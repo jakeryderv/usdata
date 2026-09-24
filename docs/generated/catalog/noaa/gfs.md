@@ -1,20 +1,18 @@
-# GFS model output
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:gfs` · **Released** · Included since usdata 0.15.
+## Reference
 
-GFS Forecast Model Output.
+`noaa:gfs` · **Released** · Included since usdata 0.15. GFS Forecast Model Output.
 
-## At a glance
+### At a glance
 
 - Files: GRIB2
 - Selection: Global files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and grid resolution
 - Required inputs: Both timestamps, cycle, and forecast_hour
-- Open locally: `usdata[grib]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[grib]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [GFS model output](https://usdata.dev/datasets/noaa/gfs/), with a walkthrough
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -25,7 +23,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `messages` | Optional GRIB2 messages to fetch instead of the whole file, spelled as the object's wgrib2 .idx sidecar spells them: 'SHORTNAME:level text', such as 'TMP:2 m above ground', with an optional ':step text'; one value, a list, or a comma-separated string. Short names are upper case and both fields match exactly. |
 | `resolution` | Grid spacing: 0p25 (default, 0.25 degree), 0p50, or 1p00. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -40,11 +38,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `prmsl` | Pa | Mean sea-level pressure |
 | `pwat` | kg/m2 | Precipitable water |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-gfs.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.15
 - Domain: Weather models
@@ -60,5 +54,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `s3`
 - Adapter: `usdata.providers.noaa.gfs:Gfs`
-
-[All NOAA datasets](../noaa.md).
