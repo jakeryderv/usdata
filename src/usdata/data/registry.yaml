@@ -380,7 +380,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-spc-tornado.md
     examples:
-      - examples/datasets/noaa-spc-tornado-reports/README.md
+      - examples/datasets/noaa-spc-tornado-reports/noaa-spc-tornado-reports.ipynb
       - examples/studies/severe-weather-case-study/severe-weather-case-study.ipynb
     resolution:
       spatial: >-
