@@ -333,7 +333,7 @@ datasets:
       - examples/studies/tornado-classification/tornado-classification.ipynb
       - examples/studies/severe-weather-case-study/severe-weather-case-study.ipynb
       - examples/studies/warning-lead-time/warning-lead-time.ipynb
-      - examples/studies/disaster-declarations/README.md
+      - examples/studies/disaster-declarations/disaster-declarations.ipynb
     resolution:
       spatial: "One record per county, forecast zone, or marine zone touched by an event"
       temporal: >-
@@ -1822,7 +1822,7 @@ datasets:
     guide: docs/providers/fema-disaster-declarations.md
     examples:
       - examples/datasets/fema-disaster-declarations/fema-disaster-declarations.ipynb
-      - examples/studies/disaster-declarations/README.md
+      - examples/studies/disaster-declarations/disaster-declarations.ipynb
     resolution:
       spatial: "One row per designated area: a county or county equivalent, a tribal area, or a whole state"
       temporal: "Calendar dates for the declaration and for the start and end of the incident"
