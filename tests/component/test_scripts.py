@@ -40,6 +40,10 @@ def test_website_catalog_matches_registry_and_release_availability(monkeypatch) 
     )
     assert hurdat2["quickstart"]["cli"].startswith("usdata fetch noaa:hurdat2 -p basin=atlantic")
     assert 'get("noaa:hurdat2")' in hurdat2["quickstart"]["python"]
+    # A manifest's bbox mapping becomes the four edges the CLI and build_query take.
+    sst = records["noaa:coastwatch-sst"]["quickstart"]
+    assert "--bbox -81.5,28.0,-74.0,32.0" in sst["cli"]
+    assert "bbox=(-81.5, 28.0, -74.0, 32.0)," in sst["python"]
     assert records["nasa:gpm-imerg"]["availability"] == "Planned"
     assert records["nasa:gpm-imerg"]["page"] is None
     assert records["nasa:gpm-imerg"]["studies"] == []

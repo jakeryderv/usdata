@@ -1,0 +1,7 @@
+name: florida-gulf-stream-sst
+sources:
+  - dataset: noaa:coastwatch-sst
+    start: 2024-05-06T12:00:00Z
+    end: 2024-05-06T12:00:00Z
+    bbox: {west: -81.5, south: 28.0, east: -74.0, north: 32.0}
+    variables: [analysed_sst]

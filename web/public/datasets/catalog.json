@@ -2324,7 +2324,11 @@
       "page": "https://usdata.dev/datasets/noaa/coastwatch-sst/",
       "walkthrough": "examples/datasets/noaa-coastwatch-sst/noaa-coastwatch-sst.ipynb",
       "studies": [],
-      "quickstart": null
+      "quickstart": {
+        "cli": "usdata fetch noaa:coastwatch-sst \\\n  --start 2024-05-06T12:00:00Z \\\n  --end 2024-05-06T12:00:00Z \\\n  --bbox -81.5,28.0,-74.0,32.0 \\\n  --vars analysed_sst",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:coastwatch-sst\"),\n    build_query(\n        start=\"2024-05-06T12:00:00Z\",\n        end=\"2024-05-06T12:00:00Z\",\n        bbox=(-81.5, 28.0, -74.0, 32.0),\n        variables=[\"analysed_sst\"],\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: florida-gulf-stream-sst\nsources:\n  - dataset: noaa:coastwatch-sst\n    start: 2024-05-06T12:00:00Z\n    end: 2024-05-06T12:00:00Z\n    bbox: {west: -81.5, south: 28.0, east: -74.0, north: 32.0}\n    variables: [analysed_sst]\n"
+      }
     },
     {
       "id": "noaa:ghcn-hourly",
