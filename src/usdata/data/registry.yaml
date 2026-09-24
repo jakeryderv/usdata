@@ -1030,7 +1030,7 @@ datasets:
     reader: grib
     guide: docs/providers/noaa-gfs.md
     examples:
-      - examples/datasets/noaa-gfs/README.md
+      - examples/datasets/noaa-gfs/noaa-gfs.ipynb
     resolution:
       spatial: "0.25, 0.5, or 1 degree global latitude-longitude grid, chosen with resolution"
       temporal: "Hourly to 120 then three-hourly to 384 at 0p25; three-hourly at 0p50 and 1p00"
