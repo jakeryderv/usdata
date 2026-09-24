@@ -106,6 +106,10 @@ test("retired /examples/ URLs redirect to pages that exist", async () => {
     assert.ok(await exists(join(output, to, "index.html")), to);
   }
   assert.ok(lines.every(line => /^\/examples(\/\S*)? \/(datasets|studies)\/(\S*\/)? 301$/.test(line)), "redirect syntax");
+  // Production applies an exact rule only when no splat rule precedes it.
+  const firstSplat = lines.findIndex(line => line.split(" ")[0].endsWith("*"));
+  assert.ok(lines.slice(firstSplat).every(line => line.split(" ")[0].endsWith("*")), "exact rules first");
+  assert.equal(lines.at(-1), "/examples/* /studies/ 301");
 });
 
 test("the grid lists every dataset and hides planned ones until asked", async () => {
