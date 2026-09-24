@@ -63,9 +63,13 @@ MkDocs configuration. Final HTML lives in ignored `.build/docs-site/`.
 | Upcoming changes | Release-note fragments under `changes/` |
 
 `docs/generated/catalog/` is committed generated Markdown. Never add prose to it.
-Dataset reference pages link to handwritten usage guides in `docs/providers/`;
-no build step merges the two pages. Each registry entry records file formats,
-selection rules, required inputs, the reader extra, and example sources.
+Each dataset has one docs page, its handwritten guide in `docs/providers/`,
+which ends with the line that includes its generated reference
+(`--8<-- "generated/catalog/<provider>/<name>.md"`); the generated files are
+snippets, not pages, and `docs/_redirects` sends their former URLs to the guide
+([ADR 0041](../adr/0041-dataset-walkthroughs-and-studies.md)). Each registry
+entry records file formats, selection rules, required inputs, the reader extra,
+and example sources.
 
 `scripts/generate_docs.py` regenerates only the catalog, CLI reference, and
 upcoming changes. It removes the former disposable `docs/examples/` output so

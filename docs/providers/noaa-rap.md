@@ -124,4 +124,4 @@ rather than estimated.
 
 [All NOAA datasets](noaa.md).
 
-[Catalog reference](../generated/catalog/noaa/rap.md#catalog-reference).
+--8<-- "generated/catalog/noaa/rap.md"

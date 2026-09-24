@@ -93,4 +93,4 @@ A short, unchanged response is retained as the
 
 [All NOAA datasets](noaa.md).
 
-[Catalog reference](../generated/catalog/noaa/coops-currents.md#catalog-reference).
+--8<-- "generated/catalog/noaa/coops-currents.md"

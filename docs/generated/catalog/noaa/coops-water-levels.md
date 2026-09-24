@@ -1,21 +1,19 @@
-# Coastal water levels
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:coops-water-levels` · **Released** · Included since usdata 0.10.
+## Reference
 
-CO-OPS Observed Water Levels.
+`noaa:coops-water-levels` · **Released** · Included since usdata 0.10. CO-OPS Observed Water Levels.
 
-## At a glance
+### At a glance
 
 - Files: CSV
 - Selection: Six-minute observations for one station and datum; at most 28 days
 - Required inputs: Station, datum, and both minute-aligned timestamps
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [Coastal water levels](https://usdata.dev/datasets/noaa/coops-water-levels/), with a walkthrough
 - Studies: [How high was Hurricane Helene's storm surge at Cedar Key?](https://usdata.dev/studies/storm-surge/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -25,7 +23,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `station` | Required seven-digit CO-OPS station id, for example '8518750'. |
 | `units` | metric (default) or english. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -38,11 +36,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `L` | — | Inferred-value flag |
 | `Quality` | — | p for preliminary or v for verified |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-coops.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.10
 - Domain: Sea level and tides
@@ -58,5 +52,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `http`
 - Adapter: `usdata.providers.noaa.coops:CoopsWaterLevels`
-
-[All NOAA datasets](../noaa.md).

@@ -150,4 +150,4 @@ rather than estimated.
 
 [EPA access notes](epa.md).
 
-[Catalog reference](../generated/catalog/epa/aqs-daily.md#catalog-reference).
+--8<-- "generated/catalog/epa/aqs-daily.md"
