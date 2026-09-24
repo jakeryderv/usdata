@@ -272,7 +272,7 @@
       "guide": "https://docs.usdata.dev/providers/noaa-lcd/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/lcd/",
       "page": "https://usdata.dev/datasets/noaa/lcd/",
-      "walkthrough": "examples/datasets/noaa-lcd/README.md",
+      "walkthrough": "examples/datasets/noaa-lcd/noaa-lcd.ipynb",
       "studies": [
         "hourly-anomalies"
       ],
