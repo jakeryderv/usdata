@@ -12,7 +12,7 @@ NWS Watch, Warning, and Advisory Events by County.
 - Selection: Events issued for one county or UGC inside an inclusive UTC window; optionally one event type
 - Required inputs: Both timestamps; a county location or a ugc; optionally phenomena with significance
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- On usdata.dev: [NWS warnings and watches by county](https://usdata.dev/datasets/noaa/nws-vtec-events/)
+- On usdata.dev: [NWS warnings and watches by county](https://usdata.dev/datasets/noaa/nws-vtec-events/), with a walkthrough
 - Studies: [How long before the 6 May 2024 Osage County tornado was a tornado warning issued?](https://usdata.dev/studies/warning-lead-time/)
 
 ## Parameters
