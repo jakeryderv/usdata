@@ -1,1 +1,0 @@
-The weekly live checks install pandas for the five live tests whose reader step needs it (AQS, FEMA declarations, earthquakes, HURDAT2, and NWS VTEC), so those steps run instead of being skipped and a passing test is no longer reported as skipped.

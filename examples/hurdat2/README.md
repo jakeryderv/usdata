@@ -1,6 +1,6 @@
 # Atlantic hurricane best tracks
 
-Available since v0.12.0. The [manifest](dataset.yaml)
+Available since v0.12.0; the manifest's `revision` parameter needs v0.26.0. The [manifest](dataset.yaml)
 requests the complete Atlantic HURDAT2 best-track file through `noaa:hurdat2`.
 The National Hurricane Center publishes one fixed-format text file per basin and
 revises it after each season, so the manifest names a basin and a revision

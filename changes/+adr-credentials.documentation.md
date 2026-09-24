@@ -1,1 +1,0 @@
-ADR 0039 records how sources that need credentials work, starting with EPA AQS. Keys come from environment variables and are checked before any request. They never appear in assets, lockfiles, provenance, cached bytes, or error messages. A pinned entry can restore from the mirror without a key. The roadmap selects this as the last workstream before 1.0.
