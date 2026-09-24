@@ -77,8 +77,11 @@ def quickstart(ds: Any, walkthrough: str | None) -> dict[str, str] | None:
             cli.append([flag, str(source[field])])
             call.append(f"{field}={_python_value(source[field])}")
     if "bbox" in source:
-        cli.append(["--bbox", _cli_value(source["bbox"])])
-        call.append(f"bbox={_python_value(source['bbox'])}")
+        # A manifest writes the box as a mapping; the CLI and build_query take its four edges.
+        box = source["bbox"]
+        edges = [box[side] for side in ("west", "south", "east", "north")]
+        cli.append(["--bbox", _cli_value(edges)])
+        call.append(f"bbox=({', '.join(map(_python_value, edges))})")
     if source.get("variables"):
         cli.append(["--vars", _cli_value(source["variables"])])
         call.append(f"variables={_python_value(source['variables'])}")
