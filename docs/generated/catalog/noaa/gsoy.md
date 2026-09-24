@@ -1,6 +1,6 @@
 # Annual station climate
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:gsoy` · **Released** · Included since usdata 0.10.
 
@@ -12,7 +12,7 @@ Global Summary of the Year.
 - Selection: Complete UTC calendar years touched by the query; station and element filters
 - Required inputs: Both dates; station IDs or a geographic query
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [annual climate](https://usdata.dev/examples/annual-climate/)
+- Examples: [How warm and wet was a year at one airport?](https://usdata.dev/examples/annual-climate/)
 
 ## Parameters
 

@@ -1,6 +1,6 @@
 # HRRR model output
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:hrrr` · **Released** · Included since usdata 0.15.
 
@@ -12,7 +12,7 @@ HRRR Forecast Model Output.
 - Selection: CONUS files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file variant
 - Required inputs: Both timestamps, cycle, and forecast_hour
 - Open locally: `usdata[grib]` · [Reader guide](../../../reference/readers.md)
-- Examples: [hrrr environment](https://usdata.dev/examples/hrrr-environment/), [severe weather case study](https://usdata.dev/examples/severe-weather-case-study/)
+- Examples: [What did the HRRR analysis say about the storm environment over central Oklahoma at 20 UTC, and how far was the tornado report from the most favorable values?](https://usdata.dev/examples/hrrr-environment/); [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/examples/severe-weather-case-study/)
 
 ## Parameters
 

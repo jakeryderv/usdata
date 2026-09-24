@@ -1,6 +1,6 @@
 # RAP model output
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:rap` · **Released** · Included since usdata 0.20.
 
@@ -12,7 +12,7 @@ RAP Model Output.
 - Selection: Files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file family
 - Required inputs: Both timestamps, cycle, and forecast_hour
 - Open locally: `usdata[grib]` · [Reader guide](../../../reference/readers.md)
-- Examples: [rap environment](https://usdata.dev/examples/rap-environment/)
+- Examples: [What did the 13 km RAP analysis say about the storm environment over Oklahoma City at 20 UTC?](https://usdata.dev/examples/rap-environment/)
 
 ## Parameters
 

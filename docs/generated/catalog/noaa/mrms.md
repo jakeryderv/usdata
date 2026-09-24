@@ -1,6 +1,6 @@
 # MRMS gridded radar products
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:mrms` · **Released** · Included since usdata 0.15.
 
@@ -12,7 +12,7 @@ Multi-Radar Multi-Sensor (MRMS).
 - Selection: Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day
 - Required inputs: Product name and both timestamps
 - Open locally: `usdata[grib]` · [Reader guide](../../../reference/readers.md)
-- Examples: [mrms rotation](https://usdata.dev/examples/mrms-rotation/), [tornado classification](https://usdata.dev/examples/tornado-classification/), [severe weather case study](https://usdata.dev/examples/severe-weather-case-study/)
+- Examples: [Where was the strongest mid-level rotation in each two-minute grid, and did it move toward the reported tornado?](https://usdata.dev/examples/mrms-rotation/); [Which severe reports came with rotation and lightning?](https://usdata.dev/examples/tornado-classification/); [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/examples/severe-weather-case-study/)
 
 ## Parameters
 

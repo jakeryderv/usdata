@@ -1,6 +1,6 @@
 # Storm Events details, fatalities, and locations
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:storm-events` · **Released** · Included since usdata 0.8.
 
@@ -12,7 +12,7 @@ Storm Events Database.
 - Selection: Whole annual archives of one table; filter rows locally after downloading
 - Required inputs: Both dates (selects the containing years); optionally table
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [storm events](https://usdata.dev/examples/storm-events/), [event context](https://usdata.dev/examples/event-context/), [tornado classification](https://usdata.dev/examples/tornado-classification/), [severe weather case study](https://usdata.dev/examples/severe-weather-case-study/)
+- Examples: [What severe weather was reported in Oklahoma?](https://usdata.dev/examples/storm-events/); [What did radar and satellites show around a reported tornado?](https://usdata.dev/examples/event-context/); [Which severe reports came with rotation and lightning?](https://usdata.dev/examples/tornado-classification/); [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/examples/severe-weather-case-study/)
 
 ## Parameters
 

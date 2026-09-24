@@ -1,6 +1,6 @@
 # Coastal water levels
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:coops-water-levels` · **Released** · Included since usdata 0.10.
 
@@ -12,7 +12,7 @@ CO-OPS Observed Water Levels.
 - Selection: Six-minute observations for one station and datum; at most 28 days
 - Required inputs: Station, datum, and both minute-aligned timestamps
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [coastal water levels](https://usdata.dev/examples/coastal-water-levels/), [storm surge](https://usdata.dev/examples/storm-surge/)
+- Examples: [How high was the water at The Battery?](https://usdata.dev/examples/coastal-water-levels/); [How high was Hurricane Helene's storm surge at Cedar Key?](https://usdata.dev/examples/storm-surge/)
 
 ## Parameters
 

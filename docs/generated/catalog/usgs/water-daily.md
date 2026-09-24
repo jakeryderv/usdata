@@ -1,6 +1,6 @@
 # Daily water observations
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `usgs:water-daily` · **Released** · Included since usdata 0.5.
 
@@ -12,7 +12,7 @@ Streamflow and Water Daily Values.
 - Selection: Site observations for inclusive local calendar dates; parameter and statistic filters
 - Required inputs: Both dates; site IDs or a geographic query
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [weather and streamflow](https://usdata.dev/examples/weather-and-streamflow/)
+- Examples: [How can I preserve weather and streamflow inputs together?](https://usdata.dev/examples/weather-and-streamflow/)
 
 ## Parameters
 

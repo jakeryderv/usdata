@@ -1,6 +1,6 @@
 # NBM forecast guidance
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:nbm` · **Released** · Included since usdata 0.20.
 
@@ -12,7 +12,7 @@ National Blend of Models.
 - Selection: Regional core files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and region
 - Required inputs: Both timestamps, cycle, and forecast_hour
 - Open locally: `usdata[grib]` · [Reader guide](../../../reference/readers.md)
-- Examples: [nbm forecast](https://usdata.dev/examples/nbm-forecast/)
+- Examples: [How warm did the National Blend expect Oklahoma City to stay through the evening of 6 May 2024?](https://usdata.dev/examples/nbm-forecast/)
 
 ## Parameters
 

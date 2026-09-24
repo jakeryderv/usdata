@@ -9,6 +9,7 @@ generated content on disk differs, which is what ``just check`` and CI run.
 
 from __future__ import annotations
 
+import json
 import posixpath
 import re
 import sys
@@ -24,8 +25,9 @@ ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
 CATALOG_DIR = ROOT / "docs/generated/catalog"
 STATUS_ORDER = [Status.AVAILABLE, Status.PLANNED]
+# An HTML comment: kept in the source for editors and for sync(), never shown to readers.
 GENERATED_NOTE = (
-    "Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand."
+    "<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->"
 )
 
 
@@ -357,10 +359,18 @@ def example_url(path: str) -> str:
     return f"https://usdata.dev/examples/{Path(path).parent.name}/"
 
 
+def example_title(path: str, root: Path = ROOT) -> str:
+    """The title the examples index gives the folder holding ``path``."""
+    slug = Path(path).parent.name
+    catalog = json.loads((root / "examples/catalog.json").read_text(encoding="utf-8"))
+    for entry in catalog:
+        if entry["slug"] == slug:
+            return entry["title"]
+    raise ValueError(f"{path}: example folder {slug!r} is not in examples/catalog.json")
+
+
 def render_dataset(registry: Registry, ds: Dataset) -> str:
-    examples = ", ".join(
-        f"[{Path(path).parent.name.replace('-', ' ')}]({example_url(path)})" for path in ds.examples
-    )
+    examples = "; ".join(f"[{example_title(path)}]({example_url(path)})" for path in ds.examples)
     reader = (
         f"`usdata[{ds.reader}]` · [Reader guide](../../../reference/readers.md)"
         if ds.reader

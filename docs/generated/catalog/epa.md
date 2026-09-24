@@ -1,6 +1,6 @@
 # EPA datasets
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 [Provider access notes](../../providers/epa.md).
 

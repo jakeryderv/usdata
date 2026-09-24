@@ -10,12 +10,13 @@
 [![usdata.dev: public science, reproducible inputs](https://usdata.dev/og.png)](https://usdata.dev/)
 
 Reproducible acquisition of U.S. public scientific data. One Python SDK and
-CLI discovers curated NOAA and USGS datasets, fetches their files, and keeps a
-record of every input: a manifest names them, a lockfile pins them by checksum,
-and the record of what was fetched is what a methods section cites. Analysis
-stays in pandas and xarray; usdata only acquires. If you need every product
-one agency publishes, that agency's own library is the better tool; usdata is
-for pinning inputs across sources and proving later that they have not changed.
+CLI discovers curated datasets from agencies such as NOAA, USGS, and EPA,
+fetches their files, and keeps a record of every input: a manifest names them,
+a lockfile pins them by checksum, and the record of what was fetched is what a
+methods section cites. Analysis stays in pandas and xarray; usdata only
+acquires. If you need every product one agency publishes, that agency's own
+library is the better tool; usdata is for pinning inputs across sources and
+proving later that they have not changed.
 
 ```sh
 pip install "usdata[pandas]"

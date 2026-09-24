@@ -1,6 +1,6 @@
 # Monthly station climate
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:gsom` · **Released** · Included since usdata 0.7.
 
@@ -12,7 +12,7 @@ Global Summary of the Month.
 - Selection: Complete UTC calendar months touched by the query; station and element filters
 - Required inputs: Both dates; station IDs or a geographic query
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [monthly climate](https://usdata.dev/examples/monthly-climate/), [climate anomalies](https://usdata.dev/examples/climate-anomalies/)
+- Examples: [How did temperature and rainfall vary through the year?](https://usdata.dev/examples/monthly-climate/); [Was 2024 warmer or wetter than normal?](https://usdata.dev/examples/climate-anomalies/)
 
 ## Parameters
 
