@@ -114,4 +114,4 @@ rather than estimated.
 
 [All NOAA datasets](noaa.md).
 
-[Catalog reference](../generated/catalog/noaa/climate-normals.md#catalog-reference).
+--8<-- "generated/catalog/noaa/climate-normals.md"

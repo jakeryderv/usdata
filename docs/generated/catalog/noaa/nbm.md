@@ -1,20 +1,18 @@
-# NBM forecast guidance
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:nbm` · **Released** · Included since usdata 0.20.
+## Reference
 
-National Blend of Models.
+`noaa:nbm` · **Released** · Included since usdata 0.20. National Blend of Models.
 
-## At a glance
+### At a glance
 
 - Files: GRIB2
 - Selection: Regional core files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and region
 - Required inputs: Both timestamps, cycle, and forecast_hour
-- Open locally: `usdata[grib]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[grib]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [NBM forecast guidance](https://usdata.dev/datasets/noaa/nbm/), with a walkthrough
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -25,7 +23,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `messages` | Optional GRIB2 messages to fetch instead of the whole file, spelled as the object's wgrib2 .idx sidecar spells them: 'SHORTNAME:level text', such as 'TMP:2 m above ground', with an optional ':step text'; one value, a list, or a comma-separated string. Short names are upper case and both fields match exactly. |
 | `region` | Grid: co (default, 2.5 km CONUS), ak (Alaska), hi (Hawaii), pr (Puerto Rico), or gu (Guam). |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -33,11 +31,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `2d` | K | 2 m dewpoint temperature |
 | `tp` | kg/m2 | Total precipitation accumulated over the step |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-nbm.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.20
 - Domain: Weather models
@@ -53,5 +47,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `s3`
 - Adapter: `usdata.providers.noaa.nbm:Nbm`
-
-[All NOAA datasets](../noaa.md).
