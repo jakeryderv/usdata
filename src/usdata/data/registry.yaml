@@ -1613,7 +1613,7 @@ datasets:
     reader: grib
     guide: docs/providers/noaa-rap.md
     examples:
-      - examples/datasets/noaa-rap/README.md
+      - examples/datasets/noaa-rap/noaa-rap.ipynb
     resolution:
       spatial: "13 km Lambert conformal CONUS grid, 451 x 337 points, for the awp130 family"
       temporal: >-
