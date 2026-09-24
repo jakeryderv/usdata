@@ -511,7 +511,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-ibtracs.md
     examples:
-      - examples/datasets/noaa-ibtracs/README.md
+      - examples/datasets/noaa-ibtracs/noaa-ibtracs.ipynb
     resolution:
       spatial: "Positions to a tenth of a degree"
       temporal: "Three-hourly points, interpolated between the agencies' six-hourly best tracks"
