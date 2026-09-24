@@ -460,7 +460,7 @@ def _with(dataset_id, **updates):
         ),
         (
             "noaa:hurdat2",
-            {"examples": ["examples/datasets/noaa-hurdat2/README.md"]},
+            {"examples": ["examples/datasets/noaa-hurdat2/noaa-hurdat2.ipynb"]},
             "study storm-surge: its manifest uses",
         ),
         ("noaa:gsoy", {"examples": ["examples/studies/storm-surge/storm-surge.ipynb"]}, "exists"),

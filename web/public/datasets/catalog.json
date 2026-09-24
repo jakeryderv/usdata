@@ -1385,7 +1385,7 @@
       "guide": "https://docs.usdata.dev/providers/noaa-hurdat2/",
       "reference": "https://docs.usdata.dev/providers/noaa-hurdat2/#reference",
       "page": "https://usdata.dev/datasets/noaa/hurdat2/",
-      "walkthrough": "examples/datasets/noaa-hurdat2/README.md",
+      "walkthrough": "examples/datasets/noaa-hurdat2/noaa-hurdat2.ipynb",
       "studies": [
         "storm-surge"
       ],
