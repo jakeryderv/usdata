@@ -139,6 +139,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-ghcn.md
     examples:
+      - examples/datasets/noaa-ghcn-daily/noaa-ghcn-daily.ipynb
       - examples/studies/weather-and-streamflow/weather-and-streamflow.ipynb
     resolution:
       spatial: >-
