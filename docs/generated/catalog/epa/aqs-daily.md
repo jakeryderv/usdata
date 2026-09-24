@@ -2,7 +2,7 @@
 
 Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
 
-`epa:aqs-daily` · **Source only** · Install from [source](../../../install.md#source-installation) to use this dataset.
+`epa:aqs-daily` · **Released** · Included since usdata 0.26.
 
 Air Quality System Daily Summaries.
 
@@ -67,7 +67,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ## Catalog reference
 
-- Availability: Source only · intended for 0.26
+- Availability: since 0.26
 - Domain: Air quality
 - Spatial resolution: Regulatory monitoring sites operated by state, local, and tribal agencies
 - Temporal resolution: Daily summaries of each monitor's samples, one row per pollutant standard

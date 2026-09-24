@@ -1,5 +1,5 @@
 {
-  "version": "0.25.0",
+  "version": "0.26.0",
   "datasets": [
     {
       "id": "noaa:ghcn-daily",
@@ -2914,7 +2914,7 @@
       "provider": "EPA",
       "domain": "Air quality",
       "system": null,
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.26",
       "keywords": [
         "air quality",

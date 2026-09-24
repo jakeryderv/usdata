@@ -46,7 +46,7 @@ The R2 bucket at `data.usdata.dev` is reserved for dataset storage; see
 [website operations](guides/website-operations.md) and
 [ADR 0015](adr/0015-separate-sites-and-data-storage.md).
 
-Shipped through v0.25.0: the tornado research inputs
+Shipped through v0.26.0: the tornado research inputs
 ([issue 118](https://github.com/jakeryderv/usdata/issues/118)), one registry
 schema verified against the adapters
 ([ADR 0026](adr/0026-one-registry-schema.md)), the published provider contract
@@ -124,19 +124,24 @@ with explicit M1/M2 selection and a fifteen-minute central Plains infrared
 comparison. The example commits its archive lockfile and checks
 timing, quality flags, a fixed footprint, and empty-cache restoration.
 
-Selected next: the first source that needs credentials,
-[EPA AQS daily summaries](https://github.com/jakeryderv/usdata/issues/222), and
-the last workstream before 1.0 ([versioning](versioning.md)). The anonymous
-surface has stopped moving: v0.23.0 through v0.25.0 changed neither the
-manifest, the lockfile, nor the `Provider` interface. Adding credentials will
-change that interface, so the two-release clock for 1.0 starts after it ships.
-[ADR 0039](adr/0039-credentialed-sources.md) sets the rules. Keys come from
-the environment, and the core checks them before any request. No key reaches an
-asset, a lockfile, provenance, cached bytes, or an error message. A pinned entry
-restores from the mirror without a key. Probing the service showed its responses
-echo the key and vary between identical requests, so the adapter writes a
-canonical form. The contract changes and their checks come first, then the
-`epa:aqs-daily` adapter, then one example.
+Shipped in v0.26.0: the first source that needs credentials,
+[EPA AQS daily summaries](https://github.com/jakeryderv/usdata/issues/222),
+which was the last feature criterion for 1.0 ([versioning](versioning.md)).
+[ADR 0039](adr/0039-credentialed-sources.md) sets the rules: keys come from
+the environment, the core checks them before any request, no key reaches an
+asset, a lockfile, provenance, cached bytes, or an error message, and a pinned
+entry restores from the mirror without a key. AQS responses echo the key and
+vary between identical requests, so the adapter writes a canonical form
+([ADR 0040](adr/0040-aqs-daily-selection.md)). The
+[wildfire-smoke example](https://usdata.dev/examples/wildfire-smoke/) pins New
+York City's PM2.5 through the June 2023 smoke. The same release lets
+`noaa:hurdat2` name a revision, since the newest Atlantic file has upstream
+typos ([ADR 0038](adr/0038-named-hurdat2-revisions.md)).
+
+v0.26.0 changed the `Provider` interface and added a provenance field, so the
+two-release stability clock for 1.0 starts after it: 1.0 can be tagged once
+two more minor releases leave the manifest, the lockfile, and the `Provider`
+interface unchanged. Until then, prefer work that uses them as they are.
 
 ## Next
 
