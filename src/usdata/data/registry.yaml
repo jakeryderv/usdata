@@ -1481,7 +1481,7 @@ datasets:
     guide: docs/providers/epa-aqs-daily.md
     examples:
       - examples/datasets/epa-aqs-daily/epa-aqs-daily.ipynb
-      - examples/studies/wildfire-smoke/README.md
+      - examples/studies/wildfire-smoke/wildfire-smoke.ipynb
     resolution:
       spatial: Regulatory monitoring sites operated by state, local, and tribal agencies
       temporal: Daily summaries of each monitor's samples, one row per pollutant standard
