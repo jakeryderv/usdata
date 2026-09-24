@@ -1463,6 +1463,9 @@ datasets:
     homepage: https://aqs.epa.gov/aqsweb/documents/data_api.html
     license: US Government Work (public domain)
     capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: true }
+    credentials:
+      variables: [USDATA_AQS_EMAIL, USDATA_AQS_KEY]
+      signup: https://aqs.epa.gov/aqsweb/documents/data_api.html#signup
 
   # ---------------------------------------------------------------- FEMA
   - id: fema:nfhl

@@ -28,6 +28,13 @@ the checks install it as ``usdata.protocols.http.client`` for their duration::
             work_dir=tmp_path,
         )
 
+For a dataset that declares credentials, the factory also takes
+``credentials=`` and defaults to ``sentinel_credentials(dataset)``, stand-in
+values the checks then search for everywhere the adapter could leak them::
+
+    def factory(client=None, credentials=sentinel_credentials(MY_DATASET)):
+        return MyKeyedProvider(MY_DATASET, client, credentials=credentials)
+
 Every check reports a failure as an ordinary assertion, so it reads the same
 under pytest as a test written by hand. ``pytest`` itself is imported inside the
 checks that need it rather than at module scope, so it stays a development
@@ -36,11 +43,12 @@ dependency of ``usdata`` and importing this module never requires it at runtime.
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 import tempfile
-from collections.abc import Callable, Iterator
-from contextlib import AbstractContextManager, contextmanager, nullcontext
+from collections.abc import Callable, Iterable, Iterator
+from contextlib import AbstractContextManager, contextmanager, nullcontext, suppress
 from datetime import timedelta, timezone
 from pathlib import Path
 
@@ -48,8 +56,10 @@ import httpx
 
 from usdata.models import BBox, Dataset, Place, Query, TimeRange
 from usdata.protocols import http, s3
-from usdata.providers import Provider, QueryError
+from usdata.providers import Credentials, MissingCredentials, Provider, QueryError
 from usdata.providers.base import BARE_BOX, QueryField
+from usdata.providers.credentials import encoded_forms
+from usdata.providers.http import HTTPX_LOGGER
 
 AdapterFactory = Callable[..., Provider]
 """Builds the adapter: no argument for an owned client, ``client=`` for an injected one."""
@@ -440,6 +450,174 @@ def check_fetch_lifecycle(
                 supplied.close()
 
 
+def sentinel_credentials(dataset: Dataset) -> Credentials:
+    """A distinctive stand-in value for every variable ``dataset`` declares, for offline checks.
+
+    Each holds an ``@`` and a ``+``, which a URL encodes, so a check that looks
+    for a leaked value sees it in whatever form it escaped in.
+    """
+    names = dataset.credentials.variables if dataset.credentials else []
+    return Credentials(
+        {
+            name: f"usdata+{name.lower().replace('_', '-')}-sentinel@example.invalid"
+            for name in names
+        }
+    )
+
+
+def check_credentials_required(dataset: Dataset, adapter_factory: AdapterFactory) -> None:
+    """An adapter cannot be built without every credential its dataset declares.
+
+    Each declared variable is withheld in turn, once absent and once blank, and
+    the refusal must be ``MissingCredentials`` naming it and where to get a key,
+    raised before any client exists.
+    """
+    spec = dataset.credentials
+    assert spec is not None, f"{dataset.id} declares no credentials"
+
+    def unexpected_client() -> httpx.Client:
+        raise AssertionError("a missing credential must be refused before any transport")
+
+    full = sentinel_credentials(dataset)
+    with _patched_client(unexpected_client):
+        for name in spec.variables:
+            absent = {key: value for key, value in full.items() if key != name}
+            for given in (absent, {**absent, name: ""}):
+                with _raises(MissingCredentials) as caught:
+                    adapter_factory(credentials=Credentials(given))
+                message = str(getattr(caught, "value", ""))
+                assert name in message and spec.signup in message, message
+
+
+def _leaks(forms: set[str], text: str) -> list[str]:
+    """The credential forms ``text`` contains."""
+    return sorted(form for form in forms if form in text)
+
+
+def _exception_text(error: BaseException) -> Iterable[str]:
+    """Everything an exception and its chain would print, including an httpx URL and body."""
+    seen: set[int] = set()
+    current: BaseException | None = error
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        yield str(current)
+        yield repr(current)
+        yield from (repr(arg) for arg in current.args)
+        if isinstance(current, httpx.HTTPError):
+            with suppress(RuntimeError):  # An error raised without a request has no URL.
+                yield str(current.request.url)
+        if isinstance(current, httpx.HTTPStatusError):
+            yield current.response.content.decode("utf-8", "replace")
+            yield str(current.response.headers)
+        current = current.__cause__ or current.__context__
+
+
+@contextmanager
+def _httpx_log(records: list[str]) -> Iterator[None]:
+    """Collect every line httpx logs at INFO and above, as a user who turned logging on sees it."""
+
+    class Collect(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:
+            records.append(record.getMessage())
+
+    logger = logging.getLogger(HTTPX_LOGGER)
+    handler, level = Collect(), logger.level
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    try:
+        yield
+    finally:
+        logger.removeHandler(handler)
+        logger.setLevel(level)
+
+
+def check_credentials_contained(
+    dataset: Dataset,
+    adapter_factory: AdapterFactory,
+    scenario_query: Query,
+    client_factory: ClientFactory,
+    *,
+    arm_download: Callable[[str], None] | None = None,
+    failing_client_factory: ClientFactory | None = None,
+    fetch_error: type[BaseException] = httpx.HTTPStatusError,
+    work_dir: Path | None = None,
+) -> None:
+    """Credentials reach the source and nothing else: no asset, file, log line, or error.
+
+    The adapter is built with ``sentinel_credentials(dataset)``, lists and
+    fetches the scenario, and the check first confirms the values were sent,
+    since a check that never saw them would prove nothing. It then looks for
+    each value, as written and URL-encoded, in every asset (the lockfile and
+    provenance are built from them), the partial-fetch record, the fetched
+    bytes, the adapter's ``repr``, and httpx's request log. With
+    ``failing_client_factory`` the fetch fails too, and the raised exception,
+    its chain, and any httpx request and response it carries must be clean.
+    """
+    secrets = sentinel_credentials(dataset)
+    assert secrets, f"{dataset.id} declares no credentials"
+    forms = {form for value in secrets.values() for form in encoded_forms(value)}
+    sent: list[str] = []
+    logged: list[str] = []
+
+    def recording(factory: ClientFactory) -> ClientFactory:
+        def build() -> httpx.Client:
+            client = factory()
+
+            def record(request: httpx.Request) -> None:
+                sent.append(f"{request.url} {request.headers}")
+
+            client.event_hooks["request"].append(record)
+            return client
+
+        return build
+
+    def exchange(root: Path, name: str) -> tuple[list[str], bytes]:
+        """List and fetch the scenario; return what the core would keep, and the bytes."""
+        with adapter_factory(credentials=secrets) as adapter:
+            assets = adapter.list_assets(scenario_query)
+            assert assets, f"{dataset.id} listed nothing for the scenario"
+            kept = [asset.model_dump_json() for asset in assets]
+            kept += [repr(adapter), repr(adapter.credentials), *adapter.transformations]
+            asset = assets[0]
+            if arm_download is not None:
+                arm_download(_download_url(asset.href))
+            dest = root / name
+            partial = adapter.prepare_fetch(asset)
+            if partial is not None:
+                kept.append(partial.model_dump_json())
+            try:
+                if partial is None:
+                    adapter.fetch(asset, dest)
+                else:
+                    adapter.fetch_partial(asset, dest, partial)
+            finally:
+                kept += logged
+            return kept, dest.read_bytes()
+
+    with _work_dir(work_dir) as root, _isolated_cache(root), _httpx_log(logged):
+        with _patched_client(recording(client_factory)):
+            kept, data = exchange(root, "contained-output")
+        assert any(_leaks(forms, line) for line in sent), (
+            f"{dataset.id} never sent its credentials, so their containment was not exercised"
+        )
+        for text in kept:
+            assert not _leaks(forms, text), f"{dataset.id} leaked a credential into: {text[:200]}"
+        assert not [form for form in forms if form.encode() in data], (
+            f"{dataset.id} wrote a credential into the fetched bytes"
+        )
+        if failing_client_factory is None:
+            return
+        failing = recording(failing_client_factory)
+        with _patched_client(failing), _raises(fetch_error) as caught:
+            exchange(root, "failed-output")
+        error = getattr(caught, "value", None)
+        assert isinstance(error, BaseException)
+        for text in [*_exception_text(error), *logged]:
+            assert not _leaks(forms, text), (
+                f"{dataset.id} leaked a credential through a failed request: {text[:200]}"
+            )
+
+
 def check_provider_contract(
     dataset: Dataset,
     adapter_factory: AdapterFactory,
@@ -461,6 +639,9 @@ def check_provider_contract(
     ``failing_client_factory``, whose transport refuses the download, also runs
     the failure half of the fetch lifecycle. The individual ``check_*``
     functions are public too, for a suite that wants one test per rule.
+
+    A dataset that declares credentials is also held to
+    ``check_credentials_required`` and ``check_credentials_contained``.
     """
     check_params_declaration(adapter_factory)
     check_declared_params(adapter_factory, scenario_query)
@@ -493,6 +674,18 @@ def check_provider_contract(
                 fetch_error=fetch_error,
                 work_dir=work_dir,
             )
+    if dataset.credentials is not None:
+        check_credentials_required(dataset, adapter_factory)
+        check_credentials_contained(
+            dataset,
+            adapter_factory,
+            scenario_query,
+            client_factory,
+            arm_download=arm_download,
+            failing_client_factory=failing_client_factory,
+            fetch_error=fetch_error,
+            work_dir=work_dir,
+        )
 
 
 __all__ = [
@@ -504,6 +697,8 @@ __all__ = [
     "AdapterFactory",
     "ClientFactory",
     "TransportReached",
+    "check_credentials_contained",
+    "check_credentials_required",
     "check_declared_capabilities",
     "check_declared_params",
     "check_fetch_lifecycle",
@@ -512,4 +707,5 @@ __all__ = [
     "check_provider_contract",
     "check_text_refused",
     "check_utc_equivalence",
+    "sentinel_credentials",
 ]

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -14,7 +15,11 @@ SIDECAR_SUFFIX = ".provenance.json"
 
 
 def record(
-    dataset: Dataset, asset: Asset, path: Path, partial: PartialFetch | None = None
+    dataset: Dataset,
+    asset: Asset,
+    path: Path,
+    partial: PartialFetch | None = None,
+    transformations: Sequence[str] = (),
 ) -> Provenance:
     """Build a provenance record for a file that was just fetched to ``path``.
 
@@ -26,6 +31,9 @@ def record(
             Its index, ranges, selectors, and object identity are recorded
             alongside the checksum of the local file, which still covers exactly
             these bytes.
+        transformations: How the adapter's ``fetch`` changed the bytes the
+            source sent (``Provider.transformations``), recorded after any
+            partial-fetch entry.
 
     Returns:
         The record to write beside ``path``.
@@ -39,13 +47,14 @@ def record(
         size=path.stat().st_size,
         license=dataset.license,
         usdata_version=__version__,
-        transformations=[] if partial is None else [partial.describe()],
+        transformations=[*([] if partial is None else [partial.describe()]), *transformations],
         index_url=None if partial is None else partial.index_url,
         index_checksum=None if partial is None else partial.index_checksum,
         ranges=[] if partial is None else list(partial.ranges),
         selectors=[] if partial is None else list(partial.selectors),
         object_size=None if partial is None else partial.object_size,
         object_etag=None if partial is None else partial.object_etag,
+        credentials=[] if dataset.credentials is None else list(dataset.credentials.variables),
     )
 
 

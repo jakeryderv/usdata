@@ -51,6 +51,9 @@ def render() -> str:
                     "formats": dataset.formats,
                     "selection": dataset.selection,
                     "inputs": dataset.inputs,
+                    "credentials": (
+                        dataset.credentials.model_dump() if dataset.credentials else None
+                    ),
                     "reader_extra": dataset.reader,
                     "resolution": (dataset.resolution.model_dump() if dataset.resolution else None),
                     "update_frequency": dataset.update_frequency,

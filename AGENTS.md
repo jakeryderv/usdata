@@ -27,6 +27,7 @@ data, with provenance and reproducible manifests. Read
 
 - Core must not import any provider module; use `load_adapter`.
 - Providers must not write to the cache or provenance; they return assets and fetch bytes to a given path.
+- Credentials reach an adapter only as `self.credentials`, never from `os.environ`, and never reach an `Asset`, fetched bytes, or an error message ([ADR 0039](docs/adr/0039-credentialed-sources.md)).
 - Core runtime deps are pydantic, pyyaml, typer, httpx. Anything heavier goes behind an extra.
 - Unit tests must not touch the network. Mock HTTP; mark live tests `live`.
 - Every registry entry must be true: real id, real endpoint, correct capabilities.

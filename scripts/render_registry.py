@@ -17,7 +17,7 @@ from collections import Counter
 from pathlib import Path
 
 from usdata.models import LATER, Dataset, ProviderInfo, Status, describe_duration
-from usdata.providers import load_adapter
+from usdata.providers import adapter_class
 from usdata.registry import Registry, version_key
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -142,6 +142,18 @@ def system_sections(registry: Registry, datasets: list[Dataset]) -> str:
     return "\n".join(blocks)
 
 
+def _credentials_text(ds: Dataset) -> str:
+    """The variables a dataset reads its key from, and where the agency issues one."""
+    assert ds.credentials is not None
+    names = ", ".join(f"`{name}`" for name in ds.credentials.variables)
+    return f"{names} in the environment ([request a key]({ds.credentials.signup}))"
+
+
+def _credentials_line(ds: Dataset) -> list[str]:
+    """The at-a-glance line for a dataset that needs credentials, or nothing."""
+    return [f"- Credentials: {_credentials_text(ds)}"] if ds.credentials else []
+
+
 def planned_block(registry: Registry, datasets: list[Dataset]) -> str:
     if not datasets:
         return "No planned datasets for this provider.\n"
@@ -156,6 +168,7 @@ def planned_block(registry: Registry, datasets: list[Dataset]) -> str:
             "",
             f"[Upstream information]({ds.homepage})" if ds.homepage else "",
             f"Domain: {registry.domain(ds.domain).name}.",
+            *([f"Credentials: {_credentials_text(ds)}."] if ds.credentials else []),
             "",
         ]
     return "\n".join(lines).rstrip() + "\n"
@@ -283,8 +296,7 @@ def check_readme_counts(registry: Registry, root: Path = ROOT) -> None:
 
 def parameter_block(ds: Dataset) -> list[str]:
     """The adapter's declared ``--param`` keys, read from the class that implements them."""
-    with load_adapter(ds) as adapter:
-        declared = dict(adapter.accepted_params)
+    declared = dict(adapter_class(ds).accepted_params)
     if not declared:
         return ["This dataset accepts no provider-specific parameters."]
     return [
@@ -373,6 +385,7 @@ def render_dataset(registry: Registry, ds: Dataset) -> str:
         f"- Files: {', '.join(ds.formats)}",
         f"- Selection: {required(ds, 'selection')}",
         f"- Required inputs: {required(ds, 'inputs')}",
+        *_credentials_line(ds),
         f"- Open locally: {reader}",
         f"- Examples: {examples}",
         "",

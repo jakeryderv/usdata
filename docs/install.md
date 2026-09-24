@@ -29,8 +29,10 @@ returns.
 
 `usdata doctor` reports what it finds and fixes nothing: the interpreter, this
 install, each reader extra with its versions, the ecCodes library behind the
-`grib` extra, the cache directory with its free space, and any
-`USDATA_CACHE_DIR`, `XDG_CACHE_HOME`, or `USDATA_MIRROR_URL` setting.
+`grib` extra, the cache directory with its free space, any
+`USDATA_CACHE_DIR`, `XDG_CACHE_HOME`, or `USDATA_MIRROR_URL` setting, and, for
+each dataset that needs a key, whether its variables are set. It never prints a
+key.
 
 ```console
 $ usdata doctor

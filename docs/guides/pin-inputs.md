@@ -68,6 +68,11 @@ by checksum can serve them: `USDATA_MIRROR_URL` names one, and the shipped
 examples restore from the project's at `https://data.usdata.dev`. The full
 contract is in [provenance and drift](../concepts/provenance-and-drift.md).
 
+A dataset that needs a key reads it from environment variables that `usdata
+info` names, so a manifest and lockfile never hold one and can be shared as
+they are. Someone without a key can still restore what the cache or a mirror
+holds.
+
 --8<-- "_snippets/upstream-revisions.md"
 
 The [weather and streamflow example](https://usdata.dev/examples/weather-and-streamflow/)

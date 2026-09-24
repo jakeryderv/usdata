@@ -1,7 +1,8 @@
-"""Read-only environment report: interpreter, reader extras, cache, and endpoints.
+"""Read-only environment report: interpreter, reader extras, cache, credentials, and endpoints.
 
 ``diagnose`` only observes. It imports optional modules, reads environment
-variables, stats the cache directory, and - when asked - makes one bounded
+variables, stats the cache directory, reports whether each dataset that needs
+credentials has them without ever printing a value, and - when asked - makes one bounded
 request per upstream host family. It never creates, moves, or repairs anything;
 the CLI prints what it finds and leaves the fixing to the reader.
 """
@@ -30,9 +31,10 @@ from usdata import __version__
 from usdata._grib import LIBRARY_HINT
 from usdata.cache import ENV_VAR, cache_dir
 from usdata.mirror import ENV_VAR as MIRROR_ENV_VAR
-from usdata.models import READER_EXTRAS
+from usdata.models import READER_EXTRAS, Status
 from usdata.protocols import http
-from usdata.registry import default_registry
+from usdata.providers.credentials import Credentials
+from usdata.registry import Registry, default_registry
 
 READER_MODULES: dict[str, tuple[str, ...]] = {
     "pandas": ("pandas",),
@@ -86,7 +88,13 @@ def diagnose(*, network: bool = False) -> Report:
         cache, environment, endpoints. A missing optional extra is ``warn``;
         a cache directory that cannot be written is ``fail``.
     """
-    checks = [*_runtime_checks(), *_reader_checks(), *_cache_checks(), *_environment_checks()]
+    checks = [
+        *_runtime_checks(),
+        *_reader_checks(),
+        *_cache_checks(),
+        *_environment_checks(),
+        *_credential_checks(),
+    ]
     if network:
         checks.extend(_endpoint_checks())
     return Report(checks=checks)
@@ -196,6 +204,31 @@ def _environment_checks() -> Iterator[Check]:
         value = os.environ.get(name)
         if value:
             yield Check(name=f"env:{name}", status=CheckStatus.OK, detail=value)
+
+
+def _credential_checks(registry: Registry | None = None) -> Iterator[Check]:
+    """Whether each fetchable dataset that needs credentials has them; values are never read out.
+
+    An unset variable is a warning, not a failure: every other dataset still
+    works, and a locked restore can still come from the cache or the mirror.
+    """
+    for dataset in (registry or default_registry()).list():
+        if dataset.credentials is None or dataset.status is Status.PLANNED:
+            continue
+        names = dataset.credentials.variables
+        present = Credentials.from_environment(names)
+        if missing := [name for name in names if name not in present]:
+            yield Check(
+                name=f"credentials:{dataset.id}",
+                status=CheckStatus.WARN,
+                detail=f"{', '.join(missing)} unset; request a key at {dataset.credentials.signup}",
+            )
+        else:
+            yield Check(
+                name=f"credentials:{dataset.id}",
+                status=CheckStatus.OK,
+                detail=f"{', '.join(names)} set",
+            )
 
 
 def _endpoint_checks() -> Iterator[Check]:

@@ -230,6 +230,37 @@ class Variable(BaseModel):
         return f"{self.name} ({self.units})" if self.units else self.name
 
 
+CREDENTIAL_VARIABLE = re.compile(r"USDATA_[A-Z0-9]+(?:_[A-Z0-9]+)+")
+"""How a credential variable is named: ``USDATA_<SYSTEM>_<FIELD>``, such as ``USDATA_AQS_KEY``."""
+
+
+class CredentialSpec(BaseModel):
+    """The environment variables a source needs before it can be contacted, and where to get a key.
+
+    Declared in the registry entry so the catalog, ``info``, and ``doctor`` can
+    say what a dataset needs, and so the core can check it before any request
+    (ADR 0039). Values never appear here or anywhere else the core writes.
+    """
+
+    variables: list[str] = Field(
+        min_length=1, description="Environment variables that must be set, USDATA_<SYSTEM>_<FIELD>"
+    )
+    signup: str = Field(description="https URL where the agency issues a key")
+
+    @model_validator(mode="after")
+    def _named(self) -> CredentialSpec:
+        for name in self.variables:
+            if not CREDENTIAL_VARIABLE.fullmatch(name):
+                raise ValueError(
+                    f"credential variable {name!r} must be named USDATA_<SYSTEM>_<FIELD>"
+                )
+        if len(set(self.variables)) != len(self.variables):
+            raise ValueError("credentials.variables entries must be distinct")
+        if not self.signup.startswith("https://"):
+            raise ValueError("credentials.signup must be an https URL")
+        return self
+
+
 class Limits(BaseModel):
     """Request limits the adapter enforces, declared here and verified by the adapter tests."""
 
@@ -303,6 +334,10 @@ class Dataset(BaseModel):
     )
     limits: Limits | None = Field(
         default=None, description="Request limits the adapter enforces, such as the longest window"
+    )
+    credentials: CredentialSpec | None = Field(
+        default=None,
+        description="Environment variables the source needs before it can be contacted (ADR 0039)",
     )
     system: str | None = Field(
         default=None,
@@ -595,7 +630,16 @@ class Provenance(BaseModel):
     )
     mirror: str | None = Field(
         default=None,
-        description="Mirror object that served these bytes after the source stopped (ADR 0030)",
+        description=(
+            "Mirror object that served these bytes in place of the source (ADR 0030, ADR 0039)"
+        ),
+    )
+    credentials: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Environment variables the source requires to fetch this file, never their values "
+            "(ADR 0039); empty for an anonymous source"
+        ),
     )
 
     @property

@@ -200,6 +200,16 @@ Rules:
   its caller. Core uses adapters as context managers. Use
   `http.get(url, client, params=...)` for metadata and `http.download` for bytes
   so retries cover both listing and downloads.
+- If the source needs a key, declare it in the registry entry under
+  `credentials`: the `variables` it reads, named `USDATA_<SYSTEM>_<FIELD>`, and
+  the `signup` URL where the agency issues one. The core reads them from the
+  environment and passes them as `credentials=`; the adapter reads
+  `self.credentials[NAME]` and never `os.environ`. Add them to each request as
+  it is sent, never to an `Asset` field, and wrap every such request in
+  `with self.redacted_errors():` so a failure cannot print the key. If the
+  response echoes the request or differs between identical requests, write a
+  canonical form and say how in the `transformations` class attribute. See
+  [ADR 0039](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0039-credentialed-sources.md).
 - Give assets stable ids: they become cache filenames and lockfile keys.
 - Set `size` and `time` on assets when the listing provides them.
 - Do not write to the cache or create provenance. `usdata.fetch` does that.
@@ -247,6 +257,22 @@ def test_my_adapter(tmp_path) -> None:
 `check_provider_contract` runs every rule; the individual `check_*` functions it
 composes are exported too, for a suite that wants one test per rule. `pytest` is
 imported inside them, so it stays a development dependency.
+
+For a dataset that declares `credentials`, the factory also takes
+`credentials=`, defaulting to `sentinel_credentials(MY_DATASET)`, and the
+contract adds two checks. A missing or blank variable must be refused with
+`MissingCredentials` before any client exists. And the sentinel values must
+reach the mock transport, yet appear in no asset, fetched byte, httpx log
+line, or error raised by a failing fetch. Pass `failing_client_factory` so that
+last part runs:
+
+```python
+def factory(client=None, credentials=sentinel_credentials(MY_DATASET)):
+    return MyKeyedProvider(MY_DATASET, client, credentials=credentials)
+```
+
+Live tests read real keys from repository secrets and skip, naming the
+variables, when they are unset.
 
 ## 5. Docs and changelog
 

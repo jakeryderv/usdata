@@ -26,6 +26,7 @@
       ],
       "selection": "Station observations within inclusive calendar dates; selected elements",
       "inputs": "Both dates; station IDs or a geographic query",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "Land surface stations; more than 100,000 stations in 180 countries and territories",
@@ -95,6 +96,7 @@
       ],
       "selection": "Complete UTC calendar months touched by the query; station and element filters",
       "inputs": "Both dates; station IDs or a geographic query",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "Land surface stations, derived from GHCN-Daily",
@@ -153,6 +155,7 @@
       ],
       "selection": "Complete UTC calendar years touched by the query; station and element filters",
       "inputs": "Both dates; station IDs or a geographic query",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "Land surface stations, derived from GHCN-Daily",
@@ -209,6 +212,7 @@
       ],
       "selection": "Every report on whole calendar days per station; optional column filters",
       "inputs": "Both dates; eleven-digit station IDs or a geographic query",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "Airport and first-order stations, addressed by eleven-digit station id",
@@ -288,6 +292,7 @@
       ],
       "selection": "Whole annual archives of one table; filter rows locally after downloading",
       "inputs": "Both dates (selects the containing years); optionally table",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "One record per county, forecast zone, or marine zone touched by an event",
@@ -376,6 +381,7 @@
       ],
       "selection": "Whole annual, half-decade, or decade files of one table; filter rows locally after downloading",
       "inputs": "Both dates (selects the files covering those years); optionally table",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "One row per tornado or per state and county segment, with start and end coordinates",
@@ -521,6 +527,7 @@
       ],
       "selection": "Events issued for one county or UGC inside an inclusive UTC window; optionally one event type",
       "inputs": "Both timestamps; a county location or a ugc; optionally phenomena with significance",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "One county, parish, or forecast zone per request, by NWS UGC code",
@@ -646,6 +653,7 @@
       ],
       "selection": "Whole radar scans by site and inclusive UTC scan-start time",
       "inputs": "Both timestamps; radar IDs or a geographic query",
+      "credentials": null,
       "reader_extra": "radar",
       "resolution": {
         "spatial": null,
@@ -725,6 +733,7 @@
       ],
       "selection": "Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day",
       "inputs": "Product name and both timestamps",
+      "credentials": null,
       "reader_extra": "grib",
       "resolution": {
         "spatial": "0.01 degree CONUS grid (3,500 x 7,000 points); 0.005 degree for rotation tracks",
@@ -879,6 +888,7 @@
       ],
       "selection": "Whole product files by site, product code, and inclusive UTC scan time since 2020-03-30",
       "inputs": "Both timestamps; product codes; radar IDs or a geographic query",
+      "credentials": null,
       "reader_extra": null,
       "resolution": {
         "spatial": null,
@@ -1036,6 +1046,7 @@
       ],
       "selection": "Whole single-channel scenes by inclusive UTC scan-start time and explicit mesoscale sector",
       "inputs": "Satellite, channel, both timestamps; product and sector for mesoscale",
+      "credentials": null,
       "reader_extra": "netcdf",
       "resolution": {
         "spatial": "0.5 km to 2 km at nadir, by ABI band",
@@ -1098,6 +1109,7 @@
       ],
       "selection": "Whole 20-second detection files by inclusive UTC file-start time, at most one day",
       "inputs": "Satellite and both timestamps",
+      "credentials": null,
       "reader_extra": "netcdf",
       "resolution": {
         "spatial": "8 to 14 km across the instrument's field of view",
@@ -1219,6 +1231,7 @@
       ],
       "selection": "The newest or a named revision of one whole basin file; filter track points locally",
       "inputs": "Optional basin (atlantic or pacific) and revision date; no dates or geographic filters",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "Best-track positions in tenths of a degree",
@@ -1377,6 +1390,7 @@
       ],
       "selection": "One whole subset file per query, from the newest or a pinned product version",
       "inputs": "Required subset; optional format and version; no dates or geographic filters",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "Positions to a tenth of a degree",
@@ -1548,6 +1562,7 @@
       ],
       "selection": "Global files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and grid resolution",
       "inputs": "Both timestamps, cycle, and forecast_hour",
+      "credentials": null,
       "reader_extra": "grib",
       "resolution": {
         "spatial": "0.25, 0.5, or 1 degree global latitude-longitude grid, chosen with resolution",
@@ -1644,6 +1659,7 @@
       ],
       "selection": "CONUS files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file variant",
       "inputs": "Both timestamps, cycle, and forecast_hour",
+      "credentials": null,
       "reader_extra": "grib",
       "resolution": {
         "spatial": "3 km Lambert conformal CONUS grid, 1799 x 1059 points",
@@ -1733,6 +1749,7 @@
       ],
       "selection": "Regional core files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and region",
       "inputs": "Both timestamps, cycle, and forecast_hour",
+      "credentials": null,
       "reader_extra": "grib",
       "resolution": {
         "spatial": "2.5 km Lambert conformal CONUS grid, 2345 x 1597 points; separate Alaska, Hawaii, Puerto Rico, and Guam grids",
@@ -1794,6 +1811,7 @@
       ],
       "selection": "Files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file family",
       "inputs": "Both timestamps, cycle, and forecast_hour",
+      "credentials": null,
       "reader_extra": "grib",
       "resolution": {
         "spatial": "13 km Lambert conformal CONUS grid, 451 x 337 points, for the awp130 family",
@@ -1869,6 +1887,7 @@
       ],
       "selection": "Hourly, daily, monthly, or annual/seasonal normals per station; optional month-day window except annual/seasonal; hourly returns whole days",
       "inputs": "Station IDs or a geographic query; dates optional",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "U.S. land surface stations with 1991-2020 normals coverage",
@@ -1978,6 +1997,7 @@
       ],
       "selection": "Native six-minute observations for one station and explicit bin; at most 28 days",
       "inputs": "Alphanumeric station, positive bin, and both minute-aligned timestamps",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "One current-meter station and bin per request; bin depths depend on deployment",
@@ -2042,6 +2062,7 @@
       ],
       "selection": "Six-minute observations for one station and datum; at most 28 days",
       "inputs": "Station, datum, and both minute-aligned timestamps",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "One National Water Level Observation Network station per request",
@@ -2131,6 +2152,7 @@
       ],
       "selection": "Predictions for one station and datum on a chosen interval; at most a year",
       "inputs": "Station, datum, and both minute-aligned timestamps; optional interval",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "One tide station per request",
@@ -2191,6 +2213,7 @@
       ],
       "selection": "Grid centers and timestamps inside the requested bounds; optional stride",
       "inputs": "BBox or location, and both timestamps",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "0.05 degree global grid, about 5 km",
@@ -2252,6 +2275,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -2283,6 +2307,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -2315,6 +2340,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -2348,6 +2374,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -2381,6 +2408,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -2414,6 +2442,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -2446,6 +2475,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -2479,6 +2509,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -2512,6 +2543,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -2543,6 +2575,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -2575,6 +2608,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -2607,6 +2641,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -2638,6 +2673,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -2670,6 +2706,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -2705,6 +2742,7 @@
       ],
       "selection": "Events inside an inclusive UTC window and optional box, magnitude, and depth bounds",
       "inputs": "Both timestamps; optionally a location or bbox and magnitude or depth bounds",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "Point epicenters in decimal degrees, as located by the contributing network",
@@ -2799,6 +2837,7 @@
       ],
       "selection": "Site observations for inclusive local calendar dates; parameter and statistic filters",
       "inputs": "Both dates; site IDs or a geographic query",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "USGS monitoring locations, one site per record",
@@ -2855,6 +2894,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -2890,6 +2930,7 @@
       ],
       "selection": "Declarations whose incident period overlaps an inclusive UTC window, for a named state or county; a county also returns its state's statewide designations",
       "inputs": "Both dates; optionally a state or county location, or state or fips, and type filters",
+      "credentials": null,
       "reader_extra": "pandas",
       "resolution": {
         "spatial": "One row per designated area: a county or county equivalent, a tribal area, or a whole state",
@@ -3076,6 +3117,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -3108,6 +3150,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -3140,6 +3183,13 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": {
+        "variables": [
+          "USDATA_AQS_EMAIL",
+          "USDATA_AQS_KEY"
+        ],
+        "signup": "https://aqs.epa.gov/aqsweb/documents/data_api.html#signup"
+      },
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -3172,6 +3222,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,
@@ -3204,6 +3255,7 @@
       "formats": [],
       "selection": null,
       "inputs": null,
+      "credentials": null,
       "reader_extra": null,
       "resolution": null,
       "update_frequency": null,

@@ -35,7 +35,7 @@ from usdata.manifest import LockedAsset, Lockfile, Manifest, lockfile_path
 from usdata.models import Asset, Dataset
 from usdata.protocols import http
 from usdata.protocols.http import ObjectChanged
-from usdata.providers import Provider, load_adapter
+from usdata.providers import MissingCredentials, Provider, load_adapter
 from usdata.registry import Registry, default_registry
 
 
@@ -113,6 +113,13 @@ class PullResult(BaseModel):
         description=(
             "Ids of assets whose pinned URL no longer served their bytes and that the mirror "
             "restored instead; their pins are unchanged and each sidecar names the mirror object"
+        ),
+    )
+    unchecked: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Ids of mirrored assets restored without asking their source, because its "
+            "credentials are not set, so upstream was not checked for changes (ADR 0039)"
         ),
     )
     by_source: dict[str, list[FetchedAsset]] = Field(
@@ -358,6 +365,13 @@ def restore(
     verified against the same pin; the result lists it under ``mirrored`` and its
     sidecar records the mirror object. Only an entry the mirror cannot supply is
     drift. See ADR 0030.
+
+    A source whose credentials are unset is never asked. An entry the cache
+    cannot supply comes from the mirror instead, listed under ``mirrored`` and
+    ``unchecked``, and ``MissingCredentials`` is raised only when the mirror
+    cannot supply it either. Every file restored before that matches its pin.
+    Updating an entry always asks its source, so a missing credential for an
+    ``update`` selection is raised before anything is fetched. See ADR 0039.
     """
     reg = registry or default_registry()
     manifest_path = Path(manifest_path)
@@ -377,6 +391,10 @@ def restore(
                 adapters[dataset.id] = stack.enter_context(load_adapter(dataset))
             return adapters[dataset.id]
 
+        # A refresh must ask its source, so its credentials are checked before any fetch.
+        for entry in lock.assets:
+            if entry.asset.id in selected:
+                adapter_for(reg.get(entry.asset.dataset_id))
         base = mirror.mirror_url()
         mirrored_from = None if base is None else (base, stack.enter_context(http.client()))
         staging = _staging(root, stack) if selected else None
@@ -416,6 +434,7 @@ def restore(
         from_lockfile=True,
         updated=updated,
         mirrored=[outcome.entry.asset.id for outcome in outcomes if outcome.mirrored],
+        unchecked=[outcome.entry.asset.id for outcome in outcomes if outcome.unchecked],
         by_source=_by_source((outcome.entry, outcome.item) for outcome in outcomes),
     )
 
@@ -454,6 +473,8 @@ class _Restored:
     item: FetchedAsset
     updated: bool = False
     mirrored: bool = False
+    unchecked: bool = False
+    """Mirrored without asking the source, whose credentials are unset."""
     staged: Path | None = None
     """Where the file waits until the run commits; ``item.path`` is where it will live."""
 
@@ -474,7 +495,8 @@ def _restore_entry(
     file still matches the pin; the pinned URL reproduces the pin; or the mirror
     supplies the pinned bytes. Only a refresh is staged, because every other
     path writes bytes the lockfile already pins. An adapter is opened only for
-    an entry that needs a fetch.
+    an entry that needs a fetch, and when its source's credentials are unset the
+    mirror is the only path left.
     """
     path = asset_path(entry.asset, root)
     if staging is not None:
@@ -488,18 +510,29 @@ def _restore_entry(
                 asset=entry.asset, path=path, provenance=entry.provenance, from_cache=True
             )
             return _Restored(entry, item)
+    try:
+        adapter = adapter_for(dataset)
+    except MissingCredentials as missing:
+        if mirrored_from is None:
+            raise
+        item, reason = _restore_from_mirror(entry, path, *mirrored_from)
+        if item is None:
+            note = f"the mirror could not restore {entry.asset.id} either ({reason})"
+            raise MissingCredentials(dataset, missing.missing, note) from None
+        return _Restored(entry, item, mirrored=True, unchecked=True)
     pinned = entry.asset.model_copy(update={"checksum": entry.provenance.checksum})
     try:
         item = _fetch_asset(
-            dataset, pinned, adapter_for(dataset), root=root, force=True, pinned=entry.provenance
+            dataset, pinned, adapter, root=root, force=True, pinned=entry.provenance
         )
     # A republished object refuses the pinned ETag, which is drift by another name.
     except (ChecksumMismatch, ObjectChanged):
         problem = "upstream changed"
         if mirrored_from is not None:
-            item, problem = _restore_from_mirror(entry, path, *mirrored_from)
+            item, reason = _restore_from_mirror(entry, path, *mirrored_from)
             if item is not None:
                 return _Restored(entry, item, mirrored=True)
+            problem = f"{problem}; {reason}"
         return Drift(
             asset_id=entry.asset.id, dataset_id=entry.asset.dataset_id, path=path, problem=problem
         )
@@ -530,7 +563,7 @@ def _refresh_entry(
 def _restore_from_mirror(
     entry: LockedAsset, path: Path, base: str, client: httpx.Client
 ) -> tuple[FetchedAsset | None, str]:
-    """Fetch one pinned entry from the mirror, or say why the entry is still drift.
+    """Fetch one pinned entry from the mirror, or say why the mirror could not supply it.
 
     The pin is unchanged either way. On success the sidecar written beside the
     file is the pinned record plus the mirror object that served it and a new
@@ -542,9 +575,9 @@ def _restore_from_mirror(
         with staged_path(path) as tmp:
             url = mirror.download(base, entry.provenance.checksum, tmp, client)
     except httpx.HTTPStatusError as error:
-        return None, f"upstream changed; not mirrored ({error.response.status_code})"
+        return None, f"not mirrored ({error.response.status_code})"
     except mirror.MirrorMismatch:
-        return None, "upstream changed; mirror mismatch"
+        return None, "mirror mismatch"
     prov = entry.provenance.model_copy(update={"retrieved_at": datetime.now(UTC), "mirror": url})
     provenance.write(prov, path)
     _progress.emit(_progress.AssetProgress(entry.asset.id, "fetched", prov.size))
