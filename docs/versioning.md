@@ -33,14 +33,23 @@ release.
 
 ## Path to 1.0
 
-1.0 is tagged when all of these hold:
+1.0 is a judgment, not a countdown. It is tagged when the project feels
+mature, which looks like:
 
-- Manifest and lockfile formats have not changed for two consecutive minor releases.
-- The `Provider` interface has not changed for two consecutive minor releases.
-- At least one provider that requires credentials exists, so the contract
-  covers how a key is supplied, where it is kept, and what provenance records
-  about it ([issue 222](https://github.com/jakeryderv/usdata/issues/222)).
-  `usgs:water-daily` already showed the abstraction is not NOAA-shaped.
+- **Breadth.** The catalog covers the major public science agencies with the
+  datasets people actually reach for, not one or two per agency.
+- **Verified.** Every available dataset has a passing live check and a worked
+  example, and the pinned examples restore from their committed lockfiles.
+- **Settled.** Recent releases have not needed breaking changes to manifests,
+  lockfiles, or the `Provider` interface, and a new dataset usually needs no
+  change to the core.
+
+There is no date, dataset count, or waiting period. 1.0 starts the deprecation
+window below, so it should come when living with that promise is comfortable.
+Until then, a minor release may change anything, and the changelog says so.
+Two contract questions that once gated 1.0 are settled: the abstraction is not
+NOAA-shaped (`usgs:water-daily`), and sources that need credentials are covered
+([ADR 0039](adr/0039-credentialed-sources.md), `epa:aqs-daily`).
 
 ## Deprecation
 

@@ -126,7 +126,7 @@ timing, quality flags, a fixed footprint, and empty-cache restoration.
 
 Shipped in v0.26.0: the first source that needs credentials,
 [EPA AQS daily summaries](https://github.com/jakeryderv/usdata/issues/222),
-which was the last feature criterion for 1.0 ([versioning](versioning.md)).
+the last contract question the old 1.0 criteria left open.
 [ADR 0039](adr/0039-credentialed-sources.md) sets the rules: keys come from
 the environment, the core checks them before any request, no key reaches an
 asset, a lockfile, provenance, cached bytes, or an error message, and a pinned
@@ -138,18 +138,18 @@ York City's PM2.5 through the June 2023 smoke. The same release lets
 `noaa:hurdat2` name a revision, since the newest Atlantic file has upstream
 typos ([ADR 0038](adr/0038-named-hurdat2-revisions.md)).
 
-v0.26.0 changed the `Provider` interface and added a provenance field, so the
-two-release stability clock for 1.0 starts after it: 1.0 can be tagged once
-two more minor releases leave the manifest, the lockfile, and the `Provider`
-interface unchanged. Until then, prefer work that uses them as they are.
+The work now is breadth: more of the datasets people reach for, from more
+agencies, each verified by a live check and a worked example. 1.0 comes when
+the catalog feels comprehensive and the contract feels settled, a judgment
+rather than a countdown ([versioning](versioning.md#path-to-10)). A new dataset
+that needs a core change makes it and says so in the changelog.
 
 ## Next
 
 Sources that need a key are supported since v0.26.0
-([ADR 0039](adr/0039-credentialed-sources.md)). Until 1.0, add another only when
-a concrete analysis needs it and it fits those rules as they stand, since a new
-credential shape would move the contract and restart the stability clock; see
-Later.
+([ADR 0039](adr/0039-credentialed-sources.md)). A second one is the best test
+of whether those rules generalize; if its credential shape does not fit them,
+amend the ADR rather than bending the adapter.
 
 Scope one dataset expansion around a concrete analysis use case. These are
 candidates to investigate, not selected implementations. Refine a candidate into
@@ -158,6 +158,13 @@ moving it to Now. Prefer additions that exercise a useful new access pattern or
 reuse an existing one while preserving the adapter, transport, cache/provenance,
 and optional-reader boundaries:
 
+- The [Census Data API](providers/census.md): a second source that needs a key,
+  on every request, and the natural second place-keyed source after FEMA.
+- [NASA access through earthaccess](https://github.com/jakeryderv/usdata/issues/9):
+  satellite products behind an Earthdata login, a different credential shape
+  and a heavier dependency, so a decision before an adapter.
+- Further USGS water data, such as instantaneous values and groundwater
+  levels, which reuse the daily-values access pattern.
 - Further NCEI Access Data Service datasets, when a concrete comparison needs them.
 - Additional GOES ABI products and sectors.
 - Geospatial readers when a supported dataset and representative fixtures justify them.
@@ -165,11 +172,6 @@ and optional-reader boundaries:
 
 ## Later
 
-- Further sources that need credentials, under
-  [ADR 0039](adr/0039-credentialed-sources.md) as EPA AQS uses it:
-  [NASA access through earthaccess](https://github.com/jakeryderv/usdata/issues/9),
-  and the [Census Data API](providers/census.md), which now requires a key on
-  every data request and is the natural second place-keyed source.
 - [Remote cache backends](https://github.com/jakeryderv/usdata/issues/11):
   a general cache keyed by asset id still needs lookup, freshness, trusted
   upload ownership, and eviction defined. The content-addressed mirror of
