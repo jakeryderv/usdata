@@ -1,21 +1,19 @@
-# HRRR model output
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:hrrr` · **Released** · Included since usdata 0.15.
+## Reference
 
-HRRR Forecast Model Output.
+`noaa:hrrr` · **Released** · Included since usdata 0.15. HRRR Forecast Model Output.
 
-## At a glance
+### At a glance
 
 - Files: GRIB2
 - Selection: CONUS files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file variant
 - Required inputs: Both timestamps, cycle, and forecast_hour
-- Open locally: `usdata[grib]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[grib]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [HRRR model output](https://usdata.dev/datasets/noaa/hrrr/), with a walkthrough
 - Studies: [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/studies/severe-weather-case-study/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -26,7 +24,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `forecast_hour` | Required forecast hour(s): an integer, list, or comma-separated string; 0 to 18, or 0 to 48 for the 00, 06, 12, and 18 UTC runs. |
 | `messages` | Optional GRIB2 messages to fetch instead of the whole file, spelled as the object's wgrib2 .idx sidecar spells them: 'SHORTNAME:level text', such as 'TMP:2 m above ground', with an optional ':step text'; one value, a list, or a comma-separated string. Short names are upper case and both fields match exactly. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -39,11 +37,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `2t` | K | 2 m temperature |
 | `2d` | K | 2 m dewpoint temperature |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-hrrr.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.15
 - Domain: Weather models
@@ -59,5 +53,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `s3`
 - Adapter: `usdata.providers.noaa.hrrr:Hrrr`
-
-[All NOAA datasets](../noaa.md).

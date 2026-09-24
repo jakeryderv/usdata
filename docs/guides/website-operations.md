@@ -83,14 +83,20 @@ the SDK before merge. Site deployment remains independent of package releases.
 ## Public URLs
 
 Current docs use `/guides/`, `/reference/`, and `/generated/catalog/` paths
-directly. Each implemented dataset has one page at
+directly. A dataset's docs page is its guide at `/providers/<guide>/`; the
+former per-dataset pages under `/generated/catalog/<provider>/<name>/` redirect
+there through `docs/_redirects`, which `just docs` writes. On the website, each
+implemented dataset has one page at
 `https://usdata.dev/datasets/<provider>/<name>/` and each study one at
-`/studies/<slug>/`, with downloads underneath them. The website's `/examples/`
-URLs redirect permanently to the dataset or study page that replaced them. Root repository policies and
-the changelog link to GitHub.
-Obsolete `/docs/`, `/start/`, `/latest/`, `/0.10.0/`, version indexes, and copied
-policy URLs return 404. Former docs paths on the homepage also return 404.
-There are no compatibility redirects or archived docs objects.
+`/studies/<slug>/`, with downloads underneath them; the website's `/examples/`
+URLs redirect permanently to the dataset or study page that replaced them.
+Root repository policies and the changelog link to GitHub.
+
+Both `_redirects` files list only exact rules before any splat rule: in
+production Cloudflare ignored an exact rule that followed a splat, although
+`wrangler dev` applied it. Obsolete `/docs/`, `/start/`, `/latest/`, `/0.10.0/`,
+version indexes, and copied policy URLs return 404, as do former docs paths on
+the homepage. There are no archived docs objects.
 
 ## R2 dataset storage
 

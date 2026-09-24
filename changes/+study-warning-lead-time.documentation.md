@@ -1,0 +1,1 @@
+The warning-lead-time study is now a notebook: it finds the Tornado Warning in effect when the 6 May 2024 Osage County EF4 began, issued 16 minutes earlier, and plots the county's alerts that evening.
