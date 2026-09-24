@@ -1,21 +1,19 @@
-# Hourly airport observations
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:lcd` · **Released** · Included since usdata 0.14.
+## Reference
 
-Local Climatological Data.
+`noaa:lcd` · **Released** · Included since usdata 0.14. Local Climatological Data.
 
-## At a glance
+### At a glance
 
 - Files: CSV
 - Selection: Every report on whole calendar days per station; optional column filters
 - Required inputs: Both dates; eleven-digit station IDs or a geographic query
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [Hourly airport observations](https://usdata.dev/datasets/noaa/lcd/), with a walkthrough
 - Studies: [How warm was Oklahoma City on 6 May 2024 compared with its hourly normals?](https://usdata.dev/studies/hourly-anomalies/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -24,7 +22,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `stations` | Station ids, comma-separated or a list; otherwise a location selects them. |
 | `units` | metric (default) or standard. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -35,11 +33,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `HourlyPrecipitation` | mm | Hourly precipitation; T marks a trace (metric units) |
 | `DailyPrecipitation` | mm | Daily summary precipitation (metric units) |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-lcd.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.14
 - Domain: Surface weather
@@ -54,5 +48,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `http`
 - Adapter: `usdata.providers.noaa.lcd:LocalClimatologicalData`
-
-[All NOAA datasets](../noaa.md).

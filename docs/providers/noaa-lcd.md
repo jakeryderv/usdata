@@ -63,4 +63,4 @@ rather than estimated.
 
 [All NOAA datasets](noaa.md).
 
-[Catalog reference](../generated/catalog/noaa/lcd.md#catalog-reference).
+--8<-- "generated/catalog/noaa/lcd.md"

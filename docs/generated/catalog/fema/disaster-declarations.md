@@ -1,21 +1,19 @@
-# Federal disaster declarations by county
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`fema:disaster-declarations` · **Released** · Included since usdata 0.21.
+## Reference
 
-FEMA Disaster Declarations Summaries.
+`fema:disaster-declarations` · **Released** · Included since usdata 0.21. FEMA Disaster Declarations Summaries.
 
-## At a glance
+### At a glance
 
 - Files: CSV
 - Selection: Declarations whose incident period overlaps an inclusive UTC window, for a named state or county; a county also returns its state's statewide designations
 - Required inputs: Both dates; optionally a state or county location, or state or fips, and type filters
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- On usdata.dev: [Federal disaster declarations by county](https://usdata.dev/datasets/fema/disaster-declarations/)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
+- On usdata.dev: [Federal disaster declarations by county](https://usdata.dev/datasets/fema/disaster-declarations/), with a walkthrough
 - Studies: [Which Oklahoma counties hit by a tornado on 6 May 2024 were under a federal disaster declaration?](https://usdata.dev/studies/disaster-declarations/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -27,7 +25,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `include_open` | Also return incidents with no end date, most of them old fire declarations that were never closed; false by default. |
 | `state` | Two-letter postal code of one state or territory, such as OK. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -61,11 +59,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `hash` | — | MD5 hash of the record's fields and values |
 | `id` | — | Unique id assigned to the record |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/fema-disaster-declarations.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.21
 - Domain: Natural hazards
@@ -80,5 +74,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `http`
 - Adapter: `usdata.providers.fema.declarations:DisasterDeclarations`
-
-[All FEMA datasets](../fema.md).

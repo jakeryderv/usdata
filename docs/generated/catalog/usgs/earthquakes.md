@@ -1,20 +1,18 @@
-# Earthquake events
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`usgs:earthquakes` · **Released** · Included since usdata 0.19.
+## Reference
 
-Earthquake Catalog (ComCat).
+`usgs:earthquakes` · **Released** · Included since usdata 0.19. Earthquake Catalog (ComCat).
 
-## At a glance
+### At a glance
 
 - Files: CSV
 - Selection: Events inside an inclusive UTC window and optional box, magnitude, and depth bounds
 - Required inputs: Both timestamps; optionally a location or bbox and magnitude or depth bounds
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [Earthquake events](https://usdata.dev/datasets/usgs/earthquakes/), with a walkthrough
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -25,7 +23,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `min_depth` | Shallowest depth to include, in kilometers, inclusive. |
 | `min_magnitude` | Smallest magnitude to include, inclusive. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -40,11 +38,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `status` | — | automatic or reviewed |
 | `updated` | ISO 8601 UTC | When the event was last revised |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/usgs-earthquakes.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.19
 - Domain: Natural hazards
@@ -60,5 +54,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `http`
 - Adapter: `usdata.providers.usgs.earthquakes:Earthquakes`
-
-[All USGS datasets](../usgs.md).
