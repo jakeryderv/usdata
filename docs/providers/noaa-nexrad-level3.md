@@ -64,11 +64,13 @@ clear-air day and grow with weather. A radar produces roughly 120 to 390 files
 per product per day depending on its scan strategy, so a day of one product is
 one listing request and up to a few hundred small downloads.
 
-The bucket holds what the Unidata feed captured, and coverage has gaps: on
-2024-05-06 KTLX reflectivity is continuous, while its mesocyclone and
-storm-track files begin at 20:42 UTC. An empty or short listing inside the
-archive period is a gap, not an error, and the adapter does not fill it from
-NCEI.
+The bucket holds what the Unidata feed captured, and an empty or short listing
+inside the archive period is not an error; the adapter does not fill it from
+NCEI. A short listing is not always a feed gap. On 2024-05-06 KTLX's echo-top
+files run from 20:34 UTC, while its mesocyclone and storm-track files begin at
+20:42:46, the scan whose header shows the radar leaving clear-air VCP 35 for
+precipitation VCP 212 ([walkthrough](https://usdata.dev/datasets/noaa/nexrad-level3/)).
+Check the volume coverage pattern before reading missing files as lost ones.
 
 ## No reader
 

@@ -26,9 +26,9 @@ python -m pip install "usdata[pandas]" jupyterlab matplotlib
 jupyter lab
 ```
 
-Radar walkthroughs need `usdata[radar]`, satellite and IBTrACS ones
-`usdata[netcdf]`, and model-output ones `usdata[grib]`; the dataset page names
-the extra. The first run downloads from the agency; later runs use the local
+Radar walkthroughs need `usdata[radar]`, satellite ones `usdata[netcdf]`,
+model-output and MRMS ones `usdata[grib]`, and the rest `usdata[pandas]`; the
+dataset page names the extra. The first run downloads from the agency; later runs use the local
 cache. A notebook that needs a key says which environment variables to set.
 With a committed lockfile beside the manifest, `usdata pull` restores exactly
 the pinned files instead of asking the agency again.

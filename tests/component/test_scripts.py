@@ -467,7 +467,12 @@ def _with(dataset_id, **updates):
             {"examples": ["examples/datasets/noaa-hurdat2/noaa-hurdat2.ipynb"]},
             "study storm-surge: its manifest uses",
         ),
-        ("noaa:gsoy", {"examples": ["examples/studies/storm-surge/storm-surge.ipynb"]}, "exists"),
+        (
+            "noaa:gsoy",
+            {"examples": ["examples/studies/storm-surge/storm-surge.ipynb"]},
+            "needs its walkthrough",
+        ),
+        ("noaa:gsoy", {"examples": ["examples/datasets/noaa-gsoy/dataset.yaml"]}, "the notebook"),
     ],
 )
 def test_usage_metadata_rejects_undocumented_or_missing_files(

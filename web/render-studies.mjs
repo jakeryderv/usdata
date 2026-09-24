@@ -24,20 +24,20 @@ export async function buildStudies(root, output, catalog, examples, setup) {
     const url = `/studies/${study.slug}/`;
     const directory = join(output, url);
     const rendered = await renderExample(root, "studies", study.slug, directory, {title: study.title, pinned: pinned.has(`studies/${study.slug}`)});
-    const preview = rendered.preview ? `${url}${rendered.preview}` : null;
+    const preview = `${url}${rendered.preview}`;
     const content = `<nav class="crumbs" aria-label="Breadcrumb"><a href="/studies/">Studies</a></nav>
 <header class="study-hero"><p class="eyebrow">Study</p><h1>${escape(study.title)}</h1><p class="lede">${escape(study.summary)}</p>
 <div class="study-data"><span class="filter-label">Data</span>${datasetChips(datasets)}</div>${rendered.downloads}</header>
-${rendered.notebook ? `<p class="note">Saved results from a run against the live services; the notebook records when it ran and the checksums of what it read. <a href="/studies/#run">Run it yourself</a>.</p>` : ""}
+<p class="note">Saved results from a run against the live services; the notebook records when it ran and the checksums of what it read. <a href="/studies/#run">Run it yourself</a>.</p>
 ${rendered.article}`;
     await writeFile(join(directory, "index.html"), page({title: study.title, description: study.summary, canonical: url, content, current: "/studies/", styles: ["/pages.css"], mainClass: "page"}));
-    const media = preview ? `<img src="${preview}" alt="" loading="lazy">` : `<div class="tile" style="--hue: 215" aria-hidden="true"><span>Study</span></div>`;
+    const media = `<img src="${preview}" alt="" loading="lazy">`;
     const card = `<article class="study-card"><div class="card-media">${media}</div><div class="card-body"><h3><a href="${url}">${escape(study.title)}</a></h3><p>${escape(study.summary)}</p><p class="card-sources">${datasets.map(dataset => escape(dataset.title)).join(" · ")}</p></div></article>`;
     studies.set(study.slug, {title: study.title, preview, card, datasets});
   }
 
   const [first, ...rest] = examples.studies.map(study => ({...study, ...studies.get(study.slug)}));
-  const feature = `<article class="study-feature"><div class="card-media">${first.preview ? `<img src="${first.preview}" alt="">` : ""}</div><div class="card-body"><p class="eyebrow">Start here</p><h2><a href="/studies/${first.slug}/">${escape(first.title)}</a></h2><p>${escape(first.summary)}</p>${datasetChips(first.datasets)}</div></article>`;
+  const feature = `<article class="study-feature"><div class="card-media"><img src="${first.preview}" alt=""></div><div class="card-body"><p class="eyebrow">Start here</p><h2><a href="/studies/${first.slug}/">${escape(first.title)}</a></h2><p>${escape(first.summary)}</p>${datasetChips(first.datasets)}</div></article>`;
   const content = `<header class="page-heading"><h1>Studies</h1><p class="lede">Questions answered end to end with real data: the sources, the analysis, the saved results, and pinned inputs anyone can restore. Each dataset's own walkthrough is on its <a href="/datasets/">dataset page</a>.</p></header>
 ${feature}
 <div class="study-grid">${rest.map(study => study.card).join("\n")}</div>

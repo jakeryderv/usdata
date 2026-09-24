@@ -451,8 +451,17 @@ def check_example_relationships(registry: Registry, root: Path = ROOT) -> None:
             raise ValueError(
                 f"{ds.id}: list only its own walkthrough, examples/datasets/{own}/, first"
             )
-        if own in folders["datasets"] and not walkthroughs:
-            raise ValueError(f"{ds.id}: examples/datasets/{own}/ exists but is not listed")
+        if not walkthroughs:
+            raise ValueError(
+                f"{ds.id}: every implemented dataset needs its walkthrough, "
+                f"examples/datasets/{own}/{own}.ipynb, listed first"
+            )
+        for path in ds.examples:
+            kind, folder = example_folder(path)
+            if PurePosixPath(path).name != f"{folder}.ipynb":
+                raise ValueError(
+                    f"{ds.id}: list the notebook, examples/{kind}/{folder}/{folder}.ipynb"
+                )
         for kind, folder in kinds:
             if kind == "studies":
                 if folder not in listed:
