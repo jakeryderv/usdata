@@ -86,8 +86,8 @@ usdata pull dataset.yaml && usdata verify dataset.yaml</code></pre>
             <div><dt>Highest water</dt><dd>3.99 m above mean lower low water</dd></div>
           </dl>
           <p>
-            Every input is pinned. The notebook ends by deleting its cache,
-            restoring from the lockfile, and checking the checksums.
+            Every input is pinned. The notebook ends by checking the cached
+            bytes against the lockfile, restoring from it, and citing each source.
           </p>
           <pre class="evidence"><code>noaa:coops-water-levels
 Bytes: 28075; cache hit: False
@@ -99,10 +99,10 @@ all assets match dataset.lock.json</code></pre>
         </div>
         <figure>
           <img
-            src="/studies/storm-surge/plot-9-0.png"
+            src="/studies/storm-surge/plot-10-0.png"
             alt="Two panels: observed and predicted water level at Cedar Key over three days, and the residual between them peaking near 3.15 metres early on 27 September 2024."
-            width="700"
-            height="500"
+            width="973"
+            height="553"
             loading="lazy"
           />
           <figcaption>Observed water level, predicted tide, and their difference at NOAA station 8727520, from the study's saved output.</figcaption>
