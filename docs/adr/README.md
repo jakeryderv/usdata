@@ -44,3 +44,4 @@ is described in the guides and reference pages.
 - [0038: A HURDAT2 query can name a revision, and the reader stays strict](0038-named-hurdat2-revisions.md)
 - [0039: Credentials come from the environment and never reach a pin](0039-credentialed-sources.md)
 - [0040: AQS daily summaries are selected by pollutant codes and one place, a year per request](0040-aqs-daily-selection.md)
+- [0041: Every dataset has a walkthrough and its own page; examples that answer a question are studies](0041-dataset-walkthroughs-and-studies.md)
