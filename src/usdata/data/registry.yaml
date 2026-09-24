@@ -443,7 +443,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-hurdat2.md
     examples:
-      - examples/datasets/noaa-hurdat2/README.md
+      - examples/datasets/noaa-hurdat2/noaa-hurdat2.ipynb
       - examples/studies/storm-surge/storm-surge.ipynb
     resolution:
       spatial: "Best-track positions in tenths of a degree"
