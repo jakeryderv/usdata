@@ -78,4 +78,33 @@ matter, pruning stale staging directories belongs with `cache prune`.
 
 `FetchedAsset.path` for a refreshed entry names the file's home in the cache,
 as before, and is valid once `pull` returns. `_fetch_asset` and the provider
-contract are unchanged; staging is a choice of root, made in `restore`.
+contract are unchanged; staging is a choice of root, made in `restore`
+(amended below: `resolve` stages too).
+
+## Amendment, 2026-09-24: a forced re-resolve stages too
+
+The guarantee above was stated for every `pull` but kept only by `restore`.
+`pull` with `force` runs `resolve`, which fetched straight into the cache. A
+cached asset is fetched again when a fresh listing reports another size or URL
+for it, so a forced re-resolve could replace a pinned file with new bytes and
+then fail on a later source. The old lockfile stayed, as promised, but now
+pinned bytes the cache no longer held, which is the defect this decision
+removed. Reproduced with two sources, the first republished with a new size and
+the second failing to list: `verify` was clean before the run and reported a
+checksum mismatch after it.
+
+When a lockfile exists, `resolve` now stages its downloads the same way and
+commits them the same way: the new lockfile is saved, then each staged file and
+its sidecar are renamed into the cache. Cache hits are still read where they
+are, since they write nothing. `_fetch_asset` takes the staging root separately
+from the cache root for this, so a resolve checks the cache before it decides
+to download.
+
+Without a lockfile nothing is pinned, and a first pull still fetches straight
+into the cache, so a failed first pull keeps what it downloaded and a retry does
+not repeat it. The rule is whether a lockfile exists, not whether it matches the
+manifest: a lockfile left stale by an edit can still come back into use if the
+edit is reverted.
+
+Two sources that resolve to the same asset stage it at one path, and the commit
+moves each staged file once.

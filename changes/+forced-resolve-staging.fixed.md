@@ -1,0 +1,1 @@
+`pull` with `force` no longer overwrites cached files the existing lockfile pins when it fails partway: while a lockfile exists, its downloads are staged and move into the cache only after the new lockfile is saved.

@@ -108,12 +108,18 @@ def _fetch_asset(
     root: Path | None = None,
     force: bool = False,
     pinned: Provenance | None = None,
+    staging: Path | None = None,
 ) -> FetchedAsset:
     """Fetch one asset through the cache, passing any pinned record to the adapter.
 
     ``pinned`` is the provenance a lockfile holds for this asset. The adapter sees
     it through ``prepare_fetch``, so an asset that pins byte ranges is reproduced
     from the record rather than by resolving its query again.
+
+    ``staging`` is a root a download is written under instead of the cache. The
+    cache at ``root`` is still checked, and a hit is returned from there; a
+    miss comes back with its ``path`` under ``staging``, for the caller to move
+    home once it can pin it (ADR 0031).
     """
     if asset.dataset_id != dataset.id:
         raise ValueError(f"asset dataset {asset.dataset_id!r} does not match {dataset.id!r}")
@@ -138,6 +144,8 @@ def _fetch_asset(
         ):
             _progress.emit(_progress.AssetProgress(asset.id, "cached", prov.size))
             return FetchedAsset(asset=asset, path=path, provenance=prov, from_cache=True)
+    if staging is not None:
+        path = asset_path(asset, staging)
     with staged_path(path) as tmp:
         partial = adapter.prepare_fetch(asset, pinned)
         if partial is None:
@@ -174,15 +182,19 @@ def _fetch_with(
     *,
     root: Path | None = None,
     force: bool = False,
+    staging: Path | None = None,
 ) -> list[FetchedAsset]:
     """Run the loop on an adapter the caller opened, so one adapter can serve many queries.
 
     The listing is put in the order every result promises, by ``asset.time.start``
     then id, so no adapter has to sort and no caller has to sort defensively.
+    ``staging`` is passed to each fetch; see ``_fetch_asset``.
     """
     assets = ordered(adapter.list_assets(query))
     _progress.batch([asset.size for asset in assets])
-    return [_fetch_asset(dataset, a, adapter, root=root, force=force) for a in assets]
+    return [
+        _fetch_asset(dataset, a, adapter, root=root, force=force, staging=staging) for a in assets
+    ]
 
 
 def ordered(assets: list[Asset]) -> list[Asset]:
