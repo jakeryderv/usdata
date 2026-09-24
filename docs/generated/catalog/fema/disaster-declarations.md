@@ -10,7 +10,7 @@
 - Selection: Declarations whose incident period overlaps an inclusive UTC window, for a named state or county; a county also returns its state's statewide designations
 - Required inputs: Both dates; optionally a state or county location, or state or fips, and type filters
 - Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
-- On usdata.dev: [Federal disaster declarations by county](https://usdata.dev/datasets/fema/disaster-declarations/)
+- On usdata.dev: [Federal disaster declarations by county](https://usdata.dev/datasets/fema/disaster-declarations/), with a walkthrough
 - Studies: [Which Oklahoma counties hit by a tornado on 6 May 2024 were under a federal disaster declaration?](https://usdata.dev/studies/disaster-declarations/)
 
 ### Parameters
