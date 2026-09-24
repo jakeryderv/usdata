@@ -1,20 +1,18 @@
-# Coastal current speed and direction
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:coops-currents` · **Released** · Included since usdata 0.24.
+## Reference
 
-CO-OPS Observed Currents.
+`noaa:coops-currents` · **Released** · Included since usdata 0.24. CO-OPS Observed Currents.
 
-## At a glance
+### At a glance
 
 - Files: CSV
 - Selection: Native six-minute observations for one station and explicit bin; at most 28 days
 - Required inputs: Alphanumeric station, positive bin, and both minute-aligned timestamps
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [Coastal current speed and direction](https://usdata.dev/datasets/noaa/coops-currents/), with a walkthrough
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -24,7 +22,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `station` | Required alphanumeric CO-OPS currents station id, for example 'cb0102'. |
 | `units` | metric (default, cm/s) or english (knots). |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -33,11 +31,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `Direction` | degrees | Observed current direction |
 | `Bin` | — | Requested bin number, not a depth measurement |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-coops-currents.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.24
 - Domain: Ocean physics
@@ -52,5 +46,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `http`
 - Adapter: `usdata.providers.noaa.coops:CoopsCurrents`
-
-[All NOAA datasets](../noaa.md).
