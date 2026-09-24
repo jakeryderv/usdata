@@ -1,21 +1,19 @@
-# Tropical cyclone best tracks
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:hurdat2` · **Released** · Included since usdata 0.12.
+## Reference
 
-HURDAT2 Atlantic and Pacific Best Tracks.
+`noaa:hurdat2` · **Released** · Included since usdata 0.12. HURDAT2 Atlantic and Pacific Best Tracks.
 
-## At a glance
+### At a glance
 
 - Files: HURDAT2 fixed-format text
 - Selection: The newest or a named revision of one whole basin file; filter track points locally
 - Required inputs: Optional basin (atlantic or pacific) and revision date; no dates or geographic filters
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [Tropical cyclone best tracks](https://usdata.dev/datasets/noaa/hurdat2/), with a walkthrough
 - Studies: [How high was Hurricane Helene's storm surge at Cedar Key?](https://usdata.dev/studies/storm-surge/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -24,7 +22,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `basin` | Best-track basin: 'atlantic' (default) or 'pacific'. |
 | `revision` | Revision date of the file to select, such as 2026-02-27; the newest revision by default. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -51,11 +49,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `r64_nw_nm` | nautical miles | 64 kt wind extent, northwest quadrant |
 | `max_wind_radius_nm` | nautical miles | Radius of maximum wind, best-tracked from 2021 |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-hurdat2.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.12
 - Domain: Tropical cyclones
@@ -70,5 +64,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `http`
 - Adapter: `usdata.providers.noaa.hurdat2:Hurdat2`
-
-[All NOAA datasets](../noaa.md).

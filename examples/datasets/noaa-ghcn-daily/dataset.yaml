@@ -1,0 +1,9 @@
+name: okc-daily-weather
+sources:
+  - dataset: noaa:ghcn-daily
+    start: 2024-01-01
+    end: 2024-12-31
+    variables: [TMAX, TMIN, PRCP, SNOW]
+    params:
+      stations: USW00013967
+      units: metric

@@ -56,14 +56,13 @@ result from a bad option, which exits 2.
 every provider parameter it accepts with a one-line description. That list is
 read from the adapter, so it is always current.
 
-The [dataset browser](https://usdata.dev/datasets/) shows the same registry
-with agency and support filters, each dataset's file format, how it selects
-data, what inputs it requires, which reader extra opens it, and links to the
-examples that use it. The
-[catalog pages](../generated/catalog/index.md) here carry the same facts plus
-endpoints and version history, and each links to the dataset's
-[provider notes](../providers/README.md), where the quirks live: window
-limits, local-time columns, sentinel values, and how the source revises.
+The [dataset grid](https://usdata.dev/datasets/) shows the same registry with
+search and agency and topic filters. Each dataset there has a page with a
+preview, a quick start, and a walkthrough notebook. Here in the docs, each
+dataset has one page, listed in the [dataset reference](../generated/catalog/index.md):
+how to select it, what arrives, where the quirks live (window limits,
+local-time columns, sentinel values, and how the source revises), and its
+generated reference of parameters, variables, and catalog facts at the end.
 
 Three things to read before fetching a dataset for the first time:
 
