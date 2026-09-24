@@ -2,8 +2,9 @@ name: oklahoma-earthquakes
 sources:
   - name: quakes
     dataset: usgs:earthquakes
+    # Oklahoma's bounding box, so the edges of Kansas, Texas, and Arkansas count too.
     location: Oklahoma
-    start: 2024-05-06
-    end: 2024-05-07
+    start: 2000-01-01
+    end: 2024-12-31
     params:
-      min_magnitude: 1.0
+      min_magnitude: 3.0
