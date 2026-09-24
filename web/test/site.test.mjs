@@ -149,3 +149,24 @@ test("a lede is the description's first sentence", () => {
   assert.equal(firstSentence("NCEI's archive since 1950. Anonymous files."), "NCEI's archive since 1950.");
   assert.equal(firstSentence("Station data, e.g. rain."), "Station data, e.g. rain.");
 });
+
+test("an example folder holds its notebook, manifest, and nothing unexpected", async () => {
+  const {mkdir, writeFile} = await import("node:fs/promises");
+  const {renderExample} = await import("../examples.mjs");
+  const base = await mkdtemp(join(tmpdir(), "usdata-example-"));
+  try {
+    const folder = join(base, "examples/studies/demo");
+    await mkdir(folder, {recursive: true});
+    const png = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 0]).toString("base64");
+    const notebook = tags => JSON.stringify({cells: [{cell_type: "code", execution_count: 1, metadata: {tags}, source: "plot()", outputs: [{output_type: "display_data", data: {"image/png": png}}]}]});
+    await writeFile(join(folder, "dataset.yaml"), "name: demo\n");
+    await writeFile(join(folder, "demo.ipynb"), notebook(["preview"]));
+    const rendered = await renderExample(base, "studies", "demo", join(base, "out"), {title: "Demo"});
+    assert.equal(rendered.preview, "plot-0-0.png");
+    await writeFile(join(folder, "README.md"), "# Old\n");
+    await assert.rejects(renderExample(base, "studies", "demo", join(base, "out"), {title: "Demo"}), /hold demo\.ipynb and dataset\.yaml/);
+    await rm(join(folder, "README.md"));
+    await writeFile(join(folder, "demo.ipynb"), notebook([]));
+    await assert.rejects(renderExample(base, "studies", "demo", join(base, "out"), {title: "Demo"}), /exactly one code cell preview/);
+  } finally { await rm(base, {recursive: true, force: true}); }
+});

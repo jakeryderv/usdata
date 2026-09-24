@@ -91,11 +91,12 @@ export async function buildDatasets(root, output, catalog, examples, studies) {
   for (const dataset of catalog.datasets.filter(implemented)) {
     const directory = join(output, pagePath(dataset));
     await mkdir(directory, {recursive: true});
+    // Every implemented dataset has a walkthrough (ADR 0041); the registry check enforces it.
     const folder = walkthroughFolder(dataset);
-    const walkthrough = folder ? await renderExample(root, "datasets", folder, directory, {title: dataset.title, pinned: pinned.has(`datasets/${folder}`), codeOpen: true}) : null;
-    previews.set(dataset.id, walkthrough?.preview ?? null);
-    const preview = walkthrough?.preview;
-    const hero = preview ? `<figure class="hero-figure"><img src="${preview}" alt="The walkthrough's first look at ${escape(dataset.title.toLowerCase())}" width="960" height="540"></figure>` : `<div class="hero-figure">${tile(dataset, dataset.product)}</div>`;
+    if (!folder) throw new Error(`${dataset.id}: no walkthrough`);
+    const walkthrough = await renderExample(root, "datasets", folder, directory, {title: dataset.title, pinned: pinned.has(`datasets/${folder}`), codeOpen: true});
+    previews.set(dataset.id, walkthrough.preview);
+    const hero = `<figure class="hero-figure"><img src="${walkthrough.preview}" alt="The walkthrough's first look at ${escape(dataset.title.toLowerCase())}" width="960" height="540"></figure>`;
     const chips = [
       ...dataset.formats.map(format => `<span class="chip">${escape(format)}</span>`),
       ...(dataset.credentials ? [`<span class="chip key">Key required</span>`] : []),
@@ -103,10 +104,10 @@ export async function buildDatasets(root, output, catalog, examples, studies) {
     ];
     const content = `<nav class="crumbs" aria-label="Breadcrumb"><a href="/datasets/">Datasets</a><span aria-hidden="true">/</span><a href="/datasets/?agency=${encodeURIComponent(dataset.provider)}">${escape(dataset.provider)}</a><span aria-hidden="true">/</span><a href="/datasets/?topic=${encodeURIComponent(dataset.domain)}">${escape(dataset.domain)}</a></nav>
 <header class="dataset-hero"><div class="hero-text"><p class="eyebrow">${escape(dataset.provider)} · ${escape(dataset.product)}</p><h1>${escape(dataset.title)}</h1><p class="lede">${escape(firstSentence(dataset.description))}</p><div class="chips">${chips.join("")}</div>
-<div class="actions"><a class="button primary" href="#quick-start">Quick start</a>${walkthrough ? `<a class="button" href="#walkthrough">Walkthrough</a>` : ""}<a class="button ghost" href="${escape(dataset.guide)}">Guide <span aria-hidden="true">↗</span></a></div></div>${hero}</header>
+<div class="actions"><a class="button primary" href="#quick-start">Quick start</a><a class="button" href="#walkthrough">Walkthrough</a><a class="button ghost" href="${escape(dataset.guide)}">Guide <span aria-hidden="true">↗</span></a></div></div>${hero}</header>
 <section class="section" aria-labelledby="glance-title"><h2 id="glance-title">At a glance</h2>${glance(dataset)}<details class="about"><summary>Full description</summary><p>${escape(dataset.description)}</p></details></section>
 <section class="section" id="quick-start" aria-labelledby="quick-title"><h2 id="quick-title">Quick start</h2>${quickStart(dataset)}</section>
-${walkthrough ? `<section class="section" id="walkthrough" aria-labelledby="walkthrough-title"><div class="section-head"><h2 id="walkthrough-title">Walkthrough</h2>${walkthrough.downloads}</div>${walkthrough.notebook ? `<p class="note">Saved results from a run against the live service; the notebook records when it ran and the checksums of what it read.</p>` : ""}${walkthrough.article}</section>` : ""}
+<section class="section" id="walkthrough" aria-labelledby="walkthrough-title"><div class="section-head"><h2 id="walkthrough-title">Walkthrough</h2>${walkthrough.downloads}</div><p class="note">Saved results from a run against the live service; the notebook records when it ran and the checksums of what it read. <a href="/studies/#run">Run it yourself</a>.</p>${walkthrough.article}</section>
 ${studyCards(dataset, studies)}
 <section class="section" id="reference" aria-labelledby="reference-title"><h2 id="reference-title">Reference</h2><ul class="link-list"><li><a href="${escape(dataset.guide)}">Usage guide</a>: selection rules, what arrives, and what the service does not say</li><li><a href="${escape(dataset.reference)}">Reference</a>: parameters, variables, coverage, and terms, at the end of the guide</li>${dataset.homepage ? `<li><a href="${escape(dataset.homepage)}">Upstream documentation</a> from ${escape(dataset.provider)}</li>` : ""}</ul>${dataset.citation ? `<p class="citation"><span>Cite as</span> ${escape(dataset.citation)}</p>` : ""}</section>`;
     await writeFile(join(directory, "index.html"), page({
