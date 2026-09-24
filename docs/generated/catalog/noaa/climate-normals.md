@@ -1,21 +1,19 @@
-# 30-year station climate normals
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:climate-normals` · **Released** · Included since usdata 0.11.
+## Reference
 
-U.S. Climate Normals 1991-2020.
+`noaa:climate-normals` · **Released** · Included since usdata 0.11. U.S. Climate Normals 1991-2020.
 
-## At a glance
+### At a glance
 
 - Files: CSV
 - Selection: Hourly, daily, monthly, or annual/seasonal normals per station; optional month-day window except annual/seasonal; hourly returns whole days
 - Required inputs: Station IDs or a geographic query; dates optional
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [30-year station climate normals](https://usdata.dev/datasets/noaa/climate-normals/), with a walkthrough
 - Studies: [Was 2024 warmer or wetter than normal?](https://usdata.dev/studies/climate-anomalies/); [How warm was Oklahoma City on 6 May 2024 compared with its hourly normals?](https://usdata.dev/studies/hourly-anomalies/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -25,7 +23,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `stations` | Station ids, comma-separated or a list; otherwise a location selects them. |
 | `units` | metric (default) or standard. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -41,11 +39,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `DLY-PRCP-NORMAL` | mm | Daily normal precipitation |
 | `ANN-TAVG-NORMAL` | degrees Celsius | Annual normal mean temperature |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-normals.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.11
 - Domain: Climate
@@ -61,5 +55,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `http`
 - Adapter: `usdata.providers.noaa.normals:ClimateNormals`
-
-[All NOAA datasets](../noaa.md).

@@ -10,7 +10,7 @@
 
 | Dataset | Availability | Files | What gets selected |
 |---|---|---|---|
-| <span id="epaaqs-daily"></span>[Daily air pollutant summaries from regulatory monitors](epa/aqs-daily.md) | Released | JSON | Local days within inclusive UTC calendar dates for one to five pollutants; one file per year |
+| <span id="epaaqs-daily"></span>[Daily air pollutant summaries from regulatory monitors](../../providers/epa-aqs-daily.md) | Released | JSON | Local days within inclusive UTC calendar dates for one to five pollutants; one file per year |
 
 ## Planned datasets
 
