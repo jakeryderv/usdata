@@ -17,17 +17,22 @@ export async function runInstructions(base = root) {
   return (end < 0 ? body : body.slice(0, end)).trim();
 }
 
-/** Cloudflare `_redirects` lines for the retired /examples/ pages, each to a page that exists. */
+/**
+ * Cloudflare `_redirects` lines for the retired /examples/ pages, each to a page that exists.
+ * Every exact rule comes before every splat rule: production Cloudflare ignored an exact
+ * rule listed after a splat, which `wrangler dev` does not show.
+ */
 export async function redirects(output) {
   const table = JSON.parse(await readFile(new URL("./redirects.json", import.meta.url), "utf8"));
-  const lines = [];
+  const exact = [];
+  const splats = [];
   for (const [from, to] of Object.entries(table)) {
     const built = join(output, to, "index.html");
     await readFile(built).catch(() => { throw new Error(`redirect ${from} -> ${to}: no such page`); });
-    lines.push(`${from} ${to} 301`, `${from.slice(0, -1)} ${to} 301`);
-    if (from !== "/examples/") lines.push(`${from}* ${to} 301`);
+    exact.push(`${from} ${to} 301`, `${from.slice(0, -1)} ${to} 301`);
+    if (from !== "/examples/") splats.push(`${from}* ${to} 301`);
   }
-  return `${lines.join("\n")}\n/examples/* /studies/ 301\n`;
+  return `${[...exact, ...splats, "/examples/* /studies/ 301"].join("\n")}\n`;
 }
 
 /** Build the whole website into `output`, a disposable directory. Returns page counts. */
