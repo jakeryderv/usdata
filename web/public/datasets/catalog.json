@@ -646,11 +646,15 @@
       "guide": "https://docs.usdata.dev/providers/noaa-nws-vtec-events/",
       "reference": "https://docs.usdata.dev/providers/noaa-nws-vtec-events/#reference",
       "page": "https://usdata.dev/datasets/noaa/nws-vtec-events/",
-      "walkthrough": null,
+      "walkthrough": "examples/datasets/noaa-nws-vtec-events/noaa-nws-vtec-events.ipynb",
       "studies": [
         "warning-lead-time"
       ],
-      "quickstart": null
+      "quickstart": {
+        "cli": "usdata fetch noaa:nws-vtec-events \\\n  --location 'Osage County, OK' \\\n  --start 2024-01-01 \\\n  --end 2024-12-31",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:nws-vtec-events\"),\n    build_query(\n        location=\"Osage County, OK\",\n        start=\"2024-01-01\",\n        end=\"2024-12-31\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: osage-county-warnings-2024\nsources:\n  - name: events\n    dataset: noaa:nws-vtec-events\n    # A county reaches county-based products: tornado, severe thunderstorm, flood.\n    location: Osage County, OK\n    start: 2024-01-01\n    end: 2024-12-31\n"
+      }
     },
     {
       "id": "noaa:nexrad-level2",

@@ -1692,6 +1692,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-nws-vtec-events.md
     examples:
+      - examples/datasets/noaa-nws-vtec-events/noaa-nws-vtec-events.ipynb
       - examples/studies/warning-lead-time/warning-lead-time.ipynb
     resolution:
       spatial: "One county, parish, or forecast zone per request, by NWS UGC code"
