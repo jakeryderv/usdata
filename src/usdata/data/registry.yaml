@@ -1480,6 +1480,7 @@ datasets:
     reader: pandas
     guide: docs/providers/epa-aqs-daily.md
     examples:
+      - examples/datasets/epa-aqs-daily/epa-aqs-daily.ipynb
       - examples/studies/wildfire-smoke/README.md
     resolution:
       spatial: Regulatory monitoring sites operated by state, local, and tribal agencies
