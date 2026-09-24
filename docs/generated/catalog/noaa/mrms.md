@@ -1,21 +1,19 @@
-# MRMS gridded radar products
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:mrms` · **Released** · Included since usdata 0.15.
+## Reference
 
-Multi-Radar Multi-Sensor (MRMS).
+`noaa:mrms` · **Released** · Included since usdata 0.15. Multi-Radar Multi-Sensor (MRMS).
 
-## At a glance
+### At a glance
 
 - Files: GRIB2 (gzipped)
 - Selection: Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day
 - Required inputs: Product name and both timestamps
-- Open locally: `usdata[grib]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[grib]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [MRMS gridded radar products](https://usdata.dev/datasets/noaa/mrms/), with a walkthrough
 - Studies: [Which severe reports came with rotation and lightning?](https://usdata.dev/studies/tornado-classification/); [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/studies/severe-weather-case-study/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -23,7 +21,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 |---|---|
 | `product` | Required product directory name, for example RotationTrackML30min_00.50; see the dataset guide for the supported list. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -48,11 +46,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `PrecipRate_00.00` | mm h-1 | Radar precipitation rate |
 | `LightningProbabilityNext30minGrid_scale_1` | % | Probability of lightning in the next 30 minutes |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-mrms.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.15
 - Domain: Weather radar
@@ -69,5 +63,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `s3`
 - Adapter: `usdata.providers.noaa.mrms:Mrms`
-
-[All NOAA datasets](../noaa.md).

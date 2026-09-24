@@ -10,8 +10,8 @@
 
 | Dataset | Availability | Files | What gets selected |
 |---|---|---|---|
-| <span id="usgsearthquakes"></span>[Earthquake events](usgs/earthquakes.md) | Released | CSV | Events inside an inclusive UTC window and optional box, magnitude, and depth bounds |
-| <span id="usgswater-daily"></span>[Daily water observations](usgs/water-daily.md) | Released | CSV | Site observations for inclusive local calendar dates; parameter and statistic filters |
+| <span id="usgsearthquakes"></span>[Earthquake events](../../providers/usgs-earthquakes.md) | Released | CSV | Events inside an inclusive UTC window and optional box, magnitude, and depth bounds |
+| <span id="usgswater-daily"></span>[Daily water observations](../../providers/usgs-water-daily.md) | Released | CSV | Site observations for inclusive local calendar dates; parameter and statistic filters |
 
 ## Planned datasets
 

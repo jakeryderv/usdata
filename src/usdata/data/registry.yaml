@@ -139,6 +139,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-ghcn.md
     examples:
+      - examples/datasets/noaa-ghcn-daily/noaa-ghcn-daily.ipynb
       - examples/studies/weather-and-streamflow/weather-and-streamflow.ipynb
     resolution:
       spatial: >-
@@ -331,8 +332,8 @@ datasets:
       - examples/studies/event-context/event-context.ipynb
       - examples/studies/tornado-classification/tornado-classification.ipynb
       - examples/studies/severe-weather-case-study/severe-weather-case-study.ipynb
-      - examples/studies/warning-lead-time/README.md
-      - examples/studies/disaster-declarations/README.md
+      - examples/studies/warning-lead-time/warning-lead-time.ipynb
+      - examples/studies/disaster-declarations/disaster-declarations.ipynb
     resolution:
       spatial: "One record per county, forecast zone, or marine zone touched by an event"
       temporal: >-
@@ -380,7 +381,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-spc-tornado.md
     examples:
-      - examples/datasets/noaa-spc-tornado-reports/README.md
+      - examples/datasets/noaa-spc-tornado-reports/noaa-spc-tornado-reports.ipynb
       - examples/studies/severe-weather-case-study/severe-weather-case-study.ipynb
     resolution:
       spatial: >-
@@ -403,8 +404,8 @@ datasets:
       - { name: "mag", description: "Tornado: F scale through January 2007 and EF scale afterwards, -9 unknown. Hail: size in inches. Wind: speed in knots" }
       - { name: "inj", units: "count", description: "Injuries" }
       - { name: "fat", units: "count", description: "Fatalities" }
-      - { name: "loss", description: "Property loss: a 0 to 9 category before 1996, millions of dollars from 1996" }
-      - { name: "closs", units: "millions of dollars", description: "Crop loss" }
+      - { name: "loss", description: "Property loss: a 0 to 9 category before 1996, millions of dollars 1996 to 2015, whole dollars from 2016" }
+      - { name: "closs", description: "Crop loss: millions of dollars through 2015, whole dollars from 2016" }
       - { name: "slat", units: "degrees_north", description: "Start latitude" }
       - { name: "slon", units: "degrees_east", description: "Start longitude" }
       - { name: "elat", units: "degrees_north", description: "End latitude" }
@@ -443,7 +444,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-hurdat2.md
     examples:
-      - examples/datasets/noaa-hurdat2/README.md
+      - examples/datasets/noaa-hurdat2/noaa-hurdat2.ipynb
       - examples/studies/storm-surge/storm-surge.ipynb
     resolution:
       spatial: "Best-track positions in tenths of a degree"
@@ -577,7 +578,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-coops.md
     examples:
-      - examples/datasets/noaa-coops-water-levels/README.md
+      - examples/datasets/noaa-coops-water-levels/noaa-coops-water-levels.ipynb
       - examples/studies/storm-surge/storm-surge.ipynb
     resolution:
       spatial: "One National Water Level Observation Network station per request"
@@ -596,7 +597,7 @@ datasets:
       - { name: "O or I (for verified)", description: "Count of outliers, or the inference flag on verified data" }
       - { name: "F", description: "Flat-tolerance limit flag" }
       - { name: "R", description: "Rate-of-change limit flag" }
-      - { name: "L", description: "Inferred-value flag" }
+      - { name: "L", description: "Expected-height limit flag: 1 when the value passed the maximum or minimum expected water level" }
       - { name: "Quality", description: "p for preliminary or v for verified" }
     limits: { max_window: P28D }
     adapter: usdata.providers.noaa.coops:CoopsWaterLevels
@@ -626,6 +627,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-coops-predictions.md
     examples:
+      - examples/datasets/noaa-coops-tide-predictions/noaa-coops-tide-predictions.ipynb
       - examples/studies/storm-surge/storm-surge.ipynb
     resolution:
       spatial: "One tide station per request"
@@ -798,7 +800,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-normals.md
     examples:
-      - examples/datasets/noaa-climate-normals/README.md
+      - examples/datasets/noaa-climate-normals/noaa-climate-normals.ipynb
       - examples/studies/climate-anomalies/climate-anomalies.ipynb
       - examples/studies/hourly-anomalies/hourly-anomalies.ipynb
     resolution:
@@ -918,7 +920,7 @@ datasets:
     reader: null
     guide: docs/providers/noaa-nexrad-level3.md
     examples:
-      - examples/datasets/noaa-nexrad-level3/README.md
+      - examples/datasets/noaa-nexrad-level3/noaa-nexrad-level3.ipynb
     resolution:
       temporal: "One file per product per volume scan; roughly 120 to 390 per product per day"
     update_frequency: "Files appear as the Unidata feed captures them, and coverage has gaps"
@@ -1030,7 +1032,7 @@ datasets:
     reader: grib
     guide: docs/providers/noaa-gfs.md
     examples:
-      - examples/datasets/noaa-gfs/README.md
+      - examples/datasets/noaa-gfs/noaa-gfs.ipynb
     resolution:
       spatial: "0.25, 0.5, or 1 degree global latitude-longitude grid, chosen with resolution"
       temporal: "Hourly to 120 then three-hourly to 384 at 0p25; three-hourly at 0p50 and 1p00"
@@ -1191,7 +1193,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-lcd.md
     examples:
-      - examples/datasets/noaa-lcd/README.md
+      - examples/datasets/noaa-lcd/noaa-lcd.ipynb
       - examples/studies/hourly-anomalies/hourly-anomalies.ipynb
     resolution:
       spatial: "Airport and first-order stations, addressed by eleven-digit station id"
@@ -1350,6 +1352,7 @@ datasets:
     reader: pandas
     guide: docs/providers/usgs-water-daily.md
     examples:
+      - examples/datasets/usgs-water-daily/usgs-water-daily.ipynb
       - examples/studies/weather-and-streamflow/weather-and-streamflow.ipynb
     resolution:
       spatial: "USGS monitoring locations, one site per record"
@@ -1392,7 +1395,7 @@ datasets:
     reader: pandas
     guide: docs/providers/usgs-earthquakes.md
     examples:
-      - examples/datasets/usgs-earthquakes/README.md
+      - examples/datasets/usgs-earthquakes/usgs-earthquakes.ipynb
     resolution:
       spatial: "Point epicenters in decimal degrees, as located by the contributing network"
       temporal: "Origin times to the millisecond"
@@ -1611,7 +1614,7 @@ datasets:
     reader: grib
     guide: docs/providers/noaa-rap.md
     examples:
-      - examples/datasets/noaa-rap/README.md
+      - examples/datasets/noaa-rap/noaa-rap.ipynb
     resolution:
       spatial: "13 km Lambert conformal CONUS grid, 451 x 337 points, for the awp130 family"
       temporal: >-
@@ -1690,7 +1693,8 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-nws-vtec-events.md
     examples:
-      - examples/studies/warning-lead-time/README.md
+      - examples/datasets/noaa-nws-vtec-events/noaa-nws-vtec-events.ipynb
+      - examples/studies/warning-lead-time/warning-lead-time.ipynb
     resolution:
       spatial: "One county, parish, or forecast zone per request, by NWS UGC code"
       temporal: "Issuance and expiry to the minute"
@@ -1817,7 +1821,8 @@ datasets:
     reader: pandas
     guide: docs/providers/fema-disaster-declarations.md
     examples:
-      - examples/studies/disaster-declarations/README.md
+      - examples/datasets/fema-disaster-declarations/fema-disaster-declarations.ipynb
+      - examples/studies/disaster-declarations/disaster-declarations.ipynb
     resolution:
       spatial: "One row per designated area: a county or county equivalent, a tribal area, or a whole state"
       temporal: "Calendar dates for the declaration and for the start and end of the incident"

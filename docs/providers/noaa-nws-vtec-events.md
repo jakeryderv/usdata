@@ -146,4 +146,4 @@ rather than estimated.
 
 [NOAA access notes](noaa.md).
 
-[Catalog reference](../generated/catalog/noaa/nws-vtec-events.md#catalog-reference).
+--8<-- "generated/catalog/noaa/nws-vtec-events.md"
