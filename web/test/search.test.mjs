@@ -36,10 +36,8 @@ test("every implemented dataset has a page, docs destinations, and a quick start
     assert.match(dataset.page, /^https:\/\/usdata\.dev\/datasets\/[a-z]+\/[a-z0-9-]+\/$/);
     assert.ok(dataset.walkthrough || dataset.studies.length);
     if (dataset.walkthrough && dataset.quickstart) assert.ok(dataset.quickstart.cli.startsWith(`usdata fetch ${dataset.id}`));
-    for (const url of [dataset.reference, dataset.guide]) {
-      assert.equal(new URL(url).origin, "https://docs.usdata.dev");
-      assert.ok(url.endsWith("/"));
-      assert.ok(!url.endsWith("README/"));
-    }
+    assert.equal(new URL(dataset.guide).origin, "https://docs.usdata.dev");
+    assert.ok(dataset.guide.endsWith("/") && !dataset.guide.endsWith("README/"));
+    assert.equal(dataset.reference, `${dataset.guide}#reference`);
   }
 });

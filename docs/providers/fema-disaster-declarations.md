@@ -129,4 +129,4 @@ rather than estimated.
 
 [FEMA access notes](fema.md).
 
-[Catalog reference](../generated/catalog/fema/disaster-declarations.md#catalog-reference).
+--8<-- "generated/catalog/fema/disaster-declarations.md"
