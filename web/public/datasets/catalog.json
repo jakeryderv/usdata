@@ -2004,7 +2004,7 @@
       "guide": "https://docs.usdata.dev/providers/noaa-normals/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/climate-normals/",
       "page": "https://usdata.dev/datasets/noaa/climate-normals/",
-      "walkthrough": "examples/datasets/noaa-climate-normals/README.md",
+      "walkthrough": "examples/datasets/noaa-climate-normals/noaa-climate-normals.ipynb",
       "studies": [
         "climate-anomalies",
         "hourly-anomalies"

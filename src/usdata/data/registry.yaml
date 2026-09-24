@@ -798,7 +798,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-normals.md
     examples:
-      - examples/datasets/noaa-climate-normals/README.md
+      - examples/datasets/noaa-climate-normals/noaa-climate-normals.ipynb
       - examples/studies/climate-anomalies/climate-anomalies.ipynb
       - examples/studies/hourly-anomalies/hourly-anomalies.ipynb
     resolution:
