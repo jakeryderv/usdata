@@ -1,0 +1,67 @@
+/*
+  usdata design tokens, shared by usdata.dev and docs.usdata.dev.
+
+  This file is the only copy. The docs load it through mkdocs.yml; the website
+  build copies it to /tokens.css (web/build.mjs). Change a colour here, never
+  in a site stylesheet. Dark is the default; light follows the reader's system
+  setting on the website and Material's palette toggle in the docs.
+*/
+:root {
+  --us-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --us-font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --us-radius: 6px;
+  --us-radius-lg: 12px;
+  --us-primary: #2563eb;
+  --us-on-primary: #fafafa;
+}
+
+:root,
+[data-md-color-scheme="slate"] {
+  color-scheme: dark;
+  --us-bg: #0a0a0b;
+  --us-surface: #161618;
+  --us-elevated: #1f1f23;
+  --us-line: #2c2c32;
+  --us-primary-hover: #3b82f6;
+  --us-accent: #60a5fa;
+  --us-accent-soft: rgba(96, 165, 250, 0.12);
+  --us-text: #fafafa;
+  --us-muted: #a1a1aa;
+  --us-dim: #8b8b94;
+  --us-figure: #ffffff;
+  --us-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+[data-md-color-scheme="default"] {
+  color-scheme: light;
+  --us-bg: #fafafa;
+  --us-surface: #f4f4f5;
+  --us-elevated: #ffffff;
+  --us-line: #e4e4e7;
+  --us-primary-hover: #1d4ed8;
+  --us-accent: #1d4ed8;
+  --us-accent-soft: rgba(37, 99, 235, 0.08);
+  --us-text: #0a0a0b;
+  --us-muted: #52525b;
+  --us-dim: #6b6b74;
+  --us-figure: #ffffff;
+  --us-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-md-color-scheme]) {
+    color-scheme: light;
+    --us-bg: #fafafa;
+    --us-surface: #f4f4f5;
+    --us-elevated: #ffffff;
+    --us-line: #e4e4e7;
+    --us-primary-hover: #1d4ed8;
+    --us-accent: #1d4ed8;
+    --us-accent-soft: rgba(37, 99, 235, 0.08);
+    --us-text: #0a0a0b;
+    --us-muted: #52525b;
+    --us-dim: #6b6b74;
+    --us-figure: #ffffff;
+    --us-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.06);
+  }
+}

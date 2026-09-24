@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
-import { buildExamples } from "../render-examples.mjs";
+import { buildSite } from "../build.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const exists = async path => access(path).then(() => true, () => false);
@@ -12,7 +12,7 @@ const exists = async path => access(path).then(() => true, () => false);
 test("the homepage only links to and embeds files that exist on the built site", async () => {
   const output = await mkdtemp(join(tmpdir(), "usdata-home-"));
   try {
-    await buildExamples(root, output);
+    await buildSite(output);
     const html = await readFile(join(root, "web/public/index.html"), "utf8");
     assert.equal((html.match(/<h1[ >]/g) ?? []).length, 1);
     assert.match(html, /<img[^>]+src="\/examples\/[^"]+\.png"/);

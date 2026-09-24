@@ -4,7 +4,8 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
-import { buildExamples, renderNotebook, renderMarkdown } from "../render-examples.mjs";
+import { renderNotebook, renderMarkdown } from "../render-examples.mjs";
+import { buildSite } from "../build.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const exists = async path => access(path).then(() => true, () => false);
@@ -13,7 +14,7 @@ test("all examples keep their saved content, exact downloads, and valid website 
   const output = await mkdtemp(join(tmpdir(), "usdata-examples-"));
   try {
     const catalog = JSON.parse(await readFile(join(root, "examples/catalog.json"), "utf8"));
-    assert.equal(await buildExamples(root, output), catalog.length);
+    assert.equal(await buildSite(output), catalog.length);
     const files = ["examples/index.html"];
     for (const example of catalog) {
       const directory = join(root, "examples", example.slug);

@@ -1,41 +1,58 @@
-:root {
-  --md-primary-fg-color: #161618;
-  --md-primary-fg-color--light: #242428;
-  --md-primary-fg-color--dark: #0a0a0b;
-  --md-primary-bg-color: #fafafa;
-  --md-primary-bg-color--light: #a1a1aa;
-  --md-accent-fg-color: #2563eb;
-  --md-accent-fg-color--transparent: rgba(37, 99, 235, 0.1);
-  --md-default-bg-color: #fafafa;
-  --md-default-fg-color: #0a0a0b;
-  --md-default-fg-color--light: #52525b;
-  --md-default-fg-color--lighter: #71717a;
-  --md-typeset-a-color: #2563eb;
-  --md-code-bg-color: #f4f4f5;
-  --md-code-fg-color: #0a0a0b;
+/* Material mapped onto the shared tokens in tokens.css (ADR 0041). No colours here. */
+:root,
+[data-md-color-scheme="slate"],
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: var(--us-bg);
+  --md-primary-fg-color--light: var(--us-surface);
+  --md-primary-fg-color--dark: var(--us-bg);
+  --md-primary-bg-color: var(--us-text);
+  --md-primary-bg-color--light: var(--us-muted);
+  --md-accent-fg-color: var(--us-accent);
+  --md-accent-fg-color--transparent: var(--us-accent-soft);
+  --md-default-bg-color: var(--us-bg);
+  --md-default-fg-color: var(--us-text);
+  --md-default-fg-color--light: var(--us-muted);
+  --md-default-fg-color--lighter: var(--us-dim);
+  --md-default-fg-color--lightest: var(--us-line);
+  --md-typeset-a-color: var(--us-accent);
+  --md-code-bg-color: var(--us-surface);
+  --md-code-fg-color: var(--us-text);
+  --md-admonition-bg-color: var(--us-surface);
+  --md-footer-bg-color: var(--us-surface);
+  --md-footer-bg-color--dark: var(--us-bg);
+  --md-footer-fg-color: var(--us-text);
+  --md-footer-fg-color--light: var(--us-muted);
+  --md-footer-fg-color--lighter: var(--us-dim);
+  --md-text-font: Inter;
+  --md-code-font: "JetBrains Mono";
 }
-[data-md-color-scheme="slate"] {
-  --md-default-bg-color: #0a0a0b;
-  --md-default-fg-color: #fafafa;
-  --md-default-fg-color--light: #a1a1aa;
-  --md-default-fg-color--lighter: #71717a;
-  --md-primary-fg-color: #161618;
-  --md-accent-fg-color: #60a5fa;
-  --md-accent-fg-color--transparent: rgba(96, 165, 250, 0.12);
-  --md-typeset-a-color: #60a5fa;
-  --md-code-bg-color: #161618;
-  --md-code-fg-color: #fafafa;
-  --md-admonition-bg-color: #161618;
-  --md-footer-bg-color: #161618;
-  --md-footer-bg-color--dark: #0a0a0b;
+
+/* The header looks like usdata.dev's: page background, a hairline below, no shadow. */
+.md-header {
+  background-color: var(--us-bg);
+  color: var(--us-text);
+  border-bottom: 1px solid var(--us-line);
+  box-shadow: none;
 }
+.md-header--shadow {
+  box-shadow: none;
+}
+.md-header__title {
+  font-weight: 750;
+}
+.md-search__form {
+  background-color: var(--us-surface);
+  border: 1px solid var(--us-line);
+  border-radius: var(--us-radius);
+}
+
 .md-typeset .md-button--primary {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: #fafafa;
+  background: var(--us-primary);
+  border-color: var(--us-primary);
+  color: var(--us-on-primary);
 }
 .md-typeset .md-button {
-  border-radius: 0.25rem;
+  border-radius: var(--us-radius);
   margin: 0.2rem 0.4rem 0.2rem 0;
 }
 .md-typeset .md-button:not(.md-button--primary) {
@@ -44,28 +61,33 @@
 }
 .md-typeset .md-button:hover,
 .md-typeset .md-button:focus {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: #fafafa;
+  background: var(--us-primary-hover);
+  border-color: var(--us-primary-hover);
+  color: var(--us-on-primary);
 }
 
-/* Header links to the other hosts (see overrides/partials/header.html). */
+/* Header links to the website (see overrides/partials/header.html). */
 .md-header__links {
   display: flex;
-  gap: 1.1rem;
+  gap: 1.4rem;
   margin-left: 0.6rem;
   font-size: 0.7rem;
   font-weight: 500;
   white-space: nowrap;
 }
 .md-header__links a {
-  color: var(--md-primary-bg-color--light);
-  opacity: 0.9;
+  color: var(--us-muted);
 }
 .md-header__links a:hover,
 .md-header__links a:focus-visible {
-  color: var(--md-primary-bg-color);
-  opacity: 1;
+  color: var(--us-text);
+}
+.md-header__links a[aria-current="page"] {
+  color: var(--us-text);
+  text-decoration: underline;
+  text-decoration-color: var(--us-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.5em;
 }
 @media screen and (max-width: 59.9375em) {
   .md-header__links {
@@ -87,4 +109,17 @@
 .md-typeset h3 {
   font-weight: 600;
   letter-spacing: -0.01em;
+}
+
+/* Tables and code blocks sit on the surface colour with the shared hairline and radius. */
+.md-typeset table:not([class]) {
+  border: 1px solid var(--us-line);
+  border-radius: var(--us-radius);
+}
+.md-typeset table:not([class]) th {
+  background: var(--us-surface);
+}
+.md-typeset pre > code {
+  border: 1px solid var(--us-line);
+  border-radius: var(--us-radius);
 }

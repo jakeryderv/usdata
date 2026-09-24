@@ -2,6 +2,9 @@ import { readFile, readdir, mkdir, writeFile, copyFile } from "node:fs/promises"
 import { join } from "node:path";
 import MarkdownIt from "markdown-it";
 import sanitize from "sanitize-html";
+import { escape, page as shell } from "./layout.mjs";
+
+export { escape };
 
 const markdown = new MarkdownIt({ html: false });
 markdown.renderer.rules.heading_open = (tokens, index, options, env, renderer) => {
@@ -10,7 +13,6 @@ markdown.renderer.rules.heading_open = (tokens, index, options, env, renderer) =
   return renderer.renderToken(tokens, index, options);
 };
 const text = value => Array.isArray(value) ? value.join("") : value ?? "";
-export const escape = value => String(value).replace(/[&<>"']/g, char => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"})[char]);
 const clean = html => sanitize(html, {
   allowedTags: sanitize.defaults.allowedTags.concat(["img"]),
   allowedAttributes: {a: ["href", "title"], img: ["src", "alt", "title"], code: ["class"], th: ["colspan", "rowspan"], td: ["colspan", "rowspan"], h1: ["id"], h2: ["id"], h3: ["id"], h4: ["id"]},
@@ -18,23 +20,8 @@ const clean = html => sanitize(html, {
 });
 export const renderMarkdown = source => clean(markdown.render(source));
 const withoutTitle = source => source.replace(/^# [^\n]*\n+/, "");
+const page = (title, description, content, canonical) => shell({title, description, content, canonical, current: "/examples/", styles: ["/examples.css"], mainClass: "examples-main"});
 const pre = source => `<pre><code>${escape(source)}</code></pre>`;
-
-function page(title, description, content, canonical) {
-  return `<!doctype html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="${escape(description)}"><meta name="color-scheme" content="dark light">
-<meta property="og:type" content="article"><meta property="og:site_name" content="usdata"><meta property="og:title" content="${escape(title)}"><meta property="og:description" content="${escape(description)}"><meta property="og:url" content="https://usdata.dev${canonical}"><meta property="og:image" content="https://usdata.dev/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">
-<title>${escape(title)} · usdata</title><link rel="canonical" href="https://usdata.dev${canonical}">
-<link rel="icon" href="/logo.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/examples.css">
-</head><body><a class="skip" href="#main">Skip to content</a>
-<header class="header wrap"><a class="brand" href="/" aria-label="usdata home"><img src="/logo.svg" alt="" width="30" height="30"> usdata</a>
-<nav aria-label="Main navigation"><a href="/datasets/">Datasets</a><a href="/examples/" aria-current="page">Examples</a><a href="https://docs.usdata.dev/">Docs</a><a href="https://github.com/jakeryderv/usdata">GitHub</a></nav></header>
-<main class="wrap examples-main" id="main">${content}</main>
-<footer class="wrap"><span>usdata · Public scientific data, with provenance.</span><a href="https://docs.usdata.dev/">Read the documentation</a></footer>
-</body></html>\n`;
-}
 
 // Render only saved, supported output types. Never execute notebook code or scripts.
 export async function renderNotebook(notebook, directory, title) {

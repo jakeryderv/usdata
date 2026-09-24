@@ -3,17 +3,37 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Page not found — usdata</title>
+    <meta name="color-scheme" content="dark light" />
+    <title>Page not found · usdata</title>
+    <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/tokens.css" />
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <main class="wrap hero">
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="header wrap">
+      <a class="brand" href="/" aria-label="usdata home"><img src="/logo.svg" alt="" width="30" height="30" /> usdata</a>
+      <nav aria-label="Main navigation">
+        <a href="/datasets/">Datasets</a>
+        <a href="/examples/">Examples</a>
+        <a href="https://docs.usdata.dev/">Docs</a>
+        <a href="https://github.com/jakeryderv/usdata">GitHub</a>
+      </nav>
+    </header>
+    <main id="main" class="wrap hero">
       <p class="eyebrow">404</p>
       <h1>Page not found.</h1>
       <p>
-        Visit the <a href="/">homepage</a> or
-        <a href="https://docs.usdata.dev/">documentation</a>.
+        Try the <a href="/datasets/">datasets</a>, the <a href="/">homepage</a>,
+        or the <a href="https://docs.usdata.dev/">documentation</a>.
       </p>
     </main>
+    <footer class="wrap"><span>usdata · Public scientific data, with provenance.</span><a href="https://docs.usdata.dev/">Read the documentation</a></footer>
   </body>
 </html>

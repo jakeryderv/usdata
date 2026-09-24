@@ -2,7 +2,10 @@
 
 `public/` contains the homepage, dataset browser, styling, logo, and 404 page.
 `build.mjs` copies these files into disposable `dist/` and renders the examples
-there; Cloudflare serves them directly.
+there; Cloudflare serves them directly. Colours, fonts, and radii come from
+`../docs/assets/tokens.css`, which the docs load too and the build copies to
+`/tokens.css`; generated pages share one head, header, and footer from
+`layout.mjs`, and `test/layout.test.mjs` keeps the handwritten pages in step.
 
 ```sh
 npm ci
