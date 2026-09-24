@@ -74,7 +74,10 @@ segment of a tornado, following the
   an estimate in 2016.
 - `inj`, `fat`, `loss`, and `closs` are injuries, fatalities, property loss,
   and crop loss. Before 1996 `loss` is a damage category from 0 to 9, not a
-  dollar amount; from 1996 it is millions of dollars, and 0 does not mean $0.
+  dollar amount; from 1996 to 2015 `loss` and `closs` are millions of dollars,
+  and from 2016 whole dollars (the 2015 file's largest `loss` is 50, the
+  2016 file's 22,000,000, checked 2026-09-24). A 0 does not mean $0. Convert
+  before comparing years across 2016.
 - `slat`, `slon`, `elat`, `elon` are start and end coordinates in decimal
   degrees; `len` is the path length in miles and `wid` the width in yards.
 - `ns`, `sn`, `sg` describe segments: `sg == 1` is the entire track (one row
@@ -116,7 +119,8 @@ rather than estimated.
 - Resolution and variables: the [SPC format
   specification](https://www.spc.noaa.gov/wcm/data/SPC_severe_database_description.pdf)
   and the column notes above, including the Central Standard Time convention and the
-  1996 change in the `loss` units.
+  1996 change in the `loss` units. The 2016 change to whole dollars was read
+  from the 2015, 2016, and 2024 files.
 - Updates: the [severe weather database page](https://www.spc.noaa.gov/wcm/#data), which
   shows an update date beside each file as SPC revises prior years in place.
 - Terms: the [NWS disclaimer](https://www.weather.gov/disclaimer).

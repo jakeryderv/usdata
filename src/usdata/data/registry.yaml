@@ -404,8 +404,8 @@ datasets:
       - { name: "mag", description: "Tornado: F scale through January 2007 and EF scale afterwards, -9 unknown. Hail: size in inches. Wind: speed in knots" }
       - { name: "inj", units: "count", description: "Injuries" }
       - { name: "fat", units: "count", description: "Fatalities" }
-      - { name: "loss", description: "Property loss: a 0 to 9 category before 1996, millions of dollars from 1996" }
-      - { name: "closs", units: "millions of dollars", description: "Crop loss" }
+      - { name: "loss", description: "Property loss: a 0 to 9 category before 1996, millions of dollars 1996 to 2015, whole dollars from 2016" }
+      - { name: "closs", description: "Crop loss: millions of dollars through 2015, whole dollars from 2016" }
       - { name: "slat", units: "degrees_north", description: "Start latitude" }
       - { name: "slon", units: "degrees_east", description: "Start longitude" }
       - { name: "elat", units: "degrees_north", description: "End latitude" }
