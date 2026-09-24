@@ -1656,7 +1656,7 @@
       "guide": "https://docs.usdata.dev/providers/noaa-gfs/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/gfs/",
       "page": "https://usdata.dev/datasets/noaa/gfs/",
-      "walkthrough": "examples/datasets/noaa-gfs/README.md",
+      "walkthrough": "examples/datasets/noaa-gfs/noaa-gfs.ipynb",
       "studies": [],
       "quickstart": {
         "cli": "usdata fetch noaa:gfs \\\n  --start 2024-05-06T00:00:00Z \\\n  --end 2024-05-06T00:00:00Z \\\n  -p cycle=0 \\\n  -p forecast_hour=0 \\\n  -p resolution=1p00",
