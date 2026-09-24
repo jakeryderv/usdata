@@ -96,17 +96,21 @@ def test_a_missing_key_is_refused_before_a_client_exists(keyed, monkeypatch) -> 
 
 
 def _key_in_href(self: Any, query: Query) -> list[Asset]:
-    return [self.asset(str(httpx.URL(self.url, params=self.keys())))]
+    return [self.asset(str(_keyed(self, self.url)))]
+
+
+def _keyed(self: Any, href: str) -> httpx.URL:
+    return httpx.URL(href).copy_merge_params(self.keys())
 
 
 def _writes_the_echo(self: Any, asset: Asset, dest: Path) -> Path:
     with self.redacted_errors():
-        dest.write_bytes(http.get(asset.href, self._http(), params=self.keys()).content)
+        dest.write_bytes(http.get(_keyed(self, asset.href), self._http()).content)
     return dest
 
 
 def _unredacted_errors(self: Any, asset: Asset, dest: Path) -> Path:
-    body = http.get(asset.href, self._http(), params=self.keys()).json()
+    body = http.get(_keyed(self, asset.href), self._http()).json()
     body.pop("url")
     dest.write_text(json.dumps(body, sort_keys=True, separators=(",", ":")))
     return dest

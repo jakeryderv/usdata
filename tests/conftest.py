@@ -116,15 +116,25 @@ class KeyedSource(HttpProvider):
 
     def fetch(self, asset: Asset, dest: Path) -> Path:
         with self.redacted_errors():
-            response = http.get(asset.href, self._http(), params=self.keys())
+            response = http.get(keyed_url(asset.href, self.keys()), self._http())
         body = response.json()
         body.pop("url", None)
         dest.write_bytes(_canonical(body))
         return dest
 
 
+def keyed_url(href: str, keys: dict[str, str]) -> httpx.URL:
+    """``href`` with the keys added; httpx's ``params=`` would replace its query instead."""
+    return httpx.URL(href).copy_merge_params(keys)
+
+
 def keyed_response(request: httpx.Request, *, fail: bool = False) -> httpx.Response:
-    """What the keyed service answers: data with the request echoed, or a 403 that echoes it too."""
+    """What the keyed service answers: data with the request echoed, or a 403 that echoes it too.
+
+    A request that lost the selection in its href is refused, as a real service would.
+    """
+    if "station" not in request.url.params:
+        return httpx.Response(400, json={"url": str(request.url), "error": "station missing"})
     if fail or "key" not in request.url.params:
         return httpx.Response(403, json={"url": str(request.url), "error": "invalid key"})
     return httpx.Response(200, json={"url": str(request.url), "data": [1, 2]})

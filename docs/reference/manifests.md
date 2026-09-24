@@ -81,6 +81,7 @@ line.
 | `noaa:ibtracs` | Required `subset`: `all`, `active`, `last3years`, `since1980`, or a basin `na`, `ep`, `wp`, `ni`, `si`, `sp`, `sa`, case-insensitive. `format`: `csv` (default) or `netcdf`. `version`: a product version such as `v04r01`; the newest by default. No geographic selection. | One whole file from the chosen version. Dates are rejected; choose a period subset and filter track points locally. |
 | `noaa:coastwatch-sst` | Requires a bbox or location. `stride`: positive integer, default 1, subsamples both spatial axes. At most 1,000,000 grid rows per request. | `analysed_sst` (default), `analysis_error`, `sea_ice_fraction`, `mask`. Inclusive UTC timestamps. |
 | `usgs:water-daily` | `site` or `sites`: quoted monitoring ids, mutually exclusive, or a geographic query; explicit sites and a geographic filter both apply. `statistic_id`: quoted five-digit code, default `"00003"` (daily mean). | Quoted parameter codes such as `"00060"`; inclusive local calendar dates. |
+| `epa:aqs-daily` | Required `parameters`: one to five AQS parameter codes, such as `88101`. A place from exactly one of `sites` (`SS-CCC-NNNN` ids), a state or county `location`, or a `bbox`. Needs `USDATA_AQS_EMAIL` and `USDATA_AQS_KEY` in the environment, never in the manifest. | Fixed columns; `variables` is rejected. The UTC calendar dates of both bounds select local days, inclusive; one file per selection and calendar year. |
 
 `messages` takes one selector, a list, or a comma-separated string, each
 `SHORTNAME:level text` with an optional `:step text` and then an optional

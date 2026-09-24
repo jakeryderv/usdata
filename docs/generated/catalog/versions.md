@@ -7,7 +7,6 @@ Move a dataset between phases by editing its `target` in the registry.
 **Later**
 
 - [`census:acs-5year`](census.md#censusacs-5year) American Community Survey 5-Year Estimates · Planned
-- [`epa:aqs-daily`](epa.md#epaaqs-daily) Air Quality System Daily Summaries · Planned
 - [`fema:nfhl`](fema.md#femanfhl) National Flood Hazard Layer · Planned
 - [`nasa:gpm-imerg`](nasa.md#nasagpm-imerg) GPM IMERG Precipitation · Planned
 - [`noaa:billion-dollar-disasters`](noaa.md#noaabillion-dollar-disasters) Billion-Dollar Weather and Climate Disasters · Planned
@@ -26,6 +25,10 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`noaa:tsunami-events`](noaa.md#noaatsunami-events) Global Historical Tsunami Database · Planned
 - [`usda:cropland-data-layer`](usda.md#usdacropland-data-layer) Cropland Data Layer · Planned
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
+
+**Implemented, unreleased (planned 0.26)**
+
+- [`epa:aqs-daily`](epa.md#epaaqs-daily) Air Quality System Daily Summaries · Source only
 
 **Included since 0.24**
 

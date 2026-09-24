@@ -112,10 +112,13 @@ class HttpProvider(Provider):
     def redacted_errors(self) -> Iterator[None]:
         """Let any exception out only after removing this adapter's credential values from it.
 
-        Wrap every request that carries credentials::
+        Wrap every request that carries credentials. Merge them into the URL
+        rather than passing ``params=``, which httpx treats as replacing the
+        URL's whole query::
 
             with self.redacted_errors():
-                response = http.get(url, self._http(), params={"key": self.credentials[KEY]})
+                keyed = httpx.URL(asset.href).copy_merge_params({"key": self.credentials[KEY]})
+                response = http.get(keyed, self._http())
 
         The exception is rewritten in place and re-raised, so its type, and any
         handling a caller has for it, are unchanged.

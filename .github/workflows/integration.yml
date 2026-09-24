@@ -61,6 +61,9 @@ jobs:
       - env:
           LIVE_TEST: ${{ matrix.path }}
           UV_NO_SYNC: '1'
+          # Keyed sources read these (ADR 0039); anonymous ones ignore them.
+          USDATA_AQS_EMAIL: ${{ secrets.USDATA_AQS_EMAIL }}
+          USDATA_AQS_KEY: ${{ secrets.USDATA_AQS_KEY }}
         run: just test-live "$LIVE_TEST" --junitxml=reports/live.xml --durations=15
       - name: Summarize live results
         if: always()
@@ -92,6 +95,8 @@ jobs:
       - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4
       - env:
           NOTEBOOK: ${{ matrix.path }}
+          USDATA_AQS_EMAIL: ${{ secrets.USDATA_AQS_EMAIL }}
+          USDATA_AQS_KEY: ${{ secrets.USDATA_AQS_KEY }}
         run: just run-notebooks --notebook "$NOTEBOOK" --output-dir reports/notebooks
       - name: Summarize notebook results
         if: always()
@@ -128,6 +133,8 @@ jobs:
           UV_NO_SYNC: '1'
           # Upstream is always tried first; the mirror only answers for bytes the source stopped serving.
           USDATA_MIRROR_URL: https://data.usdata.dev
+          USDATA_AQS_EMAIL: ${{ secrets.USDATA_AQS_EMAIL }}
+          USDATA_AQS_KEY: ${{ secrets.USDATA_AQS_KEY }}
         run: uv run python scripts/restore_lockfiles.py --manifest "$MANIFEST" --output-dir reports/restore --cache "$RUNNER_TEMP/cache"
       - name: Mirror the pinned objects this restore proved (ADR 0030)
         # Only a passing restore on main uploads, and only objects the mirror lacks.

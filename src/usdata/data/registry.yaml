@@ -1451,21 +1451,80 @@ datasets:
   # ---------------------------------------------------------------- EPA
   - id: epa:aqs-daily
     provider: epa
-    status: planned
+    status: available
     domain: air-quality
-    target: later
+    since: "0.26"
     title: Air Quality System Daily Summaries
     description: >-
-      Daily pollutant summaries (ozone, PM2.5, NO2, and others) from regulatory
-      monitors via the AQS Data API. Requires a free API key issued by email.
-    keywords: [air quality, pollution, ozone, pm2.5, monitors, aqs]
+      Daily summaries of regulatory air monitoring data from EPA's Air Quality
+      System through the AQS Data API: one row per monitor, local day, and
+      pollutant standard, for one to five AQS parameter codes such as PM2.5
+      and ozone, over named sites, a state or county, or a box. Each request
+      covers at most one calendar year, so a window becomes one JSON file per
+      year. Requires a free key issued by email; the response is stored in a
+      canonical form without the echoed request.
+    keywords: [air quality, pollution, ozone, pm2.5, monitors, aqs, smoke, epa]
     protocol: http
-    homepage: https://aqs.epa.gov/aqsweb/documents/data_api.html
+    homepage: https://aqs.epa.gov/aqsweb/documents/data_api.html#daily
     license: US Government Work (public domain)
-    capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: true }
+    capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: false }
     credentials:
       variables: [USDATA_AQS_EMAIL, USDATA_AQS_KEY]
       signup: https://aqs.epa.gov/aqsweb/documents/data_api.html#signup
+    summary: Daily air pollutant summaries from regulatory monitors
+    formats: [JSON]
+    selection: Local days within inclusive UTC calendar dates for one to five pollutants; one file per year
+    inputs: Both dates; one to five parameter codes; site ids, a state or county, or a box
+    reader: pandas
+    guide: docs/providers/epa-aqs-daily.md
+    examples:
+      - examples/wildfire-smoke/README.md
+    resolution:
+      spatial: Regulatory monitoring sites operated by state, local, and tribal agencies
+      temporal: Daily summaries of each monitor's samples, one row per pollutant standard
+    update_frequency: >-
+      As monitoring agencies submit each quarter (40 CFR 58.16) and certify the previous year by
+      May 1 (40 CFR 58.15); submitted values can be revised later
+    latency: >-
+      Agencies must submit each calendar quarter's data within 90 days after it ends (40 CFR 58.16)
+    citation: >-
+      U.S. Environmental Protection Agency, Air Quality System (AQS) daily summary data, AQS Data
+      API, accessed via usdata
+    terms: https://aqs.epa.gov/aqsweb/documents/data_api.html#terms
+    variables:
+      - { name: "state_code", description: "FIPS code of the state the monitor is in; 80 for Mexico, CC for Canada at border sites" }
+      - { name: "county_code", description: "FIPS code of the county, parish, or independent city within the state" }
+      - { name: "site_number", description: "Four-digit site number, unique within the county" }
+      - { name: "parameter_code", description: "AQS code of the parameter measured" }
+      - { name: "poc", description: "Parameter occurrence code distinguishing instruments measuring the same parameter at one site" }
+      - { name: "latitude", units: "degrees_north", description: "Site latitude, WGS84" }
+      - { name: "longitude", units: "degrees_east", description: "Site longitude, WGS84" }
+      - { name: "datum", description: "Datum of the coordinates, always WGS84" }
+      - { name: "parameter", description: "Name of the parameter measured" }
+      - { name: "sample_duration_code", description: "Code of the sample duration" }
+      - { name: "sample_duration", description: "Averaging period: observed, such as 1 HOUR or 24 HOUR, or calculated, such as 24-HR BLK AVG" }
+      - { name: "pollutant_standard", description: "National ambient air quality standard the row's statistics are calculated for; empty for none" }
+      - { name: "date_local", description: "Day the sample was taken, in local standard time" }
+      - { name: "units_of_measure", description: "Units of every statistic on the row" }
+      - { name: "event_type", description: "Whether exceptional-event data are included: No Events, Events Included, Events Excluded, or Concurred Events Excluded" }
+      - { name: "observation_count", description: "Number of observations in the averaging period" }
+      - { name: "observation_percent", units: "percent", description: "Share of scheduled values for the day that were reported" }
+      - { name: "validity_indicator", description: "Y where the value meets all completeness criteria" }
+      - { name: "arithmetic_mean", description: "Mean of the day's values, in units_of_measure" }
+      - { name: "first_max_value", description: "Highest value at the row's duration or standard, in units_of_measure" }
+      - { name: "first_max_hour", description: "Hour of the day, 24-hour local standard time, of the highest value" }
+      - { name: "aqi", description: "Air Quality Index for the day, where the pollutant has one" }
+      - { name: "method_code", description: "Three-digit measurement method code, unique within a parameter" }
+      - { name: "method", description: "Collection and analysis method" }
+      - { name: "local_site_name", description: "Site name in the operating agency's own nomenclature" }
+      - { name: "site_address", description: "Approximate street address of the site" }
+      - { name: "county", description: "Name of the county the site is in" }
+      - { name: "state", description: "Name of the state the site is in" }
+      - { name: "city", description: "Incorporated city the site is in, if any" }
+      - { name: "cbsa_code", description: "Code of the core-based statistical (metropolitan) area" }
+      - { name: "cbsa", description: "Name of the core-based statistical (metropolitan) area" }
+      - { name: "date_of_last_change", description: "Date the underlying data were last changed in AQS" }
+    adapter: usdata.providers.epa.aqs:AqsDaily
 
   # ---------------------------------------------------------------- FEMA
   - id: fema:nfhl

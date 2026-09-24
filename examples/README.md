@@ -66,6 +66,11 @@ FEMA's major disaster declarations in force in Oklahoma on the outbreak day and
 joins them to the Storm Events tornado reports by county FIPS code (available
 since v0.21.0).
 
+[Wildfire smoke in New York City](https://usdata.dev/examples/wildfire-smoke/) pins
+two weeks of PM2.5 daily summaries from the city's regulatory monitors across
+the June 2023 Canadian smoke and counts the days above the daily standard. It
+is the first example that needs a key (available since v0.26.0).
+
 [Atlantic hurricane best tracks](https://usdata.dev/examples/hurdat2/) fetches the whole HURDAT2
 Atlantic file and reads it into one row per track point (available since v0.12.0).
 
@@ -117,11 +122,15 @@ usdata cache (`USDATA_CACHE_DIR` overrides it). Every example keeps its
 
 ## Pinned examples
 
-Seven examples commit their `dataset.lock.json`, marked `"pinned": true` in
+Eight examples commit their `dataset.lock.json`, marked `"pinned": true` in
 `catalog.json`: `goes-imagery`, `goes-mesoscale`, `glm-flashes`, `hrrr-environment`,
-`mrms-rotation`, `gfs-environment`, and `radar-products`. Their only sources
-are object archives on public buckets, written once and republished rarely, so
-a pin can be expected to hold. The notebook runner carries the committed
+`mrms-rotation`, `gfs-environment`, `radar-products`, and `wildfire-smoke`. The
+first seven read only object archives on public buckets, written once and
+republished rarely, so a pin can be expected to hold. `wildfire-smoke` reads
+AQS summaries, which agencies keep revising: some of its rows changed in 2025,
+two years after the data were collected, so it is the pin most likely to
+drift. The weekly job restores it with a key from repository secrets, and
+someone without a key restores it from the mirror. The notebook runner carries the committed
 lockfile beside the manifest, so those notebooks restore the pinned inputs
 instead of resolving their query again, and the example page offers the
 lockfile for download beside the manifest. `just check` holds each committed

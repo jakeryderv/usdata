@@ -16,6 +16,7 @@ examples/**/*.lock.json
 !examples/hrrr-environment/dataset.lock.json
 !examples/mrms-rotation/dataset.lock.json
 !examples/radar-products/dataset.lock.json
+!examples/wildfire-smoke/dataset.lock.json
 .ipynb_checkpoints/
 reports/
 
@@ -37,3 +38,6 @@ infra/node_modules/
 
 # Local browser previews
 .playwright-cli/
+# Local credentials: a 1Password-mounted .env pipe and the direnv file that points uv at it.
+.env
+.envrc

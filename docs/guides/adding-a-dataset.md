@@ -10,7 +10,8 @@ Before writing code, answer these against the live service:
 - How are files or records addressed? (bucket layout, REST parameters, ERDDAP grammar)
 - Does the server subset by space, time, or variable? This becomes `capabilities`,
   which a contract test holds to the fields the adapter accepts and refuses.
-- Is access anonymous? Datasets needing credentials are not yet supported.
+- Is access anonymous? If the source needs a key, declare it under `credentials`
+  (see [Adapter](#3-adapter)) and probe it with your own key, never a shared one.
 - What is the license? Most federal data is public domain; say so explicitly.
 
 Probe with `curl` and keep the commands; they become the basis of the
@@ -205,7 +206,9 @@ Rules:
   the `signup` URL where the agency issues one. The core reads them from the
   environment and passes them as `credentials=`; the adapter reads
   `self.credentials[NAME]` and never `os.environ`. Add them to each request as
-  it is sent, never to an `Asset` field, and wrap every such request in
+  it is sent, never to an `Asset` field. Merge them into the href with
+  `httpx.URL(asset.href).copy_merge_params(...)`: passing `params=` makes httpx
+  replace the href's whole query, selection and all. Wrap every such request in
   `with self.redacted_errors():` so a failure cannot print the key. If the
   response echoes the request or differs between identical requests, write a
   canonical form and say how in the `transformations` class attribute. See
