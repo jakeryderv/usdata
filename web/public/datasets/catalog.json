@@ -508,7 +508,7 @@
       "guide": "https://docs.usdata.dev/providers/noaa-spc-tornado/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/spc-tornado-reports/",
       "page": "https://usdata.dev/datasets/noaa/spc-tornado-reports/",
-      "walkthrough": "examples/datasets/noaa-spc-tornado-reports/README.md",
+      "walkthrough": "examples/datasets/noaa-spc-tornado-reports/noaa-spc-tornado-reports.ipynb",
       "studies": [
         "severe-weather-case-study"
       ],
