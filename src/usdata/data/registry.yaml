@@ -1084,7 +1084,7 @@ datasets:
     reader: grib
     guide: docs/providers/noaa-nbm.md
     examples:
-      - examples/datasets/noaa-nbm/README.md
+      - examples/datasets/noaa-nbm/noaa-nbm.ipynb
     resolution:
       spatial: "2.5 km Lambert conformal CONUS grid, 2345 x 1597 points; separate Alaska, Hawaii, Puerto Rico, and Guam grids"
       temporal: >-

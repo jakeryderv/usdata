@@ -1824,7 +1824,7 @@
       "guide": "https://docs.usdata.dev/providers/noaa-nbm/",
       "reference": "https://docs.usdata.dev/providers/noaa-nbm/#reference",
       "page": "https://usdata.dev/datasets/noaa/nbm/",
-      "walkthrough": "examples/datasets/noaa-nbm/README.md",
+      "walkthrough": "examples/datasets/noaa-nbm/noaa-nbm.ipynb",
       "studies": [],
       "quickstart": {
         "cli": "usdata fetch noaa:nbm \\\n  --start 2024-05-06T20:00:00Z \\\n  --end 2024-05-06T20:00:00Z \\\n  -p cycle=20 \\\n  -p forecast_hour=1,2,3,4 \\\n  -p 'messages=TMP:2 m above ground'",
