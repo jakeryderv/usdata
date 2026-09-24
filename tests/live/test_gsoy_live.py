@@ -35,9 +35,10 @@ def test_gsoy_annual_example_restore(tmp_path: Path) -> None:
     (item,) = result.fetched
     with item.path.open(newline="") as stream:
         rows = list(csv.DictReader(stream))
-    assert len(rows) == 1 and rows[0]["DATE"] == "2024"
-    assert rows[0]["STATION"] == "USW00013967"
-    assert float(rows[0]["PRCP"]) >= 0 and -60 < float(rows[0]["TAVG"]) < 60
+    # The walkthrough's thirty full years, 1995 to 2024, one row each.
+    assert [row["DATE"] for row in rows] == [str(year) for year in range(1995, 2025)]
+    assert {row["STATION"] for row in rows} == {"USW00013967"}
+    assert all(float(row["PRCP"]) >= 0 and -60 < float(row["TAVG"]) < 60 for row in rows)
     original = item.path.read_bytes()
     item.path.unlink()
     restored = pull(manifest, root=tmp_path / "cache")
