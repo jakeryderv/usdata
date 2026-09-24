@@ -67,4 +67,4 @@ rather than estimated.
 
 [USGS access notes](usgs.md).
 
-[Catalog reference](../generated/catalog/usgs/water-daily.md#catalog-reference).
+--8<-- "generated/catalog/usgs/water-daily.md"

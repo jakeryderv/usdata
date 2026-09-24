@@ -1,22 +1,20 @@
-# Daily air pollutant summaries from regulatory monitors
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`epa:aqs-daily` · **Released** · Included since usdata 0.26.
+## Reference
 
-Air Quality System Daily Summaries.
+`epa:aqs-daily` · **Released** · Included since usdata 0.26. Air Quality System Daily Summaries.
 
-## At a glance
+### At a glance
 
 - Files: JSON
 - Selection: Local days within inclusive UTC calendar dates for one to five pollutants; one file per year
 - Required inputs: Both dates; one to five parameter codes; site ids, a state or county, or a box
 - Credentials: `USDATA_AQS_EMAIL`, `USDATA_AQS_KEY` in the environment ([request a key](https://aqs.epa.gov/aqsweb/documents/data_api.html#signup))
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [Daily air pollutant summaries from regulatory monitors](https://usdata.dev/datasets/epa/aqs-daily/), with a walkthrough
 - Studies: [How far above the daily PM2.5 standard did Canadian wildfire smoke push New York City's air in June 2023?](https://usdata.dev/studies/wildfire-smoke/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -25,7 +23,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `parameters` | Required AQS parameter code(s), one to five, such as 88101 (PM2.5) or 44201 (ozone). |
 | `sites` | AQS site id(s) as state-county-site, such as 36-081-0124; or use a location. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -62,11 +60,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `cbsa` | — | Name of the core-based statistical (metropolitan) area |
 | `date_of_last_change` | — | Date the underlying data were last changed in AQS |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/epa-aqs-daily.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.26
 - Domain: Air quality
@@ -82,5 +76,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `http`
 - Adapter: `usdata.providers.epa.aqs:AqsDaily`
-
-[All EPA datasets](../epa.md).
