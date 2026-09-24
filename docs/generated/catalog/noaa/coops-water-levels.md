@@ -35,7 +35,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `O or I (for verified)` | — | Count of outliers, or the inference flag on verified data |
 | `F` | — | Flat-tolerance limit flag |
 | `R` | — | Rate-of-change limit flag |
-| `L` | — | Inferred-value flag |
+| `L` | — | Expected-height limit flag: 1 when the value passed the maximum or minimum expected water level |
 | `Quality` | — | p for preliminary or v for verified |
 
 ## Usage and limitations
