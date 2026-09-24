@@ -111,8 +111,9 @@ class PullResult(BaseModel):
     mirrored: list[str] = Field(
         default_factory=list,
         description=(
-            "Ids of assets whose pinned URL no longer served their bytes and that the mirror "
-            "restored instead; their pins are unchanged and each sidecar names the mirror object"
+            "Ids of assets the mirror restored instead of the source: because the pinned URL no "
+            "longer served their bytes, or, for those also in unchecked, because the source's "
+            "credentials are not set; pins are unchanged and each sidecar names the mirror object"
         ),
     )
     unchecked: list[str] = Field(

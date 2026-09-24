@@ -8,7 +8,8 @@ closest routine measurement of storm surge; it is not a regional surge height
 or a return-period estimate. See [examples setup](https://usdata.dev/examples/#run-examples) to run it.
 
 Available since v0.14.0, which adds
-`noaa:coops-tide-predictions`. The retained [manifest](dataset.yaml) holds three
+`noaa:coops-tide-predictions`; its HURDAT2 source names a `revision`, which
+needs v0.26.0. The retained [manifest](dataset.yaml) holds three
 sources: observed six-minute water levels and six-minute tide predictions for
 station 8727520 over the same three UTC days, both relative to mean lower low
 water in meters, and the whole Atlantic HURDAT2 file, which takes no dates.

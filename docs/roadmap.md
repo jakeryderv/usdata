@@ -145,10 +145,11 @@ interface unchanged. Until then, prefer work that uses them as they are.
 
 ## Next
 
-Datasets stay anonymous-access for now. Every source added before 1.0 is one
-that needs no account or key, so the adapter, transport, cache, and reader
-boundaries settle on the simplest cases before a credential layer is shaped
-around them; see Later.
+Sources that need a key are supported since v0.26.0
+([ADR 0039](adr/0039-credentialed-sources.md)). Until 1.0, add another only when
+a concrete analysis needs it and it fits those rules as they stand, since a new
+credential shape would move the contract and restart the stability clock; see
+Later.
 
 Scope one dataset expansion around a concrete analysis use case. These are
 candidates to investigate, not selected implementations. Refine a candidate into
@@ -164,8 +165,8 @@ and optional-reader boundaries:
 
 ## Later
 
-- Further sources that need credentials, once
-  [ADR 0039](adr/0039-credentialed-sources.md) has shipped with EPA AQS:
+- Further sources that need credentials, under
+  [ADR 0039](adr/0039-credentialed-sources.md) as EPA AQS uses it:
   [NASA access through earthaccess](https://github.com/jakeryderv/usdata/issues/9),
   and the [Census Data API](providers/census.md), which now requires a key on
   every data request and is the natural second place-keyed source.
