@@ -10,7 +10,7 @@
 - Selection: Predictions for one station and datum on a chosen interval; at most a year
 - Required inputs: Station, datum, and both minute-aligned timestamps; optional interval
 - Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
-- On usdata.dev: [Coastal tide predictions](https://usdata.dev/datasets/noaa/coops-tide-predictions/)
+- On usdata.dev: [Coastal tide predictions](https://usdata.dev/datasets/noaa/coops-tide-predictions/), with a walkthrough
 - Studies: [How high was Hurricane Helene's storm surge at Cedar Key?](https://usdata.dev/studies/storm-surge/)
 
 ### Parameters

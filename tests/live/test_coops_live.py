@@ -1,4 +1,4 @@
-"""Small historical CO-OPS request, original quality fields, and pinned restoration."""
+"""Three-day historical CO-OPS request, original quality fields, and pinned restoration."""
 
 import csv
 from importlib.util import find_spec
@@ -24,9 +24,10 @@ def test_coops_water_levels_restore(tmp_path: Path) -> None:
         rows = [
             {name.strip(): value for name, value in row.items()} for row in csv.DictReader(stream)
         ]
-    assert len(rows) == 3
+    assert len(rows) == 720  # three whole days of six-minute readings
     assert {row["Quality"].strip() for row in rows} == {"v"}
     assert rows[0]["Date Time"] == "2024-05-06 00:00"
+    assert rows[-1]["Date Time"] == "2024-05-08 23:54"
     assert all(-10 < float(row["Water Level"]) < 10 for row in rows)
     original = item.path.read_bytes()
     item.path.unlink()
@@ -37,6 +38,6 @@ def test_coops_water_levels_restore(tmp_path: Path) -> None:
     assert verify(manifest, root=tmp_path / "cache") == []
     if find_spec("pandas") is not None:
         frame = restored.fetched[0].open(parse_dates=["Date Time"])
-        assert len(frame) == 3
+        assert len(frame) == 720
         assert " Quality " in frame.columns
         assert frame.attrs["usdata"]["provenance"]["checksum"] == item.provenance.checksum
