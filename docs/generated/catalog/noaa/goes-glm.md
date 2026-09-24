@@ -1,21 +1,19 @@
-# GOES lightning detections
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:goes-glm` · **Released** · Included since usdata 0.15.
+## Reference
 
-GOES Geostationary Lightning Mapper.
+`noaa:goes-glm` · **Released** · Included since usdata 0.15. GOES Geostationary Lightning Mapper.
 
-## At a glance
+### At a glance
 
 - Files: NetCDF4
 - Selection: Whole 20-second detection files by inclusive UTC file-start time, at most one day
 - Required inputs: Satellite and both timestamps
-- Open locally: `usdata[netcdf]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[netcdf]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [GOES lightning detections](https://usdata.dev/datasets/noaa/goes-glm/), with a walkthrough
 - Studies: [Which severe reports came with rotation and lightning?](https://usdata.dev/studies/tornado-classification/); [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/studies/severe-weather-case-study/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -23,7 +21,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 |---|---|
 | `satellite` | Required GOES satellite number: 16, 17, 18, or 19. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -42,11 +40,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `event_lon` | degrees_east | Event longitude |
 | `event_energy` | J | Event radiant energy |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-glm.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.15
 - Domain: Weather satellites
@@ -62,5 +56,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `s3`
 - Adapter: `usdata.providers.noaa.glm:GoesGlm`
-
-[All NOAA datasets](../noaa.md).

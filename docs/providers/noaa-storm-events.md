@@ -140,4 +140,4 @@ rather than estimated.
 
 [All NOAA datasets](noaa.md).
 
-[Catalog reference](../generated/catalog/noaa/storm-events.md#catalog-reference).
+--8<-- "generated/catalog/noaa/storm-events.md"

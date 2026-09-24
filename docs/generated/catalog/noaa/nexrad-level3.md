@@ -1,12 +1,10 @@
-# NEXRAD derived radar products
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:nexrad-level3` · **Released** · Included since usdata 0.15.
+## Reference
 
-NEXRAD Level III Products.
+`noaa:nexrad-level3` · **Released** · Included since usdata 0.15. NEXRAD Level III Products.
 
-## At a glance
+### At a glance
 
 - Files: NEXRAD Level III (no reader)
 - Selection: Whole product files by site, product code, and inclusive UTC scan time since 2020-03-30
@@ -14,7 +12,7 @@ NEXRAD Level III Products.
 - Open locally: Local files; no bundled reader for this format
 - On usdata.dev: [NEXRAD derived radar products](https://usdata.dev/datasets/noaa/nexrad-level3/), with a walkthrough
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -25,7 +23,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `site` | One radar ICAO id, for example KTLX. |
 | `sites` | Several radar ICAO ids, comma-separated or a list. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -52,11 +50,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `DSP` | — | Digital storm-total precipitation |
 | `OHA` | — | One-hour precipitation accumulation |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-nexrad-level3.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.15
 - Domain: Weather radar
@@ -72,5 +66,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `s3`
 - Adapter: `usdata.providers.noaa.nexrad_level3:NexradLevel3`
-
-[All NOAA datasets](../noaa.md).
