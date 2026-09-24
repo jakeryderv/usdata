@@ -1,0 +1,1 @@
+The NEXRAD radar scans page has a walkthrough notebook: one KTLX volume from a manifest, its lowest sweep's moments, and reflectivity beside correlation coefficient separating distant storms from clear-air echo.

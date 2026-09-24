@@ -50,4 +50,4 @@ rather than estimated.
 
 [All NOAA datasets](noaa.md).
 
-[Catalog reference](../generated/catalog/noaa/coastwatch-sst.md#catalog-reference).
+--8<-- "generated/catalog/noaa/coastwatch-sst.md"

@@ -141,9 +141,10 @@ def render() -> str:
                         else None
                     ),
                     "guide": docs_url(dataset.guide) if dataset.guide else None,
+                    # A dataset's docs page is its guide, which ends in its reference.
                     "reference": (
-                        DOCS + f"generated/catalog/{dataset.provider}/{dataset.name}/"
-                        if implemented
+                        docs_url(dataset.guide) + "#reference"
+                        if implemented and dataset.guide
                         else DOCS + f"generated/catalog/{dataset.provider}/"
                     ),
                     "page": dataset_page_url(dataset) if implemented else None,

@@ -383,9 +383,35 @@ def test_release_notices_include_navigation_and_notebook_markdown_only(tmp_path)
 def test_catalog_generator_owns_only_generated_directory():
     module = script("render_registry")
     outputs = module.render_all(Registry.bundled())
-    assert outputs and all(path.is_relative_to(module.CATALOG_DIR) for path in outputs)
+    owned = [path for path in outputs if path != module.DOCS_REDIRECTS]
+    assert owned and all(path.is_relative_to(module.CATALOG_DIR) for path in owned)
     assert module.ROOT / "README.md" not in outputs
     assert module.ROOT / "docs/providers/README.md" not in outputs
+
+
+def test_each_guide_is_the_dataset_page_and_includes_its_reference():
+    module = script("render_registry")
+    registry = Registry.bundled()
+    outputs = module.render_all(registry)
+    aqs = registry.get("epa:aqs-daily")
+    reference = outputs[module.ROOT / module.dataset_path(aqs)]
+    # Included into docs/providers/, so it has no title and links from there.
+    assert not reference.startswith("# ") and "\n## Reference\n" in reference
+    assert "](../reference/readers.md)" in reference
+    guide = (module.ROOT / aqs.guide).read_text()
+    assert guide.rstrip().endswith('--8<-- "generated/catalog/epa/aqs-daily.md"')
+    redirects = outputs[module.DOCS_REDIRECTS]
+    assert "/generated/catalog/epa/aqs-daily/ /providers/epa-aqs-daily/ 301" in redirects
+    index = outputs[module.CATALOG_DIR / "index.md"]
+    assert "](../../providers/epa-aqs-daily.md)" in index
+
+
+def test_a_guide_without_its_reference_include_is_refused(tmp_path):
+    module = script("render_registry")
+    registry = Registry.bundled()
+    _checkout(tmp_path, registry)
+    with pytest.raises(ValueError, match="end the guide with the line"):
+        module.check_guides_include_reference(registry, tmp_path)
 
 
 def _checkout(root, registry):
@@ -438,7 +464,7 @@ def _with(dataset_id, **updates):
         ),
         (
             "noaa:hurdat2",
-            {"examples": ["examples/datasets/noaa-hurdat2/README.md"]},
+            {"examples": ["examples/datasets/noaa-hurdat2/noaa-hurdat2.ipynb"]},
             "study storm-surge: its manifest uses",
         ),
         ("noaa:gsoy", {"examples": ["examples/studies/storm-surge/storm-surge.ipynb"]}, "exists"),

@@ -68,13 +68,17 @@
       ],
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-ghcn/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/ghcn-daily/",
+      "reference": "https://docs.usdata.dev/providers/noaa-ghcn/#reference",
       "page": "https://usdata.dev/datasets/noaa/ghcn-daily/",
-      "walkthrough": null,
+      "walkthrough": "examples/datasets/noaa-ghcn-daily/noaa-ghcn-daily.ipynb",
       "studies": [
         "weather-and-streamflow"
       ],
-      "quickstart": null
+      "quickstart": {
+        "cli": "usdata fetch noaa:ghcn-daily \\\n  --start 2024-01-01 \\\n  --end 2024-12-31 \\\n  --vars TMAX,TMIN,PRCP,SNOW \\\n  -p stations=USW00013967 \\\n  -p units=metric",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:ghcn-daily\"),\n    build_query(\n        start=\"2024-01-01\",\n        end=\"2024-12-31\",\n        variables=[\"TMAX\", \"TMIN\", \"PRCP\", \"SNOW\"],\n        stations=\"USW00013967\",\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: okc-daily-weather\nsources:\n  - dataset: noaa:ghcn-daily\n    start: 2024-01-01\n    end: 2024-12-31\n    variables: [TMAX, TMIN, PRCP, SNOW]\n    params:\n      stations: USW00013967\n      units: metric\n"
+      }
     },
     {
       "id": "noaa:gsom",
@@ -126,7 +130,7 @@
       ],
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-gsom/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/gsom/",
+      "reference": "https://docs.usdata.dev/providers/noaa-gsom/#reference",
       "page": "https://usdata.dev/datasets/noaa/gsom/",
       "walkthrough": "examples/datasets/noaa-gsom/noaa-gsom.ipynb",
       "studies": [
@@ -188,7 +192,7 @@
       ],
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-gsoy/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/gsoy/",
+      "reference": "https://docs.usdata.dev/providers/noaa-gsoy/#reference",
       "page": "https://usdata.dev/datasets/noaa/gsoy/",
       "walkthrough": "examples/datasets/noaa-gsoy/noaa-gsoy.ipynb",
       "studies": [],
@@ -270,9 +274,9 @@
       ],
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-lcd/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/lcd/",
+      "reference": "https://docs.usdata.dev/providers/noaa-lcd/#reference",
       "page": "https://usdata.dev/datasets/noaa/lcd/",
-      "walkthrough": "examples/datasets/noaa-lcd/README.md",
+      "walkthrough": "examples/datasets/noaa-lcd/noaa-lcd.ipynb",
       "studies": [
         "hourly-anomalies"
       ],
@@ -353,7 +357,7 @@
       ],
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-storm-events/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/storm-events/",
+      "reference": "https://docs.usdata.dev/providers/noaa-storm-events/#reference",
       "page": "https://usdata.dev/datasets/noaa/storm-events/",
       "walkthrough": "examples/datasets/noaa-storm-events/noaa-storm-events.ipynb",
       "studies": [
@@ -456,12 +460,12 @@
         {
           "name": "loss",
           "units": null,
-          "description": "Property loss: a 0 to 9 category before 1996, millions of dollars from 1996"
+          "description": "Property loss: a 0 to 9 category before 1996, millions of dollars 1996 to 2015, whole dollars from 2016"
         },
         {
           "name": "closs",
-          "units": "millions of dollars",
-          "description": "Crop loss"
+          "units": null,
+          "description": "Crop loss: millions of dollars through 2015, whole dollars from 2016"
         },
         {
           "name": "slat",
@@ -506,9 +510,9 @@
       ],
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-spc-tornado/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/spc-tornado-reports/",
+      "reference": "https://docs.usdata.dev/providers/noaa-spc-tornado/#reference",
       "page": "https://usdata.dev/datasets/noaa/spc-tornado-reports/",
-      "walkthrough": "examples/datasets/noaa-spc-tornado-reports/README.md",
+      "walkthrough": "examples/datasets/noaa-spc-tornado-reports/noaa-spc-tornado-reports.ipynb",
       "studies": [
         "severe-weather-case-study"
       ],
@@ -640,13 +644,17 @@
       ],
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-nws-vtec-events/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/nws-vtec-events/",
+      "reference": "https://docs.usdata.dev/providers/noaa-nws-vtec-events/#reference",
       "page": "https://usdata.dev/datasets/noaa/nws-vtec-events/",
-      "walkthrough": null,
+      "walkthrough": "examples/datasets/noaa-nws-vtec-events/noaa-nws-vtec-events.ipynb",
       "studies": [
         "warning-lead-time"
       ],
-      "quickstart": null
+      "quickstart": {
+        "cli": "usdata fetch noaa:nws-vtec-events \\\n  --location 'Osage County, OK' \\\n  --start 2024-01-01 \\\n  --end 2024-12-31",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:nws-vtec-events\"),\n    build_query(\n        location=\"Osage County, OK\",\n        start=\"2024-01-01\",\n        end=\"2024-12-31\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: osage-county-warnings-2024\nsources:\n  - name: events\n    dataset: noaa:nws-vtec-events\n    # A county reaches county-based products: tornado, severe thunderstorm, flood.\n    location: Osage County, OK\n    start: 2024-01-01\n    end: 2024-12-31\n"
+      }
     },
     {
       "id": "noaa:nexrad-level2",
@@ -709,7 +717,7 @@
       ],
       "max_window": "31 days",
       "guide": "https://docs.usdata.dev/providers/noaa-nexrad/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/nexrad-level2/",
+      "reference": "https://docs.usdata.dev/providers/noaa-nexrad/#reference",
       "page": "https://usdata.dev/datasets/noaa/nexrad-level2/",
       "walkthrough": "examples/datasets/noaa-nexrad-level2/noaa-nexrad-level2.ipynb",
       "studies": [
@@ -717,7 +725,11 @@
         "tornado-classification",
         "severe-weather-case-study"
       ],
-      "quickstart": null
+      "quickstart": {
+        "cli": "usdata fetch noaa:nexrad-level2 \\\n  --start 2024-05-06T20:00:00Z \\\n  --end 2024-05-06T20:05:00Z \\\n  -p site=KTLX",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:nexrad-level2\"),\n    build_query(\n        start=\"2024-05-06T20:00:00Z\",\n        end=\"2024-05-06T20:05:00Z\",\n        site=\"KTLX\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: ktlx-one-volume\nsources:\n  - dataset: noaa:nexrad-level2\n    start: 2024-05-06T20:00:00Z\n    end: 2024-05-06T20:05:00Z\n    params:\n      site: KTLX\n"
+      }
     },
     {
       "id": "noaa:mrms",
@@ -862,7 +874,7 @@
       ],
       "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-mrms/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/mrms/",
+      "reference": "https://docs.usdata.dev/providers/noaa-mrms/#reference",
       "page": "https://usdata.dev/datasets/noaa/mrms/",
       "walkthrough": "examples/datasets/noaa-mrms/noaa-mrms.ipynb",
       "studies": [
@@ -1027,9 +1039,9 @@
       ],
       "max_window": "31 days",
       "guide": "https://docs.usdata.dev/providers/noaa-nexrad-level3/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/nexrad-level3/",
+      "reference": "https://docs.usdata.dev/providers/noaa-nexrad-level3/#reference",
       "page": "https://usdata.dev/datasets/noaa/nexrad-level3/",
-      "walkthrough": "examples/datasets/noaa-nexrad-level3/README.md",
+      "walkthrough": "examples/datasets/noaa-nexrad-level3/noaa-nexrad-level3.ipynb",
       "studies": [],
       "quickstart": {
         "cli": "usdata fetch noaa:nexrad-level3 \\\n  --start 2024-05-06T20:30:00Z \\\n  --end 2024-05-06T21:00:00Z \\\n  -p site=KTLX \\\n  -p products=NMD,NST,EET",
@@ -1090,7 +1102,7 @@
       ],
       "max_window": "7 days",
       "guide": "https://docs.usdata.dev/providers/noaa-goes/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/goes-abi/",
+      "reference": "https://docs.usdata.dev/providers/noaa-goes/#reference",
       "page": "https://usdata.dev/datasets/noaa/goes-abi/",
       "walkthrough": "examples/datasets/noaa-goes-abi/noaa-goes-abi.ipynb",
       "studies": [
@@ -1213,7 +1225,7 @@
       ],
       "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-glm/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/goes-glm/",
+      "reference": "https://docs.usdata.dev/providers/noaa-glm/#reference",
       "page": "https://usdata.dev/datasets/noaa/goes-glm/",
       "walkthrough": "examples/datasets/noaa-goes-glm/noaa-goes-glm.ipynb",
       "studies": [
@@ -1375,9 +1387,9 @@
       ],
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-hurdat2/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/hurdat2/",
+      "reference": "https://docs.usdata.dev/providers/noaa-hurdat2/#reference",
       "page": "https://usdata.dev/datasets/noaa/hurdat2/",
-      "walkthrough": "examples/datasets/noaa-hurdat2/README.md",
+      "walkthrough": "examples/datasets/noaa-hurdat2/noaa-hurdat2.ipynb",
       "studies": [
         "storm-surge"
       ],
@@ -1552,9 +1564,9 @@
       ],
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-ibtracs/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/ibtracs/",
+      "reference": "https://docs.usdata.dev/providers/noaa-ibtracs/#reference",
       "page": "https://usdata.dev/datasets/noaa/ibtracs/",
-      "walkthrough": "examples/datasets/noaa-ibtracs/README.md",
+      "walkthrough": "examples/datasets/noaa-ibtracs/noaa-ibtracs.ipynb",
       "studies": [],
       "quickstart": {
         "cli": "usdata fetch noaa:ibtracs -p subset=last3years",
@@ -1654,9 +1666,9 @@
       ],
       "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-gfs/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/gfs/",
+      "reference": "https://docs.usdata.dev/providers/noaa-gfs/#reference",
       "page": "https://usdata.dev/datasets/noaa/gfs/",
-      "walkthrough": "examples/datasets/noaa-gfs/README.md",
+      "walkthrough": "examples/datasets/noaa-gfs/noaa-gfs.ipynb",
       "studies": [],
       "quickstart": {
         "cli": "usdata fetch noaa:gfs \\\n  --start 2024-05-06T00:00:00Z \\\n  --end 2024-05-06T00:00:00Z \\\n  -p cycle=0 \\\n  -p forecast_hour=0 \\\n  -p resolution=1p00",
@@ -1746,7 +1758,7 @@
       ],
       "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-hrrr/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/hrrr/",
+      "reference": "https://docs.usdata.dev/providers/noaa-hrrr/#reference",
       "page": "https://usdata.dev/datasets/noaa/hrrr/",
       "walkthrough": "examples/datasets/noaa-hrrr/noaa-hrrr.ipynb",
       "studies": [
@@ -1814,9 +1826,9 @@
       ],
       "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-nbm/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/nbm/",
+      "reference": "https://docs.usdata.dev/providers/noaa-nbm/#reference",
       "page": "https://usdata.dev/datasets/noaa/nbm/",
-      "walkthrough": "examples/datasets/noaa-nbm/README.md",
+      "walkthrough": "examples/datasets/noaa-nbm/noaa-nbm.ipynb",
       "studies": [],
       "quickstart": {
         "cli": "usdata fetch noaa:nbm \\\n  --start 2024-05-06T20:00:00Z \\\n  --end 2024-05-06T20:00:00Z \\\n  -p cycle=20 \\\n  -p forecast_hour=1,2,3,4 \\\n  -p 'messages=TMP:2 m above ground'",
@@ -1896,9 +1908,9 @@
       ],
       "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-rap/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/rap/",
+      "reference": "https://docs.usdata.dev/providers/noaa-rap/#reference",
       "page": "https://usdata.dev/datasets/noaa/rap/",
-      "walkthrough": "examples/datasets/noaa-rap/README.md",
+      "walkthrough": "examples/datasets/noaa-rap/noaa-rap.ipynb",
       "studies": [],
       "quickstart": {
         "cli": "usdata fetch noaa:rap \\\n  --start 2024-05-06T20:00:00Z \\\n  --end 2024-05-06T20:00:00Z \\\n  -p cycle=20 \\\n  -p forecast_hour=0 \\\n  -p 'messages=CAPE:surface,HLCY:3000-0 m above ground'",
@@ -2002,9 +2014,9 @@
       ],
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-normals/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/climate-normals/",
+      "reference": "https://docs.usdata.dev/providers/noaa-normals/#reference",
       "page": "https://usdata.dev/datasets/noaa/climate-normals/",
-      "walkthrough": "examples/datasets/noaa-climate-normals/README.md",
+      "walkthrough": "examples/datasets/noaa-climate-normals/noaa-climate-normals.ipynb",
       "studies": [
         "climate-anomalies",
         "hourly-anomalies"
@@ -2077,7 +2089,7 @@
       ],
       "max_window": "28 days",
       "guide": "https://docs.usdata.dev/providers/noaa-coops-currents/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-currents/",
+      "reference": "https://docs.usdata.dev/providers/noaa-coops-currents/#reference",
       "page": "https://usdata.dev/datasets/noaa/coops-currents/",
       "walkthrough": "examples/datasets/noaa-coops-currents/noaa-coops-currents.ipynb",
       "studies": [],
@@ -2157,7 +2169,7 @@
         {
           "name": "L",
           "units": null,
-          "description": "Inferred-value flag"
+          "description": "Expected-height limit flag: 1 when the value passed the maximum or minimum expected water level"
         },
         {
           "name": "Quality",
@@ -2167,16 +2179,16 @@
       ],
       "max_window": "28 days",
       "guide": "https://docs.usdata.dev/providers/noaa-coops/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-water-levels/",
+      "reference": "https://docs.usdata.dev/providers/noaa-coops/#reference",
       "page": "https://usdata.dev/datasets/noaa/coops-water-levels/",
-      "walkthrough": "examples/datasets/noaa-coops-water-levels/README.md",
+      "walkthrough": "examples/datasets/noaa-coops-water-levels/noaa-coops-water-levels.ipynb",
       "studies": [
         "storm-surge"
       ],
       "quickstart": {
-        "cli": "usdata fetch noaa:coops-water-levels \\\n  --start 2024-05-06T00:00:00Z \\\n  --end 2024-05-06T00:12:00Z \\\n  -p station=8518750 \\\n  -p datum=MLLW \\\n  -p units=metric",
-        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:coops-water-levels\"),\n    build_query(\n        start=\"2024-05-06T00:00:00Z\",\n        end=\"2024-05-06T00:12:00Z\",\n        station=\"8518750\",\n        datum=\"MLLW\",\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
-        "manifest": "name: coastal-water-levels\nsources:\n  - dataset: noaa:coops-water-levels\n    start: 2024-05-06T00:00:00Z\n    end: 2024-05-06T00:12:00Z\n    params:\n      station: \"8518750\"\n      datum: MLLW\n      units: metric\n"
+        "cli": "usdata fetch noaa:coops-water-levels \\\n  --start 2024-05-06 \\\n  --end 2024-05-08 \\\n  -p station=8518750 \\\n  -p datum=MLLW \\\n  -p units=metric",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:coops-water-levels\"),\n    build_query(\n        start=\"2024-05-06\",\n        end=\"2024-05-08\",\n        station=\"8518750\",\n        datum=\"MLLW\",\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: coastal-water-levels\nsources:\n  - dataset: noaa:coops-water-levels\n    start: 2024-05-06\n    end: 2024-05-08\n    params:\n      station: \"8518750\"\n      datum: MLLW\n      units: metric\n"
       }
     },
     {
@@ -2235,13 +2247,17 @@
       ],
       "max_window": "366 days",
       "guide": "https://docs.usdata.dev/providers/noaa-coops-predictions/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-tide-predictions/",
+      "reference": "https://docs.usdata.dev/providers/noaa-coops-predictions/#reference",
       "page": "https://usdata.dev/datasets/noaa/coops-tide-predictions/",
-      "walkthrough": null,
+      "walkthrough": "examples/datasets/noaa-coops-tide-predictions/noaa-coops-tide-predictions.ipynb",
       "studies": [
         "storm-surge"
       ],
-      "quickstart": null
+      "quickstart": {
+        "cli": "usdata fetch noaa:coops-tide-predictions \\\n  --start 2024-05-01 \\\n  --end 2024-05-31 \\\n  -p station=8518750 \\\n  -p datum=MLLW \\\n  -p units=metric \\\n  -p interval=hilo",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:coops-tide-predictions\"),\n    build_query(\n        start=\"2024-05-01\",\n        end=\"2024-05-31\",\n        station=\"8518750\",\n        datum=\"MLLW\",\n        units=\"metric\",\n        interval=\"hilo\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: battery-tide-predictions\nsources:\n  - dataset: noaa:coops-tide-predictions\n    start: 2024-05-01\n    end: 2024-05-31\n    params:\n      station: \"8518750\"\n      datum: MLLW\n      units: metric\n      interval: hilo\n"
+      }
     },
     {
       "id": "noaa:coastwatch-sst",
@@ -2304,7 +2320,7 @@
       ],
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-coastwatch/",
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/coastwatch-sst/",
+      "reference": "https://docs.usdata.dev/providers/noaa-coastwatch/#reference",
       "page": "https://usdata.dev/datasets/noaa/coastwatch-sst/",
       "walkthrough": "examples/datasets/noaa-coastwatch-sst/noaa-coastwatch-sst.ipynb",
       "studies": [],
@@ -2952,14 +2968,14 @@
       ],
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/usgs-earthquakes/",
-      "reference": "https://docs.usdata.dev/generated/catalog/usgs/earthquakes/",
+      "reference": "https://docs.usdata.dev/providers/usgs-earthquakes/#reference",
       "page": "https://usdata.dev/datasets/usgs/earthquakes/",
-      "walkthrough": "examples/datasets/usgs-earthquakes/README.md",
+      "walkthrough": "examples/datasets/usgs-earthquakes/usgs-earthquakes.ipynb",
       "studies": [],
       "quickstart": {
-        "cli": "usdata fetch usgs:earthquakes \\\n  --location Oklahoma \\\n  --start 2024-05-06 \\\n  --end 2024-05-07 \\\n  -p min_magnitude=1.0",
-        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"usgs:earthquakes\"),\n    build_query(\n        location=\"Oklahoma\",\n        start=\"2024-05-06\",\n        end=\"2024-05-07\",\n        min_magnitude=1.0,\n    ),\n)\ndata = items[0].open()\n",
-        "manifest": "name: oklahoma-earthquakes\nsources:\n  - name: quakes\n    dataset: usgs:earthquakes\n    location: Oklahoma\n    start: 2024-05-06\n    end: 2024-05-07\n    params:\n      min_magnitude: 1.0\n"
+        "cli": "usdata fetch usgs:earthquakes \\\n  --location Oklahoma \\\n  --start 2000-01-01 \\\n  --end 2024-12-31 \\\n  -p min_magnitude=3.0",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"usgs:earthquakes\"),\n    build_query(\n        location=\"Oklahoma\",\n        start=\"2000-01-01\",\n        end=\"2024-12-31\",\n        min_magnitude=3.0,\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: oklahoma-earthquakes\nsources:\n  - name: quakes\n    dataset: usgs:earthquakes\n    # Oklahoma's bounding box, so the edges of Kansas, Texas, and Arkansas count too.\n    location: Oklahoma\n    start: 2000-01-01\n    end: 2024-12-31\n    params:\n      min_magnitude: 3.0\n"
       }
     },
     {
@@ -3017,13 +3033,17 @@
       ],
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/usgs-water-daily/",
-      "reference": "https://docs.usdata.dev/generated/catalog/usgs/water-daily/",
+      "reference": "https://docs.usdata.dev/providers/usgs-water-daily/#reference",
       "page": "https://usdata.dev/datasets/usgs/water-daily/",
-      "walkthrough": null,
+      "walkthrough": "examples/datasets/usgs-water-daily/usgs-water-daily.ipynb",
       "studies": [
         "weather-and-streamflow"
       ],
-      "quickstart": null
+      "quickstart": {
+        "cli": "usdata fetch usgs:water-daily \\\n  --start 2023-10-01 \\\n  --end 2024-09-30 \\\n  --vars 00060 \\\n  -p sites=07164500 \\\n  -p statistic_id=00003",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"usgs:water-daily\"),\n    build_query(\n        start=\"2023-10-01\",\n        end=\"2024-09-30\",\n        variables=[\"00060\"],\n        sites=\"07164500\",\n        statistic_id=\"00003\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: tulsa-streamflow\nsources:\n  - dataset: usgs:water-daily\n    start: 2023-10-01\n    end: 2024-09-30\n    variables: [\"00060\"]\n    params:\n      sites: \"07164500\"\n      statistic_id: \"00003\"\n"
+      }
     },
     {
       "id": "usgs:3dep-elevation",
@@ -3271,7 +3291,7 @@
       ],
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/epa-aqs-daily/",
-      "reference": "https://docs.usdata.dev/generated/catalog/epa/aqs-daily/",
+      "reference": "https://docs.usdata.dev/providers/epa-aqs-daily/#reference",
       "page": "https://usdata.dev/datasets/epa/aqs-daily/",
       "walkthrough": "examples/datasets/epa-aqs-daily/epa-aqs-daily.ipynb",
       "studies": [
@@ -3468,13 +3488,17 @@
       ],
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/fema-disaster-declarations/",
-      "reference": "https://docs.usdata.dev/generated/catalog/fema/disaster-declarations/",
+      "reference": "https://docs.usdata.dev/providers/fema-disaster-declarations/#reference",
       "page": "https://usdata.dev/datasets/fema/disaster-declarations/",
-      "walkthrough": null,
+      "walkthrough": "examples/datasets/fema-disaster-declarations/fema-disaster-declarations.ipynb",
       "studies": [
         "disaster-declarations"
       ],
-      "quickstart": null
+      "quickstart": {
+        "cli": "usdata fetch fema:disaster-declarations \\\n  --location Oklahoma \\\n  --start 2000-01-01 \\\n  --end 2024-12-31",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"fema:disaster-declarations\"),\n    build_query(\n        location=\"Oklahoma\",\n        start=\"2000-01-01\",\n        end=\"2024-12-31\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: oklahoma-declarations\nsources:\n  - name: declarations\n    dataset: fema:disaster-declarations\n    # Declarations whose incident period overlaps the window, in any Oklahoma area.\n    location: Oklahoma\n    start: 2000-01-01\n    end: 2024-12-31\n"
+      }
     },
     {
       "id": "fema:nfhl",
