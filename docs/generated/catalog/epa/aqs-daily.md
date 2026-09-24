@@ -13,7 +13,7 @@ Air Quality System Daily Summaries.
 - Required inputs: Both dates; one to five parameter codes; site ids, a state or county, or a box
 - Credentials: `USDATA_AQS_EMAIL`, `USDATA_AQS_KEY` in the environment ([request a key](https://aqs.epa.gov/aqsweb/documents/data_api.html#signup))
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- On usdata.dev: [Daily air pollutant summaries from regulatory monitors](https://usdata.dev/datasets/epa/aqs-daily/)
+- On usdata.dev: [Daily air pollutant summaries from regulatory monitors](https://usdata.dev/datasets/epa/aqs-daily/), with a walkthrough
 - Studies: [How far above the daily PM2.5 standard did Canadian wildfire smoke push New York City's air in June 2023?](https://usdata.dev/studies/wildfire-smoke/)
 
 ## Parameters

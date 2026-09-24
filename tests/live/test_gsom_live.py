@@ -1,4 +1,4 @@
-"""Bounded NCEI GSOM probes: one airport, one month, raw CSV restoration."""
+"""Bounded NCEI GSOM probes: one airport, five years of months, raw CSV restoration."""
 
 import csv
 import logging
@@ -36,9 +36,10 @@ def test_gsom_monthly_example_restore(tmp_path: Path) -> None:
     (item,) = result.fetched
     with item.path.open(newline="") as stream:
         rows = list(csv.DictReader(stream))
-    assert len(rows) == 1 and rows[0]["DATE"] == "2024-05"
-    assert rows[0]["STATION"] == "USW00013967"
-    assert float(rows[0]["PRCP"]) >= 0 and -60 < float(rows[0]["TAVG"]) < 60
+    assert len(rows) == 60
+    assert (rows[0]["DATE"], rows[-1]["DATE"]) == ("2020-01", "2024-12")
+    assert {row["STATION"] for row in rows} == {"USW00013967"}
+    assert all(float(row["PRCP"]) >= 0 and -60 < float(row["TAVG"]) < 60 for row in rows)
     assert item.provenance.checksum.startswith("sha256:")
     item.path.unlink()
     restored = pull(manifest, root=tmp_path / "cache")
@@ -49,6 +50,6 @@ def test_gsom_monthly_example_restore(tmp_path: Path) -> None:
     if find_spec("pandas") is None:
         return
     frame = restored.fetched[0].open()
-    assert frame["DATE"].tolist() == ["2024-05"]
-    assert frame["STATION"].tolist() == ["USW00013967"]
+    assert frame["DATE"].iloc[4] == "2020-05"
+    assert set(frame["STATION"]) == {"USW00013967"}
     assert frame.attrs["usdata"]["provenance"]["checksum"] == item.provenance.checksum
