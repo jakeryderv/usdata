@@ -2237,11 +2237,15 @@
       "guide": "https://docs.usdata.dev/providers/noaa-coops-predictions/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-tide-predictions/",
       "page": "https://usdata.dev/datasets/noaa/coops-tide-predictions/",
-      "walkthrough": null,
+      "walkthrough": "examples/datasets/noaa-coops-tide-predictions/noaa-coops-tide-predictions.ipynb",
       "studies": [
         "storm-surge"
       ],
-      "quickstart": null
+      "quickstart": {
+        "cli": "usdata fetch noaa:coops-tide-predictions \\\n  --start 2024-05-01 \\\n  --end 2024-05-31 \\\n  -p station=8518750 \\\n  -p datum=MLLW \\\n  -p units=metric \\\n  -p interval=hilo",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:coops-tide-predictions\"),\n    build_query(\n        start=\"2024-05-01\",\n        end=\"2024-05-31\",\n        station=\"8518750\",\n        datum=\"MLLW\",\n        units=\"metric\",\n        interval=\"hilo\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: battery-tide-predictions\nsources:\n  - dataset: noaa:coops-tide-predictions\n    start: 2024-05-01\n    end: 2024-05-31\n    params:\n      station: \"8518750\"\n      datum: MLLW\n      units: metric\n      interval: hilo\n"
+      }
     },
     {
       "id": "noaa:coastwatch-sst",

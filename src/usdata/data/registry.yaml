@@ -626,6 +626,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-coops-predictions.md
     examples:
+      - examples/datasets/noaa-coops-tide-predictions/noaa-coops-tide-predictions.ipynb
       - examples/studies/storm-surge/storm-surge.ipynb
     resolution:
       spatial: "One tide station per request"
