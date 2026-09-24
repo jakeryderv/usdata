@@ -1191,7 +1191,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-lcd.md
     examples:
-      - examples/datasets/noaa-lcd/README.md
+      - examples/datasets/noaa-lcd/noaa-lcd.ipynb
       - examples/studies/hourly-anomalies/hourly-anomalies.ipynb
     resolution:
       spatial: "Airport and first-order stations, addressed by eleven-digit station id"
