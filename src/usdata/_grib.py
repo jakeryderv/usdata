@@ -9,7 +9,8 @@ repeat, so the same select always yields the same names. Values arrive from
 ecCodes as float64, are masked to NaN where the message's bitmap marks them
 missing, and are stored as float32; the float64 array is released before the
 Dataset is returned. Rows are ordered north to south and columns west to east
-regardless of the message's scanning mode. See ADR 0022.
+regardless of the message's scanning mode, including grids whose adjacent rows
+scan in opposite directions. See ADR 0022.
 """
 
 from __future__ import annotations
@@ -279,6 +280,8 @@ class _Grid:
         rows, cols = shape
         self.flip_rows = bool(_get(eccodes, h, "jScansPositively", int))
         self.flip_cols = bool(_get(eccodes, h, "iScansNegatively", int))
+        # Adjacent rows scan in opposite directions (NBM's CONUS grid does this).
+        self.alternating = bool(_get(eccodes, h, "alternativeRowScanning", int))
         if _get(eccodes, h, "jPointsAreConsecutive", int):
             raise ValueError("grids with consecutive j points are not supported")
         self.regular = self.grid_type == "regular_ll"
@@ -305,15 +308,25 @@ class _Grid:
                 value = _get(eccodes, h, key)
                 if value is not None:
                     self.attrs[key] = value
-        self.key = (self.grid_type, self.shape, self.flip_rows, self.flip_cols)
+        self.key = (self.grid_type, self.shape, self.flip_rows, self.flip_cols, self.alternating)
 
     def _orient(self, numpy: Any, axis: Any, *, rows: bool) -> Any:
         return axis[::-1].copy() if (self.flip_rows if rows else self.flip_cols) else axis
 
-    def reshape(self, numpy: Any, flat: Any) -> Any:
+    def reshape(self, numpy: Any, flat: Any, *, stored: bool = False) -> Any:
+        """Order a flat array north to south and west to east.
+
+        ``stored`` marks data values, which ecCodes returns in the order the
+        message stores them: with alternative row scanning every second row
+        runs the other way and is reversed here. The latitudes and longitudes
+        ecCodes computes do not alternate, so coordinates skip that step.
+        """
         if flat.size != self.shape[0] * self.shape[1]:
             raise ValueError(f"message has {flat.size} values for a {self.shape} grid")
         grid = flat.reshape(self.shape)
+        if stored and self.alternating:
+            grid = grid.copy()
+            grid[1::2] = grid[1::2, ::-1]
         if self.flip_rows:
             grid = grid[::-1, :]
         if self.flip_cols:
@@ -423,7 +436,7 @@ def open_grib2(
             missing = _get(eccodes, h, "missingValue", float)
             if missing is not None:
                 values[values == missing] = numpy.nan
-        data = grid.reshape(numpy, values).astype(numpy.float32)
+        data = grid.reshape(numpy, values, stored=True).astype(numpy.float32)
         del values
         attrs = {
             key: value for key in VARIABLE_KEYS if (value := _get(eccodes, h, key)) is not None

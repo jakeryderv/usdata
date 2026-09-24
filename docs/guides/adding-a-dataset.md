@@ -109,8 +109,10 @@ the dataset's guide:
 - `limits.max_window` is an ISO 8601 duration such as `P1D`, and must equal the
   window constant the adapter enforces; a registry test compares the two.
 
-The generated catalog links each reference to its usage guide and examples;
-no manual dataset navigation entry is needed. For a new agency, write access notes in
+End the guide with the line `--8<-- "generated/catalog/<provider>/<name>.md"`,
+which appends the generated reference, so the guide is the dataset's one docs
+page; `just docs` refuses a guide without it. The generated dataset reference
+index lists the guide, so no manual navigation entry is needed. For a new agency, write access notes in
 `docs/providers/<provider>.md` and link its generated catalog. See the
 [documentation workflow](documentation.md) for source ownership and preview commands.
 

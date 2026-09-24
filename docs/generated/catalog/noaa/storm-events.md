@@ -1,21 +1,19 @@
-# Storm Events details, fatalities, and locations
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:storm-events` · **Released** · Included since usdata 0.8.
+## Reference
 
-Storm Events Database.
+`noaa:storm-events` · **Released** · Included since usdata 0.8. Storm Events Database.
 
-## At a glance
+### At a glance
 
 - Files: gzip CSV
 - Selection: Whole annual archives of one table; filter rows locally after downloading
 - Required inputs: Both dates (selects the containing years); optionally table
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [Storm Events details, fatalities, and locations](https://usdata.dev/datasets/noaa/storm-events/), with a walkthrough
 - Studies: [What did radar and satellites show around a reported tornado?](https://usdata.dev/studies/event-context/); [Which severe reports came with rotation and lightning?](https://usdata.dev/studies/tornado-classification/); [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/studies/severe-weather-case-study/); [How long before the 6 May 2024 Osage County tornado was a tornado warning issued?](https://usdata.dev/studies/warning-lead-time/); [Which Oklahoma counties hit by a tornado on 6 May 2024 were under a federal disaster declaration?](https://usdata.dev/studies/disaster-declarations/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -23,7 +21,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 |---|---|
 | `table` | Annual table: details (default, one row per event), fatalities (one row per death), or locations (points per event, from 1996); EVENT_ID joins them. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -34,11 +32,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `CZ_TIMEZONE` | — | Time zone of the record's local timestamps |
 | `TOR_F_SCALE` | — | Tornado rating as text, such as EF1 |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-storm-events.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.8
 - Domain: Severe weather
@@ -53,5 +47,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `http`
 - Adapter: `usdata.providers.noaa.storm_events:StormEvents`
-
-[All NOAA datasets](../noaa.md).

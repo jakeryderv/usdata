@@ -1,21 +1,19 @@
-# NEXRAD radar scans
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:nexrad-level2` · **Released** · Included since usdata 0.2.
+## Reference
 
-NEXRAD Level II Radar.
+`noaa:nexrad-level2` · **Released** · Included since usdata 0.2. NEXRAD Level II Radar.
 
-## At a glance
+### At a glance
 
 - Files: NEXRAD Level II
 - Selection: Whole radar scans by site and inclusive UTC scan-start time
 - Required inputs: Both timestamps; radar IDs or a geographic query
-- Open locally: `usdata[radar]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[radar]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [NEXRAD radar scans](https://usdata.dev/datasets/noaa/nexrad-level2/), with a walkthrough
 - Studies: [What did radar and satellites show around a reported tornado?](https://usdata.dev/studies/event-context/); [Which severe reports came with rotation and lightning?](https://usdata.dev/studies/tornado-classification/); [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/studies/severe-weather-case-study/)
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -25,7 +23,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `site` | One radar ICAO id, for example KTLX. |
 | `sites` | Several radar ICAO ids, comma-separated or a list. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -34,11 +32,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `PHIDP` | degrees | Differential phase HV |
 | `RHOHV` | unitless | Correlation coefficient HV |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-nexrad.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.2
 - Domain: Weather radar
@@ -54,5 +48,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: US Government Work (public domain)
 - Transport: `s3`
 - Adapter: `usdata.providers.noaa.nexrad:NexradLevel2`
-
-[All NOAA datasets](../noaa.md).
