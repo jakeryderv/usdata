@@ -752,7 +752,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-gsoy.md
     examples:
-      - examples/datasets/noaa-gsoy/README.md
+      - examples/datasets/noaa-gsoy/noaa-gsoy.ipynb
     spatial_extent: { west: -180.0, south: -90.0, east: 180.0, north: 90.0 }
     resolution:
       spatial: "Land surface stations, derived from GHCN-Daily"
