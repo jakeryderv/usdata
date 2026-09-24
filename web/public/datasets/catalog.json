@@ -1902,7 +1902,7 @@
       "guide": "https://docs.usdata.dev/providers/noaa-rap/",
       "reference": "https://docs.usdata.dev/providers/noaa-rap/#reference",
       "page": "https://usdata.dev/datasets/noaa/rap/",
-      "walkthrough": "examples/datasets/noaa-rap/README.md",
+      "walkthrough": "examples/datasets/noaa-rap/noaa-rap.ipynb",
       "studies": [],
       "quickstart": {
         "cli": "usdata fetch noaa:rap \\\n  --start 2024-05-06T20:00:00Z \\\n  --end 2024-05-06T20:00:00Z \\\n  -p cycle=20 \\\n  -p forecast_hour=0 \\\n  -p 'messages=CAPE:surface,HLCY:3000-0 m above ground'",
