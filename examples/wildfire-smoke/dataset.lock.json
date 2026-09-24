@@ -1,0 +1,54 @@
+{
+  "manifest": "nyc-wildfire-smoke",
+  "manifest_checksum": "sha256:71eb2aeb2c52c17be9ab6253b6e2015553724f48aa402c53886798990f371b04",
+  "generated_at": "2026-09-24T03:44:26.794520Z",
+  "usdata_version": "0.25.0",
+  "assets": [
+    {
+      "asset": {
+        "id": "aqs-daily_box-be2891a2a177_88101_20230601_20230615.json",
+        "dataset_id": "epa:aqs-daily",
+        "href": "https://aqs.epa.gov/data/api/dailyData/byBox?param=88101&bdate=20230601&edate=20230615&minlat=40.49&maxlat=40.92&minlon=-74.26&maxlon=-73.7",
+        "protocol": "http",
+        "media_type": "application/json",
+        "size": null,
+        "checksum": "sha256:f33b42caaad1f9f26b17b4ddb85a6e74ef8f64e9f44f35ed084e0bea563d016a",
+        "time": {
+          "start": "2023-06-01T00:00:00Z",
+          "end": "2023-06-15T23:59:59.999999Z"
+        },
+        "bbox": {
+          "west": -74.26,
+          "south": 40.49,
+          "east": -73.7,
+          "north": 40.92
+        }
+      },
+      "provenance": {
+        "dataset_id": "epa:aqs-daily",
+        "provider": "epa",
+        "source_url": "https://aqs.epa.gov/data/api/dailyData/byBox?param=88101&bdate=20230601&edate=20230615&minlat=40.49&maxlat=40.92&minlon=-74.26&maxlon=-73.7",
+        "retrieved_at": "2026-09-24T03:44:26.793209Z",
+        "checksum": "sha256:f33b42caaad1f9f26b17b4ddb85a6e74ef8f64e9f44f35ed084e0bea563d016a",
+        "size": 1583231,
+        "license": "US Government Work (public domain)",
+        "usdata_version": "0.25.0",
+        "transformations": [
+          "aqs canonical json: Header url and request_time removed; Data sorted by site, parameter, poc, local date, duration, standard, method, and event type"
+        ],
+        "index_url": null,
+        "index_checksum": null,
+        "ranges": [],
+        "selectors": [],
+        "object_size": null,
+        "object_etag": null,
+        "mirror": null,
+        "credentials": [
+          "USDATA_AQS_EMAIL",
+          "USDATA_AQS_KEY"
+        ]
+      },
+      "source": "pm25"
+    }
+  ]
+}

@@ -16,6 +16,7 @@ examples/**/*.lock.json
 !examples/hrrr-environment/dataset.lock.json
 !examples/mrms-rotation/dataset.lock.json
 !examples/radar-products/dataset.lock.json
+!examples/wildfire-smoke/dataset.lock.json
 .ipynb_checkpoints/
 reports/
 
