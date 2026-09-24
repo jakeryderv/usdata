@@ -2157,7 +2157,7 @@
         {
           "name": "L",
           "units": null,
-          "description": "Inferred-value flag"
+          "description": "Expected-height limit flag: 1 when the value passed the maximum or minimum expected water level"
         },
         {
           "name": "Quality",
@@ -2169,14 +2169,14 @@
       "guide": "https://docs.usdata.dev/providers/noaa-coops/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-water-levels/",
       "page": "https://usdata.dev/datasets/noaa/coops-water-levels/",
-      "walkthrough": "examples/datasets/noaa-coops-water-levels/README.md",
+      "walkthrough": "examples/datasets/noaa-coops-water-levels/noaa-coops-water-levels.ipynb",
       "studies": [
         "storm-surge"
       ],
       "quickstart": {
-        "cli": "usdata fetch noaa:coops-water-levels \\\n  --start 2024-05-06T00:00:00Z \\\n  --end 2024-05-06T00:12:00Z \\\n  -p station=8518750 \\\n  -p datum=MLLW \\\n  -p units=metric",
-        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:coops-water-levels\"),\n    build_query(\n        start=\"2024-05-06T00:00:00Z\",\n        end=\"2024-05-06T00:12:00Z\",\n        station=\"8518750\",\n        datum=\"MLLW\",\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
-        "manifest": "name: coastal-water-levels\nsources:\n  - dataset: noaa:coops-water-levels\n    start: 2024-05-06T00:00:00Z\n    end: 2024-05-06T00:12:00Z\n    params:\n      station: \"8518750\"\n      datum: MLLW\n      units: metric\n"
+        "cli": "usdata fetch noaa:coops-water-levels \\\n  --start 2024-05-06 \\\n  --end 2024-05-08 \\\n  -p station=8518750 \\\n  -p datum=MLLW \\\n  -p units=metric",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:coops-water-levels\"),\n    build_query(\n        start=\"2024-05-06\",\n        end=\"2024-05-08\",\n        station=\"8518750\",\n        datum=\"MLLW\",\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: coastal-water-levels\nsources:\n  - dataset: noaa:coops-water-levels\n    start: 2024-05-06\n    end: 2024-05-08\n    params:\n      station: \"8518750\"\n      datum: MLLW\n      units: metric\n"
       }
     },
     {

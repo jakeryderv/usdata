@@ -577,7 +577,7 @@ datasets:
     reader: pandas
     guide: docs/providers/noaa-coops.md
     examples:
-      - examples/datasets/noaa-coops-water-levels/README.md
+      - examples/datasets/noaa-coops-water-levels/noaa-coops-water-levels.ipynb
       - examples/studies/storm-surge/storm-surge.ipynb
     resolution:
       spatial: "One National Water Level Observation Network station per request"
@@ -596,7 +596,7 @@ datasets:
       - { name: "O or I (for verified)", description: "Count of outliers, or the inference flag on verified data" }
       - { name: "F", description: "Flat-tolerance limit flag" }
       - { name: "R", description: "Rate-of-change limit flag" }
-      - { name: "L", description: "Inferred-value flag" }
+      - { name: "L", description: "Expected-height limit flag: 1 when the value passed the maximum or minimum expected water level" }
       - { name: "Quality", description: "p for preliminary or v for verified" }
     limits: { max_window: P28D }
     adapter: usdata.providers.noaa.coops:CoopsWaterLevels
