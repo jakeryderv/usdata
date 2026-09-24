@@ -12,7 +12,7 @@ IBTrACS Global Tropical Cyclone Tracks.
 - Selection: One whole subset file per query, from the newest or a pinned product version
 - Required inputs: Required subset; optional format and version; no dates or geographic filters
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [Which tropical cyclones reached Category 4 or 5 worldwide in recent seasons?](https://usdata.dev/examples/ibtracs/)
+- On usdata.dev: [Global tropical cyclone best tracks](https://usdata.dev/datasets/noaa/ibtracs/), with a walkthrough
 
 ## Parameters
 

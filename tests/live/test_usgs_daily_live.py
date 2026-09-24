@@ -38,7 +38,9 @@ sources:
 
 
 def test_documented_noaa_usgs_example(tmp_path: Path) -> None:
-    example = Path(__file__).resolve().parents[2] / "examples/weather-and-streamflow/dataset.yaml"
+    example = (
+        Path(__file__).resolve().parents[2] / "examples/studies/weather-and-streamflow/dataset.yaml"
+    )
     manifest = tmp_path / "dataset.yaml"
     manifest.write_bytes(example.read_bytes())
     first = pull(manifest, root=tmp_path / "cache")

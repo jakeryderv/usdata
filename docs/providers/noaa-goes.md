@@ -50,7 +50,7 @@ uv run usdata fetch noaa:goes-abi \
   -p satellite=16 -p channel=13 -p product=ABI-L2-CMIPM -p sector=M1
 ```
 
-The [mesoscale example](https://usdata.dev/examples/goes-mesoscale/) checks scan
+The [mesoscale example](https://usdata.dev/studies/goes-mesoscale/) checks scan
 timing, quality flags, and footprint stability before comparing a fixed local
 region, then restores all fifteen pinned scenes into an empty cache.
 

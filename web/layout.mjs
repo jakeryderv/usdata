@@ -6,7 +6,7 @@ export const escape = value => String(value).replace(/[&<>"']/g, char => ({"&":"
 
 export const NAV = [
   ["Datasets", "/datasets/"],
-  ["Examples", "/examples/"],
+  ["Studies", "/studies/"],
   ["Docs", "https://docs.usdata.dev/"],
   ["GitHub", "https://github.com/jakeryderv/usdata"],
 ];

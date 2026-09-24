@@ -12,7 +12,7 @@ Global Summary of the Year.
 - Selection: Complete UTC calendar years touched by the query; station and element filters
 - Required inputs: Both dates; station IDs or a geographic query
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [How warm and wet was a year at one airport?](https://usdata.dev/examples/annual-climate/)
+- On usdata.dev: [Annual station climate](https://usdata.dev/datasets/noaa/gsoy/), with a walkthrough
 
 ## Parameters
 

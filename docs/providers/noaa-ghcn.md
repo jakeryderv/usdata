@@ -21,7 +21,7 @@ can occur independently. See [service diagnostics](noaa-services.md#access-notes
 Open the downloaded file with the [pandas reader](../reference/readers.md).
 The CSV has no units row; request provenance retains the unit system.
 See the [getting-started walkthrough](../getting-started.md) and
-[weather/streamflow example](https://usdata.dev/examples/weather-and-streamflow/).
+[weather/streamflow example](https://usdata.dev/studies/weather-and-streamflow/).
 
 --8<-- "_snippets/upstream-revisions.md"
 

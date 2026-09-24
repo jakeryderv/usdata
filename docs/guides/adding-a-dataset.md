@@ -45,8 +45,9 @@ Add to `src/usdata/data/registry.yaml`:
     inputs: Both dates; station IDs or a geographic query
     reader: pandas                      # pandas | radar | netcdf | grib, or null for bytes only
     guide: docs/providers/noaa-ghcn.md  # this dataset's own usage guide
-    examples:                           # repository-relative example documents
-      - examples/weather-and-streamflow/example.ipynb
+    examples:                           # its walkthrough first, then every study using it
+      - examples/datasets/noaa-ghcn-daily/noaa-ghcn-daily.ipynb
+      - examples/studies/weather-and-streamflow/weather-and-streamflow.ipynb
     resolution:                         # free text, in the source's own words
       spatial: Land surface stations; more than 100,000 stations in 180 countries and territories
       temporal: Daily
@@ -77,7 +78,9 @@ and provider index remain handwritten. The entry is the only schema: `summary`,
 generated reference, the website browser, and `usdata info` from the same place.
 A planned entry leaves them out; an implemented one must give a summary, at least
 one format, a selection rule, its required inputs, its own usage guide under
-`docs/providers/`, and at least one example that exists. `reader` names the extra
+`docs/providers/`, and at least one example that exists: its walkthrough in
+`examples/datasets/<provider>-<name>/`, listed first, then every study whose
+manifest uses it ([ADR 0041](../adr/0041-dataset-walkthroughs-and-studies.md)). `reader` names the extra
 that opens the files, or is `null` for a format with no bundled reader. `system`
 names the product family or service the dataset comes from, declared under
 top-level `systems:` for the same provider, and groups the generated catalog
@@ -279,6 +282,11 @@ variables, when they are unset.
 
 ## 5. Docs and changelog
 
+- Write the dataset's walkthrough notebook in `examples/datasets/<provider>-<name>/`,
+  following the template in [`examples/README.md`](https://github.com/jakeryderv/usdata/blob/main/examples/README.md#writing-a-walkthrough-or-a-study),
+  run it with `just run-notebooks --notebook <provider>-<name> --write`, and
+  list it first under the entry's `examples`. It becomes the dataset's page on
+  usdata.dev, preview image included.
 - Add a CLI example to the README if the dataset introduces a new kind of query.
 - Add anything you learned about the source to the access notes in `docs/providers/<provider>.md`.
 - Add a [release-note fragment](https://github.com/jakeryderv/usdata/blob/main/changes/README.md) for the new dataset.

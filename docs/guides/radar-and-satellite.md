@@ -58,6 +58,6 @@ had finished scanning. Save the selection's JSON beside the analysis; see
 
 --8<-- "_snippets/large-grids.md"
 
-The [event-context example](https://usdata.dev/examples/event-context/) does
+The [event-context example](https://usdata.dev/studies/event-context/) does
 all of this for one Storm Events report: nearest KTLX volume, nearest GOES-16
 scene, explicit UTC conversion, one safe sweep, and a locked restore.

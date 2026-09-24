@@ -93,7 +93,7 @@ conformal for HRRR, with two-dimensional latitude and longitude, and regular for
 GFS. Each dataset's guide lists verified keys for the common severe-weather
 fields.
 
-The [HRRR environment example](https://usdata.dev/examples/hrrr-environment/)
+The [HRRR environment example](https://usdata.dev/datasets/noaa/hrrr/)
 reads surface CAPE and 0–3 km helicity at the grid point nearest a tornado
-report; the [GFS example](https://usdata.dev/examples/gfs-environment/) does
+report; the [GFS example](https://usdata.dev/datasets/noaa/gfs/) does
 the same from the global analysis.

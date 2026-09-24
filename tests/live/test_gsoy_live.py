@@ -28,7 +28,7 @@ def test_gsoy_station_discovery(caplog: pytest.LogCaptureFixture) -> None:
 
 
 def test_gsoy_annual_example_restore(tmp_path: Path) -> None:
-    example = Path(__file__).resolve().parents[2] / "examples/annual-climate/dataset.yaml"
+    example = Path(__file__).resolve().parents[2] / "examples/datasets/noaa-gsoy/dataset.yaml"
     manifest = tmp_path / "dataset.yaml"
     manifest.write_bytes(example.read_bytes())
     result = pull(manifest, root=tmp_path / "cache")

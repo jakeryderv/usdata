@@ -12,7 +12,8 @@ NEXRAD Level II Radar.
 - Selection: Whole radar scans by site and inclusive UTC scan-start time
 - Required inputs: Both timestamps; radar IDs or a geographic query
 - Open locally: `usdata[radar]` · [Reader guide](../../../reference/readers.md)
-- Examples: [What does one weather radar volume show?](https://usdata.dev/examples/radar-reflectivity/); [What did radar and satellites show around a reported tornado?](https://usdata.dev/examples/event-context/); [Which severe reports came with rotation and lightning?](https://usdata.dev/examples/tornado-classification/); [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/examples/severe-weather-case-study/)
+- On usdata.dev: [NEXRAD radar scans](https://usdata.dev/datasets/noaa/nexrad-level2/), with a walkthrough
+- Studies: [What did radar and satellites show around a reported tornado?](https://usdata.dev/studies/event-context/); [Which severe reports came with rotation and lightning?](https://usdata.dev/studies/tornado-classification/); [For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?](https://usdata.dev/studies/severe-weather-case-study/)
 
 ## Parameters
 

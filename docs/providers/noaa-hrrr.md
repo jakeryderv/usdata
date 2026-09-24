@@ -76,7 +76,7 @@ hrrr.20240506.t20z.wrfsfcf00.part-13819cd0ccdf.grib2	1838460	s3://noaa-hrrr-bdp-
 ```
 
 That is 1.8 MB instead of 150 MB for the two fields the
-[HRRR environment example](https://usdata.dev/examples/hrrr-environment/) uses.
+[HRRR environment example](https://usdata.dev/datasets/noaa/hrrr/) uses.
 The spelling is exact and case-sensitive: short names are upper case (`CAPE`,
 `HLCY`, `TMP`), and the level text is the sidecar's own wording, which is
 **not** the ecCodes vocabulary `open(select=...)` takes. `2 m above ground`,

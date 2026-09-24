@@ -12,7 +12,8 @@ Local Climatological Data.
 - Selection: Every report on whole calendar days per station; optional column filters
 - Required inputs: Both dates; eleven-digit station IDs or a geographic query
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [Do hourly airport observations reproduce the daily summary?](https://usdata.dev/examples/hourly-observations/); [How warm was Oklahoma City on 6 May 2024 compared with its hourly normals?](https://usdata.dev/examples/hourly-anomalies/)
+- On usdata.dev: [Hourly airport observations](https://usdata.dev/datasets/noaa/lcd/), with a walkthrough
+- Studies: [How warm was Oklahoma City on 6 May 2024 compared with its hourly normals?](https://usdata.dev/studies/hourly-anomalies/)
 
 ## Parameters
 

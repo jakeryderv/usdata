@@ -32,11 +32,11 @@ uv run usdata fetch noaa:lcd -p stations=72353013967 \
   --vars HourlyDryBulbTemperature,HourlyPrecipitation --dry-run
 ```
 
-The [hourly observations example](https://usdata.dev/examples/hourly-observations/)
+The [hourly observations example](https://usdata.dev/datasets/noaa/lcd/)
 compares hourly readings with the daily summary for the same station. NCEI
 revises LCD as reports are quality-controlled.
 
-The [hourly anomalies example](https://usdata.dev/examples/hourly-anomalies/)
+The [hourly anomalies example](https://usdata.dev/studies/hourly-anomalies/)
 compares routine reports with hourly normals in local standard time, using an
 explicit ten-minute matching tolerance rather than treating reports as hourly means.
 

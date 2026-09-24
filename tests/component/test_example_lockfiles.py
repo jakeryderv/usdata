@@ -23,12 +23,13 @@ def scripts(monkeypatch):
 
 def write_pinned_example(root: Path, slug: str, *, lockfile: bool = True) -> Path:
     """A catalog naming ``slug`` as pinned, its manifest, and a consistent lockfile."""
-    example = root / "examples" / slug
+    example = root / "examples/studies" / slug
     example.mkdir(parents=True, exist_ok=True)
     catalog = root / "examples/catalog.json"
-    entries = json.loads(catalog.read_text()) if catalog.exists() else []
-    entries.append({"slug": slug, "title": "Q?", "summary": "A.", "pinned": True})
-    catalog.write_text(json.dumps(entries))
+    index = json.loads(catalog.read_text()) if catalog.exists() else {"studies": [], "pinned": []}
+    index["studies"].append({"slug": slug, "title": "Q?", "summary": "A."})
+    index["pinned"].append(f"studies/{slug}")
+    catalog.write_text(json.dumps(index))
     manifest = example / "dataset.yaml"
     manifest.write_text(f"name: {slug}\nsources:\n  - dataset: noaa:mrms\n")
     if lockfile:
@@ -54,18 +55,18 @@ def write_pinned_example(root: Path, slug: str, *, lockfile: bool = True) -> Pat
 def test_committed_lockfiles_match_their_manifests(scripts):
     check = scripts["check_notebooks"]
     pinned = check.pinned_manifests()
-    assert {m.parent.name for m in pinned} == {
-        "goes-imagery",
-        "goes-mesoscale",
-        "glm-flashes",
-        "hrrr-environment",
-        "mrms-rotation",
-        "gfs-environment",
-        "radar-products",
-        "wildfire-smoke",
+    assert {m.parent.relative_to(ROOT / "examples").as_posix() for m in pinned} == {
+        "datasets/noaa-goes-abi",
+        "datasets/noaa-goes-glm",
+        "datasets/noaa-hrrr",
+        "datasets/noaa-mrms",
+        "datasets/noaa-gfs",
+        "datasets/noaa-nexrad-level3",
+        "studies/goes-mesoscale",
+        "studies/wildfire-smoke",
     }
     assert [error for manifest in pinned for error in check.check_lockfile(manifest)] == []
-    unpinned = {m.parent.name for m in (ROOT / "examples").glob("*/dataset.yaml")} - {
+    unpinned = {m.parent.name for m in (ROOT / "examples").glob("*/*/dataset.yaml")} - {
         m.parent.name for m in pinned
     }
     assert unpinned, "some examples must stay unpinned"
@@ -132,7 +133,7 @@ def test_restore_runner_reports_drift_and_failures_without_stopping(scripts, tmp
     assert "Restoring" in capsys.readouterr().out
 
     assert restore.resolve_manifests(
-        ["second", "examples/first/dataset.yaml"], [first, second], root=tmp_path
+        ["second", "examples/studies/first/dataset.yaml"], [first, second], root=tmp_path
     ) == [first, second]
     with pytest.raises(ValueError, match="not a pinned example: nope; choose from: first, second"):
         restore.resolve_manifests(["nope"], [first, second], root=tmp_path)

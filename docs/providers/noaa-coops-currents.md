@@ -50,7 +50,7 @@ available in another. The dated probe below found `interval=h` ignored.
 No resampling, vector averaging, predictions, automatic station discovery,
 or detailed echo/correlation fields are included.
 
-The [Cape Henry notebook](https://usdata.dev/examples/coastal-currents/)
+The [Cape Henry notebook](https://usdata.dev/datasets/noaa/coops-currents/)
 plots one UTC day, counts gaps and missing values, gives dated bin/deployment
 context, and restores its pinned CSV into an empty cache. Query responses may
 be revised; a successful restore establishes equality at execution time.

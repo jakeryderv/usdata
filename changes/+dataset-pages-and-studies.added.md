@@ -1,0 +1,1 @@
+Every dataset has its own page on usdata.dev, with a preview, the facts at a glance, a quick start taken from a query that ran, its walkthrough, and the studies that use it. The dataset list is now a grid of cards grouped by topic, and question-driven examples are now Studies at usdata.dev/studies; old example links redirect.

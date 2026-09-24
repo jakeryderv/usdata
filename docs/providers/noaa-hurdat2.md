@@ -131,7 +131,7 @@ with every other agency's tracks into one worldwide record.
 Field meanings, record codes, and era-by-era caveats are documented in the NHC
 [Atlantic format reference](https://www.nhc.noaa.gov/data/hurdat/hurdat2-format-atl-1851-2021.pdf)
 and [northeast Pacific format reference](https://www.nhc.noaa.gov/data/hurdat/hurdat2-format-nencpac-1949-2021.pdf).
-The [manifest example](https://usdata.dev/examples/hurdat2/) fetches the Atlantic file
+The [manifest example](https://usdata.dev/datasets/noaa/hurdat2/) fetches the Atlantic file
 and reads it locally. The
 [design decision](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0020-hurdat2-whole-file-and-format-reader.md) records the
 whole-file and reader contract.

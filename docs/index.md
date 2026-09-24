@@ -82,7 +82,7 @@ The [concepts](concepts/how-it-works.md) section explains each of these and the 
 | Learn the query options and the fetch loop | [Fetch and analyze](guides/fetch-and-analyze.md) |
 | Repeat an analysis with pinned inputs | [Pin inputs](guides/pin-inputs.md) |
 | Work with radar, satellite, model, or severe-weather data | [Guides](guides/radar-and-satellite.md) |
-| See a whole analysis with saved outputs | [Examples](https://usdata.dev/examples/) |
+| See a whole analysis with saved outputs | [Examples](https://usdata.dev/studies/) |
 | Understand what usdata guarantees and what it does not | [Concepts](concepts/how-it-works.md) |
 | Find an exact option, field, or Python argument | [Reference](reference/api.md) |
 

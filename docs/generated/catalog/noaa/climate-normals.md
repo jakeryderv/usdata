@@ -12,7 +12,8 @@ U.S. Climate Normals 1991-2020.
 - Selection: Hourly, daily, monthly, or annual/seasonal normals per station; optional month-day window except annual/seasonal; hourly returns whole days
 - Required inputs: Station IDs or a geographic query; dates optional
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [What is normal weather for a month at one station?](https://usdata.dev/examples/climate-normals/); [Was 2024 warmer or wetter than normal?](https://usdata.dev/examples/climate-anomalies/); [How warm was Oklahoma City on 6 May 2024 compared with its hourly normals?](https://usdata.dev/examples/hourly-anomalies/)
+- On usdata.dev: [30-year station climate normals](https://usdata.dev/datasets/noaa/climate-normals/), with a walkthrough
+- Studies: [Was 2024 warmer or wetter than normal?](https://usdata.dev/studies/climate-anomalies/); [How warm was Oklahoma City on 6 May 2024 compared with its hourly normals?](https://usdata.dev/studies/hourly-anomalies/)
 
 ## Parameters
 

@@ -1,170 +1,69 @@
-[
-  {
-    "slug": "severe-weather-case-study",
-    "title": "For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?",
-    "summary": "Take one tornado report's UTC time and position out of the 2024 Storm Events archive, check it against the SPC tornado file, and measure what the nearest NEXRAD volume, five MRMS rotation grids, twenty minutes of GOES-16 lightning, and the last HRRR analysis held within 25 km of it."
-  },
-  {
-    "slug": "radar-products",
-    "title": "Which derived radar products did KTLX publish around a tornado report?",
-    "summary": "Pull thirty minutes of NEXRAD Level III mesocyclone, storm-track, and echo-top files, lock them, and see that they are stored without a reader.",
-    "pinned": true
-  },
-  {
-    "slug": "storm-surge",
-    "title": "How high was Hurricane Helene's storm surge at Cedar Key?",
-    "summary": "Subtract CO-OPS tide predictions from observed water levels to isolate the surge, find its peak, and time it against the HURDAT2 landfall."
-  },
-  {
-    "slug": "coastal-currents",
-    "title": "How did currents change at Cape Henry on 6 May 2025?",
-    "summary": "Plot one day of observed current speed and direction for an explicit bin, report missing readings, preserve dated depth metadata, and restore the pinned CSV into an empty cache."
-  },
-  {
-    "slug": "hourly-observations",
-    "title": "Do hourly airport observations reproduce the daily summary?",
-    "summary": "Pull three days of Local Climatological Data for one airport, separate report types, and compare hourly extremes with NCEI's daily summary."
-  },
-  {
-    "slug": "hourly-anomalies",
-    "title": "How warm was Oklahoma City on 6 May 2024 compared with its hourly normals?",
-    "summary": "Compare routine airport temperatures with 1991\u20132020 hourly normals in local standard time, make the matching tolerance explicit, and restore both pinned inputs into an empty cache."
-  },
-  {
-    "slug": "spc-tornadoes",
-    "title": "How many tornadoes did 2024 bring, by rating?",
-    "summary": "Pull the Storm Prediction Center's 2024 tornado file, keep one row per tornado, and count them by EF rating with the longest paths."
-  },
-  {
-    "slug": "climate-anomalies",
-    "title": "Was 2024 warmer or wetter than normal?",
-    "summary": "Compare twelve months at Oklahoma City's airport with 1991\u20132020 station normals, including temperature-unit checks and monthly anomaly plots."
-  },
-  {
-    "slug": "event-context",
-    "title": "What did radar and satellites show around a reported tornado?",
-    "summary": "Connect one Storm Events report to nearby NEXRAD and GOES observations, with explicit time matching and a plotted event context."
-  },
-  {
-    "slug": "weather-and-streamflow",
-    "title": "How can I preserve weather and streamflow inputs together?",
-    "summary": "Fetch NOAA and USGS observations with one manifest, inspect the tables, and verify and restore the exact inputs."
-  },
-  {
-    "slug": "sst-analysis",
-    "title": "How warm was the sea in a small area?",
-    "summary": "Download four sea-surface-temperature grid cells, inspect their units, and plot the selected area."
-  },
-  {
-    "slug": "monthly-climate",
-    "title": "How did temperature and rainfall vary through the year?",
-    "summary": "Read monthly station observations, compare temperature and precipitation in two plots, and verify the source manifest."
-  },
-  {
-    "slug": "storm-events",
-    "title": "What severe weather was reported in Oklahoma?",
-    "summary": "Filter an annual Storm Events archive locally, plot report counts and damage ratings, and account for reporting limitations."
-  },
-  {
-    "slug": "radar-reflectivity",
-    "title": "What does one weather radar volume show?",
-    "summary": "Open a NEXRAD Level II volume, inspect its sweeps and reflectivity units, and plot a selected sweep."
-  },
-  {
-    "slug": "goes-imagery",
-    "title": "What did a satellite see in infrared?",
-    "summary": "Decode a GOES CONUS scene, inspect quality flags and scan coordinates, and plot brightness temperatures.",
-    "pinned": true
-  },
-  {
-    "slug": "goes-mesoscale",
-    "title": "How did central Plains infrared cloud patterns change over fifteen minutes?",
-    "summary": "Compare fifteen minutes of GOES-16 M1 channel-13 imagery over a fixed region, report timing and quality gaps, and restore every pinned scene into an empty cache.",
-    "pinned": true
-  },
-  {
-    "slug": "annual-climate",
-    "title": "How warm and wet was a year at one airport?",
-    "summary": "Fetch complete-year station summaries and read annual temperature and precipitation with a reproducible manifest."
-  },
-  {
-    "slug": "climate-normals",
-    "title": "What is normal weather for a month at one station?",
-    "summary": "Read 1991\u20132020 monthly temperature and precipitation normals and select a month for comparison."
-  },
-  {
-    "slug": "coastal-water-levels",
-    "title": "How high was the water at The Battery?",
-    "summary": "Inspect three six-minute coastal observations, their reference datum, quality flags, and source provenance."
-  },
-  {
-    "slug": "wildfire-smoke",
-    "title": "How far above the daily PM2.5 standard did Canadian wildfire smoke push New York City's air in June 2023?",
-    "summary": "Pin two weeks of EPA AQS daily PM2.5 summaries for the city's regulatory monitors, choose one row per monitor-day from the several AQS writes, and count the monitor-days above 35 ug/m3.",
-    "pinned": true
-  },
-  {
-    "slug": "hurdat2",
-    "title": "How can I inspect Atlantic hurricane tracks?",
-    "summary": "Read the whole Atlantic best-track file, identify hurricane-intensity landfall records, and inspect peak winds and historical coverage limits."
-  },
-  {
-    "slug": "glm-flashes",
-    "title": "Did lightning near the storm pick up before the Oklahoma City tornado report?",
-    "summary": "Count GOES-16 GLM flashes minute by minute in a fixed box around the report over the hour ending at it, against a same-size control box and the whole field of view.",
-    "pinned": true
-  },
-  {
-    "slug": "mrms-rotation",
-    "title": "Where was the strongest mid-level rotation in each two-minute grid, and did it move toward the reported tornado?",
-    "summary": "Locate the strongest MRMS mid-level azimuthal shear in each two-minute grid inside two boxes around the report and measure how far each peak sat from the reported path start.",
-    "pinned": true
-  },
-  {
-    "slug": "hrrr-environment",
-    "title": "What did the HRRR analysis say about the storm environment over central Oklahoma at 20 UTC, and how far was the tornado report from the most favorable values?",
-    "summary": "Read surface CAPE and 0-3 km helicity from one HRRR analysis at the grid point nearest the report, find the largest values within 100 km, and map both fields.",
-    "pinned": true
-  },
-  {
-    "slug": "gfs-environment",
-    "title": "What did the global model say the environment was before a reported tornado?",
-    "summary": "Pull the GFS 00 UTC 1-degree analysis for 2024-05-06 and read surface CAPE and 0-3 km helicity at the grid point nearest Oklahoma City.",
-    "pinned": true
-  },
-  {
-    "slug": "tornado-classification",
-    "title": "Which severe reports came with rotation and lightning?",
-    "summary": "Convert one Oklahoma tornado report to UTC, join it to the nearest NEXRAD volume, MRMS rotation track, and GLM flashes, then build a small labeled table of rotation and lightning features for tornado, hail, and wind reports from the same evening."
-  },
-  {
-    "slug": "earthquakes",
-    "title": "Which earthquakes did Oklahoma record on the days of the May 2024 tornado outbreak?",
-    "summary": "Pull every magnitude 1.0 or larger event inside Oklahoma on 6 and 7 May 2024 from the USGS catalog as one pinned CSV, then rank them by magnitude."
-  },
-  {
-    "slug": "warning-lead-time",
-    "title": "How long before the 6 May 2024 Osage County tornado was a tornado warning issued?",
-    "summary": "Pin the NWS watches and warnings issued for one county that evening beside the Storm Events report of its EF4, find the warning in effect when the tornado began, and see what a county-level record can and cannot say about lead time."
-  },
-  {
-    "slug": "disaster-declarations",
-    "title": "Which Oklahoma counties hit by a tornado on 6 May 2024 were under a federal disaster declaration?",
-    "summary": "Pin FEMA's major disaster declarations in force in Oklahoma that day and the Storm Events tornado reports, then join them by state and county FIPS code to see which tornado counties were designated."
-  },
-  {
-    "slug": "rap-environment",
-    "title": "What did the 13 km RAP analysis say about the storm environment over Oklahoma City at 20 UTC?",
-    "summary": "Fetch surface CAPE and 0-3 km helicity from one Rapid Refresh analysis as two byte ranges of an 18 MB file and read them at the grid point nearest Oklahoma City."
-  },
-  {
-    "slug": "nbm-forecast",
-    "title": "How warm did the National Blend expect Oklahoma City to stay through the evening of 6 May 2024?",
-    "summary": "Fetch the 2 m temperature message from four hours of one National Blend run, 1.5 MB each of 171 MB files, and print the forecast at the nearest grid point per valid hour."
-  },
-  {
-    "slug": "ibtracs",
-    "title": "Which tropical cyclones reached Category 4 or 5 worldwide in recent seasons?",
-    "summary": "Pull the IBTrACS file of the last three seasons for every basin, read it with its units row, separate final from provisional tracks, and rank the strongest storms by the U.S. agency's peak wind."
-  }
-]
+{
+  "studies": [
+    {
+      "slug": "severe-weather-case-study",
+      "title": "For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?",
+      "summary": "Take one tornado report's UTC time and position out of the 2024 Storm Events archive, check it against the SPC tornado file, and measure what the nearest NEXRAD volume, five MRMS rotation grids, twenty minutes of GOES-16 lightning, and the last HRRR analysis held within 25 km of it."
+    },
+    {
+      "slug": "event-context",
+      "title": "What did radar and satellites show around a reported tornado?",
+      "summary": "Connect one Storm Events report to nearby NEXRAD and GOES observations, with explicit time matching and a plotted event context."
+    },
+    {
+      "slug": "tornado-classification",
+      "title": "Which severe reports came with rotation and lightning?",
+      "summary": "Convert one Oklahoma tornado report to UTC, join it to the nearest NEXRAD volume, MRMS rotation track, and GLM flashes, then build a small labeled table of rotation and lightning features for tornado, hail, and wind reports from the same evening."
+    },
+    {
+      "slug": "storm-surge",
+      "title": "How high was Hurricane Helene's storm surge at Cedar Key?",
+      "summary": "Subtract CO-OPS tide predictions from observed water levels to isolate the surge, find its peak, and time it against the HURDAT2 landfall."
+    },
+    {
+      "slug": "climate-anomalies",
+      "title": "Was 2024 warmer or wetter than normal?",
+      "summary": "Compare twelve months at Oklahoma City's airport with 1991–2020 station normals, including temperature-unit checks and monthly anomaly plots."
+    },
+    {
+      "slug": "hourly-anomalies",
+      "title": "How warm was Oklahoma City on 6 May 2024 compared with its hourly normals?",
+      "summary": "Compare routine airport temperatures with 1991–2020 hourly normals in local standard time, make the matching tolerance explicit, and restore both pinned inputs into an empty cache."
+    },
+    {
+      "slug": "weather-and-streamflow",
+      "title": "How can I preserve weather and streamflow inputs together?",
+      "summary": "Fetch NOAA and USGS observations with one manifest, inspect the tables, and verify and restore the exact inputs."
+    },
+    {
+      "slug": "warning-lead-time",
+      "title": "How long before the 6 May 2024 Osage County tornado was a tornado warning issued?",
+      "summary": "Pin the NWS watches and warnings issued for one county that evening beside the Storm Events report of its EF4, find the warning in effect when the tornado began, and see what a county-level record can and cannot say about lead time."
+    },
+    {
+      "slug": "disaster-declarations",
+      "title": "Which Oklahoma counties hit by a tornado on 6 May 2024 were under a federal disaster declaration?",
+      "summary": "Pin FEMA's major disaster declarations in force in Oklahoma that day and the Storm Events tornado reports, then join them by state and county FIPS code to see which tornado counties were designated."
+    },
+    {
+      "slug": "wildfire-smoke",
+      "title": "How far above the daily PM2.5 standard did Canadian wildfire smoke push New York City's air in June 2023?",
+      "summary": "Pin two weeks of EPA AQS daily PM2.5 summaries for the city's regulatory monitors, choose one row per monitor-day from the several AQS writes, and count the monitor-days above 35 ug/m3."
+    },
+    {
+      "slug": "goes-mesoscale",
+      "title": "How did central Plains infrared cloud patterns change over fifteen minutes?",
+      "summary": "Compare fifteen minutes of GOES-16 M1 channel-13 imagery over a fixed region, report timing and quality gaps, and restore every pinned scene into an empty cache."
+    }
+  ],
+  "pinned": [
+    "datasets/noaa-gfs",
+    "datasets/noaa-goes-abi",
+    "datasets/noaa-goes-glm",
+    "datasets/noaa-hrrr",
+    "datasets/noaa-mrms",
+    "datasets/noaa-nexrad-level3",
+    "studies/goes-mesoscale",
+    "studies/wildfire-smoke"
+  ]
+}

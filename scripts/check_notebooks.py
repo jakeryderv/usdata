@@ -15,23 +15,22 @@ ROOT = Path(__file__).resolve().parents[1]
 MAX_OUTPUT_BYTES = 1_000_000
 
 
-def catalog(root: Path = ROOT) -> list[dict[str, object]]:
-    """The example index, or an empty list where a checkout has none."""
+def catalog(root: Path = ROOT) -> dict[str, list]:
+    """The example index, or an empty one where a checkout has none."""
     path = root / "examples/catalog.json"
-    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+    if not path.exists():
+        return {"studies": [], "pinned": []}
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def pinned_manifests(root: Path = ROOT) -> list[Path]:
     """Manifests of the examples whose lockfiles are committed, in catalog order.
 
-    An example opts in with ``"pinned": true`` in ``examples/catalog.json``;
-    ADR 0029 says which examples do and why the rest do not.
+    ``examples/catalog.json`` lists them under ``pinned`` as folders relative to
+    ``examples/``, such as ``datasets/noaa-goes-abi``; ADR 0029 says which
+    examples are pinned and why, and ADR 0041 where they live.
     """
-    return [
-        root / "examples" / str(entry["slug"]) / "dataset.yaml"
-        for entry in catalog(root)
-        if entry.get("pinned") is True
-    ]
+    return [root / "examples" / str(folder) / "dataset.yaml" for folder in catalog(root)["pinned"]]
 
 
 def check_lockfile(manifest: Path) -> list[str]:

@@ -20,31 +20,33 @@ rendering, then validates asset deployment without publishing; the dry run reads
 Docs content lives in `../docs/`, with configuration in `../mkdocs.yml` and
 hosting settings in `../infra/docs.wrangler.jsonc`.
 
-The browser at `/datasets/` searches a committed static metadata index in
-`public/datasets/catalog.json`. Run `just docs` from the repository root to
-regenerate it after registry or package-version changes.
-`just check-docs` rejects stale output. The generator reuses the documentation
-catalog's availability rules and validates the same guide/example sources.
-The Node-only homepage build needs no Python runtime or upstream access.
+Pages follow [ADR 0041](../docs/adr/0041-dataset-walkthroughs-and-studies.md):
 
-Search matches dataset IDs, topics, descriptions, formats, and selection rules;
-agency and support filters combine with it. Ready-to-use entries are the default;
-planned entries explicitly cannot fetch data. Filter state stays in the URL.
-If JavaScript or catalog loading fails, a link opens the documentation catalog.
+- `render-datasets.mjs` builds the `/datasets/` grid and one page per
+  implemented dataset: preview, at-a-glance facts, a quick start, the
+  walkthrough from `../examples/datasets/`, and the studies that use it.
+- `render-studies.mjs` builds `/studies/` and one page per study in
+  `../examples/studies/`, in the order of `../examples/catalog.json`.
+- `notebook.mjs` renders saved notebook outputs; the cell tagged `preview`
+  supplies the card and hero image. No data is fetched and no notebook cells
+  execute during builds. Downloads preserve source bytes; Markdown and saved
+  HTML outputs are sanitized, and saved PNGs are extracted locally.
+- `redirects.json` maps each retired `/examples/` URL to its replacement; the
+  build writes `_redirects` and refuses a target page that does not exist.
 
-`render-examples.mjs` builds `/examples/` from `../examples/catalog.json` and
-one canonical detail page per example folder. Edit notebook content, saved
-outputs, and run instructions in `../examples/`; edit only index questions and
-summaries in its `catalog.json`. Dataset relationships come from the registry
-entries through the generated browser index. No data is fetched and no
-notebook cells execute during builds. Downloads preserve source bytes; Markdown
-and saved HTML outputs are sanitized, and saved PNGs are extracted locally.
+Dataset facts come from the committed index `public/datasets/catalog.json`.
+Run `just docs` from the repository root to regenerate it after registry,
+example, or package-version changes; `just check-docs` rejects stale output.
+The Node-only build needs no Python runtime or upstream access.
 
-The shared run instructions on the examples index come from the sections starting
-at `## Run interactively` in `../examples/README.md`. Links to other example pages
-use `https://usdata.dev/examples/<example>/`; same-folder notebook and manifest
-links point to downloads. `npm test` checks generated links/downloads, dataset
-relationships, and output rendering, including rejection of saved notebook errors.
+The grid is rendered in full at build time; `public/datasets/finder.js` adds
+search, agency and topic filters, and the planned toggle, keeping filter state
+in the URL. Without script every released dataset is still listed.
+
+The run instructions on `/studies/` come from the `## Run a notebook yourself`
+section of `../examples/README.md`. `npm test` checks every page's links and
+anchors, downloads, redirects, and output rendering, including rejection of
+saved notebook errors.
 
 `public/og.png` is the Open Graph card every page declares, also used by the
 README and the GitHub social preview. Its source is `og-card.html`; to

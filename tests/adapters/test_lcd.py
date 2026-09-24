@@ -93,7 +93,7 @@ def test_invalid_queries_rejected_before_client_creation(kwargs, monkeypatch) ->
 @pytest.mark.l2
 def test_hourly_example_reads_report_types_with_the_csv_reader(tmp_path: Path) -> None:
     pytest.importorskip("pandas")
-    example = Path(__file__).resolve().parents[2] / "examples/hourly-observations/dataset.yaml"
+    example = Path(__file__).resolve().parents[2] / "examples/datasets/noaa-lcd/dataset.yaml"
     manifest = tmp_path / "dataset.yaml"
     manifest.write_bytes(example.read_bytes())
     source = (

@@ -13,7 +13,10 @@ pytestmark = pytest.mark.live
 
 def test_coops_water_levels_restore(tmp_path: Path) -> None:
     manifest = tmp_path / "dataset.yaml"
-    example = Path(__file__).resolve().parents[2] / "examples/coastal-water-levels/dataset.yaml"
+    example = (
+        Path(__file__).resolve().parents[2]
+        / "examples/datasets/noaa-coops-water-levels/dataset.yaml"
+    )
     manifest.write_bytes(example.read_bytes())
     result = pull(manifest, root=tmp_path / "cache")
     (item,) = result.fetched

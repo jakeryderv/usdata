@@ -47,7 +47,7 @@ usdata pull dataset.yaml --cache-dir fresh && usdata verify dataset.yaml --cache
 Commit `dataset.yaml` and `dataset.lock.json`. Back up the cache directory
 separately for anything that must be reproducible years later: a checksum
 proves bytes are unchanged, but cannot recover bytes an agency no longer
-serves. The archive-backed [examples](https://usdata.dev/examples/) commit
+serves. The archive-backed [examples](https://usdata.dev/studies/) commit
 their lockfiles and are restored from them every week, so each example page
 has a lockfile to download alongside its manifest.
 
@@ -75,6 +75,6 @@ holds.
 
 --8<-- "_snippets/upstream-revisions.md"
 
-The [weather and streamflow example](https://usdata.dev/examples/weather-and-streamflow/)
+The [weather and streamflow example](https://usdata.dev/studies/weather-and-streamflow/)
 runs this whole loop, including restoring into an empty cache, and keeps its
 lockfile with the notebook.

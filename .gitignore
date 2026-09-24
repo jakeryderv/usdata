@@ -9,14 +9,14 @@ __pycache__/
 .coverage
 examples/**/*.lock.json
 # Pinned examples commit theirs (ADR 0029); the list is examples/catalog.json.
-!examples/gfs-environment/dataset.lock.json
-!examples/glm-flashes/dataset.lock.json
-!examples/goes-imagery/dataset.lock.json
-!examples/goes-mesoscale/dataset.lock.json
-!examples/hrrr-environment/dataset.lock.json
-!examples/mrms-rotation/dataset.lock.json
-!examples/radar-products/dataset.lock.json
-!examples/wildfire-smoke/dataset.lock.json
+!examples/datasets/noaa-gfs/dataset.lock.json
+!examples/datasets/noaa-goes-glm/dataset.lock.json
+!examples/datasets/noaa-goes-abi/dataset.lock.json
+!examples/studies/goes-mesoscale/dataset.lock.json
+!examples/datasets/noaa-hrrr/dataset.lock.json
+!examples/datasets/noaa-mrms/dataset.lock.json
+!examples/datasets/noaa-nexrad-level3/dataset.lock.json
+!examples/studies/wildfire-smoke/dataset.lock.json
 .ipynb_checkpoints/
 reports/
 

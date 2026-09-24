@@ -12,7 +12,7 @@ on:
         options: [all, live, notebooks, restores, minimum]
         default: all
       target:
-        description: Optional live module (coops), notebook folder (sst-analysis), or pinned example (glm-flashes); blank runs the scope
+        description: Optional live module (coops), notebook folder (noaa-coastwatch-sst), or pinned example (noaa-goes-glm); blank runs the scope
         type: string
         default: ''
 

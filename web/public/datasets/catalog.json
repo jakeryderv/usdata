@@ -4,8 +4,10 @@
     {
       "id": "noaa:ghcn-daily",
       "title": "Daily station weather",
+      "product": "GHCN-Daily Station Observations",
       "description": "Global Historical Climatology Network daily summaries: temperature, precipitation, snow, and other elements from land surface stations, served by the NCEI Access Data Service with station and date filtering. Variables are NCEI element codes and the catalog lists the common ones; the delivered set is open and depends on the station.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Surface weather",
       "system": "NCEI Access Data Service",
       "availability": "Released",
@@ -36,6 +38,7 @@
       "latency": "Real-time streams are replaced by archive-ready sources 45 to 60 days after the end of a month",
       "citation": "Menne, M.J., I. Durre, R.S. Vose, B.E. Gleason, and T.G. Houston, 2012: An overview of the Global Historical Climatology Network-Daily Database. Journal of Atmospheric and Oceanic Technology, 29, 897-910, doi:10.1175/JTECH-D-11-00103.1",
       "terms": "https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00861/html",
+      "homepage": "https://www.ncei.noaa.gov/products/land-based-station/global-historical-climatology-network-daily",
       "variables": [
         {
           "name": "PRCP",
@@ -66,18 +69,20 @@
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-ghcn/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/ghcn-daily/",
-      "examples": [
-        {
-          "title": "How can I preserve weather and streamflow inputs together?",
-          "url": "https://usdata.dev/examples/weather-and-streamflow/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/ghcn-daily/",
+      "walkthrough": null,
+      "studies": [
+        "weather-and-streamflow"
+      ],
+      "quickstart": null
     },
     {
       "id": "noaa:gsom",
       "title": "Monthly station climate",
+      "product": "Global Summary of the Month",
       "description": "Monthly station summaries derived from GHCN-Daily (means, extremes, totals) via the NCEI Access Data Service dataset global-summary-of-the-month. Selects whole calendar months and explicit stations, or discovers stations through the companion search service. Variables are NCEI element codes and the catalog lists the common ones; the delivered set is open and depends on the station.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Surface weather",
       "system": "NCEI Access Data Service",
       "availability": "Released",
@@ -106,6 +111,7 @@
       "latency": null,
       "citation": "Lawrimore, Jay H.; Ray, Ron; Applequist, Scott; Korzeniewski, Bryant; Menne, Matthew J. (2016): Global Summary of the Month (GSOM), Version 1. NOAA National Centers for Environmental Information. https://doi.org/10.7289/V5QV3JJ5",
       "terms": "https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00946/html",
+      "homepage": "https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-month",
       "variables": [
         {
           "name": "PRCP",
@@ -121,22 +127,24 @@
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-gsom/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/gsom/",
-      "examples": [
-        {
-          "title": "How did temperature and rainfall vary through the year?",
-          "url": "https://usdata.dev/examples/monthly-climate/"
-        },
-        {
-          "title": "Was 2024 warmer or wetter than normal?",
-          "url": "https://usdata.dev/examples/climate-anomalies/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/gsom/",
+      "walkthrough": "examples/datasets/noaa-gsom/noaa-gsom.ipynb",
+      "studies": [
+        "climate-anomalies"
+      ],
+      "quickstart": {
+        "cli": "usdata fetch noaa:gsom \\\n  --start 2024-05-01 \\\n  --end 2024-05-31 \\\n  --vars PRCP,TAVG \\\n  -p stations=USW00013967 \\\n  -p units=metric",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:gsom\"),\n    build_query(\n        start=\"2024-05-01\",\n        end=\"2024-05-31\",\n        variables=[\"PRCP\", \"TAVG\"],\n        stations=\"USW00013967\",\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: okc-monthly-climate\nsources:\n  - dataset: noaa:gsom\n    start: 2024-05-01\n    end: 2024-05-31\n    variables: [PRCP, TAVG]\n    params:\n      stations: USW00013967\n      units: metric\n"
+      }
     },
     {
       "id": "noaa:gsoy",
       "title": "Annual station climate",
+      "product": "Global Summary of the Year",
       "description": "Annual station summaries derived from GHCN-Daily via the NCEI Access Data Service dataset global-summary-of-the-year. Selects complete UTC calendar years and explicit stations, or discovers stations through the search service. Variables are NCEI element codes and the catalog lists the common ones; the delivered set is open and depends on the station.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Surface weather",
       "system": "NCEI Access Data Service",
       "availability": "Released",
@@ -165,6 +173,7 @@
       "latency": null,
       "citation": "Lawrimore, Jay H.; Ray, Ron; Applequist, Scott; Korzeniewski, Bryant; Menne, Matthew J. (2016): Global Summary of the Year (GSOY), Version 1. NOAA National Centers for Environmental Information. https://doi.org/10.7289/JWPF-Y430",
       "terms": "https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00947/html",
+      "homepage": "https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-year",
       "variables": [
         {
           "name": "PRCP",
@@ -180,18 +189,22 @@
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-gsoy/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/gsoy/",
-      "examples": [
-        {
-          "title": "How warm and wet was a year at one airport?",
-          "url": "https://usdata.dev/examples/annual-climate/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/gsoy/",
+      "walkthrough": "examples/datasets/noaa-gsoy/README.md",
+      "studies": [],
+      "quickstart": {
+        "cli": "usdata fetch noaa:gsoy \\\n  --start 2024-01-01 \\\n  --end 2024-12-31 \\\n  --vars PRCP,TAVG \\\n  -p stations=USW00013967 \\\n  -p units=metric",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:gsoy\"),\n    build_query(\n        start=\"2024-01-01\",\n        end=\"2024-12-31\",\n        variables=[\"PRCP\", \"TAVG\"],\n        stations=\"USW00013967\",\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: okc-annual-climate\nsources:\n  - dataset: noaa:gsoy\n    start: 2024-01-01\n    end: 2024-12-31\n    variables: [PRCP, TAVG]\n    params:\n      stations: USW00013967\n      units: metric\n"
+      }
     },
     {
       "id": "noaa:lcd",
       "title": "Hourly airport observations",
+      "product": "Local Climatological Data",
       "description": "Hourly, special, synoptic, and daily-summary reports from airport and first-order stations via the NCEI Access Data Service dataset local-climatological-data, addressed by eleven-digit station ids and timestamped in local standard time. Select whole days, stations or a location, and optional columns. Every row carries 125 columns; the catalog lists the ones the guide and example use.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Surface weather",
       "system": "NCEI Access Data Service",
       "availability": "Released",
@@ -222,6 +235,7 @@
       "latency": null,
       "citation": "NOAA National Centers for Environmental Information, U.S. Local Climatological Data, accessed via usdata",
       "terms": "https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00684/html",
+      "homepage": "https://www.ncei.noaa.gov/products/land-based-station/local-climatological-data",
       "variables": [
         {
           "name": "STATION",
@@ -257,22 +271,24 @@
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-lcd/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/lcd/",
-      "examples": [
-        {
-          "title": "Do hourly airport observations reproduce the daily summary?",
-          "url": "https://usdata.dev/examples/hourly-observations/"
-        },
-        {
-          "title": "How warm was Oklahoma City on 6 May 2024 compared with its hourly normals?",
-          "url": "https://usdata.dev/examples/hourly-anomalies/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/lcd/",
+      "walkthrough": "examples/datasets/noaa-lcd/README.md",
+      "studies": [
+        "hourly-anomalies"
+      ],
+      "quickstart": {
+        "cli": "usdata fetch noaa:lcd \\\n  --start 2024-05-06 \\\n  --end 2024-05-08 \\\n  --vars HourlyDryBulbTemperature,HourlyPrecipitation,DailyMaximumDryBulbTemperature,DailyMinimumDryBulbTemperature,DailyPrecipitation \\\n  -p stations=72353013967 \\\n  -p units=metric",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:lcd\"),\n    build_query(\n        start=\"2024-05-06\",\n        end=\"2024-05-08\",\n        variables=[\"HourlyDryBulbTemperature\", \"HourlyPrecipitation\", \"DailyMaximumDryBulbTemperature\", \"DailyMinimumDryBulbTemperature\", \"DailyPrecipitation\"],\n        stations=\"72353013967\",\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: okc-hourly-observations\nsources:\n  - dataset: noaa:lcd\n    start: 2024-05-06\n    end: 2024-05-08\n    variables:\n      - HourlyDryBulbTemperature\n      - HourlyPrecipitation\n      - DailyMaximumDryBulbTemperature\n      - DailyMinimumDryBulbTemperature\n      - DailyPrecipitation\n    params:\n      stations: \"72353013967\"\n      units: metric\n"
+      }
     },
     {
       "id": "noaa:storm-events",
       "title": "Storm Events details, fatalities, and locations",
+      "product": "Storm Events Database",
       "description": "NCEI's significant-weather event details since 1950, with locations, impacts, and narratives. Anonymous whole-year gzipped CSV archives; select the latest creation-date revision for each requested year. No server-side row, location, or variable subsetting. Historical event coverage and reporting practices vary. The default is the details table; the fatalities table (one row per death) and the locations table (points per event, with rows from 1996) are chosen with the table parameter and join to details on EVENT_ID. The catalog lists the identifying columns; the full column set is documented in the NCEI bulk format reference.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Severe weather",
       "system": null,
       "availability": "Released",
@@ -302,6 +318,7 @@
       "latency": null,
       "citation": "NOAA National Centers for Environmental Information, Storm Events Database, accessed via usdata",
       "terms": "https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00510/html",
+      "homepage": "https://www.ncei.noaa.gov/access/storm-events-database/",
       "variables": [
         {
           "name": "EVENT_ID",
@@ -337,30 +354,28 @@
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-storm-events/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/storm-events/",
-      "examples": [
-        {
-          "title": "What severe weather was reported in Oklahoma?",
-          "url": "https://usdata.dev/examples/storm-events/"
-        },
-        {
-          "title": "What did radar and satellites show around a reported tornado?",
-          "url": "https://usdata.dev/examples/event-context/"
-        },
-        {
-          "title": "Which severe reports came with rotation and lightning?",
-          "url": "https://usdata.dev/examples/tornado-classification/"
-        },
-        {
-          "title": "For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?",
-          "url": "https://usdata.dev/examples/severe-weather-case-study/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/storm-events/",
+      "walkthrough": "examples/datasets/noaa-storm-events/noaa-storm-events.ipynb",
+      "studies": [
+        "event-context",
+        "tornado-classification",
+        "severe-weather-case-study",
+        "warning-lead-time",
+        "disaster-declarations"
+      ],
+      "quickstart": {
+        "cli": "usdata fetch noaa:storm-events --start 2024-05-01 --end 2024-05-31",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:storm-events\"),\n    build_query(\n        start=\"2024-05-01\",\n        end=\"2024-05-31\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: oklahoma-storm-reports-may-2024\nsources:\n  - dataset: noaa:storm-events\n    # Bulk access returns the entire 2024 details archive. Filter rows locally.\n    start: 2024-05-01\n    end: 2024-05-31\n"
+      }
     },
     {
       "id": "noaa:spc-tornado-reports",
       "title": "SPC tornado, hail, and wind databases",
+      "product": "SPC Tornado Reports",
       "description": "The Storm Prediction Center's tornado database since 1950 as plain CSV: one row per tornado or state/county segment with date, local time, EF or F rating, injuries, fatalities, loss, start and end coordinates, path length and width, and FIPS codes. Whole files linked from the SPC page: annual from 2008, half-decade for 2000-2007, decade for 1950-1999. The table parameter selects SPC's hail and wind databases instead, which share the layout and start in 1955; mag is then the stone diameter in inches or the wind speed in knots. Stable names revised in place; no server-side row, location, or variable subsetting.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Severe weather",
       "system": null,
       "availability": "Released",
@@ -391,6 +406,7 @@
       "latency": null,
       "citation": "NOAA/NWS Storm Prediction Center, Severe Weather Database tornado files, accessed via usdata",
       "terms": "https://www.weather.gov/disclaimer",
+      "homepage": "https://www.spc.noaa.gov/wcm/#data",
       "variables": [
         {
           "name": "om",
@@ -491,22 +507,24 @@
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-spc-tornado/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/spc-tornado-reports/",
-      "examples": [
-        {
-          "title": "How many tornadoes did 2024 bring, by rating?",
-          "url": "https://usdata.dev/examples/spc-tornadoes/"
-        },
-        {
-          "title": "For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?",
-          "url": "https://usdata.dev/examples/severe-weather-case-study/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/spc-tornado-reports/",
+      "walkthrough": "examples/datasets/noaa-spc-tornado-reports/README.md",
+      "studies": [
+        "severe-weather-case-study"
+      ],
+      "quickstart": {
+        "cli": "usdata fetch noaa:spc-tornado-reports \\\n  --start 2024-01-01 \\\n  --end 2024-12-31",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:spc-tornado-reports\"),\n    build_query(\n        start=\"2024-01-01\",\n        end=\"2024-12-31\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: spc-tornadoes-2024\nsources:\n  - dataset: noaa:spc-tornado-reports\n    start: 2024-01-01\n    end: 2024-12-31\n"
+      }
     },
     {
       "id": "noaa:nws-vtec-events",
       "title": "NWS warnings and watches by county",
+      "product": "NWS Watch, Warning, and Advisory Events by County",
       "description": "National Weather Service watch, warning, and advisory events issued for one county or forecast zone, one row per event with its issuance and expiry, VTEC phenomena and significance, issuing office, and product id, as CSV from the Iowa Environmental Mesonet's archive of NWS products; the NWS API itself keeps no archive. Rows carry no coordinates, so selection is by a named county rather than by box, and a window selects events by when they were issued, not by when they were in effect. A county reaches county-based products (tornado, severe thunderstorm, flash flood); zone-based products need an explicit UGC. Polygons are a separate product, noaa:nws-warnings.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Severe weather",
       "system": null,
       "availability": "Released",
@@ -537,6 +555,7 @@
       "latency": null,
       "citation": "National Weather Service watch, warning, and advisory products, as archived and served by the Iowa Environmental Mesonet of Iowa State University, accessed via usdata",
       "terms": "https://mesonet.agron.iastate.edu/disclaimer.php",
+      "homepage": "https://mesonet.agron.iastate.edu/info/datasets/vtec.html",
       "variables": [
         {
           "name": "vtec_year",
@@ -622,18 +641,20 @@
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-nws-vtec-events/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/nws-vtec-events/",
-      "examples": [
-        {
-          "title": "How long before the 6 May 2024 Osage County tornado was a tornado warning issued?",
-          "url": "https://usdata.dev/examples/warning-lead-time/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/nws-vtec-events/",
+      "walkthrough": null,
+      "studies": [
+        "warning-lead-time"
+      ],
+      "quickstart": null
     },
     {
       "id": "noaa:nexrad-level2",
       "title": "NEXRAD radar scans",
+      "product": "NEXRAD Level II Radar",
       "description": "Raw volume scans from the WSR-88D weather radar network, archived in the public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). One object per radar site per volume scan. No server-side subsetting; whole files are fetched. Select radars by site id, bbox, or nearest to a point. Moments vary by sweep and volume coverage pattern; the catalog lists the ones the radar example's lowest sweep carries.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Weather radar",
       "system": "Next Generation Weather Radar (NEXRAD)",
       "availability": "Released",
@@ -663,6 +684,7 @@
       "latency": null,
       "citation": "NEXRAD on AWS was accessed on [date] from https://registry.opendata.aws/noaa-nexrad",
       "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "homepage": "https://registry.opendata.aws/noaa-nexrad/",
       "variables": [
         {
           "name": "DBZH",
@@ -688,30 +710,22 @@
       "max_window": "31 days",
       "guide": "https://docs.usdata.dev/providers/noaa-nexrad/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/nexrad-level2/",
-      "examples": [
-        {
-          "title": "What does one weather radar volume show?",
-          "url": "https://usdata.dev/examples/radar-reflectivity/"
-        },
-        {
-          "title": "What did radar and satellites show around a reported tornado?",
-          "url": "https://usdata.dev/examples/event-context/"
-        },
-        {
-          "title": "Which severe reports came with rotation and lightning?",
-          "url": "https://usdata.dev/examples/tornado-classification/"
-        },
-        {
-          "title": "For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?",
-          "url": "https://usdata.dev/examples/severe-weather-case-study/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/nexrad-level2/",
+      "walkthrough": "examples/datasets/noaa-nexrad-level2/noaa-nexrad-level2.ipynb",
+      "studies": [
+        "event-context",
+        "tornado-classification",
+        "severe-weather-case-study"
+      ],
+      "quickstart": null
     },
     {
       "id": "noaa:mrms",
       "title": "MRMS gridded radar products",
+      "product": "Multi-Radar Multi-Sensor (MRMS)",
       "description": "Gridded CONUS products merged from every radar plus other sensors: rotation tracks, reflectivity, hail size, echo tops, precipitation rate, and lightning probability as two-minute gzipped GRIB2 files in the public noaa-mrms-pds S3 bucket laid out as CONUS/PRODUCT/YYYYMMDD/. Select one product from the supported list and a file-stamp window of at most one day; each asset is a complete CONUS grid with no spatial or variable subsetting, and the product is the variable. The stated extent is the grid's coverage, not an offer to crop to a bounding box.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Weather radar",
       "system": null,
       "availability": "Released",
@@ -743,6 +757,7 @@
       "latency": null,
       "citation": "NOAA Multi-Radar/Multi-Sensor System (MRMS) was accessed on [date] from https://registry.opendata.aws/noaa-mrms-pds",
       "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "homepage": "https://registry.opendata.aws/noaa-mrms-pds/",
       "variables": [
         {
           "name": "RotationTrack30min_00.50",
@@ -848,26 +863,25 @@
       "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-mrms/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/mrms/",
-      "examples": [
-        {
-          "title": "Where was the strongest mid-level rotation in each two-minute grid, and did it move toward the reported tornado?",
-          "url": "https://usdata.dev/examples/mrms-rotation/"
-        },
-        {
-          "title": "Which severe reports came with rotation and lightning?",
-          "url": "https://usdata.dev/examples/tornado-classification/"
-        },
-        {
-          "title": "For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?",
-          "url": "https://usdata.dev/examples/severe-weather-case-study/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/mrms/",
+      "walkthrough": "examples/datasets/noaa-mrms/noaa-mrms.ipynb",
+      "studies": [
+        "tornado-classification",
+        "severe-weather-case-study"
+      ],
+      "quickstart": {
+        "cli": "usdata fetch noaa:mrms \\\n  --start 2024-05-07T04:30:00Z \\\n  --end 2024-05-07T04:50:00Z \\\n  -p product=RotationTrackML30min_00.50",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:mrms\"),\n    build_query(\n        start=\"2024-05-07T04:30:00Z\",\n        end=\"2024-05-07T04:50:00Z\",\n        product=\"RotationTrackML30min_00.50\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: oklahoma-rotation-tracks\nsources:\n  - dataset: noaa:mrms\n    start: 2024-05-07T04:30:00Z\n    end: 2024-05-07T04:50:00Z\n    params:\n      product: RotationTrackML30min_00.50\n"
+      }
     },
     {
       "id": "noaa:nexrad-level3",
       "title": "NEXRAD derived radar products",
+      "product": "NEXRAD Level III Products",
       "description": "Derived single-radar products (super-resolution reflectivity and velocity, dual-polarization moments, mesocyclone and storm-track detections, echo tops, accumulations) in the public unidata-nexrad-level3 S3 bucket, with flat keys SITE_PRODUCT_YYYY_MM_DD_HH_MM_SS where the site id drops the first letter of its ICAO id. One object per product per volume scan since 2020-03-30; earlier products are archived at NCEI. Files are fetched whole and have no reader.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Weather radar",
       "system": "Next Generation Weather Radar (NEXRAD)",
       "availability": "Released",
@@ -898,6 +912,7 @@
       "latency": null,
       "citation": "NEXRAD on AWS was accessed on [date] from https://registry.opendata.aws/noaa-nexrad",
       "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "homepage": "https://registry.opendata.aws/noaa-nexrad/",
       "variables": [
         {
           "name": "N?B",
@@ -1013,18 +1028,22 @@
       "max_window": "31 days",
       "guide": "https://docs.usdata.dev/providers/noaa-nexrad-level3/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/nexrad-level3/",
-      "examples": [
-        {
-          "title": "Which derived radar products did KTLX publish around a tornado report?",
-          "url": "https://usdata.dev/examples/radar-products/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/nexrad-level3/",
+      "walkthrough": "examples/datasets/noaa-nexrad-level3/README.md",
+      "studies": [],
+      "quickstart": {
+        "cli": "usdata fetch noaa:nexrad-level3 \\\n  --start 2024-05-06T20:30:00Z \\\n  --end 2024-05-06T21:00:00Z \\\n  -p site=KTLX \\\n  -p products=NMD,NST,EET",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:nexrad-level3\"),\n    build_query(\n        start=\"2024-05-06T20:30:00Z\",\n        end=\"2024-05-06T21:00:00Z\",\n        site=\"KTLX\",\n        products=[\"NMD\", \"NST\", \"EET\"],\n    ),\n)\nprint(items[0].path)\n",
+        "manifest": "name: ktlx-derived-products\nsources:\n  - dataset: noaa:nexrad-level3\n    start: 2024-05-06T20:30:00Z\n    end: 2024-05-06T21:00:00Z\n    params:\n      site: KTLX\n      products: [NMD, NST, EET]\n"
+      }
     },
     {
       "id": "noaa:goes-abi",
       "title": "GOES CONUS and mesoscale imagery",
+      "product": "GOES-R ABI Cloud and Moisture Imagery",
       "description": "Single-channel CONUS (ABI-L2-CMIPC) and mesoscale (ABI-L2-CMIPM) imagery from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit satellite, channel, scan-start interval, and M1 or M2 for mesoscale; each asset is a complete NetCDF scene with no geographic or variable subsetting.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Weather satellites",
       "system": "GOES-R Series",
       "availability": "Released",
@@ -1056,6 +1075,7 @@
       "latency": null,
       "citation": "NOAA Geostationary Operational Environmental Satellites (GOES) 16, 17, 18 & 19 was accessed on [date] from https://registry.opendata.aws/noaa-goes",
       "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "homepage": "https://registry.opendata.aws/noaa-goes/",
       "variables": [
         {
           "name": "CMI",
@@ -1071,26 +1091,25 @@
       "max_window": "7 days",
       "guide": "https://docs.usdata.dev/providers/noaa-goes/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/goes-abi/",
-      "examples": [
-        {
-          "title": "What did a satellite see in infrared?",
-          "url": "https://usdata.dev/examples/goes-imagery/"
-        },
-        {
-          "title": "How did central Plains infrared cloud patterns change over fifteen minutes?",
-          "url": "https://usdata.dev/examples/goes-mesoscale/"
-        },
-        {
-          "title": "What did radar and satellites show around a reported tornado?",
-          "url": "https://usdata.dev/examples/event-context/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/goes-abi/",
+      "walkthrough": "examples/datasets/noaa-goes-abi/noaa-goes-abi.ipynb",
+      "studies": [
+        "goes-mesoscale",
+        "event-context"
+      ],
+      "quickstart": {
+        "cli": "usdata fetch noaa:goes-abi \\\n  --start 2024-05-06T12:01:18.1Z \\\n  --end 2024-05-06T12:01:18.1Z \\\n  -p satellite=18 \\\n  -p channel=13 \\\n  -p product=ABI-L2-CMIPC",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:goes-abi\"),\n    build_query(\n        start=\"2024-05-06T12:01:18.1Z\",\n        end=\"2024-05-06T12:01:18.1Z\",\n        satellite=18,\n        channel=13,\n        product=\"ABI-L2-CMIPC\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: goes18-infrared-scene\nsources:\n  - dataset: noaa:goes-abi\n    start: 2024-05-06T12:01:18.1Z\n    end: 2024-05-06T12:01:18.1Z\n    params:\n      satellite: 18\n      channel: 13\n      product: ABI-L2-CMIPC\n"
+      }
     },
     {
       "id": "noaa:goes-glm",
       "title": "GOES lightning detections",
+      "product": "GOES Geostationary Lightning Mapper",
       "description": "Lightning flash, group, and event detections (GLM-L2-LCFA) from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit satellite and a file-start interval of at most one day; each asset is a complete 20-second NetCDF detection table with no geographic subsetting.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Weather satellites",
       "system": "GOES-R Series",
       "availability": "Released",
@@ -1119,6 +1138,7 @@
       "latency": null,
       "citation": "NOAA Geostationary Operational Environmental Satellites (GOES) 16, 17, 18 & 19 was accessed on [date] from https://registry.opendata.aws/noaa-goes",
       "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "homepage": "https://registry.opendata.aws/noaa-goes/",
       "variables": [
         {
           "name": "flash_lat",
@@ -1194,26 +1214,25 @@
       "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-glm/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/goes-glm/",
-      "examples": [
-        {
-          "title": "Did lightning near the storm pick up before the Oklahoma City tornado report?",
-          "url": "https://usdata.dev/examples/glm-flashes/"
-        },
-        {
-          "title": "Which severe reports came with rotation and lightning?",
-          "url": "https://usdata.dev/examples/tornado-classification/"
-        },
-        {
-          "title": "For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?",
-          "url": "https://usdata.dev/examples/severe-weather-case-study/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/goes-glm/",
+      "walkthrough": "examples/datasets/noaa-goes-glm/noaa-goes-glm.ipynb",
+      "studies": [
+        "tornado-classification",
+        "severe-weather-case-study"
+      ],
+      "quickstart": {
+        "cli": "usdata fetch noaa:goes-glm \\\n  --start 2024-05-07T03:40:00Z \\\n  --end 2024-05-07T04:39:59Z \\\n  -p satellite=16",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:goes-glm\"),\n    build_query(\n        start=\"2024-05-07T03:40:00Z\",\n        end=\"2024-05-07T04:39:59Z\",\n        satellite=16,\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: oklahoma-glm-hour\nsources:\n  - dataset: noaa:goes-glm\n    start: 2024-05-07T03:40:00Z\n    end: 2024-05-07T04:39:59Z\n    params:\n      satellite: 16\n"
+      }
     },
     {
       "id": "noaa:hurdat2",
       "title": "Tropical cyclone best tracks",
+      "product": "HURDAT2 Atlantic and Pacific Best Tracks",
       "description": "National Hurricane Center best-track database: six-hourly position, intensity, pressure, and wind radii for Atlantic (since 1851) and northeast/north-central Pacific (since 1949) tropical cyclones. One fixed-format text file per basin, revised after each season; a basin parameter picks the file and the newest revision wins unless a revision date names another. There is no query interface, so dates and geographic filters are rejected and the local reader turns the whole file into one row per track point.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Tropical cyclones",
       "system": null,
       "availability": "Released",
@@ -1241,6 +1260,7 @@
       "latency": null,
       "citation": "Landsea, C. W. and J. L. Franklin, 2013: Atlantic Hurricane Database Uncertainty and Presentation of a New Database Format. Mon. Wea. Rev., 141, 3576-3592",
       "terms": "https://www.weather.gov/disclaimer",
+      "homepage": "https://www.nhc.noaa.gov/data/#hurdat",
       "variables": [
         {
           "name": "storm_id",
@@ -1356,22 +1376,24 @@
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-hurdat2/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/hurdat2/",
-      "examples": [
-        {
-          "title": "How can I inspect Atlantic hurricane tracks?",
-          "url": "https://usdata.dev/examples/hurdat2/"
-        },
-        {
-          "title": "How high was Hurricane Helene's storm surge at Cedar Key?",
-          "url": "https://usdata.dev/examples/storm-surge/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/hurdat2/",
+      "walkthrough": "examples/datasets/noaa-hurdat2/README.md",
+      "studies": [
+        "storm-surge"
+      ],
+      "quickstart": {
+        "cli": "usdata fetch noaa:hurdat2 -p basin=atlantic -p revision=2026-02-27",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:hurdat2\"),\n    build_query(\n        basin=\"atlantic\",\n        revision=\"2026-02-27\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: atlantic-best-tracks\nsources:\n  - dataset: noaa:hurdat2\n    # One whole basin file. HURDAT2 has no query interface, so dates and\n    # geographic filters are rejected; filter the parsed track table locally.\n    params:\n      basin: atlantic\n      # The 2026-09-12 revision has two upstream typos the reader refuses to guess at.\n      revision: 2026-02-27\n"
+      }
     },
     {
       "id": "noaa:ibtracs",
       "title": "Global tropical cyclone best tracks",
+      "product": "IBTrACS Global Tropical Cyclone Tracks",
       "description": "International Best Track Archive for Climate Stewardship: every agency's tropical cyclone best tracks merged into one global record since 1842, published by NCEI as whole files under an anonymous HTTPS directory. A subset parameter names one of the eleven files NCEI builds (the complete record, active storms, the last three years, everything since 1980, or one of seven basins), a format parameter picks the CSV list or the NetCDF file, and the newest product version wins unless one is pinned. There is no query interface, so dates and geographic filters are rejected; the files are rebuilt in place under unchanging names, so a lockfile's checksum is what pins the bytes. The CSV opens with the units-row reader and the NetCDF with xarray; filter the table locally.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Tropical cyclones",
       "system": null,
       "availability": "Released",
@@ -1400,6 +1422,7 @@
       "latency": null,
       "citation": "Gahtan, J., K. R. Knapp, C. J. Schreck, H. J. Diamond, J. P. Kossin, and M. C. Kruk, 2024: International Best Track Archive for Climate Stewardship (IBTrACS) Project, Version 4r01. NOAA National Centers for Environmental Information, doi:10.25921/82ty-9e16. Knapp, K. R., M. C. Kruk, D. H. Levinson, H. J. Diamond, and C. J. Neumann, 2010: The International Best Track Archive for Climate Stewardship (IBTrACS). Bull. Amer. Meteor. Soc., 91, 363-376",
       "terms": "https://www.ncei.noaa.gov/products/international-best-track-archive",
+      "homepage": "https://www.ncei.noaa.gov/products/international-best-track-archive",
       "variables": [
         {
           "name": "sid",
@@ -1530,18 +1553,22 @@
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-ibtracs/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/ibtracs/",
-      "examples": [
-        {
-          "title": "Which tropical cyclones reached Category 4 or 5 worldwide in recent seasons?",
-          "url": "https://usdata.dev/examples/ibtracs/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/ibtracs/",
+      "walkthrough": "examples/datasets/noaa-ibtracs/README.md",
+      "studies": [],
+      "quickstart": {
+        "cli": "usdata fetch noaa:ibtracs -p subset=last3years",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:ibtracs\"),\n    build_query(\n        subset=\"last3years\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: recent-global-tracks\nsources:\n  - name: tracks\n    dataset: noaa:ibtracs\n    # One whole file: the last three seasons and the current one, every basin.\n    # IBTrACS has no query interface, so dates and geographic filters are\n    # rejected; filter the parsed table locally. The file is rebuilt in place\n    # as agencies deliver best tracks, so the lockfile's checksum is the pin.\n    params:\n      subset: last3years\n"
+      }
     },
     {
       "id": "noaa:gfs",
       "title": "GFS model output",
+      "product": "GFS Forecast Model Output",
       "description": "Global Forecast System forecasts in GRIB2 from the anonymous noaa-gfs-bdp-pds S3 bucket, one whole global file per run, forecast hour, and grid resolution. Select a run by initialization window and cycle hour (00, 06, 12, or 18 UTC), the forecast hours, and the 0.25, 0.5, or 1 degree grid. Files are 42 MB to 550 MB; the server subsets nothing, so fields are chosen either by naming GRIB2 messages, which fetches their byte ranges through the object's index sidecar, or after download with the GRIB2 reader. Each file holds hundreds of fields; the catalog lists the handful the guide and example select.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Weather models",
       "system": "NCEP model output",
       "availability": "Released",
@@ -1572,6 +1599,7 @@
       "latency": null,
       "citation": "NOAA Global Forecast System (GFS) was accessed on [date] from https://registry.opendata.aws/noaa-gfs-bdp-pds",
       "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "homepage": "https://registry.opendata.aws/noaa-gfs-bdp-pds/",
       "variables": [
         {
           "name": "cape",
@@ -1627,18 +1655,22 @@
       "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-gfs/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/gfs/",
-      "examples": [
-        {
-          "title": "What did the global model say the environment was before a reported tornado?",
-          "url": "https://usdata.dev/examples/gfs-environment/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/gfs/",
+      "walkthrough": "examples/datasets/noaa-gfs/README.md",
+      "studies": [],
+      "quickstart": {
+        "cli": "usdata fetch noaa:gfs \\\n  --start 2024-05-06T00:00:00Z \\\n  --end 2024-05-06T00:00:00Z \\\n  -p cycle=0 \\\n  -p forecast_hour=0 \\\n  -p resolution=1p00",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:gfs\"),\n    build_query(\n        start=\"2024-05-06T00:00:00Z\",\n        end=\"2024-05-06T00:00:00Z\",\n        cycle=0,\n        forecast_hour=0,\n        resolution=\"1p00\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: oklahoma-gfs-analysis\nsources:\n  - dataset: noaa:gfs\n    start: 2024-05-06T00:00:00Z\n    end: 2024-05-06T00:00:00Z\n    params:\n      cycle: 0\n      forecast_hour: 0\n      resolution: 1p00\n"
+      }
     },
     {
       "id": "noaa:hrrr",
       "title": "HRRR model output",
+      "product": "HRRR Forecast Model Output",
       "description": "High-Resolution Rapid Refresh 3 km CONUS forecasts in GRIB2 from the anonymous noaa-hrrr-bdp-pds S3 bucket, one whole file per run and forecast hour. Select a run by initialization window and cycle hour, the forecast hours, and the surface, pressure-level, or native file variant. Files are 150 MB to 750 MB; the server subsets nothing, so fields are chosen either by naming GRIB2 messages, which fetches their byte ranges through the object's index sidecar, or after download with the GRIB2 reader. Each file holds hundreds of fields; the catalog lists the handful the guide and example select.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Weather models",
       "system": "NCEP model output",
       "availability": "Released",
@@ -1669,6 +1701,7 @@
       "latency": null,
       "citation": "NOAA High-Resolution Rapid Refresh (HRRR) Model was accessed on [date] from https://registry.opendata.aws/noaa-hrrr-pds",
       "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "homepage": "https://registry.opendata.aws/noaa-hrrr-pds/",
       "variables": [
         {
           "name": "cape",
@@ -1714,22 +1747,24 @@
       "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-hrrr/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/hrrr/",
-      "examples": [
-        {
-          "title": "What did the HRRR analysis say about the storm environment over central Oklahoma at 20 UTC, and how far was the tornado report from the most favorable values?",
-          "url": "https://usdata.dev/examples/hrrr-environment/"
-        },
-        {
-          "title": "For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?",
-          "url": "https://usdata.dev/examples/severe-weather-case-study/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/hrrr/",
+      "walkthrough": "examples/datasets/noaa-hrrr/noaa-hrrr.ipynb",
+      "studies": [
+        "severe-weather-case-study"
+      ],
+      "quickstart": {
+        "cli": "usdata fetch noaa:hrrr \\\n  --start 2024-05-06T20:00:00Z \\\n  --end 2024-05-06T20:00:00Z \\\n  -p cycle=20 \\\n  -p forecast_hour=0",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:hrrr\"),\n    build_query(\n        start=\"2024-05-06T20:00:00Z\",\n        end=\"2024-05-06T20:00:00Z\",\n        cycle=20,\n        forecast_hour=0,\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: oklahoma-hrrr-analysis\nsources:\n  - dataset: noaa:hrrr\n    start: 2024-05-06T20:00:00Z\n    end: 2024-05-06T20:00:00Z\n    params:\n      cycle: 20\n      forecast_hour: 0\n"
+      }
     },
     {
       "id": "noaa:nbm",
       "title": "NBM forecast guidance",
+      "product": "National Blend of Models",
       "description": "NOAA's statistically blended, bias-corrected forecast guidance in GRIB2 from the anonymous noaa-nbm-grib2-pds S3 bucket, one whole core file per hourly run, forecast hour, and region. Select a run by initialization window and cycle hour, the forecast hours from 1 to 264, and the CONUS, Alaska, Hawaii, Puerto Rico, or Guam grid. The CONUS file is about 170 MB per hour; the server subsets nothing, so fields are chosen either by naming GRIB2 messages, which fetches their byte ranges through the object's index sidecar, or after download with the GRIB2 reader. Each file holds hundreds of fields; the catalog lists the handful the guide and example select.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Weather models",
       "system": "NCEP model output",
       "availability": "Released",
@@ -1759,6 +1794,7 @@
       "latency": null,
       "citation": "NOAA National Blend of Models (NBM) was accessed on [date] from https://registry.opendata.aws/noaa-nbm",
       "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "homepage": "https://registry.opendata.aws/noaa-nbm/",
       "variables": [
         {
           "name": "2t",
@@ -1779,18 +1815,22 @@
       "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-nbm/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/nbm/",
-      "examples": [
-        {
-          "title": "How warm did the National Blend expect Oklahoma City to stay through the evening of 6 May 2024?",
-          "url": "https://usdata.dev/examples/nbm-forecast/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/nbm/",
+      "walkthrough": "examples/datasets/noaa-nbm/README.md",
+      "studies": [],
+      "quickstart": {
+        "cli": "usdata fetch noaa:nbm \\\n  --start 2024-05-06T20:00:00Z \\\n  --end 2024-05-06T20:00:00Z \\\n  -p cycle=20 \\\n  -p forecast_hour=1,2,3,4 \\\n  -p 'messages=TMP:2 m above ground'",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:nbm\"),\n    build_query(\n        start=\"2024-05-06T20:00:00Z\",\n        end=\"2024-05-06T20:00:00Z\",\n        cycle=20,\n        forecast_hour=[1, 2, 3, 4],\n        messages=\"TMP:2 m above ground\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: oklahoma-nbm-temperature\nsources:\n  - name: forecast\n    dataset: noaa:nbm\n    start: 2024-05-06T20:00:00Z\n    end: 2024-05-06T20:00:00Z\n    params:\n      cycle: 20\n      forecast_hour: [1, 2, 3, 4]\n      messages: \"TMP:2 m above ground\"\n"
+      }
     },
     {
       "id": "noaa:rap",
       "title": "RAP model output",
+      "product": "RAP Model Output",
       "description": "Rapid Refresh 13 km hourly analyses and forecasts in GRIB2 from the anonymous noaa-rap-pds S3 bucket, one whole file per run, forecast hour, and grid family. Select a run by initialization window and cycle hour, the forecast hours, and the file family: the 13 km CONUS pressure-level grid (about 18 MB per file), its secondary fields, or the native-grid pressure and hybrid-level files. Runs reach 21 hours, or 51 from the 03, 09, 15, and 21 UTC runs. The server subsets nothing, so fields are chosen either by naming GRIB2 messages, which fetches their byte ranges through the object's index sidecar, or after download with the GRIB2 reader. Each file holds hundreds of fields; the catalog lists the handful the guide and example select.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Weather models",
       "system": "NCEP model output",
       "availability": "Released",
@@ -1821,6 +1861,7 @@
       "latency": null,
       "citation": "NOAA Rapid Refresh (RAP) was accessed on [date] from https://registry.opendata.aws/noaa-rap",
       "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "homepage": "https://registry.opendata.aws/noaa-rap/",
       "variables": [
         {
           "name": "cape",
@@ -1856,18 +1897,22 @@
       "max_window": "1 day",
       "guide": "https://docs.usdata.dev/providers/noaa-rap/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/rap/",
-      "examples": [
-        {
-          "title": "What did the 13 km RAP analysis say about the storm environment over Oklahoma City at 20 UTC?",
-          "url": "https://usdata.dev/examples/rap-environment/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/rap/",
+      "walkthrough": "examples/datasets/noaa-rap/README.md",
+      "studies": [],
+      "quickstart": {
+        "cli": "usdata fetch noaa:rap \\\n  --start 2024-05-06T20:00:00Z \\\n  --end 2024-05-06T20:00:00Z \\\n  -p cycle=20 \\\n  -p forecast_hour=0 \\\n  -p 'messages=CAPE:surface,HLCY:3000-0 m above ground'",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:rap\"),\n    build_query(\n        start=\"2024-05-06T20:00:00Z\",\n        end=\"2024-05-06T20:00:00Z\",\n        cycle=20,\n        forecast_hour=0,\n        messages=\"CAPE:surface,HLCY:3000-0 m above ground\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: oklahoma-rap-analysis\nsources:\n  - name: environment\n    dataset: noaa:rap\n    start: 2024-05-06T20:00:00Z\n    end: 2024-05-06T20:00:00Z\n    params:\n      cycle: 20\n      forecast_hour: 0\n      messages: \"CAPE:surface,HLCY:3000-0 m above ground\"\n"
+      }
     },
     {
       "id": "noaa:climate-normals",
       "title": "30-year station climate normals",
+      "product": "U.S. Climate Normals 1991-2020",
       "description": "Hourly, daily, monthly, and annual/seasonal 30-year station normals via the NCEI Access Data Service datasets normals-hourly-1991-2020, normals-daily-1991-2020, normals-monthly-1991-2020, and normals-annualseasonal-1991-2020, chosen with a period parameter. Dates are optional; hourly, daily, and monthly normals accept a month-day window inside a placeholder year. Hourly labels use local standard time, with no February 29 values. Explicit stations or station discovery through the companion search service. Variables are NCEI data-type codes and the catalog lists the probed ones; the delivered set is the open NCEI normals list.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Climate",
       "system": "NCEI Access Data Service",
       "availability": "Released",
@@ -1897,6 +1942,7 @@
       "latency": null,
       "citation": "Palecki, Michael; Durre, Imke; Applequist, Scott; Arguez, Anthony; Lawrimore, Jay (2021). U.S. Climate Normals 2020 (1991-2020). NOAA National Centers for Environmental Information; cite the record for the period used",
       "terms": "https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals",
+      "homepage": "https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals",
       "variables": [
         {
           "name": "HLY-TEMP-NORMAL",
@@ -1957,26 +2003,25 @@
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-normals/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/climate-normals/",
-      "examples": [
-        {
-          "title": "What is normal weather for a month at one station?",
-          "url": "https://usdata.dev/examples/climate-normals/"
-        },
-        {
-          "title": "Was 2024 warmer or wetter than normal?",
-          "url": "https://usdata.dev/examples/climate-anomalies/"
-        },
-        {
-          "title": "How warm was Oklahoma City on 6 May 2024 compared with its hourly normals?",
-          "url": "https://usdata.dev/examples/hourly-anomalies/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/climate-normals/",
+      "walkthrough": "examples/datasets/noaa-climate-normals/README.md",
+      "studies": [
+        "climate-anomalies",
+        "hourly-anomalies"
+      ],
+      "quickstart": {
+        "cli": "usdata fetch noaa:climate-normals \\\n  --vars MLY-TMAX-NORMAL,MLY-TMIN-NORMAL,MLY-PRCP-NORMAL \\\n  -p period=monthly \\\n  -p stations=USW00013967 \\\n  -p units=metric",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:climate-normals\"),\n    build_query(\n        variables=[\"MLY-TMAX-NORMAL\", \"MLY-TMIN-NORMAL\", \"MLY-PRCP-NORMAL\"],\n        period=\"monthly\",\n        stations=\"USW00013967\",\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: okc-climate-normals\nsources:\n  - dataset: noaa:climate-normals\n    variables: [MLY-TMAX-NORMAL, MLY-TMIN-NORMAL, MLY-PRCP-NORMAL]\n    params:\n      period: monthly\n      stations: USW00013967\n      units: metric\n"
+      }
     },
     {
       "id": "noaa:coops-currents",
       "title": "Coastal current speed and direction",
+      "product": "CO-OPS Observed Currents",
       "description": "Native six-minute current speed and direction from the anonymous CO-OPS Data API. Select one alphanumeric station, a positive bin, units, and a UTC interval of at most 28 days. Raw CSV preserves gaps and blank values. Bin depths can change between deployments; the CSV carries bin number, not depth or a verification-quality flag. Predictions, all-bin queries, station discovery, and resampling are not included.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Ocean physics",
       "system": "CO-OPS Data API",
       "availability": "Released",
@@ -2007,6 +2052,7 @@
       "latency": null,
       "citation": "NOAA National Ocean Service, CO-OPS observed currents, accessed via usdata",
       "terms": "https://tidesandcurrents.noaa.gov/disclaimers.html",
+      "homepage": "https://api.tidesandcurrents.noaa.gov/api/prod/",
       "variables": [
         {
           "name": "Date Time",
@@ -2032,18 +2078,22 @@
       "max_window": "28 days",
       "guide": "https://docs.usdata.dev/providers/noaa-coops-currents/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-currents/",
-      "examples": [
-        {
-          "title": "How did currents change at Cape Henry on 6 May 2025?",
-          "url": "https://usdata.dev/examples/coastal-currents/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/coops-currents/",
+      "walkthrough": "examples/datasets/noaa-coops-currents/noaa-coops-currents.ipynb",
+      "studies": [],
+      "quickstart": {
+        "cli": "usdata fetch noaa:coops-currents \\\n  --start 2025-05-06 \\\n  --end 2025-05-06 \\\n  -p station=cb0102 \\\n  -p bin=4 \\\n  -p units=metric",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:coops-currents\"),\n    build_query(\n        start=\"2025-05-06\",\n        end=\"2025-05-06\",\n        station=\"cb0102\",\n        bin=4,\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: cape-henry-currents\nsources:\n  - name: currents\n    dataset: noaa:coops-currents\n    start: 2025-05-06\n    end: 2025-05-06\n    params:\n      station: cb0102\n      bin: 4\n      units: metric\n"
+      }
     },
     {
       "id": "noaa:coops-water-levels",
       "title": "Coastal water levels",
+      "product": "CO-OPS Observed Water Levels",
       "description": "Preliminary or verified six-minute observed water levels from the anonymous CO-OPS Data API. Select one station, an explicit vertical datum, units, and a UTC interval of at most 28 days. Raw CSV retains quality flags; predictions and station discovery are not included.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Sea level and tides",
       "system": "CO-OPS Data API",
       "availability": "Released",
@@ -2072,6 +2122,7 @@
       "latency": null,
       "citation": "NOAA National Ocean Service, Center for Operational Oceanographic Products and Services, observed water levels, accessed via usdata",
       "terms": "https://tidesandcurrents.noaa.gov/disclaimers.html",
+      "homepage": "https://api.tidesandcurrents.noaa.gov/api/prod/",
       "variables": [
         {
           "name": "Date Time",
@@ -2117,22 +2168,24 @@
       "max_window": "28 days",
       "guide": "https://docs.usdata.dev/providers/noaa-coops/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-water-levels/",
-      "examples": [
-        {
-          "title": "How high was the water at The Battery?",
-          "url": "https://usdata.dev/examples/coastal-water-levels/"
-        },
-        {
-          "title": "How high was Hurricane Helene's storm surge at Cedar Key?",
-          "url": "https://usdata.dev/examples/storm-surge/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/coops-water-levels/",
+      "walkthrough": "examples/datasets/noaa-coops-water-levels/README.md",
+      "studies": [
+        "storm-surge"
+      ],
+      "quickstart": {
+        "cli": "usdata fetch noaa:coops-water-levels \\\n  --start 2024-05-06T00:00:00Z \\\n  --end 2024-05-06T00:12:00Z \\\n  -p station=8518750 \\\n  -p datum=MLLW \\\n  -p units=metric",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:coops-water-levels\"),\n    build_query(\n        start=\"2024-05-06T00:00:00Z\",\n        end=\"2024-05-06T00:12:00Z\",\n        station=\"8518750\",\n        datum=\"MLLW\",\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: coastal-water-levels\nsources:\n  - dataset: noaa:coops-water-levels\n    start: 2024-05-06T00:00:00Z\n    end: 2024-05-06T00:12:00Z\n    params:\n      station: \"8518750\"\n      datum: MLLW\n      units: metric\n"
+      }
     },
     {
       "id": "noaa:coops-tide-predictions",
       "title": "Coastal tide predictions",
+      "product": "CO-OPS Tide Predictions",
       "description": "Astronomical tide predictions from the anonymous CO-OPS Data API for one station, an explicit vertical datum, and units, on a six-minute, other minute, hourly, or high/low interval spanning at most a year. Subtracting predictions from observed water levels isolates the non-tidal residual, such as storm surge.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Sea level and tides",
       "system": "CO-OPS Data API",
       "availability": "Released",
@@ -2162,6 +2215,7 @@
       "latency": null,
       "citation": "NOAA National Ocean Service, Center for Operational Oceanographic Products and Services, tide predictions, accessed via usdata",
       "terms": "https://tidesandcurrents.noaa.gov/disclaimers.html",
+      "homepage": "https://api.tidesandcurrents.noaa.gov/api/prod/",
       "variables": [
         {
           "name": "Date Time",
@@ -2182,18 +2236,20 @@
       "max_window": "366 days",
       "guide": "https://docs.usdata.dev/providers/noaa-coops-predictions/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-tide-predictions/",
-      "examples": [
-        {
-          "title": "How high was Hurricane Helene's storm surge at Cedar Key?",
-          "url": "https://usdata.dev/examples/storm-surge/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/coops-tide-predictions/",
+      "walkthrough": null,
+      "studies": [
+        "storm-surge"
+      ],
+      "quickstart": null
     },
     {
       "id": "noaa:coastwatch-sst",
       "title": "Sea-surface temperature",
+      "product": "CoastWatch Blended Sea Surface Temperature",
       "description": "NOAA geo-polar blended daily SST analysis (day and night) on a global 5 km grid, ERDDAP dataset noaacwBLENDEDsstDNDaily on the CoastWatch server, with server-side spatial, temporal, and variable subsetting. Raw CSV subsets retain grid coordinates and units without volatile NetCDF history.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Satellite oceanography",
       "system": null,
       "availability": "Released",
@@ -2223,6 +2279,7 @@
       "latency": null,
       "citation": "NOAA/NESDIS Office of Satellite Products and Operations, Geo-polar Blended Sea Surface Temperature Analysis (noaacwBLENDEDsstDNDaily), accessed via usdata",
       "terms": "https://coastwatch.noaa.gov/erddap/info/noaacwBLENDEDsstDNDaily/index.html",
+      "homepage": "https://coastwatch.noaa.gov/erddap/griddap/noaacwBLENDEDsstDNDaily.html",
       "variables": [
         {
           "name": "analysed_sst",
@@ -2248,18 +2305,18 @@
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/noaa-coastwatch/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/coastwatch-sst/",
-      "examples": [
-        {
-          "title": "How warm was the sea in a small area?",
-          "url": "https://usdata.dev/examples/sst-analysis/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/noaa/coastwatch-sst/",
+      "walkthrough": "examples/datasets/noaa-coastwatch-sst/noaa-coastwatch-sst.ipynb",
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "noaa:ghcn-hourly",
       "title": "GHCN-Hourly Station Observations",
+      "product": "GHCN-Hourly Station Observations",
       "description": "Global hourly and sub-hourly surface observations, the successor to ISD. Published as per-station and per-year bulk files by NCEI; the exact access path has not been confirmed yet and must be verified before an adapter is built.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Surface weather",
       "system": null,
       "availability": "Planned",
@@ -2282,17 +2339,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.ncei.noaa.gov/products/global-historical-climatology-network-hourly",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "noaa:igra",
       "title": "IGRA Radiosonde Observations",
+      "product": "IGRA Radiosonde Observations",
       "description": "Integrated Global Radiosonde Archive version 2: observed upper-air soundings from 2,931 stations as one zipped fixed-width text file per station for its full period of record (about 81 MB for Norman, Oklahoma), plus year-to-date and derived-parameter directories, from an NCEI HTTPS directory. Needs a fixed-width sounding reader.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Surface weather",
       "system": null,
       "availability": "Planned",
@@ -2314,17 +2377,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.ncei.noaa.gov/products/weather-balloon/integrated-global-radiosonde-archive",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "noaa:nws-warnings",
       "title": "NWS Watch, Warning, and Advisory Archive",
+      "product": "NWS Watch, Warning, and Advisory Archive",
       "description": "Every National Weather Service watch, warning, and advisory polygon with VTEC codes and issue, expiry, and update times, as one zipped shapefile per year. The maintained archive is the Iowa Environmental Mesonet's mirror of NWS products, not an NWS endpoint; the tornado and severe thunderstorm storm-based warnings for 2024 are 6.5 MB and all products 351 MB. Needs a shapefile reader.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Severe weather",
       "system": null,
       "availability": "Planned",
@@ -2347,17 +2416,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://mesonet.agron.iastate.edu/request/gis/watchwarn.phtml",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "noaa:nclimdiv",
       "title": "nClimDiv Climate Divisional Data",
+      "product": "nClimDiv Climate Divisional Data",
       "description": "Monthly temperature, precipitation, and drought indices for U.S. climate divisions, states, and regions since 1895, as fixed-width text files in an NCEI monitoring-content directory refreshed monthly.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Climate",
       "system": null,
       "availability": "Planned",
@@ -2381,17 +2456,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "noaa:sea-ice-index",
       "title": "Sea Ice Index",
+      "product": "Sea Ice Index",
       "description": "Daily and monthly Arctic and Antarctic sea ice extent and concentration (NOAA@NSIDC G02135) as CSV, GeoTIFF, and shapefiles in an HTTPS directory hosted by NSIDC.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Snow and ice",
       "system": null,
       "availability": "Planned",
@@ -2415,17 +2496,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://nsidc.org/data/g02135",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "noaa:ersst",
       "title": "ERSST Monthly Sea Surface Temperature",
+      "product": "ERSST Monthly Sea Surface Temperature",
       "description": "Extended Reconstructed SST v5: monthly global 2 degree analysis since 1854, one NetCDF per month in an NCEI HTTPS directory.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Ocean physics",
       "system": null,
       "availability": "Planned",
@@ -2449,17 +2536,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.ncei.noaa.gov/products/extended-reconstructed-sst",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "noaa:oisst",
       "title": "OISST Daily Sea Surface Temperature",
+      "product": "OISST Daily Sea Surface Temperature",
       "description": "Optimum Interpolation SST v2.1: daily global 0.25 degree analysis since September 1981 as one NetCDF per day, from the NOAA CDR S3 bucket (data/v2.1/avhrr/YYYYMM/) or the NCEI HTTPS mirror.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Ocean physics",
       "system": null,
       "availability": "Planned",
@@ -2482,17 +2575,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.ncei.noaa.gov/products/optimum-interpolation-sst",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "noaa:ocads",
       "title": "Ocean Carbon and Acidification Data System",
+      "product": "Ocean Carbon and Acidification Data System",
       "description": "Archived ocean carbon, pH, and related chemistry datasets (cruises, moorings, syntheses such as SOCAT and GLODAP) in an NCEI HTTPS directory organized by accession.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Ocean chemistry",
       "system": null,
       "availability": "Planned",
@@ -2516,17 +2615,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.ncei.noaa.gov/products/ocean-carbon-acidification-data-system",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "noaa:etopo",
       "title": "ETOPO 2022 Global Relief",
+      "product": "ETOPO 2022 Global Relief",
       "description": "Global topography and bathymetry at 15, 30, and 60 arc-seconds as NetCDF and GeoTIFF tiles, served through the NCEI THREDDS catalog with OPeNDAP access; the THREDDS pattern.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Bathymetry and hydrography",
       "system": null,
       "availability": "Planned",
@@ -2550,17 +2655,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.ncei.noaa.gov/products/etopo-global-relief-model",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "noaa:billion-dollar-disasters",
       "title": "Billion-Dollar Weather and Climate Disasters",
+      "product": "Billion-Dollar Weather and Climate Disasters",
       "description": "NCEI's list of U.S. disasters with CPI-adjusted and unadjusted costs, dates, and deaths since 1980, served as one CSV with two header comment lines from the NCEI access service (about 36 kB for all events).",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Natural hazards",
       "system": null,
       "availability": "Planned",
@@ -2582,17 +2693,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.ncei.noaa.gov/access/billions/",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "noaa:tsunami-events",
       "title": "Global Historical Tsunami Database",
+      "product": "Global Historical Tsunami Database",
       "description": "Tsunami source events and runup observations since 2100 BCE from NCEI, served as JSON by the HazEL hazard-service API with year, magnitude, and location filters.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Natural hazards",
       "system": null,
       "availability": "Planned",
@@ -2615,17 +2732,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.ngdc.noaa.gov/hazel/view/hazards/tsunami/event-search",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "noaa:paleo-search",
       "title": "World Data Service for Paleoclimatology",
+      "product": "World Data Service for Paleoclimatology",
       "description": "Proxy climate records (tree rings, ice cores, sediments, corals) with a JSON study-search API from NCEI that returns study metadata and data file URLs filtered by data type, region, and time span.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Paleoclimate",
       "system": null,
       "availability": "Planned",
@@ -2648,17 +2771,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.ncei.noaa.gov/products/paleoclimatology",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "noaa:swpc-realtime",
       "title": "SWPC Real-Time Space Weather Products",
+      "product": "SWPC Real-Time Space Weather Products",
       "description": "Planetary K index, solar wind, and other real-time indices as small JSON files from the Space Weather Prediction Center services host. Rolling recent windows only; historical archives live elsewhere.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Space weather",
       "system": null,
       "availability": "Planned",
@@ -2680,17 +2809,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.swpc.noaa.gov/products-and-data",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "noaa:cdr-ndvi",
       "title": "NDVI Climate Data Record",
+      "product": "NDVI Climate Data Record",
       "description": "Daily global normalized difference vegetation index from AVHRR and VIIRS since 1981, one NetCDF per day in the public noaa-cdr-ndvi-pds S3 bucket laid out as data/YYYY/.",
       "provider": "NOAA",
+      "provider_id": "noaa",
       "domain": "Land and environment",
       "system": null,
       "availability": "Planned",
@@ -2713,17 +2848,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.ncei.noaa.gov/products/climate-data-records/normalized-difference-vegetation-index",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "usgs:earthquakes",
       "title": "Earthquake events",
+      "product": "Earthquake Catalog (ComCat)",
       "description": "Global earthquake events with origin time, epicenter, depth, magnitude, and review status from the ANSS Comprehensive Catalog through the FDSN event web service. Anonymous REST filtered by bounding box, time window, magnitude, and depth, served as CSV with fixed columns; the service caps a response at 20,000 events, so longer selections arrive as pages ordered by time. Events are revised as networks review them.",
       "provider": "USGS",
+      "provider_id": "usgs",
       "domain": "Natural hazards",
       "system": null,
       "availability": "Released",
@@ -2752,6 +2893,7 @@
       "latency": null,
       "citation": "U.S. Geological Survey, Earthquake Hazards Program, 2017, Advanced National Seismic System (ANSS) Comprehensive Catalog of Earthquake Events and Products, doi:10.5066/F7MS3QZH",
       "terms": "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits",
+      "homepage": "https://earthquake.usgs.gov/fdsnws/event/1/",
       "variables": [
         {
           "name": "time",
@@ -2807,18 +2949,22 @@
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/usgs-earthquakes/",
       "reference": "https://docs.usdata.dev/generated/catalog/usgs/earthquakes/",
-      "examples": [
-        {
-          "title": "Which earthquakes did Oklahoma record on the days of the May 2024 tornado outbreak?",
-          "url": "https://usdata.dev/examples/earthquakes/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/usgs/earthquakes/",
+      "walkthrough": "examples/datasets/usgs-earthquakes/README.md",
+      "studies": [],
+      "quickstart": {
+        "cli": "usdata fetch usgs:earthquakes \\\n  --location Oklahoma \\\n  --start 2024-05-06 \\\n  --end 2024-05-07 \\\n  -p min_magnitude=1.0",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"usgs:earthquakes\"),\n    build_query(\n        location=\"Oklahoma\",\n        start=\"2024-05-06\",\n        end=\"2024-05-07\",\n        min_magnitude=1.0,\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: oklahoma-earthquakes\nsources:\n  - name: quakes\n    dataset: usgs:earthquakes\n    location: Oklahoma\n    start: 2024-05-06\n    end: 2024-05-07\n    params:\n      min_magnitude: 1.0\n"
+      }
     },
     {
       "id": "usgs:water-daily",
       "title": "Daily water observations",
+      "product": "Streamflow and Water Daily Values",
       "description": "Daily statistics (streamflow, gage height, temperature) for USGS monitoring sites via the modern USGS Water Data OGC API. Anonymous, paginated CSV downloads filtered by site or bbox, dates, and parameter codes; daily mean by default, with units and quality metadata preserved. Variables are five-digit NWIS parameter codes and the catalog lists the common ones; the delivered set is open.",
       "provider": "USGS",
+      "provider_id": "usgs",
       "domain": "Water resources",
       "system": null,
       "availability": "Released",
@@ -2847,6 +2993,7 @@
       "latency": null,
       "citation": "U.S. Geological Survey, Water Data for the Nation daily values, accessed via usdata",
       "terms": "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits",
+      "homepage": "https://api.waterdata.usgs.gov/",
       "variables": [
         {
           "name": "00060",
@@ -2867,18 +3014,20 @@
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/usgs-water-daily/",
       "reference": "https://docs.usdata.dev/generated/catalog/usgs/water-daily/",
-      "examples": [
-        {
-          "title": "How can I preserve weather and streamflow inputs together?",
-          "url": "https://usdata.dev/examples/weather-and-streamflow/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/usgs/water-daily/",
+      "walkthrough": null,
+      "studies": [
+        "weather-and-streamflow"
+      ],
+      "quickstart": null
     },
     {
       "id": "usgs:3dep-elevation",
       "title": "3DEP Elevation",
+      "product": "3DEP Elevation",
       "description": "Seamless digital elevation models from the 3D Elevation Program (1/3 arc-second and 1 m where available). Tiled rasters on public cloud storage; spatial selection by tile.",
       "provider": "USGS",
+      "provider_id": "usgs",
       "domain": "Terrain and elevation",
       "system": null,
       "availability": "Planned",
@@ -2901,17 +3050,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.usgs.gov/3d-elevation-program",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/usgs/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "epa:aqs-daily",
       "title": "Daily air pollutant summaries from regulatory monitors",
+      "product": "Air Quality System Daily Summaries",
       "description": "Daily summaries of regulatory air monitoring data from EPA's Air Quality System through the AQS Data API: one row per monitor, local day, and pollutant standard, for one to five AQS parameter codes such as PM2.5 and ozone, over named sites, a state or county, or a box. Each request covers at most one calendar year, so a window becomes one JSON file per year. Requires a free key issued by email; the response is stored in a canonical form without the echoed request.",
       "provider": "EPA",
+      "provider_id": "epa",
       "domain": "Air quality",
       "system": null,
       "availability": "Released",
@@ -2947,6 +3102,7 @@
       "latency": "Agencies must submit each calendar quarter's data within 90 days after it ends (40 CFR 58.16)",
       "citation": "U.S. Environmental Protection Agency, Air Quality System (AQS) daily summary data, AQS Data API, accessed via usdata",
       "terms": "https://aqs.epa.gov/aqsweb/documents/data_api.html#terms",
+      "homepage": "https://aqs.epa.gov/aqsweb/documents/data_api.html#daily",
       "variables": [
         {
           "name": "state_code",
@@ -3112,18 +3268,20 @@
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/epa-aqs-daily/",
       "reference": "https://docs.usdata.dev/generated/catalog/epa/aqs-daily/",
-      "examples": [
-        {
-          "title": "How far above the daily PM2.5 standard did Canadian wildfire smoke push New York City's air in June 2023?",
-          "url": "https://usdata.dev/examples/wildfire-smoke/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/epa/aqs-daily/",
+      "walkthrough": null,
+      "studies": [
+        "wildfire-smoke"
+      ],
+      "quickstart": null
     },
     {
       "id": "fema:disaster-declarations",
       "title": "Federal disaster declarations by county",
+      "product": "FEMA Disaster Declarations Summaries",
       "description": "Every federally declared disaster since 1953, major disaster, emergency, and fire management declarations alike, one row per declaration and designated area, with the incident type and period, the programs declared, and state and county FIPS codes, from the OpenFEMA v2 API as CSV. Rows carry no coordinates, so selection is by named state or county rather than by box, and a window selects declarations whose incident period overlaps it. The dataset is rebuilt every twenty minutes and rows are revised as incidents close.",
       "provider": "FEMA",
+      "provider_id": "fema",
       "domain": "Natural hazards",
       "system": null,
       "availability": "Released",
@@ -3152,6 +3310,7 @@
       "latency": null,
       "citation": "Federal Emergency Management Agency (FEMA), OpenFEMA Dataset: Disaster Declarations Summaries - v2. Retrieved from https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries on [date, time]. This product uses the Federal Emergency Management Agency's OpenFEMA API, but is not endorsed by FEMA. The Federal Government or FEMA cannot vouch for the data or analyses derived from these data after the data have been retrieved from the Agency's website(s).",
       "terms": "https://www.fema.gov/about/openfema/terms-conditions",
+      "homepage": "https://www.fema.gov/openfema-data-page/disaster-declarations-summaries-v2",
       "variables": [
         {
           "name": "femaDeclarationString",
@@ -3302,18 +3461,20 @@
       "max_window": null,
       "guide": "https://docs.usdata.dev/providers/fema-disaster-declarations/",
       "reference": "https://docs.usdata.dev/generated/catalog/fema/disaster-declarations/",
-      "examples": [
-        {
-          "title": "Which Oklahoma counties hit by a tornado on 6 May 2024 were under a federal disaster declaration?",
-          "url": "https://usdata.dev/examples/disaster-declarations/"
-        }
-      ]
+      "page": "https://usdata.dev/datasets/fema/disaster-declarations/",
+      "walkthrough": null,
+      "studies": [
+        "disaster-declarations"
+      ],
+      "quickstart": null
     },
     {
       "id": "fema:nfhl",
       "title": "National Flood Hazard Layer",
+      "product": "National Flood Hazard Layer",
       "description": "Effective flood zones, base flood elevations, and related features from FEMA's flood insurance rate maps, available as county or state extracts and through ArcGIS services.",
       "provider": "FEMA",
+      "provider_id": "fema",
       "domain": "Natural hazards",
       "system": null,
       "availability": "Planned",
@@ -3336,17 +3497,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.fema.gov/flood-maps/national-flood-hazard-layer",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/fema/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "census:acs-5year",
       "title": "American Community Survey 5-Year Estimates",
+      "product": "American Community Survey 5-Year Estimates",
       "description": "Population, housing, income, and demographic estimates for every geography down to block group, via the Census Data API, selected by state and county FIPS code rather than by box. Requires a free API key on every data request; only the dataset and variable metadata are served without one.",
       "provider": "Census Bureau",
+      "provider_id": "census",
       "domain": "Demographics",
       "system": null,
       "availability": "Planned",
@@ -3369,17 +3536,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.census.gov/data/developers/data-sets/acs-5year.html",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/census/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "nasa:gpm-imerg",
       "title": "GPM IMERG Precipitation",
+      "product": "GPM IMERG Precipitation",
       "description": "Global half-hourly and daily merged satellite precipitation estimates. Discovered through NASA CMR and downloaded from GES DISC. Requires a free Earthdata Login; the first credentialed dataset.",
       "provider": "NASA",
+      "provider_id": "nasa",
       "domain": "Weather satellites",
       "system": null,
       "availability": "Planned",
@@ -3402,17 +3575,23 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://gpm.nasa.gov/data/imerg",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/nasa/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     },
     {
       "id": "usda:cropland-data-layer",
       "title": "Cropland Data Layer",
+      "product": "Cropland Data Layer",
       "description": "Annual 30 m raster of crop type across the contiguous United States from NASS, served through CropScape with bbox extraction.",
       "provider": "USDA",
+      "provider_id": "usda",
       "domain": "Agriculture",
       "system": null,
       "availability": "Planned",
@@ -3435,11 +3614,15 @@
       "latency": null,
       "citation": null,
       "terms": null,
+      "homepage": "https://www.nass.usda.gov/Research_and_Science/Cropland/SARS1a.php",
       "variables": [],
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/usda/",
-      "examples": []
+      "page": null,
+      "walkthrough": null,
+      "studies": [],
+      "quickstart": null
     }
   ]
 }

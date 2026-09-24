@@ -12,7 +12,7 @@ CoastWatch Blended Sea Surface Temperature.
 - Selection: Grid centers and timestamps inside the requested bounds; optional stride
 - Required inputs: BBox or location, and both timestamps
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [How warm was the sea in a small area?](https://usdata.dev/examples/sst-analysis/)
+- On usdata.dev: [Sea-surface temperature](https://usdata.dev/datasets/noaa/coastwatch-sst/), with a walkthrough
 
 ## Parameters
 

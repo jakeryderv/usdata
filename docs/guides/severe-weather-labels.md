@@ -54,7 +54,7 @@ changed over the decades. Negative examples should come from hail and wind
 rows, not from silence, and any climatology should state the reporting era it
 covers.
 
-The [tornado classification example](https://usdata.dev/examples/tornado-classification/)
+The [tornado classification example](https://usdata.dev/studies/tornado-classification/)
 builds a twelve-row labeled table this way and lists the caveats it could not
-resolve; the [SPC tornadoes example](https://usdata.dev/examples/spc-tornadoes/)
+resolve; the [SPC tornadoes example](https://usdata.dev/datasets/noaa/spc-tornado-reports/)
 counts one year by rating.

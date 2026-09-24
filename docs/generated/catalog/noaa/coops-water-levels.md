@@ -12,7 +12,8 @@ CO-OPS Observed Water Levels.
 - Selection: Six-minute observations for one station and datum; at most 28 days
 - Required inputs: Station, datum, and both minute-aligned timestamps
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [How high was the water at The Battery?](https://usdata.dev/examples/coastal-water-levels/); [How high was Hurricane Helene's storm surge at Cedar Key?](https://usdata.dev/examples/storm-surge/)
+- On usdata.dev: [Coastal water levels](https://usdata.dev/datasets/noaa/coops-water-levels/), with a walkthrough
+- Studies: [How high was Hurricane Helene's storm surge at Cedar Key?](https://usdata.dev/studies/storm-surge/)
 
 ## Parameters
 
