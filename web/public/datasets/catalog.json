@@ -725,7 +725,11 @@
         "tornado-classification",
         "severe-weather-case-study"
       ],
-      "quickstart": null
+      "quickstart": {
+        "cli": "usdata fetch noaa:nexrad-level2 \\\n  --start 2024-05-06T20:00:00Z \\\n  --end 2024-05-06T20:05:00Z \\\n  -p site=KTLX",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:nexrad-level2\"),\n    build_query(\n        start=\"2024-05-06T20:00:00Z\",\n        end=\"2024-05-06T20:05:00Z\",\n        site=\"KTLX\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: ktlx-one-volume\nsources:\n  - dataset: noaa:nexrad-level2\n    start: 2024-05-06T20:00:00Z\n    end: 2024-05-06T20:05:00Z\n    params:\n      site: KTLX\n"
+      }
     },
     {
       "id": "noaa:mrms",
