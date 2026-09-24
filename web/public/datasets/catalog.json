@@ -1037,7 +1037,7 @@
       "guide": "https://docs.usdata.dev/providers/noaa-nexrad-level3/",
       "reference": "https://docs.usdata.dev/providers/noaa-nexrad-level3/#reference",
       "page": "https://usdata.dev/datasets/noaa/nexrad-level3/",
-      "walkthrough": "examples/datasets/noaa-nexrad-level3/README.md",
+      "walkthrough": "examples/datasets/noaa-nexrad-level3/noaa-nexrad-level3.ipynb",
       "studies": [],
       "quickstart": {
         "cli": "usdata fetch noaa:nexrad-level3 \\\n  --start 2024-05-06T20:30:00Z \\\n  --end 2024-05-06T21:00:00Z \\\n  -p site=KTLX \\\n  -p products=NMD,NST,EET",
