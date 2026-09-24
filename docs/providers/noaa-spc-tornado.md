@@ -130,4 +130,4 @@ rather than estimated.
 
 [All NOAA datasets](noaa.md).
 
-[Catalog reference](../generated/catalog/noaa/spc-tornado-reports.md#catalog-reference).
+--8<-- "generated/catalog/noaa/spc-tornado-reports.md"
