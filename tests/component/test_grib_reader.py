@@ -210,6 +210,33 @@ def test_south_to_north_scanning_is_reordered_north_to_south(tmp_path) -> None:
     assert result.t.values.tolist() == values[::-1].tolist()
 
 
+def test_alternating_rows_are_unreversed_before_ordering_north_to_south(tmp_path) -> None:
+    # Stored south to north, every second row east to west, as NBM's CONUS grid is.
+    stored = np.array([[0, 1, 2, 3], [7, 6, 5, 4], [8, 9, 10, 11]], dtype=float)
+    content = message(
+        stored,
+        jScansPositively=1,
+        alternativeRowScanning=1,
+        latitudeOfFirstGridPointInDegrees=38.0,
+        latitudeOfLastGridPointInDegrees=40.0,
+    )
+    result = item(tmp_path, content).open()
+    assert result.latitude.values.tolist() == [40.0, 39.0, 38.0]
+    assert result.longitude.values.tolist() == [250.0, 251.0, 252.0, 253.0]
+    assert result.t.values.tolist() == [[8, 9, 10, 11], [4, 5, 6, 7], [0, 1, 2, 3]]
+
+
+def test_alternating_rows_on_a_lambert_grid_keep_values_beside_their_coordinates(
+    tmp_path,
+) -> None:
+    stored = np.array([[0, 1, 2], [5, 4, 3]], dtype=float)
+    content = message(stored, grid=LAMBERT, param=59, alternativeRowScanning=1)
+    result = item(tmp_path, content).open()
+    assert result.cape.values.tolist() == [[0, 1, 2], [3, 4, 5]]
+    # ecCodes lists coordinates west to east on every row, so they are not reversed.
+    assert (np.diff(result.longitude.values, axis=1) > 0).all()
+
+
 def test_lambert_grid_has_two_dimensional_coordinates_and_projection(tmp_path) -> None:
     content = message(np.arange(6, dtype=float), grid=LAMBERT, param=59)
     result = item(tmp_path, content).open()
