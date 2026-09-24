@@ -133,9 +133,9 @@
         "climate-anomalies"
       ],
       "quickstart": {
-        "cli": "usdata fetch noaa:gsom \\\n  --start 2024-05-01 \\\n  --end 2024-05-31 \\\n  --vars PRCP,TAVG \\\n  -p stations=USW00013967 \\\n  -p units=metric",
-        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:gsom\"),\n    build_query(\n        start=\"2024-05-01\",\n        end=\"2024-05-31\",\n        variables=[\"PRCP\", \"TAVG\"],\n        stations=\"USW00013967\",\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
-        "manifest": "name: okc-monthly-climate\nsources:\n  - dataset: noaa:gsom\n    start: 2024-05-01\n    end: 2024-05-31\n    variables: [PRCP, TAVG]\n    params:\n      stations: USW00013967\n      units: metric\n"
+        "cli": "usdata fetch noaa:gsom \\\n  --start 2020-01-01 \\\n  --end 2024-12-31 \\\n  --vars PRCP,TAVG \\\n  -p stations=USW00013967 \\\n  -p units=metric",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:gsom\"),\n    build_query(\n        start=\"2020-01-01\",\n        end=\"2024-12-31\",\n        variables=[\"PRCP\", \"TAVG\"],\n        stations=\"USW00013967\",\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: okc-monthly-climate\nsources:\n  - dataset: noaa:gsom\n    start: 2020-01-01\n    end: 2024-12-31\n    variables: [PRCP, TAVG]\n    params:\n      stations: USW00013967\n      units: metric\n"
       }
     },
     {
@@ -272,7 +272,7 @@
       "guide": "https://docs.usdata.dev/providers/noaa-lcd/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/lcd/",
       "page": "https://usdata.dev/datasets/noaa/lcd/",
-      "walkthrough": "examples/datasets/noaa-lcd/README.md",
+      "walkthrough": "examples/datasets/noaa-lcd/noaa-lcd.ipynb",
       "studies": [
         "hourly-anomalies"
       ],
@@ -508,7 +508,7 @@
       "guide": "https://docs.usdata.dev/providers/noaa-spc-tornado/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/spc-tornado-reports/",
       "page": "https://usdata.dev/datasets/noaa/spc-tornado-reports/",
-      "walkthrough": "examples/datasets/noaa-spc-tornado-reports/README.md",
+      "walkthrough": "examples/datasets/noaa-spc-tornado-reports/noaa-spc-tornado-reports.ipynb",
       "studies": [
         "severe-weather-case-study"
       ],
@@ -1656,7 +1656,7 @@
       "guide": "https://docs.usdata.dev/providers/noaa-gfs/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/gfs/",
       "page": "https://usdata.dev/datasets/noaa/gfs/",
-      "walkthrough": "examples/datasets/noaa-gfs/README.md",
+      "walkthrough": "examples/datasets/noaa-gfs/noaa-gfs.ipynb",
       "studies": [],
       "quickstart": {
         "cli": "usdata fetch noaa:gfs \\\n  --start 2024-05-06T00:00:00Z \\\n  --end 2024-05-06T00:00:00Z \\\n  -p cycle=0 \\\n  -p forecast_hour=0 \\\n  -p resolution=1p00",
@@ -2004,7 +2004,7 @@
       "guide": "https://docs.usdata.dev/providers/noaa-normals/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/climate-normals/",
       "page": "https://usdata.dev/datasets/noaa/climate-normals/",
-      "walkthrough": "examples/datasets/noaa-climate-normals/README.md",
+      "walkthrough": "examples/datasets/noaa-climate-normals/noaa-climate-normals.ipynb",
       "studies": [
         "climate-anomalies",
         "hourly-anomalies"
@@ -2157,7 +2157,7 @@
         {
           "name": "L",
           "units": null,
-          "description": "Inferred-value flag"
+          "description": "Expected-height limit flag: 1 when the value passed the maximum or minimum expected water level"
         },
         {
           "name": "Quality",
@@ -2169,14 +2169,14 @@
       "guide": "https://docs.usdata.dev/providers/noaa-coops/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-water-levels/",
       "page": "https://usdata.dev/datasets/noaa/coops-water-levels/",
-      "walkthrough": "examples/datasets/noaa-coops-water-levels/README.md",
+      "walkthrough": "examples/datasets/noaa-coops-water-levels/noaa-coops-water-levels.ipynb",
       "studies": [
         "storm-surge"
       ],
       "quickstart": {
-        "cli": "usdata fetch noaa:coops-water-levels \\\n  --start 2024-05-06T00:00:00Z \\\n  --end 2024-05-06T00:12:00Z \\\n  -p station=8518750 \\\n  -p datum=MLLW \\\n  -p units=metric",
-        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:coops-water-levels\"),\n    build_query(\n        start=\"2024-05-06T00:00:00Z\",\n        end=\"2024-05-06T00:12:00Z\",\n        station=\"8518750\",\n        datum=\"MLLW\",\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
-        "manifest": "name: coastal-water-levels\nsources:\n  - dataset: noaa:coops-water-levels\n    start: 2024-05-06T00:00:00Z\n    end: 2024-05-06T00:12:00Z\n    params:\n      station: \"8518750\"\n      datum: MLLW\n      units: metric\n"
+        "cli": "usdata fetch noaa:coops-water-levels \\\n  --start 2024-05-06 \\\n  --end 2024-05-08 \\\n  -p station=8518750 \\\n  -p datum=MLLW \\\n  -p units=metric",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:coops-water-levels\"),\n    build_query(\n        start=\"2024-05-06\",\n        end=\"2024-05-08\",\n        station=\"8518750\",\n        datum=\"MLLW\",\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: coastal-water-levels\nsources:\n  - dataset: noaa:coops-water-levels\n    start: 2024-05-06\n    end: 2024-05-08\n    params:\n      station: \"8518750\"\n      datum: MLLW\n      units: metric\n"
       }
     },
     {
@@ -2950,12 +2950,12 @@
       "guide": "https://docs.usdata.dev/providers/usgs-earthquakes/",
       "reference": "https://docs.usdata.dev/generated/catalog/usgs/earthquakes/",
       "page": "https://usdata.dev/datasets/usgs/earthquakes/",
-      "walkthrough": "examples/datasets/usgs-earthquakes/README.md",
+      "walkthrough": "examples/datasets/usgs-earthquakes/usgs-earthquakes.ipynb",
       "studies": [],
       "quickstart": {
-        "cli": "usdata fetch usgs:earthquakes \\\n  --location Oklahoma \\\n  --start 2024-05-06 \\\n  --end 2024-05-07 \\\n  -p min_magnitude=1.0",
-        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"usgs:earthquakes\"),\n    build_query(\n        location=\"Oklahoma\",\n        start=\"2024-05-06\",\n        end=\"2024-05-07\",\n        min_magnitude=1.0,\n    ),\n)\ndata = items[0].open()\n",
-        "manifest": "name: oklahoma-earthquakes\nsources:\n  - name: quakes\n    dataset: usgs:earthquakes\n    location: Oklahoma\n    start: 2024-05-06\n    end: 2024-05-07\n    params:\n      min_magnitude: 1.0\n"
+        "cli": "usdata fetch usgs:earthquakes \\\n  --location Oklahoma \\\n  --start 2000-01-01 \\\n  --end 2024-12-31 \\\n  -p min_magnitude=3.0",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"usgs:earthquakes\"),\n    build_query(\n        location=\"Oklahoma\",\n        start=\"2000-01-01\",\n        end=\"2024-12-31\",\n        min_magnitude=3.0,\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: oklahoma-earthquakes\nsources:\n  - name: quakes\n    dataset: usgs:earthquakes\n    # Oklahoma's bounding box, so the edges of Kansas, Texas, and Arkansas count too.\n    location: Oklahoma\n    start: 2000-01-01\n    end: 2024-12-31\n    params:\n      min_magnitude: 3.0\n"
       }
     },
     {
