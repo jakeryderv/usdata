@@ -45,7 +45,7 @@ function datasetRow(dataset) {
   row.append(facts);
   const links = element("div", null, "dataset-links");
   links.append(link("Usage & limits", dataset.guide));
-  for (const example of dataset.examples) links.append(link(`${example.title} example`, example.url));
+  for (const example of dataset.examples) links.append(link(example.title, example.url));
   row.append(links);
   const details = element("details");
   details.append(element("summary", "Inspect in your terminal"));

@@ -1,6 +1,6 @@
 # GOES CONUS and mesoscale imagery
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:goes-abi` · **Released** · Included since usdata 0.8.
 
@@ -12,7 +12,7 @@ GOES-R ABI Cloud and Moisture Imagery.
 - Selection: Whole single-channel scenes by inclusive UTC scan-start time and explicit mesoscale sector
 - Required inputs: Satellite, channel, both timestamps; product and sector for mesoscale
 - Open locally: `usdata[netcdf]` · [Reader guide](../../../reference/readers.md)
-- Examples: [goes imagery](https://usdata.dev/examples/goes-imagery/), [goes mesoscale](https://usdata.dev/examples/goes-mesoscale/), [event context](https://usdata.dev/examples/event-context/)
+- Examples: [What did a satellite see in infrared?](https://usdata.dev/examples/goes-imagery/); [How did central Plains infrared cloud patterns change over fifteen minutes?](https://usdata.dev/examples/goes-mesoscale/); [What did radar and satellites show around a reported tornado?](https://usdata.dev/examples/event-context/)
 
 ## Parameters
 

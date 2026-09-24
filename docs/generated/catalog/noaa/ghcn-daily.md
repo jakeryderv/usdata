@@ -1,6 +1,6 @@
 # Daily station weather
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:ghcn-daily` · **Released** · Included since usdata 0.2.
 
@@ -12,7 +12,7 @@ GHCN-Daily Station Observations.
 - Selection: Station observations within inclusive calendar dates; selected elements
 - Required inputs: Both dates; station IDs or a geographic query
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [weather and streamflow](https://usdata.dev/examples/weather-and-streamflow/)
+- Examples: [How can I preserve weather and streamflow inputs together?](https://usdata.dev/examples/weather-and-streamflow/)
 
 ## Parameters
 

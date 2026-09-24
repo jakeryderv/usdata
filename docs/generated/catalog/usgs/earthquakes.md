@@ -1,6 +1,6 @@
 # Earthquake events
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `usgs:earthquakes` · **Released** · Included since usdata 0.19.
 
@@ -12,7 +12,7 @@ Earthquake Catalog (ComCat).
 - Selection: Events inside an inclusive UTC window and optional box, magnitude, and depth bounds
 - Required inputs: Both timestamps; optionally a location or bbox and magnitude or depth bounds
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [earthquakes](https://usdata.dev/examples/earthquakes/)
+- Examples: [Which earthquakes did Oklahoma record on the days of the May 2024 tornado outbreak?](https://usdata.dev/examples/earthquakes/)
 
 ## Parameters
 

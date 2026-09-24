@@ -1,6 +1,6 @@
 # Sea-surface temperature
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:coastwatch-sst` · **Released** · Included since usdata 0.5.
 
@@ -12,7 +12,7 @@ CoastWatch Blended Sea Surface Temperature.
 - Selection: Grid centers and timestamps inside the requested bounds; optional stride
 - Required inputs: BBox or location, and both timestamps
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [sst analysis](https://usdata.dev/examples/sst-analysis/)
+- Examples: [How warm was the sea in a small area?](https://usdata.dev/examples/sst-analysis/)
 
 ## Parameters
 

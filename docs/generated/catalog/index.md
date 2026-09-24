@@ -1,6 +1,6 @@
 # Find a dataset
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 **Released** is included in usdata 0.26.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
 

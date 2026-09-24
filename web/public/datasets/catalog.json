@@ -68,7 +68,7 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/ghcn-daily/",
       "examples": [
         {
-          "title": "Weather and streamflow",
+          "title": "How can I preserve weather and streamflow inputs together?",
           "url": "https://usdata.dev/examples/weather-and-streamflow/"
         }
       ]
@@ -123,11 +123,11 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/gsom/",
       "examples": [
         {
-          "title": "Monthly climate",
+          "title": "How did temperature and rainfall vary through the year?",
           "url": "https://usdata.dev/examples/monthly-climate/"
         },
         {
-          "title": "Climate anomalies",
+          "title": "Was 2024 warmer or wetter than normal?",
           "url": "https://usdata.dev/examples/climate-anomalies/"
         }
       ]
@@ -182,7 +182,7 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/gsoy/",
       "examples": [
         {
-          "title": "Annual climate",
+          "title": "How warm and wet was a year at one airport?",
           "url": "https://usdata.dev/examples/annual-climate/"
         }
       ]
@@ -259,11 +259,11 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/lcd/",
       "examples": [
         {
-          "title": "Hourly observations",
+          "title": "Do hourly airport observations reproduce the daily summary?",
           "url": "https://usdata.dev/examples/hourly-observations/"
         },
         {
-          "title": "Hourly anomalies",
+          "title": "How warm was Oklahoma City on 6 May 2024 compared with its hourly normals?",
           "url": "https://usdata.dev/examples/hourly-anomalies/"
         }
       ]
@@ -339,19 +339,19 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/storm-events/",
       "examples": [
         {
-          "title": "Storm events",
+          "title": "What severe weather was reported in Oklahoma?",
           "url": "https://usdata.dev/examples/storm-events/"
         },
         {
-          "title": "Event context",
+          "title": "What did radar and satellites show around a reported tornado?",
           "url": "https://usdata.dev/examples/event-context/"
         },
         {
-          "title": "Tornado classification",
+          "title": "Which severe reports came with rotation and lightning?",
           "url": "https://usdata.dev/examples/tornado-classification/"
         },
         {
-          "title": "Severe weather case study",
+          "title": "For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?",
           "url": "https://usdata.dev/examples/severe-weather-case-study/"
         }
       ]
@@ -493,11 +493,11 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/spc-tornado-reports/",
       "examples": [
         {
-          "title": "Spc tornadoes",
+          "title": "How many tornadoes did 2024 bring, by rating?",
           "url": "https://usdata.dev/examples/spc-tornadoes/"
         },
         {
-          "title": "Severe weather case study",
+          "title": "For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?",
           "url": "https://usdata.dev/examples/severe-weather-case-study/"
         }
       ]
@@ -624,7 +624,7 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/nws-vtec-events/",
       "examples": [
         {
-          "title": "Warning lead time",
+          "title": "How long before the 6 May 2024 Osage County tornado was a tornado warning issued?",
           "url": "https://usdata.dev/examples/warning-lead-time/"
         }
       ]
@@ -690,19 +690,19 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/nexrad-level2/",
       "examples": [
         {
-          "title": "Radar reflectivity",
+          "title": "What does one weather radar volume show?",
           "url": "https://usdata.dev/examples/radar-reflectivity/"
         },
         {
-          "title": "Event context",
+          "title": "What did radar and satellites show around a reported tornado?",
           "url": "https://usdata.dev/examples/event-context/"
         },
         {
-          "title": "Tornado classification",
+          "title": "Which severe reports came with rotation and lightning?",
           "url": "https://usdata.dev/examples/tornado-classification/"
         },
         {
-          "title": "Severe weather case study",
+          "title": "For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?",
           "url": "https://usdata.dev/examples/severe-weather-case-study/"
         }
       ]
@@ -850,15 +850,15 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/mrms/",
       "examples": [
         {
-          "title": "Mrms rotation",
+          "title": "Where was the strongest mid-level rotation in each two-minute grid, and did it move toward the reported tornado?",
           "url": "https://usdata.dev/examples/mrms-rotation/"
         },
         {
-          "title": "Tornado classification",
+          "title": "Which severe reports came with rotation and lightning?",
           "url": "https://usdata.dev/examples/tornado-classification/"
         },
         {
-          "title": "Severe weather case study",
+          "title": "For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?",
           "url": "https://usdata.dev/examples/severe-weather-case-study/"
         }
       ]
@@ -1015,7 +1015,7 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/nexrad-level3/",
       "examples": [
         {
-          "title": "Radar products",
+          "title": "Which derived radar products did KTLX publish around a tornado report?",
           "url": "https://usdata.dev/examples/radar-products/"
         }
       ]
@@ -1073,15 +1073,15 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/goes-abi/",
       "examples": [
         {
-          "title": "Goes imagery",
+          "title": "What did a satellite see in infrared?",
           "url": "https://usdata.dev/examples/goes-imagery/"
         },
         {
-          "title": "Goes mesoscale",
+          "title": "How did central Plains infrared cloud patterns change over fifteen minutes?",
           "url": "https://usdata.dev/examples/goes-mesoscale/"
         },
         {
-          "title": "Event context",
+          "title": "What did radar and satellites show around a reported tornado?",
           "url": "https://usdata.dev/examples/event-context/"
         }
       ]
@@ -1196,15 +1196,15 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/goes-glm/",
       "examples": [
         {
-          "title": "Glm flashes",
+          "title": "Did lightning near the storm pick up before the Oklahoma City tornado report?",
           "url": "https://usdata.dev/examples/glm-flashes/"
         },
         {
-          "title": "Tornado classification",
+          "title": "Which severe reports came with rotation and lightning?",
           "url": "https://usdata.dev/examples/tornado-classification/"
         },
         {
-          "title": "Severe weather case study",
+          "title": "For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?",
           "url": "https://usdata.dev/examples/severe-weather-case-study/"
         }
       ]
@@ -1358,11 +1358,11 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/hurdat2/",
       "examples": [
         {
-          "title": "Hurdat2",
+          "title": "How can I inspect Atlantic hurricane tracks?",
           "url": "https://usdata.dev/examples/hurdat2/"
         },
         {
-          "title": "Storm surge",
+          "title": "How high was Hurricane Helene's storm surge at Cedar Key?",
           "url": "https://usdata.dev/examples/storm-surge/"
         }
       ]
@@ -1532,7 +1532,7 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/ibtracs/",
       "examples": [
         {
-          "title": "Ibtracs",
+          "title": "Which tropical cyclones reached Category 4 or 5 worldwide in recent seasons?",
           "url": "https://usdata.dev/examples/ibtracs/"
         }
       ]
@@ -1629,7 +1629,7 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/gfs/",
       "examples": [
         {
-          "title": "Gfs environment",
+          "title": "What did the global model say the environment was before a reported tornado?",
           "url": "https://usdata.dev/examples/gfs-environment/"
         }
       ]
@@ -1716,11 +1716,11 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/hrrr/",
       "examples": [
         {
-          "title": "Hrrr environment",
+          "title": "What did the HRRR analysis say about the storm environment over central Oklahoma at 20 UTC, and how far was the tornado report from the most favorable values?",
           "url": "https://usdata.dev/examples/hrrr-environment/"
         },
         {
-          "title": "Severe weather case study",
+          "title": "For one Oklahoma tornado, do the two report archives agree on when and where it was, and what did radar, lightning, and the model analysis show at that place and time?",
           "url": "https://usdata.dev/examples/severe-weather-case-study/"
         }
       ]
@@ -1781,7 +1781,7 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/nbm/",
       "examples": [
         {
-          "title": "Nbm forecast",
+          "title": "How warm did the National Blend expect Oklahoma City to stay through the evening of 6 May 2024?",
           "url": "https://usdata.dev/examples/nbm-forecast/"
         }
       ]
@@ -1858,7 +1858,7 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/rap/",
       "examples": [
         {
-          "title": "Rap environment",
+          "title": "What did the 13 km RAP analysis say about the storm environment over Oklahoma City at 20 UTC?",
           "url": "https://usdata.dev/examples/rap-environment/"
         }
       ]
@@ -1959,15 +1959,15 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/climate-normals/",
       "examples": [
         {
-          "title": "Climate normals",
+          "title": "What is normal weather for a month at one station?",
           "url": "https://usdata.dev/examples/climate-normals/"
         },
         {
-          "title": "Climate anomalies",
+          "title": "Was 2024 warmer or wetter than normal?",
           "url": "https://usdata.dev/examples/climate-anomalies/"
         },
         {
-          "title": "Hourly anomalies",
+          "title": "How warm was Oklahoma City on 6 May 2024 compared with its hourly normals?",
           "url": "https://usdata.dev/examples/hourly-anomalies/"
         }
       ]
@@ -2034,7 +2034,7 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-currents/",
       "examples": [
         {
-          "title": "Coastal currents",
+          "title": "How did currents change at Cape Henry on 6 May 2025?",
           "url": "https://usdata.dev/examples/coastal-currents/"
         }
       ]
@@ -2119,11 +2119,11 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-water-levels/",
       "examples": [
         {
-          "title": "Coastal water levels",
+          "title": "How high was the water at The Battery?",
           "url": "https://usdata.dev/examples/coastal-water-levels/"
         },
         {
-          "title": "Storm surge",
+          "title": "How high was Hurricane Helene's storm surge at Cedar Key?",
           "url": "https://usdata.dev/examples/storm-surge/"
         }
       ]
@@ -2184,7 +2184,7 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/coops-tide-predictions/",
       "examples": [
         {
-          "title": "Storm surge",
+          "title": "How high was Hurricane Helene's storm surge at Cedar Key?",
           "url": "https://usdata.dev/examples/storm-surge/"
         }
       ]
@@ -2250,7 +2250,7 @@
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/coastwatch-sst/",
       "examples": [
         {
-          "title": "Sst analysis",
+          "title": "How warm was the sea in a small area?",
           "url": "https://usdata.dev/examples/sst-analysis/"
         }
       ]
@@ -2809,7 +2809,7 @@
       "reference": "https://docs.usdata.dev/generated/catalog/usgs/earthquakes/",
       "examples": [
         {
-          "title": "Earthquakes",
+          "title": "Which earthquakes did Oklahoma record on the days of the May 2024 tornado outbreak?",
           "url": "https://usdata.dev/examples/earthquakes/"
         }
       ]
@@ -2869,7 +2869,7 @@
       "reference": "https://docs.usdata.dev/generated/catalog/usgs/water-daily/",
       "examples": [
         {
-          "title": "Weather and streamflow",
+          "title": "How can I preserve weather and streamflow inputs together?",
           "url": "https://usdata.dev/examples/weather-and-streamflow/"
         }
       ]
@@ -3114,7 +3114,7 @@
       "reference": "https://docs.usdata.dev/generated/catalog/epa/aqs-daily/",
       "examples": [
         {
-          "title": "Wildfire smoke",
+          "title": "How far above the daily PM2.5 standard did Canadian wildfire smoke push New York City's air in June 2023?",
           "url": "https://usdata.dev/examples/wildfire-smoke/"
         }
       ]
@@ -3304,7 +3304,7 @@
       "reference": "https://docs.usdata.dev/generated/catalog/fema/disaster-declarations/",
       "examples": [
         {
-          "title": "Disaster declarations",
+          "title": "Which Oklahoma counties hit by a tornado on 6 May 2024 were under a federal disaster declaration?",
           "url": "https://usdata.dev/examples/disaster-declarations/"
         }
       ]

@@ -1,6 +1,6 @@
 # Hourly airport observations
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:lcd` · **Released** · Included since usdata 0.14.
 
@@ -12,7 +12,7 @@ Local Climatological Data.
 - Selection: Every report on whole calendar days per station; optional column filters
 - Required inputs: Both dates; eleven-digit station IDs or a geographic query
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [hourly observations](https://usdata.dev/examples/hourly-observations/), [hourly anomalies](https://usdata.dev/examples/hourly-anomalies/)
+- Examples: [Do hourly airport observations reproduce the daily summary?](https://usdata.dev/examples/hourly-observations/); [How warm was Oklahoma City on 6 May 2024 compared with its hourly normals?](https://usdata.dev/examples/hourly-anomalies/)
 
 ## Parameters
 

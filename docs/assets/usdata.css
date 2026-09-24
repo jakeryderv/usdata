@@ -72,3 +72,19 @@
     display: none;
   }
 }
+
+/* Headings match usdata.dev: heavy, tight, full-contrast; Material's default h1 is light grey. */
+.md-typeset h1 {
+  color: var(--md-default-fg-color);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+.md-typeset h2 {
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+.md-typeset h3 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}

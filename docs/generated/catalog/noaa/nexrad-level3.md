@@ -1,6 +1,6 @@
 # NEXRAD derived radar products
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:nexrad-level3` · **Released** · Included since usdata 0.15.
 
@@ -12,7 +12,7 @@ NEXRAD Level III Products.
 - Selection: Whole product files by site, product code, and inclusive UTC scan time since 2020-03-30
 - Required inputs: Both timestamps; product codes; radar IDs or a geographic query
 - Open locally: Local files; no bundled reader for this format
-- Examples: [radar products](https://usdata.dev/examples/radar-products/)
+- Examples: [Which derived radar products did KTLX publish around a tornado report?](https://usdata.dev/examples/radar-products/)
 
 ## Parameters
 

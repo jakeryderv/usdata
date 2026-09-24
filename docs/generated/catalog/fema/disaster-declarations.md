@@ -1,6 +1,6 @@
 # Federal disaster declarations by county
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `fema:disaster-declarations` · **Released** · Included since usdata 0.21.
 
@@ -12,7 +12,7 @@ FEMA Disaster Declarations Summaries.
 - Selection: Declarations whose incident period overlaps an inclusive UTC window, for a named state or county; a county also returns its state's statewide designations
 - Required inputs: Both dates; optionally a state or county location, or state or fips, and type filters
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [disaster declarations](https://usdata.dev/examples/disaster-declarations/)
+- Examples: [Which Oklahoma counties hit by a tornado on 6 May 2024 were under a federal disaster declaration?](https://usdata.dev/examples/disaster-declarations/)
 
 ## Parameters
 

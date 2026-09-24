@@ -12,6 +12,7 @@ from render_registry import (
     availability,
     by_provider,
     check_usage_metadata,
+    example_title,
     example_url,
 )
 
@@ -74,7 +75,7 @@ def render() -> str:
                     ),
                     "examples": [
                         {
-                            "title": Path(path).parent.name.replace("-", " ").capitalize(),
+                            "title": example_title(path),
                             "url": example_url(path),
                         }
                         for path in dataset.examples

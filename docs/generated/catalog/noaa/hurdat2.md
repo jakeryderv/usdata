@@ -1,6 +1,6 @@
 # Tropical cyclone best tracks
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:hurdat2` · **Released** · Included since usdata 0.12.
 
@@ -12,7 +12,7 @@ HURDAT2 Atlantic and Pacific Best Tracks.
 - Selection: The newest or a named revision of one whole basin file; filter track points locally
 - Required inputs: Optional basin (atlantic or pacific) and revision date; no dates or geographic filters
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [hurdat2](https://usdata.dev/examples/hurdat2/), [storm surge](https://usdata.dev/examples/storm-surge/)
+- Examples: [How can I inspect Atlantic hurricane tracks?](https://usdata.dev/examples/hurdat2/); [How high was Hurricane Helene's storm surge at Cedar Key?](https://usdata.dev/examples/storm-surge/)
 
 ## Parameters
 

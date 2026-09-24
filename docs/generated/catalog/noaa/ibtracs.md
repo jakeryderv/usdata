@@ -1,6 +1,6 @@
 # Global tropical cyclone best tracks
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:ibtracs` · **Released** · Included since usdata 0.20.
 
@@ -12,7 +12,7 @@ IBTrACS Global Tropical Cyclone Tracks.
 - Selection: One whole subset file per query, from the newest or a pinned product version
 - Required inputs: Required subset; optional format and version; no dates or geographic filters
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [ibtracs](https://usdata.dev/examples/ibtracs/)
+- Examples: [Which tropical cyclones reached Category 4 or 5 worldwide in recent seasons?](https://usdata.dev/examples/ibtracs/)
 
 ## Parameters
 

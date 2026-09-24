@@ -2,7 +2,8 @@
 
 One Python SDK and CLI for U.S. scientific data. Find a dataset, fetch its
 files unchanged, open them locally, and keep a record that lets anyone repeat
-the download and check the bytes. Supported sources today are NOAA and USGS.
+the download and check the bytes. Datasets come from agencies such as NOAA,
+USGS, and EPA; the [dataset browser](https://usdata.dev/datasets/) lists them all.
 
 ## Four commands
 

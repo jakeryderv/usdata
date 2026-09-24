@@ -1,6 +1,6 @@
 # Coastal tide predictions
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 `noaa:coops-tide-predictions` · **Released** · Included since usdata 0.14.
 
@@ -12,7 +12,7 @@ CO-OPS Tide Predictions.
 - Selection: Predictions for one station and datum on a chosen interval; at most a year
 - Required inputs: Station, datum, and both minute-aligned timestamps; optional interval
 - Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
-- Examples: [storm surge](https://usdata.dev/examples/storm-surge/)
+- Examples: [How high was Hurricane Helene's storm surge at Cedar Key?](https://usdata.dev/examples/storm-surge/)
 
 ## Parameters
 

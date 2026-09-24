@@ -1,6 +1,6 @@
 # Dataset versions and targets
 
-Generated from `src/usdata/data/registry.yaml` by `just docs`. Do not edit by hand.
+<!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
 Move a dataset between phases by editing its `target` in the registry.
 
