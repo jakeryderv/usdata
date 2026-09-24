@@ -18,6 +18,12 @@ LIVE_EXTRAS = {
     "test_gfs_live": "grib",
     "test_rap_live": "grib",
     "test_nbm_live": "grib",
+    # Their reader step ends in importorskip("pandas"), which core-only would turn into a skip.
+    "test_aqs_daily_live": "pandas",
+    "test_disaster_declarations_live": "pandas",
+    "test_earthquakes_live": "pandas",
+    "test_hurdat2_live": "pandas",
+    "test_nws_vtec_live": "pandas",
 }
 
 
