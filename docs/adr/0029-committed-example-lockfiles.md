@@ -2,7 +2,7 @@
 
 Status: accepted. Date: 2026-09-16. Extends
 [ADR 0018](0018-selective-lockfile-updates.md) and
-[ADR 0025](0025-examples-as-usage-review.md).
+[ADR 0025](0025-examples-as-usage-review.md). Updated by [ADR 0041](0041-dataset-walkthroughs-and-studies.md).
 
 ## Context
 

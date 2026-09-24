@@ -2,7 +2,7 @@
 
 Status: accepted. Date: 2026-09-15. Retires the per-release first-use review
 that [versioning](../versioning.md) asked for after each publication, and whose
-results are kept in [docs/reviews/](../reviews/).
+results are kept in [docs/reviews/](../reviews/). Updated by [ADR 0041](0041-dataset-walkthroughs-and-studies.md).
 
 ## Context
 
