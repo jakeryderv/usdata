@@ -76,7 +76,8 @@ nav:
   - Places: reference/places.md
   - Upcoming changes: generated/changes.md
 # Contributor and project-record pages stay in docs/ for GitHub readers but are
-# not part of the user site; see ADR 0023. Snippets are included, not served.
+# not part of the user site; see ADR 0023. Snippets are included, not served,
+# and so is each dataset's generated reference, which its guide includes (ADR 0041).
 exclude_docs: |
   overrides/
   architecture.md
@@ -89,6 +90,7 @@ exclude_docs: |
   adr/
   reviews/
   _snippets/
+  generated/catalog/*/
 extra_css:
 - assets/tokens.css
 - assets/usdata.css

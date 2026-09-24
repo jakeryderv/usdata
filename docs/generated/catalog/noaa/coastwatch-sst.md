@@ -1,20 +1,18 @@
-# Sea-surface temperature
-
 <!-- Generated from src/usdata/data/registry.yaml by `just docs`. Do not edit by hand. -->
 
-`noaa:coastwatch-sst` · **Released** · Included since usdata 0.5.
+## Reference
 
-CoastWatch Blended Sea Surface Temperature.
+`noaa:coastwatch-sst` · **Released** · Included since usdata 0.5. CoastWatch Blended Sea Surface Temperature.
 
-## At a glance
+### At a glance
 
 - Files: CSV with units row
 - Selection: Grid centers and timestamps inside the requested bounds; optional stride
 - Required inputs: BBox or location, and both timestamps
-- Open locally: `usdata[pandas]` · [Reader guide](../../../reference/readers.md)
+- Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [Sea-surface temperature](https://usdata.dev/datasets/noaa/coastwatch-sst/), with a walkthrough
 
-## Parameters
+### Parameters
 
 Pass these as `--param name=value` to the CLI, as `params:` entries in a manifest, or as keyword arguments to `build_query`.
 
@@ -22,7 +20,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 |---|---|
 | `stride` | Positive integer subsampling both spatial axes; default 1. |
 
-## Variables
+### Variables
 
 | Variable | Units | Meaning |
 |---|---|---|
@@ -31,11 +29,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `sea_ice_fraction` | 1 | Sea ice area fraction |
 | `mask` | — | Source mask flags; consult the source metadata for the codes |
 
-## Usage and limitations
-
-[Usage guide](../../../providers/noaa-coastwatch.md).
-
-## Catalog reference
+### Catalog facts
 
 - Availability: since 0.5
 - Domain: Satellite oceanography
@@ -51,5 +45,3 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - License: GHRSST free and open data
 - Transport: `erddap`
 - Adapter: `usdata.providers.noaa.coastwatch:CoastwatchSst`
-
-[All NOAA datasets](../noaa.md).
