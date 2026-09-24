@@ -47,7 +47,10 @@ The adapter contract is a named, published surface. It is:
   fetches selected byte ranges of an object; and `place_of`, with the
   `Query.place` it reads and the `place_subset` capability the checks hold it
   to ([ADR 0034](0034-query-keeps-the-resolved-place.md)), for a source keyed
-  by state and county rather than by coordinates.
+  by state and county rather than by coordinates; and, for a source that needs
+  a key, the constructor's keyword-only `credentials`, the `credentials`
+  attribute it sets, and the `transformations` class attribute
+  ([ADR 0039](0039-credentialed-sources.md)).
 - **`usdata.providers.HttpProvider`.** The lifecycle HTTP-backed adapters
   inherit, renamed from `_HttpProvider` and moved to `usdata/providers/http.py`:
   the constructor's optional `client`, the `_http()` accessor subclasses call,
@@ -59,7 +62,11 @@ The adapter contract is a named, published surface. It is:
   messages they raise. Added since: `flag`, for a boolean the CLI passes as text.
 - **`QueryError`**, raised for any query this dataset cannot satisfy, and
   **`NotImplementedProvider`**, raised for a registered dataset with no adapter.
+  Added since: **`MissingCredentials`**, the `QueryError` raised when a
+  declared credential is unset, and **`Credentials`**, the mapping that carries
+  the values and redacts them ([ADR 0039](0039-credentialed-sources.md)).
 - **`load_adapter`**, which instantiates the `Provider` a `Dataset` names.
+  Added since: `adapter_class`, which returns the class without building it.
 - **The transport helpers in `usdata.protocols`.** `http.client`, `http.get`,
   and `http.download` with their shared retry policy; `s3.list_objects`,
   `s3.parse_s3_url`, `s3.https_url`, and `S3Object`; `erddap.info`,

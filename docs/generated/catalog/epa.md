@@ -22,3 +22,4 @@ Daily pollutant summaries (ozone, PM2.5, NO2, and others) from regulatory monito
 
 [Upstream information](https://aqs.epa.gov/aqsweb/documents/data_api.html)
 Domain: Air quality.
+Credentials: `USDATA_AQS_EMAIL`, `USDATA_AQS_KEY` in the environment ([request a key](https://aqs.epa.gov/aqsweb/documents/data_api.html#signup)).

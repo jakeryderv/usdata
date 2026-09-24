@@ -37,6 +37,11 @@ function datasetRow(dataset) {
   for (const [label, value] of [["Files", dataset.formats.join(", ")], ["What you get", dataset.selection], ["Required inputs", dataset.inputs]]) {
     facts.append(element("dt", label), element("dd", value));
   }
+  if (dataset.credentials) {
+    const needs = element("dd", `${dataset.credentials.variables.join(", ")} in the environment. `);
+    needs.append(link("Request a key", dataset.credentials.signup));
+    facts.append(element("dt", "Credentials"), needs);
+  }
   row.append(facts);
   const links = element("div", null, "dataset-links");
   links.append(link("Usage & limits", dataset.guide));

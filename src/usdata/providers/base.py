@@ -14,6 +14,7 @@ from pydantic import BaseModel, ValidationError
 from pydantic_core import ErrorDetails
 
 from usdata.models import Asset, Dataset, PartialFetch, Place, Provenance, Query
+from usdata.providers.credentials import Credentials
 
 QueryField = Literal["text", "bbox", "variables", "time"]
 Params = TypeVar("Params", bound=BaseModel)
@@ -35,6 +36,36 @@ class NotImplementedProvider(NotImplementedError):
 
 class QueryError(ValueError):
     """The query cannot be satisfied by this dataset (missing or unsupported constraints)."""
+
+
+class MissingCredentials(QueryError):
+    """A source that needs credentials was about to be contacted without them.
+
+    Raised when the adapter is built, so no request is ever sent without them.
+    ``missing`` names the unset variables, and the message says where to get a key.
+    """
+
+    def __init__(self, dataset: Dataset, missing: list[str], note: str = "") -> None:
+        self.dataset_id = dataset.id
+        self.missing = missing
+        signup = dataset.credentials.signup if dataset.credentials else None
+        message = f"{dataset.id} needs {', '.join(missing)} set in the environment"
+        if signup:
+            message = f"{message}; request a key at {signup}"
+        super().__init__(f"{message}; {note}" if note else message)
+
+
+def required_credentials(dataset: Dataset, credentials: Credentials | None) -> Credentials:
+    """``credentials``, checked against what ``dataset`` declares; empty for an anonymous source.
+
+    Raises:
+        MissingCredentials: A declared variable has no value in ``credentials``.
+    """
+    given = credentials if credentials is not None else Credentials()
+    declared = [] if dataset.credentials is None else dataset.credentials.variables
+    if missing := [name for name in declared if not given.get(name)]:
+        raise MissingCredentials(dataset, missing)
+    return given
 
 
 def to_utc(value: datetime) -> datetime:
@@ -115,14 +146,34 @@ class Provider(ABC):
     subclassing the parent's model.
     """
 
+    transformations: ClassVar[tuple[str, ...]] = ()
+    """How ``fetch`` changes the bytes the source sent, one line each, or nothing for exact bytes.
+
+    The core records these in every provenance sidecar the adapter's fetches
+    write, beside any partial-fetch entry. Only an adapter whose source cannot be
+    pinned as received declares one: a response that echoes the request's
+    credentials, or differs between identical requests (ADR 0039).
+    """
+
     def __init_subclass__(cls, **kwargs: Any) -> None:
         """Derive ``accepted_params`` from a declared model, so one declaration feeds both."""
         super().__init_subclass__(**kwargs)
         if cls.params_model is not None:
             cls.accepted_params = described_params(cls.params_model)
 
-    def __init__(self, dataset: Dataset) -> None:
+    def __init__(self, dataset: Dataset, *, credentials: Credentials | None = None) -> None:
+        """Bind the adapter to its registry entry, refusing to exist without declared credentials.
+
+        Args:
+            dataset: The registry entry this adapter serves.
+            credentials: Values for the variables ``dataset.credentials`` declares;
+                ``load_adapter`` reads them from the environment.
+
+        Raises:
+            MissingCredentials: The dataset declares a variable ``credentials`` lacks.
+        """
         self.dataset = dataset
+        self.credentials = required_credentials(dataset, credentials)
 
     def __enter__(self) -> Self:
         return self
@@ -265,8 +316,15 @@ class Provider(ABC):
         )
 
 
-def load_adapter(dataset: Dataset) -> Provider:
-    """Instantiate the Provider named by a dataset's ``adapter`` dotted path."""
+def adapter_class(dataset: Dataset) -> type[Provider]:
+    """The Provider class a dataset's ``adapter`` dotted path names, without instantiating it.
+
+    For what a class declares, such as ``accepted_params``, which needs no
+    credentials and no transport.
+
+    Raises:
+        NotImplementedProvider: The dataset is planned and names no adapter.
+    """
     if dataset.adapter is None:
         raise NotImplementedProvider(
             f"{dataset.id} is {dataset.status.value}; no adapter exists yet"
@@ -276,4 +334,22 @@ def load_adapter(dataset: Dataset) -> Provider:
     cls = getattr(module, class_name)
     if not (isinstance(cls, type) and issubclass(cls, Provider)):
         raise TypeError(f"{dataset.adapter} is not a Provider subclass")
-    return cls(dataset)
+    return cls
+
+
+def load_adapter(dataset: Dataset) -> Provider:
+    """Instantiate the Provider named by a dataset's ``adapter`` dotted path.
+
+    A dataset that declares credentials gets their values from the environment,
+    and one that is missing any is refused here, before a request can be made.
+    An anonymous dataset's adapter is built from the dataset alone, so an
+    adapter that predates credentials needs no change.
+
+    Raises:
+        NotImplementedProvider: The dataset is planned and names no adapter.
+        MissingCredentials: A variable the dataset declares is unset or blank.
+    """
+    cls = adapter_class(dataset)
+    if dataset.credentials is None:
+        return cls(dataset)
+    return cls(dataset, credentials=Credentials.from_environment(dataset.credentials.variables))

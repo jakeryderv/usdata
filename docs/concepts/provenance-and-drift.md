@@ -17,6 +17,14 @@ persistent record.
 A lockfile records the manifest's checksum, when it was generated, the usdata
 version, and for each asset its resolved URL, checksum, and provenance.
 
+For a source that needs a key, the sidecar's `credentials` field names the
+environment variables the source requires, such as `USDATA_AQS_EMAIL` and
+`USDATA_AQS_KEY`, and never their values. No key appears in the source URL,
+the lockfile, or the cached file. Where a service's response echoes the key or
+changes between identical requests, the adapter writes a canonical form of it
+and says how in `transformations`, so the checksum can pin it. See
+[ADR 0039](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0039-credentialed-sources.md).
+
 ### Files fetched as byte ranges
 
 An asset fetched as part of a larger object, today the HRRR and GFS `messages`
@@ -111,6 +119,13 @@ examples and nothing else. The layout is one directory of files named by
 hash, which any static host can serve; a manifest of your own gets the same
 guarantee from a mirror you run behind the same setting. The SDK never
 uploads. See [ADR 0030](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0030-content-addressed-mirror.md).
+
+A source whose credentials are not set is never asked. A locked restore takes
+each of its entries from the cache, or from the mirror when one is configured,
+and reports those as `mirrored` with a note that upstream was not checked for
+changes; `PullResult.unchecked` names them. Only an entry that neither can
+supply fails, with the variables to set. Resolving, `--update`, and `--force`
+always need the key.
 
 ## Accepting a change
 

@@ -21,7 +21,7 @@ from usdata.cli.inspect import inspect
 from usdata.cli.progress import progress
 from usdata.manifest import lockfile_path
 from usdata.models import READER_EXTRAS_TEXT, Dataset, Status, describe_duration
-from usdata.providers import load_adapter
+from usdata.providers import adapter_class, load_adapter
 from usdata.providers.base import NotImplementedProvider
 from usdata.pull import EmptySource, ManifestChanged, Plan, UnknownDatasets, UpstreamChanged
 from usdata.pull import plan as plan_manifest
@@ -260,8 +260,7 @@ def info(
         )
     if ds.status is not Status.AVAILABLE:
         return  # Planned entries have no adapter or usage metadata to show.
-    with load_adapter(ds) as adapter:
-        declared = dict(adapter.accepted_params)
+    declared = dict(adapter_class(ds).accepted_params)
     if declared:
         typer.echo("  params:")
         width = max(len(name) for name in declared)
@@ -285,6 +284,9 @@ def _echo_usage(ds: Dataset) -> None:
         typer.echo(f"  selection: {ds.selection}")
     if ds.inputs:
         typer.echo(f"  inputs:    {ds.inputs}")
+    if ds.credentials:
+        typer.echo(f"  credentials: {', '.join(ds.credentials.variables)} (environment)")
+        typer.echo(f"  key:       {ds.credentials.signup}")
     if ds.examples:
         typer.echo(f"  examples:  {', '.join(ds.examples)}")
 
@@ -528,10 +530,18 @@ def pull(
     else:
         mode = "restored from" if result.from_lockfile else "wrote"
     typer.echo(f"{len(result.fetched)} asset(s); {mode} {result.lockfile_path}", err=True)
-    if result.mirrored:
+    changed = len(result.mirrored) - len(result.unchecked)
+    if changed:
         typer.secho(
-            f"{len(result.mirrored)} asset(s) changed upstream and were restored from the "
+            f"{changed} asset(s) changed upstream and were restored from the "
             "mirror; the lockfile still pins the source. Pass --update to accept new bytes.",
+            err=True,
+            fg="yellow",
+        )
+    if result.unchecked:
+        typer.secho(
+            f"{len(result.unchecked)} asset(s) were restored from the mirror without asking "
+            "their source, whose credentials are not set; upstream was not checked for changes.",
             err=True,
             fg="yellow",
         )

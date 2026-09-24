@@ -1,11 +1,30 @@
 from __future__ import annotations
 
+import json
 import socket
+import sys
+from collections.abc import Callable
+from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
+from types import ModuleType
 
+import httpx
 import pytest
 
+from usdata.models import (
+    Asset,
+    CredentialSpec,
+    Dataset,
+    Protocol,
+    Query,
+    Status,
+    TimeRange,
+    Variable,
+)
 from usdata.protocols import http
+from usdata.providers import HttpProvider
+from usdata.registry import Registry
 
 
 @pytest.fixture(autouse=True)
@@ -53,3 +72,102 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
             raise pytest.UsageError(f"{item.nodeid}: declare exactly one consistent test level")
         if live and not config.getoption("run_live"):
             item.add_marker(pytest.mark.skip(reason="needs --run-live"))
+
+
+KEYED_EMAIL = "USDATA_TEST_EMAIL"
+KEYED_KEY = "USDATA_TEST_KEY"
+KEYED_URL = "https://keyed.example.test/data?station=A1"
+KEYED_MODULE = "usdata_test_keyed"
+
+
+def _canonical(body: dict[str, object]) -> bytes:
+    return json.dumps(body, sort_keys=True, separators=(",", ":")).encode()
+
+
+class KeyedSource(HttpProvider):
+    """A source like AQS: keys ride in the query string, and the response echoes the request.
+
+    It adds the keys only as it sends the request, drops the echoed URL before
+    writing, and redacts errors, so it meets ADR 0039. Tests subclass it to
+    break one rule at a time.
+    """
+
+    transformations = ("json: dropped the echoed request url; keys sorted",)
+    url = KEYED_URL
+
+    def list_assets(self, query: Query) -> list[Asset]:
+        self.check_params(query)
+        self.reject(query, "text", "bbox", "variables", "time", hint="the station is fixed")
+        return [self.asset(self.url)]
+
+    def asset(self, href: str) -> Asset:
+        start = datetime(2024, 1, 1, tzinfo=UTC)
+        return Asset(
+            id="keyed.json",
+            dataset_id=self.dataset.id,
+            href=href,
+            protocol=Protocol.HTTP,
+            media_type="application/json",
+            time=TimeRange(start=start, end=start),
+        )
+
+    def keys(self) -> dict[str, str]:
+        return {"email": self.credentials[KEYED_EMAIL], "key": self.credentials[KEYED_KEY]}
+
+    def fetch(self, asset: Asset, dest: Path) -> Path:
+        with self.redacted_errors():
+            response = http.get(asset.href, self._http(), params=self.keys())
+        body = response.json()
+        body.pop("url", None)
+        dest.write_bytes(_canonical(body))
+        return dest
+
+
+def keyed_response(request: httpx.Request, *, fail: bool = False) -> httpx.Response:
+    """What the keyed service answers: data with the request echoed, or a 403 that echoes it too."""
+    if fail or "key" not in request.url.params:
+        return httpx.Response(403, json={"url": str(request.url), "error": "invalid key"})
+    return httpx.Response(200, json={"url": str(request.url), "data": [1, 2]})
+
+
+@dataclass(frozen=True)
+class Keyed:
+    """The fake keyed source: its registry entry, adapter class, and what a fetch writes."""
+
+    dataset: Dataset
+    adapter: type[KeyedSource]
+    data: bytes
+    variables: tuple[str, str] = (KEYED_EMAIL, KEYED_KEY)
+    url: str = KEYED_URL
+    respond: Callable[..., httpx.Response] = keyed_response
+
+    @property
+    def registry(self) -> Registry:
+        return Registry([self.dataset])
+
+
+@pytest.fixture
+def keyed(monkeypatch: pytest.MonkeyPatch) -> Keyed:
+    """A credentialed dataset whose adapter ``load_adapter`` can import, and no keys set."""
+    module = ModuleType(KEYED_MODULE)
+    module.KeyedSource = KeyedSource  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, KEYED_MODULE, module)
+    for name in (KEYED_EMAIL, KEYED_KEY):
+        monkeypatch.delenv(name, raising=False)
+    dataset = Dataset(
+        id="test:keyed",
+        provider="test",
+        title="Keyed test source",
+        summary="Keyed test source",
+        formats=["JSON"],
+        protocol=Protocol.HTTP,
+        domain="test",
+        status=Status.AVAILABLE,
+        since="0.1",
+        adapter=f"{KEYED_MODULE}:KeyedSource",
+        variables=[Variable(name="data")],
+        credentials=CredentialSpec(
+            variables=[KEYED_EMAIL, KEYED_KEY], signup="https://keyed.example.test/signup"
+        ),
+    )
+    return Keyed(dataset=dataset, adapter=KeyedSource, data=_canonical({"data": [1, 2]}))

@@ -144,7 +144,7 @@ def _fetch_asset(
             adapter.fetch(asset, tmp)
         else:
             adapter.fetch_partial(asset, tmp, partial)
-        prov = provenance.record(dataset, asset, tmp, partial)
+        prov = provenance.record(dataset, asset, tmp, partial, adapter.transformations)
         if asset.checksum and prov.checksum != asset.checksum:
             raise ChecksumMismatch(f"{asset.id}: expected {asset.checksum}, got {prov.checksum}")
     # A crash between replacements leaves a detectable mismatch, never a trusted partial file.
