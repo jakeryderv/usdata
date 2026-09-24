@@ -70,11 +70,15 @@
       "guide": "https://docs.usdata.dev/providers/noaa-ghcn/",
       "reference": "https://docs.usdata.dev/generated/catalog/noaa/ghcn-daily/",
       "page": "https://usdata.dev/datasets/noaa/ghcn-daily/",
-      "walkthrough": null,
+      "walkthrough": "examples/datasets/noaa-ghcn-daily/noaa-ghcn-daily.ipynb",
       "studies": [
         "weather-and-streamflow"
       ],
-      "quickstart": null
+      "quickstart": {
+        "cli": "usdata fetch noaa:ghcn-daily \\\n  --start 2024-01-01 \\\n  --end 2024-12-31 \\\n  --vars TMAX,TMIN,PRCP,SNOW \\\n  -p stations=USW00013967 \\\n  -p units=metric",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:ghcn-daily\"),\n    build_query(\n        start=\"2024-01-01\",\n        end=\"2024-12-31\",\n        variables=[\"TMAX\", \"TMIN\", \"PRCP\", \"SNOW\"],\n        stations=\"USW00013967\",\n        units=\"metric\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: okc-daily-weather\nsources:\n  - dataset: noaa:ghcn-daily\n    start: 2024-01-01\n    end: 2024-12-31\n    variables: [TMAX, TMIN, PRCP, SNOW]\n    params:\n      stations: USW00013967\n      units: metric\n"
+      }
     },
     {
       "id": "noaa:gsom",
