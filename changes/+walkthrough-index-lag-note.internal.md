@@ -1,1 +1,0 @@
-Corrects the reason given for turning pip's cache off in the post-release walkthrough: PyPI's CDN can also serve a stale index page, and which cache caused the v0.27.0 failure was not established. Comment only; CI only.
