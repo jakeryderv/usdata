@@ -137,6 +137,9 @@ class Grib2Summary(BaseModel):
         Raises:
             KeyError: No message here was fetched for that selector; the message
                 lists the selectors that were.
+            ValueError: That selector fetched a message holding several fields,
+                as RAP publishes wind components, and the record cannot say
+                which field it named; the message lists their variables.
         """
         from usdata._grib import variable_names
 
@@ -150,9 +153,19 @@ class Grib2Summary(BaseModel):
                 for message in self.messages
             ]
         )
-        for message, name in zip(self.messages, names, strict=True):
-            if message.selector == selector:
-                return name
+        matched = [
+            name
+            for message, name in zip(self.messages, names, strict=True)
+            if message.selector == selector
+        ]
+        if len(matched) > 1:
+            # The record keeps one selector per byte range, and one range can hold several fields.
+            raise ValueError(
+                f"selector {selector!r} fetched one message holding {len(matched)} fields "
+                f"({', '.join(matched)}); pick the variable by name"
+            )
+        if matched:
+            return matched[0]
         recorded = ", ".join(
             repr(message.selector) for message in self.messages if message.selector is not None
         )

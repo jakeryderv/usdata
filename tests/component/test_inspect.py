@@ -14,7 +14,7 @@ from typer.testing import CliRunner
 from usdata import FetchedAsset, inspect_asset, inspect_path
 from usdata.cache import cached_path, sha256_file
 from usdata.cli import app
-from usdata.inspect import AssetFormat, CsvSummary, NetcdfSummary
+from usdata.inspect import AssetFormat, CsvSummary, Grib2Summary, GribMessage, NetcdfSummary
 from usdata.models import Asset, ByteRange, Protocol, Provenance
 from usdata.provenance import write
 
@@ -647,3 +647,16 @@ def test_the_cli_exits_2_for_a_file_with_no_sidecar(tmp_path: Path) -> None:
     result = runner.invoke(app, ["inspect", str(fetched.path)])
     assert result.exit_code == 2
     assert "no usable provenance beside" in result.output
+
+
+def test_variable_for_refuses_a_selector_whose_message_holds_several_fields() -> None:
+    """RAP's winds share one message; the record keeps its first selector for both fields."""
+    fields = [
+        GribMessage(file_index=0, short_name=name, type_of_level="isobaricInhPa", level="100")
+        for name in ("u", "v")
+    ]
+    summary = Grib2Summary(
+        messages=[field.model_copy(update={"selector": "UGRD:100 mb"}) for field in fields]
+    )
+    with pytest.raises(ValueError, match=r"2 fields \(u, v\)"):
+        summary.variable_for("UGRD:100 mb")
