@@ -13,6 +13,7 @@ from unittest.mock import patch
 import pytest
 
 from usdata import FetchedAsset
+from usdata._grib import udunits
 from usdata.cache import sha256_file
 from usdata.models import Asset, ByteRange, Protocol, Provenance
 from usdata.readers import MissingReaderDependency, open_asset, open_grib2
@@ -248,7 +249,8 @@ def test_lambert_grid_has_two_dimensional_coordinates_and_projection(tmp_path) -
     assert result.attrs["gridType"] == "lambert"
     assert result.attrs["LoVInDegrees"] == 262.5 and result.attrs["DxInMetres"] == 3000.0
     assert result.attrs["shapeOfTheEarth"] == 6
-    assert result.cape.attrs["units"] == "J kg**-1"
+    assert result.cape.attrs["units"] == "J kg-1"
+    assert result.cape.attrs["GRIB_units"] == "J kg**-1"
 
 
 @pytest.fixture
@@ -413,10 +415,30 @@ def test_registry_fills_units_and_long_name_the_file_leaves_unknown(tmp_path) ->
     ]
 
 
+@pytest.mark.parametrize(
+    ("ecc", "plain"),
+    [
+        ("J kg**-1", "J kg-1"),
+        ("m**2 s**-2", "m2 s-2"),
+        ("kg m**-2 s**-1", "kg m-2 s-1"),
+        ("K", "K"),
+        ("(0 - 1)", "(0 - 1)"),
+        ("10**-3 s**-1", "10**-3 s**-1"),
+    ],
+)
+def test_units_take_udunits_notation_without_changing_their_meaning(ecc, plain) -> None:
+    assert udunits(ecc) == plain
+
+
+def test_units_already_in_udunits_notation_gain_no_grib_units(tmp_path) -> None:
+    result = item(tmp_path, message(np.arange(12, dtype=float))).open()
+    assert result.t.attrs["units"] == "K" and "GRIB_units" not in result.t.attrs
+
+
 def test_registry_never_overwrites_units_the_file_provides(tmp_path) -> None:
     content = message(np.arange(6, dtype=float), grid=LAMBERT, param=59)
     result = item(tmp_path, content).open()
-    assert result.cape.attrs["units"] == "J kg**-1"
+    assert result.cape.attrs["units"] == "J kg-1"
     assert result.cape.attrs["long_name"] == (
         "Convective available potential energy, surface or a ground layer"
     )
