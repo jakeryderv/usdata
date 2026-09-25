@@ -169,10 +169,11 @@ Shipped in v0.29.0: the fixes from a code review of the whole package. A
 restore now reaches the mirror when a pinned object is gone or a range is
 refused, an asset two sources share is fetched once, and staged writes are
 flushed to disk. Place and radar extents are true across the antimeridian, all
-model datetimes are aware UTC, and AQS paces its retries. Two design questions
-it raised are open:
-[Connecticut's county codes](https://github.com/jakeryderv/usdata/issues/360)
-and [per-field GRIB2 selectors](https://github.com/jakeryderv/usdata/issues/354).
+model datetimes are aware UTC, and AQS paces its retries. It raised two design
+questions: [Connecticut's county codes](https://github.com/jakeryderv/usdata/issues/360),
+since settled by carrying the pre-2022 counties as places, and per-field GRIB2
+selectors, now part of
+[GRIB2 field names](https://github.com/jakeryderv/usdata/issues/331).
 
 The work now is breadth: more of the datasets people reach for, from more
 agencies, each verified by a live check and a worked example. 1.0 comes when
