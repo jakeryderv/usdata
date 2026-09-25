@@ -2,7 +2,8 @@
 
 Requires bbox and inclusive UTC start/end timestamps; a bare end date runs to the end of its day.
 Variables default to analysed_sst; stride optionally subsamples both spatial
-axes by a positive integer. Empty intersections resolve to no assets. Requests
+axes by a positive integer. A point, or a box that holds no grid center, selects
+the one cell at its middle; a window with no analysis time resolves to no assets. Requests
 exceeding one million grid rows must be narrowed or use a larger stride.
 """
 
@@ -32,11 +33,12 @@ MAX_ROWS = 1_000_000
 
 def _spatial_slice(
     low: float, high: float, origin: float, count: int, stride: int
-) -> tuple[erddap.GridSlice, int] | None:
+) -> tuple[erddap.GridSlice, int]:
     first = max(0, math.ceil((low - origin) / 0.05 - 1e-9))
     last = min(count - 1, math.floor((high - origin) / 0.05 + 1e-9))
     if first > last:
-        return None
+        # A point, or a box narrower than a cell, holds no center: take the cell at its middle.
+        first = last = min(count - 1, max(0, round(((low + high) / 2 - origin) / 0.05)))
     length = (last - first) // stride + 1
     last = first + (length - 1) * stride
     return erddap.GridSlice(
@@ -81,8 +83,6 @@ class CoastwatchSst(HttpProvider):
             raise QueryError(f"unsupported CoastWatch variables: {', '.join(sorted(unsupported))}")
         lat = _spatial_slice(query.bbox.south, query.bbox.north, -89.975, 3600, stride)
         lon = _spatial_slice(query.bbox.west, query.bbox.east, -179.975, 7200, stride)
-        if lat is None or lon is None:
-            return []
         metadata = erddap.info(BASE, DATASET, self._http())
         try:
             if metadata.dimensions["latitude"] != 3600 or metadata.dimensions["longitude"] != 7200:

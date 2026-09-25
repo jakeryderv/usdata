@@ -8,10 +8,8 @@ from pathlib import Path
 
 from usdata import __version__
 from usdata._files import atomic_write_text
-from usdata.cache import sha256_file
+from usdata.cache import SIDECAR_SUFFIX, sha256_file
 from usdata.models import Asset, Dataset, PartialFetch, Provenance
-
-SIDECAR_SUFFIX = ".provenance.json"
 
 
 def record(

@@ -16,8 +16,9 @@ Its metadata describes data use as free and open under the GHRSST protocol.
 | `mask` | Source mask flags | Byte codes; consult source metadata |
 
 Require a bbox/location and both timestamps. Bounds include only grid centers
-and timestamps inside the requested interval; an interval with no matching
-coordinates returns no assets. UTC bounds are inclusive. A date alone as the
+and timestamps inside the requested interval. A point (`--lat`/`--lon` with no
+radius) or a box too small to hold a grid center selects the one cell at its
+middle; a window with no analysis time returns no assets. UTC bounds are inclusive. A date alone as the
 end runs through that day, so it includes the day's noon analysis. `params.stride`
 (or `-p stride=2`) subsamples both spatial axes with a positive integer. Reduce
 the area/time window or increase stride when a query exceeds 1,000,000 rows.

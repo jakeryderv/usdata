@@ -26,6 +26,22 @@ AwareUTC = Annotated[datetime, AfterValidator(as_utc)]
 """A datetime field stored as aware UTC whatever it was given; see :func:`as_utc`."""
 
 
+_SHA256 = re.compile(r"sha256:[0-9a-f]{64}")
+
+
+def as_sha256(value: str) -> str:
+    """A checksum in the one form usdata computes and compares: ``sha256:`` and lowercase hex."""
+    algorithm, sep, digest = value.partition(":")
+    normal = f"{algorithm.lower()}{sep}{digest.lower()}"
+    if not _SHA256.fullmatch(normal):
+        raise ValueError(f"checksum must be 'sha256:' and 64 hex digits, not {value!r}")
+    return normal
+
+
+Sha256 = Annotated[str, AfterValidator(as_sha256)]
+"""A checksum field holding ``sha256:<hex>``, lowercased; see :func:`as_sha256`."""
+
+
 class Protocol(StrEnum):
     """Access mechanism used to reach a dataset's files."""
 
@@ -506,7 +522,7 @@ class Asset(BaseModel):
     protocol: Protocol
     media_type: str | None = None
     size: int | None = Field(default=None, ge=0)
-    checksum: str | None = Field(default=None, description="'<algo>:<hex>', e.g. 'sha256:ab12...'")
+    checksum: Sha256 | None = Field(default=None, description="'sha256:<hex>' of the file's bytes")
     time: TimeRange | None = None
     bbox: BBox | None = None
     properties: dict[str, str] = Field(
@@ -560,7 +576,7 @@ class PartialFetch(BaseModel):
     object_size: int = Field(ge=0, description="Size of that object when the ranges were resolved")
     object_etag: str = Field(description="ETag sent as ``If-Match`` on every range request")
     index_url: str = Field(description="The index sidecar the ranges were resolved through")
-    index_checksum: str = Field(description="'sha256:<hex>' of the index text as fetched")
+    index_checksum: Sha256 = Field(description="'sha256:<hex>' of the index text as fetched")
     messages: list[int] = Field(description="Selected message numbers, ascending and distinct")
     ranges: list[ByteRange] = Field(description="Byte ranges of those messages, in the same order")
     selectors: list[str] = Field(
@@ -621,7 +637,7 @@ class Provenance(BaseModel):
     provider: str
     source_url: str
     retrieved_at: AwareUTC
-    checksum: str
+    checksum: Sha256
     size: int = Field(ge=0)
     license: str | None = None
     usdata_version: str
@@ -629,7 +645,7 @@ class Provenance(BaseModel):
     index_url: str | None = Field(
         default=None, description="Index sidecar a partial fetch resolved its ranges through"
     )
-    index_checksum: str | None = Field(
+    index_checksum: Sha256 | None = Field(
         default=None, description="'sha256:<hex>' of that index text as it was fetched"
     )
     ranges: list[ByteRange] = Field(
