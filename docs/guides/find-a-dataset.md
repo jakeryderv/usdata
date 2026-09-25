@@ -50,7 +50,8 @@ usgs:water-daily
 ```
 
 Both commands exit 1 when nothing matches, so a shell script can tell an empty
-result from a bad option, which exits 2.
+result from a bad option, which exits 2. Search text with no letters or digits,
+such as `?`, is a bad option too: it has no keyword to match.
 
 `info` prints a dataset's status, domain, license, extent, capabilities, and
 every provider parameter it accepts with a one-line description. That list is

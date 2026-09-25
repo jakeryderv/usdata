@@ -40,6 +40,13 @@ def test_get_unknown_raises(registry: Registry) -> None:
         registry.get("nope:nothing")
 
 
+def test_search_refuses_text_with_no_keyword_but_treats_blank_as_none(registry) -> None:
+    for text in ("?", " ... ", "!!"):
+        with pytest.raises(ValueError, match="no letters or digits"):
+            registry.search(Query(text=text))
+    assert registry.search(Query(text="  ")) == registry.search(Query())
+
+
 def test_search_ranks_by_keyword(registry: Registry) -> None:
     results = registry.search(Query(text="nexrad radar scans"))
     assert results[0].dataset.id == "noaa:nexrad-level2"

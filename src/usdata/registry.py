@@ -264,9 +264,19 @@ class Registry:
 
         The keyword arguments are the ``list`` filters, applied before scoring.
         Planned datasets are left out unless ``include_planned`` is set;
-        ``status`` supersedes it when given.
+        ``status`` supersedes it when given. Blank or absent text is no keyword
+        filter, as in ``list``.
+
+        Raises:
+            ValueError: The text has no letters or digits to match, such as ``?``;
+                it would otherwise match every dataset.
         """
         terms = _tokens(query.text or "")
+        if not terms and query.text and query.text.strip():
+            raise ValueError(
+                f"search text {query.text!r} has no letters or digits to match; "
+                "use a keyword, or leave it out to list every dataset"
+            )
         results: list[SearchResult] = []
         candidates = self.list(
             provider=provider,
