@@ -57,14 +57,23 @@ the server cannot subset the files.
 object, exactly as the [HRRR guide](noaa-hrrr.md#fetching-selected-messages)
 describes. NBM index lines carry a further text for ensemble statistics and
 probability thresholds, so `TMP:2 m above ground` names the value alone and
-`TMP:2 m above ground:1 hour fcst:ens std dev` names its spread. Selectors
-observed in the 2024-05-06 20Z CONUS f001 file:
+`TMP:2 m above ground:1 hour fcst:ens std dev` names its spread. The further
+text is everything after the step text and is matched whole, colons included:
+a probability line's text reads `prob >0.254:prob fcst 255/255`, and
+`prob >0.254` alone matches nothing. Any line of the `.idx` sidecar, from the
+short name onward, is a selector for that line. Selectors observed in the
+2024-05-06 20Z CONUS f001 file:
 
 | Field | `messages` |
 |---|---|
 | 2 m temperature | `TMP:2 m above ground` |
 | 2 m dewpoint | `DPT:2 m above ground` |
 | 1-hour precipitation | `APCP:surface:0-1 hour acc fcst` |
+| Probability of more than 0.254 mm in 1 hour | `APCP:surface:0-1 hour acc fcst:prob >0.254:prob fcst 255/255` |
+
+A selector that matches nothing names what the index publishes instead: the
+levels of an unmatched level, the steps of an unmatched step, and otherwise
+the further texts beside that step, where `none` is the plain field.
 
 ```sh
 uv run usdata fetch noaa:nbm \
