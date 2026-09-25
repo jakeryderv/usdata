@@ -234,6 +234,19 @@ def _fetch_with(
     ``staging`` is passed to each fetch; see ``_fetch_asset``.
     """
     assets = ordered(adapter.list_assets(query))
+    return _fetch_listed(adapter, dataset, assets, root=root, force=force, staging=staging)
+
+
+def _fetch_listed(
+    adapter: Provider,
+    dataset: Dataset,
+    assets: list[Asset],
+    *,
+    root: Path | None = None,
+    force: bool = False,
+    staging: Path | None = None,
+) -> list[FetchedAsset]:
+    """Fetch assets already listed and put in order, as the loop does once it has listed them."""
     _progress.batch([asset.size for asset in assets])
     return [
         _fetch_asset(dataset, a, adapter, root=root, force=force, staging=staging) for a in assets

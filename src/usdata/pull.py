@@ -28,10 +28,10 @@ import httpx
 from pydantic import BaseModel, Field, computed_field
 
 from usdata import __version__, _progress, mirror, provenance
-from usdata._fetch import ChecksumMismatch, FetchedAsset, _fetch_asset, _fetch_with, ordered
+from usdata._fetch import ChecksumMismatch, FetchedAsset, _fetch_asset, _fetch_listed, ordered
 from usdata._files import staged_path
 from usdata.cache import asset_path, cache_dir, sha256_file
-from usdata.manifest import LockedAsset, Lockfile, Manifest, lockfile_path
+from usdata.manifest import LockedAsset, Lockfile, Manifest, SourceSpec, lockfile_path
 from usdata.models import Asset, Dataset
 from usdata.protocols import http
 from usdata.protocols.http import ObjectChanged, RangeNotHonored
@@ -208,6 +208,38 @@ def _checked_adapters(
     return adapters
 
 
+def _listed(adapter: Provider, source: SourceSpec) -> list[Asset]:
+    """A source's assets as its adapter lists them, in result order, narrowed by any ``select``.
+
+    A ``select`` rule keeps at most one asset: the one ``select_by_time``
+    chooses from everything the rule's window listed (ADR 0044).
+    """
+    assets = ordered(adapter.list_assets(source.to_query()))
+    if source.select is None:
+        return assets
+    chosen = source.select.choose(assets).asset
+    return [] if chosen is None else [chosen]
+
+
+def _empty(key: str, dataset_id: str, source: SourceSpec) -> str:
+    """Why a required source resolved to nothing, in the terms the manifest used."""
+    if (rule := source.select) is not None:
+        when = rule.time.isoformat()
+        span = (
+            f"in the {rule.within} up to {when}"
+            if rule.direction == "at_or_before"
+            else (f"within {rule.within} of {when}")
+        )
+        return (
+            f"source {key} ({dataset_id}) has no asset starting {span}; "
+            "widen within or set allow_empty: true for this source"
+        )
+    return (
+        f"source {key} ({dataset_id}) matched no assets; "
+        "check the query or set allow_empty: true for this source"
+    )
+
+
 def resolve(
     manifest_path: str | os.PathLike[str],
     *,
@@ -235,14 +267,11 @@ def resolve(
         staging = _staging(root, stack) if out.exists() else None
         for key, source in zip(manifest.source_keys(), manifest.sources, strict=True):
             dataset = reg.get(source.dataset)
-            items = _fetch_with(
-                adapters[dataset.id], dataset, source.to_query(), root=root, staging=staging
-            )
-            if not items and not source.allow_empty:
-                raise EmptySource(
-                    f"source {key} ({dataset.id}) matched no assets; "
-                    "check the query or set allow_empty: true for this source"
-                )
+            adapter = adapters[dataset.id]
+            assets = _listed(adapter, source)
+            if not assets and not source.allow_empty:
+                raise EmptySource(_empty(key, dataset.id, source))
+            items = _fetch_listed(adapter, dataset, assets, root=root, staging=staging)
             for item in items:
                 home = asset_path(item.asset, root)
                 if item.path != home:
@@ -347,7 +376,7 @@ def plan(manifest_path: str | os.PathLike[str], *, registry: Registry | None = N
         adapters = _checked_adapters(manifest, reg, stack)
         for key, source in zip(manifest.source_keys(), manifest.sources, strict=True):
             dataset = reg.get(source.dataset)
-            assets = ordered(adapters[dataset.id].list_assets(source.to_query()))
+            assets = _listed(adapters[dataset.id], source)
             sources.append(SourcePlan(source=key, dataset_id=dataset.id, assets=assets))
     return Plan(manifest=manifest.name, sources=sources)
 

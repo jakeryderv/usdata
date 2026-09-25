@@ -45,11 +45,39 @@ Each source accepts:
 | `start`, `end` | ISO dates or datetimes. A date alone is the first instant of its UTC day as `start` and the last as `end`, so two bare dates select whole calendar days. Most adapters require both; climate normals make them optional and HURDAT2 rejects them. |
 | `variables` | Dataset-specific variable names or codes. Quote numeric codes to keep leading zeros. |
 | `params` | Provider-specific options from the table below. Unknown keys are errors. |
+| `select` | Keep only the one asset nearest an instant, instead of every asset in a window; see below. Replaces `start` and `end`. |
 | `allow_empty` | Default `false`. `true` only when this source may legitimately resolve to no assets. |
 
 Unknown manifest and source fields are rejected. `params` must not repeat
-`location`, `bbox`, `start`, `end`, or `variables`. Empty explicit id lists are
-invalid even with `allow_empty: true`.
+`location`, `bbox`, `start`, `end`, `variables`, or `select`. Empty explicit id
+lists are invalid even with `allow_empty: true`.
+
+### Selecting one asset by time
+
+```yaml
+  - dataset: noaa:nexrad-level2
+    params: {site: KTLX}
+    select:
+      time: 2024-05-07T04:41:00Z
+      within: 5m
+      direction: at_or_before
+```
+
+| Field | Meaning |
+|---|---|
+| `time` | Required instant. A naive value means UTC. |
+| `within` | Required tolerance between an asset's start and `time`: `90s`, `5m`, `1h`, `1d`, or an ISO 8601 duration such as `PT2M30S`. `0s` asks for an exact start. |
+| `direction` | Required. `nearest` keeps the start closest to `time` on either side; `at_or_before` keeps the latest start no later than `time`, which for back-to-back scans is the one under way at that instant. |
+
+The source is listed over `time` plus or minus `within` for `nearest`, or the
+`within` before `time` for `at_or_before`, and
+[`select_by_time`](selection.md) keeps one asset from that listing; equal
+distances go to the lower asset id. It uses each asset's start and nothing
+else, so it works for any dataset whose assets carry one: NEXRAD, GOES, GLM,
+MRMS. When nothing starts within the tolerance, the source is empty and the
+pull fails unless `allow_empty` is set. The lockfile pins the chosen asset
+like any other, and a restore never selects again; see
+[ADR 0044](../adr/0044-manifest-select-by-time.md).
 
 ## Provider options
 
