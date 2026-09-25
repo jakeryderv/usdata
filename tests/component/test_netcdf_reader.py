@@ -7,7 +7,7 @@ import pytest
 from usdata import FetchedAsset
 from usdata.cache import sha256_file
 from usdata.models import Asset, Dataset, Protocol, Provenance, Status, Variable
-from usdata.readers import MissingReaderDependency
+from usdata.readers import MissingReaderDependency, fill_registry_attrs
 from usdata.registry import Registry
 
 pytestmark = pytest.mark.netcdf
@@ -135,14 +135,78 @@ def test_registry_variables_fill_only_what_the_file_leaves_unstated(item, xr):
     assert result.CMI.attrs["long_name"] == "Packed brightness temperature"
     assert result.DQF.attrs["units"] == "1"
     assert result.DQF.attrs["long_name"] == "Per-pixel data quality flags"
-    assert result.t.attrs["units"] == "CF datetime"
+    # The file states t's units, which decoding moved into its encoding.
+    assert "units" not in result.t.attrs
+    assert result.t.encoding["units"].startswith("seconds since 2024-05-06")
     assert result.t.attrs["long_name"] == "Scene mid-point time"
     assert result.unsigned_count.attrs == {"units": "1"}
     assert result.attrs["usdata"]["registry_attrs"] == [
         {"variable": "DQF", "attribute": "long_name"},
-        {"variable": "t", "attribute": "units"},
         {"variable": "t", "attribute": "long_name"},
     ]
+
+
+def glm_file(xr, path: Path) -> None:
+    """A GLM-shaped file: flash times stored as CF offsets, a duration, and a unit-less field."""
+    numpy = pytest.importorskip("numpy")
+    offsets = numpy.array([-0.2, -0.1], dtype="float32")
+    epoch = {"units": "seconds since 2024-05-06 20:00:00.000"}
+    xr.Dataset(
+        {
+            "flash_time_offset_of_first_event": ("number_of_flashes", offsets, epoch),
+            "flash_time_offset_of_last_event": ("number_of_flashes", offsets + 0.05, epoch),
+            "flash_duration": ("number_of_flashes", offsets + 0.3, {"units": "seconds"}),
+            "flash_area": ("number_of_flashes", numpy.array([4.0e8, 2.0e8], dtype="float32")),
+        }
+    ).to_netcdf(path, engine="h5netcdf")
+
+
+def test_decoded_time_variables_gain_no_registry_units_and_write_back(item, xr, tmp_path):
+    """Registry units on a decoded time variable made ``to_netcdf`` refuse to write it."""
+    glm_file(xr, item.path)
+    registry = synthetic(
+        Variable(name="flash_time_offset_of_first_event", units="CF datetime", description="First"),
+        Variable(name="flash_time_offset_of_last_event", units="CF datetime", description="Last"),
+        Variable(name="flash_duration", units="s", description="Duration"),
+        Variable(name="flash_area", units="m2", description="Area"),
+    )
+    with patch("usdata.registry.default_registry", return_value=registry):
+        result = item.open_netcdf()
+    for name in ("flash_time_offset_of_first_event", "flash_time_offset_of_last_event"):
+        assert result[name].dtype.kind == "M"
+        assert "units" not in result[name].attrs
+    assert result.flash_duration.attrs["units"] == "seconds"
+    # A variable the file leaves unit-less, and that is not a time, is still filled.
+    assert result.flash_area.attrs["units"] == "m2"
+    filled = result.attrs["usdata"]["registry_attrs"]
+    assert [entry for entry in filled if entry["attribute"] == "units"] == [
+        {"variable": "flash_area", "attribute": "units"}
+    ]
+    del result.attrs["usdata"]
+    written = tmp_path / "round-trip.nc"
+    result.to_netcdf(written, engine="h5netcdf")
+    with xr.open_dataset(written, engine="h5netcdf") as back:
+        assert back.flash_time_offset_of_first_event.equals(result.flash_time_offset_of_first_event)
+
+
+def test_datetime_and_timedelta_variables_never_gain_registry_units(item, xr):
+    """Even with no encoding to say so, xarray owns a time variable's units."""
+    numpy = pytest.importorskip("numpy")
+    data = xr.Dataset(
+        {
+            "t": ("n", numpy.array(["2024-05-06T20:00"], dtype="datetime64[ns]")),
+            "flash_duration": ("n", numpy.array([300], dtype="timedelta64[ms]")),
+        },
+        attrs={"usdata": {}},
+    )
+    registry = synthetic(
+        Variable(name="t", units="CF datetime", description="Time"),
+        Variable(name="flash_duration", units="s", description="Duration"),
+    )
+    with patch("usdata.registry.default_registry", return_value=registry):
+        fill_registry_attrs(item, data)
+    assert "units" not in data.t.attrs and "units" not in data.flash_duration.attrs
+    assert data.flash_duration.attrs["long_name"] == "Duration"
 
 
 def test_registry_entry_without_variables_records_nothing(item, xr):
