@@ -1,7 +1,7 @@
 # Model output
 
 HRRR and GFS files are whole GRIB2 archives of one model run at one forecast
-hour. A query names the run; `open(select=...)` picks the fields.
+hour. A query names the run; `open_grib2(select=...)` picks the fields.
 
 ```sh
 usdata fetch noaa:hrrr -p cycle=20 -p forecast_hour=0 \
@@ -80,7 +80,7 @@ ecCodes key names. Opening without it raises an error listing every
 discover what a run contains:
 
 ```python
-env = item.open(
+env = item.open_grib2(
     select={"shortName": ["cape", "hlcy"], "typeOfLevel": ["surface", "heightAboveGroundLayer"]}
 )
 ```

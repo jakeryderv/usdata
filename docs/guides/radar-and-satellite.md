@@ -20,7 +20,7 @@ choice = select_by_time(
 )
 start = choice.asset.time.start
 (item,) = fetch(dataset, build_query(start=start, end=start, site="KTLX"))
-radar = item.open(sweep=0)
+radar = item.open_nexrad(sweep=0)
 ```
 
 ## Level II volumes

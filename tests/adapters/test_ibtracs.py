@@ -330,7 +330,9 @@ def test_reader_keeps_the_north_atlantic_basin_code_as_text(tracks) -> None:
 
 
 def test_reader_options_still_apply(tracks) -> None:
-    frame = tracks.open(parse_dates=["ISO_TIME"], usecols=["SID", "ISO_TIME", "USA_SSHS"], nrows=6)
+    frame = tracks.open_csv(
+        parse_dates=["ISO_TIME"], usecols=["SID", "ISO_TIME", "USA_SSHS"], nrows=6
+    )
     assert list(frame.columns) == ["SID", "ISO_TIME", "USA_SSHS"] and len(frame) == 6
     assert str(frame.ISO_TIME.dtype).startswith("datetime64")
     assert frame.ISO_TIME.iloc[-1].isoformat() == "2021-08-29T03:00:00"

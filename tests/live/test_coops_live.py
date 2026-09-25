@@ -37,7 +37,7 @@ def test_coops_water_levels_restore(tmp_path: Path) -> None:
     assert restored.lockfile == result.lockfile
     assert verify(manifest, root=tmp_path / "cache") == []
     if find_spec("pandas") is not None:
-        frame = restored.fetched[0].open(parse_dates=["Date Time"])
+        frame = restored.fetched[0].open_csv(parse_dates=["Date Time"])
         assert len(frame) == 720
         assert " Quality " in frame.columns
         assert frame.attrs["usdata"]["provenance"]["checksum"] == item.provenance.checksum

@@ -43,7 +43,7 @@ def test_annual_file_schema_ratings_and_locked_restore(tmp_path: Path) -> None:
     assert restored.from_lockfile and restored.fetched[0].path.read_bytes() == original
     assert verify(manifest, root=tmp_path / "cache") == []
     if find_spec("pandas") is not None:
-        frame = restored.fetched[0].open(parse_dates=["date"])
+        frame = restored.fetched[0].open_csv(parse_dates=["date"])
         assert len(frame) == len(rows) and frame["mag"].between(-9, 5).all()
 
 

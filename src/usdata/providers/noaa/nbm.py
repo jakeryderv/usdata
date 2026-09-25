@@ -74,7 +74,7 @@ class Nbm(ModelRuns):
     key_re = KEY_RE
     hint = (
         "NBM files are whole regional grids; fetch with messages=..., or download and let "
-        "open(select=...) pick fields"
+        "open_grib2(select=...) pick fields"
     )
     hour_width = 3
     suffix = ".grib2"

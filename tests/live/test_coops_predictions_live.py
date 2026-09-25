@@ -52,5 +52,5 @@ def test_coops_predictions_align_with_observations_and_restore(tmp_path: Path) -
     assert restored.from_lockfile and restored.fetched[1].path.read_bytes() == original
     assert verify(manifest, root=tmp_path / "cache") == []
     if find_spec("pandas") is not None:
-        frame = restored.fetched[1].open(parse_dates=["Date Time"])
+        frame = restored.fetched[1].open_csv(parse_dates=["Date Time"])
         assert len(frame) == 3 and " Prediction" in frame.columns

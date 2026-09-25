@@ -244,7 +244,9 @@ def test_gzip_csv_reader_is_local_preserves_ids_options_and_source(tmp_path: Pat
         )
     before = fetched.path.read_bytes(), provenance.read(fetched.path)
     with respx.mock() as mock:
-        frame = fetched.open(usecols=["EVENT_ID", "STATE_FIPS", "CZ_FIPS", "EVENT_TYPE"], nrows=2)
+        frame = fetched.open_csv(
+            usecols=["EVENT_ID", "STATE_FIPS", "CZ_FIPS", "EVENT_TYPE"], nrows=2
+        )
         assert not mock.calls
     assert list(frame.EVENT_ID) == ["10096222", "10120412"]
     assert str(frame.STATE_FIPS.dtype).startswith("string")
@@ -256,7 +258,7 @@ def test_gzip_csv_reader_is_local_preserves_ids_options_and_source(tmp_path: Pat
     )
     with pytest.raises(UnsupportedFormat):
         explicit.open()
-    assert len(explicit.open(reader="csv", nrows=1)) == 1
+    assert len(explicit.open_csv(nrows=1, units_row=False)) == 1
 
 
 def test_owned_client_can_reopen_and_injected_client_remains_open() -> None:

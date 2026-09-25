@@ -57,15 +57,6 @@ def test_missing_radar_dependency_and_broken_install() -> None:
     assert error.value.name == "numpy"
 
 
-@pytest.mark.parametrize("option", ["dtype", "parse_dates", "usecols", "nrows"])
-def test_csv_options_rejected_before_import(option) -> None:
-    item = radar_asset(FIXTURES / "example_nexrad_archive_msg31_compressed.ar2v")
-    with patch("usdata._radar.import_module") as loader, pytest.raises(ValueError, match="CSV"):
-        options: dict[str, Any] = {option: 1 if option == "nrows" else []}
-        item.open(**options)
-    loader.assert_not_called()
-
-
 @pytest.mark.parametrize(
     "filename,rays,gates,sweeps,minimum,maximum",
     [
@@ -107,13 +98,13 @@ def test_gzip_explicit_reader_and_bad_local_files(tmp_path):
     content = (FIXTURES / "example_nexrad_archive_msg31_compressed.ar2v").read_bytes()
     path.write_bytes(gzip.compress(content))
     item = radar_asset(path, "example:ambiguous")
-    assert item.open(reader="nexrad-level2")["sweep_0"]["DBZH"].shape == (720, 1832)
+    assert item.open_nexrad()["sweep_0"]["DBZH"].shape == (720, 1832)
     path.write_bytes(b"invalid archive")
     with pytest.raises((ValueError, OSError, EOFError, struct.error)):
-        item.open(reader="nexrad-level2")
+        item.open_nexrad()
     path.unlink()
     with pytest.raises(FileNotFoundError):
-        item.open(reader="nexrad-level2")
+        item.open_nexrad()
 
 
 def test_flags_masked_without_changing_valid_moments_or_coordinates():
@@ -166,15 +157,8 @@ def test_decoder_closed_when_eager_loading_fails() -> None:
 def test_invalid_sweep_selection_before_backend_import(selection: Any):
     item = radar_asset(FIXTURES / "example_nexrad_archive_msg1.bz2")
     with patch("usdata._radar.import_module") as loader, pytest.raises(ValueError, match="sweep"):
-        item.open(sweep=selection)
+        item.open_nexrad(sweep=selection)
     loader.assert_not_called()
-
-
-@pytest.mark.parametrize("reader", ["csv", "erddap-csv", "netcdf"])
-def test_sweep_rejected_for_other_readers(reader):
-    item = radar_asset(FIXTURES / "example_nexrad_archive_msg1.bz2")
-    with pytest.raises(ValueError, match="only to the NEXRAD"):
-        item.open(reader=reader, sweep=0)
 
 
 @pytest.mark.parametrize("selection,groups", [(0, ["sweep_0"]), ([0, 2], ["sweep_0", "sweep_2"])])
@@ -183,13 +167,13 @@ def test_selected_sweeps_match_full_volume(selection, groups):
     pytest.importorskip("xradar")
     item = radar_asset(FIXTURES / "example_nexrad_archive_msg1.bz2")
     full = item.open()
-    selected = item.open(sweep=selection)
+    selected = item.open_nexrad(sweep=selection)
     assert selected.attrs["usdata"]["sweeps"] == groups
     assert [g.lstrip("/") for g in selected.groups if g.startswith("/sweep_")] == groups
     for group in groups:
         xr.testing.assert_equal(full[group].to_dataset(), selected[group].to_dataset())
     with pytest.raises(ValueError, match="outside this volume"):
-        item.open(sweep=7)
+        item.open_nexrad(sweep=7)
 
 
 def test_missing_interior_end_marker_rejects_shifted_coordinates(tmp_path):
@@ -211,7 +195,7 @@ def test_missing_interior_end_marker_rejects_shifted_coordinates(tmp_path):
     checksum = item.provenance.checksum
     for selection in [None, 1, 2, 4, 6, [0, 4]]:
         with pytest.raises(RadarDecodeError, match="No sweeps were silently dropped"):
-            item.open(sweep=selection)
+            item.open_nexrad(sweep=selection)
     # Sweep 4 has the same ray count as the wrongly paired sweep 5: a shape
     # check alone cannot catch this loss of coordinate/timestamp alignment.
     with backend.NEXRADLevel2File(bytes(raw), loaddata=False) as volume:
@@ -219,7 +203,7 @@ def test_missing_interior_end_marker_rejects_shifted_coordinates(tmp_path):
         assert len(volume.msg_31_header[4]) == 366
         assert volume.data[4]["record_end"] - volume.data[4]["record_number"] + 1 == 366
         assert volume.msg_31_header[4][0]["record_number"] != volume.data[4]["record_number"]
-    selected = item.open(sweep=0)
+    selected = item.open_nexrad(sweep=0)
     assert selected["sweep_0"].DBZH.shape == (367, 460)
     assert selected.attrs["usdata"]["sweeps"] == ["sweep_0"]
     assert selected.attrs["usdata"]["provenance"]["checksum"] == checksum == sha256_file(path)
@@ -247,7 +231,7 @@ def test_incomplete_sweep_with_trailing_non_radial_record(tmp_path):
         native.load()
     finally:
         native.close()
-    opened = radar_asset(path).open(sweep=0)
+    opened = radar_asset(path).open_nexrad(sweep=0)
     assert opened["sweep_0"].DBZH.shape == native["sweep_0"].DBZH.shape
     # The SDK masks reserved moment flags; coordinates and valid samples agree.
     xr.testing.assert_equal(opened["sweep_0"].time, native["sweep_0"].time)

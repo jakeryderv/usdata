@@ -1,6 +1,6 @@
 # 0022: GRIB2 reading through ecCodes, built into xarray by usdata
 
-Status: accepted. Date: 2026-09-14.
+Status: accepted. Date: 2026-09-14. Updated by [ADR 0042](0042-one-open-method-per-format.md).
 
 ## Context
 

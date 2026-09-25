@@ -49,6 +49,6 @@ sources:
     assert restored.from_lockfile and not restored.one("evening").from_cache
     assert verify(manifest, root=tmp_path / "cache") == []
     pandas = pytest.importorskip("pandas")
-    frame = restored.one("evening").open(parse_dates=["iso_issued", "iso_expired"])
+    frame = restored.one("evening").open_csv(parse_dates=["iso_issued", "iso_expired"])
     assert isinstance(frame, pandas.DataFrame) and len(frame) == len(rows)
     assert str(frame.iso_issued.dt.tz) == "UTC"

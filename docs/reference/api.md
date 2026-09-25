@@ -24,7 +24,7 @@ See [fetch and analyze](../guides/fetch-and-analyze.md) for complete workflows.
 ::: usdata.fetch_asset
 ::: usdata.FetchedAsset
     options:
-      members: [asset, path, provenance, from_cache, open, inspect]
+      members: [asset, path, provenance, from_cache, open, open_csv, open_nexrad, open_grib2, open_netcdf, inspect]
 
 ## Inspecting a file
 

@@ -99,7 +99,7 @@ class Gfs(ModelRuns):
     key_re = KEY_RE
     hint = (
         "GFS files are whole global grids; fetch with messages=..., or download and let "
-        "open(select=...) pick fields"
+        "open_grib2(select=...) pick fields"
     )
     hour_width = 3
     params_model = GfsParams

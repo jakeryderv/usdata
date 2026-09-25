@@ -15,6 +15,10 @@ from typing import TYPE_CHECKING, Any
 from usdata.models import Protocol, Variable
 
 if TYPE_CHECKING:
+    # Each is an optional extra: without it installed the result is simply untyped.
+    import pandas as pd  # pyright: ignore[reportMissingImports]
+    import xarray as xr  # pyright: ignore[reportMissingImports]
+
     from usdata._fetch import FetchedAsset
     from usdata.inspect import GribMessage
 
@@ -313,140 +317,161 @@ def inventory(path: str | os.PathLike[str]) -> list[GribMessage]:
     return grib_inventory(Path(path))
 
 
-def open_asset(
+def open_asset(fetched: FetchedAsset) -> Any:
+    """Open a local asset with the reader its format implies, retaining units and provenance.
+
+    The reader is inferred from the asset's dataset, media type, and id:
+    ``noaa:nexrad-level2`` volumes open as with ``open_nexrad``, HURDAT2 best
+    tracks and AQS daily-summary JSON by their dataset or filename, NetCDF4 as
+    with ``open_netcdf``, GRIB2 as with ``open_grib2``, and CSV as with
+    ``open_csv``, with its units row detected. Each takes its defaults; a file
+    that needs options is opened with the function for its format instead.
+    HURDAT2 best-track text returns one row per track point, and AQS daily-summary
+    JSON one row per monitor, day, and standard; neither takes options.
+
+    Raises:
+        UnsupportedFormat: Nothing about the asset names a format usdata reads.
+    """
+    media_type = (fetched.asset.media_type or "").split(";", 1)[0].strip().lower()
+    name = fetched.asset.id.lower()
+    dataset_id = fetched.asset.dataset_id
+    if dataset_id in {"noaa:nexrad-level2", "noaa:nexrad-level3"}:
+        return open_nexrad(fetched)
+    if dataset_id == "noaa:hurdat2" or (name.startswith("hurdat2-") and name.endswith(".txt")):
+        from usdata._hurdat2 import open_hurdat2
+
+        return open_hurdat2(fetched)
+    if dataset_id == AQS_DATASET or (name.startswith(AQS_PREFIX) and name.endswith(".json")):
+        from usdata._aqs import open_aqs
+
+        return open_aqs(fetched)
+    if media_type in NETCDF_MEDIA_TYPES:
+        return open_netcdf(fetched)
+    if media_type in GRIB2_MEDIA_TYPES or (
+        media_type in OPAQUE_MEDIA_TYPES and name.endswith(GRIB2_SUFFIXES)
+    ):
+        return open_grib2(fetched)
+    if media_type in CSV_MEDIA_TYPES or (
+        media_type in GZIP_MEDIA_TYPES and name.endswith(".csv.gz")
+    ):
+        return open_csv(fetched)
+    raise UnsupportedFormat(
+        f"no reader for {fetched.asset.media_type!r}; supported formats are CSV, "
+        "ERDDAP CSV, NetCDF4, GRIB2, NEXRAD Level II, HURDAT2 best tracks, "
+        "and AQS daily JSON. For a CSV with ambiguous metadata, use open_csv; "
+        "otherwise use fetched.path with a format-specific reader"
+    )
+
+
+def open_nexrad(fetched: FetchedAsset, *, sweep: int | list[int] | None = None) -> xr.DataTree:
+    """Open a local NEXRAD Level II volume as a loaded xarray DataTree.
+
+    Args:
+        fetched: The fetched volume; its cached bytes are never changed.
+        sweep: A zero-based sweep index or a non-empty list of distinct ones;
+            ``None`` opens the whole volume after checking that every sweep's
+            records line up with its coordinates.
+
+    Raises:
+        UnsupportedFormat: The asset is a Level III product, which has no reader.
+        MissingReaderDependency: The radar extra is not installed.
+    """
+    if fetched.asset.dataset_id == "noaa:nexrad-level3":
+        raise UnsupportedFormat(
+            "NEXRAD Level III products have no usdata reader; open fetched.path with "
+            "Py-ART (pyart.io.read_nexrad_level3) or another Level III decoder"
+        )
+    if sweep is not None:
+        values = sweep if isinstance(sweep, list) else [sweep]
+        if not values or any(type(value) is not int or value < 0 for value in values):
+            raise ValueError("sweep must be a nonnegative integer or non-empty list of them")
+        if len(set(values)) != len(values):
+            raise ValueError("sweep indices must be unique")
+    from usdata import _radar
+
+    return _radar.open_nexrad(fetched, sweep=sweep)
+
+
+def open_netcdf(fetched: FetchedAsset) -> xr.Dataset:
+    """Open a local NetCDF4 file as a loaded xarray Dataset.
+
+    Units the file leaves missing or ``unknown``, and missing long names, are
+    filled from the registry entry's variables and listed under
+    ``attrs["usdata"]["registry_attrs"]``.
+
+    Raises:
+        MissingReaderDependency: The netcdf extra is not installed.
+    """
+    from usdata import _netcdf
+
+    return _netcdf.open_netcdf(fetched)
+
+
+def open_grib2(
+    fetched: FetchedAsset, *, select: Mapping[str, Any] | None = None, strict: bool = False
+) -> xr.Dataset:
+    """Open selected messages of a local GRIB2 file as one loaded xarray Dataset.
+
+    Gzipped GRIB2 is decompressed in memory. Units and long names the file
+    leaves unstated are filled from the registry as ``open_netcdf`` fills them.
+
+    Args:
+        fetched: The fetched file; its cached bytes are never changed.
+        select: ecCodes key names mapped to one value or a list of values,
+            choosing messages from a file of several; a file of one message,
+            or a partial fetch, needs none.
+        strict: Raise ``ValueError`` instead of warning when a select value
+            matches none of the selected messages. A select that matches
+            nothing raises either way.
+
+    Raises:
+        MissingReaderDependency: The grib extra, or the ecCodes library, is unavailable.
+    """
+    from usdata import _grib
+
+    return _grib.open_grib2(fetched, select=select, strict=strict)
+
+
+def open_csv(
     fetched: FetchedAsset,
     *,
-    reader: str | None = None,
     dtype: dict[str, str] | None = None,
     parse_dates: list[str] | None = None,
     usecols: list[str] | None = None,
     nrows: int | None = None,
-    sweep: int | list[int] | None = None,
-    select: Mapping[str, Any] | None = None,
-    strict: bool = False,
-) -> Any:
-    """Open local CSV, NetCDF4, GRIB2, NEXRAD, or HURDAT2 data, retaining units and provenance.
+    units_row: bool | None = None,
+) -> pd.DataFrame:
+    """Open a local CSV, gzipped or not, as a pandas DataFrame.
 
-    Gzip CSVs are decompressed locally without changing cached bytes.
-    Infer ``csv`` or ``erddap-csv`` from media type and protocol, or use an
-    explicit reader for ambiguous metadata. An IBTrACS CSV lays a units row
-    under its header as ERDDAP does, so it takes the ``erddap-csv`` reader; the
-    single space it writes for a missing value is read as missing, and nothing
-    else is, so the North Atlantic basin code ``NA`` stays text.
-    Identifier columns default to pandas
-    strings; explicit dtype entries override those defaults. Dates are not parsed
-    unless named in parse_dates; use dtype to preserve numeric-looking date labels
-    as strings. No checksum verification or downloading occurs.
-    Radar accepts zero-based ``sweep`` indices (one integer or a non-empty list);
-    the default opens the whole volume after checking sweep record alignment.
-    GRIB2 accepts ``select``, a mapping of ecCodes key names to one value or a
-    list of values, to choose messages from a multi-message file; a file with one
-    message needs none. A select value that matches none of the selected messages
-    warns, or raises ``ValueError`` when ``strict``; a select that matches nothing
-    raises either way. Gzipped GRIB2 is decompressed in memory.
-    HURDAT2 best-track text is recognized by dataset or filename and returns one
-    row per track point; it takes no CSV options. AQS daily-summary JSON is
-    recognized the same way and returns one row per monitor, day, and standard.
-    A Storm Events CSV gains ``BEGIN_UTC`` and ``END_UTC`` when the frame keeps
-    ``BEGIN_DATE_TIME``, ``END_DATE_TIME``, and ``CZ_TIMEZONE``: the local
-    timestamp shifted by the whole-hour offset ending the timezone label, or by
-    the one offset a bare label such as ``CST`` names, with every other row left
-    ``NaT`` and counted under ``attrs["usdata"]["derived"]``.
-    NetCDF4 and GRIB2 results have units the file leaves missing or ``unknown``
-    and missing long names filled from the registry entry's variables, listed
-    under ``attrs["usdata"]["registry_attrs"]``.
+    Identifier columns default to pandas strings, and ``dtype`` entries override
+    those defaults. Dates are not parsed unless named in ``parse_dates``; use
+    ``dtype`` to keep numeric-looking date labels as strings. An IBTrACS CSV
+    lays a units row under its header as ERDDAP does; the single space it writes
+    for a missing value is read as missing, and nothing else is, so the North
+    Atlantic basin code ``NA`` stays text. A Storm Events CSV gains
+    ``BEGIN_UTC`` and ``END_UTC`` when the frame keeps ``BEGIN_DATE_TIME``,
+    ``END_DATE_TIME``, and ``CZ_TIMEZONE``: the local timestamp shifted by the
+    whole-hour offset ending the timezone label, or by the one offset a bare
+    label such as ``CST`` names, with every other row left ``NaT`` and counted
+    under ``attrs["usdata"]["derived"]``.
+
+    Args:
+        fetched: The fetched file; its cached bytes are never changed.
+        dtype: Column names mapped to pandas dtype strings.
+        parse_dates: Columns to parse as dates.
+        usecols: Columns to read.
+        nrows: Most observation rows to read, not counting header or units rows.
+        units_row: Whether a units row follows the header, as in ERDDAP CSV;
+            ``None`` infers it from the asset's protocol and dataset. The units
+            are kept in ``attrs["units"]``.
+
+    Raises:
+        MissingReaderDependency: The pandas extra is not installed.
+        ValueError: The header is empty or repeats a name, or a units row does
+            not match it.
     """
-    if reader is None:
-        media_type = (fetched.asset.media_type or "").split(";", 1)[0].strip().lower()
-        name = fetched.asset.id.lower()
-        gzip_csv = media_type in GZIP_MEDIA_TYPES and name.endswith(".csv.gz")
-        grib2 = media_type in GRIB2_MEDIA_TYPES or (
-            media_type in OPAQUE_MEDIA_TYPES and name.endswith(GRIB2_SUFFIXES)
-        )
-        hurdat2 = fetched.asset.dataset_id == "noaa:hurdat2" or (
-            name.startswith("hurdat2-") and name.endswith(".txt")
-        )
-        aqs = fetched.asset.dataset_id == AQS_DATASET or (
-            name.startswith(AQS_PREFIX) and name.endswith(".json")
-        )
-        if fetched.asset.dataset_id == "noaa:nexrad-level3":
-            raise UnsupportedFormat(
-                "NEXRAD Level III products have no usdata reader; open fetched.path with "
-                "Py-ART (pyart.io.read_nexrad_level3) or another Level III decoder"
-            )
-        if fetched.asset.dataset_id == "noaa:nexrad-level2":
-            reader = "nexrad-level2"
-        elif hurdat2:
-            reader = "hurdat2"
-        elif aqs:
-            reader = "aqs"
-        elif media_type in NETCDF_MEDIA_TYPES:
-            reader = "netcdf"
-        elif grib2:
-            reader = "grib2"
-        elif media_type in CSV_MEDIA_TYPES or gzip_csv:
-            units_row = has_units_row(fetched.asset.dataset_id, fetched.asset.protocol)
-            reader = "erddap-csv" if units_row else "csv"
-        else:
-            raise UnsupportedFormat(
-                f"no reader for {fetched.asset.media_type!r}; supported formats are CSV, "
-                "ERDDAP CSV, NetCDF4, GRIB2, NEXRAD Level II, HURDAT2 best tracks, "
-                "and AQS daily JSON. "
-                "For a known CSV with ambiguous metadata, "
-                "pass reader='csv' "
-                "or reader='erddap-csv'; otherwise use fetched.path with a format-specific reader"
-            )
-    if sweep is not None and reader != "nexrad-level2":
-        raise ValueError("sweep applies only to the NEXRAD reader")
-    if select is not None and reader != "grib2":
-        raise ValueError("select applies only to the GRIB2 reader")
-    if strict and reader != "grib2":
-        raise ValueError("strict applies only to the GRIB2 reader")
-    if reader == "grib2":
-        if any(value is not None for value in (dtype, parse_dates, usecols, nrows)):
-            raise ValueError(
-                "CSV options dtype, parse_dates, usecols and nrows do not apply to GRIB2"
-            )
-        from usdata._grib import open_grib2
-
-        return open_grib2(fetched, select=select, strict=strict)
-    if reader == "netcdf":
-        if any(value is not None for value in (dtype, parse_dates, usecols, nrows)):
-            raise ValueError(
-                "CSV options dtype, parse_dates, usecols and nrows do not apply to NetCDF"
-            )
-        from usdata._netcdf import open_netcdf
-
-        return open_netcdf(fetched)
-    if reader == "nexrad-level2":
-        if any(value is not None for value in (dtype, parse_dates, usecols, nrows)):
-            raise ValueError("dtype, parse_dates, usecols, and nrows apply only to CSV readers")
-        from usdata._radar import open_nexrad
-
-        if sweep is not None:
-            values = sweep if isinstance(sweep, list) else [sweep]
-            if not values or any(type(value) is not int or value < 0 for value in values):
-                raise ValueError("sweep must be a nonnegative integer or non-empty list of them")
-            if len(set(values)) != len(values):
-                raise ValueError("sweep indices must be unique")
-        return open_nexrad(fetched, sweep=sweep)
-    if reader == "hurdat2":
-        if any(value is not None for value in (dtype, parse_dates, usecols, nrows)):
-            raise ValueError("dtype, parse_dates, usecols, and nrows apply only to CSV readers")
-        from usdata._hurdat2 import open_hurdat2
-
-        return open_hurdat2(fetched)
-    if reader == "aqs":
-        if any(value is not None for value in (dtype, parse_dates, usecols, nrows)):
-            raise ValueError("dtype, parse_dates, usecols, and nrows apply only to CSV readers")
-        from usdata._aqs import open_aqs
-
-        return open_aqs(fetched)
-    if reader not in {"csv", "erddap-csv"}:
-        raise UnsupportedFormat(
-            f"unsupported reader {reader!r}; use 'csv', 'erddap-csv', 'netcdf', 'grib2', "
-            "'nexrad-level2', 'hurdat2', or 'aqs'"
-        )
+    if units_row is None:
+        units_row = has_units_row(fetched.asset.dataset_id, fetched.asset.protocol)
     try:
         pandas = import_module("pandas")
     except ModuleNotFoundError as error:
@@ -472,7 +497,7 @@ def open_asset(
             ):
                 raise ValueError("CSV must have a non-empty header with unique column names")
             units = {}
-            if reader == "erddap-csv":
+            if units_row:
                 values = next(records, [])
                 if len(values) != len(columns):
                     raise ValueError("ERDDAP CSV must have a units row matching the header")

@@ -124,13 +124,13 @@ def test_grib2_is_inferred_and_names_the_grib_extra(fetched, media_type, name) -
         pytest.raises(MissingReaderDependency, match=r"usdata\[grib\]"),
     ):
         item.open()
-    with pytest.raises(ValueError, match="select applies only"):
-        item.open(reader="csv", select={"shortName": "t"})
 
 
-def test_unknown_reader_rejected(fetched) -> None:
-    with pytest.raises(UnsupportedFormat, match="unsupported reader"):
-        fetched("x\n1\n").open(reader="pickle")
+def test_level_iii_has_no_reader_by_inference_or_by_name(fetched) -> None:
+    item = fetched("not a product", media_type=None, dataset="noaa:nexrad-level3")
+    for opener in (item.open, item.open_nexrad):
+        with pytest.raises(UnsupportedFormat, match="Level III products have no usdata reader"):
+            opener()
 
 
 def test_csv_identifiers_dates_and_numeric_observations(pd, fetched) -> None:
@@ -146,7 +146,7 @@ def test_csv_identifiers_dates_and_numeric_observations(pd, fetched) -> None:
     assert frame.DATE.iloc[0] == "2024-05-06"
     assert frame.TMAX.iloc[0] == 25.5 and pd.isna(frame.TMAX.iloc[1])
     assert frame.NAME.iloc[0] == "Norman, OK"
-    dated = item.open(parse_dates=["DATE"], dtype={"STATION": "int64"}, nrows=1)
+    dated = item.open_csv(parse_dates=["DATE"], dtype={"STATION": "int64"}, nrows=1)
     assert dated.STATION.iloc[0] == 123
     assert dated.DATE.iloc[0] == pd.Timestamp("2024-05-06")
     assert len(dated) == 1
@@ -177,7 +177,7 @@ def test_erddap_units_are_metadata_not_observations(pd, fetched) -> None:
     )
     # The public model must also work after deserializing a restored result.
     item = FetchedAsset.model_validate_json(item.model_dump_json())
-    frame = item.open(parse_dates=["time"], usecols=["time", "analysed_sst"])
+    frame = item.open_csv(parse_dates=["time"], usecols=["time", "analysed_sst"])
     assert len(frame) == 2 and frame.analysed_sst.mean() == pytest.approx(27)
     assert frame.time.iloc[0] == pd.Timestamp("2024-05-06T12:00:00Z")
     assert frame.attrs["units"] == {"time": "UTC", "analysed_sst": "degree_C"}
@@ -186,9 +186,9 @@ def test_erddap_units_are_metadata_not_observations(pd, fetched) -> None:
 
 def test_explicit_reader_handles_ambiguous_metadata(pd, fetched) -> None:
     item = fetched("site_no,value\n00123,2\n", media_type=None)
-    assert item.open(reader="csv").site_no.iloc[0] == "00123"
+    assert item.open_csv(units_row=False).site_no.iloc[0] == "00123"
     item = fetched("value\nmm\n2\n", media_type=None)
-    frame = item.open(reader="erddap-csv")
+    frame = item.open_csv(units_row=True)
     assert frame.value.iloc[0] == 2 and frame.attrs["units"] == {"value": "mm"}
 
 
@@ -351,7 +351,7 @@ def test_a_timestamp_column_the_caller_parsed_is_moved_back_to_the_archive_centu
     pd, fetched
 ) -> None:
     item = fetched(BARE_LABEL_CSV, dataset="noaa:storm-events")
-    frame = item.open(parse_dates=["BEGIN_DATE_TIME", "END_DATE_TIME"])
+    frame = item.open_csv(parse_dates=["BEGIN_DATE_TIME", "END_DATE_TIME"])
     assert frame.BEGIN_UTC.iloc[0] == pd.Timestamp("1950-04-28T20:45:00Z")
     assert frame.BEGIN_UTC.iloc[4] == pd.Timestamp("2006-03-15T18:00:00Z")
 

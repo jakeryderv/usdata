@@ -74,7 +74,7 @@ uv run usdata fetch noaa:gfs \
 
 A 0.25 degree analysis is 508 MB; those two fields are a few megabytes of it.
 The spelling is exact and case-sensitive, and it is the sidecar's vocabulary,
-not the ecCodes names `open(select=...)` takes: `CAPE:surface`, not
+not the ecCodes names `open_grib2(select=...)` takes: `CAPE:surface`, not
 `{"shortName": "cape", "typeOfLevel": "surface"}`. Pass one value, a list, or a
 comma-separated string; a selector matching no message is an error listing the
 levels that short name publishes or the nearest short names, and an absent
@@ -100,7 +100,7 @@ the verified upstream probes are in
 
 ## Reading fields
 
-The `grib` extra opens a file with `FetchedAsset.open(select=...)` as an
+The `grib` extra opens a file with `FetchedAsset.open_grib2(select=...)` as an
 xarray Dataset. `select` is required to choose messages by ecCodes keys;
 opening without it lists the available `(shortName, typeOfLevel, level)`
 triples. A file fetched with `messages` is already a selection, so it opens
@@ -123,7 +123,7 @@ without `select`. Keys observed in the 2024-05-06 00Z 1 degree analysis:
 from usdata import pull
 
 (item,) = pull("dataset.yaml").fetched
-environment = item.open(select={"shortName": ["cape", "cin"], "typeOfLevel": "surface"})
+environment = item.open_grib2(select={"shortName": ["cape", "cin"], "typeOfLevel": "surface"})
 ```
 
 The grids are regular latitude-longitude; the reader attaches one-dimensional

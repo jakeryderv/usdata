@@ -434,7 +434,7 @@ class Hrrr(ModelRuns):
     key_re = KEY_RE
     hint = (
         "HRRR files are whole CONUS grids; fetch with messages=..., or download and let "
-        "open(select=...) pick fields"
+        "open_grib2(select=...) pick fields"
     )
     suffix = ".grib2"
     params_model = HrrrParams

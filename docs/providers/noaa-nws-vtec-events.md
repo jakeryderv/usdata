@@ -71,7 +71,7 @@ To ask what was in effect, widen the window backwards far enough to catch what
 was still running, and compare the two instants yourself:
 
 ```python
-frame = item.open(parse_dates=["iso_issued", "iso_expired"])
+frame = item.open_csv(parse_dates=["iso_issued", "iso_expired"])
 moment = pd.Timestamp("2024-05-07T02:12Z")
 in_effect = frame[(frame.iso_issued <= moment) & (frame.iso_expired > moment)]
 ```
