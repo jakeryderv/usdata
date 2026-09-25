@@ -15,7 +15,7 @@ from typer.testing import CliRunner
 
 from usdata import fetch
 from usdata.cli import app
-from usdata.models import Query
+from usdata.models import BBox, Query
 from usdata.protocols import http
 from usdata.providers import Credentials, MissingCredentials, QueryError
 from usdata.providers.epa import aqs
@@ -113,6 +113,32 @@ def test_a_state_location_sites_and_a_box_select_as_the_adr_says(adapter) -> Non
         "minlon": "-74.3",
         "maxlon": "-73.7",
     }
+
+
+def test_a_box_is_sent_to_six_decimals_and_agrees_with_its_label(adapter) -> None:
+    fine = (-105.123456, 39.654321, -104.9, 40.0)
+    (url,) = listed(adapter, bbox=fine, parameters="88101", **JUNE)
+    assert [url.params[k] for k in ("minlat", "maxlat", "minlon", "maxlon")] == [
+        "39.654321",
+        "40",
+        "-105.123456",
+        "-104.9",
+    ]
+    # Boxes apart only past the sixth decimal share a label, so they share a URL too;
+    # boxes apart at the sixth decimal differ in both.
+    same = listed(adapter, bbox=(-105.1234561, 39.654321, -104.9, 40.0), parameters="88101", **JUNE)
+    other = listed(adapter, bbox=(-105.123457, 39.654321, -104.9, 40.0), parameters="88101", **JUNE)
+    assert same == [url] and other != [url]
+    labels = {
+        aqs._box_label(BBox(west=w, south=s, east=e, north=n))
+        for w, s, e, n in [fine, (-105.1234561, 39.654321, -104.9, 40.0)]
+    }
+    assert len(labels) == 1
+
+
+def test_a_box_of_few_decimals_is_sent_as_the_committed_example_pins_it(adapter) -> None:
+    (url,) = listed(adapter, bbox=(-74.26, 40.49, -73.70, 40.92), parameters="88101", **JUNE)
+    assert str(url).endswith("&minlat=40.49&maxlat=40.92&minlon=-74.26&maxlon=-73.7")
 
 
 def test_each_calendar_year_is_its_own_request(adapter) -> None:

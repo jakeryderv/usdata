@@ -81,6 +81,15 @@ def _stamp(value: datetime) -> str:
     return value.replace(tzinfo=None).isoformat()
 
 
+def _degrees(value: float) -> str:
+    """A box edge to six decimals, about 0.1 m, without trailing zeros.
+
+    ``:g`` would keep six significant digits, moving an edge such as
+    -105.123456 by tens of metres.
+    """
+    return f"{value:.6f}".rstrip("0").rstrip(".")
+
+
 class Earthquakes(HttpProvider):
     """ComCat events as CSV pages; params bound magnitude and depth, the query gives the rest."""
 
@@ -101,10 +110,10 @@ class Earthquakes(HttpProvider):
         if query.bbox is not None:
             box = query.bbox
             filters.update(
-                minlatitude=f"{box.south:g}",
-                maxlatitude=f"{box.north:g}",
-                minlongitude=f"{box.west:g}",
-                maxlongitude=f"{box.east:g}",
+                minlatitude=_degrees(box.south),
+                maxlatitude=_degrees(box.north),
+                minlongitude=_degrees(box.west),
+                maxlongitude=_degrees(box.east),
             )
         count = self._count(filters)
         assets: list[Asset] = []

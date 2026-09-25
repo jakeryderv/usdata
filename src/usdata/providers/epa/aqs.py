@@ -134,6 +134,15 @@ def _box_label(box: BBox) -> str:
     return "box-" + hashlib.sha256(text.encode()).hexdigest()[:12]
 
 
+def _degrees(value: float) -> str:
+    """A box edge as sent: the six decimals ``_box_label`` hashes, without trailing zeros.
+
+    Two boxes then share a request URL exactly when they share a label, and an
+    edge given to six decimals or fewer is sent as given.
+    """
+    return f"{value:.6f}".rstrip("0").rstrip(".")
+
+
 def _row_key(row: dict[str, Any]) -> tuple[str, ...]:
     """Where a row sorts: its identifying columns as text, then the whole row."""
     return (
@@ -292,10 +301,10 @@ class AqsDaily(HttpProvider):
         if query.bbox is not None:
             box = query.bbox
             filters = {
-                "minlat": f"{box.south:g}",
-                "maxlat": f"{box.north:g}",
-                "minlon": f"{box.west:g}",
-                "maxlon": f"{box.east:g}",
+                "minlat": _degrees(box.south),
+                "maxlat": _degrees(box.north),
+                "minlon": _degrees(box.west),
+                "maxlon": _degrees(box.east),
             }
             return [(_box_label(box), "byBox", filters)]
         raise QueryError(

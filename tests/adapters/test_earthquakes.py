@@ -104,6 +104,15 @@ def test_listing_counts_first_and_pins_one_csv_page_with_the_query_as_sent() -> 
     assert asset.time == q.time
 
 
+def test_a_box_is_sent_to_six_decimals() -> None:
+    with respx.mock() as mock, adapter() as provider:
+        count = mock.get(COUNT_URL).respond(200, text="1")
+        (asset,) = provider.list_assets(query(bbox=(-105.123456, 39.654321, -104.9, 40.0)))
+    for params in (count.calls[0].request.url.params, httpx.URL(asset.href).params):
+        assert [params[k] for k in ("minlatitude", "maxlatitude")] == ["39.654321", "40"]
+        assert [params[k] for k in ("minlongitude", "maxlongitude")] == ["-105.123456", "-104.9"]
+
+
 def test_no_matching_events_is_an_empty_listing() -> None:
     with respx.mock() as mock, adapter() as provider:
         mock.get(COUNT_URL).respond(200, text="0")
