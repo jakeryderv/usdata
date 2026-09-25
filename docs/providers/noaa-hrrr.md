@@ -110,8 +110,8 @@ level. A selector no message here was fetched for raises `KeyError` listing the
 ones that were.
 
 The fetched file is the selected messages concatenated, which is itself a valid
-GRIB2 file: `usdata inspect` lists them and `open()` reads them, with `select`
-optional because the fetch already selected. The asset id carries a digest of
+GRIB2 file: `usdata inspect` lists them and `open()` reads them without
+`select`, because the fetch already selected. The asset id carries a digest of
 the resolved message numbers, so a partial file never collides with the whole
 one in the cache, and the lockfile pins the byte ranges and the object's ETag.
 A restore re-issues exactly those ranges and never re-reads the index; if the

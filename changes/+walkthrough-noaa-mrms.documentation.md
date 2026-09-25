@@ -1,1 +1,0 @@
-The MRMS gridded radar products page has a walkthrough notebook: eleven two-minute mid-level rotation grids cropped around an Oklahoma tornado report, their swaths mapped, and the thirty-minute accumulation explained.

@@ -1,1 +1,0 @@
-The GRIB2 reader now reverses every second row of a grid whose adjacent rows scan in opposite directions, as the National Blend of Models CONUS grid does. Before, half the rows of every `noaa:nbm` field came back mirrored east to west, so values sat beside the wrong coordinates.

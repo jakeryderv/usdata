@@ -63,7 +63,7 @@ hrrr.20240506.t20z.wrfsfcf00.part-13819cd0ccdf.grib2	1838460	s3://noaa-hrrr-bdp-
 
 The same run without `messages` reports 150,114,757 bytes, so the two fields
 cost about 1.2% of the file. The result is those messages concatenated, which
-is a valid GRIB2 file: `open()` reads it with `select` optional, since the
+is a valid GRIB2 file: `open()` reads it without `select`, since the
 fetch already selected. A manifest pins the byte ranges and the object's ETag
 and restores from them without re-reading the index; because listing a
 `messages` source resolves its ranges, `usdata pull dataset.yaml --dry-run`
@@ -74,8 +74,8 @@ verified selectors:
 
 ## Selecting fields
 
-A whole file holds hundreds of messages, so `open()` needs `select` with
-ecCodes key names. Opening without it raises an error listing every
+A whole file holds hundreds of messages, so it is opened with `open_grib2(select=...)`
+and ecCodes key names. Opening without it raises an error listing every
 `(shortName, typeOfLevel, level)` in the file, which is the quickest way to
 discover what a run contains:
 

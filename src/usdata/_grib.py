@@ -467,8 +467,8 @@ def open_grib2(
         selected.append(_Field(short=short, data=data, attrs=attrs, message=message))
     if count > 1 and needs_select:
         raise ValueError(
-            f"{count} messages; pass select={{...}} with ecCodes keys to choose, "
-            f"for example select={{'shortName': ..., 'typeOfLevel': ...}}. "
+            f"{count} messages; pass select={{...}} to open_grib2 with ecCodes keys to "
+            f"choose, for example select={{'shortName': ..., 'typeOfLevel': ...}}. "
             f"Available (shortName, typeOfLevel, level): {_available(fetched.path)}"
         )
     if grid is None or not selected:

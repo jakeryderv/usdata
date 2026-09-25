@@ -4,7 +4,7 @@
 
 Each dataset has one page here: how to select it, what arrives, what the service does not say, and its generated reference. To browse datasets with previews and walkthroughs, use the [dataset grid on usdata.dev](https://usdata.dev/datasets/).
 
-**Released** is included in usdata 0.26.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
+**Released** is included in usdata 0.27.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
 
 ## Implemented datasets
 

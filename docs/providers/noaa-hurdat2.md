@@ -108,8 +108,8 @@ published for the same point in a later revision. Of the 43 files listed on
 and the `revision` parameter; `revision: 2026-02-27` reads the previous
 Atlantic revision, which the examples pin until the NHC corrects the file.
 
-CSV options (`dtype`, `parse_dates`, `usecols`, `nrows`) do not apply and are
-rejected. Opening is local: it never re-fetches, decompresses into the cache, or
+The file takes no reader options, so it is opened with `open()`, not
+`open_csv()`. Opening is local: it never re-fetches, decompresses into the cache, or
 changes provenance, which is copied into `frame.attrs["usdata"]`.
 
 ## Scientific limits
