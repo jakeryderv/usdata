@@ -404,6 +404,8 @@ def fetch(
             typer.echo(f"{len(assets)} asset(s) matched, {sizes}", err=True)
             with progress(disabled=no_progress):
                 batch([asset.size for asset in assets])
+            if not assets:
+                raise typer.Exit(code=1)
             return
         with progress(disabled=no_progress):
             fetched = fetch_query(ds, query, root=cache_dir, force=force)
