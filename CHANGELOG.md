@@ -17,7 +17,7 @@ The documentation site assembles their preview automatically.
 
 ### Breaking
 
-- `FetchedAsset.open()` no longer takes options. Open a file that needs them with the method for its format: `open_csv(dtype=, parse_dates=, usecols=, nrows=, units_row=)`, `open_nexrad(sweep=)`, `open_grib2(select=, strict=)`, or `open_netcdf()`, each typed with the pandas or xarray object it returns. `open(reader="csv")` and `open(reader="erddap-csv")` become `open_csv(units_row=False)` and `open_csv(units_row=True)`, and the other `reader` values become the method of the same format. `usdata.readers.open_asset` likewise takes only the fetched asset, beside new `open_csv`, `open_nexrad`, `open_grib2`, and `open_netcdf` functions.
+- `FetchedAsset.open()` no longer takes options. Open a file that needs them with the method for its format: `open_csv(dtype=, parse_dates=, usecols=, nrows=, units_row=)`, `open_nexrad(sweep=)`, `open_grib2(select=, strict=)`, or `open_netcdf()`, each typed with the pandas or xarray object it returns. `open(reader="csv")` and `open(reader="erddap-csv")` become `open_csv(units_row=False)` and `open_csv(units_row=True)`; `reader="netcdf"`, `"grib2"`, and `"nexrad-level2"` become `open_netcdf()`, `open_grib2()`, and `open_nexrad()`. `"hurdat2"` and `"aqs"` have no method: `open()` recognizes those files by their dataset id or filename. `usdata.readers.open_asset` likewise takes only the fetched asset, beside new `open_csv`, `open_nexrad`, `open_grib2`, and `open_netcdf` functions.
 
 ### Added
 
