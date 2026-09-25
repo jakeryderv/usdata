@@ -96,7 +96,7 @@ pandas inference and default missing-value parsing.
 | NEXRAD Level II | `radar.attrs["usdata"]` | Asset id, provenance, and `sweeps` listing the returned groups |
 | NetCDF4, GRIB2 | `dataset.attrs["usdata"]` | Asset id and provenance |
 | GRIB2 | `dataset.attrs["usdata"]["messages"]` | Each variable name mapped to its message's `file_index`, `object_index`, `shortName`, `typeOfLevel`, `level`, and `step`, plus the `selector` a partial fetch asked for |
-| `grib2` | per-variable `attrs` | `units`, `name`, `typeOfLevel`, `level`, discipline, category, and parameter numbers, packing type, reference and valid times, step; projection parameters on the Dataset for projected grids |
+| `grib2` | per-variable `attrs` | `units` in UDUNITS notation (`J kg-1` where ecCodes writes `J kg**-1`, with the file's spelling in `GRIB_units` whenever the two differ), `name`, `typeOfLevel`, `level`, discipline, category, and parameter numbers, packing type, reference and valid times, step; projection parameters on the Dataset for projected grids |
 
 ## Errors
 

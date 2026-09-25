@@ -15,7 +15,9 @@ Opening is local. It does not re-fetch, verify checksums, alter the cached
 file, update provenance, or write anything. Editing the returned object does
 not change its source. Scientific units are not converted, and each source's
 own missing-data sentinels are left as the source wrote them, beyond what
-pandas and CF decoding normally handle.
+pandas and CF decoding normally handle. The one rewrite is notation: GRIB2
+`units` take the UDUNITS spelling CF metadata uses, `J kg-1` for ecCodes'
+`J kg**-1`, and keep the file's own spelling in `GRIB_units`.
 
 Every result carries a copy of the asset id and provenance under a `usdata`
 attribute. That is metadata about the source bytes, not a record of your

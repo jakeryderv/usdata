@@ -39,6 +39,11 @@ LIBRARY_HINT = (
 )
 MRMS_NAME = re.compile(r"^MRMS_(?P<product>.+?)_\d{2}\.\d{2}_\d{8}-\d{6}\.grib2(?:\.gz)?$")
 INVENTORY_KEYS = ("shortName", "name", "typeOfLevel", "level", "step", "units")
+SYMBOL_POWER = re.compile(r"(?<=[A-Za-z])\*\*")
+"""A power written after a unit symbol, as ecCodes writes ``kg**-1``."""
+NUMERIC_POWER = re.compile(r"(?<![A-Za-z])\*\*")
+"""A power written after anything else, such as the ``10**-3`` of a scale factor."""
+
 VARIABLE_KEYS = (
     "name",
     "units",
@@ -227,6 +232,20 @@ def inventory(path: Path) -> list[GribMessage]:
             )
         )
     return messages
+
+
+def udunits(units: str) -> str:
+    """EcCodes ``units`` in the UDUNITS notation CF metadata uses, or unchanged.
+
+    ecCodes writes powers as ``**``: ``J kg**-1``, ``m**2 s**-2``. UDUNITS and
+    CF write them as a trailing signed integer, ``J kg-1`` and ``m2 s-2``,
+    which is what xarray-based tools expect. Only the notation changes. A power
+    of a number, such as ``10**-3``, has no such spelling, so a string holding
+    one is returned as it is rather than half rewritten.
+    """
+    if NUMERIC_POWER.search(units):
+        return units
+    return SYMBOL_POWER.sub("", units)
 
 
 def _available(path: Path) -> str:
@@ -428,6 +447,10 @@ def open_grib2(
         attrs = {
             key: value for key in VARIABLE_KEYS if (value := _get(eccodes, h, key)) is not None
         }
+        if isinstance(units := attrs.get("units"), str) and (plain := udunits(units)) != units:
+            # The file's own spelling stays beside the rewritten one, as cfgrib keeps it.
+            attrs["GRIB_units"] = units
+            attrs["units"] = plain
         for label, date_key, time_key in (
             ("reference_time", "dataDate", "dataTime"),
             ("valid_time", "validityDate", "validityTime"),
