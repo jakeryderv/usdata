@@ -145,10 +145,13 @@ def run(command: list[str], work: Path, env: dict[str, str]) -> None:
 def install(step: Install, python: Path, version: str, work: Path, env: dict[str, str]) -> None:
     """Install the guide's requirement at the released version, tolerating index lag.
 
-    pip's HTTP cache keeps PyPI's index page for its ten-minute ``max-age``, so a
-    retry that may use it rereads the page the first attempt saw from before the
-    upload. The v0.27.0 walkthrough spent its whole window that way and installed
-    at once on a fresh runner a minute later. Every attempt asks the index again.
+    A stale index page can come from two caches, both honouring PyPI's ten-minute
+    ``max-age``. pip's own HTTP cache would hand every retry the page the first
+    attempt saw, so it is turned off and each attempt asks the index again. PyPI's
+    CDN can also serve an edge's cached page after an upload: the 0.28.0 index was
+    stale at one edge for about 80 seconds with pip's cache off. The retry window
+    in ``publish.yml`` is there to wait that out. Which cache kept the v0.27.0
+    walkthrough failing for its whole ten-minute window was not established.
     """
     command = [str(python), *step.prefix, f"{step.requirement}=={version}"]
     attempts = int(env.get("USDATA_INSTALL_ATTEMPTS", "8"))
