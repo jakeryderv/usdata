@@ -34,7 +34,7 @@ fetching. They are selected by format, independently of the transport used.
 | `testing` | The adapter contract as runnable checks: `check_provider_contract` holds any adapter, bundled or external, to the rules `providers` states. Imports pytest lazily. |
 | `protocols` | Transport clients with no dataset knowledge. `http.download` streams to disk atomically; `s3.list_objects` paginates ListObjectsV2 anonymously. |
 | `fetch` | Core loop: adapter resolves assets, cache is checked, bytes fetched, provenance written. |
-| `readers` | Local CSV, radar, and NetCDF4 opening behind optional extras; format dispatch, units and source metadata, no fetching or cache writes. |
+| `readers` | Local CSV, NEXRAD Level II, NetCDF4, GRIB2, HURDAT2, and AQS JSON opening behind optional extras; format inference, one typed function per format with options, units and source metadata, no fetching or cache writes. |
 | `cache` | Cache directory resolution and content hashing. |
 | `provenance` | Builds and persists a `Provenance` record beside each fetched file. |
 | `manifest` | `Manifest` (declared inputs) and `Lockfile` (what was actually fetched, with checksums). |
@@ -100,10 +100,14 @@ GET failures. Metadata retries preserve the original request; download retries
 restart with a new temporary file. Provider code uses these helpers with its
 owned or injected client. Transport remains independent of dataset semantics.
 
-`FetchedAsset.open()` delegates to `readers` on demand. It does not change models,
-lockfiles, source bytes, or sidecars. Format selection uses the asset rather than
-a current registry lookup, so restored results remain readable. See the
-[reader reference](reference/readers.md) and [ADR 0006](adr/0006-optional-local-csv-readers.md).
+`FetchedAsset.open()` delegates to `readers` on demand, inferring the format
+and using its defaults; `open_csv`, `open_nexrad`, `open_grib2`, and `open_netcdf`
+name the format, take only its options, and are typed with what they return.
+None of them changes models, lockfiles, source bytes, or sidecars. Format
+selection uses the asset rather than a current registry lookup, so restored
+results remain readable. See the [reader reference](reference/readers.md),
+[ADR 0006](adr/0006-optional-local-csv-readers.md), and
+[ADR 0042](adr/0042-one-open-method-per-format.md).
 Fetch trusts a cache hit whose sidecar checks pass and whose file has not been
 touched since that sidecar was written, and hashes in every other case; restore
 and verify still re-hash everything. See

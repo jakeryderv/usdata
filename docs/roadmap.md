@@ -138,6 +138,21 @@ York City's PM2.5 through the June 2023 smoke. The same release lets
 `noaa:hurdat2` name a revision, since the newest Atlantic file has upstream
 typos ([ADR 0038](adr/0038-named-hurdat2-revisions.md)).
 
+Shipped in v0.27.0: every dataset has its own
+[page on usdata.dev](https://usdata.dev/datasets/) with a walkthrough notebook
+and a preview from real data, and question-driven examples became
+[studies](https://usdata.dev/studies/)
+([ADR 0041](adr/0041-dataset-walkthroughs-and-studies.md)). Writing the
+walkthroughs turned up two faults, now fixed: the GRIB2 reader mirrored half the
+rows of every NBM grid, and the SPC reference gave losses in millions where
+they are whole dollars from 2016. Opening a file now names its format when it needs options:
+`open_csv`, `open_nexrad`, `open_grib2`, and `open_netcdf` take only their own
+options and are typed with the pandas or xarray object they return, while a bare
+`open()` still infers
+([ADR 0042](adr/0042-one-open-method-per-format.md)). A forced re-resolve that
+fails partway no longer overwrites pinned cache files
+([ADR 0031](adr/0031-staged-refresh-and-lockfile-first-commit.md)).
+
 The work now is breadth: more of the datasets people reach for, from more
 agencies, each verified by a live check and a worked example. 1.0 comes when
 the catalog feels comprehensive and the contract feels settled, a judgment
