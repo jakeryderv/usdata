@@ -86,10 +86,14 @@ folder's lockfile stays ignored.
 
 A walkthrough follows one template, as markdown headings in this order: the
 dataset's title and what it is, `Select`, `What arrives`, `Open`,
-`A first look`, `Pin and cite`, and `What was awkward`. A study's title is the
-question a student or analyst would ask, written down before touching the tool;
-it opens with `Data`, organizes its analysis freely, and ends with
-`Pin and cite` and `What was awkward`.
+`A first look`, `Pin and cite`, and `What was awkward`. `Open` uses `open()`
+when the format's defaults serve, and otherwise the method for the format, such
+as `open_csv(parse_dates=[...])` or `open_nexrad(sweep=0)`, so the cell names
+what it opens.
+
+A study's title is the question a student or analyst would ask, written down
+before touching the tool; it opens with `Data`, organizes its analysis freely,
+and ends with `Pin and cite` and `What was awkward`.
 
 "What was awkward" lists the places where you had to work around the tool or
 the data. Each entry is an issue candidate, and together they are how usage
