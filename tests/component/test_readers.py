@@ -1,3 +1,4 @@
+import warnings
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
@@ -365,11 +366,30 @@ def test_the_1950_archive_file_lands_in_1950(pd, fetched) -> None:
     assert frame.attrs["usdata"]["derived"][0]["labels_without_offset"] == {}
 
 
-def test_storm_events_frame_without_the_three_columns_is_untouched(pd, fetched) -> None:
-    source = "EVENT_ID,STATE,BEGIN_DATE_TIME\n1184052,OKLAHOMA,06-MAY-24 22:39:00\n"
-    frame = fetched(source, dataset="noaa:storm-events").open()
-    assert frame.columns.tolist() == ["EVENT_ID", "STATE", "BEGIN_DATE_TIME"]
-    assert frame.BEGIN_DATE_TIME.tolist() == ["06-MAY-24 22:39:00"]
+def test_each_utc_column_needs_only_its_own_local_column(pd, fetched) -> None:
+    item = fetched(STORM_EVENTS_CSV, dataset="noaa:storm-events")
+    frame = item.open_csv(usecols=["EVENT_ID", "BEGIN_DATE_TIME", "CZ_TIMEZONE"])
+    assert frame.BEGIN_UTC.iloc[0] == pd.Timestamp("2024-05-07T04:39:00Z")
+    assert "END_UTC" not in frame.columns
+    assert [entry["column"] for entry in frame.attrs["usdata"]["derived"]] == ["BEGIN_UTC"]
+
+
+def test_a_local_column_without_its_timezone_warns_at_the_caller(pd, fetched) -> None:
+    item = fetched(STORM_EVENTS_CSV, dataset="noaa:storm-events")
+    with pytest.warns(UserWarning, match="without CZ_TIMEZONE, so BEGIN_UTC cannot") as caught:
+        frame = item.open_csv(usecols=["EVENT_ID", "BEGIN_DATE_TIME"])
+    assert caught[0].filename == __file__
+    assert frame.columns.tolist() == ["EVENT_ID", "BEGIN_DATE_TIME"]
+    assert frame.BEGIN_DATE_TIME.tolist()[0] == "06-MAY-24 22:39:00"
+    assert "derived" not in frame.attrs["usdata"]
+
+
+def test_a_frame_without_local_columns_is_left_alone(pd, fetched) -> None:
+    item = fetched(STORM_EVENTS_CSV, dataset="noaa:storm-events")
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        frame = item.open_csv(usecols=["EVENT_ID", "CZ_TIMEZONE"])
+    assert frame.columns.tolist() == ["EVENT_ID", "CZ_TIMEZONE"]
     assert "derived" not in frame.attrs["usdata"]
 
 

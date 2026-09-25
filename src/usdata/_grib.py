@@ -22,12 +22,11 @@ from collections.abc import Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from importlib import import_module
-from inspect import currentframe
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 from usdata.inspect import GribMessage
-from usdata.readers import MissingReaderDependency, fill_registry_attrs
+from usdata.readers import MissingReaderDependency, caller_stacklevel, fill_registry_attrs
 
 if TYPE_CHECKING:
     from usdata._fetch import FetchedAsset
@@ -199,18 +198,6 @@ def _unmatched_report(
             f"{key} values available with the other select keys: {available}."
         )
     return " ".join(parts)
-
-
-def _caller_stacklevel() -> int:
-    """Stack level of the first frame outside usdata, so a warning points at the caller."""
-    package = Path(__file__).resolve().parent
-    frame = currentframe()
-    frame = frame.f_back if frame is not None else None
-    level = 1
-    while frame is not None and Path(frame.f_code.co_filename).resolve().is_relative_to(package):
-        level += 1
-        frame = frame.f_back
-    return level
 
 
 def _shape(eccodes: Any, h: int) -> tuple[int, int] | None:
@@ -481,7 +468,7 @@ def open_grib2(
     if report := _unmatched_report(options, matched, present):
         if strict:
             raise ValueError(report)
-        warnings.warn(report, UserWarning, stacklevel=_caller_stacklevel())
+        warnings.warn(report, UserWarning, stacklevel=caller_stacklevel())
     variables: dict[str, Any] = {}
     messages: dict[str, dict[str, Any]] = {}
     names = variable_names(
