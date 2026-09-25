@@ -4,13 +4,17 @@ sources:
   start: '2024-05-06'
   end: '2024-05-06'
 - dataset: noaa:nexrad-level2
-  start: '2024-05-07T04:40:53+00:00'
-  end: '2024-05-07T04:40:53+00:00'
   params:
     site: KTLX
+  select:
+    time: '2024-05-07T04:39:00+00:00'
+    within: 5m
+    direction: nearest
 - dataset: noaa:goes-abi
-  start: '2024-05-07T04:41:17.300000+00:00'
-  end: '2024-05-07T04:41:17.300000+00:00'
   params:
     satellite: 16
     channel: 13
+  select:
+    time: '2024-05-07T04:39:00+00:00'
+    within: 5m
+    direction: nearest

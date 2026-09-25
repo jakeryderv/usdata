@@ -726,9 +726,9 @@
         "severe-weather-case-study"
       ],
       "quickstart": {
-        "cli": "usdata fetch noaa:nexrad-level2 \\\n  --start 2024-05-06T20:00:00Z \\\n  --end 2024-05-06T20:05:00Z \\\n  -p site=KTLX",
-        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:nexrad-level2\"),\n    build_query(\n        start=\"2024-05-06T20:00:00Z\",\n        end=\"2024-05-06T20:05:00Z\",\n        site=\"KTLX\",\n    ),\n)\ndata = items[0].open()\n",
-        "manifest": "name: ktlx-one-volume\nsources:\n  - dataset: noaa:nexrad-level2\n    start: 2024-05-06T20:00:00Z\n    end: 2024-05-06T20:05:00Z\n    params:\n      site: KTLX\n"
+        "cli": "# The manifest keeps only the file starting nearest 2024-05-06T20:00:00Z;\n# fetch takes every file that starts in its window.\nusdata fetch noaa:nexrad-level2 \\\n  --start 2024-05-06T19:55:00Z \\\n  --end 2024-05-06T20:05:00Z \\\n  -p site=KTLX",
+        "python": "from datetime import datetime, timedelta\n\nfrom usdata import build_query, fetch, get, select_by_time\n\nitems = fetch(\n    get(\"noaa:nexrad-level2\"),\n    build_query(\n        start=\"2024-05-06T19:55:00Z\",\n        end=\"2024-05-06T20:05:00Z\",\n        site=\"KTLX\",\n    ),\n)\nchosen = select_by_time(\n    [item.asset for item in items],\n    target=datetime.fromisoformat(\"2024-05-06T20:00:00Z\"),\n    tolerance=timedelta(seconds=300),\n    direction=\"nearest\",\n).asset\ndata = next(item for item in items if item.asset == chosen).open()\n",
+        "manifest": "name: ktlx-one-volume\nsources:\n  - dataset: noaa:nexrad-level2\n    params:\n      site: KTLX\n    select:\n      time: 2024-05-06T20:00:00Z\n      within: 5m\n      direction: nearest\n"
       }
     },
     {
@@ -1110,9 +1110,9 @@
         "event-context"
       ],
       "quickstart": {
-        "cli": "usdata fetch noaa:goes-abi \\\n  --start 2024-05-06T12:01:18.1Z \\\n  --end 2024-05-06T12:01:18.1Z \\\n  -p satellite=18 \\\n  -p channel=13 \\\n  -p product=ABI-L2-CMIPC",
-        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:goes-abi\"),\n    build_query(\n        start=\"2024-05-06T12:01:18.1Z\",\n        end=\"2024-05-06T12:01:18.1Z\",\n        satellite=18,\n        channel=13,\n        product=\"ABI-L2-CMIPC\",\n    ),\n)\ndata = items[0].open()\n",
-        "manifest": "name: goes18-infrared-scene\nsources:\n  - dataset: noaa:goes-abi\n    start: 2024-05-06T12:01:18.1Z\n    end: 2024-05-06T12:01:18.1Z\n    params:\n      satellite: 18\n      channel: 13\n      product: ABI-L2-CMIPC\n"
+        "cli": "# The manifest keeps only the file starting nearest 2024-05-06T12:00:00Z;\n# fetch takes every file that starts in its window.\nusdata fetch noaa:goes-abi \\\n  --start 2024-05-06T11:55:00Z \\\n  --end 2024-05-06T12:05:00Z \\\n  -p satellite=18 \\\n  -p channel=13 \\\n  -p product=ABI-L2-CMIPC",
+        "python": "from datetime import datetime, timedelta\n\nfrom usdata import build_query, fetch, get, select_by_time\n\nitems = fetch(\n    get(\"noaa:goes-abi\"),\n    build_query(\n        start=\"2024-05-06T11:55:00Z\",\n        end=\"2024-05-06T12:05:00Z\",\n        satellite=18,\n        channel=13,\n        product=\"ABI-L2-CMIPC\",\n    ),\n)\nchosen = select_by_time(\n    [item.asset for item in items],\n    target=datetime.fromisoformat(\"2024-05-06T12:00:00Z\"),\n    tolerance=timedelta(seconds=300),\n    direction=\"nearest\",\n).asset\ndata = next(item for item in items if item.asset == chosen).open()\n",
+        "manifest": "name: goes18-infrared-scene\nsources:\n  - dataset: noaa:goes-abi\n    params:\n      satellite: 18\n      channel: 13\n      product: ABI-L2-CMIPC\n    select:\n      time: 2024-05-06T12:00:00Z\n      within: 5m\n      direction: nearest\n"
       }
     },
     {

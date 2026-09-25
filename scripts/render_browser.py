@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import shlex
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +21,7 @@ from render_registry import (
     walkthrough_of,
 )
 
+from usdata.manifest import TimeSelect
 from usdata.models import Status, describe_duration
 from usdata.registry import Registry
 
@@ -57,11 +59,19 @@ def _python_value(value: Any) -> str:
     return json.dumps(str(value))
 
 
+def _utc_text(moment: datetime) -> str:
+    return moment.astimezone(UTC).isoformat().replace("+00:00", "Z")
+
+
 def quickstart(ds: Any, walkthrough: str | None) -> dict[str, str] | None:
     """The walkthrough's own query as a CLI line, a Python call, and a manifest.
 
     Nothing here is invented: the query is the first source of the manifest the
-    walkthrough ran, so every quick start on the website has been executed.
+    walkthrough ran, so every quick start on the website has been executed. A
+    source with ``select`` lists the window its rule implies and keeps one asset
+    (ADR 0044). ``fetch`` has no such rule, so the CLI line fetches that window
+    and says which file the manifest keeps, and the Python call keeps it with
+    ``select_by_time``.
     """
     if walkthrough is None:
         return None
@@ -70,6 +80,10 @@ def quickstart(ds: Any, walkthrough: str | None) -> dict[str, str] | None:
         return None
     text = manifest.read_text(encoding="utf-8")
     source = yaml.load(text, Loader=_TextDates)["sources"][0]
+    rule = TimeSelect.model_validate(source["select"]) if "select" in source else None
+    if rule is not None:
+        start, end = map(_utc_text, rule.window())
+        source = {**source, "start": start, "end": end}
     cli = [["usdata", "fetch", ds.id]]
     call = []
     for field, flag in (("location", "--location"), ("start", "--start"), ("end", "--end")):
@@ -92,10 +106,33 @@ def quickstart(ds: Any, walkthrough: str | None) -> dict[str, str] | None:
     # A long command continues one option per line, as a person would paste it.
     command = line if len(line) <= 72 else " \\\n  ".join(shlex.join(part) for part in cli)
     arguments = "".join(f"        {argument},\n" for argument in call)
+    fetched = f'items = fetch(\n    get("{ds.id}"),\n    build_query(\n{arguments}    ),\n)\n'
+    item = "items[0]"
+    if rule is None:
+        imports = "from usdata import build_query, fetch, get\n\n"
+    else:
+        # fetch has no select rule (ADR 0044): list the window the rule implies,
+        # then keep the one asset select_by_time chooses, as pull does.
+        command = (
+            f"# The manifest keeps only the file starting {rule.direction.replace('_', ' ')} "
+            f"{_utc_text(rule.time)};\n# fetch takes every file that starts in its window.\n"
+            + command
+        )
+        imports = (
+            "from datetime import datetime, timedelta\n\n"
+            "from usdata import build_query, fetch, get, select_by_time\n\n"
+        )
+        fetched += (
+            "chosen = select_by_time(\n"
+            "    [item.asset for item in items],\n"
+            f'    target=datetime.fromisoformat("{_utc_text(rule.time)}"),\n'
+            f"    tolerance=timedelta(seconds={int(rule.within.total_seconds())}),\n"
+            f'    direction="{rule.direction}",\n'
+            ").asset\n"
+        )
+        item = "next(item for item in items if item.asset == chosen)"
     python = (
-        "from usdata import build_query, fetch, get\n\n"
-        f'items = fetch(\n    get("{ds.id}"),\n    build_query(\n{arguments}    ),\n)\n'
-        + ("data = items[0].open()\n" if ds.reader else "print(items[0].path)\n")
+        imports + fetched + (f"data = {item}.open()\n" if ds.reader else f"print({item}.path)\n")
     )
     return {"cli": command, "python": python, "manifest": text}
 

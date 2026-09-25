@@ -45,6 +45,14 @@ def test_website_catalog_matches_registry_and_release_availability(monkeypatch) 
     sst = records["noaa:coastwatch-sst"]["quickstart"]
     assert "--bbox -81.5,28.0,-74.0,32.0" in sst["cli"]
     assert "bbox=(-81.5, 28.0, -74.0, 32.0)," in sst["python"]
+    # A select rule becomes the window it lists, and the Python call keeps its one file.
+    goes = records["noaa:goes-abi"]["quickstart"]
+    assert "--start 2024-05-06T11:55:00Z" in goes["cli"]
+    assert "--end 2024-05-06T12:05:00Z" in goes["cli"]
+    assert goes["cli"].startswith("# The manifest keeps only the file starting nearest")
+    assert 'target=datetime.fromisoformat("2024-05-06T12:00:00Z"),' in goes["python"]
+    assert "tolerance=timedelta(seconds=300)," in goes["python"]
+    assert "if item.asset == chosen).open()" in goes["python"]
     assert records["nasa:gpm-imerg"]["availability"] == "Planned"
     assert records["nasa:gpm-imerg"]["page"] is None
     assert records["nasa:gpm-imerg"]["studies"] == []

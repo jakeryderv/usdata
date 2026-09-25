@@ -1,8 +1,8 @@
 {
   "manifest": "goes18-infrared-scene",
-  "manifest_checksum": "sha256:ccfbdefb3c6def5690ae109c89435f0f596e147692c20859780e7f6617624d65",
-  "generated_at": "2026-09-16T16:05:25.090447Z",
-  "usdata_version": "0.18.0",
+  "manifest_checksum": "sha256:66fd0f1739a3e9f444bc15fcdd2ff7d9a7eb6927887c5cb36d599ad885afe834",
+  "generated_at": "2026-09-25T22:25:56.141650Z",
+  "usdata_version": "0.29.0",
   "assets": [
     {
       "asset": {
@@ -17,24 +17,27 @@
           "start": "2024-05-06T12:01:18.100000Z",
           "end": "2024-05-06T12:03:56.600000Z"
         },
-        "bbox": null
+        "bbox": null,
+        "properties": {}
       },
       "provenance": {
         "dataset_id": "noaa:goes-abi",
         "provider": "noaa",
         "source_url": "s3://noaa-goes18/ABI-L2-CMIPC/2024/127/12/OR_ABI-L2-CMIPC-M6C13_G18_s20241271201181_e20241271203566_c20241271204061.nc",
-        "retrieved_at": "2026-09-16T16:05:25.088251Z",
+        "retrieved_at": "2026-09-25T22:25:56.133385Z",
         "checksum": "sha256:3331dc3dcf67f3015e221484750fefebead4c51d728272045c3e31c9123a0c0a",
         "size": 3821830,
         "license": "US Government Work (public domain)",
-        "usdata_version": "0.18.0",
+        "usdata_version": "0.29.0",
         "transformations": [],
         "index_url": null,
         "index_checksum": null,
         "ranges": [],
         "selectors": [],
         "object_size": null,
-        "object_etag": null
+        "object_etag": null,
+        "mirror": null,
+        "credentials": []
       },
       "source": "1"
     }
