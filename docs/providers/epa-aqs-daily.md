@@ -122,7 +122,10 @@ needs before averaging or counting:
   a locked restore reports as drift; `pull --update` accepts it.
 - **Refusals.** A request the service refuses answers with a `Failed` header
   and a reason, usually with a 4xx status. usdata raises `AqsError`, a
-  `QueryError` (CLI exit 2), with that reason and without the key.
+  `QueryError` (CLI exit 2), with that reason and without the key. An error
+  without that header, such as a maintenance page, or a success that is not
+  the expected JSON, is an upstream failure: an httpx error (CLI exit 4),
+  also without the key.
 - Sizes are not known before download; `--dry-run` lists the requests, and
   needs the key set only because the adapter cannot be built without it.
 

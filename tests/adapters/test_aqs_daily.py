@@ -389,6 +389,60 @@ def test_a_refusal_keeps_the_services_reason_and_not_the_key(
         assert KEY not in text and "someone%2Baqs" not in text
 
 
+def cli_fetch(tmp_path: Path) -> list[str]:
+    return [
+        "fetch",
+        "epa:aqs-daily",
+        "--start",
+        "2023-06-01",
+        "--end",
+        "2023-06-10",
+        "-p",
+        "parameters=88101",
+        "-p",
+        "sites=36-081-0124",
+        "--cache-dir",
+        str(tmp_path),
+    ]
+
+
+@pytest.mark.parametrize(
+    "answer",
+    [
+        httpx.Response(503, text="<html>Down for maintenance</html>"),
+        httpx.Response(500, json={"message": "internal error"}),
+        httpx.Response(200, text="<html>Down for maintenance</html>"),
+        httpx.Response(200, json={"Data": []}),
+        httpx.Response(200, json=[]),
+    ],
+    ids=["503-html", "500-json-no-header", "200-html", "200-no-header", "200-list"],
+)
+def test_an_upstream_failure_exits_4_without_the_key(
+    tmp_path, monkeypatch, unpaced, answer
+) -> None:
+    monkeypatch.setenv("USDATA_AQS_EMAIL", EMAIL)
+    monkeypatch.setenv("USDATA_AQS_KEY", KEY)
+    with respx.mock() as mock:
+        mock.get(url__startswith=SERVICE_URL).mock(return_value=answer)
+        result = CliRunner().invoke(app, cli_fetch(tmp_path))
+    assert result.exit_code == 4, result.output
+    assert "request failed" in result.output and "refused" not in result.output
+    assert KEY not in result.output and "someone" not in result.output
+    assert not [path for path in tmp_path.rglob("*") if path.is_file()]
+
+
+def test_a_header_refusal_still_exits_2_with_its_reason(tmp_path, monkeypatch, unpaced) -> None:
+    monkeypatch.setenv("USDATA_AQS_EMAIL", EMAIL)
+    monkeypatch.setenv("USDATA_AQS_KEY", KEY)
+    refused = {"Header": [{"status": "Failed", "error": ["Email and/or key are invalid."]}]}
+    with respx.mock() as mock:
+        mock.get(url__startswith=SERVICE_URL).respond(400, json=refused)
+        result = CliRunner().invoke(app, cli_fetch(tmp_path))
+    assert result.exit_code == 2, result.output
+    assert "AQS refused the request (400): Email and/or key are invalid." in result.output
+    assert KEY not in result.output
+
+
 def test_a_rejected_key_says_which_variables_to_check(tmp_path, monkeypatch, unpaced) -> None:
     monkeypatch.setenv("USDATA_AQS_EMAIL", EMAIL)
     monkeypatch.setenv("USDATA_AQS_KEY", KEY)

@@ -5,8 +5,10 @@ from pathlib import Path
 import httpx
 import pytest
 import respx
+from typer.testing import CliRunner
 
 from usdata import build_query, fetch, get
+from usdata.cli import app
 from usdata.models import Query
 from usdata.providers.base import QueryError
 from usdata.providers.usgs.earthquakes import (
@@ -118,11 +120,31 @@ def test_more_than_one_page_becomes_one_asset_per_page_in_time_order(monkeypatch
     assert len({a.id for a in assets}) == 3
 
 
-def test_a_count_that_is_not_a_number_is_named() -> None:
+@pytest.mark.parametrize("text", ["Error 400: Bad Request\n", "<html>down</html>", "²"])
+def test_a_count_that_is_not_a_number_is_an_upstream_failure(text: str) -> None:
     with respx.mock() as mock, adapter() as provider:
-        mock.get(COUNT_URL).respond(200, text="Error 400: Bad Request\n")
-        with pytest.raises(QueryError, match="did not return a count"):
+        mock.get(COUNT_URL).respond(200, text=text)
+        with pytest.raises(httpx.DecodingError, match="did not return a count"):
             provider.list_assets(query())
+
+
+def test_the_cli_exits_4_when_the_count_is_not_a_number() -> None:
+    with respx.mock() as mock:
+        mock.get(COUNT_URL).respond(200, text="<html>maintenance</html>")
+        result = CliRunner().invoke(
+            app,
+            [
+                "fetch",
+                "usgs:earthquakes",
+                "--dry-run",
+                "--start",
+                "2024-05-06",
+                "--end",
+                "2024-05-07",
+            ],
+        )
+    assert result.exit_code == 4, result.output
+    assert "did not return a count" in result.output
 
 
 def test_fetch_downloads_the_page_bytes_unchanged(tmp_path: Path) -> None:

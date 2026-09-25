@@ -26,7 +26,6 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
-from usdata.providers.base import QueryError
 from usdata.providers.http import HttpProvider
 from usdata.providers.params import number_range
 
@@ -138,8 +137,11 @@ class Earthquakes(HttpProvider):
         """How many events the filters match, from the service's own count method."""
         response = http.get(COUNT_URL, self._http(), params=filters)
         text = response.text.strip()
-        if not text.isdigit():
-            raise QueryError(f"the catalog did not return a count for this query: {text[:200]!r}")
+        if not (text.isascii() and text.isdigit()):
+            raise httpx.DecodingError(
+                f"the catalog did not return a count for this query: {text[:200]!r}",
+                request=response.request,
+            )
         return int(text)
 
     def fetch(self, asset: Asset, dest: Path) -> Path:

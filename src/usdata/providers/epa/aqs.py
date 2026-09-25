@@ -142,20 +142,35 @@ def _row_key(row: dict[str, Any]) -> tuple[str, ...]:
     )
 
 
-def _failure(body: object) -> str | None:
-    """The reason a response header gives for refusing a request, or None if it did not."""
+def _header(body: object) -> list[dict[str, Any]]:
+    """The entries of a response's ``Header``, or none when it has no such list."""
     header = body.get("Header") if isinstance(body, dict) else None
-    entries = [entry for entry in header or [] if isinstance(entry, dict)]
-    status = entries[0].get("status") if entries else None
-    if status in (SUCCESS, NO_DATA):
+    return (
+        [entry for entry in header if isinstance(entry, dict)] if isinstance(header, list) else []
+    )
+
+
+def _status(body: object) -> object:
+    """The status a response header gives, or None when there is no header saying one."""
+    entries = _header(body)
+    return entries[0].get("status") if entries else None
+
+
+def _failure(body: object) -> str | None:
+    """The reason a response header gives for refusing a request, or None if it gives none.
+
+    A body with no header status, such as an HTML maintenance page, gives no
+    reason: that is the service failing, not refusing, and stays an HTTP error.
+    """
+    if _status(body) in (None, SUCCESS, NO_DATA):
         return None
     reasons = [
         "; ".join(map(str, entry["error"]))
         if isinstance(entry.get("error"), list)
         else str(entry.get("error") or entry.get("status"))
-        for entry in entries
+        for entry in _header(body)
     ]
-    return "; ".join(reasons) or "no header in the response"
+    return "; ".join(reasons)
 
 
 def canonical(body: dict[str, Any]) -> bytes:
@@ -163,13 +178,15 @@ def canonical(body: dict[str, Any]) -> bytes:
 
     Raises:
         AqsError: The header reports a failure rather than data or an empty selection.
+        httpx.DecodingError: There is no header status to say how the request went.
     """
     if (reason := _failure(body)) is not None:
         raise AqsError(f"AQS refused the request: {reason}")
+    if _status(body) is None:
+        raise httpx.DecodingError("AQS answered without a Header status")
     header = [
         {name: value for name, value in entry.items() if name not in ECHOED}
-        for entry in body.get("Header") or []
-        if isinstance(entry, dict)
+        for entry in _header(body)
     ]
     rows = body.get("Data") or []
     ordered = sorted(rows, key=_row_key) if isinstance(rows, list) else rows
@@ -297,12 +314,19 @@ class AqsDaily(HttpProvider):
                 response = http.get(keyed, self._http(), before_attempt=PACE.wait, timeout=TIMEOUT)
             except httpx.HTTPStatusError as error:
                 # A refusal comes as a 4xx whose JSON header says why; keep that reason.
+                # Any other error, such as a 503 maintenance page, stays an upstream failure.
                 if (reason := _failure(_json(error.response))) is None:
                     raise
                 status = error.response.status_code
                 if "key" in reason.lower():
                     reason = f"{reason} Check {EMAIL} and {KEY}."
                 raise AqsError(f"AQS refused the request ({status}): {reason}") from error
-            data = canonical(response.json())
+            body = _json(response)
+            if not isinstance(body, dict):
+                raise httpx.DecodingError(
+                    "AQS answered with something other than a JSON object",
+                    request=response.request,
+                )
+            data = canonical(body)
         dest.write_bytes(data)
         return dest
