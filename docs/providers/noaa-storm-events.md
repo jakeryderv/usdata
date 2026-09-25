@@ -32,8 +32,13 @@ The tables of one year are revised together and carry the same creation date.
 Both dates are required and interpreted in UTC for annual file selection.
 Every calendar year touched is returned in full: May 1–31 selects the complete
 year; December 31–January 1 selects both years. Asset time bounds label those
-whole file years, not precise coverage of local event timestamps. Dates before
-1950 and a missing requested year are errors, so a multi-year request cannot
+whole file years, not precise coverage of local event timestamps. The files
+are split by each event's local begin date, so an event early on January 1 UTC
+can sit in the previous year's file: at UTC−6 it is still December 31 until
+06:00 UTC, and at UTC−11 until 11:00 UTC; Guam, at UTC+10, is already in the
+next year from 14:00 UTC on December 31. A window within those hours of a new
+year selects only one file; start it a day earlier, or end it a day later, to
+fetch both. Dates before 1950 and a missing requested year are errors, so a multi-year request cannot
 silently succeed with only some years. Location/bbox, variables, and text are
 rejected, and `table` is the only parameter, so `spatial_subset` and
 `variable_subset` are false: selecting an annual object performs no server-side
