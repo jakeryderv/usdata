@@ -7,8 +7,10 @@ import gzip
 import io
 import os
 import re
+import warnings
 from collections.abc import Mapping
 from importlib import import_module
+from inspect import currentframe
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -226,6 +228,18 @@ def fill_registry_attrs(fetched: FetchedAsset, data: Any) -> None:
         data.attrs["usdata"]["registry_attrs"] = filled
 
 
+def caller_stacklevel() -> int:
+    """Stack level of the first frame outside usdata, so a warning points at the caller."""
+    package = Path(__file__).resolve().parent
+    frame = currentframe()
+    frame = frame.f_back if frame is not None else None
+    level = 1
+    while frame is not None and Path(frame.f_code.co_filename).resolve().is_relative_to(package):
+        level += 1
+        frame = frame.f_back
+    return level
+
+
 def _local_timestamps(pandas: Any, values: Any) -> Any:
     """Storm Events local timestamps as tz-naive datetimes, unparsable strings as NaT.
 
@@ -259,15 +273,29 @@ def derive_storm_events_utc(pandas: Any, frame: Any) -> None:
     timestamp does not yield an instant gets ``NaT``, and each derived column,
     its source, the rule, that row count, and the labels that gave no offset
     with how many rows carry each are listed under
-    ``frame.attrs["usdata"]["derived"]``. A frame missing any of the three
-    source columns is left alone.
+    ``frame.attrs["usdata"]["derived"]``.
+
+    Each UTC column needs only its own local column and ``CZ_TIMEZONE``, so a
+    ``usecols`` that keeps ``BEGIN_DATE_TIME`` but not ``END_DATE_TIME`` still
+    gets ``BEGIN_UTC``. A frame that keeps a local column without
+    ``CZ_TIMEZONE`` cannot be converted, and says so with a ``UserWarning``
+    rather than coming back without the column it would otherwise have.
 
     Args:
         pandas: The imported pandas module.
         frame: The DataFrame read from a Storm Events details CSV.
     """
-    required = {*STORM_EVENTS_UTC_COLUMNS, STORM_EVENTS_TIMEZONE_COLUMN}
-    if not required.issubset(frame.columns):
+    sources = [source for source in STORM_EVENTS_UTC_COLUMNS if source in frame.columns]
+    if not sources:
+        return
+    if STORM_EVENTS_TIMEZONE_COLUMN not in frame.columns:
+        derivable = ", ".join(STORM_EVENTS_UTC_COLUMNS[source] for source in sources)
+        warnings.warn(
+            f"{', '.join(sources)} read without {STORM_EVENTS_TIMEZONE_COLUMN}, so "
+            f"{derivable} cannot be derived; add {STORM_EVENTS_TIMEZONE_COLUMN} to usecols",
+            UserWarning,
+            stacklevel=caller_stacklevel(),
+        )
         return
     labels = frame[STORM_EVENTS_TIMEZONE_COLUMN].astype("string").str.strip()
     stated = pandas.to_numeric(
@@ -279,7 +307,8 @@ def derive_storm_events_utc(pandas: Any, frame: Any) -> None:
     without_offset = labels[hours.isna() & labels.notna()].value_counts()
     unconverted = {str(label): int(count) for label, count in sorted(without_offset.items())}
     derived = []
-    for source, column in STORM_EVENTS_UTC_COLUMNS.items():
+    for source in sources:
+        column = STORM_EVENTS_UTC_COLUMNS[source]
         local = _local_timestamps(pandas, frame[source])
         frame[column] = (local - offsets).dt.tz_localize("UTC")
         derived.append(

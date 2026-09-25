@@ -86,9 +86,11 @@ them by hand. The local timestamps carry two-digit years; `50` to `99` are read
 as 1950 to 1999, since the archive begins in 1950, where the usual pivot would
 put its first nineteen years a century late.
 
-When the frame keeps `BEGIN_DATE_TIME`, `END_DATE_TIME`, and `CZ_TIMEZONE`,
-`open()` adds `BEGIN_UTC` and `END_UTC` as timezone-aware UTC timestamps,
-leaving the original columns alone. A row whose label yields no offset, or whose
+When the frame keeps `CZ_TIMEZONE`, `open()` and `open_csv()` add `BEGIN_UTC`
+for a kept `BEGIN_DATE_TIME` and `END_UTC` for a kept `END_DATE_TIME`, as
+timezone-aware UTC timestamps, leaving the original columns alone. A frame that
+keeps a local column without `CZ_TIMEZONE` gets no UTC column and a
+`UserWarning` naming what to add to `usecols`. A row whose label yields no offset, or whose
 timestamp does not parse, gets `NaT`. `frame.attrs["usdata"]["derived"]` lists,
 per derived column, the rule used, the count of such rows as `unparsed`, and
 under `labels_without_offset` each label that gave no offset with how many rows
