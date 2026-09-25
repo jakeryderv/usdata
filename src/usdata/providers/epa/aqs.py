@@ -13,7 +13,9 @@ Selection (ADR 0040):
   ``variables`` filter is refused.
 - A place comes from exactly one of: ``sites`` (AQS site ids, ``SS-CCC-NNNN``),
   a ``location`` naming a state or county, which selects it exactly, or a bare
-  ``bbox`` or ``lat``/``lon``, which selects the monitors inside the box.
+  ``bbox`` or ``lat``/``lon``, which selects the monitors inside the box. AQS
+  keys Connecticut by its eight counties before 2022, so a planning-region
+  location is refused with the counties it overlaps.
 - The window's UTC calendar dates select local days, inclusive. The service
   refuses a request spanning two calendar years, so each year becomes its own
   asset, and each site its own asset too.
@@ -293,6 +295,7 @@ class AqsDaily(HttpProvider):
         if params.sites:
             return [(f"site-{site}", "bySite", _site_filters(site)) for site in params.sites]
         place = query.place
+        self.refuse_planning_region(place)
         if place is not None and place.county_fips is not None:
             filters = {"state": place.state_fips, "county": place.county_fips}
             return [(f"county-{place.geoid}", "byCounty", filters)]

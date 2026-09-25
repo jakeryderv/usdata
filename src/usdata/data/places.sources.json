@@ -15,7 +15,23 @@
       "records": 3235
     }
   ],
-  "csv_sha256": "eed6d7c53dcccb486f4e6f46fd393195cfb14e198b241f5ed9eed356f41f71f4",
+  "csv_sha256": "c71219686c33399bc70b1e083e6794de03370e51afc29a7e6a54a0596ddde1dd",
+  "connecticut_legacy_counties": {
+    "rule": "Connecticut's eight counties before 2022 are kept as legacy_county rows beside the planning regions that replaced them, for sources still keyed by the old codes. A planning region's legacy_counties lists the old counties it shares a town with.",
+    "vintage": "2021",
+    "sources": [
+      {
+        "url": "https://www2.census.gov/geo/tiger/GENZ2021/kml/cb_2021_us_county_500k.zip",
+        "sha256": "a321490984f84f66678ee5c870a11d91e34cdc742c3bd38467dde0936e35fff6",
+        "records": 8
+      },
+      {
+        "url": "https://www2.census.gov/geo/docs/reference/ct_change/ct_cou_to_cousub_crosswalk.txt",
+        "sha256": "13ad002564e30e6dcd1df112fdaa985f2cd0cdb908f7f3017cd2723db294cff8",
+        "records": 174
+      }
+    ]
+  },
   "antimeridian": {
     "rule": "A place whose longitudes span more than 180 degrees keeps only its western-hemisphere polygons; no box crosses the antimeridian.",
     "clipped": [

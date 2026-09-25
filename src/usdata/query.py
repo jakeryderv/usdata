@@ -7,7 +7,7 @@ import io
 from datetime import UTC, date, datetime, time
 from functools import lru_cache
 from importlib import resources
-from typing import Any
+from typing import Any, NamedTuple
 
 from usdata.models import BBox, Place, Query, TimeRange
 
@@ -22,12 +22,20 @@ class AmbiguousPlace(UnknownPlace):
     """A county name matches multiple places; qualify it with a state or FIPS."""
 
 
+class _Table(NamedTuple):
+    aliases: dict[str, set[str]]
+    places: dict[str, tuple[Place, BBox]]
+    legacy: dict[str, tuple[str, ...]]
+    """Each Connecticut planning region's geoid mapped to the legacy counties it overlaps."""
+
+
 @lru_cache(maxsize=1)
-def _places() -> tuple[dict[str, set[str]], dict[str, tuple[Place, BBox]]]:
+def _places() -> _Table:
     data = (resources.files("usdata.data") / "places.csv").read_text(encoding="utf-8")
     rows = list(csv.DictReader(io.StringIO(data)))
     aliases: dict[str, set[str]] = {}
     places: dict[str, tuple[Place, BBox]] = {}
+    legacy: dict[str, tuple[str, ...]] = {}
 
     def add(alias: str, geoid: str) -> None:
         aliases.setdefault(alias.casefold(), set()).add(geoid)
@@ -38,15 +46,18 @@ def _places() -> tuple[dict[str, set[str]], dict[str, tuple[Place, BBox]]]:
         label = (
             row["name"] if row["kind"] == "state" else f"{row['qualified_name']}, {row['state']}"
         )
+        # A legacy Connecticut county is a county to every reader; only the table marks it.
         kind = "state" if row["kind"] == "state" else "county"
         places[geoid] = (Place(kind=kind, geoid=geoid, label=label, state=row["state"]), box)
+        if row["legacy_counties"]:
+            legacy[geoid] = tuple(row["legacy_counties"].split())
         add(geoid, geoid)
         if row["kind"] == "state":
             add(row["name"], geoid)
             add(row["state"], geoid)
     state_aliases = set(aliases)
     for row in rows:
-        if row["kind"] != "county":
+        if row["kind"] == "state":
             continue
         geoid = row["geoid"]
         for county in (row["name"], row["qualified_name"]):
@@ -55,7 +66,27 @@ def _places() -> tuple[dict[str, set[str]], dict[str, tuple[Place, BBox]]]:
         # Bare qualified names are useful, but must not shadow state names.
         if row["qualified_name"].casefold() not in state_aliases:
             add(row["qualified_name"], geoid)
-    return aliases, places
+    return _Table(aliases, places, legacy)
+
+
+def legacy_counties(place: Place) -> tuple[Place, ...]:
+    """The pre-2022 Connecticut counties a planning region overlaps, or () for any other place.
+
+    Connecticut replaced its eight counties with nine planning regions as county
+    equivalents in 2022. The place table holds both, so a ``location`` can name
+    either, but sources such as OpenFEMA, AQS, and the NWS still key
+    Connecticut by the eight counties alone. Neither set nests in
+    the other: a region overlaps each county it shares a town with, per the
+    Census town crosswalk.
+
+    Args:
+        place: Any place from ``find_place`` or ``build_query``.
+
+    Returns:
+        The legacy counties, in FIPS order, when ``place`` is a planning region.
+    """
+    table = _places()
+    return tuple(table.places[geoid][0] for geoid in table.legacy.get(place.geoid, ()))
 
 
 def resolve_place(name: str) -> BBox:
@@ -78,7 +109,7 @@ def find_place(name: str) -> tuple[Place, BBox]:
         AmbiguousPlace: A bare county name matches more than one state's county.
     """
     key = ", ".join(" ".join(part.split()) for part in name.split(",")).casefold()
-    aliases, places = _places()
+    aliases, places, _ = _places()
     candidates = aliases.get(key, set())
     if not candidates:
         raise UnknownPlace(f"unknown place: {name!r}; use a state, 'County, ST', or quoted FIPS")

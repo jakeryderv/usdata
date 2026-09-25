@@ -164,3 +164,23 @@ now pass a fourth; nothing that gets its places from `build_query` or
 The lesson is the one ADR 0034 was always going to be tested on: an abstraction
 drawn from one source records that source's needs. The second source is where
 it finds out which of them were general.
+
+## Amendment, 2026-09-25: a source keyed by Connecticut's old counties refuses a planning region
+
+[ADR 0005](0005-generated-census-place-envelopes.md) now keeps Connecticut's
+eight counties before 2022 beside the planning regions that replaced them, and
+every place-keyed source so far, FEMA, AQS, and NWS, holds only the counties.
+A region reached them as a county code they have no rows for, so the answer
+was empty or statewide and looked like a real one.
+
+`usdata.query.legacy_counties(place)` returns the counties a region overlaps,
+and nothing for any other place. `Provider` gains one helper beside
+`place_of`, `refuse_planning_region(place)`, which raises `QueryError` for a
+region and names those counties, in the same words for every source. The
+three adapters call it; one that moves to the regions stops calling it. `Place`
+is unchanged: a legacy county is a county, and nothing in the query needs to
+know which set it came from.
+
+Parameters still win. An explicit FIPS code, UGC, or AQS site id is sent as
+given, so a source that starts serving region codes stays reachable before the
+adapter changes.

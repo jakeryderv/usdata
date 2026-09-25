@@ -63,6 +63,11 @@ usdata fetch epa:aqs-daily --start 2023-06-01 --end 2023-06-15 --location "Queen
 usdata fetch epa:aqs-daily --start 2023-01-01 --end 2023-12-31 -p sites=36-081-0124 -p parameters=88101,44201
 ```
 
+--8<-- "_snippets/connecticut-counties.md"
+
+EPA's site list (`aqs_sites.zip` from the AirData downloads) gave every open
+Connecticut monitor a county code from `001` to `015` in September 2026.
+
 ## What arrives
 
 A JSON file per selection and year, named

@@ -5,9 +5,20 @@ from pathlib import Path
 
 import pytest
 
+from usdata import build_query, fetch, get
 from usdata.pull import pull, verify
 
 pytestmark = pytest.mark.live
+
+
+def test_connecticut_rows_still_carry_its_counties_before_2022(tmp_path: Path) -> None:
+    query = build_query(location="Fairfield County, CT", start="2024-08-18", end="2024-08-19")
+    (asset,) = fetch(get("fema:disaster-declarations"), query, root=tmp_path)
+    with asset.path.open(newline="") as f:
+        rows = list(csv.DictReader(f))
+    # DR-4820 designated Fairfield as 001, its legacy code, not as a planning region.
+    assert "DR-4820-CT" in {row["femaDeclarationString"] for row in rows}
+    assert {row["fipsCountyCode"] for row in rows} <= {"001", "000"}
 
 
 def test_the_declaration_covering_the_may_2024_oklahoma_outbreak(tmp_path: Path) -> None:

@@ -3,7 +3,14 @@ from datetime import UTC, date, datetime
 import pytest
 
 from usdata.models import BBox, TimeRange
-from usdata.query import UnknownPlace, build_query, find_place, parse_datetime, resolve_place
+from usdata.query import (
+    UnknownPlace,
+    build_query,
+    find_place,
+    legacy_counties,
+    parse_datetime,
+    resolve_place,
+)
 
 
 def test_resolve_place_by_name_and_alias() -> None:
@@ -84,6 +91,64 @@ def test_counties_fips_and_qualified_names() -> None:
     assert resolve_place("VI") == resolve_place("78")
 
 
+LEGACY_CT = {
+    "09001": "Fairfield",
+    "09003": "Hartford",
+    "09005": "Litchfield",
+    "09007": "Middlesex",
+    "09009": "New Haven",
+    "09011": "New London",
+    "09013": "Tolland",
+    "09015": "Windham",
+}
+
+
+@pytest.mark.parametrize(("geoid", "name"), LEGACY_CT.items())
+def test_connecticuts_legacy_counties_resolve_beside_its_planning_regions(geoid, name) -> None:
+    place = build_query(location=f"{name} County, CT").place
+    assert place is not None
+    assert (place.kind, place.geoid, place.state) == ("county", geoid, "CT")
+    assert place.label == f"{name} County, CT"
+    assert find_place(geoid) == find_place(f"{name}, Connecticut")
+    state, county = resolve_place("Connecticut"), resolve_place(geoid)
+    assert state.west <= county.west < county.east <= state.east
+    assert state.south <= county.south < county.north <= state.north
+    # A legacy county is what the old-code sources want, so it maps to nothing further.
+    assert legacy_counties(place) == ()
+
+
+def test_a_planning_region_lists_the_legacy_counties_it_shares_a_town_with() -> None:
+    capitol, _ = find_place("Capitol Planning Region, CT")
+    assert capitol.geoid == "09110" and capitol.label == "Capitol Planning Region, CT"
+    assert [c.geoid for c in legacy_counties(capitol)] == ["09003", "09013"]
+    naugatuck = legacy_counties(find_place("09140")[0])
+    assert [c.label for c in naugatuck] == [
+        "Fairfield County, CT",
+        "Hartford County, CT",
+        "Litchfield County, CT",
+        "New Haven County, CT",
+    ]
+    regions = [find_place(f"09{code}")[0] for code in range(110, 200, 10)]
+    overlapped = {county.geoid for region in regions for county in legacy_counties(region)}
+    assert overlapped == set(LEGACY_CT)
+    for region in regions:
+        for county in legacy_counties(region):
+            assert resolve_place(region.geoid).intersects(resolve_place(county.geoid))
+    for other in ("Connecticut", "Osage County, OK", "Fairfield County, OH"):
+        assert legacy_counties(find_place(other)[0]) == ()
+
+
+def test_legacy_county_names_do_not_collide_with_other_places() -> None:
+    from usdata.query import AmbiguousPlace
+
+    # Unique names now resolve bare; shared ones stay ambiguous rather than choose one.
+    assert resolve_place("Hartford County") == resolve_place("09003")
+    with pytest.raises(AmbiguousPlace, match="Fairfield County, CT"):
+        resolve_place("Fairfield County")
+    assert resolve_place("Fairfield County, OH") != resolve_place("Fairfield County, CT")
+    assert find_place("CT")[0].kind == "state"
+
+
 def test_ambiguous_counties_do_not_choose_a_silent_match() -> None:
     from usdata.query import AmbiguousPlace
 
@@ -113,6 +178,17 @@ def test_census_coverage_and_antimeridian_clipped_boxes() -> None:
     rows = list(csv.DictReader(io.StringIO(raw.decode("utf-8"))))
     assert sum(r["kind"] == "state" for r in rows) == 56
     assert sum(r["kind"] == "county" for r in rows) == 3235
+    # Connecticut's counties before 2022, from the last vintage that held them.
+    legacy = [r["geoid"] for r in rows if r["kind"] == "legacy_county"]
+    assert legacy == [f"09{code:03d}" for code in range(1, 16, 2)]
+    assert metadata["connecticut_legacy_counties"]["vintage"] == "2021"
+    sources = metadata["connecticut_legacy_counties"]["sources"]
+    assert [s["url"].rsplit("/", 1)[1] for s in sources] == [
+        "cb_2021_us_county_500k.zip",
+        "ct_cou_to_cousub_crosswalk.txt",
+    ]
+    linked = {r["geoid"] for r in rows if r["legacy_counties"]}
+    assert linked == {f"09{code}" for code in range(110, 200, 10)}
     assert len({r["geoid"] for r in rows}) == len(rows)
     for row in rows:
         box = resolve_place(row["geoid"])
