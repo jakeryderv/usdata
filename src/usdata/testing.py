@@ -49,7 +49,7 @@ import re
 import tempfile
 from collections.abc import Callable, Iterable, Iterator
 from contextlib import AbstractContextManager, contextmanager, nullcontext, suppress
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta, timezone
 from pathlib import Path
 
 import httpx
@@ -258,11 +258,12 @@ def check_utc_equivalence(
     """Naive bounds mean UTC and aware ones convert, whatever the adapter's own time logic."""
     aware = scenario_query
     assert aware.time and aware.time.start and aware.time.end
+    # The same instants as naive UTC, whatever offset the scenario was written in.
     naive = aware.model_copy(
         update={
             "time": TimeRange(
-                start=aware.time.start.replace(tzinfo=None),
-                end=aware.time.end.replace(tzinfo=None),
+                start=aware.time.start.astimezone(UTC).replace(tzinfo=None),
+                end=aware.time.end.astimezone(UTC).replace(tzinfo=None),
             )
         }
     )

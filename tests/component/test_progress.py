@@ -80,19 +80,23 @@ def test_retry_resets_download_bytes_and_reports_current_attempt(tmp_path: Path)
     assert (tmp_path / "data").read_bytes() == DATA
 
 
-@pytest.mark.parametrize("encoded", [False, True])
-def test_unknown_or_encoded_length_never_becomes_a_false_total(tmp_path: Path, encoded) -> None:
+def test_unknown_length_never_becomes_a_false_total(tmp_path: Path) -> None:
     events: list[Event] = []
-    response = (
-        httpx.Response(200, content=gzip.compress(DATA), headers={"Content-Encoding": "gzip"})
-        if encoded
-        else httpx.Response(200, stream=UnknownLengthStream())
-    )
     with respx.mock() as mock, observe(events.append):
-        mock.get(DATA_URL).return_value = response
+        mock.get(DATA_URL).return_value = httpx.Response(200, stream=UnknownLengthStream())
         http.download(DATA_URL, tmp_path / "data")
     assert events[-1] == TransferProgress(len(DATA), None, 1)
     assert (tmp_path / "data").read_bytes() == DATA
+
+
+def test_a_stored_encoding_is_written_as_stored_with_its_length_as_total(tmp_path: Path) -> None:
+    events: list[Event] = []
+    stored = gzip.compress(DATA)
+    with respx.mock() as mock, observe(events.append):
+        mock.get(DATA_URL).respond(200, content=stored, headers={"Content-Encoding": "gzip"})
+        http.download(DATA_URL, tmp_path / "data")
+    assert events[-1] == TransferProgress(len(stored), len(stored), 1)
+    assert (tmp_path / "data").read_bytes() == stored
 
 
 def test_cache_hits_have_no_transfer_events_and_force_downloads(tmp_path: Path) -> None:

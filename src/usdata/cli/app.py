@@ -404,6 +404,8 @@ def fetch(
             typer.echo(f"{len(assets)} asset(s) matched, {sizes}", err=True)
             with progress(disabled=no_progress):
                 batch([asset.size for asset in assets])
+            if not assets:
+                raise typer.Exit(code=1)
             return
         with progress(disabled=no_progress):
             fetched = fetch_query(ds, query, root=cache_dir, force=force)
@@ -507,7 +509,8 @@ def pull(
             typer.echo(f"{d.asset_id}\t{d.problem}\t{d.path}")
         typer.secho(
             f"{len(e.drift)} asset(s) changed upstream; lockfile unchanged. "
-            "Pass --update <asset or dataset id> to accept the new bytes.",
+            "Pass --update <asset or dataset id> to accept the new bytes, "
+            "or --force to re-resolve.",
             err=True,
             fg="red",
         )

@@ -9,6 +9,7 @@ from usdata.cli import app
 from usdata.providers.noaa.ghcnd import DATA_URL as GHCN_DATA_URL
 from usdata.providers.noaa.hrrr import BUCKET
 from usdata.providers.noaa.storm_events import StormEvents
+from usdata.providers.usgs.earthquakes import COUNT_URL as EARTHQUAKE_COUNT_URL
 from usdata.registry import default_registry
 
 runner = CliRunner()
@@ -309,6 +310,17 @@ def test_fetch_dry_run_json_emits_only_asset_records() -> None:
     ]
     assert records[0]["size"] == 150_000_000
     assert records[0]["href"] == f"s3://{BUCKET}/{HRRR_RUN}wrfsfcf00.grib2"
+
+
+def test_fetch_dry_run_exits_1_when_nothing_matched() -> None:
+    args = ["fetch", "usgs:earthquakes", "--start", "2024-05-06", "--end", "2024-05-07"]
+    with respx.mock() as mock:
+        mock.get(EARTHQUAKE_COUNT_URL).respond(200, text="0")
+        listed = runner.invoke(app, [*args, "--dry-run"])
+        as_json = runner.invoke(app, [*args, "--dry-run", "--json"])
+    assert listed.exit_code == 1 and listed.stdout == ""
+    assert listed.stderr == "0 asset(s) matched, 0 bytes\n"
+    assert as_json.exit_code == 1 and json.loads(as_json.stdout) == []
 
 
 def test_fetch_json_emits_path_provenance_and_cache_state(tmp_path: Path) -> None:

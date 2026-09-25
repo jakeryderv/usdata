@@ -26,7 +26,6 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from usdata.models import Asset, Protocol, Query, TimeRange
 from usdata.protocols import http
-from usdata.providers.base import QueryError
 from usdata.providers.http import HttpProvider
 from usdata.providers.params import number_range
 
@@ -82,6 +81,15 @@ def _stamp(value: datetime) -> str:
     return value.replace(tzinfo=None).isoformat()
 
 
+def _degrees(value: float) -> str:
+    """A box edge to six decimals, about 0.1 m, without trailing zeros.
+
+    ``:g`` would keep six significant digits, moving an edge such as
+    -105.123456 by tens of metres.
+    """
+    return f"{value:.6f}".rstrip("0").rstrip(".")
+
+
 class Earthquakes(HttpProvider):
     """ComCat events as CSV pages; params bound magnitude and depth, the query gives the rest."""
 
@@ -102,10 +110,10 @@ class Earthquakes(HttpProvider):
         if query.bbox is not None:
             box = query.bbox
             filters.update(
-                minlatitude=f"{box.south:g}",
-                maxlatitude=f"{box.north:g}",
-                minlongitude=f"{box.west:g}",
-                maxlongitude=f"{box.east:g}",
+                minlatitude=_degrees(box.south),
+                maxlatitude=_degrees(box.north),
+                minlongitude=_degrees(box.west),
+                maxlongitude=_degrees(box.east),
             )
         count = self._count(filters)
         assets: list[Asset] = []
@@ -138,8 +146,11 @@ class Earthquakes(HttpProvider):
         """How many events the filters match, from the service's own count method."""
         response = http.get(COUNT_URL, self._http(), params=filters)
         text = response.text.strip()
-        if not text.isdigit():
-            raise QueryError(f"the catalog did not return a count for this query: {text[:200]!r}")
+        if not (text.isascii() and text.isdigit()):
+            raise httpx.DecodingError(
+                f"the catalog did not return a count for this query: {text[:200]!r}",
+                request=response.request,
+            )
         return int(text)
 
     def fetch(self, asset: Asset, dest: Path) -> Path:

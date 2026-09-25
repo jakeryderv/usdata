@@ -15,6 +15,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ValidationError
 
 from usdata import provenance
+from usdata._files import is_temporary
 from usdata.cache import asset_path, cache_dir
 from usdata.manifest import Lockfile, lockfile_path
 from usdata.models import Provenance
@@ -90,6 +91,7 @@ def entries(root: Path | None = None) -> list[CacheEntry]:
         One entry per file at ``<root>/<provider>/<name>/<asset id>``. A file
         with no readable sidecar is still listed, as unrecorded, with its
         dataset id taken from the directories it sits in. Sidecars themselves,
+        temporary files a download or a killed run left, the staging directory,
         and files at any other depth, are skipped.
     """
     base = _root(root)
@@ -98,9 +100,11 @@ def entries(root: Path | None = None) -> list[CacheEntry]:
     found = [
         _entry(path)
         for provider in _subdirectories(base)
+        # No provider id starts with a dot; the staging directory does.
+        if not provider.name.startswith(".")
         for name in _subdirectories(provider)
         for path in sorted(name.iterdir())
-        if path.is_file() and not path.name.endswith(SIDECAR_SUFFIX)
+        if path.is_file() and not path.name.endswith(SIDECAR_SUFFIX) and not is_temporary(path)
     ]
     return sorted(found, key=lambda entry: (entry.dataset_id, entry.asset_id))
 

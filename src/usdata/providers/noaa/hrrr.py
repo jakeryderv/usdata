@@ -270,7 +270,8 @@ class ModelRuns(HttpProvider):
             raise QueryError(
                 f"the {self.bucket} archive begins with the {self.archive_start:%Y-%m-%d %HZ} run"
             )
-        runs = select_runs(start, end, cycle)
+        # A window straddling the archive start keeps only the runs the archive holds.
+        runs = [init for init in select_runs(start, end, cycle) if init >= self.archive_start]
         if not runs:
             raise QueryError(
                 f"no {cycle:02d}Z initialization falls inside {start.isoformat()} to "

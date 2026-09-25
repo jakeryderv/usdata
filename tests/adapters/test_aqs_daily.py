@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import random
 from datetime import date
+from itertools import pairwise
 from pathlib import Path
 
 import httpx
@@ -14,7 +15,7 @@ from typer.testing import CliRunner
 
 from usdata import fetch
 from usdata.cli import app
-from usdata.models import Query
+from usdata.models import BBox, Query
 from usdata.protocols import http
 from usdata.providers import Credentials, MissingCredentials, QueryError
 from usdata.providers.epa import aqs
@@ -112,6 +113,32 @@ def test_a_state_location_sites_and_a_box_select_as_the_adr_says(adapter) -> Non
         "minlon": "-74.3",
         "maxlon": "-73.7",
     }
+
+
+def test_a_box_is_sent_to_six_decimals_and_agrees_with_its_label(adapter) -> None:
+    fine = (-105.123456, 39.654321, -104.9, 40.0)
+    (url,) = listed(adapter, bbox=fine, parameters="88101", **JUNE)
+    assert [url.params[k] for k in ("minlat", "maxlat", "minlon", "maxlon")] == [
+        "39.654321",
+        "40",
+        "-105.123456",
+        "-104.9",
+    ]
+    # Boxes apart only past the sixth decimal share a label, so they share a URL too;
+    # boxes apart at the sixth decimal differ in both.
+    same = listed(adapter, bbox=(-105.1234561, 39.654321, -104.9, 40.0), parameters="88101", **JUNE)
+    other = listed(adapter, bbox=(-105.123457, 39.654321, -104.9, 40.0), parameters="88101", **JUNE)
+    assert same == [url] and other != [url]
+    labels = {
+        aqs._box_label(BBox(west=w, south=s, east=e, north=n))
+        for w, s, e, n in [fine, (-105.1234561, 39.654321, -104.9, 40.0)]
+    }
+    assert len(labels) == 1
+
+
+def test_a_box_of_few_decimals_is_sent_as_the_committed_example_pins_it(adapter) -> None:
+    (url,) = listed(adapter, bbox=(-74.26, 40.49, -73.70, 40.92), parameters="88101", **JUNE)
+    assert str(url).endswith("&minlat=40.49&maxlat=40.92&minlon=-74.26&maxlon=-73.7")
 
 
 def test_each_calendar_year_is_its_own_request(adapter) -> None:
@@ -250,6 +277,43 @@ def test_requests_are_paced_six_seconds_apart_across_adapters(unpaced, monkeypat
     assert unpaced == [4.5]
 
 
+def test_transport_retries_are_paced_like_any_request(tmp_path, monkeypatch, unpaced) -> None:
+    monkeypatch.setenv("USDATA_AQS_EMAIL", EMAIL)
+    monkeypatch.setenv("USDATA_AQS_KEY", KEY)
+    now = [1000.0]
+
+    def sleep(seconds: float) -> None:
+        now[0] += seconds
+
+    monkeypatch.setattr(http, "sleep", sleep)
+    monkeypatch.setattr(aqs, "monotonic", lambda: now[0])
+    sent: list[float] = []
+    answers = iter(
+        [
+            lambda request: httpx.Response(503, text="<html>maintenance</html>"),
+            lambda request: httpx.Response(429, headers={"Retry-After": "9"}),
+            lambda request: httpx.Response(200, json=body(request, ROWS)),
+        ]
+    )
+
+    def answer(request: httpx.Request) -> httpx.Response:
+        sent.append(now[0])
+        return next(answers)(request)
+
+    with respx.mock() as mock:
+        mock.get(url__startswith=SERVICE_URL).mock(side_effect=answer)
+        fetch(
+            DATASET,
+            build_query(
+                sites="36-081-0124", parameters="88101", start="2023-06-01", end="2023-06-10"
+            ),
+            root=tmp_path,
+        )
+    gaps = [later - earlier for earlier, later in pairwise(sent)]
+    # The 503's short backoff is stretched to the pace; the 429's longer Retry-After is kept.
+    assert gaps == [aqs.MIN_INTERVAL, 9.0]
+
+
 def test_the_adapter_cannot_be_built_without_both_variables(monkeypatch) -> None:
     monkeypatch.setenv("USDATA_AQS_EMAIL", EMAIL)
     monkeypatch.delenv("USDATA_AQS_KEY", raising=False)
@@ -349,6 +413,60 @@ def test_a_refusal_keeps_the_services_reason_and_not_the_key(
     assert isinstance(cause, httpx.HTTPStatusError)
     for text in (str(error), str(cause), str(cause.request.url), cause.response.text):
         assert KEY not in text and "someone%2Baqs" not in text
+
+
+def cli_fetch(tmp_path: Path) -> list[str]:
+    return [
+        "fetch",
+        "epa:aqs-daily",
+        "--start",
+        "2023-06-01",
+        "--end",
+        "2023-06-10",
+        "-p",
+        "parameters=88101",
+        "-p",
+        "sites=36-081-0124",
+        "--cache-dir",
+        str(tmp_path),
+    ]
+
+
+@pytest.mark.parametrize(
+    "answer",
+    [
+        httpx.Response(503, text="<html>Down for maintenance</html>"),
+        httpx.Response(500, json={"message": "internal error"}),
+        httpx.Response(200, text="<html>Down for maintenance</html>"),
+        httpx.Response(200, json={"Data": []}),
+        httpx.Response(200, json=[]),
+    ],
+    ids=["503-html", "500-json-no-header", "200-html", "200-no-header", "200-list"],
+)
+def test_an_upstream_failure_exits_4_without_the_key(
+    tmp_path, monkeypatch, unpaced, answer
+) -> None:
+    monkeypatch.setenv("USDATA_AQS_EMAIL", EMAIL)
+    monkeypatch.setenv("USDATA_AQS_KEY", KEY)
+    with respx.mock() as mock:
+        mock.get(url__startswith=SERVICE_URL).mock(return_value=answer)
+        result = CliRunner().invoke(app, cli_fetch(tmp_path))
+    assert result.exit_code == 4, result.output
+    assert "request failed" in result.output and "refused" not in result.output
+    assert KEY not in result.output and "someone" not in result.output
+    assert not [path for path in tmp_path.rglob("*") if path.is_file()]
+
+
+def test_a_header_refusal_still_exits_2_with_its_reason(tmp_path, monkeypatch, unpaced) -> None:
+    monkeypatch.setenv("USDATA_AQS_EMAIL", EMAIL)
+    monkeypatch.setenv("USDATA_AQS_KEY", KEY)
+    refused = {"Header": [{"status": "Failed", "error": ["Email and/or key are invalid."]}]}
+    with respx.mock() as mock:
+        mock.get(url__startswith=SERVICE_URL).respond(400, json=refused)
+        result = CliRunner().invoke(app, cli_fetch(tmp_path))
+    assert result.exit_code == 2, result.output
+    assert "AQS refused the request (400): Email and/or key are invalid." in result.output
+    assert KEY not in result.output
 
 
 def test_a_rejected_key_says_which_variables_to_check(tmp_path, monkeypatch, unpaced) -> None:

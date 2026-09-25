@@ -9,7 +9,7 @@ import respx
 from usdata import ChecksumMismatch, provenance
 from usdata.cache import sha256_bytes, sha256_file
 from usdata.manifest import Lockfile, lockfile_path
-from usdata.protocols import http, s3
+from usdata.protocols import s3
 from usdata.providers.base import QueryError
 from usdata.providers.noaa.hrrr import BUCKET, Hrrr, HrrrParams, select_runs
 from usdata.pull import UpstreamChanged, pull, verify
@@ -172,6 +172,18 @@ def test_two_runs_when_the_window_touches_both_days(adapter):
         "hrrr.20240506/conus/hrrr.t20z.wrfsfcf",
         "hrrr.20240507/conus/hrrr.t20z.wrfsfcf",
     ]
+
+
+def test_a_window_straddling_the_archive_start_lists_only_archived_runs(adapter):
+    # The archive begins with the 2014-07-30 18Z run, so the day before's 00Z run is not asked for.
+    run = "hrrr.20140731/conus/hrrr.t00z.wrfsfcf"
+    with respx.mock() as mock:
+        route = mock.get(LIST_URL).respond(200, text=listing([(f"{run}00.grib2", 10)]))
+        (asset,) = adapter.list_assets(
+            query(start="2014-07-30T00:00Z", end="2014-07-31T00:00Z", cycle=0)
+        )
+    assert [call.request.url.params["prefix"] for call in route.calls] == [run]
+    assert asset.time.start == datetime(2014, 7, 31, tzinfo=UTC)
 
 
 def test_select_runs_uses_inclusive_bounds():
@@ -475,14 +487,14 @@ def test_restore_reissues_the_pinned_ranges_without_reading_the_index(tmp_path: 
 
 @pytest.mark.l2
 @pytest.mark.parametrize(
-    ("kwargs", "error"),
+    ("kwargs", "problem"),
     [
-        ({"content": OBJECT[:40] + bytes(80)}, UpstreamChanged),
-        ({"etag": "republished"}, UpstreamChanged),
-        ({"status": 200}, http.RangeNotHonored),
+        ({"content": OBJECT[:40] + bytes(80)}, "upstream changed"),
+        ({"etag": "republished"}, "upstream changed"),
+        ({"status": 200}, "range refused"),
     ],
 )
-def test_restore_reports_every_way_a_pinned_range_can_fail(tmp_path: Path, kwargs, error) -> None:
+def test_restore_reports_every_way_a_pinned_range_can_fail(tmp_path: Path, kwargs, problem) -> None:
     manifest = tmp_path / "dataset.yaml"
     manifest.write_text(PARTIAL_MANIFEST)
     root = tmp_path / "cache"
@@ -494,12 +506,11 @@ def test_restore_reports_every_way_a_pinned_range_can_fail(tmp_path: Path, kwarg
     with respx.mock(assert_all_called=False) as mock:
         index = mock.get(f"{OBJECT_URL}.idx")
         mock.get(OBJECT_URL).side_effect = ranged(**kwargs)
-        with pytest.raises(error) as raised:
+        with pytest.raises(UpstreamChanged) as raised:
             pull(manifest, root=root)
         assert index.call_count == 0
-    if error is UpstreamChanged:
-        assert [drift.asset_id for drift in raised.value.drift] == [PART_ID]
-        assert raised.value.drift[0].problem == "upstream changed"
+    assert [drift.asset_id for drift in raised.value.drift] == [PART_ID]
+    assert raised.value.drift[0].problem == problem
     assert not first.fetched[0].path.exists()
     assert Lockfile.load(lockfile_path(manifest)) == first.lockfile
 

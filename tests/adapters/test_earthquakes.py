@@ -5,8 +5,10 @@ from pathlib import Path
 import httpx
 import pytest
 import respx
+from typer.testing import CliRunner
 
 from usdata import build_query, fetch, get
+from usdata.cli import app
 from usdata.models import Query
 from usdata.providers.base import QueryError
 from usdata.providers.usgs.earthquakes import (
@@ -102,6 +104,15 @@ def test_listing_counts_first_and_pins_one_csv_page_with_the_query_as_sent() -> 
     assert asset.time == q.time
 
 
+def test_a_box_is_sent_to_six_decimals() -> None:
+    with respx.mock() as mock, adapter() as provider:
+        count = mock.get(COUNT_URL).respond(200, text="1")
+        (asset,) = provider.list_assets(query(bbox=(-105.123456, 39.654321, -104.9, 40.0)))
+    for params in (count.calls[0].request.url.params, httpx.URL(asset.href).params):
+        assert [params[k] for k in ("minlatitude", "maxlatitude")] == ["39.654321", "40"]
+        assert [params[k] for k in ("minlongitude", "maxlongitude")] == ["-105.123456", "-104.9"]
+
+
 def test_no_matching_events_is_an_empty_listing() -> None:
     with respx.mock() as mock, adapter() as provider:
         mock.get(COUNT_URL).respond(200, text="0")
@@ -118,11 +129,31 @@ def test_more_than_one_page_becomes_one_asset_per_page_in_time_order(monkeypatch
     assert len({a.id for a in assets}) == 3
 
 
-def test_a_count_that_is_not_a_number_is_named() -> None:
+@pytest.mark.parametrize("text", ["Error 400: Bad Request\n", "<html>down</html>", "²"])
+def test_a_count_that_is_not_a_number_is_an_upstream_failure(text: str) -> None:
     with respx.mock() as mock, adapter() as provider:
-        mock.get(COUNT_URL).respond(200, text="Error 400: Bad Request\n")
-        with pytest.raises(QueryError, match="did not return a count"):
+        mock.get(COUNT_URL).respond(200, text=text)
+        with pytest.raises(httpx.DecodingError, match="did not return a count"):
             provider.list_assets(query())
+
+
+def test_the_cli_exits_4_when_the_count_is_not_a_number() -> None:
+    with respx.mock() as mock:
+        mock.get(COUNT_URL).respond(200, text="<html>maintenance</html>")
+        result = CliRunner().invoke(
+            app,
+            [
+                "fetch",
+                "usgs:earthquakes",
+                "--dry-run",
+                "--start",
+                "2024-05-06",
+                "--end",
+                "2024-05-07",
+            ],
+        )
+    assert result.exit_code == 4, result.output
+    assert "did not return a count" in result.output
 
 
 def test_fetch_downloads_the_page_bytes_unchanged(tmp_path: Path) -> None:

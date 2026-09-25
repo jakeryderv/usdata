@@ -70,6 +70,9 @@ def axis(base: str, dataset: str, name: str, client: httpx.Client) -> tuple[str,
     response = http.get(_endpoint(base, "griddap", dataset) + ".csv?" + _identifier(name), client)
     try:
         rows = list(csv.reader(io.StringIO(response.text)))
+        # A unitless axis has an empty units row, which reads as no fields at all.
+        if len(rows) >= 2 and rows[1] == []:
+            rows[1] = [""]
         if len(rows) < 3 or rows[0] != [name] or any(len(row) != 1 for row in rows):
             raise ValueError("invalid axis CSV")
         return rows[1][0], [row[0] for row in rows[2:]]
