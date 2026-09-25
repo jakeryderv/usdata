@@ -97,4 +97,20 @@ and `pull --update` accepts the new bytes.
 Pacing is per process. Two processes sharing a key can together exceed EPA's
 limits, and nothing here prevents it. A retry after a 5xx or 429 follows the
 shared transport policy, which waits well under six seconds; that is rare
-enough to leave, and a 429 with `Retry-After` is honoured.
+enough to leave, and a 429 with `Retry-After` is honoured (amended below:
+retries are paced too).
+
+## Amendment, 2026-09-25: transport retries are paced
+
+The pace ran once per fetch, but the shared transport retries a 429, a 5xx, or
+a timeout up to twice more, 0.5 s and 1 s later. When EPA was struggling, the
+same heavy keyed request reached it three times in about a second and a half,
+which is what its terms warn against
+([issue 342](https://github.com/jakeryderv/usdata/issues/342)).
+
+`http.get` now takes a `before_attempt` callable, run before every attempt
+after any backoff, and the adapter passes its pace. Each retry therefore starts
+at least six seconds after the previous attempt, or later when `Retry-After`
+asks for longer. The transport stays free of dataset knowledge: it only calls
+the hook. Disabling transport retries and retrying in the adapter would have
+repeated the backoff and `Retry-After` handling for one source.

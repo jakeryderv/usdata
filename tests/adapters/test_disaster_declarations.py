@@ -173,12 +173,16 @@ def test_a_location_keeps_its_box_on_the_asset_and_a_param_has_none() -> None:
     assert listed(state="OK")[1][0].bbox is None
 
 
-@pytest.mark.parametrize("body", [{"metadata": {}}, {"metadata": {"count": "25"}}, []])
-def test_a_response_without_a_usable_count_is_refused(body) -> None:
+@pytest.mark.parametrize(
+    "content",
+    [b'{"metadata": {}}', b'{"metadata": {"count": "25"}}', b"[]", b"<html>maintenance</html>"],
+)
+def test_a_response_without_a_usable_count_is_an_upstream_failure(content) -> None:
     with adapter() as provider, respx.mock() as mock:
-        mock.get(SERVICE_URL).respond(200, json=body)
-        with pytest.raises(QueryError, match="did not return a count"):
+        mock.get(SERVICE_URL).respond(200, content=content)
+        with pytest.raises(httpx.DecodingError, match="did not return a count") as raised:
             provider.list_assets(query(state="OK"))
+    assert not isinstance(raised.value, ValueError)  # The CLI exits 4, not 2.
 
 
 @pytest.mark.l2

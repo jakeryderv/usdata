@@ -42,12 +42,19 @@ LIBRARY_HINT = (
     "on macOS and on Windows with Python 3.14 install it separately, for example "
     "`conda install -c conda-forge eccodes` or `brew install eccodes`"
 )
-MRMS_NAME = re.compile(r"^MRMS_(?P<product>.+?)_\d{2}\.\d{2}_\d{8}-\d{6}\.grib2(?:\.gz)?$")
+MRMS_NAME = re.compile(r"^MRMS_(?P<product>.+?)(?:_\d{2}\.\d{2})?_\d{8}-\d{6}\.grib2(?:\.gz)?$")
+"""An MRMS filename, whose product segment names a variable ecCodes cannot.
+
+Most products end in a level such as ``_00.50``, which the name drops; one,
+``LightningProbabilityNext30minGrid_scale_1``, has none and is named whole.
+"""
 INVENTORY_KEYS = ("shortName", "name", "typeOfLevel", "level", "step", "units")
-SYMBOL_POWER = re.compile(r"(?<=[A-Za-z])\*\*")
-"""A power written after a unit symbol, as ecCodes writes ``kg**-1``."""
-NUMERIC_POWER = re.compile(r"(?<![A-Za-z])\*\*")
-"""A power written after anything else, such as the ``10**-3`` of a scale factor."""
+PARAMETER_KEYS = ("discipline", "parameterCategory", "parameterNumber")
+"""The keys that identify a parameter ecCodes has no short name for."""
+UNNAMED = frozenset({"", "unknown", "~"})
+"""Short names ecCodes gives a parameter its tables do not name."""
+SYMBOL_POWER = re.compile(r"(?<=[A-Za-z])\*\*(?=-?\d+(?![\d.]))")
+"""An integer power of a unit symbol, as ecCodes writes ``kg**-1``."""
 
 VARIABLE_KEYS = (
     "name",
@@ -218,16 +225,23 @@ def _shape(eccodes: Any, h: int) -> tuple[int, int] | None:
     return None if rows is None or cols is None else (rows, cols)
 
 
-def inventory(path: Path) -> list[GribMessage]:
-    """Every message in a local GRIB2 file, in file order, without decoding its values."""
+def inventory(path: Path, source: str | None = None) -> list[GribMessage]:
+    """Every message in a local GRIB2 file, in file order, without decoding its values.
+
+    ``source`` is the asset id the file was fetched as, which names a message
+    ecCodes cannot; it defaults to the file's name, which is the asset id for a
+    cached file.
+    """
     eccodes = _modules()[0]
     messages = []
     for index, h in _messages(eccodes, path):
         keys = {key: _get(eccodes, h, key, str) for key in INVENTORY_KEYS}
+        parameter = [_get(eccodes, h, key) for key in PARAMETER_KEYS]
         messages.append(
             GribMessage(
                 file_index=index,
                 short_name=keys["shortName"],
+                base_name=base_name(keys["shortName"], parameter, source or path.name),
                 name=keys["name"],
                 type_of_level=keys["typeOfLevel"],
                 level=keys["level"],
@@ -244,11 +258,13 @@ def udunits(units: str) -> str:
 
     ecCodes writes powers as ``**``: ``J kg**-1``, ``m**2 s**-2``. UDUNITS and
     CF write them as a trailing signed integer, ``J kg-1`` and ``m2 s-2``,
-    which is what xarray-based tools expect. Only the notation changes. A power
-    of a number, such as ``10**-3``, has no such spelling, so a string holding
-    one is returned as it is rather than half rewritten.
+    which is what xarray-based tools expect. Only the notation changes, and only
+    for an integer power of a unit symbol. Any other power has no such
+    spelling: of a number, as in ``10**-3``, of a group, as in ``(m s**-1)**2``,
+    or not an integer, as in ``m**(2/3)``. A string holding one is returned as
+    it is rather than half rewritten.
     """
-    if NUMERIC_POWER.search(units):
+    if len(SYMBOL_POWER.findall(units)) != units.count("**"):
         return units
     return SYMBOL_POWER.sub("", units)
 
@@ -264,6 +280,28 @@ def _available(path: Path) -> str:
 def _product_name(asset_id: str) -> str | None:
     match = MRMS_NAME.match(asset_id)
     return match["product"] if match else None
+
+
+def base_name(short_name: str | None, parameter: Sequence[Any], source: str) -> str:
+    """The name one message's variable starts from, before ``variable_names`` qualifies it.
+
+    That is the ecCodes ``shortName`` where its tables name the parameter.
+    Where they do not, it is the MRMS product the asset id names, or else
+    ``parameter_<discipline>_<category>_<number>``. The reader and
+    ``Grib2Summary.variable_for`` both name messages through here.
+
+    Args:
+        short_name: The message's ecCodes ``shortName``, or None when it has none.
+        parameter: Its ``discipline``, ``parameterCategory``, and ``parameterNumber``.
+        source: The asset id the file was fetched as.
+
+    Returns:
+        The unqualified variable name.
+    """
+    if short_name is not None and short_name not in UNNAMED:
+        return short_name
+    discipline, category, number = parameter
+    return _product_name(source) or f"parameter_{discipline}_{category}_{number}"
 
 
 def _time(date: Any, time: Any) -> str | None:
@@ -473,12 +511,9 @@ def open_grib2(
         }
         if selectors:
             message["selector"] = selectors[index]
-        short = message["shortName"]
-        if short in (None, "", "unknown", "~"):
-            short = _product_name(fetched.asset.id) or (
-                f"parameter_{attrs.get('discipline')}_{attrs.get('parameterCategory')}"
-                f"_{attrs.get('parameterNumber')}"
-            )
+        short = base_name(
+            message["shortName"], [attrs.get(key) for key in PARAMETER_KEYS], fetched.asset.id
+        )
         selected.append(_Field(short=short, data=data, attrs=attrs, message=message))
     if count > 1 and needs_select:
         raise ValueError(

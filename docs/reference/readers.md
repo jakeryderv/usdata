@@ -76,7 +76,9 @@ which `usdata inspect` prints in a `selector` column and the reader puts on each
 selectors into the variable name the naming rule above gives that message, so a
 notebook that asked for `CAPE:surface` can look up the `cape_surface_0` it became
 instead of guessing it; a selector this file holds no message for raises
-`KeyError` naming the ones it does.
+`KeyError` naming the ones it does. Both start from each message's `base_name`
+on `GribMessage`: its `shortName`, or for a parameter ecCodes has no name for,
+the MRMS product or `parameter_<discipline>_<category>_<number>`.
 
 ## CSV identifier defaults
 

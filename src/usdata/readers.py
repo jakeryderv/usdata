@@ -189,9 +189,29 @@ def _matching(tables: list[tuple[bool, dict[str, Variable]]], name: str) -> Vari
     return None
 
 
-def _units_stated(attrs: Mapping[str, Any]) -> bool:
-    """Whether the file states units, counting an empty or ``unknown`` value as silence."""
-    return str(attrs.get("units", "")).strip().casefold() not in UNSET_UNITS
+def _stated(value: Any) -> bool:
+    """Whether one units value says something, counting an empty or ``unknown`` one as silence."""
+    return value is not None and str(value).strip().casefold() not in UNSET_UNITS
+
+
+def _units_stated(array: Any) -> bool:
+    """Whether the file states units for one variable, where xarray left them or moved them.
+
+    Decoding a CF time variable moves its ``units`` and ``calendar`` from
+    ``attrs`` into ``encoding``, so a decoded variable that looks unit-less
+    still had them stated in the file.
+    """
+    encoding: Mapping[str, Any] = getattr(array, "encoding", {})
+    return (
+        _stated(array.attrs.get("units"))
+        or _stated(encoding.get("units"))
+        or _stated(encoding.get("calendar"))
+    )
+
+
+def _is_time(array: Any) -> bool:
+    """Whether a variable holds datetimes or durations, whose units xarray owns."""
+    return getattr(getattr(array, "dtype", None), "kind", None) in ("M", "m")
 
 
 def fill_registry_attrs(fetched: FetchedAsset, data: Any) -> None:
@@ -201,7 +221,10 @@ def fill_registry_attrs(fetched: FetchedAsset, data: Any) -> None:
     ``fetched``'s dataset by name, first exactly and then case-insensitively,
     and lists every attribute filled under ``data.attrs["usdata"]``. A value the
     file provides is never overwritten, and an asset whose dataset has no entry
-    or no variables is left alone.
+    or no variables is left alone. Units stated in a decoded variable's
+    ``encoding`` count as stated, and a datetime or timedelta variable never
+    gains ``units``: xarray writes those from the encoding, and refuses to
+    write a variable that carries them in both places.
     """
     from usdata.registry import DatasetNotFound, default_registry
 
@@ -218,7 +241,7 @@ def fill_registry_attrs(fetched: FetchedAsset, data: Any) -> None:
         variable = _matching(tables, name)
         if variable is None:
             continue
-        if variable.units and not _units_stated(array.attrs):
+        if variable.units and not _is_time(array) and not _units_stated(array):
             array.attrs["units"] = variable.units
             filled.append({"variable": name, "attribute": "units"})
         if variable.description and "long_name" not in array.attrs:

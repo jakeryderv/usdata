@@ -212,7 +212,10 @@ class DisasterDeclarations(HttpProvider):
         except (ValueError, KeyError, TypeError):
             count = None
         if isinstance(count, bool) or not isinstance(count, int) or count < 0:
-            raise QueryError(f"OpenFEMA did not return a count: {response.text[:200]!r}")
+            raise httpx.DecodingError(
+                f"OpenFEMA did not return a count: {response.text[:200]!r}",
+                request=response.request,
+            )
         return count
 
     def fetch(self, asset: Asset, dest: Path) -> Path:

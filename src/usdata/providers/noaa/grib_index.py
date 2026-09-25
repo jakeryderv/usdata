@@ -13,14 +13,17 @@ threshold. A message's length is the next message's offset minus its own, and
 the last message runs to the end of the object, so parsing needs the object's
 size. Two dialects widen that picture: RAP numbers the fields of one GRIB2
 message holding several as ``12.1`` and ``12.2`` at one offset, so they are one
-byte range; and NBM's fourth text distinguishes a value from its ensemble
-spread, so a selector without it names the plain field alone.
+byte range; and NBM's further text distinguishes a value from its ensemble
+spread or a probability threshold, so a selector without it names the plain
+field alone. That text may itself hold colons, as in
+``APCP:surface:0-1 hour acc fcst:prob >0.254:prob fcst 255/255``.
 
 Selection speaks the index's own vocabulary, not the ecCodes names the reader's
 ``select`` uses: ``TMP:2 m above ground``, optionally with a step text and then
-the further text. Nothing here performs I/O, so the caller fetches the index
-text and the object size and this module turns them into byte ranges. See
-ADR 0028.
+the further text, which is everything after the step, so every index line's
+``label`` is a selector for it. Nothing here performs I/O, so the caller
+fetches the index text and the object size and this module turns them into
+byte ranges. See ADR 0028.
 """
 
 from __future__ import annotations
@@ -81,7 +84,10 @@ class Selector(BaseModel):
 
     Without the further text the selector names the plain field: an index line
     whose extra text is empty. Naming the text selects that variant instead,
-    such as ``TMP:2 m above ground:1 hour fcst:ens std dev``.
+    such as ``TMP:2 m above ground:1 hour fcst:ens std dev``. The further text
+    is everything after the step, colons included, and matches the index
+    line's whole tail, so ``prob >0.254`` alone does not name
+    ``prob >0.254:prob fcst 255/255``.
     """
 
     short_name: str
@@ -108,6 +114,9 @@ class Selector(BaseModel):
 def parse_selector(raw: str) -> Selector:
     """Read one ``VAR:level text`` selector, with an optional ``:step text[:further text]``.
 
+    The further text runs to the end of the selector and may hold colons of
+    its own, so an index line's ``label`` always reads back as a selector.
+
     Args:
         raw: The selector as the caller wrote it, such as ``TMP:2 m above ground``.
 
@@ -115,19 +124,20 @@ def parse_selector(raw: str) -> Selector:
         The parsed selector.
 
     Raises:
-        QueryError: The selector has the wrong number of fields or an empty one.
+        QueryError: The selector has fewer than two fields or an empty one.
     """
     parts = [part.strip() for part in raw.split(":")]
-    if len(parts) not in (2, 3, 4) or not all(parts):
+    if len(parts) < 2 or not all(parts):
         raise QueryError(
             f"messages selector {raw!r} must be 'VAR:level text', with an optional "
-            "':step text' and then an optional further text, such as 'TMP:2 m above ground'"
+            "':step text' and then an optional further text that runs to the end, such as "
+            "'TMP:2 m above ground'"
         )
     return Selector(
         short_name=parts[0],
         level=parts[1],
         step=parts[2] if len(parts) > 2 else None,
-        extra=parts[3] if len(parts) > 3 else None,
+        extra=":".join(parts[3:]) or None,
     )
 
 
@@ -202,7 +212,25 @@ def parse_index(text: str, *, object_size: int, url: str) -> list[IndexEntry]:
 
 
 def _hint(entries: Sequence[IndexEntry], selector: Selector) -> str:
-    """What to try instead: this short name's levels, or the nearest short names."""
+    """What to try instead, naming the first part of the selector the index does not publish.
+
+    A short name and level that exist narrow the hint to their steps when the
+    step differs, and otherwise to the further texts published beside the
+    step, where ``none`` is the plain field.
+    """
+    placed = [
+        e for e in entries if e.short_name == selector.short_name and e.level == selector.level
+    ]
+    if placed:
+        where = f"{selector.short_name}:{selector.level}"
+        stepped = [e for e in placed if selector.step is None or e.step == selector.step]
+        if not stepped:
+            steps = list(dict.fromkeys(e.step for e in placed))
+            return f"steps published for {where}: {', '.join(steps)}"
+        if selector.step is not None:
+            where = f"{where}:{selector.step}"
+        extras = list(dict.fromkeys(repr(e.extra) if e.extra else "none" for e in stepped))
+        return f"further texts published for {where}: {', '.join(extras)}"
     levels = list(dict.fromkeys(e.level for e in entries if e.short_name == selector.short_name))
     if levels:
         return f"levels published for {selector.short_name}: {', '.join(levels)}"

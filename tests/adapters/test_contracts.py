@@ -284,6 +284,16 @@ def test_naive_and_offset_bounds_resolve_like_utc(dataset_id) -> None:
     )
 
 
+def test_the_utc_check_holds_for_a_scenario_written_with_an_offset() -> None:
+    dataset_id = "noaa:ghcn-daily"
+    scenario = build_query(
+        start="2024-05-06T07:00-05:00", end="2024-05-06T07:05-05:00", **CASES[dataset_id]
+    )
+    testing.check_utc_equivalence(
+        adapter_factory(dataset_id), scenario, client_factory(dataset_id, set())
+    )
+
+
 @pytest.mark.parametrize("dataset_id", CASES)
 def test_invalid_query_rejected_without_creating_client(dataset_id) -> None:
     testing.check_invalid_params_refused(adapter_factory(dataset_id), query(dataset_id))

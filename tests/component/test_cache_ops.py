@@ -134,6 +134,22 @@ def test_entries_pair_data_files_with_sidecars(temp_cache: Path) -> None:
     assert recorded.path.read_bytes() == b"12345"
 
 
+def test_entries_skip_temporary_files_and_staging(temp_cache: Path) -> None:
+    kept = cache_file(temp_cache, "noaa:ghcn-daily", "a.csv", retrieved_at=NOW)
+    # What a killed download or sidecar write leaves beside the files it was replacing.
+    (kept.parent / ".a.csv.x1y2.part").write_bytes(b"half")
+    (kept.parent / ".a.csv.provenance.json.x1y2.part").write_text("{")
+    staged = temp_cache / ".staging" / "tmp123" / "noaa" / "ghcn-daily"
+    staged.mkdir(parents=True)
+    (staged / "b.csv").write_bytes(b"staged")
+
+    assert [entry.path for entry in entries(temp_cache)] == [kept]
+    assert total_size(temp_cache) == kept.stat().st_size
+    removed = prune(temp_cache, older_than=timedelta(0), now=NOW + timedelta(days=1))
+    assert [entry.path for entry in removed] == [kept]
+    assert (kept.parent / ".a.csv.x1y2.part").exists(), "a concurrent pull may still own it"
+
+
 def test_a_naive_retrieval_time_is_read_as_utc_and_ages(temp_cache: Path) -> None:
     path = cache_file(temp_cache, "noaa:ghcn-daily", "a.csv")
     sidecar = provenance.sidecar_path(path)

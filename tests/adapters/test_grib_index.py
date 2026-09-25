@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from usdata.providers.base import QueryError
@@ -15,6 +17,11 @@ INDEX = (
     "3:2500:d=2024050620:TMP:surface:1 hour fcst:\n"
     "4:4000:d=2024050620:HLCY:3000-0 m above ground:1 hour fcst:\n"
 )
+
+
+NBM_INDEX = Path(__file__).parents[1] / "fixtures/nbm-co-f001.grib2.idx"
+"""A real NBM CONUS index, with probability thresholds whose further text holds colons."""
+NBM_SIZE = 171_000_000
 
 
 def entries(text: str = INDEX, size: int = SIZE):
@@ -87,7 +94,9 @@ def test_selectors_take_a_short_name_a_level_and_an_optional_step(raw, expected)
     assert selector.text == ":".join(part for part in expected if part)
 
 
-@pytest.mark.parametrize("raw", ["TMP", "", ":", "TMP:", ":surface", "TMP:surface:anl:x:y"])
+@pytest.mark.parametrize(
+    "raw", ["TMP", "", ":", "TMP:", ":surface", "TMP:surface:anl:", "TMP:surface:anl:x::y"]
+)
 def test_a_malformed_selector_is_refused_with_the_spelling(raw: str) -> None:
     with pytest.raises(QueryError, match="must be 'VAR:level text'"):
         parse_selector(raw)
@@ -193,3 +202,55 @@ def test_a_further_index_text_is_named_to_be_selected_and_excluded_otherwise() -
     assert parsed[2].label == "APCP:surface:0-1 hour acc fcst:prob >0.254:prob fcst 255/255"
     selector = parse_selector("TMP:2 m above ground:1 hour fcst:ens std dev")
     assert (selector.step, selector.extra) == ("1 hour fcst", "ens std dev")
+
+
+def nbm_entries():
+    return parse_index(NBM_INDEX.read_text(), object_size=NBM_SIZE, url=URL)
+
+
+@pytest.mark.l2
+def test_every_nbm_index_label_reads_back_as_a_selector_for_its_line() -> None:
+    """A label is what provenance and ``inspect`` show, so it must select what it names."""
+    parsed = nbm_entries()
+    assert len(parsed) == 300
+    for entry in parsed:
+        selector = parse_selector(entry.label)
+        assert selector.text == entry.label
+        chosen = resolve(parsed, [selector], url=URL)
+        # A level wgrib2 cannot name repeats one label, which then selects every such line.
+        twins = [other.number for other in parsed if other.label == entry.label]
+        assert [s.entry.number for s in chosen] == twins
+        assert all(s.selector == entry.label for s in chosen)
+
+
+@pytest.mark.l2
+def test_one_probability_threshold_is_selected_by_its_whole_further_text() -> None:
+    parsed = nbm_entries()
+    raw = "APCP:surface:0-1 hour acc fcst:prob >0.254:prob fcst 255/255"
+    selector = parse_selector(raw)
+    assert (selector.step, selector.extra) == ("0-1 hour acc fcst", "prob >0.254:prob fcst 255/255")
+    chosen = resolve(parsed, [selector], url=URL)
+    assert [(s.entry.number, s.selector) for s in chosen] == [(228, raw)]
+    # The plain field beside it is still what a selector without further text names.
+    plain = resolve(parsed, selectors("APCP:surface"), url=URL)
+    assert [s.entry.number for s in plain] == [235]
+
+
+@pytest.mark.l2
+@pytest.mark.parametrize(
+    ("raw", "hint"),
+    [
+        (
+            "APCP:surface:0-1 hour acc fcst:prob >0.254",
+            "further texts published for APCP:surface:0-1 hour acc fcst: "
+            "'prob >0.254:prob fcst 255/255', none",
+        ),
+        ("APCP:surface:0-6 hour acc fcst", "steps published for APCP:surface: 0-1 hour acc fcst"),
+        ("TSTM:surface", "further texts published for TSTM:surface: 'probability forecast'"),
+        ("APCP:2 m above ground", "levels published for APCP: surface"),
+    ],
+)
+def test_a_near_miss_hint_names_the_part_that_differed(raw: str, hint: str) -> None:
+    with pytest.raises(QueryError, match="matched no message") as error:
+        resolve(nbm_entries(), selectors(raw), url=URL)
+    assert str(error.value).endswith(hint)

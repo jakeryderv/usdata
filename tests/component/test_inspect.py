@@ -14,7 +14,7 @@ from typer.testing import CliRunner
 from usdata import FetchedAsset, inspect_asset, inspect_path
 from usdata.cache import cached_path, sha256_file
 from usdata.cli import app
-from usdata.inspect import AssetFormat, CsvSummary, NetcdfSummary
+from usdata.inspect import AssetFormat, CsvSummary, Grib2Summary, GribMessage, NetcdfSummary
 from usdata.models import Asset, ByteRange, Protocol, Provenance
 from usdata.provenance import write
 
@@ -416,6 +416,73 @@ def test_variable_for_keeps_the_bare_name_when_one_level_is_spanned(
     assert set(one_level.open().data_vars) == {"t", "r"}
 
 
+def unnamed_grib(**keys: Any) -> bytes:
+    """One small message whose parameter ecCodes has no short name for."""
+    ec = pytest.importorskip("eccodes")
+    np = pytest.importorskip("numpy")
+    handle = ec.codes_grib_new_from_samples("regular_ll_sfc_grib2")
+    try:
+        for key, setting in (("Ni", 4), ("Nj", 3), *keys.items()):
+            ec.codes_set(handle, key, setting)
+        ec.codes_set(handle, "packingType", "grid_simple")
+        ec.codes_set_values(handle, np.full(12, 1.0))
+        return ec.codes_get_message(handle)
+    finally:
+        ec.codes_release(handle)
+
+
+@pytest.mark.grib
+def test_variable_for_names_a_message_eccodes_cannot_name_as_the_reader_does(
+    tmp_path: Path, partial_grib: FetchedAsset
+) -> None:
+    """The reader falls back to parameter_<d>_<c>_<n>; variable_for once used ``unknown``."""
+    pytest.importorskip("xarray")
+    content = partial_grib.path.read_bytes() + unnamed_grib(
+        discipline=0, parameterCategory=191, parameterNumber=250
+    )
+    selectors = ["CAPE:surface", "TMP:2 m above ground", "var discipline=0 parm=250:surface"]
+    fetched = cached(
+        tmp_path,
+        "unnamed.grib2",
+        content,
+        media_type="application/x-grib2",
+        dataset_id="noaa:hrrr",
+        messages=[105, 131, 140],
+        selectors=selectors,
+    )
+    summary = fetched.inspect().grib2
+    assert summary is not None
+    assert summary.messages[2].short_name == "unknown"
+    assert summary.messages[2].base_name == "parameter_0_191_250"
+    dataset = fetched.open()
+    names = [summary.variable_for(selector) for selector in selectors]
+    assert names == list(dataset.data_vars)
+    assert names[2] == "parameter_0_191_250_surface_0"
+    messages = dataset.attrs["usdata"]["messages"]
+    assert [messages[name]["selector"] for name in names] == selectors
+
+
+@pytest.mark.grib
+def test_an_mrms_message_is_inventoried_under_the_name_the_reader_gives_it(
+    tmp_path: Path,
+) -> None:
+    pytest.importorskip("xarray")
+    name = "MRMS_RotationTrackML30min_00.50_20240506-200000.grib2.gz"
+    content = unnamed_grib(discipline=209, parameterCategory=3, parameterNumber=14)
+    fetched = cached(
+        tmp_path,
+        name,
+        gzip.compress(content),
+        media_type="application/x-grib2",
+        dataset_id="noaa:mrms",
+    )
+    summary = fetched.inspect().grib2
+    assert summary is not None
+    assert [message.base_name for message in summary.messages] == ["RotationTrackML30min"]
+    assert list(fetched.open().data_vars) == ["RotationTrackML30min"]
+    assert inspect_path(fetched.path).grib2 == summary
+
+
 @pytest.mark.grib
 def test_variable_for_names_the_selectors_a_file_does_hold(partial_grib: FetchedAsset) -> None:
     summary = partial_grib.inspect()
@@ -580,3 +647,16 @@ def test_the_cli_exits_2_for_a_file_with_no_sidecar(tmp_path: Path) -> None:
     result = runner.invoke(app, ["inspect", str(fetched.path)])
     assert result.exit_code == 2
     assert "no usable provenance beside" in result.output
+
+
+def test_variable_for_refuses_a_selector_whose_message_holds_several_fields() -> None:
+    """RAP's winds share one message; the record keeps its first selector for both fields."""
+    fields = [
+        GribMessage(file_index=0, short_name=name, type_of_level="isobaricInhPa", level="100")
+        for name in ("u", "v")
+    ]
+    summary = Grib2Summary(
+        messages=[field.model_copy(update={"selector": "UGRD:100 mb"}) for field in fields]
+    )
+    with pytest.raises(ValueError, match=r"2 fields \(u, v\)"):
+        summary.variable_for("UGRD:100 mb")

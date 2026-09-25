@@ -27,9 +27,9 @@ provenance sidecar.
 
 EPA asks callers to send one request at a time, at most ten a minute, with a
 pause between them, and will disable an account that does not. Requests from
-this module are therefore spaced at least ``MIN_INTERVAL`` apart, across every
-adapter instance in the process. Responses are slow, a minute or more for a
-county-month, so the read timeout is long.
+this module, transport retries included, are therefore spaced at least
+``MIN_INTERVAL`` apart, across every adapter instance in the process. Responses
+are slow, a minute or more for a county-month, so the read timeout is long.
 """
 
 from __future__ import annotations
@@ -134,6 +134,15 @@ def _box_label(box: BBox) -> str:
     return "box-" + hashlib.sha256(text.encode()).hexdigest()[:12]
 
 
+def _degrees(value: float) -> str:
+    """A box edge as sent: the six decimals ``_box_label`` hashes, without trailing zeros.
+
+    Two boxes then share a request URL exactly when they share a label, and an
+    edge given to six decimals or fewer is sent as given.
+    """
+    return f"{value:.6f}".rstrip("0").rstrip(".")
+
+
 def _row_key(row: dict[str, Any]) -> tuple[str, ...]:
     """Where a row sorts: its identifying columns as text, then the whole row."""
     return (
@@ -142,20 +151,35 @@ def _row_key(row: dict[str, Any]) -> tuple[str, ...]:
     )
 
 
-def _failure(body: object) -> str | None:
-    """The reason a response header gives for refusing a request, or None if it did not."""
+def _header(body: object) -> list[dict[str, Any]]:
+    """The entries of a response's ``Header``, or none when it has no such list."""
     header = body.get("Header") if isinstance(body, dict) else None
-    entries = [entry for entry in header or [] if isinstance(entry, dict)]
-    status = entries[0].get("status") if entries else None
-    if status in (SUCCESS, NO_DATA):
+    return (
+        [entry for entry in header if isinstance(entry, dict)] if isinstance(header, list) else []
+    )
+
+
+def _status(body: object) -> object:
+    """The status a response header gives, or None when there is no header saying one."""
+    entries = _header(body)
+    return entries[0].get("status") if entries else None
+
+
+def _failure(body: object) -> str | None:
+    """The reason a response header gives for refusing a request, or None if it gives none.
+
+    A body with no header status, such as an HTML maintenance page, gives no
+    reason: that is the service failing, not refusing, and stays an HTTP error.
+    """
+    if _status(body) in (None, SUCCESS, NO_DATA):
         return None
     reasons = [
         "; ".join(map(str, entry["error"]))
         if isinstance(entry.get("error"), list)
         else str(entry.get("error") or entry.get("status"))
-        for entry in entries
+        for entry in _header(body)
     ]
-    return "; ".join(reasons) or "no header in the response"
+    return "; ".join(reasons)
 
 
 def canonical(body: dict[str, Any]) -> bytes:
@@ -163,13 +187,15 @@ def canonical(body: dict[str, Any]) -> bytes:
 
     Raises:
         AqsError: The header reports a failure rather than data or an empty selection.
+        httpx.DecodingError: There is no header status to say how the request went.
     """
     if (reason := _failure(body)) is not None:
         raise AqsError(f"AQS refused the request: {reason}")
+    if _status(body) is None:
+        raise httpx.DecodingError("AQS answered without a Header status")
     header = [
         {name: value for name, value in entry.items() if name not in ECHOED}
-        for entry in body.get("Header") or []
-        if isinstance(entry, dict)
+        for entry in _header(body)
     ]
     rows = body.get("Data") or []
     ordered = sorted(rows, key=_row_key) if isinstance(rows, list) else rows
@@ -275,10 +301,10 @@ class AqsDaily(HttpProvider):
         if query.bbox is not None:
             box = query.bbox
             filters = {
-                "minlat": f"{box.south:g}",
-                "maxlat": f"{box.north:g}",
-                "minlon": f"{box.west:g}",
-                "maxlon": f"{box.east:g}",
+                "minlat": _degrees(box.south),
+                "maxlat": _degrees(box.north),
+                "minlon": _degrees(box.west),
+                "maxlon": _degrees(box.east),
             }
             return [(_box_label(box), "byBox", filters)]
         raise QueryError(
@@ -288,21 +314,28 @@ class AqsDaily(HttpProvider):
     def fetch(self, asset: Asset, dest: Path) -> Path:
         """Request the selection with this adapter's key and write the canonical JSON."""
         with self.redacted_errors():
-            PACE.wait()
             try:
                 # httpx replaces a URL's query when given params, so merge the keys into it.
                 keyed = httpx.URL(asset.href).copy_merge_params(
                     {"email": self.credentials[EMAIL], "key": self.credentials[KEY]}
                 )
-                response = http.get(keyed, self._http(), timeout=TIMEOUT)
+                # A transport retry is a request to EPA too, so every attempt is paced.
+                response = http.get(keyed, self._http(), before_attempt=PACE.wait, timeout=TIMEOUT)
             except httpx.HTTPStatusError as error:
                 # A refusal comes as a 4xx whose JSON header says why; keep that reason.
+                # Any other error, such as a 503 maintenance page, stays an upstream failure.
                 if (reason := _failure(_json(error.response))) is None:
                     raise
                 status = error.response.status_code
                 if "key" in reason.lower():
                     reason = f"{reason} Check {EMAIL} and {KEY}."
                 raise AqsError(f"AQS refused the request ({status}): {reason}") from error
-            data = canonical(response.json())
+            body = _json(response)
+            if not isinstance(body, dict):
+                raise httpx.DecodingError(
+                    "AQS answered with something other than a JSON object",
+                    request=response.request,
+                )
+            data = canonical(body)
         dest.write_bytes(data)
         return dest
