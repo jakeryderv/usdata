@@ -34,7 +34,7 @@ from usdata.cache import asset_path, cache_dir, sha256_file
 from usdata.manifest import LockedAsset, Lockfile, Manifest, lockfile_path
 from usdata.models import Asset, Dataset
 from usdata.protocols import http
-from usdata.protocols.http import ObjectChanged
+from usdata.protocols.http import ObjectChanged, RangeNotHonored
 from usdata.providers import MissingCredentials, Provider, load_adapter
 from usdata.registry import Registry, default_registry
 
@@ -71,21 +71,27 @@ class Drift(BaseModel):
     path: Path
     problem: str = Field(
         description=(
-            "'missing', 'checksum mismatch', or 'upstream changed'; a restore that also tried "
-            "a mirror appends why the mirror did not help"
+            "'missing', 'checksum mismatch', 'upstream changed', 'gone upstream (<status>)', or "
+            "'range refused'; a restore that also tried a mirror appends why the mirror did "
+            "not help"
         )
     )
 
 
 class UpstreamChanged(ChecksumMismatch):
-    """Pinned URLs returned different bytes than the lockfile recorded; nothing was rewritten."""
+    """Pinned URLs no longer reproduced what the lockfile recorded; nothing was rewritten.
+
+    Each ``Drift`` says how: different bytes, an object that is gone, or a
+    refused range request.
+    """
 
     def __init__(self, drift: list[Drift]) -> None:
         self.drift = drift
         ids = ", ".join(d.asset_id for d in drift)
         super().__init__(
             f"{len(drift)} asset(s) changed upstream: {ids}; "
-            "pull with update to accept new bytes for named assets or datasets"
+            "pull with update to accept new bytes for named assets or datasets, "
+            "or with force to re-resolve"
         )
 
 
@@ -418,9 +424,14 @@ def restore(
         # Pinned entries go first. A refresh accepts whatever upstream serves, so it can
         # never drift; holding it back means a run that fails on drift has fetched nothing
         # it would have to throw away.
+        refreshed: dict[str, _Restored] = {}
         for refresh in (False, True):
             for index, entry in enumerate(lock.assets):
                 if (entry.asset.id in selected) is not refresh:
+                    continue
+                if (earlier := refreshed.get(entry.asset.id)) is not None and earlier.staged:
+                    # Sources sharing an asset share its one refresh, so they share one pin.
+                    restored[index] = _repinned(entry, earlier.item, earlier.staged)
                     continue
                 outcome = _restore_entry(
                     entry,
@@ -430,6 +441,8 @@ def restore(
                     adapter_for=adapter_for,
                     mirrored_from=mirrored_from,
                 )
+                if refresh and isinstance(outcome, _Restored):
+                    refreshed[entry.asset.id] = outcome
                 if isinstance(outcome, Drift):
                     drift.append(outcome)
                 else:
@@ -546,9 +559,10 @@ def _restore_entry(
         item = _fetch_asset(
             dataset, pinned, adapter, root=root, force=True, pinned=entry.provenance
         )
-    # A republished object refuses the pinned ETag, which is drift by another name.
-    except (ChecksumMismatch, ObjectChanged):
-        problem = "upstream changed"
+    except (ChecksumMismatch, RangeNotHonored, httpx.HTTPStatusError) as error:
+        problem = _unreproduced(error)
+        if problem is None:
+            raise
         if mirrored_from is not None:
             item, reason = _restore_from_mirror(entry, path, *mirrored_from)
             if item is not None:
@@ -560,6 +574,27 @@ def _restore_entry(
     return _Restored(entry, item)
 
 
+GONE = frozenset({404, 410})
+"""Statuses that say the pinned object is no longer served, rather than that a request failed."""
+
+
+def _unreproduced(error: Exception) -> str | None:
+    """How a pinned URL failed to reproduce its pin, or None when the failure says nothing of it.
+
+    Different bytes, an object that is gone, and a refused range request all
+    mean the pin cannot be had from its source, so each is drift the mirror may
+    repair (ADR 0030). Any other failure, such as a server error, is raised.
+    """
+    # A republished object refuses the pinned ETag, which is drift by another name.
+    if isinstance(error, ChecksumMismatch | ObjectChanged):
+        return "upstream changed"
+    if isinstance(error, RangeNotHonored):
+        return "range refused"
+    if isinstance(error, httpx.HTTPStatusError) and error.response.status_code in GONE:
+        return f"gone upstream ({error.response.status_code})"
+    return None
+
+
 def _refresh_entry(
     entry: LockedAsset, dataset: Dataset, adapter: Provider, path: Path, staging: Path
 ) -> _Restored:
@@ -569,16 +604,31 @@ def _refresh_entry(
     and the staged copy that ``_commit_staged`` moves there once the run succeeds.
     """
     unpinned = entry.asset.model_copy(update={"checksum": None})
-    staged = _fetch_asset(
-        dataset, unpinned, adapter, root=staging, force=True, pinned=entry.provenance
-    )
-    item = staged.model_copy(update={"path": path})
+    try:
+        staged = _fetch_asset(
+            dataset, unpinned, adapter, root=staging, force=True, pinned=entry.provenance
+        )
+    except ObjectChanged as error:
+        # Pinned byte ranges are only valid for the pinned object; new ones need its new index.
+        raise ObjectChanged(
+            f"{entry.asset.id} pins byte ranges of an object that was republished, so update "
+            "cannot refresh it; pull with force to re-resolve its source"
+        ) from error
+    return _repinned(entry, staged.model_copy(update={"path": path}), staged.path)
+
+
+def _repinned(entry: LockedAsset, item: FetchedAsset, staged: Path) -> _Restored:
+    """A refreshed file as ``entry``'s outcome: its pin kept for the same bytes, else rewritten.
+
+    Entries that share an asset are refreshed by one fetch, and each is pinned
+    from it here, so every entry for the asset pins the bytes the run commits.
+    """
     if item.provenance.checksum == entry.provenance.checksum:
         # Same bytes: keep the original pin and record.
-        return _Restored(entry, item, staged=staged.path)
+        return _Restored(entry, item, staged=staged)
     pinned = item.asset.model_copy(update={"checksum": item.provenance.checksum})
     repinned = LockedAsset(asset=pinned, provenance=item.provenance, source=entry.source)
-    return _Restored(repinned, item, updated=True, staged=staged.path)
+    return _Restored(repinned, item, updated=True, staged=staged)
 
 
 def _restore_from_mirror(
@@ -597,6 +647,8 @@ def _restore_from_mirror(
             url = mirror.download(base, entry.provenance.checksum, tmp, client)
     except httpx.HTTPStatusError as error:
         return None, f"not mirrored ({error.response.status_code})"
+    except httpx.RequestError as error:
+        return None, f"mirror unreachable ({type(error).__name__})"
     except mirror.MirrorMismatch:
         return None, "mirror mismatch"
     prov = entry.provenance.model_copy(update={"retrieved_at": datetime.now(UTC), "mirror": url})
