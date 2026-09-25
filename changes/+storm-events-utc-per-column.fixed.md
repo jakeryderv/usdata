@@ -1,1 +1,0 @@
-A Storm Events frame read with `usecols` now gets `BEGIN_UTC` whenever it keeps `BEGIN_DATE_TIME` and `CZ_TIMEZONE`, and `END_UTC` likewise; before, dropping `END_DATE_TIME` silently dropped `BEGIN_UTC` too. Keeping a local date-time column without `CZ_TIMEZONE` now warns instead of returning no UTC column without saying why.
