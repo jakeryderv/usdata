@@ -1,3 +1,6 @@
 # Generated data hashes must be identical across checkout platforms.
 src/usdata/data/*.csv text eol=lf
 src/usdata/data/*.json text eol=lf
+# Example lockfiles pin their manifest's exact bytes, so a CRLF checkout must not rewrite them.
+examples/**/*.yaml text eol=lf
+examples/**/*.lock.json text eol=lf
