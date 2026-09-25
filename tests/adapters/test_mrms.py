@@ -1,3 +1,4 @@
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -7,11 +8,13 @@ import pytest
 import respx
 
 from usdata import ChecksumMismatch
+from usdata._grib import _product_name
 from usdata.protocols import s3
 from usdata.providers.base import QueryError
 from usdata.providers.noaa.mrms import PRODUCTS, Mrms, file_time
 from usdata.pull import pull, verify
 from usdata.query import build_query
+from usdata.readers import _matching, _name_tables
 from usdata.registry import default_registry
 
 PRODUCT = "RotationTrackML30min_00.50"
@@ -223,3 +226,15 @@ sources:
     with respx.mock() as mock, pytest.raises(ChecksumMismatch):
         mock.get(s3.https_url("noaa-mrms-pds", KEY)).respond(200, content=b"revised bytes")
         pull(manifest, root=tmp_path / "cache")
+
+
+@pytest.mark.l0
+@pytest.mark.parametrize("product", sorted(PRODUCTS))
+def test_every_allowlisted_product_names_its_variable_and_finds_its_registry_entry(product):
+    """ecCodes cannot name MRMS fields, so the reader names them from the filename."""
+    name = _product_name(f"MRMS_{product}_20240506-200000.grib2.gz")
+    level = re.search(r"_\d{2}\.\d{2}$", product)
+    assert name is not None and name == (product[: level.start()] if level else product)
+    assert _product_name(f"MRMS_{product}_20240506-200000.grib2") == name
+    variable = _matching(_name_tables(default_registry().get("noaa:mrms").variables), name)
+    assert variable is not None and variable.name == product

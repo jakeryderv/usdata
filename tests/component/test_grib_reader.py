@@ -400,6 +400,17 @@ def test_mrms_products_are_named_from_the_asset_when_eccodes_has_no_name(tmp_pat
     assert list(other.open().data_vars) == ["parameter_209_3_14"]
 
 
+def test_an_mrms_product_without_a_level_suffix_is_named_whole(tmp_path) -> None:
+    content = message(
+        np.arange(12, dtype=float), discipline=209, parameterCategory=2, parameterNumber=4
+    )
+    name = "MRMS_LightningProbabilityNext30minGrid_scale_1_20240506-200000.grib2.gz"
+    result = item(tmp_path, gzip.compress(content), name=name, dataset_id="noaa:mrms").open()
+    probability = result.LightningProbabilityNext30minGrid_scale_1
+    assert probability.attrs["units"] == "%"
+    assert probability.attrs["long_name"] == "Probability of lightning in the next 30 minutes"
+
+
 def test_registry_fills_units_and_long_name_the_file_leaves_unknown(tmp_path) -> None:
     content = message(
         np.arange(12, dtype=float), discipline=209, parameterCategory=3, parameterNumber=14

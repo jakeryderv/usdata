@@ -42,7 +42,12 @@ LIBRARY_HINT = (
     "on macOS and on Windows with Python 3.14 install it separately, for example "
     "`conda install -c conda-forge eccodes` or `brew install eccodes`"
 )
-MRMS_NAME = re.compile(r"^MRMS_(?P<product>.+?)_\d{2}\.\d{2}_\d{8}-\d{6}\.grib2(?:\.gz)?$")
+MRMS_NAME = re.compile(r"^MRMS_(?P<product>.+?)(?:_\d{2}\.\d{2})?_\d{8}-\d{6}\.grib2(?:\.gz)?$")
+"""An MRMS filename, whose product segment names a variable ecCodes cannot.
+
+Most products end in a level such as ``_00.50``, which the name drops; one,
+``LightningProbabilityNext30minGrid_scale_1``, has none and is named whole.
+"""
 INVENTORY_KEYS = ("shortName", "name", "typeOfLevel", "level", "step", "units")
 SYMBOL_POWER = re.compile(r"(?<=[A-Za-z])\*\*(?=-?\d+(?![\d.]))")
 """An integer power of a unit symbol, as ecCodes writes ``kg**-1``."""
