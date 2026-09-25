@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -23,6 +23,14 @@ MAX_RETRY_DELAY = 30.0
 RETRY_STATUS = {429, 500, 502, 503, 504}
 PARTIAL_CONTENT = 206
 CONTENT_RANGE = re.compile(r"bytes (\d+)-(\d+)/(\d+)")
+AS_STORED = {"Accept-Encoding": "identity"}
+"""Download headers: ask for no transfer compression, then write the body undecoded.
+
+Many services gzip a response on the fly when asked, while an object stored with a
+``Content-Encoding`` is served with it regardless. Asking for ``identity`` and
+writing the raw body leaves the file byte for byte the object the source holds,
+so its size and checksum match the listing.
+"""
 T = TypeVar("T")
 
 
@@ -48,9 +56,19 @@ def client(**kwargs: Any) -> httpx.Client:
     return httpx.Client(**kwargs)
 
 
+def _as_stored(response: httpx.Response) -> Iterator[bytes]:
+    """A downloaded body's bytes as the server sent them, not decoded (see ``AS_STORED``).
+
+    A response built in memory, such as a mock transport returns, was read and
+    decoded when it was made, and that content is all there is to write.
+    """
+    return response.iter_bytes() if response.is_stream_consumed else response.iter_raw()
+
+
 def _retry_after(response: httpx.Response) -> float:
     value = response.headers.get("Retry-After", "")
-    if value.isdigit():
+    # str.isdigit accepts characters such as "²" that float() refuses.
+    if value.isascii() and value.isdigit():
         return float(value)
     try:
         when = parsedate_to_datetime(value)
@@ -216,11 +234,11 @@ def download_ranges(
         with staged_path(dest) as tmp, tmp.open("wb") as out:
             for run in runs:
                 with active.stream(
-                    "GET", url, headers={**headers, "Range": run.header}
+                    "GET", url, headers={**headers, **AS_STORED, "Range": run.header}
                 ) as response:
                     _honored(response, run, total, url)
                     written = 0
-                    for chunk in response.iter_bytes():
+                    for chunk in _as_stored(response):
                         out.write(chunk)
                         written += len(chunk)
                         completed += len(chunk)
@@ -240,7 +258,11 @@ def download_ranges(
 
 
 def download(url: str, dest: Path, http: httpx.Client | None = None) -> Path:
-    """Download atomically, restarting interrupted GETs up to three total attempts."""
+    """Download atomically, restarting interrupted GETs up to three total attempts.
+
+    The file holds the body as stored, never decoded from a ``Content-Encoding``
+    (see ``AS_STORED``).
+    """
     own = http is None
     active = http or client()
     attempt = 0
@@ -249,21 +271,17 @@ def download(url: str, dest: Path, http: httpx.Client | None = None) -> Path:
         nonlocal attempt
         attempt += 1
         _progress.emit(_progress.TransferProgress(0, None, attempt))
-        with staged_path(dest) as tmp, active.stream("GET", url) as resp:
+        with (
+            staged_path(dest) as tmp,
+            active.stream("GET", url, headers=AS_STORED) as resp,
+        ):
             resp.raise_for_status()
             length = resp.headers.get("Content-Length", "")
-            # iter_bytes writes decoded bytes; an encoded length is not comparable.
-            total = (
-                int(length)
-                if length.isascii()
-                and length.isdigit()
-                and resp.headers.get("Content-Encoding", "identity").lower() == "identity"
-                else None
-            )
+            total = int(length) if length.isascii() and length.isdigit() else None
             completed = 0
             _progress.emit(_progress.TransferProgress(completed, total, attempt))
             with tmp.open("wb") as f:
-                for chunk in resp.iter_bytes():
+                for chunk in _as_stored(resp):
                     f.write(chunk)
                     completed += len(chunk)
                     _progress.emit(_progress.TransferProgress(completed, total, attempt))

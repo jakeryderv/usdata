@@ -1,3 +1,4 @@
+import gzip
 from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from email.utils import format_datetime
@@ -217,6 +218,55 @@ def test_long_retry_after_is_not_retried_early(monkeypatch) -> None:
         with pytest.raises(httpx.HTTPStatusError):
             http.get(URL, client)
     assert route.call_count == 1 and not delays
+
+
+@pytest.mark.parametrize("value", ["²", "٣", "soon", ""])
+def test_an_unreadable_retry_after_falls_back_to_the_backoff(monkeypatch, value: str) -> None:
+    delays = []
+    monkeypatch.setattr(http, "sleep", delays.append)
+    with respx.mock() as mock, http.client() as client:
+        route = mock.get(URL)
+        route.side_effect = [
+            httpx.Response(429, headers=[(b"Retry-After", value.encode())]),
+            httpx.Response(200),
+        ]
+        http.get(URL, client)
+    assert delays == [0.5]
+
+
+@pytest.mark.l2
+def test_download_writes_a_stored_encoding_undecoded(tmp_path: Path) -> None:
+    stored = gzip.compress(b"STATION,PRCP\nUSW00013967,1.2\n")
+    dest = tmp_path / "data.csv"
+    with respx.mock() as mock, http.client() as client:
+        route = mock.get(URL).respond(200, content=stored, headers={"Content-Encoding": "gzip"})
+        http.download(URL, dest, client)
+    assert dest.read_bytes() == stored
+    # Asking for no transfer compression keeps services from gzipping on the fly.
+    assert route.calls[0].request.headers["Accept-Encoding"] == "identity"
+
+
+@pytest.mark.l2
+def test_a_range_of_a_stored_encoding_is_written_undecoded(tmp_path: Path) -> None:
+    stored = gzip.compress(OBJECT)
+    dest = tmp_path / "part"
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        assert request.headers["Accept-Encoding"] == "identity"
+        start, end = (int(value) for value in request.headers["Range"][6:].split("-"))
+        return httpx.Response(
+            206,
+            content=stored[start : end + 1],
+            headers={
+                "Content-Range": f"bytes {start}-{end}/{len(stored)}",
+                "Content-Encoding": "gzip",
+            },
+        )
+
+    with respx.mock() as mock, http.client() as client:
+        mock.get(URL).side_effect = respond
+        http.download_ranges(URL, dest, parts((0, 9)), etag=ETAG, total=len(stored), http=client)
+    assert dest.read_bytes() == stored[:10]
 
 
 def test_before_attempt_runs_before_every_attempt_after_the_backoff(monkeypatch) -> None:
