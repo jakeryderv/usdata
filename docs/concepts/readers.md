@@ -17,7 +17,8 @@ not change its source. Scientific units are not converted, and each source's
 own missing-data sentinels are left as the source wrote them, beyond what
 pandas and CF decoding normally handle. The one rewrite is notation: GRIB2
 `units` take the UDUNITS spelling CF metadata uses, `J kg-1` for ecCodes'
-`J kg**-1`, and keep the file's own spelling in `GRIB_units`.
+`J kg**-1`, and keep the file's own spelling in `GRIB_units`. Units holding a
+power UDUNITS cannot spell, such as `m**(2/3) s**-1`, keep the file's spelling.
 
 Every result carries a copy of the asset id, its request properties, and its
 provenance under a `usdata` attribute. That is metadata about the source bytes,

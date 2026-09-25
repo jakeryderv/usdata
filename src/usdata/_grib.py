@@ -44,10 +44,8 @@ LIBRARY_HINT = (
 )
 MRMS_NAME = re.compile(r"^MRMS_(?P<product>.+?)_\d{2}\.\d{2}_\d{8}-\d{6}\.grib2(?:\.gz)?$")
 INVENTORY_KEYS = ("shortName", "name", "typeOfLevel", "level", "step", "units")
-SYMBOL_POWER = re.compile(r"(?<=[A-Za-z])\*\*")
-"""A power written after a unit symbol, as ecCodes writes ``kg**-1``."""
-NUMERIC_POWER = re.compile(r"(?<![A-Za-z])\*\*")
-"""A power written after anything else, such as the ``10**-3`` of a scale factor."""
+SYMBOL_POWER = re.compile(r"(?<=[A-Za-z])\*\*(?=-?\d+(?![\d.]))")
+"""An integer power of a unit symbol, as ecCodes writes ``kg**-1``."""
 
 VARIABLE_KEYS = (
     "name",
@@ -244,11 +242,13 @@ def udunits(units: str) -> str:
 
     ecCodes writes powers as ``**``: ``J kg**-1``, ``m**2 s**-2``. UDUNITS and
     CF write them as a trailing signed integer, ``J kg-1`` and ``m2 s-2``,
-    which is what xarray-based tools expect. Only the notation changes. A power
-    of a number, such as ``10**-3``, has no such spelling, so a string holding
-    one is returned as it is rather than half rewritten.
+    which is what xarray-based tools expect. Only the notation changes, and only
+    for an integer power of a unit symbol. Any other power has no such
+    spelling: of a number, as in ``10**-3``, of a group, as in ``(m s**-1)**2``,
+    or not an integer, as in ``m**(2/3)``. A string holding one is returned as
+    it is rather than half rewritten.
     """
-    if NUMERIC_POWER.search(units):
+    if len(SYMBOL_POWER.findall(units)) != units.count("**"):
         return units
     return SYMBOL_POWER.sub("", units)
 

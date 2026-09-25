@@ -425,6 +425,10 @@ def test_registry_fills_units_and_long_name_the_file_leaves_unknown(tmp_path) ->
         ("K", "K"),
         ("(0 - 1)", "(0 - 1)"),
         ("10**-3 s**-1", "10**-3 s**-1"),
+        ("(m s**-1)**2", "(m s**-1)**2"),
+        ("m**(2/3) s**-1", "m**(2/3) s**-1"),
+        ("m**0.5", "m**0.5"),
+        ("m**+2", "m**+2"),
     ],
 )
 def test_units_take_udunits_notation_without_changing_their_meaning(ecc, plain) -> None:
