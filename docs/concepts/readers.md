@@ -60,8 +60,9 @@ how large it is, the format that was recognized, and what that format holds. A
 CSV reports its columns and a row count read with the standard library, so it
 needs no extra; the count stops after 100,000 rows and says so. A NetCDF4 file
 reports its data variables with dims, shape, units, and long name, and a GRIB2
-file reports every message with its `file_index`, `shortName`, `name`,
-`typeOfLevel`, `level`, `step`, `units`, and grid shape, plus the `object_index`
+file reports every message with its `file_index`, `shortName`, the `base_name`
+the reader names its variable from, `name`, `typeOfLevel`, `level`, `step`,
+`units`, and grid shape, plus the `object_index`
 and `selector` a partial fetch recorded. Those two use the same extras `open()` does,
 and a missing one produces a summary whose detail is `None` and whose `note`
 names the extra rather than an exception. Bytes that no longer decode are

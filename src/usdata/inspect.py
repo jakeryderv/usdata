@@ -99,6 +99,13 @@ class GribMessage(BaseModel):
         default=None, description="Index selector this message was fetched for, for a partial fetch"
     )
     short_name: str | None = Field(default=None, description="ecCodes shortName")
+    base_name: str | None = Field(
+        default=None,
+        description=(
+            "Name the reader starts this message's variable from: shortName, or where "
+            "ecCodes has none, the MRMS product or parameter_<discipline>_<category>_<number>"
+        ),
+    )
     name: str | None = Field(default=None, description="ecCodes name")
     type_of_level: str | None = Field(default=None, description="ecCodes typeOfLevel")
     level: str | None = Field(default=None, description="ecCodes level")
@@ -135,7 +142,11 @@ class Grib2Summary(BaseModel):
 
         names = variable_names(
             [
-                (message.short_name or "", message.type_of_level, message.level)
+                (
+                    message.base_name or message.short_name or "",
+                    message.type_of_level,
+                    message.level,
+                )
                 for message in self.messages
             ]
         )
@@ -243,7 +254,7 @@ def _summarize(
     note: str | None = None
     if fmt is not AssetFormat.BYTES:
         try:
-            detail = _detail(path, fmt, record, protocol)
+            detail = _detail(path, asset_id, fmt, record, protocol)
         except readers.MissingReaderDependency as error:
             note = str(error)
         # A cached file that no longer decodes is reported, not raised: a summary
@@ -288,16 +299,22 @@ def _detect(name: str, media_type: str | None) -> AssetFormat:
 
 
 def _detail(
-    path: Path, fmt: AssetFormat, record: Provenance, protocol: Protocol | None
+    path: Path, asset_id: str, fmt: AssetFormat, record: Provenance, protocol: Protocol | None
 ) -> CsvSummary | NetcdfSummary | Grib2Summary:
-    """The detail for one recognized format, reading only what that format needs."""
+    """The detail for one recognized format, reading only what that format needs.
+
+    A GRIB2 inventory is given the asset id, which names a message ecCodes
+    cannot, as the reader names it.
+    """
     if fmt is AssetFormat.CSV:
         return _csv_summary(path, units_row=readers.has_units_row(record.dataset_id, protocol))
     if fmt is AssetFormat.NETCDF:
         from usdata._netcdf import variables
 
         return NetcdfSummary(variables=variables(path))
-    return Grib2Summary(messages=_paired(readers.inventory(path), record))
+    from usdata._grib import inventory
+
+    return Grib2Summary(messages=_paired(inventory(path, asset_id), record))
 
 
 def _paired(messages: list[GribMessage], record: Provenance) -> list[GribMessage]:
