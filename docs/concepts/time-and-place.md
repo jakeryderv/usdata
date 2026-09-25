@@ -45,6 +45,12 @@ records the choice and the policy, not source provenance; keep the candidate
 list if you need to audit alternatives. Arguments and result fields are in the
 [selection reference](../reference/selection.md).
 
+A manifest source can apply the same rule with `select`, so pinning one radar
+volume or satellite scan no longer means copying its start from a listing: name
+the instant, a tolerance, and a direction, and the lockfile pins whichever file
+the rule chose. See the
+[manifest reference](../reference/manifests.md#selecting-one-asset-by-time).
+
 ## Places
 
 A `location` is a state, county, or county equivalent, given by name, postal
