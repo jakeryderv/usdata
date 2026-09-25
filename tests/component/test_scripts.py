@@ -175,6 +175,38 @@ def test_census_kml_parser_preserves_geometry_names_and_fips() -> None:
         module.parse_kml(b'<kml xmlns="http://www.opengis.net/kml/2.2"/>', "county")
 
 
+def test_census_places_split_by_the_antimeridian_keep_their_western_part() -> None:
+    module = script("build_places")
+    west = [(-179.0, 51.0), (-170.0, 51.0), (-170.0, 57.0)]
+    east = [(172.0, 52.0), (179.5, 52.0), (179.5, 53.0)]
+    box, clip = module.envelope([west, east], "02016")
+    assert box == (-179.0, 51.0, -170.0, 57.0)
+    assert clip == {"geoid": "02016", "dropped_polygons": 1, "dropped_box": [172, 52, 179.5, 53]}
+    assert module.envelope([west], "02016") == ((-179.0, 51.0, -170.0, 57.0), None)
+    with pytest.raises(ValueError, match="straddles"):
+        module.envelope([west + east], "02016")
+    kml = f"""<kml xmlns="http://www.opengis.net/kml/2.2"><Placemark>
+    <ExtendedData><SchemaData>
+    <SimpleData name="GEOID">02016</SimpleData>
+    <SimpleData name="NAME">Aleutians West</SimpleData>
+    <SimpleData name="STUSPS">AK</SimpleData>
+    </SchemaData></ExtendedData><MultiGeometry>
+    <Polygon><outerBoundaryIs><LinearRing><coordinates>{
+        " ".join(f"{x},{y},0" for x, y in west)
+    }</coordinates></LinearRing></outerBoundaryIs></Polygon>
+    <Polygon><outerBoundaryIs><LinearRing><coordinates>{
+        " ".join(f"{x},{y},0" for x, y in east)
+    }</coordinates></LinearRing></outerBoundaryIs></Polygon>
+    </MultiGeometry></Placemark></kml>""".encode()
+    # A caller that does not collect clips gets a refusal, never a globe-wide box.
+    with pytest.raises(ValueError, match="antimeridian"):
+        module.parse_kml(kml, "county")
+    clips: list[dict] = []
+    (row,) = module.parse_kml(kml, "county", clips)
+    assert (row["west"], row["east"]) == ("-179.000000", "-170.000000")
+    assert [clip["geoid"] for clip in clips] == ["02016"]
+
+
 @pytest.mark.parametrize(
     "notice",
     [
