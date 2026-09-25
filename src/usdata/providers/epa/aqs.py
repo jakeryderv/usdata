@@ -27,9 +27,9 @@ provenance sidecar.
 
 EPA asks callers to send one request at a time, at most ten a minute, with a
 pause between them, and will disable an account that does not. Requests from
-this module are therefore spaced at least ``MIN_INTERVAL`` apart, across every
-adapter instance in the process. Responses are slow, a minute or more for a
-county-month, so the read timeout is long.
+this module, transport retries included, are therefore spaced at least
+``MIN_INTERVAL`` apart, across every adapter instance in the process. Responses
+are slow, a minute or more for a county-month, so the read timeout is long.
 """
 
 from __future__ import annotations
@@ -288,13 +288,13 @@ class AqsDaily(HttpProvider):
     def fetch(self, asset: Asset, dest: Path) -> Path:
         """Request the selection with this adapter's key and write the canonical JSON."""
         with self.redacted_errors():
-            PACE.wait()
             try:
                 # httpx replaces a URL's query when given params, so merge the keys into it.
                 keyed = httpx.URL(asset.href).copy_merge_params(
                     {"email": self.credentials[EMAIL], "key": self.credentials[KEY]}
                 )
-                response = http.get(keyed, self._http(), timeout=TIMEOUT)
+                # A transport retry is a request to EPA too, so every attempt is paced.
+                response = http.get(keyed, self._http(), before_attempt=PACE.wait, timeout=TIMEOUT)
             except httpx.HTTPStatusError as error:
                 # A refusal comes as a 4xx whose JSON header says why; keep that reason.
                 if (reason := _failure(_json(error.response))) is None:

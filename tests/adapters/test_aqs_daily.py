@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import random
 from datetime import date
+from itertools import pairwise
 from pathlib import Path
 
 import httpx
@@ -248,6 +249,43 @@ def test_requests_are_paced_six_seconds_apart_across_adapters(unpaced, monkeypat
     aqs.PACE.wait()  # 1.5 s after the first: wait out the rest of six.
     aqs.PACE.wait()  # 6.5 s after the second was sent: no wait.
     assert unpaced == [4.5]
+
+
+def test_transport_retries_are_paced_like_any_request(tmp_path, monkeypatch, unpaced) -> None:
+    monkeypatch.setenv("USDATA_AQS_EMAIL", EMAIL)
+    monkeypatch.setenv("USDATA_AQS_KEY", KEY)
+    now = [1000.0]
+
+    def sleep(seconds: float) -> None:
+        now[0] += seconds
+
+    monkeypatch.setattr(http, "sleep", sleep)
+    monkeypatch.setattr(aqs, "monotonic", lambda: now[0])
+    sent: list[float] = []
+    answers = iter(
+        [
+            lambda request: httpx.Response(503, text="<html>maintenance</html>"),
+            lambda request: httpx.Response(429, headers={"Retry-After": "9"}),
+            lambda request: httpx.Response(200, json=body(request, ROWS)),
+        ]
+    )
+
+    def answer(request: httpx.Request) -> httpx.Response:
+        sent.append(now[0])
+        return next(answers)(request)
+
+    with respx.mock() as mock:
+        mock.get(url__startswith=SERVICE_URL).mock(side_effect=answer)
+        fetch(
+            DATASET,
+            build_query(
+                sites="36-081-0124", parameters="88101", start="2023-06-01", end="2023-06-10"
+            ),
+            root=tmp_path,
+        )
+    gaps = [later - earlier for earlier, later in pairwise(sent)]
+    # The 503's short backoff is stretched to the pace; the 429's longer Retry-After is kept.
+    assert gaps == [aqs.MIN_INTERVAL, 9.0]
 
 
 def test_the_adapter_cannot_be_built_without_both_variables(monkeypatch) -> None:

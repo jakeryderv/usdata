@@ -114,8 +114,9 @@ needs before averaging or counting:
 - **It limits callers.** EPA asks for one request at a time, at most ten a
   minute, and a pause between them, and may disable an account that ignores
   this. The adapter waits until six seconds have passed since the previous
-  request started, across every adapter in the process. Two processes sharing
-  a key are not coordinated.
+  request started, across every adapter in the process, and a retry after a
+  429, a 5xx, or a timeout waits the same way. Two processes sharing a key are
+  not coordinated.
 - **Values are revised.** Agencies can change submitted data, and each row
   carries `date_of_last_change`. A revised day changes its year's file, which
   a locked restore reports as drift; `pull --update` accepts it.

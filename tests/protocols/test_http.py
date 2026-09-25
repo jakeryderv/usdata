@@ -219,6 +219,21 @@ def test_long_retry_after_is_not_retried_early(monkeypatch) -> None:
     assert route.call_count == 1 and not delays
 
 
+def test_before_attempt_runs_before_every_attempt_after_the_backoff(monkeypatch) -> None:
+    events: list[str] = []
+    monkeypatch.setattr(http, "sleep", lambda delay: events.append(f"sleep {delay}"))
+    with respx.mock() as mock, http.client() as client:
+        route = mock.get(URL)
+        route.side_effect = [
+            httpx.Response(503),
+            httpx.ReadTimeout("slow"),
+            httpx.Response(200),
+        ]
+        http.get(URL, client, before_attempt=lambda: events.append("attempt"))
+    assert events == ["attempt", "sleep 0.5", "attempt", "sleep 1.0", "attempt"]
+    assert route.call_count == 3
+
+
 class InterruptedStream(httpx.SyncByteStream):
     def __iter__(self) -> Iterator[bytes]:
         yield b"partial"

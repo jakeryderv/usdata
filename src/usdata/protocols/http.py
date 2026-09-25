@@ -83,10 +83,23 @@ def _retry(operation: Callable[[], T]) -> T:
     raise AssertionError("unreachable")
 
 
-def get(url: str | httpx.URL, http: httpx.Client, **kwargs: Any) -> httpx.Response:
-    """GET a metadata page with bounded retries; the caller owns the client."""
+def get(
+    url: str | httpx.URL,
+    http: httpx.Client,
+    *,
+    before_attempt: Callable[[], object] | None = None,
+    **kwargs: Any,
+) -> httpx.Response:
+    """GET a metadata page with bounded retries; the caller owns the client.
+
+    ``before_attempt``, when given, is called before every attempt, retries
+    included, after any backoff. A source that must space its requests passes
+    its pacing here, so a retry cannot reach the service sooner than it allows.
+    """
 
     def request() -> httpx.Response:
+        if before_attempt is not None:
+            before_attempt()
         response = http.get(url, **kwargs)
         response.raise_for_status()
         return response
