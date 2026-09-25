@@ -1,1 +1,0 @@
-1.0 is now a judgment of maturity (breadth across agencies, every dataset verified, a settled contract) rather than a count of releases without contract changes. The roadmap turns to building out coverage, with the Census Data API, NASA through earthaccess, and more USGS water data as the next candidates.

@@ -1,1 +1,0 @@
-The NEXRAD derived radar products page has a walkthrough notebook: thirty minutes of KTLX echo-top, mesocyclone, and storm-track files, their headers read without a decoder, and a timeline of what the archive holds.

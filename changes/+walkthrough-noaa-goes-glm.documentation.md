@@ -1,1 +1,0 @@
-The GOES lightning detections page has a walkthrough notebook: an hour of GOES-16 GLM files flattened into one flash table, mapped over the central United States, and counted minute by minute near an Oklahoma tornado report.

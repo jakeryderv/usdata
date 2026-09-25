@@ -12,6 +12,73 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.27.0](https://github.com/jakeryderv/usdata/releases/tag/v0.27.0) - 2026-09-25
+
+
+### Breaking
+
+- `FetchedAsset.open()` no longer takes options. Open a file that needs them with the method for its format: `open_csv(dtype=, parse_dates=, usecols=, nrows=, units_row=)`, `open_nexrad(sweep=)`, `open_grib2(select=, strict=)`, or `open_netcdf()`, each typed with the pandas or xarray object it returns. `open(reader="csv")` and `open(reader="erddap-csv")` become `open_csv(units_row=False)` and `open_csv(units_row=True)`, and the other `reader` values become the method of the same format. `usdata.readers.open_asset` likewise takes only the fetched asset, beside new `open_csv`, `open_nexrad`, `open_grib2`, and `open_netcdf` functions.
+
+### Added
+
+- Every dataset has its own page on usdata.dev, with a preview, the facts at a glance, a quick start taken from a query that ran, its walkthrough, and the studies that use it. The dataset list is now a grid of cards grouped by topic, and question-driven examples are now Studies at usdata.dev/studies; old example links redirect.
+
+### Changed
+
+- The website and docs share one set of colours, fonts, and header styling, and every website page loads the same fonts.
+
+### Fixed
+
+- Links to former example pages now redirect to the matching dataset or study page instead of the studies index.
+- The GRIB2 reader now reverses every second row of a grid whose adjacent rows scan in opposite directions, as the National Blend of Models CONUS grid does. Before, half the rows of every `noaa:nbm` field came back mirrored east to west, so values sat beside the wrong coordinates.
+- The SPC tornado, hail, and wind reference now says that property and crop loss are in whole dollars from 2016, not millions.
+- `pull` with `force` no longer overwrites cached files the existing lockfile pins when it fails partway: while a lockfile exists, its downloads are staged and move into the cache only after the new lockfile is saved.
+
+### Documentation
+
+- 1.0 is now a judgment of maturity (breadth across agencies, every dataset verified, a settled contract) rather than a count of releases without contract changes. The roadmap turns to building out coverage, with the Census Data API, NASA through earthaccess, and more USGS water data as the next candidates.
+- Each dataset now has one page in the docs: its guide, which ends with the dataset's parameters, variables, and catalog facts. The separate generated reference pages redirect to it, and the docs' dataset index points to the website's dataset grid for browsing.
+- Every dataset page on usdata.dev now has its walkthrough notebook and a preview from real data. The Level III guide no longer calls the late start of mesocyclone and storm-track files a feed gap: on the documented day it matches the radar leaving clear-air mode.
+- The AQS daily summaries page has a walkthrough notebook: a year of PM2.5 at Queens College in 2023, one row per monitor-day chosen from the several AQS writes, with the June wildfire smoke standing out.
+- The Coastal current speed and direction page has a walkthrough notebook: one day of flood and ebb at the mouth of Chesapeake Bay, drawn as an along-channel current with gaps kept.
+- The Coastal tide predictions page has a walkthrough notebook: a month of predicted high and low waters at The Battery, showing the spring-neap cycle and the daily inequality.
+- The Coastal water levels page has a walkthrough notebook: three days of six-minute water levels at The Battery, with the unequal daily tides and NOAA's quality flags read off one plot.
+- The GFS model output page has a walkthrough notebook: one 1 degree global analysis, its message inventory, and a world map of surface CAPE on 6 May 2024.
+- The GHCN-Daily page has a walkthrough notebook: a year of daily highs, lows, precipitation, and snowfall at Oklahoma City's airport.
+- The GOES CONUS and mesoscale imagery page has a walkthrough notebook: one GOES-18 infrared scene, its quality flags, and its scan angles turned into latitude and longitude.
+- The GOES lightning detections page has a walkthrough notebook: an hour of GOES-16 GLM files flattened into one flash table, mapped over the central United States, and counted minute by minute near an Oklahoma tornado report.
+- The GOES mesoscale study follows the study template, with its fixed-region brightness-temperature summaries as the preview.
+- The Global Summary of the Month page has a walkthrough notebook: five years of monthly precipitation and mean temperature at Oklahoma City's airport, month by month.
+- The Global tropical cyclone best tracks page has a walkthrough notebook: the IBTrACS last-three-years file, opened with its units row and mapped to show every storm of category 4 or 5 since 2023.
+- The HRRR model output page has a walkthrough notebook: one 20 UTC analysis over the contiguous United States, its message inventory, and a map of where surface CAPE and 0-3 km helicity overlapped on 6 May 2024.
+- The Local Climatological Data page has a walkthrough notebook: three days of hourly, special, and daily summary reports at Oklahoma City's airport, including the 6 May 2024 evening storm.
+- The MRMS gridded radar products page has a walkthrough notebook: eleven two-minute mid-level rotation grids cropped around an Oklahoma tornado report, their swaths mapped, and the thirty-minute accumulation explained.
+- The NBM forecast guidance page has a walkthrough notebook: 2 m temperature from the first four hours of one run fetched as byte ranges, a CONUS map of the first hour, and Oklahoma City's evening on 6 May 2024.
+- The NEXRAD derived radar products page has a walkthrough notebook: thirty minutes of KTLX echo-top, mesocyclone, and storm-track files, their headers read without a decoder, and a timeline of what the archive holds.
+- The NEXRAD radar scans page has a walkthrough notebook: one KTLX volume from a manifest, its lowest sweep's moments, and reflectivity beside correlation coefficient separating distant storms from clear-air echo.
+- The NWS warnings and watches by county page has a walkthrough notebook: a year of Osage County, Oklahoma events, what was in effect at one moment, and how long each kind lasted.
+- The RAP model output page has a walkthrough notebook: two fields of one 13 km analysis fetched as byte ranges, their provenance, and a map of CAPE and helicity over the southern Plains on 6 May 2024.
+- The SPC tornado reports page has a walkthrough notebook: the 2024 tornado file, counted once per tornado and plotted by month and rating.
+- The Sea-surface temperature page has a walkthrough notebook: one day of the blended analysis off northeast Florida, mapped to show the Gulf Stream's warm core against the shelf and open ocean.
+- The Storm Events page has a walkthrough notebook: the 2024 details file, opened with UTC times, and Oklahoma's May 2024 hail, wind, and tornado reports counted by day.
+- The Streamflow and Water Daily Values page has a walkthrough notebook: a water year of daily mean flow for the Arkansas River at Tulsa, with estimated days marked.
+- The Tropical cyclone best tracks page has a walkthrough notebook: the whole Atlantic HURDAT2 file, opened into a track table and drawn as the 2024 season against 175 years of landfall points.
+- The U.S. Climate Normals page has a walkthrough notebook: the 1991 to 2020 monthly normal high, low, and precipitation at Oklahoma City's airport.
+- The annual station climate page has a walkthrough notebook: thirty years of precipitation and mean temperature at Oklahoma City, pulled, opened, plotted, pinned, and cited.
+- The climate-anomalies study is one notebook in the study template: Oklahoma City's 2024 monthly temperature and precipitation against 1991–2020 normals, with its friction list.
+- The disaster-declarations study is now a notebook: it joins FEMA's Oklahoma declarations to the 6 May 2024 tornado reports by county and finds 7 of 15 tornado counties designated.
+- The earthquake events page has a walkthrough notebook: 25 years of magnitude 3 and larger earthquakes in Oklahoma, counted by year through the 2015 peak and after.
+- The event-context study follows the study template: one notebook with its data, the radar and infrared preview, citations, and a friction list.
+- The federal disaster declarations page has a walkthrough notebook: 25 years of Oklahoma declarations, counted once per disaster and plotted by year and type.
+- The hourly-anomalies study is one notebook in the study template: 6 May 2024 routine reports at Oklahoma City against hourly normals, with its friction list.
+- The severe-weather case study follows the study template: one notebook with its data, analysis, citations, and friction list, and no separate README.
+- The storm-surge study is one notebook in the study template: Hurricane Helene's 3.15 m peak residual at Cedar Key, timed against landfall, with its friction list.
+- The tornado classification study follows the study template, with a preview that places each of the twelve reports by its rotation and lightning features.
+- The warning-lead-time study is now a notebook: it finds the Tornado Warning in effect when the 6 May 2024 Osage County EF4 began, issued 16 minutes earlier, and plots the county's alerts that evening.
+- The weather-and-streamflow study is one notebook in the study template and now covers May 2024, plotting Oklahoma City rain beside Arkansas River flow at Tulsa.
+- The website and docs name the agencies usdata covers today, dataset pages link examples by their titles, and docs headings match the website.
+- The wildfire-smoke study is now a notebook: New York City's regulatory PM2.5 monitors through 1 to 15 June 2023, one row per monitor-day, with the smoke days far above the daily standard.
+
 ## [0.26.0](https://github.com/jakeryderv/usdata/releases/tag/v0.26.0) - 2026-09-24
 
 

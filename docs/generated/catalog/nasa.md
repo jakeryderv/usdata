@@ -4,7 +4,7 @@
 
 [Provider access notes](../../providers/nasa.md).
 
-**Released** is included in usdata 0.26.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
+**Released** is included in usdata 0.27.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
 
 ## Implemented datasets
 

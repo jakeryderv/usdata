@@ -1,1 +1,0 @@
-Each dataset now has one page in the docs: its guide, which ends with the dataset's parameters, variables, and catalog facts. The separate generated reference pages redirect to it, and the docs' dataset index points to the website's dataset grid for browsing.
