@@ -22,6 +22,18 @@ falls back to the nearest radar when none lies inside the bounding rectangle.
 
 The bundled station list excludes test/research radars from default selection.
 See [archive and station metadata notes](noaa-services.md#access-notes).
+
+## Coverage outside the declared extent
+
+The catalog extent, 180°W to 27°W and 15°N to 72°N, holds every bundled radar
+in the western hemisphere, from the Aleutians to Lajes in the Azores (`LPLA`).
+Four radars lie across the antimeridian from it: Andersen AFB on Guam (`PGUA`),
+Kunsan (`RKJK`) and Camp Humphreys (`RKSG`) in Korea, and Kadena on Okinawa
+(`RODN`). A box cannot wrap across 180°, and one spanning every longitude would
+match any search anywhere, so these four stay outside the extent. Registry
+search by place or point does not list the radar datasets there; fetch them by
+site id (`-p site=PGUA`), or with a geographic query, which falls back to the
+nearest radar. A registry test keeps this list and the bundled table in agreement.
 The optional `usdata[radar]` reader opens local scans with xradar; an explicit
 zero-based `sweep` chooses a sweep. See [reader limits](../reference/readers.md),
 [temporal selection](../reference/selection.md), and the

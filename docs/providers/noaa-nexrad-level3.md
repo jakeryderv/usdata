@@ -14,7 +14,9 @@ usdata fetch noaa:nexrad-level3 -p site=KTLX -p products=N0B,NMD \
 ```
 
 Site selection follows [Level II](noaa-nexrad.md): `site` or `sites`, radars
-inside a bounding rectangle, or `nearest`. UTC bounds include both endpoints
+inside a bounding rectangle, or `nearest`. So does the catalog extent, which
+leaves out the Guam, Korea, and Okinawa radars
+([coverage](noaa-nexrad.md#coverage-outside-the-declared-extent)). UTC bounds include both endpoints
 and span at most 31 days per query. A window that starts before 2020-03-30 is
 rejected before any request and names the NCEI archive, which this adapter
 does not reach.

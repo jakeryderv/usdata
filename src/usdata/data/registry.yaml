@@ -79,12 +79,14 @@ datasets:
       unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). One object per radar site
       per volume scan. No server-side subsetting; whole files are fetched. Select radars by site
       id, bbox, or nearest to a point. Moments vary by sweep and volume coverage pattern; the
-      catalog lists the ones the radar example's lowest sweep carries.
+      catalog lists the ones the radar example's lowest sweep carries. The extent spans the
+      radars from the Aleutians to the Azores; Guam, Korea, and Okinawa lie beyond the
+      antimeridian, outside it, and are reached by site id.
     keywords: [radar, weather, storms, tornado, precipitation, reflectivity, nexrad, wsr-88d]
     protocol: s3
     homepage: https://registry.opendata.aws/noaa-nexrad/
     license: US Government Work (public domain)
-    spatial_extent: { west: -180.0, south: 15.0, east: -60.0, north: 72.0 }
+    spatial_extent: { west: -180.0, south: 15.0, east: -27.0, north: 72.0 }
     temporal_extent: { start: "1991-06-01T00:00:00Z" }
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
     summary: NEXRAD radar scans
@@ -905,12 +907,14 @@ datasets:
       S3 bucket, with flat keys SITE_PRODUCT_YYYY_MM_DD_HH_MM_SS where the site
       id drops the first letter of its ICAO id. One object per product per
       volume scan since 2020-03-30; earlier products are archived at NCEI.
-      Files are fetched whole and have no reader.
+      Files are fetched whole and have no reader. The extent spans the radars
+      from the Aleutians to the Azores; Guam, Korea, and Okinawa lie beyond the
+      antimeridian, outside it, and are reached by site id.
     keywords: [radar, nexrad, level iii, reflectivity, velocity, mesocyclone, storm tracks, products, tornado]
     protocol: s3
     homepage: https://registry.opendata.aws/noaa-nexrad/
     license: US Government Work (public domain)
-    spatial_extent: { west: -180.0, south: 15.0, east: -60.0, north: 72.0 }
+    spatial_extent: { west: -180.0, south: 15.0, east: -27.0, north: 72.0 }
     temporal_extent: { start: "2020-03-30T00:00:00Z" }
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
     summary: NEXRAD derived radar products
