@@ -65,7 +65,7 @@ def make_registry(dataset: Dataset) -> Registry:
 
 def locked(asset_id: str, retrieved: datetime, size: int, source: str) -> LockedAsset:
     href = f"https://example.test/{asset_id}.csv"
-    checksum = f"sha256:{asset_id * 8}"
+    checksum = f"sha256:{asset_id * 64}"
     return LockedAsset(
         asset=Asset(id=asset_id, dataset_id="test:widgets", href=href, protocol=Protocol.HTTP),
         provenance=Provenance(

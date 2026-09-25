@@ -283,3 +283,25 @@ def test_asset_properties_default_empty_and_older_json_parses() -> None:
     assert Asset.model_validate(raw).properties == {}
     stated = Asset.model_validate({**raw, "properties": {"units": "metric"}})
     assert Asset.model_validate_json(stated.model_dump_json()) == stated
+
+
+def test_a_checksum_is_sha256_in_lowercase_hex() -> None:
+    digest = "AB" * 32
+    asset = Asset(
+        id="a",
+        dataset_id="noaa:x",
+        href="https://example.test/a",
+        protocol=Protocol.HTTP,
+        checksum=f"SHA256:{digest}",
+    )
+    # A hand-edited pin in capitals still names the same bytes, and the same mirror object.
+    assert asset.checksum == f"sha256:{digest.lower()}"
+    for bad in ("md5:" + "ab" * 16, "sha256:" + "ab" * 8, "ab" * 32, "sha256:" + "zz" * 32):
+        with pytest.raises(ValidationError, match="64 hex digits"):
+            Asset(
+                id="a",
+                dataset_id="noaa:x",
+                href="https://example.test/a",
+                protocol=Protocol.HTTP,
+                checksum=bad,
+            )

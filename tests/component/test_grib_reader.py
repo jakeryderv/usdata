@@ -625,3 +625,17 @@ def test_a_message_holding_two_fields_yields_both_and_shares_one_index(tmp_path)
         (0, 12, "v"),
         (1, 226, "cape"),
     ]
+
+
+def test_reference_and_valid_times_keep_the_messages_seconds(tmp_path) -> None:
+    """MRMS stamps its analyses to the second; ecCodes keeps those seconds in their own key."""
+    handle = ec.codes_new_from_message(message(np.zeros((3, 4))))
+    try:
+        ec.codes_set(handle, "second", 41)
+        ec.codes_set(handle, "forecastTime", 1)
+        content = ec.codes_get_message(handle)
+    finally:
+        ec.codes_release(handle)
+    result = item(tmp_path, content).open()
+    assert result.t.attrs["reference_time"] == "2024-05-06T20:00:41+00:00"
+    assert result.t.attrs["valid_time"] == "2024-05-06T21:00:41+00:00"

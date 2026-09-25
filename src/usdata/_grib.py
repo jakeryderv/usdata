@@ -304,15 +304,19 @@ def base_name(short_name: str | None, parameter: Sequence[Any], source: str) -> 
     return _product_name(source) or f"parameter_{discipline}_{category}_{number}"
 
 
-def _time(date: Any, time: Any) -> str | None:
+def _time(date: Any, time: Any, second: Any = None) -> str | None:
+    """An ecCodes date and ``HHMM`` time as ISO 8601 UTC, with the message's seconds.
+
+    ecCodes spells times to the minute and keeps the reference time's seconds
+    in a key of their own, which MRMS sets: a file stamped ``20:00:41`` would
+    otherwise read as ``20:00:00``. A validity time is the reference time plus
+    a whole-minute step, so it carries the same seconds.
+    """
     if date is None or time is None:
         return None
     try:
-        return (
-            datetime.strptime(f"{int(date):08d}{int(time):04d}", "%Y%m%d%H%M")
-            .replace(tzinfo=UTC)
-            .isoformat()
-        )
+        stamp = datetime.strptime(f"{int(date):08d}{int(time):04d}", "%Y%m%d%H%M")
+        return stamp.replace(second=int(second or 0), tzinfo=UTC).isoformat()
     except ValueError:
         return None
 
@@ -494,11 +498,12 @@ def open_grib2(
             # The file's own spelling stays beside the rewritten one, as cfgrib keeps it.
             attrs["GRIB_units"] = units
             attrs["units"] = plain
+        second = _get(eccodes, h, "second", int)
         for label, date_key, time_key in (
             ("reference_time", "dataDate", "dataTime"),
             ("valid_time", "validityDate", "validityTime"),
         ):
-            stamp = _time(attrs.get(date_key), attrs.get(time_key))
+            stamp = _time(attrs.get(date_key), attrs.get(time_key), second)
             if stamp:
                 attrs[label] = stamp
         message: dict[str, Any] = {

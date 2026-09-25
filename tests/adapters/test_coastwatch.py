@@ -117,8 +117,15 @@ def test_a_bare_end_date_includes_that_days_analysis(adapter) -> None:
     assert asset.time and asset.time.start == datetime(2024, 5, 8, 12, tzinfo=UTC)
 
 
-def test_box_without_grid_centers_returns_empty_without_http(adapter) -> None:
-    assert adapter.list_assets(query(bbox=(0, 0, 0.01, 0.01))) == []
+@pytest.mark.parametrize(
+    ("bbox", "cell"), [((0, 0, 0.01, 0.01), "0.025"), ((0.03, 0.03, 0.03, 0.03), "0.025")]
+)
+def test_a_point_or_box_inside_one_cell_selects_that_cell(adapter, bbox, cell) -> None:
+    with respx.mock() as mock:
+        mock.get(INFO_URL).respond(200, text=INFO)
+        mock.get(GRID_URL + "?time").respond(200, text=TIMES)
+        (asset,) = adapter.list_assets(query(bbox=bbox))
+    assert unquote(asset.href).count(f"[({cell}):1:({cell})]") == 2
 
 
 def test_variables_stride_and_stable_query_ids(adapter) -> None:
