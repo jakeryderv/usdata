@@ -17,6 +17,16 @@ def registry() -> Registry:
     return default_registry()
 
 
+def test_search_takes_a_naive_window_built_directly_as_utc(registry: Registry) -> None:
+    from datetime import UTC, datetime
+
+    from usdata.models import TimeRange
+
+    naive = registry.search(Query(time=TimeRange(start=datetime(2020, 1, 1))))
+    aware = registry.search(Query(time=TimeRange(start=datetime(2020, 1, 1, tzinfo=UTC))))
+    assert naive and naive == aware
+
+
 def test_bundled_registry_loads(registry: Registry) -> None:
     assert len(registry) >= 3
     assert "noaa:nexrad-level2" in registry
@@ -28,6 +38,13 @@ def test_bundled_registry_loads(registry: Registry) -> None:
 def test_get_unknown_raises(registry: Registry) -> None:
     with pytest.raises(DatasetNotFound):
         registry.get("nope:nothing")
+
+
+def test_search_refuses_text_with_no_keyword_but_treats_blank_as_none(registry) -> None:
+    for text in ("?", " ... ", "!!"):
+        with pytest.raises(ValueError, match="no letters or digits"):
+            registry.search(Query(text=text))
+    assert registry.search(Query(text="  ")) == registry.search(Query())
 
 
 def test_search_ranks_by_keyword(registry: Registry) -> None:

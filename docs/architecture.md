@@ -136,8 +136,8 @@ and [counties](https://www2.census.gov/geo/tiger/GENZ2025/kml/cb_2025_us_county_
 
 `scripts/build_places.py` reads the KML with the standard library and writes
 the CSV plus `places.sources.json`, which records source URLs, archive SHA-256
-hashes, counts, vintage, scale, and CSV checksum. No geospatial runtime
-dependency or online geocoder is involved.
+hashes, counts, vintage, scale, CSV checksum, and the places clipped at the
+antimeridian. No geospatial runtime dependency or online geocoder is involved.
 
 ```sh
 just places                           # download pinned 2025 archives and generate

@@ -38,5 +38,14 @@ accepted.
 
 Territories covered: American Samoa, Guam, the Northern Mariana Islands,
 Puerto Rico, and the U.S. Virgin Islands. Boxes are the minimum and maximum
-longitude and latitude of every polygon vertex; Alaska and Aleutians West span
-more than 350 degrees of longitude.
+longitude and latitude of every polygon vertex.
+
+## Antimeridian
+
+A box cannot wrap across 180 degrees of longitude. A place whose polygons lie
+on both sides of it keeps only its western-hemisphere polygons, so no box is
+wider than 180 degrees. Two places are clipped this way: Alaska and Aleutians
+West Census Area, whose boxes end at 179.146711°W and omit the Near Islands
+(Attu) and part of the Rat Islands, between 172.46°E and 179.78°E. The bundled
+`places.sources.json` records each clip and the box it dropped. For those
+islands, pass a `bbox` or name sites explicitly.

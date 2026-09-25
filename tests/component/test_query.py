@@ -24,6 +24,13 @@ def test_bare_end_date_runs_to_the_last_instant_of_its_day() -> None:
     assert parse_datetime("2024-05-07", end=True) == last
     assert parse_datetime(" 2024-05-07 ", end=True) == last
     assert parse_datetime(date(2024, 5, 7), end=True) == last
+    # Every date-only spelling is a whole day, not only the extended one.
+    for spelling in ("20240507", "2024-W19-2", "2024W192"):
+        assert parse_datetime(spelling, end=True) == last, spelling
+        assert parse_datetime(spelling) == datetime(2024, 5, 7, tzinfo=UTC), spelling
+    assert build_query(start="2024-01-10", end="20240115").time == (
+        build_query(start="2024-01-10", end="2024-01-15").time
+    )
     # A datetime is taken as given on either bound, and a bare start is still midnight.
     assert parse_datetime("2024-05-07T00:00Z", end=True) == datetime(2024, 5, 7, tzinfo=UTC)
     assert parse_datetime(datetime(2024, 5, 7), end=True) == datetime(2024, 5, 7, tzinfo=UTC)
@@ -91,7 +98,7 @@ def test_ambiguous_counties_do_not_choose_a_silent_match() -> None:
         resolve_place("1")  # Leading zero required: this must be '01'.
 
 
-def test_census_coverage_and_conservative_antimeridian_boxes() -> None:
+def test_census_coverage_and_antimeridian_clipped_boxes() -> None:
     import csv
     import hashlib
     import io
@@ -110,9 +117,18 @@ def test_census_coverage_and_conservative_antimeridian_boxes() -> None:
     for row in rows:
         box = resolve_place(row["geoid"])
         assert box.west < box.east and box.south < box.north
-    for name in ("Alaska", "Aleutians West Census Area, AK"):
-        box = resolve_place(name)
-        assert box.east - box.west > 350
+        assert box.east - box.west < 180, row["geoid"]
+    # Places split by 180 degrees keep their western part; the dropped islands are recorded.
+    clipped = metadata["antimeridian"]["clipped"]
+    assert {clip["geoid"] for clip in clipped} == {"02", "02016"}
+    assert all(clip["dropped_box"][0] > 170 for clip in clipped)
+    alaska = build_query(location="Alaska").bbox
+    assert alaska is not None
+    assert (alaska.west, alaska.east) == (-179.146711, -129.974167)
+    assert alaska.contains_point(61.2, -149.9) and not alaska.contains_point(
+        56.0, 160.0
+    )  # Kamchatka
+    assert resolve_place("Aleutians West Census Area, AK").east < -160
 
 
 def test_a_location_keeps_the_place_it_resolved_beside_its_box() -> None:

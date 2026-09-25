@@ -59,7 +59,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 - Longest query window: 31 days
 - Terms of use: <https://www.noaa.gov/information-technology/open-data-dissemination>
 - Citation: NEXRAD on AWS was accessed on [date] from https://registry.opendata.aws/noaa-nexrad
-- Geographic bounds (WGS84): west -180°, south 15°, east -60°, north 72°
+- Geographic bounds (WGS84): west -180°, south 15°, east -27°, north 72°
 - Catalog date range: 2020-03-30 to open-ended
 - Coverage varies by station, product, and date; the range above does not guarantee observations.
 - [Upstream documentation](https://registry.opendata.aws/noaa-nexrad/)

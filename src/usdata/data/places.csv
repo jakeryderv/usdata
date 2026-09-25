@@ -1,6 +1,6 @@
 kind,geoid,name,qualified_name,state,state_name,west,south,east,north
 state,01,Alabama,Alabama,AL,Alabama,-88.473227,30.223334,-84.889080,35.008028
-state,02,Alaska,Alaska,AK,Alaska,-179.146711,51.215567,179.778470,71.387815
+state,02,Alaska,Alaska,AK,Alaska,-179.146711,51.215567,-129.974167,71.387815
 state,04,Arizona,Arizona,AZ,Arizona,-114.816510,31.332177,-109.045223,37.004260
 state,05,Arkansas,Arkansas,AR,Arkansas,-94.617919,33.004291,-89.641003,36.499600
 state,06,California,California,CA,California,-124.409591,32.534435,-114.131211,42.009485
@@ -123,7 +123,7 @@ county,01129,Washington,Washington County,AL,Alabama,-88.464427,31.114298,-87.88
 county,01131,Wilcox,Wilcox County,AL,Alabama,-87.667945,31.827123,-86.856576,32.268921
 county,01133,Winston,Winston County,AL,Alabama,-87.636573,33.985004,-87.109911,34.306997
 county,02013,Aleutians East,Aleutians East Borough,AK,Alaska,-166.199167,53.953959,-158.893471,56.880265
-county,02016,Aleutians West,Aleutians West Census Area,AK,Alaska,-179.146711,51.215567,179.778470,57.249626
+county,02016,Aleutians West,Aleutians West Census Area,AK,Alaska,-179.146711,51.215567,-166.038614,57.249626
 county,02020,Anchorage,Anchorage Municipality,AK,Alaska,-150.285859,60.732987,-148.462403,61.484029
 county,02050,Bethel,Bethel Census Area,AK,Alaska,-173.121318,58.550337,-153.001640,62.292644
 county,02060,Bristol Bay,Bristol Bay Borough,AK,Alaska,-157.260883,58.615921,-156.316015,58.885114

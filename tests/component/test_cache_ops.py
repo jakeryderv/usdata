@@ -150,6 +150,21 @@ def test_entries_skip_temporary_files_and_staging(temp_cache: Path) -> None:
     assert (kept.parent / ".a.csv.x1y2.part").exists(), "a concurrent pull may still own it"
 
 
+def test_a_naive_retrieval_time_is_read_as_utc_and_ages(temp_cache: Path) -> None:
+    path = cache_file(temp_cache, "noaa:ghcn-daily", "a.csv")
+    sidecar = provenance.sidecar_path(path)
+    data = json.loads(sidecar.read_text())
+    data["retrieved_at"] = "2025-01-01T12:00:00"  # as an older or hand-written sidecar has it
+    sidecar.write_text(json.dumps(data))
+    naive = Provenance.model_validate({**data, "retrieved_at": datetime(2025, 1, 1, 12)})
+    assert naive.retrieved_at == datetime(2025, 1, 1, 12, tzinfo=UTC)
+
+    [entry] = entries(temp_cache)
+    assert entry.retrieved_at == naive.retrieved_at and entry.age(NOW) == timedelta(days=29)
+    assert candidates(temp_cache, older_than=timedelta(days=20), now=NOW) == [entry]
+    assert candidates(temp_cache, older_than=timedelta(days=20), now=NOW.replace(tzinfo=None))
+
+
 def test_entries_is_empty_without_a_cache_directory(temp_cache: Path) -> None:
     assert entries(temp_cache) == [] and total_size(temp_cache) == 0
 

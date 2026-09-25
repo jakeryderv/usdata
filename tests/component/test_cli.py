@@ -2,6 +2,7 @@ import json
 from itertools import takewhile
 from pathlib import Path
 
+import pytest
 import respx
 from typer.testing import CliRunner
 
@@ -76,6 +77,13 @@ def test_fetch_planned_dataset_exits_3() -> None:
 
 def test_search_unknown_state_exits_2() -> None:
     assert runner.invoke(app, ["search", "radar", "--state", "Atlantis"]).exit_code == 2
+
+
+@pytest.mark.parametrize("text", ["?", "--", "...!"])
+def test_search_text_without_a_keyword_exits_2_instead_of_matching_everything(text) -> None:
+    result = runner.invoke(app, ["search", "--", text])
+    assert result.exit_code == 2
+    assert "no letters or digits" in result.output
 
 
 def test_datasets_prints_an_aligned_table() -> None:

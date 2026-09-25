@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import csv
 import io
-import re
 from datetime import UTC, date, datetime, time
 from functools import lru_cache
 from importlib import resources
@@ -94,15 +93,15 @@ def find_place(name: str) -> tuple[Place, BBox]:
 LAST_INSTANT = time(23, 59, 59, 999999)
 """The time of day a bare end date resolves to: the last microsecond of its UTC day."""
 
-_BARE_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-
 
 def parse_datetime(value: str | date | datetime | None, *, end: bool = False) -> datetime | None:
     """Accept ISO dates or datetimes; naive values are treated as UTC.
 
     A date alone is the first instant of its UTC day, or with ``end=True`` the
     last, ``23:59:59.999999``, so a window bounded by two bare dates covers
-    whole calendar days. A datetime is taken as given, whichever bound it is.
+    whole calendar days. Every ISO 8601 date spelling Python reads counts as a
+    date alone, compact ``20240507`` and week-form ``2024-W19-2`` included. A
+    datetime is taken as given, whichever bound it is.
     """
     if value is None:
         return None
@@ -110,10 +109,14 @@ def parse_datetime(value: str | date | datetime | None, *, end: bool = False) ->
         dt = value
     elif isinstance(value, date):
         dt = datetime.combine(value, LAST_INSTANT if end else time.min)
-    elif _BARE_DATE.match(value.strip()):
-        dt = datetime.combine(date.fromisoformat(value.strip()), LAST_INSTANT if end else time.min)
     else:
-        dt = datetime.fromisoformat(value.strip())
+        text = value.strip()
+        try:
+            day = date.fromisoformat(text)
+        except ValueError:
+            dt = datetime.fromisoformat(text)
+        else:
+            dt = datetime.combine(day, LAST_INSTANT if end else time.min)
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=UTC)
     return dt

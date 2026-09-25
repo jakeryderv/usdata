@@ -15,6 +15,30 @@
       "records": 3235
     }
   ],
-  "csv_sha256": "ab1ff74793ffa8fe6dc6d9e0fb6a89292c5d1652cbcefe88992a93af70b32c67",
-  "antimeridian": "Conservative min/max envelopes; Alaska and Aleutians West span most longitudes."
+  "csv_sha256": "eed6d7c53dcccb486f4e6f46fd393195cfb14e198b241f5ed9eed356f41f71f4",
+  "antimeridian": {
+    "rule": "A place whose longitudes span more than 180 degrees keeps only its western-hemisphere polygons; no box crosses the antimeridian.",
+    "clipped": [
+      {
+        "geoid": "02",
+        "dropped_polygons": 14,
+        "dropped_box": [
+          172.461667,
+          51.357688,
+          179.77847,
+          53.01075
+        ]
+      },
+      {
+        "geoid": "02016",
+        "dropped_polygons": 14,
+        "dropped_box": [
+          172.461667,
+          51.357688,
+          179.77847,
+          53.01075
+        ]
+      }
+    ]
+  }
 }
