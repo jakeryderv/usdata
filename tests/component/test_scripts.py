@@ -49,7 +49,8 @@ def test_website_catalog_matches_registry_and_release_availability(monkeypatch) 
     goes = records["noaa:goes-abi"]["quickstart"]
     assert "--start 2024-05-06T11:55:00Z" in goes["cli"]
     assert "--end 2024-05-06T12:05:00Z" in goes["cli"]
-    assert goes["cli"].startswith("# The manifest keeps only the file starting nearest")
+    assert goes["cli"].startswith("usdata fetch noaa:goes-abi")
+    assert goes["cli"].endswith("# the one starting nearest 2024-05-06T12:00:00Z.")
     assert 'target=datetime.fromisoformat("2024-05-06T12:00:00Z"),' in goes["python"]
     assert "tolerance=timedelta(seconds=300)," in goes["python"]
     assert "if item.asset == chosen).open()" in goes["python"]

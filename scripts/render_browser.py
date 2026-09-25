@@ -113,10 +113,10 @@ def quickstart(ds: Any, walkthrough: str | None) -> dict[str, str] | None:
     else:
         # fetch has no select rule (ADR 0044): list the window the rule implies,
         # then keep the one asset select_by_time chooses, as pull does.
-        command = (
-            f"# The manifest keeps only the file starting {rule.direction.replace('_', ' ')} "
-            f"{_utc_text(rule.time)};\n# fetch takes every file that starts in its window.\n"
-            + command
+        # The command leads, as on every quick start; the note on what it differs in follows.
+        command += (
+            "\n# fetch takes every file that starts in this window; the manifest keeps only\n"
+            f"# the one starting {rule.direction.replace('_', ' ')} {_utc_text(rule.time)}."
         )
         imports = (
             "from datetime import datetime, timedelta\n\n"
