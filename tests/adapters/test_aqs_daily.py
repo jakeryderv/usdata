@@ -115,6 +115,25 @@ def test_a_state_location_sites_and_a_box_select_as_the_adr_says(adapter) -> Non
     }
 
 
+def test_connecticut_is_selected_by_its_counties_before_2022(adapter) -> None:
+    (url,) = listed(adapter, location="Hartford County, CT", parameters="88101", **JUNE)
+    assert url.path.endswith("/byCounty")
+    assert (url.params["state"], url.params["county"]) == ("09", "003")
+    with respx.mock() as mock, pytest.raises(QueryError) as raised:
+        # 09140 is the Naugatuck Valley planning region.
+        adapter.list_assets(
+            build_query(location="09140", parameters="88101", start="2023-06-01", end="2023-06-10")
+        )
+    assert not mock.calls
+    assert str(raised.value).startswith(
+        "epa:aqs-daily keys Connecticut by its eight counties before 2022, and "
+        "Naugatuck Valley Planning Region, CT is a planning region"
+    )
+    assert str(raised.value).endswith(
+        ": Fairfield County, CT; Hartford County, CT; Litchfield County, CT; New Haven County, CT"
+    )
+
+
 def test_a_box_is_sent_to_six_decimals_and_agrees_with_its_label(adapter) -> None:
     fine = (-105.123456, 39.654321, -104.9, 40.0)
     (url,) = listed(adapter, bbox=fine, parameters="88101", **JUNE)

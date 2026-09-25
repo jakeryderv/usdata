@@ -49,6 +49,12 @@ usdata fetch fema:disaster-declarations --start 2024-05-06 --end 2024-05-06 --lo
 usdata fetch fema:disaster-declarations --start 2024-05-06 --end 2024-05-06 -p state=OK -p incident_type=Tornado
 ```
 
+--8<-- "_snippets/connecticut-counties.md"
+
+All eleven Connecticut rows declared since 2022 carry `000` or a code from
+`001` to `015`: DR-4820 (August 2024) designates Fairfield as `001`. A
+planning-region code such as `110` would match only the `Statewide` rows.
+
 ## What the service does not say
 
 Three behaviours were found by getting them wrong, and the adapter is built

@@ -207,6 +207,46 @@ def test_census_places_split_by_the_antimeridian_keep_their_western_part() -> No
     assert [clip["geoid"] for clip in clips] == ["02016"]
 
 
+def test_connecticut_regions_list_the_legacy_counties_they_share_a_town_with() -> None:
+    module = script("build_places")
+    counties = sorted(module.LEGACY_COUNTIES)
+    regions = sorted(module.PLANNING_REGIONS)
+
+    def row(kind: str, geoid: str, name: str) -> dict[str, str]:
+        return {"kind": kind, "geoid": geoid, "name": name, "qualified_name": name, "state": "CT"}
+
+    def table() -> list[dict[str, str]]:
+        return [row("legacy_county", g, f"County {g}") for g in counties] + [
+            {**row("county", g, f"Region {g}"), "legacy_counties": ""} for g in regions
+        ]
+
+    # Each region shares a town with one county; the first also with a second.
+    pairs = [(counties[i % 8], region) for i, region in enumerate(regions)]
+    pairs.append((counties[1], regions[0]))
+    lines = [
+        f"09|{old[2:]}|County {old}|{new[2:]}|Region {new}|{i:05d}|x|x|Town|0|43|A|T1"
+        for i, (old, new) in enumerate(pairs)
+    ]
+    raw = "\n".join(
+        ['﻿"STATEFP', '(INCITS38)"|"OLD_COUNTYFP', *lines, "", "GLOSSARY", "STATEFP = x"]
+    ).encode()
+    crosswalk = module.parse_crosswalk(raw)
+    assert len(crosswalk) == len(pairs)
+    rows = table()
+    module.link_legacy_counties(rows, crosswalk)
+    linked = {r["geoid"]: r["legacy_counties"] for r in rows if r["kind"] == "county"}
+    assert linked["09110"] == "09001 09003" and linked["09190"] == "09001"
+    # A name a region also has would let a lookup land on the wrong kind.
+    clash = table()
+    clash[0]["name"] = "Region 09120"
+    with pytest.raises(ValueError, match="shares a name"):
+        module.link_legacy_counties(clash, crosswalk)
+    with pytest.raises(ValueError, match="does not cover"):
+        module.link_legacy_counties(table(), crosswalk[:8])  # No 09190
+    with pytest.raises(ValueError, match="crosswalk names"):
+        module.link_legacy_counties(table(), [{**crosswalk[0], "old_name": "Elsewhere"}])
+
+
 @pytest.mark.parametrize(
     "notice",
     [

@@ -45,6 +45,11 @@ usdata fetch noaa:nws-vtec-events --location "Osage County, OK" --start 2024-05-
 usdata fetch noaa:nws-vtec-events --start 2024-01-01 --end 2024-12-31 -p ugc=OKZ054
 ```
 
+--8<-- "_snippets/connecticut-counties.md"
+
+`CTC003`, Hartford County, returns 57 events issued from January 2024 to June
+2025; `CTC110`, the Capitol region's code, returns none.
+
 ## What the service does not say
 
 Three behaviours were found by getting them wrong, and the adapter is built

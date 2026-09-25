@@ -15,6 +15,7 @@ from pydantic_core import ErrorDetails
 
 from usdata.models import Asset, Dataset, PartialFetch, Place, Provenance, Query, as_utc
 from usdata.providers.credentials import Credentials
+from usdata.query import legacy_counties
 
 QueryField = Literal["text", "bbox", "variables", "time"]
 Params = TypeVar("Params", bound=BaseModel)
@@ -256,6 +257,27 @@ class Provider(ABC):
             message = f"{self.dataset.id} does not support {BARE_BOX}; name a state or county"
             raise QueryError(f"{message} with location, or {hint}" if hint else message)
         return query.place
+
+    def refuse_planning_region(self, place: Place | None) -> None:
+        """Refuse a Connecticut planning region, for a source keyed by the counties before 2022.
+
+        The place table holds both Connecticut's 2022 planning regions and the
+        eight counties they replaced. A source whose rows still carry the old
+        county codes has no rows under a region's code, so it would answer a
+        region with nothing, or with statewide rows alone. Refusing it names the
+        counties the region overlaps, which the source does know.
+
+        Raises:
+            QueryError: ``place`` is a planning region.
+        """
+        if place is None or not (counties := legacy_counties(place)):
+            return
+        names = "; ".join(county.label for county in counties)
+        raise QueryError(
+            f"{self.dataset.id} keys Connecticut by its eight counties before 2022, and "
+            f"{place.label} is a planning region that replaced them; name a county it "
+            f"overlaps with location: {names}"
+        )
 
     def utc_window(self, query: Query) -> tuple[datetime, datetime]:
         """Both time bounds, required, in UTC. Naive bounds are read as UTC."""

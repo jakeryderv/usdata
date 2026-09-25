@@ -95,6 +95,18 @@ def test_a_county_becomes_its_postal_code_c_and_county_fips() -> None:
     assert listed(location="District of Columbia, DC").params["ugc"] == "DCC001"
 
 
+def test_connecticut_counties_are_the_ones_before_2022_and_a_region_is_refused() -> None:
+    assert listed(location="Hartford County, CT").params["ugc"] == "CTC003"
+    assert listed(location="09015").params["ugc"] == "CTC015"
+    with adapter() as provider, respx.mock() as mock, pytest.raises(QueryError) as raised:
+        provider.list_assets(query(location="Western Connecticut Planning Region, CT"))
+    assert not mock.calls
+    assert "noaa:nws-vtec-events keys Connecticut by its eight counties before 2022" in str(
+        raised.value
+    )
+    assert str(raised.value).endswith(": Fairfield County, CT; Litchfield County, CT")
+
+
 def test_an_explicit_ugc_reaches_a_forecast_zone_a_county_cannot_name() -> None:
     url = listed(location=None, ugc="okz054")
     assert url.params["ugc"] == "OKZ054"

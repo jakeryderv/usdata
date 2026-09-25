@@ -12,7 +12,9 @@ The rows carry no coordinates, so this is a source keyed by place: a county
 ``location`` selects that county's UGC exactly, and a bare ``bbox`` or
 ``lat``/``lon`` is refused (ADR 0034). A county UGC is the state's postal code,
 ``C``, and the three-digit county FIPS code, so Osage County, Oklahoma is
-``OKC113``.
+``OKC113``. Connecticut's county UGCs are still its eight counties before 2022,
+such as ``CTC003`` for Hartford, so a planning-region location is refused with
+the counties it overlaps.
 
 Three things about the service shape the queries, each learned by getting it
 wrong first (ADR 0036):
@@ -122,6 +124,7 @@ class NwsVtecEvents(HttpProvider):
                 f"{self.dataset.id} selects one county at a time, and {place.label} is a state; "
                 "name a county with location, or pass ugc"
             )
+        self.refuse_planning_region(place)
         if place is not None:
             ugc = f"{place.state}C{place.county_fips}"
         elif params.ugc is not None:

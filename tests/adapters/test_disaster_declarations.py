@@ -133,6 +133,29 @@ def test_a_county_also_returns_its_states_statewide_designations() -> None:
     assert listed(fips="40113")[0] == expected
 
 
+def test_connecticut_is_selected_by_its_counties_before_2022() -> None:
+    expected = (
+        f"{PERIOD} and fipsStateCode eq '09' and "
+        "(fipsCountyCode eq '003' or designatedArea eq 'Statewide')"
+    )
+    assert listed(location="Hartford County, CT")[0] == expected
+    assert listed(location="09003")[0] == expected
+    assert listed(location="CT")[0] == f"{PERIOD} and fipsStateCode eq '09'"
+
+
+def test_a_planning_region_is_refused_with_the_counties_it_overlaps() -> None:
+    with adapter() as provider, respx.mock() as mock, pytest.raises(QueryError) as raised:
+        provider.list_assets(query(location="Capitol Planning Region, CT"))
+    assert not mock.calls
+    assert str(raised.value) == (
+        "fema:disaster-declarations keys Connecticut by its eight counties before 2022, and "
+        "Capitol Planning Region, CT is a planning region that replaced them; name a county "
+        "it overlaps with location: Hartford County, CT; Tolland County, CT"
+    )
+    # An explicit code is sent as given, should the service ever key by region.
+    assert "fipsCountyCode eq '110'" in listed(fips="09110")[0]
+
+
 def test_type_filters_join_one_or_several_values() -> None:
     where, _ = listed(state="OK", incident_type="Tornado", declaration_type="dr")
     assert where == (

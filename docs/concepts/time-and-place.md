@@ -63,6 +63,11 @@ that state or county, and refuses a bare `bbox` or `lat`/`lon`, which names no
 place; its registry entry declares `place_subset`. So a location means a
 rectangle to a grid, a way to choose stations to GHCN, and an exact county to a
 place-keyed source ([ADR 0034](../adr/0034-query-keeps-the-resolved-place.md)).
+Connecticut is the one state with two sets of counties: its 2022 planning
+regions, which Census geography uses, and the eight counties they replaced,
+which several place-keyed sources still use. The table holds both, and such a
+source refuses a region with the counties it overlaps
+([places reference](../reference/places.md#connecticut)).
 
 The rectangle cannot wrap across the antimeridian. Alaska and Aleutians West,
 whose westernmost islands lie beyond 180 degrees, therefore resolve to their

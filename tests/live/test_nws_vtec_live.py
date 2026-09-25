@@ -5,9 +5,18 @@ from pathlib import Path
 
 import pytest
 
+from usdata import build_query, fetch, get
 from usdata.pull import pull, verify
 
 pytestmark = pytest.mark.live
+
+
+def test_connecticut_ugcs_are_still_its_counties_before_2022(tmp_path: Path) -> None:
+    query = build_query(location="Hartford County, CT", start="2024-01-01", end="2025-06-30")
+    (asset,) = fetch(get("noaa:nws-vtec-events"), query, root=tmp_path)
+    with asset.path.open(newline="") as f:
+        rows = list(csv.DictReader(f))
+    assert rows and {row["ugc"] for row in rows} == {"CTC003"}
 
 
 def test_the_warnings_issued_for_osage_county_on_the_evening_of_the_may_2024_outbreak(

@@ -133,16 +133,21 @@ generated table of state and county bounding boxes. The
 describes the source; the pinned archives are the 2025 1:500,000 KML files for
 [states](https://www2.census.gov/geo/tiger/GENZ2025/kml/cb_2025_us_state_500k.zip)
 and [counties](https://www2.census.gov/geo/tiger/GENZ2025/kml/cb_2025_us_county_500k.zip).
+Connecticut's eight counties before 2022 come from the
+[2021 county file](https://www2.census.gov/geo/tiger/GENZ2021/kml/cb_2021_us_county_500k.zip),
+the last to hold them, and each planning region's overlapping counties from the
+Census [town crosswalk](https://www2.census.gov/geo/docs/reference/ct_change/ct_cou_to_cousub_crosswalk.txt)
+([Connecticut](reference/places.md#connecticut)).
 
 `scripts/build_places.py` reads the KML with the standard library and writes
 the CSV plus `places.sources.json`, which records source URLs, archive SHA-256
-hashes, counts, vintage, scale, CSV checksum, and the places clipped at the
+hashes, counts, vintages, scale, CSV checksum, and the places clipped at the
 antimeridian. No geospatial runtime dependency or online geocoder is involved.
 
 ```sh
-just places                           # download pinned 2025 archives and generate
+just places                           # download the four pinned sources and generate
 just places --check                   # download and compare with committed outputs
-just places --source-dir /path/to/zips --check  # reproduce offline from saved archives
+just places --source-dir /path/to/sources --check  # reproduce offline from saved files
 ```
 
 Never hand-edit the CSV. Updating the vintage means updating the generator,

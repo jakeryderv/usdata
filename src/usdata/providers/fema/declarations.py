@@ -26,6 +26,11 @@ designation, or a tribal area. A county selection also returns its state's
 ``Statewide`` rows, which do cover that county, and no tribal area, which is
 not one; a state selection returns them all.
 
+Connecticut's rows carry the eight counties it had before 2022, not the
+planning regions that replaced them as county equivalents. A planning-region
+location is refused with the counties it overlaps, which the place table also
+holds.
+
 Listing asks for the count first and makes one asset per page under a fixed
 order, so page membership is stable. The dataset is rebuilt every twenty minutes
 and rows are revised as incidents close, so a pinned page can change bytes;
@@ -150,6 +155,7 @@ class DisasterDeclarations(HttpProvider):
             raise QueryError(
                 f"{self.dataset.id} was given a location and a state or fips; pass one of them"
             )
+        self.refuse_planning_region(place)
         start, end = self.utc_window(query)
         terms = [self._period(start, end, include_open=params.include_open)]
         if place is not None and place.county_fips is not None:
