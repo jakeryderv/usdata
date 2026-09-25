@@ -1,9 +1,13 @@
 # Readers
 
-A reader opens one cached file into a Python object. Which reader runs is
-decided by the asset's media type and id, so restored files open the same way
-as freshly fetched ones. Readers live behind optional extras, listed with
-their options in the [reader reference](../reference/readers.md).
+A reader opens one cached file into a Python object. `item.open()` picks the
+reader from the asset's dataset, media type, and id, so restored files open the
+same way as freshly fetched ones, and runs it with its defaults. A file that
+needs options is opened with the method for its format, which takes only the
+options that format has and is typed with what it returns: `open_csv` returns a
+pandas DataFrame, `open_nexrad` an xarray DataTree, and `open_grib2` and
+`open_netcdf` an xarray Dataset. Readers live behind optional extras, listed
+with their options in the [reader reference](../reference/readers.md).
 
 ## What every reader does and does not do
 
@@ -80,14 +84,14 @@ print(summary.grib2.messages[0].short_name)
 The pandas extra returns a DataFrame. Identifier-like columns default to
 string dtype so leading zeros survive; the reference lists which names, and an
 explicit `dtype` overrides the default. Dates are not parsed unless you ask.
-An ERDDAP response has a second row of units, which the `erddap-csv` reader
+An ERDDAP response has a second row of units, which the CSV reader
 consumes into `frame.attrs["units"]`; USGS per-observation units stay as
 ordinary columns. A gzipped CSV is decompressed through a stream, never into
 the cache. `nrows` limits parsing and does not check the whole archive; use
 `verify` for integrity.
 
 ```python
-frame = items[0].open(parse_dates=["time"], usecols=["time", "analysed_sst"])
+frame = items[0].open_csv(parse_dates=["time"], usecols=["time", "analysed_sst"])
 print(frame["analysed_sst"].mean(), frame.attrs["units"]["analysed_sst"])
 ```
 
@@ -120,7 +124,7 @@ velocity unfolding is performed. Legacy files may lack location metadata,
 which the reader does not guess.
 
 ```python
-radar = item.open(sweep=0)
+radar = item.open_nexrad(sweep=0)
 sweep = radar["sweep_0"].to_dataset()
 print(sweep["DBZH"].attrs["units"])
 ```
@@ -174,7 +178,7 @@ complete. HRRR carries `hlcy` only in layers above ground, so both level types
 have to be named for both fields to arrive.
 
 ```python
-env = item.open(
+env = item.open_grib2(
     select={"shortName": ["cape", "hlcy"], "typeOfLevel": ["surface", "heightAboveGroundLayer"]},
     strict=True,
 )

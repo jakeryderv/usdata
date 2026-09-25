@@ -126,7 +126,7 @@ def test_annual_example_uses_existing_csv_reader(tmp_path: Path) -> None:
     with respx.mock() as mock:
         mock.get(DATA_URL).respond(200, content=source)
         (item,) = pull(manifest, root=tmp_path / "cache").fetched
-    frame = item.open(dtype={"DATE": "string"})
+    frame = item.open_csv(dtype={"DATE": "string"})
     assert frame["DATE"].tolist() == ["2024"]
     assert frame["STATION"].tolist() == ["USW00013967"]
     assert frame["PRCP"].tolist() == [900.0]

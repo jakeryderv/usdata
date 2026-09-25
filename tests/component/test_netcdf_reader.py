@@ -86,15 +86,6 @@ def test_broken_dependency_not_hidden(item):
     assert error.value.name == "unrelated"
 
 
-@pytest.mark.parametrize(
-    "options", [{"dtype": {}}, {"parse_dates": []}, {"usecols": []}, {"nrows": 1}]
-)
-def test_csv_options_rejected_before_loading_dependencies(item, options):
-    with patch("usdata._netcdf.import_module") as loader, pytest.raises(ValueError, match="CSV"):
-        item.open(**options)
-    loader.assert_not_called()
-
-
 @pytest.mark.parametrize("content", [b"", b"not NetCDF", FIXTURE.read_bytes()[:150]])
 def test_invalid_or_truncated_file_fails_without_mutation(item, xr, content):
     item.path.write_bytes(content)
@@ -108,7 +99,7 @@ def test_explicit_reader_on_restored_asset_needs_no_registry_entry(item, xr):
     item.asset = item.asset.model_copy(
         update={"dataset_id": "unknown:archived", "media_type": None}
     )
-    result = item.open(reader="netcdf")
+    result = item.open_netcdf()
     assert result.CMI.attrs["units"] == "K"
     assert "registry_attrs" not in result.attrs["usdata"]
 

@@ -95,7 +95,7 @@ under `labels_without_offset` each label that gave no offset with how many rows
 carry it.
 
 ```python
-frame = item.open(usecols=["EVENT_ID", "BEGIN_DATE_TIME", "END_DATE_TIME", "CZ_TIMEZONE"])
+frame = item.open_csv(usecols=["EVENT_ID", "BEGIN_DATE_TIME", "END_DATE_TIME", "CZ_TIMEZONE"])
 print(frame[["BEGIN_DATE_TIME", "CZ_TIMEZONE", "BEGIN_UTC", "END_UTC"]].head())
 print(frame.attrs["usdata"]["derived"])  # column, source, rule, unparsed, labels_without_offset
 hours = pd.to_numeric(frame.CZ_TIMEZONE.str.extract(r"^[A-Za-z]+([+-]?\d{1,2})$", expand=False))

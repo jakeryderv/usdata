@@ -79,7 +79,7 @@ That is 1.8 MB instead of 150 MB for the two fields the
 [HRRR environment example](https://usdata.dev/datasets/noaa/hrrr/) uses.
 The spelling is exact and case-sensitive: short names are upper case (`CAPE`,
 `HLCY`, `TMP`), and the level text is the sidecar's own wording, which is
-**not** the ecCodes vocabulary `open(select=...)` takes. `2 m above ground`,
+**not** the ecCodes vocabulary `open_grib2(select=...)` takes. `2 m above ground`,
 not `heightAboveGround`; `3000-0 m above ground`, not `heightAboveGroundLayer`.
 Pass one value, a list, or a comma-separated string; a selector matching no
 message is an error listing the levels that short name publishes or the nearest
@@ -121,7 +121,7 @@ drift instead of silently mixing revisions. See
 
 ## Reading fields
 
-The `grib` extra opens a file with `FetchedAsset.open(select=...)` as an
+The `grib` extra opens a file with `FetchedAsset.open_grib2(select=...)` as an
 xarray Dataset. A surface file holds 170 messages, so `select` is required to
 choose them by ecCodes keys; opening without it lists the available
 `(shortName, typeOfLevel, level)` triples. A file fetched with `messages` is
@@ -143,7 +143,7 @@ surface analysis:
 from usdata import pull
 
 (item,) = pull("dataset.yaml").fetched
-environment = item.open(select={"shortName": ["cape", "cin"], "typeOfLevel": "surface"})
+environment = item.open_grib2(select={"shortName": ["cape", "cin"], "typeOfLevel": "surface"})
 ```
 
 The grid is Lambert conformal, 1799 × 1059 points at 3 km; the reader attaches

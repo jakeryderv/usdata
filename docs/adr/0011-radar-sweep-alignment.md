@@ -1,6 +1,6 @@
 # 0011: Explicit radar selection and record alignment checks
 
-Status: accepted. Date: 2026-09-09.
+Status: accepted. Date: 2026-09-09. Updated by [ADR 0042](0042-one-open-method-per-format.md).
 
 ## Context
 

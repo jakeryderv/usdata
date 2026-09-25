@@ -42,5 +42,5 @@ def test_lcd_reports_and_daily_summaries_restore(tmp_path: Path) -> None:
     assert restored.from_lockfile and restored.fetched[0].path.read_bytes() == original
     assert verify(manifest, root=tmp_path / "cache") == []
     if find_spec("pandas") is not None:
-        frame = restored.fetched[0].open(parse_dates=["DATE"])
+        frame = restored.fetched[0].open_csv(parse_dates=["DATE"])
         assert len(frame) == len(rows) and "REPORT_TYPE" in frame.columns

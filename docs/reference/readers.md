@@ -1,19 +1,19 @@
 # Reader options
 
 How each reader behaves is explained in [readers](../concepts/readers.md).
-This page lists what to install, what is inferred, and what `open()` accepts.
+This page lists what to install, what `open()` infers, and what each format's method accepts.
 
 ## Readers and extras
 
-| Reader | Extra | Returns | Inferred for |
-|---|---|---|---|
-| `csv` | `pandas` | pandas DataFrame | `text/csv`, `application/csv` (charset parameters allowed); `application/gzip` or `application/x-gzip` when the id ends in `.csv.gz` |
-| `erddap-csv` | `pandas` | pandas DataFrame with `attrs["units"]` | CSV media types on an asset whose protocol is ERDDAP, and `noaa:ibtracs` CSV assets, whose units row has the same layout; for IBTrACS only a single space or an empty field is missing, so the basin code `NA` stays text |
-| `hurdat2` | `pandas` | pandas DataFrame, one row per track point | `noaa:hurdat2` assets, or ids `hurdat2-*.txt` |
-| `aqs` | `pandas` | pandas DataFrame, one row per monitor, local day, and pollutant standard; `date_local` and `date_of_last_change` as naive dates, the header in `attrs["usdata"]["header"]` | `epa:aqs-daily` assets, or ids `aqs-daily_*.json` |
-| `nexrad-level2` | `radar` | xarray DataTree | `noaa:nexrad-level2` assets |
-| `netcdf` | `netcdf` | xarray Dataset | `application/x-netcdf`, `application/netcdf`, `application/x-netcdf4` |
-| `grib2` | `grib` | xarray Dataset | `application/x-grib2`, `application/grib2`, `application/x-grib`, `application/wmo-grib2`; ids ending `.grib2`, `.grb2`, or their `.gz` forms when the media type is missing, generic, or gzip |
+| Format | Method | Extra | Returns | Inferred for |
+|---|---|---|---|---|
+| CSV | `open_csv` | `pandas` | pandas DataFrame | `text/csv`, `application/csv` (charset parameters allowed); `application/gzip` or `application/x-gzip` when the id ends in `.csv.gz` |
+| ERDDAP CSV | `open_csv` | `pandas` | pandas DataFrame with `attrs["units"]` | CSV media types on an asset whose protocol is ERDDAP, and `noaa:ibtracs` CSV assets, whose units row has the same layout; for IBTrACS only a single space or an empty field is missing, so the basin code `NA` stays text |
+| HURDAT2 | `open()` only | `pandas` | pandas DataFrame, one row per track point | `noaa:hurdat2` assets, or ids `hurdat2-*.txt` |
+| AQS daily JSON | `open()` only | `pandas` | pandas DataFrame, one row per monitor, local day, and pollutant standard; `date_local` and `date_of_last_change` as naive dates, the header in `attrs["usdata"]["header"]` | `epa:aqs-daily` assets, or ids `aqs-daily_*.json` |
+| NEXRAD Level II | `open_nexrad` | `radar` | xarray DataTree | `noaa:nexrad-level2` assets |
+| NetCDF4 | `open_netcdf` | `netcdf` | xarray Dataset | `application/x-netcdf`, `application/netcdf`, `application/x-netcdf4` |
+| GRIB2 | `open_grib2` | `grib` | xarray Dataset | `application/x-grib2`, `application/grib2`, `application/x-grib`, `application/wmo-grib2`; ids ending `.grib2`, `.grb2`, or their `.gz` forms when the media type is missing, generic, or gzip |
 
 `noaa:nexrad-level3` assets have no reader and `open()` raises
 `UnsupportedFormat`. Install extras as `pip install "usdata[pandas,grib]"`; the
@@ -21,19 +21,27 @@ This page lists what to install, what is inferred, and what `open()` accepts.
 
 ## Options
 
-| Option | Applies to | Behavior |
-|---|---|---|
-| `reader` | all | Overrides inference: `"csv"`, `"erddap-csv"`, `"hurdat2"`, `"aqs"`, `"nexrad-level2"`, `"netcdf"`, or `"grib2"`. Use it for ambiguous media metadata. |
-| `dtype` | CSV readers | Mapping of column names to pandas dtype strings; overrides the identifier defaults below. |
-| `parse_dates` | CSV readers | Columns to parse as dates. Nothing is parsed by default; `dtype={"DATE": "string"}` keeps numeric-looking labels as text. |
-| `usecols` | CSV readers | Columns to read, in pandas order. |
-| `nrows` | CSV readers | Maximum observation rows, excluding header and units rows. |
-| `sweep` | `nexrad-level2` | Zero-based integer or non-empty list of distinct integers; `None` opens every sweep. |
-| `select` | `grib2` | Mapping of ecCodes key names to one value or a list of values; required when a file holds more than one message. |
-| `strict` | `grib2` | `True` raises when a `select` value matches none of the selected messages; the default warns and returns the rest. |
+`open()` takes no options. Each format with options has its own method on
+`FetchedAsset`, and a function of the same name in `usdata.readers` that takes
+the fetched asset first. A method opens the file as that format whatever its
+metadata says, so it is also how a file with ambiguous metadata is opened.
+HURDAT2 and AQS files take no options and are opened with `open()`.
 
-Passing an option to a reader it does not apply to raises `ValueError`, even
-with an empty value.
+| Method | Returns | Option | Behavior |
+|---|---|---|---|
+| `open_csv` | pandas DataFrame | `dtype` | Mapping of column names to pandas dtype strings; overrides the identifier defaults below. |
+| | | `parse_dates` | Columns to parse as dates. Nothing is parsed by default; `dtype={"DATE": "string"}` keeps numeric-looking labels as text. |
+| | | `usecols` | Columns to read, in pandas order. |
+| | | `nrows` | Maximum observation rows, excluding header and units rows. |
+| | | `units_row` | Whether a units row follows the header, as in ERDDAP CSV; `None`, the default, infers it as `open()` does. |
+| `open_nexrad` | xarray DataTree | `sweep` | Zero-based integer or non-empty list of distinct integers; `None` opens every sweep. |
+| `open_grib2` | xarray Dataset | `select` | Mapping of ecCodes key names to one value or a list of values; required when a file holds more than one message. |
+| | | `strict` | `True` raises when a `select` value matches none of the selected messages; the default warns and returns the rest. |
+| `open_netcdf` | xarray Dataset | | No options. |
+
+The return types are declared for type checkers, so an editor knows what each
+method returns once the extra that provides the type is installed; `open()`
+returns `Any` because its result depends on the file.
 
 ## GRIB2 variable names
 
@@ -81,13 +89,13 @@ pandas inference and default missing-value parsing.
 
 ## Result attributes
 
-| Reader | Where | Contents |
+| Format | Where | Contents |
 |---|---|---|
-| CSV readers | `frame.attrs["usdata"]` | Asset id and a JSON-compatible copy of its provenance |
-| `erddap-csv` | `frame.attrs["units"]` | Units row, filtered to the selected columns |
-| `nexrad-level2` | `radar.attrs["usdata"]` | Asset id, provenance, and `sweeps` listing the returned groups |
-| `netcdf`, `grib2` | `dataset.attrs["usdata"]` | Asset id and provenance |
-| `grib2` | `dataset.attrs["usdata"]["messages"]` | Each variable name mapped to its message's `file_index`, `object_index`, `shortName`, `typeOfLevel`, `level`, and `step`, plus the `selector` a partial fetch asked for |
+| CSV, HURDAT2, AQS | `frame.attrs["usdata"]` | Asset id and a JSON-compatible copy of its provenance |
+| CSV with a units row | `frame.attrs["units"]` | Units row, filtered to the selected columns |
+| NEXRAD Level II | `radar.attrs["usdata"]` | Asset id, provenance, and `sweeps` listing the returned groups |
+| NetCDF4, GRIB2 | `dataset.attrs["usdata"]` | Asset id and provenance |
+| GRIB2 | `dataset.attrs["usdata"]["messages"]` | Each variable name mapped to its message's `file_index`, `object_index`, `shortName`, `typeOfLevel`, `level`, and `step`, plus the `selector` a partial fetch asked for |
 | `grib2` | per-variable `attrs` | `units`, `name`, `typeOfLevel`, `level`, discipline, category, and parameter numbers, packing type, reference and valid times, step; projection parameters on the Dataset for projected grids |
 
 ## Errors
@@ -95,7 +103,7 @@ pandas inference and default missing-value parsing.
 | Error | From `usdata.readers` | Raised when |
 |---|---|---|
 | `MissingReaderDependency` | subclass of `ImportError` | The extra is not installed; the message names it, and for `grib` also names the ecCodes library when the binding is present but the library is not |
-| `UnsupportedFormat` | subclass of `ValueError` | No reader matches, an unknown `reader` name is passed, or the asset is a Level III product |
+| `UnsupportedFormat` | subclass of `ValueError` | `open()` finds no reader for the asset, or the asset is a Level III product |
 | `RadarDecodeError` | subclass of `ValueError` | Moment and coordinate records do not align for the requested sweeps |
 | `Hurdat2FormatError` | subclass of `ValueError` | A HURDAT2 line, count, or value cannot be parsed; the message names the line |
 | `ValueError` | built-in | A multi-message GRIB2 file opened without `select`, a `select` that matches no message at all, selected messages on different grids, or, under `strict`, a `select` value that matched none of them |

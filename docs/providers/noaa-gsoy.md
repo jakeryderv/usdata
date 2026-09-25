@@ -12,7 +12,7 @@ requests use January 1 through December 31, giving equivalent year selections
 identical URLs and asset IDs. Asset coverage labels complete years; the original
 query remains in the manifest. A timezone offset can change the selected UTC year.
 
-CSV `DATE` is a four-digit year. Use `item.open(dtype={"DATE": "string"})` to
+CSV `DATE` is a four-digit year. Use `item.open_csv(dtype={"DATE": "string"})` to
 preserve it as text with the existing pandas reader. Common variables are `PRCP`
 (annual precipitation total, metric millimeters) and `TAVG` (annual mean
 temperature, metric degrees Celsius). CSV contains no units row; provenance

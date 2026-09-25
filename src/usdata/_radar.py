@@ -67,8 +67,9 @@ def _check_sweeps(content: bytes, sweep: int | list[int] | None) -> None:
             ):
                 raise RadarDecodeError(
                     f"cannot safely decode sweep {index}: NEXRAD moment and coordinate records "
-                    "do not agree; select an unaffected sweep explicitly with open(sweep=...) "
-                    "or use another decoder. No sweeps were silently dropped."
+                    "do not agree; select an unaffected sweep explicitly with "
+                    "open_nexrad(sweep=...) or use another decoder. "
+                    "No sweeps were silently dropped."
                 )
 
 

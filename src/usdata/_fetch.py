@@ -17,6 +17,10 @@ from usdata.models import Asset, Dataset, Provenance, Query
 from usdata.providers import Provider, load_adapter
 
 if TYPE_CHECKING:
+    # Each is an optional extra: without it installed the result is simply untyped.
+    import pandas as pd  # pyright: ignore[reportMissingImports]
+    import xarray as xr  # pyright: ignore[reportMissingImports]
+
     from usdata.inspect import Summary
 
 
@@ -32,45 +36,73 @@ class FetchedAsset(BaseModel):
     provenance: Provenance
     from_cache: bool
 
-    def open(
+    def open(self) -> Any:
+        """Open local data with the reader its format implies, with that reader's defaults.
+
+        CSV and ERDDAP CSV, HURDAT2 and AQS daily JSON return a pandas DataFrame;
+        NetCDF4 and GRIB2 a loaded xarray Dataset; NEXRAD Level II an xarray
+        DataTree. Provenance is kept in the result's ``attrs["usdata"]``. A file
+        that needs options, or whose metadata leaves its format ambiguous, is
+        opened with the method for its format instead: ``open_csv``,
+        ``open_nexrad``, ``open_grib2``, or ``open_netcdf``. Cached files and
+        provenance sidecars are never changed. See ``usdata.readers.open_asset``.
+        """
+        from usdata.readers import open_asset
+
+        return open_asset(self)
+
+    def open_csv(
         self,
         *,
-        reader: str | None = None,
         dtype: dict[str, str] | None = None,
         parse_dates: list[str] | None = None,
         usecols: list[str] | None = None,
         nrows: int | None = None,
-        sweep: int | list[int] | None = None,
-        select: Mapping[str, Any] | None = None,
-        strict: bool = False,
-    ) -> Any:
-        """Open local data with an optional ``pandas``, ``radar``, ``netcdf``, or ``grib`` reader.
+        units_row: bool | None = None,
+    ) -> pd.DataFrame:
+        """Open a CSV as a pandas DataFrame; see ``usdata.readers.open_csv``.
 
-        ERDDAP units are kept in ``frame.attrs["units"]`` and source provenance
-        in ``frame.attrs["usdata"]``. NEXRAD returns a xarray DataTree with provenance
-        in ``radar.attrs["usdata"]``. NetCDF4 and GRIB2 return a loaded xarray Dataset
-        with matching provenance in its attributes, and with units and long names
-        the file leaves unstated filled from the registry entry's variables. See
-        ``usdata.readers.open_asset`` for options. Use ``sweep=0`` or ``sweep=[0, 2]``
-        to load selected zero-based radar sweeps, and
-        ``select={"shortName": "cape", "typeOfLevel": "surface"}``
-        to choose GRIB2 messages; ``strict=True`` raises instead of warning when a
-        GRIB2 select value matches none of the selected messages. Cached files and
-        provenance sidecars are never changed.
+        ``units_row`` says whether a units row follows the header, as in ERDDAP
+        CSV, and is inferred when ``None``; the units go to ``frame.attrs["units"]``.
         """
-        from usdata.readers import open_asset
+        from usdata.readers import open_csv
 
-        return open_asset(
+        return open_csv(
             self,
-            reader=reader,
             dtype=dtype,
             parse_dates=parse_dates,
             usecols=usecols,
             nrows=nrows,
-            sweep=sweep,
-            select=select,
-            strict=strict,
+            units_row=units_row,
         )
+
+    def open_nexrad(self, *, sweep: int | list[int] | None = None) -> xr.DataTree:
+        """Open a NEXRAD Level II volume as an xarray DataTree; see ``usdata.readers.open_nexrad``.
+
+        Use ``sweep=0`` or ``sweep=[0, 2]`` to load selected zero-based sweeps.
+        """
+        from usdata.readers import open_nexrad
+
+        return open_nexrad(self, sweep=sweep)
+
+    def open_grib2(
+        self, *, select: Mapping[str, Any] | None = None, strict: bool = False
+    ) -> xr.Dataset:
+        """Open GRIB2 messages as one xarray Dataset; see ``usdata.readers.open_grib2``.
+
+        ``select={"shortName": "cape", "typeOfLevel": "surface"}`` chooses
+        messages; ``strict=True`` raises instead of warning when a select value
+        matches none of the selected messages.
+        """
+        from usdata.readers import open_grib2
+
+        return open_grib2(self, select=select, strict=strict)
+
+    def open_netcdf(self) -> xr.Dataset:
+        """Open a NetCDF4 file as an xarray Dataset; see ``usdata.readers.open_netcdf``."""
+        from usdata.readers import open_netcdf
+
+        return open_netcdf(self)
 
     def inspect(self) -> Summary:
         """Summarize this file: provenance, format, and what that format holds.

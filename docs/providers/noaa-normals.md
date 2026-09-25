@@ -28,7 +28,7 @@ instant range. The same UTC normalization of query dates applies before the
 month and day are selected; use plain dates to avoid a timezone shift changing
 the day. Returned `DATE` labels are `MM-DDTHH:MM:SS` in the station's **local
 standard time**, without a year or offset. They are not UTC and do not follow
-daylight saving time. Keep them as text with `item.open(dtype={"DATE": "string"})`
+daylight saving time. Keep them as text with `item.open_csv(dtype={"DATE": "string"})`
 and align them explicitly with observations.
 
 Hourly normals have **no February 29 values**. A February 28–March 1 request
@@ -57,7 +57,7 @@ normals coverage over 1991-2020 inside the box. Not every GHCN station has
 normals; stations that do are listed by the [NCEI normals product page](https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals).
 
 CSV `DATE` is `MM` for monthly and `MM-DD` for daily normals; annual/seasonal
-files have no `DATE` column. Use `item.open(dtype={"DATE": "string"})` to keep
+files have no `DATE` column. Use `item.open_csv(dtype={"DATE": "string"})` to keep
 the labels as text with the pandas reader. Variables are NCEI data type codes
 such as `MLY-TMAX-NORMAL`, `DLY-PRCP-NORMAL`, or `ANN-TAVG-NORMAL`; see the
 [NCEI normals documentation](https://www.ncei.noaa.gov/data/normals-monthly/1991-2020/doc/Normals_MLY_Documentation_1991-2020.pdf)

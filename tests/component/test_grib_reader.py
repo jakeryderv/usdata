@@ -15,7 +15,7 @@ import pytest
 from usdata import FetchedAsset
 from usdata.cache import sha256_file
 from usdata.models import Asset, ByteRange, Protocol, Provenance
-from usdata.readers import MissingReaderDependency, open_asset
+from usdata.readers import MissingReaderDependency, open_asset, open_grib2
 
 pytestmark = [pytest.mark.l2, pytest.mark.grib]
 
@@ -280,21 +280,21 @@ def test_multi_message_file_requires_select_and_lists_messages(multi) -> None:
 
 
 def test_select_by_value_and_list_and_numeric_level(multi) -> None:
-    both = multi.open(select={"shortName": "t", "level": [500, 850]})
+    both = multi.open_grib2(select={"shortName": "t", "level": [500, 850]})
     assert set(both.data_vars) == {"t_isobaricInhPa_500", "t_isobaricInhPa_850"}
     assert float(both["t_isobaricInhPa_850"].values[0, 0]) == 850.0
-    one = multi.open(select={"shortName": "t", "level": 500})
+    one = multi.open_grib2(select={"shortName": "t", "level": 500})
     assert list(one.data_vars) == ["t"] and one.t.attrs["level"] == 500
-    text = multi.open(select={"level": "850"})
+    text = multi.open_grib2(select={"level": "850"})
     assert list(text.data_vars) == ["t"]
-    surface = multi.open(select={"shortName": "cape", "typeOfLevel": "entireAtmosphere"})
+    surface = multi.open_grib2(select={"shortName": "cape", "typeOfLevel": "entireAtmosphere"})
     assert list(surface.data_vars) == ["cape"]
 
 
 def test_one_level_keeps_bare_names_and_more_levels_suffix_every_variable(levels) -> None:
-    one = levels.open(select={"level": 500})
+    one = levels.open_grib2(select={"level": 500})
     assert set(one.data_vars) == {"t", "r"}
-    spanning = levels.open(select={"shortName": ["t", "r"], "level": [500, 850]})
+    spanning = levels.open_grib2(select={"shortName": ["t", "r"], "level": [500, 850]})
     # 'r' occurs once and is suffixed anyway: the names follow the select, not the collisions.
     assert set(spanning.data_vars) == {
         "t_isobaricInhPa_500",
@@ -304,12 +304,12 @@ def test_one_level_keeps_bare_names_and_more_levels_suffix_every_variable(levels
 
 
 def test_more_than_one_level_type_suffixes_distinct_short_names_too(multi) -> None:
-    result = multi.open(select={"shortName": ["t", "cape"], "level": [500, 0]})
+    result = multi.open_grib2(select={"shortName": ["t", "cape"], "level": [500, 0]})
     assert set(result.data_vars) == {"t_isobaricInhPa_500", "cape_entireAtmosphere_0"}
 
 
 def test_messages_attribute_maps_every_variable_to_the_message_it_came_from(levels) -> None:
-    result = levels.open(select={"shortName": ["t", "r"], "level": [500, 850]})
+    result = levels.open_grib2(select={"shortName": ["t", "r"], "level": [500, 850]})
     assert result.attrs["usdata"]["messages"] == {
         "t_isobaricInhPa_500": {
             "file_index": 0,
@@ -337,25 +337,25 @@ def test_messages_attribute_maps_every_variable_to_the_message_it_came_from(leve
         },
     }
     # file_index numbers every message in the file, not just the selected ones.
-    bare = levels.open(select={"level": 850})
+    bare = levels.open_grib2(select={"level": 850})
     assert bare.attrs["usdata"]["messages"]["t"]["file_index"] == 2
 
 
 def test_select_without_match_or_with_bad_values_is_rejected(multi) -> None:
     with pytest.raises(ValueError, match=r"matched no messages.*'cape'"):
-        multi.open(select={"shortName": "nope"})
+        multi.open_grib2(select={"shortName": "nope"})
     with pytest.raises(ValueError, match="must not be empty"):
-        multi.open(select={"shortName": []})
+        multi.open_grib2(select={"shortName": []})
     with pytest.raises(ValueError, match="strings or numbers"):
-        multi.open(select={"level": [True]})
+        multi.open_grib2(select={"level": [True]})
     with pytest.raises(ValueError, match="mapping"):
-        multi.open(select=["shortName"])  # type: ignore[arg-type]
+        multi.open_grib2(select=["shortName"])  # type: ignore[arg-type]
 
 
 def test_unmatched_select_value_warns_and_names_what_was_available(multi) -> None:
     select = {"shortName": ["t", "nope"], "level": 500}
     with pytest.warns(UserWarning) as record:
-        result = multi.open(select=select)
+        result = multi.open_grib2(select=select)
     assert list(result.data_vars) == ["t"]
     assert len(record) == 1
     text = str(record[0].message)
@@ -364,21 +364,23 @@ def test_unmatched_select_value_warns_and_names_what_was_available(multi) -> Non
     # The warning names the caller, not a usdata frame, through either entry point.
     assert Path(record[0].filename).resolve() == Path(__file__).resolve()
     with pytest.warns(UserWarning) as direct:
-        open_asset(multi, select=select)
+        open_grib2(multi, select=select)
     assert Path(direct[0].filename).resolve() == Path(__file__).resolve()
 
 
 def test_strict_raises_for_an_unmatched_value_and_keeps_the_no_match_error(multi) -> None:
     with pytest.raises(ValueError, match=r"select\['shortName'\] matched no message for 'nope'"):
-        multi.open(select={"shortName": ["t", "nope"], "level": 500}, strict=True)
+        multi.open_grib2(select={"shortName": ["t", "nope"], "level": 500}, strict=True)
     with pytest.raises(ValueError, match=r"matched no messages.*'cape'"):
-        multi.open(select={"shortName": "nope"}, strict=True)
+        multi.open_grib2(select={"shortName": "nope"}, strict=True)
 
 
 def test_fully_matched_select_neither_warns_nor_raises(multi) -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        result = multi.open(select={"shortName": ["t", "cape"], "level": [500, 0]}, strict=True)
+        result = multi.open_grib2(
+            select={"shortName": ["t", "cape"], "level": [500, 0]}, strict=True
+        )
     assert set(result.data_vars) == {"t_isobaricInhPa_500", "cape_entireAtmosphere_0"}
 
 
@@ -431,18 +433,9 @@ def test_registry_leaves_a_dataset_without_an_entry_alone(tmp_path) -> None:
     assert "registry_attrs" not in result.attrs["usdata"]
 
 
-def test_reader_options_are_scoped(tmp_path) -> None:
-    fetched = item(tmp_path, message(np.arange(12, dtype=float)))
-    with pytest.raises(ValueError, match="CSV options"):
-        fetched.open(nrows=1)
-    with pytest.raises(ValueError, match="sweep applies only"):
-        fetched.open(sweep=0)
-    assert isinstance(fetched.open(reader="grib2"), xr.Dataset)
-    csv_item = item(tmp_path, b"a,b\n1,2\n", name="table.csv", media_type="text/csv")
-    with pytest.raises(ValueError, match="select applies only"):
-        csv_item.open(select={"shortName": "t"})
-    with pytest.raises(ValueError, match="strict applies only"):
-        csv_item.open(strict=True)
+def test_open_grib2_opens_a_file_its_metadata_does_not_name(tmp_path) -> None:
+    fetched = item(tmp_path, message(np.arange(12, dtype=float)), name="field.bin", media_type="")
+    assert isinstance(fetched.open_grib2(), xr.Dataset)
 
 
 def test_grib1_and_truncated_messages_are_rejected(tmp_path) -> None:
@@ -501,7 +494,7 @@ def test_a_partial_fetch_opens_with_and_without_select(tmp_path) -> None:
         "level": 0,
         "step": 0,
     }
-    one = fetched.open(select={"shortName": "cape"})
+    one = fetched.open_grib2(select={"shortName": "cape"})
     assert list(one.data_vars) == ["cape"]
     # One recorded range per selected message, which is what pairs the two numberings.
     assert one.attrs["usdata"]["provenance"]["ranges"] == [

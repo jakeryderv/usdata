@@ -325,11 +325,6 @@ def test_an_unparseable_revision_names_the_file_and_the_revision_parameter(track
     assert "'revision' parameter" in message
 
 
-def test_reader_rejects_csv_options(tracks) -> None:
-    with pytest.raises(ValueError, match="apply only to CSV readers"):
-        tracks.open(nrows=1)
-
-
 def test_owned_client_can_reopen_and_injected_client_remains_open() -> None:
     dataset = default_registry().get("noaa:hurdat2")
     with respx.mock() as mock:

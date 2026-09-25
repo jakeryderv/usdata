@@ -85,7 +85,7 @@ class Rap(ModelRuns):
     key_re = KEY_RE
     hint = (
         "RAP files are whole grids; fetch with messages=..., or download and let "
-        "open(select=...) pick fields"
+        "open_grib2(select=...) pick fields"
     )
     suffix = ".grib2"
     params_model = RapParams

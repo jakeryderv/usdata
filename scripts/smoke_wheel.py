@@ -82,7 +82,7 @@ assert "pandas" not in sys.modules
 result = usdata.pull(Path("dataset.yaml"), root=Path("cache"))
 item = result.fetched[0]
 before = item.path.read_bytes()
-frame = item.open(parse_dates=["DATE"])
+frame = item.open_csv(parse_dates=["DATE"])
 assert frame.PRCP.sum() == 1
 assert frame.DATE.iloc[0].year == 2024
 assert frame.attrs["usdata"]["provenance"]["checksum"] == item.provenance.checksum

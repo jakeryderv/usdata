@@ -1,6 +1,6 @@
 # 0006: Optional local CSV readers on fetched assets
 
-Status: accepted. Date: 2026-09-05.
+Status: accepted. Date: 2026-09-05. Updated by [ADR 0042](0042-one-open-method-per-format.md).
 
 ## Context
 

@@ -142,7 +142,7 @@ def test_fetch_writes_the_csv_and_the_reader_opens_it(tmp_path) -> None:
         (item,) = fetch(get("noaa:nws-vtec-events"), query(), root=tmp_path)
     assert route.call_count == 1 and item.path.read_bytes() == CSV
     pandas = pytest.importorskip("pandas")
-    frame = item.open(parse_dates=["iso_issued", "iso_expired"])
+    frame = item.open_csv(parse_dates=["iso_issued", "iso_expired"])
     assert isinstance(frame, pandas.DataFrame)
     assert frame.ugc.tolist() == ["OKC113"] and frame.name.tolist() == ["Tornado Warning"]
     assert frame.iso_issued.iloc[0] == pandas.Timestamp("2024-05-07T01:34:00Z")

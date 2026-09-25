@@ -79,7 +79,7 @@ the byte ranges and the object's ETag
 
 ## Reading fields
 
-The `grib` extra opens a file with `FetchedAsset.open(select=...)` as an
+The `grib` extra opens a file with `FetchedAsset.open_grib2(select=...)` as an
 xarray Dataset; a file fetched with `messages` is already a selection and
 opens without `select`. The `awp130` grid is Lambert conformal, so the reader
 attaches two-dimensional `latitude` and `longitude` coordinates of shape

@@ -277,8 +277,6 @@ def test_reader_opens_one_row_per_summary_with_local_dates(tmp_path, monkeypatch
     assert str(frame.date_local.dtype).startswith("datetime64") and frame.date_local.dt.tz is None
     assert frame.attrs["usdata"]["header"] == [{"rows": 5, "status": "Success"}]
     assert frame.attrs["usdata"]["provenance"]["checksum"] == item.provenance.checksum
-    with pytest.raises(ValueError, match="apply only to CSV readers"):
-        item.open(nrows=1)
 
 
 def test_cli_dry_run_lists_hrefs_without_the_key(monkeypatch) -> None:

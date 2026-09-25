@@ -77,8 +77,8 @@ bytes, exact listed size, and checksum are preserved.
 ## Opening the file
 
 The CSV lays a units row under its header, as ERDDAP responses do, so
-`FetchedAsset.open()` selects the `erddap-csv` reader for `noaa:ibtracs` CSV
-assets and keeps the units in `frame.attrs["units"]` (`kts`, `mb`, `nmile`,
+`FetchedAsset.open()` and `open_csv()` read a units row from `noaa:ibtracs` CSV
+assets and keep the units in `frame.attrs["units"]` (`kts`, `mb`, `nmile`,
 `degrees_north`; an empty string for text columns). Two conventions in the
 file would otherwise mislead pandas, and the reader handles both: a missing
 value is written as a single space, which is read as missing so that

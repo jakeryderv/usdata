@@ -106,7 +106,7 @@ def test_hourly_example_reads_report_types_with_the_csv_reader(tmp_path: Path) -
     with respx.mock() as mock:
         mock.get(DATA_URL).respond(200, content=source)
         (item,) = pull(manifest, root=tmp_path / "cache").fetched
-    frame = item.open(parse_dates=["DATE"])
+    frame = item.open_csv(parse_dates=["DATE"])
     assert frame["REPORT_TYPE"].str.strip().tolist() == ["FM-15", "FM-15", "SOD"]
     assert frame["DATE"].dt.hour.tolist() == [0, 13, 23]
     assert item.path.read_bytes() == source

@@ -184,7 +184,7 @@ def test_normals_example_uses_existing_csv_reader(tmp_path: Path) -> None:
         (item,) = pull(manifest, root=tmp_path / "cache").fetched
     params = route.calls[0].request.url.params
     assert params["dataset"] == "normals-monthly-1991-2020" and params["units"] == "metric"
-    frame = item.open(dtype={"DATE": "string"})
+    frame = item.open_csv(dtype={"DATE": "string"})
     assert frame["DATE"].tolist() == ["01"]
     assert frame["MLY-TMAX-NORMAL"].tolist() == [9.6]
     assert frame.attrs["usdata"]["provenance"] == item.provenance.model_dump(mode="json")
@@ -208,7 +208,7 @@ def test_hourly_normals_preserve_labels_and_restore_exact_bytes(tmp_path: Path) 
         first = pull(manifest, root=tmp_path / "cache")
         (item,) = first.fetched
         assert route.calls[0].request.url.params["dataset"] == "normals-hourly-1991-2020"
-        frame = item.open(dtype={"DATE": "string"})
+        frame = item.open_csv(dtype={"DATE": "string"})
         assert frame["DATE"].tolist() == [f"05-06T{hour:02}:00:00" for hour in range(24)]
         assert frame["HLY-TEMP-NORMAL"].iloc[0] == 16.1
         assert item.path.read_bytes() == source

@@ -282,7 +282,7 @@ def test_csv_reader_is_local_and_accepts_fips_string_overrides(tmp_path: Path) -
         )
     before = fetched.path.read_bytes(), provenance.read(fetched.path)
     with respx.mock() as mock:
-        frame = fetched.open(dtype={"stf": "string", "f1": "string"}, parse_dates=["date"])
+        frame = fetched.open_csv(dtype={"stf": "string", "f1": "string"}, parse_dates=["date"])
         assert not mock.calls
     assert list(frame["om"]) == [623402, 623403] and list(frame["mag"]) == [0, -9]
     assert list(frame["stf"]) == ["48", "12"] and str(frame["stf"].dtype).startswith("string")
