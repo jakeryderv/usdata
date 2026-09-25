@@ -93,6 +93,35 @@ def test_restore_refetches_missing_file_and_rejects_changed_upstream(
     assert not path.exists()
 
 
+def test_request_properties_are_pinned_and_come_back_on_restore(
+    manifest: Path, tmp_path: Path
+) -> None:
+    with respx.mock() as mock:
+        mock.get(DATA_URL).respond(200, content=CSV_V1)
+        first = pull(manifest, root=tmp_path)
+    assert first.fetched[0].asset.properties == {"units": "metric"}
+    (entry,) = json.loads(lockfile_path(manifest).read_text())["assets"]
+    assert entry["asset"]["properties"] == {"units": "metric"}
+    with respx.mock(assert_all_called=False):
+        restored = pull(manifest, root=tmp_path)
+    assert restored.from_lockfile and restored.fetched[0].asset.properties == {"units": "metric"}
+
+
+def test_a_lockfile_written_before_properties_restores_with_none(
+    manifest: Path, tmp_path: Path
+) -> None:
+    with respx.mock() as mock:
+        mock.get(DATA_URL).respond(200, content=CSV_V1)
+        pull(manifest, root=tmp_path)
+    raw = json.loads(lockfile_path(manifest).read_text())
+    del raw["assets"][0]["asset"]["properties"]
+    lockfile_path(manifest).write_text(json.dumps(raw))
+    with respx.mock(assert_all_called=False):
+        restored = pull(manifest, root=tmp_path)
+    assert restored.fetched[0].asset.properties == {}
+    assert verify(manifest, root=tmp_path) == []
+
+
 def test_verify_detects_local_modification(manifest: Path, tmp_path: Path) -> None:
     with respx.mock() as mock:
         mock.get(DATA_URL).mock(return_value=httpx.Response(200, content=CSV_V1))

@@ -500,6 +500,14 @@ class Asset(BaseModel):
     checksum: str | None = Field(default=None, description="'<algo>:<hex>', e.g. 'sha256:ab12...'")
     time: TimeRange | None = None
     bbox: BBox | None = None
+    properties: dict[str, str] = Field(
+        default_factory=dict,
+        description=(
+            "Facts of the request the bytes do not state, such as the unit system, datum, "
+            "or station, keyed in lowercase snake case; readers copy them into "
+            "attrs['usdata']['properties'] (ADR 0043)"
+        ),
+    )
 
 
 class ByteRange(BaseModel):

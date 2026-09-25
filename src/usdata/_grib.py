@@ -26,7 +26,12 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 from usdata.inspect import GribMessage
-from usdata.readers import MissingReaderDependency, caller_stacklevel, fill_registry_attrs
+from usdata.readers import (
+    MissingReaderDependency,
+    caller_stacklevel,
+    fill_registry_attrs,
+    source_attrs,
+)
 
 if TYPE_CHECKING:
     from usdata._fetch import FetchedAsset
@@ -507,10 +512,6 @@ def open_grib2(
     dataset.latitude.attrs["units"] = "degrees_north"
     dataset.longitude.attrs["units"] = "degrees_east"
     dataset.attrs.update(grid.attrs)
-    dataset.attrs["usdata"] = {
-        "asset_id": fetched.asset.id,
-        "provenance": fetched.provenance.model_dump(mode="json"),
-        "messages": messages,
-    }
+    dataset.attrs["usdata"] = {**source_attrs(fetched), "messages": messages}
     fill_registry_attrs(fetched, dataset)
     return dataset

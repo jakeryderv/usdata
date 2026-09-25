@@ -18,8 +18,8 @@ retains the original query. CSV `DATE` is `YYYY-MM`.
 Common variables include `PRCP` (monthly precipitation total) and `TAVG` (monthly
 mean temperature). With metric output these are millimeters and degrees Celsius.
 Variable availability depends on the station; unrecognized codes are rejected by
-NCEI. The API CSV has no units row, so `open()` retains the URL's `units` setting
-in provenance without adding a DataFrame units map. See the
+NCEI. The API CSV has no units row, so `open()` keeps the requested unit system in
+`attrs["usdata"]["properties"]["units"]` rather than adding a per-column units map. See the
 [NCEI API documentation](https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation)
 and [monthly example](https://usdata.dev/datasets/noaa/gsom/).
 

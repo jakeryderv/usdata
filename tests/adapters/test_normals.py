@@ -27,6 +27,7 @@ def test_monthly_is_default_and_requests_the_whole_placeholder_year(adapter) -> 
         assert not mock.calls
     params = httpx.URL(asset.href).params
     assert params["dataset"] == "normals-monthly-1991-2020"
+    assert asset.properties == {"units": "metric"}
     assert params["startDate"] == "2020-01-01" and params["endDate"] == "2020-12-31"
     assert params["units"] == "metric" and params["dataTypes"] == "MLY-TMAX-NORMAL"
     assert params["includeStationLocation"] == "1"

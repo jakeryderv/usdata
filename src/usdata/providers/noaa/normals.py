@@ -117,6 +117,7 @@ class ClimateNormals(GhcnDaily):
                     media_type="text/csv",
                     time=NORMALS_PERIOD,
                     bbox=query.bbox,
+                    properties={"units": params.units},
                 )
             )
         return assets

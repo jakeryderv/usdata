@@ -15,7 +15,7 @@ from datetime import UTC, datetime
 from importlib import import_module
 from typing import TYPE_CHECKING, Any
 
-from usdata.readers import Hurdat2FormatError, MissingReaderDependency
+from usdata.readers import Hurdat2FormatError, MissingReaderDependency, source_attrs
 
 if TYPE_CHECKING:
     from usdata._fetch import FetchedAsset
@@ -174,8 +174,5 @@ def open_hurdat2(fetched: FetchedAsset) -> Any:
     data["time"] = pandas.to_datetime(columns["time"], utc=True)
     data.update({name: pandas.array(columns[name], dtype="float64") for name in NUMERIC_COLUMNS})
     frame = pandas.DataFrame(data, columns=COLUMNS)
-    frame.attrs["usdata"] = {
-        "asset_id": fetched.asset.id,
-        "provenance": fetched.provenance.model_dump(mode="json"),
-    }
+    frame.attrs["usdata"] = source_attrs(fetched)
     return frame

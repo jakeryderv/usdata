@@ -1,7 +1,7 @@
 # 0027: The provider contract
 
 Status: accepted. Date: 2026-09-15. Extends [ADR 0001](0001-curated-registry-over-federated-search.md)
-and [ADR 0026](0026-one-registry-schema.md).
+and [ADR 0026](0026-one-registry-schema.md). Updated by [ADR 0043](0043-asset-properties.md).
 
 ## Context
 
@@ -50,7 +50,9 @@ The adapter contract is a named, published surface. It is:
   by state and county rather than by coordinates; and, for a source that needs
   a key, the constructor's keyword-only `credentials`, the `credentials`
   attribute it sets, and the `transformations` class attribute
-  ([ADR 0039](0039-credentialed-sources.md)).
+  ([ADR 0039](0039-credentialed-sources.md)); and `Asset.properties`, where
+  `list_assets` records the request facts the fetched bytes do not state
+  ([ADR 0043](0043-asset-properties.md)).
 - **`usdata.providers.HttpProvider`.** The lifecycle HTTP-backed adapters
   inherit, renamed from `_HttpProvider` and moved to `usdata/providers/http.py`:
   the constructor's optional `client`, the `_http()` accessor subclasses call,

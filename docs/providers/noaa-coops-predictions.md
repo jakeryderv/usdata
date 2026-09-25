@@ -32,8 +32,8 @@ uv run usdata fetch noaa:coops-tide-predictions \
 ```
 
 The raw CSV retains NOAA's header spacing. Use the ordinary CSV reader and
-rename columns locally if desired; station, datum, units, interval, and
-timezone remain explicit in the provenance source URL. Predictions are computed
+rename columns locally if desired. The CSV states none of station, datum, units,
+interval, or time zone, so the frame carries them in `attrs["usdata"]["properties"]`. Predictions are computed
 from harmonic constituents, not observed, so they carry no quality flags and
 never contain gaps. NOAA occasionally revises a station's constituents, after
 which the same request returns different bytes. The

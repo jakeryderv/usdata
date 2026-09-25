@@ -134,6 +134,17 @@ def test_level_iii_has_no_reader_by_inference_or_by_name(fetched) -> None:
             opener()
 
 
+def test_request_properties_reach_the_frame_by_either_open(pd, fetched) -> None:
+    item = fetched("DATE,PRCP\n2024-05-06,10.9\n")
+    assert item.open().attrs["usdata"]["properties"] == {}
+    stated = item.model_copy(
+        update={"asset": item.asset.model_copy(update={"properties": {"units": "metric"}})}
+    )
+    for frame in (stated.open(), stated.open_csv()):
+        assert frame.attrs["usdata"]["properties"] == {"units": "metric"}
+        assert "units" not in frame.attrs  # units the file states, per column, stay separate
+
+
 def test_csv_identifiers_dates_and_numeric_observations(pd, fetched) -> None:
     item = fetched(
         'STATION,DATE,TMAX,NAME\n00123,2024-05-06,25.5,"Norman, OK"\n'

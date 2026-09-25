@@ -55,6 +55,12 @@ def test_explicit_request_and_normalized_identity():
     assert asset.dataset_id == "noaa:coops-currents"
     assert asset.media_type == "text/csv"
     assert asset.time == query().time
+    assert asset.properties == {
+        "station": "cb0102",
+        "bin": "4",
+        "units": "metric",
+        "time_zone": "gmt",
+    }
 
 
 @pytest.mark.parametrize(

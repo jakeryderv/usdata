@@ -183,6 +183,18 @@ def test_subclasses_adding_no_params_inherit_the_declaration(cls) -> None:
     assert dict(cls.accepted_params) == dict(GhcnDaily.accepted_params)
 
 
+@pytest.mark.parametrize("units", ["metric", "standard"])
+def test_each_asset_records_the_unit_system_its_csv_does_not_state(
+    adapter: GhcnDaily, units: str
+) -> None:
+    q = build_query(start="2024-05-06", end="2024-05-07", stations=["X"], units=units)
+    (asset,) = adapter.list_assets(q)
+    assert asset.properties == {"units": units}
+    monthly = GlobalSummaryMonthly(default_registry().get("noaa:gsom"))
+    (month,) = monthly.list_assets(q)
+    assert month.properties == {"units": units}
+
+
 @pytest.mark.parametrize(
     "params",
     [

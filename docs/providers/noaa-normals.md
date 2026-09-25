@@ -8,8 +8,9 @@ statistics, served by the anonymous NCEI Access Data Service datasets
 transport, and 50-station CSV chunks. Choose the dataset with `period`:
 `monthly` (default), `daily`, `annualseasonal`, or `hourly`. Hourly support is
 available since v0.23.0. Pass either `stations` or a
-location/bbox, not both. `units` is `metric` (default) or `standard`; unknown
-parameters and text queries are rejected.
+location/bbox, not both. `units` is `metric` (default) or `standard`, recorded in
+the frame's `attrs["usdata"]["properties"]["units"]` since the CSV does not state
+it; unknown parameters and text queries are rejected.
 
 Dates are optional because normals are not observations. For `hourly`, `daily`, and
 `monthly`, an optional `start`/`end` pair selects a calendar window by month

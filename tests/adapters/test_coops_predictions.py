@@ -70,6 +70,8 @@ def test_interval_is_normalized_into_the_request(raw, sent):
     with adapter() as provider:
         (asset,) = provider.list_assets(query(interval=raw))
     assert httpx.URL(asset.href).params["interval"] == sent
+    assert asset.properties["interval"] == sent
+    assert set(asset.properties) == {"station", "datum", "units", "interval", "time_zone"}
 
 
 def test_interval_extends_the_shared_station_declaration():

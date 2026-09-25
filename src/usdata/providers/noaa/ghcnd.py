@@ -163,6 +163,8 @@ class GhcnDaily(HttpProvider):
                     media_type="text/csv",
                     time=window,
                     bbox=query.bbox,
+                    # The CSV has no units row; its stations are in a column.
+                    properties={"units": params.units},
                 )
             )
         return assets

@@ -5,7 +5,9 @@ anonymous NCEI Access Data Service dataset `local-climatological-data`, reusing
 GHCN station discovery, pagination, and CSV chunking, with ten stations per
 asset instead of fifty because hourly rows are wide. Require both dates and
 either `stations` or a location/bbox, not both. `units` is `metric` (default)
-or `standard`; unknown parameters and text queries are rejected.
+or `standard`, and the CSV does not say which, so the frame records it in
+`attrs["usdata"]["properties"]["units"]`. Unknown parameters and text queries
+are rejected.
 
 Station ids are the eleven-digit LCD identifiers the search service returns,
 such as `72353013967` for Oklahoma City's Will Rogers World Airport: a
