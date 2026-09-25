@@ -143,13 +143,20 @@ def run(command: list[str], work: Path, env: dict[str, str]) -> None:
 
 
 def install(step: Install, python: Path, version: str, work: Path, env: dict[str, str]) -> None:
-    """Install the guide's requirement at the released version, tolerating index lag."""
+    """Install the guide's requirement at the released version, tolerating index lag.
+
+    pip's HTTP cache keeps PyPI's index page for its ten-minute ``max-age``, so a
+    retry that may use it rereads the page the first attempt saw from before the
+    upload. The v0.27.0 walkthrough spent its whole window that way and installed
+    at once on a fresh runner a minute later. Every attempt asks the index again.
+    """
     command = [str(python), *step.prefix, f"{step.requirement}=={version}"]
     attempts = int(env.get("USDATA_INSTALL_ATTEMPTS", "8"))
     delay = float(env.get("USDATA_INSTALL_DELAY", "20"))
+    uncached = {**env, "PIP_NO_CACHE_DIR": "1"}
     for attempt in range(1, attempts + 1):
         try:
-            run(command, work, env)
+            run(command, work, uncached)
             return
         except subprocess.CalledProcessError:
             if attempt == attempts:

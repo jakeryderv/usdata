@@ -1,6 +1,7 @@
 import importlib.util
 import io
 import json
+import subprocess
 import tarfile
 import zipfile
 from pathlib import Path
@@ -596,6 +597,24 @@ def test_walkthrough_extracts_the_published_guides_own_commands():
     assert [step.name for step in written] == ["dataset.yaml"]
     assert "noaa:ghcn-daily" in written[0].content
     assert module.cache_dirs(steps) == {"restored-data"}
+
+
+def test_walkthrough_install_retries_past_pips_cached_index(monkeypatch, tmp_path):
+    module = script("walkthrough")
+    seen: list[dict[str, str]] = []
+
+    def run(command, work, env):
+        seen.append(env)
+        if len(seen) < 3:
+            raise subprocess.CalledProcessError(1, command)
+
+    monkeypatch.setattr(module, "run", run)
+    monkeypatch.setattr(module.time, "sleep", lambda seconds: None)
+    step = module.Install(prefix=("-m", "pip", "install"), requirement="usdata[pandas]")
+    env = {"USDATA_INSTALL_ATTEMPTS": "3", "USDATA_INSTALL_DELAY": "0"}
+    module.install(step, tmp_path / "python", "0.27.0", tmp_path, env)
+    assert len(seen) == 3 and all(e["PIP_NO_CACHE_DIR"] == "1" for e in seen)
+    assert "PIP_NO_CACHE_DIR" not in env
 
 
 @pytest.mark.parametrize(
