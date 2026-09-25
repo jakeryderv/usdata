@@ -46,6 +46,10 @@ there. A second fetch of the same asset is a cache hit checked against that
 sidecar, and re-hashed only when the file has been touched since it was written.
 A listing that reports a different size for the same URL is a miss, since a
 source that rebuilds a file under an unchanging name announces it that way.
+Run one fetch or pull per cache at a time: nothing locks the cache, and two
+processes fetching the same asset while its source republishes it can leave
+one's bytes beside the other's record. Part of the cache can live on another
+disk through a symlink; asset ids themselves can never place a file outside it.
 
 **Readers** open a cached file into pandas or xarray behind optional extras.
 Without the extra you still have the file, its path, and its provenance.

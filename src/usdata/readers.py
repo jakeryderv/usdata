@@ -514,12 +514,12 @@ def open_csv(
     ``dtype`` to keep numeric-looking date labels as strings. An IBTrACS CSV
     lays a units row under its header as ERDDAP does; the single space it writes
     for a missing value is read as missing, and nothing else is, so the North
-    Atlantic basin code ``NA`` stays text. A Storm Events CSV gains
-    ``BEGIN_UTC`` and ``END_UTC`` when the frame keeps ``BEGIN_DATE_TIME``,
-    ``END_DATE_TIME``, and ``CZ_TIMEZONE``: the local timestamp shifted by the
-    whole-hour offset ending the timezone label, or by the one offset a bare
-    label such as ``CST`` names, with every other row left ``NaT`` and counted
-    under ``attrs["usdata"]["derived"]``.
+    Atlantic basin code ``NA`` stays text. A Storm Events frame that keeps
+    ``CZ_TIMEZONE`` gains ``BEGIN_UTC`` for a kept ``BEGIN_DATE_TIME`` and
+    ``END_UTC`` for a kept ``END_DATE_TIME``, each derived from its own column:
+    the local timestamp shifted by the whole-hour offset ending the timezone
+    label, or by the one offset a bare label such as ``CST`` names, with every
+    other row left ``NaT`` and counted under ``attrs["usdata"]["derived"]``.
 
     Args:
         fetched: The fetched file; its cached bytes are never changed.

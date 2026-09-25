@@ -39,7 +39,10 @@ covering a requested year is returned in full: May 1–31, 2024 selects
 December 31, 1999 to January 1, 2000 selects the 1990s decade and the 2000–2004
 file. When several linked files cover a year, the narrowest one wins, so a
 per-year file is preferred over any wider archive. Asset time bounds label the
-file's years, not precise event coverage. Dates before 1950 and a requested
+file's years, not precise event coverage. The files are split by date in
+Central Standard Time, so an event before 06:00 UTC on January 1 belongs to the
+previous year's file; a window within those hours selects only the new year's
+file, so start it a day earlier to fetch both. Dates before 1950 and a requested
 year with no linked file are errors, so a span cannot silently succeed with
 only some years. Location/bbox, variables, and text are rejected, and `table` is
 the only parameter, so `spatial_subset` and `variable_subset` are false:

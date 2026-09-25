@@ -10,6 +10,8 @@ from pathlib import Path
 from usdata.models import Asset
 
 ENV_VAR = "USDATA_CACHE_DIR"
+SIDECAR_SUFFIX = ".provenance.json"
+"""What a provenance sidecar's name adds to its data file's; ``provenance`` names it from here."""
 
 
 def cache_dir() -> Path:
@@ -38,7 +40,9 @@ def cached_path(dataset_id: str, asset_id: str, root: Path | None = None) -> Pat
         The path the cache uses for that asset, whether or not it exists.
 
     Raises:
-        ValueError: Either id is unsafe, or the path would escape the cache root.
+        ValueError: Either id is unsafe, names a sidecar or temporary file, or the
+            path would escape the cache root. Symlinks inside the root are
+            followed like any directory, so part of the cache can live elsewhere.
     """
     provider, sep, name = dataset_id.partition(":")
     if not sep or any(
@@ -48,11 +52,16 @@ def cached_path(dataset_id: str, asset_id: str, root: Path | None = None) -> Pat
     safe_id = asset_id.replace("/", "_")
     if not safe_id or safe_id in {".", ".."} or "\\" in safe_id or "\x00" in safe_id:
         raise ValueError(f"unsafe asset id: {asset_id!r}")
+    # A file of this name would be taken for another asset's sidecar, or for a temporary file.
+    if safe_id.endswith(SIDECAR_SUFFIX) or (safe_id.startswith(".") and safe_id.endswith(".part")):
+        raise ValueError(f"asset id {asset_id!r} names a file the cache keeps for itself")
     base = (root or cache_dir()).expanduser().resolve()
-    path = base / provider / name / safe_id
-    for candidate in (path, path.with_name(path.name + ".provenance.json")):
-        if not candidate.resolve().is_relative_to(base):
-            raise ValueError(f"cache path escapes root: {candidate}")
+    home = base / provider / name
+    path = home / safe_id
+    # Checked on the path as written, so a directory the user symlinked elsewhere is still
+    # inside the cache; only an id that re-anchors the path, such as C:x on Windows, is not.
+    if path.parent != home:
+        raise ValueError(f"cache path escapes root: {path}")
     return path
 
 

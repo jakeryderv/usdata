@@ -24,7 +24,9 @@ local cache. The parts that matter for security are:
   bucket.
 - Cache paths derived from asset ids. Ids are sanitized before use; a
   registry entry or upstream listing must not be able to write outside the
-  cache directory.
+  cache directory. Symlinks a user places inside the cache are followed, so
+  part of it can live on another disk; every write replaces its file
+  atomically, so a symlinked file is replaced rather than written through.
 - Provenance and lockfile records. These are meant to be trustworthy; changes
   that could let them misreport a source or checksum are security relevant.
 
