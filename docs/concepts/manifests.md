@@ -2,7 +2,8 @@
 
 A manifest is a small YAML file that declares the datasets a project needs, as
 queries. A lockfile records what those queries actually produced: the resolved
-asset URLs, their checksums, and their provenance. Commit both. The cache holds
+asset URLs, their checksums, the request facts their bytes leave out (such as
+units or datum), and their provenance. Commit both. The cache holds
 the bytes themselves and should be backed up separately when long-lived
 reproducibility matters.
 

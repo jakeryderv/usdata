@@ -15,13 +15,13 @@ The documentation site assembles their preview automatically.
 ## [0.28.0](https://github.com/jakeryderv/usdata/releases/tag/v0.28.0) - 2026-09-25
 
 
+### Breaking
+
+- GRIB2 variables' `units` attribute now uses the UDUNITS notation CF metadata and xarray-based tools expect, `J kg-1` and `m2 s-2` where ecCodes writes `J kg**-1` and `m**2 s**-2`. Only the notation changes, and the file's own spelling is kept in `GRIB_units` whenever the two differ, so code that compared `units` with the ecCodes spelling should read `GRIB_units` instead. `usdata inspect` and `readers.inventory` still list the raw ecCodes strings.
+
 ### Added
 
-- Assets carry `properties`, the facts of the request their bytes do not state, and every reader copies them into `attrs["usdata"]["properties"]`. The NCEI CSVs (GHCN-Daily, GSOM, GSOY, LCD, climate normals) record the requested `units`, and the CO-OPS CSVs record their `station`, `datum`, `units`, `interval` or `bin`, and `time_zone`, so a frame says whether `PRCP` is millimetres or inches without the manifest beside it. Lockfiles keep them. A lockfile written before this release restores with empty properties until a forced pull re-resolves it.
-
-### Changed
-
-- GRIB2 variables' `units` attribute now uses the UDUNITS notation CF metadata and xarray-based tools expect, `J kg-1` and `m2 s-2` where ecCodes writes `J kg**-1` and `m**2 s**-2`. Only the notation changes, and the file's own spelling is kept in `GRIB_units` whenever the two differ. `usdata inspect` and `readers.inventory` still list the raw ecCodes strings.
+- Assets carry `properties`, the facts of the request their bytes do not state, and every reader copies them into `attrs["usdata"]["properties"]`. The NCEI CSVs (GHCN-Daily, GSOM, GSOY, LCD, climate normals) record the requested `units`, and the CO-OPS CSVs record `station`, `units`, and `time_zone`, plus `datum` for water levels and predictions, `interval` for predictions, and `bin` for currents, so a frame says whether `PRCP` is millimetres or inches without the manifest beside it. Lockfiles keep them. A lockfile written before this release restores with empty properties until a forced pull re-resolves it.
 
 ### Fixed
 
