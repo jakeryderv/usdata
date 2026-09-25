@@ -174,6 +174,18 @@ def test_two_runs_when_the_window_touches_both_days(adapter):
     ]
 
 
+def test_a_window_straddling_the_archive_start_lists_only_archived_runs(adapter):
+    # The archive begins with the 2014-07-30 18Z run, so the day before's 00Z run is not asked for.
+    run = "hrrr.20140731/conus/hrrr.t00z.wrfsfcf"
+    with respx.mock() as mock:
+        route = mock.get(LIST_URL).respond(200, text=listing([(f"{run}00.grib2", 10)]))
+        (asset,) = adapter.list_assets(
+            query(start="2014-07-30T00:00Z", end="2014-07-31T00:00Z", cycle=0)
+        )
+    assert [call.request.url.params["prefix"] for call in route.calls] == [run]
+    assert asset.time.start == datetime(2014, 7, 31, tzinfo=UTC)
+
+
 def test_select_runs_uses_inclusive_bounds():
     start, end = datetime(2024, 5, 6, 3, tzinfo=UTC), datetime(2024, 5, 7, 3, tzinfo=UTC)
     assert select_runs(start, end, 3) == [start, end]
