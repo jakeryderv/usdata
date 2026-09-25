@@ -86,11 +86,11 @@ entry with `ranges` re-issues exactly those ranges against the pinned ETag,
 one request per contiguous run, and never reads the index again, so a
 republished index cannot move a pin. When the bytes differ from the pin,
 restoration continues through the remaining entries, then exits 4 listing every
-asset that changed. A range request refused because the object was republished
-(HTTP 412) is reported the same way, as one changed asset. A server that
-answers a range request with the whole object, or with a `Content-Range` that
-does not match the request, fails the run before anything is written; that is a
-transport fault, not drift. Assets that still match
+asset that changed. A range request that is refused, whether because the
+object was republished (HTTP 412) or because the server answered with the whole
+object or a `Content-Range` that does not match the request, and a pinned URL
+that answers 404 or 410, are reported the same way, as drift a configured
+mirror may repair; nothing is written for them. Assets that still match
 are restored; changed ones keep whatever file was already at that path; the
 lockfile is not rewritten. In Python, `pull()` raises `UpstreamChanged`, whose
 `drift` lists each asset.

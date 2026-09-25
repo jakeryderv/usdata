@@ -1,1 +1,0 @@
-HTTP downloads now write the object exactly as the source stores it. They ask for no transfer compression and write the body undecoded, so a file stored with `Content-Encoding: gzip` keeps the size and checksum its listing reports instead of being written decompressed. Services that compress on the fly still send the plain bytes they did before.
