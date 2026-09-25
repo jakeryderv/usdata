@@ -125,7 +125,12 @@ before any selected entry is refreshed, and refreshed files wait in
 `<cache root>/.staging/` until the lockfile is saved, so a `pull` that fails for
 any reason leaves the lockfile as it was and every cached file either absent or
 matching it. `force` stages its downloads the same way whenever a lockfile
-already exists. A failed `update` or `force` can simply be run again. Exit
+already exists, and fetches an asset that several sources share once. A pinned
+URL that serves different bytes, answers 404 or 410, or refuses a range request
+is drift, which a configured mirror may repair; any other failed request is
+raised. An entry that pins byte ranges cannot be refreshed with `update` once
+its object is republished, because new ranges need the new index: re-resolve it
+with `force`. A failed `update` or `force` can simply be run again. Exit
 codes are listed in [how it works](../concepts/how-it-works.md#cli-exit-codes).
 
 `pull()` returns a `PullResult`. Its `fetched` list is in manifest order, then

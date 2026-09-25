@@ -117,6 +117,60 @@ def test_a_mirror_that_cannot_help_leaves_the_entry_as_drift(
     assert not drift.path.exists(), "a mismatching mirror object is never written as the asset"
 
 
+@pytest.mark.parametrize("status", [404, 410])
+def test_mirror_restores_an_object_the_source_no_longer_serves(
+    locked: tuple[Path, Path, str], monkeypatch: pytest.MonkeyPatch, status: int
+) -> None:
+    manifest, root, mirror_object = locked
+    monkeypatch.setenv(ENV_VAR, MIRROR)
+    with respx.mock() as mock:
+        mock.get(DATA_URL).respond(status)
+        mock.get(mirror_object).respond(200, content=V1)
+        result = pull(manifest, root=root)
+    (item,) = result.fetched
+    assert result.mirrored == [item.asset.id]
+    assert item.path.read_bytes() == V1
+    assert verify(manifest, root=root) == []
+
+
+@pytest.mark.parametrize("status", [404, 410])
+def test_without_a_mirror_a_gone_object_is_drift(
+    locked: tuple[Path, Path, str], monkeypatch: pytest.MonkeyPatch, status: int
+) -> None:
+    manifest, root, _ = locked
+    monkeypatch.delenv(ENV_VAR, raising=False)
+    with respx.mock() as mock, pytest.raises(UpstreamChanged) as info:
+        mock.get(DATA_URL).respond(status)
+        pull(manifest, root=root)
+    assert [d.problem for d in info.value.drift] == [f"gone upstream ({status})"]
+
+
+def test_a_server_error_is_not_drift(
+    locked: tuple[Path, Path, str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest, root, mirror_object = locked
+    monkeypatch.setenv(ENV_VAR, MIRROR)
+    with respx.mock(assert_all_called=False) as mock:
+        mock.get(DATA_URL).respond(503)
+        mirrored = mock.get(mirror_object).respond(200, content=V1)
+        with pytest.raises(httpx.HTTPStatusError):
+            pull(manifest, root=root)
+    assert not mirrored.called, "a failed request says nothing about the pin"
+
+
+def test_an_unreachable_mirror_is_reported_with_the_drift(
+    locked: tuple[Path, Path, str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest, root, mirror_object = locked
+    monkeypatch.setenv(ENV_VAR, MIRROR)
+    with respx.mock() as mock, pytest.raises(UpstreamChanged) as info:
+        mock.get(DATA_URL).respond(200, content=V2)
+        mock.get(mirror_object).mock(side_effect=httpx.ConnectError("down"))
+        pull(manifest, root=root)
+    (drift,) = info.value.drift
+    assert drift.problem == "upstream changed; mirror unreachable (ConnectError)"
+
+
 def test_mirror_download_verifies_what_it_is_named_for(tmp_path: Path) -> None:
     checksum = "sha256:" + "ab" * 32
     with respx.mock() as mock, httpx.Client() as client:

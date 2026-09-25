@@ -132,6 +132,29 @@ def _sidecar_not_older(path: Path) -> bool:
         return False
 
 
+def _cached(dataset: Dataset, asset: Asset, path: Path) -> Provenance | None:
+    """The record of a file at ``path`` that still describes ``asset``, or None if there is none."""
+    if not path.is_file():
+        return None
+    try:
+        prov = provenance.read(path)
+    except (ValueError, OSError):
+        return None
+    if (
+        prov.dataset_id == dataset.id
+        and prov.provider == dataset.provider
+        and prov.source_url == asset.href
+        and prov.size == path.stat().st_size
+        # A listing that now reports another size describes a rebuilt file.
+        and (asset.size is None or prov.size == asset.size)
+        and (asset.checksum is None or prov.checksum == asset.checksum)
+        # Trust an untouched cached file; hash whenever anything is unclear.
+        and (_sidecar_not_older(path) or sha256_file(path) == prov.checksum)
+    ):
+        return prov
+    return None
+
+
 def _fetch_asset(
     dataset: Dataset,
     asset: Asset,
@@ -149,35 +172,23 @@ def _fetch_asset(
     from the record rather than by resolving its query again.
 
     ``staging`` is a root a download is written under instead of the cache. The
-    cache at ``root`` is still checked, and a hit is returned from there; a
-    miss comes back with its ``path`` under ``staging``, for the caller to move
-    home once it can pin it (ADR 0031).
+    cache at ``root`` is still checked, and a hit is returned from there; so is
+    ``staging``, where an earlier source in the same run may have fetched the
+    same asset. A miss comes back with its ``path`` under ``staging``, for the
+    caller to move home once it can pin it (ADR 0031).
     """
     if asset.dataset_id != dataset.id:
         raise ValueError(f"asset dataset {asset.dataset_id!r} does not match {dataset.id!r}")
     _progress.emit(_progress.AssetProgress(asset.id, "start", asset.size))
     path = asset_path(asset, root)
-    if not force and path.is_file():
-        try:
-            prov = provenance.read(path)
-        except (ValueError, OSError):
-            prov = None
-        if (
-            prov is not None
-            and prov.dataset_id == dataset.id
-            and prov.provider == dataset.provider
-            and prov.source_url == asset.href
-            and prov.size == path.stat().st_size
-            # A listing that now reports another size describes a rebuilt file.
-            and (asset.size is None or prov.size == asset.size)
-            and (asset.checksum is None or prov.checksum == asset.checksum)
-            # Trust an untouched cached file; hash whenever anything is unclear.
-            and (_sidecar_not_older(path) or sha256_file(path) == prov.checksum)
-        ):
+    staged = None if staging is None else asset_path(asset, staging)
+    # A staged run looks in its staging too, so an asset two sources share is fetched once.
+    for candidate in () if force else (path, staged):
+        if candidate is not None and (prov := _cached(dataset, asset, candidate)) is not None:
             _progress.emit(_progress.AssetProgress(asset.id, "cached", prov.size))
-            return FetchedAsset(asset=asset, path=path, provenance=prov, from_cache=True)
-    if staging is not None:
-        path = asset_path(asset, staging)
+            return FetchedAsset(asset=asset, path=candidate, provenance=prov, from_cache=True)
+    if staged is not None:
+        path = staged
     with staged_path(path) as tmp:
         partial = adapter.prepare_fetch(asset, pinned)
         if partial is None:

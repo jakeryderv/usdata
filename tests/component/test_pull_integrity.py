@@ -7,10 +7,11 @@ import respx
 from usdata import ChecksumMismatch, provenance
 from usdata.cache import sha256_file
 from usdata.manifest import Lockfile, lockfile_path
-from usdata.models import Asset, Protocol, Query
+from usdata.models import Asset, ByteRange, PartialFetch, Protocol, Provenance, Query
+from usdata.protocols.http import ObjectChanged, RangeNotHonored
 from usdata.providers.base import Provider
 from usdata.providers.noaa.ghcnd import DATA_URL
-from usdata.pull import STAGING_DIR, pull, verify
+from usdata.pull import STAGING_DIR, UpstreamChanged, pull, verify
 from usdata.registry import Registry, default_registry
 
 MANIFEST = """name: test
@@ -111,22 +112,64 @@ class Sized(Provider):
         ]
 
     def fetch(self, asset: Asset, dest: Path) -> Path:
+        FETCHED.append(asset.id)
         dest.write_bytes(UPSTREAM[asset.id])
+        if asset.id in REPUBLISH:
+            # The next fetch sees the next version, as if upstream republished in between.
+            UPSTREAM[asset.id] = REPUBLISH[asset.id].pop(0)
         return dest
 
 
 UPSTREAM: dict[str, bytes] = {}
 DOWN: set[str] = set()
+FETCHED: list[str] = []
+REPUBLISH: dict[str, list[bytes]] = {}
+
+
+class Ranged(Sized):
+    """``Sized``, but every asset is read as byte ranges, and a range request can be refused."""
+
+    def prepare_fetch(self, asset: Asset, pinned: Provenance | None = None) -> PartialFetch:
+        return PartialFetch(
+            object_url=asset.href,
+            object_size=100,
+            object_etag="etag-v1",
+            index_url=asset.href + ".idx",
+            index_checksum="sha256:" + "1" * 64,
+            messages=[1],
+            ranges=[ByteRange(start=0, end=3)],
+        )
+
+    def fetch_partial(self, asset: Asset, dest: Path, partial: PartialFetch) -> Path:
+        if REFUSE:
+            raise REFUSE[0]
+        return self.fetch(asset, dest)
+
+
+REFUSE: list[Exception] = []
 
 
 @pytest.fixture
 def sized() -> Registry:
     """The default registry with ghcn-daily served by ``Sized``, upstream at version 1."""
+    return _served_by("Sized")
+
+
+@pytest.fixture
+def ranged() -> Registry:
+    """The default registry with ghcn-daily served by ``Ranged``, upstream at version 1."""
+    return _served_by("Ranged")
+
+
+def _served_by(adapter: str) -> Registry:
     UPSTREAM.clear()
     UPSTREAM.update(a=b"a-v1", b=b"b-v1")
     DOWN.clear()
+    FETCHED.clear()
+    REPUBLISH.clear()
+    REFUSE.clear()
     reg = default_registry()
-    dataset = reg.get("noaa:ghcn-daily").model_copy(update={"adapter": f"{__name__}:Sized"})
+    dataset = reg.get("noaa:ghcn-daily").model_copy(update={"adapter": f"{__name__}:{adapter}"})
     return Registry(
         [dataset if d.id == dataset.id else d for d in reg],
         providers=[reg.provider(provider_id) for provider_id in sorted(reg.providers())],
@@ -177,6 +220,58 @@ def test_forced_resolve_commits_an_asset_two_sources_share_once(
     forced = pull(manifest, root=root, registry=sized, force=True)
     assert [item.path.read_bytes() for item in forced.fetched] == [b"a-version-2"] * 2
     assert verify(manifest, root=root) == []
+
+
+@pytest.mark.parametrize("how", ["force", "update"])
+def test_a_staged_run_fetches_an_asset_two_sources_share_once(
+    tmp_path: Path, sized: Registry, how: str
+) -> None:
+    """Upstream republishing mid-run cannot leave the two entries pinning different bytes."""
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text("name: shared\nsources:\n" + day("2024-05-06") + day("2024-05-06"))
+    root = tmp_path / "cache"
+    pull(manifest, root=root, registry=sized)
+    FETCHED.clear()
+    # A new size, so the forced re-resolve cannot trust the cached copy.
+    UPSTREAM["a"] = b"a-version-2"
+    REPUBLISH["a"] = [b"a-version-3"]
+    if how == "force":
+        result = pull(manifest, root=root, registry=sized, force=True)
+    else:
+        result = pull(manifest, root=root, registry=sized, update=["a"])
+        assert result.updated == ["a", "a"]
+    assert FETCHED == ["a"]
+    assert [item.path.read_bytes() for item in result.fetched] == [b"a-version-2"] * 2
+    pins = {entry.provenance.checksum for entry in Lockfile.load(lockfile_path(manifest)).assets}
+    assert len(pins) == 1
+    assert [entry.source for entry in result.lockfile.assets] == ["1", "2"]
+    assert verify(manifest, root=root) == []
+
+
+def test_a_refused_range_is_drift(tmp_path: Path, ranged: Registry) -> None:
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text("name: ranged\nsources:\n" + day("2024-05-06"))
+    root = tmp_path / "cache"
+    (item,) = pull(manifest, root=root, registry=ranged).fetched
+    item.path.unlink()
+    REFUSE.append(RangeNotHonored("https://example.test/a ignored the range"))
+    with pytest.raises(UpstreamChanged) as info:
+        pull(manifest, root=root, registry=ranged)
+    assert [d.problem for d in info.value.drift] == ["range refused"]
+
+
+def test_updating_a_republished_partial_asset_says_to_force(
+    tmp_path: Path, ranged: Registry
+) -> None:
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text("name: ranged\nsources:\n" + day("2024-05-06"))
+    root = tmp_path / "cache"
+    pull(manifest, root=root, registry=ranged)
+    before = lockfile_path(manifest).read_bytes()
+    REFUSE.append(ObjectChanged("https://example.test/a was republished"))
+    with pytest.raises(ObjectChanged, match="pull with force"):
+        pull(manifest, root=root, registry=ranged, update=["a"])
+    assert lockfile_path(manifest).read_bytes() == before
 
 
 def test_failed_first_pull_keeps_what_it_fetched(tmp_path: Path, sized: Registry) -> None:

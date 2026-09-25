@@ -507,7 +507,8 @@ def pull(
             typer.echo(f"{d.asset_id}\t{d.problem}\t{d.path}")
         typer.secho(
             f"{len(e.drift)} asset(s) changed upstream; lockfile unchanged. "
-            "Pass --update <asset or dataset id> to accept the new bytes.",
+            "Pass --update <asset or dataset id> to accept the new bytes, "
+            "or --force to re-resolve.",
             err=True,
             fg="red",
         )
