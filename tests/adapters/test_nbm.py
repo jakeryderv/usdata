@@ -144,3 +144,19 @@ def test_messages_resolve_to_one_partial_asset(adapter) -> None:
     assert str(index.calls[0].request.url).endswith("f001.co.grib2.idx")
     assert asset.id == "blend.20240506.t20z.core.f001.co.part-d4735e3a265e.grib2"
     assert asset.href == f"s3://{BUCKET}/{KEY}#messages=2" and asset.size == 40
+
+
+def test_a_probability_threshold_is_selected_by_its_index_label(adapter) -> None:
+    """NBM's further text holds a colon, which a selector must be able to carry."""
+    threshold = "APCP:surface:0-1 hour acc fcst:prob >0.254:prob fcst 255/255"
+    index = f"1:0:d=2024050620:{threshold}\n2:40:d=2024050620:APCP:surface:0-1 hour acc fcst:\n"
+    with respx.mock() as mock:
+        mock.get(LIST_URL).respond(200, text=listing([(KEY, len(OBJECT))]))
+        mock.head(OBJECT_URL).respond(
+            200, headers={"Content-Length": str(len(OBJECT)), "ETag": f'"{ETAG}"'}
+        )
+        mock.get(f"{OBJECT_URL}.idx").respond(200, text=index)
+        (asset,) = adapter.list_assets(query(messages=threshold))
+        assert asset.href == f"s3://{BUCKET}/{KEY}#messages=1" and asset.size == 40
+        partial = adapter.prepare_fetch(asset)
+    assert partial is not None and partial.selectors == [threshold]

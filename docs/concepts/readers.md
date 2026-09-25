@@ -17,7 +17,8 @@ not change its source. Scientific units are not converted, and each source's
 own missing-data sentinels are left as the source wrote them, beyond what
 pandas and CF decoding normally handle. The one rewrite is notation: GRIB2
 `units` take the UDUNITS spelling CF metadata uses, `J kg-1` for ecCodes'
-`J kg**-1`, and keep the file's own spelling in `GRIB_units`.
+`J kg**-1`, and keep the file's own spelling in `GRIB_units`. Units holding a
+power UDUNITS cannot spell, such as `m**(2/3) s**-1`, keep the file's spelling.
 
 Every result carries a copy of the asset id, its request properties, and its
 provenance under a `usdata` attribute. That is metadata about the source bytes,
@@ -35,8 +36,11 @@ table, matching each data variable's name against the entry's names exactly and
 then case-insensitively. A decoded MRMS variable drops the product's level
 suffix, so `RotationTrackML30min` matches the entry's
 `RotationTrackML30min_00.50`. A value the file provides is never overwritten,
-no other attribute is touched, and the `registry_attrs` list under the `usdata`
-attribute names every variable and attribute filled, so a stamped value stays
+including units xarray moved into a decoded time variable's `encoding`, and a
+datetime or timedelta variable never gains `units`, so the Dataset still writes
+back with `to_netcdf()`. No other attribute is touched, and the
+`registry_attrs` list under the `usdata` attribute names every variable and
+attribute filled, so a stamped value stays
 distinguishable from the file's own. The CSV readers fill no units, but a Storm
 Events frame gains `BEGIN_UTC` and `END_UTC` beside its untouched local columns,
 derived from `CZ_TIMEZONE` under the rule listed in `attrs["usdata"]["derived"]`
@@ -56,8 +60,9 @@ how large it is, the format that was recognized, and what that format holds. A
 CSV reports its columns and a row count read with the standard library, so it
 needs no extra; the count stops after 100,000 rows and says so. A NetCDF4 file
 reports its data variables with dims, shape, units, and long name, and a GRIB2
-file reports every message with its `file_index`, `shortName`, `name`,
-`typeOfLevel`, `level`, `step`, `units`, and grid shape, plus the `object_index`
+file reports every message with its `file_index`, `shortName`, the `base_name`
+the reader names its variable from, `name`, `typeOfLevel`, `level`, `step`,
+`units`, and grid shape, plus the `object_index`
 and `selector` a partial fetch recorded. Those two use the same extras `open()` does,
 and a missing one produces a summary whose detail is `None` and whose `note`
 names the extra rather than an exception. Bytes that no longer decode are
