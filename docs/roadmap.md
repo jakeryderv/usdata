@@ -153,6 +153,18 @@ options and are typed with the pandas or xarray object they return, while a bare
 fails partway no longer overwrites pinned cache files
 ([ADR 0031](adr/0031-staged-refresh-and-lockfile-first-commit.md)).
 
+Shipped in v0.28.0: the first fixes from triaging the walkthroughs' friction
+notes. A frame now says which unit system, datum, and station its CSV left
+unstated: assets carry the request's `properties`, lockfiles pin them, and
+every reader copies them into `attrs["usdata"]`
+([ADR 0043](adr/0043-asset-properties.md)). GRIB2 units take the UDUNITS
+notation, and a Storm Events frame no longer loses `BEGIN_UTC` when `usecols`
+drops `END_DATE_TIME`. The larger friction themes are issues:
+[nearest-scan selection](https://github.com/jakeryderv/usdata/issues/330),
+[GRIB2 field names](https://github.com/jakeryderv/usdata/issues/331),
+[checking a lockfile against today's listings](https://github.com/jakeryderv/usdata/issues/332),
+and [citation dates](https://github.com/jakeryderv/usdata/issues/333).
+
 The work now is breadth: more of the datasets people reach for, from more
 agencies, each verified by a live check and a worked example. 1.0 comes when
 the catalog feels comprehensive and the contract feels settled, a judgment

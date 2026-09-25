@@ -1,1 +1,0 @@
-Correction to the 0.27.0 notes: that release also corrected the `L` column of `noaa:coops-water-levels`, which CO-OPS defines as the expected water level height limit flag (1 when a reading passes the maximum or minimum expected level), not an inferred-value flag.

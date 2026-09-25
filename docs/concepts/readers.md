@@ -24,8 +24,9 @@ provenance under a `usdata` attribute. That is metadata about the source bytes,
 not a record of your analysis; see [provenance and drift](provenance-and-drift.md).
 The properties are the facts of the request the bytes leave out: an NCEI CSV
 has no units row, so its frame's `attrs["usdata"]["properties"]` says
-`{"units": "metric"}`, and a CO-OPS frame names its station, datum, units, and
-time zone there. They travel in the lockfile, so a restored file says the same
+`{"units": "metric"}`, and a CO-OPS frame names its station, units, and time
+zone there, with the datum for water levels and predictions and the bin for
+currents. They travel in the lockfile, so a restored file says the same
 ([ADR 0043](../adr/0043-asset-properties.md)).
 
 Where a file leaves a variable's units missing or `unknown`, the NetCDF4 and

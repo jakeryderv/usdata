@@ -15,7 +15,8 @@ operations can drop attributes, so the sidecar and the lockfile remain the
 persistent record.
 
 A lockfile records the manifest's checksum, when it was generated, the usdata
-version, and for each asset its resolved URL, checksum, and provenance.
+version, and for each asset its resolved URL, checksum, request `properties`,
+and provenance.
 
 For a source that needs a key, the sidecar's `credentials` field names the
 environment variables the source requires, such as `USDATA_AQS_EMAIL` and

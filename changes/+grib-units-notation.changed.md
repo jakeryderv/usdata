@@ -1,1 +1,0 @@
-GRIB2 variables' `units` attribute now uses the UDUNITS notation CF metadata and xarray-based tools expect, `J kg-1` and `m2 s-2` where ecCodes writes `J kg**-1` and `m**2 s**-2`. Only the notation changes, and the file's own spelling is kept in `GRIB_units` whenever the two differ. `usdata inspect` and `readers.inventory` still list the raw ecCodes strings.
