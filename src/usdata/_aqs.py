@@ -13,7 +13,7 @@ import json
 from importlib import import_module
 from typing import TYPE_CHECKING, Any
 
-from usdata.readers import MissingReaderDependency
+from usdata.readers import MissingReaderDependency, source_attrs
 
 if TYPE_CHECKING:
     from usdata._fetch import FetchedAsset
@@ -43,9 +43,5 @@ def open_aqs(fetched: FetchedAsset) -> Any:
     for column in DATE_COLUMNS:
         if column in frame:
             frame[column] = pandas.to_datetime(frame[column], format="%Y-%m-%d")
-    frame.attrs["usdata"] = {
-        "asset_id": fetched.asset.id,
-        "provenance": fetched.provenance.model_dump(mode="json"),
-        "header": body.get("Header", []),
-    }
+    frame.attrs["usdata"] = {**source_attrs(fetched), "header": body.get("Header", [])}
     return frame

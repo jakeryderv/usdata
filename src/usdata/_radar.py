@@ -7,7 +7,7 @@ import gzip
 from importlib import import_module
 from typing import TYPE_CHECKING, Any
 
-from usdata.readers import MissingReaderDependency, RadarDecodeError
+from usdata.readers import MissingReaderDependency, RadarDecodeError, source_attrs
 
 # NOAA RDA/RPG ICD 2620002Y, Table XVII-I notes 21 and 30.
 MOMENT_FLAG_COUNTS = {
@@ -117,8 +117,7 @@ def open_nexrad(fetched: FetchedAsset, *, sweep: int | list[int] | None = None) 
                     masked.encoding = data.encoding.copy()
                     node[name] = masked
     radar.attrs["usdata"] = {
-        "asset_id": fetched.asset.id,
-        "provenance": fetched.provenance.model_dump(mode="json"),
+        **source_attrs(fetched),
         "sweeps": [name.lstrip("/") for name in radar.groups if name.startswith("/sweep_")],
     }
     return radar

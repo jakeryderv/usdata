@@ -57,6 +57,12 @@ def test_request_is_explicit_and_equivalent_utc_bounds_are_stable():
     assert asset.time == original.time
     assert asset.dataset_id == "noaa:coops-water-levels"
     assert asset.media_type == "text/csv"
+    assert asset.properties == {
+        "station": "8518750",
+        "datum": "MLLW",
+        "units": "metric",
+        "time_zone": "gmt",
+    }
 
 
 @pytest.mark.parametrize(

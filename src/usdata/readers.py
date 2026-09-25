@@ -240,6 +240,20 @@ def caller_stacklevel() -> int:
     return level
 
 
+def source_attrs(fetched: FetchedAsset) -> dict[str, Any]:
+    """The ``attrs["usdata"]`` every reader starts from: the asset, its request facts, its record.
+
+    ``properties`` are the facts of the request the bytes do not state, such as
+    a unit system or datum, always a mapping and empty when the asset records
+    none (ADR 0043).
+    """
+    return {
+        "asset_id": fetched.asset.id,
+        "properties": dict(fetched.asset.properties),
+        "provenance": fetched.provenance.model_dump(mode="json"),
+    }
+
+
 def _local_timestamps(pandas: Any, values: Any) -> Any:
     """Storm Events local timestamps as tz-naive datetimes, unparsable strings as NaT.
 
@@ -549,10 +563,7 @@ def open_csv(
             )
     if units:
         frame.attrs["units"] = {name: units[name] for name in frame.columns}
-    frame.attrs["usdata"] = {
-        "asset_id": fetched.asset.id,
-        "provenance": fetched.provenance.model_dump(mode="json"),
-    }
+    frame.attrs["usdata"] = source_attrs(fetched)
     if fetched.asset.dataset_id == STORM_EVENTS_DATASET:
         derive_storm_events_utc(pandas, frame)
     return frame

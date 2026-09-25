@@ -161,6 +161,7 @@ def test_regular_grid_coordinates_values_attrs_and_provenance(tmp_path) -> None:
     assert result.latitude.attrs["units"] == "degrees_north"
     assert result.attrs["usdata"] == {
         "asset_id": "field.grib2",
+        "properties": {},
         "provenance": fetched.provenance.model_dump(mode="json"),
         "messages": {
             "t": {

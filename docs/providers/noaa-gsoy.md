@@ -15,8 +15,8 @@ query remains in the manifest. A timezone offset can change the selected UTC yea
 CSV `DATE` is a four-digit year. Use `item.open_csv(dtype={"DATE": "string"})` to
 preserve it as text with the existing pandas reader. Common variables are `PRCP`
 (annual precipitation total, metric millimeters) and `TAVG` (annual mean
-temperature, metric degrees Celsius). CSV contains no units row; provenance
-retains the requested unit system. Variable availability depends on the station.
+temperature, metric degrees Celsius). CSV contains no units row; the frame's
+`attrs["usdata"]["properties"]["units"]` records the requested unit system. Variable availability depends on the station.
 
 Some elements, including degree-day summaries, have hemisphere-dependent
 accumulation seasons. Annual record labels do not mean every element represents

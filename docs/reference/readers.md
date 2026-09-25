@@ -91,10 +91,10 @@ pandas inference and default missing-value parsing.
 
 | Format | Where | Contents |
 |---|---|---|
-| CSV, HURDAT2, AQS | `frame.attrs["usdata"]` | Asset id and a JSON-compatible copy of its provenance |
+| CSV, HURDAT2, AQS | `frame.attrs["usdata"]` | Asset id, the asset's request `properties` (a mapping, empty when it records none), and a JSON-compatible copy of its provenance |
 | CSV with a units row | `frame.attrs["units"]` | Units row, filtered to the selected columns |
-| NEXRAD Level II | `radar.attrs["usdata"]` | Asset id, provenance, and `sweeps` listing the returned groups |
-| NetCDF4, GRIB2 | `dataset.attrs["usdata"]` | Asset id and provenance |
+| NEXRAD Level II | `radar.attrs["usdata"]` | Asset id, `properties`, provenance, and `sweeps` listing the returned groups |
+| NetCDF4, GRIB2 | `dataset.attrs["usdata"]` | Asset id, `properties`, and provenance |
 | GRIB2 | `dataset.attrs["usdata"]["messages"]` | Each variable name mapped to its message's `file_index`, `object_index`, `shortName`, `typeOfLevel`, `level`, and `step`, plus the `selector` a partial fetch asked for |
 | `grib2` | per-variable `attrs` | `units` in UDUNITS notation (`J kg-1` where ecCodes writes `J kg**-1`, with the file's spelling in `GRIB_units` whenever the two differ), `name`, `typeOfLevel`, `level`, discipline, category, and parameter numbers, packing type, reference and valid times, step; projection parameters on the Dataset for projected grids |
 

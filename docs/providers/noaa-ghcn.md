@@ -19,7 +19,8 @@ then request CSV in groups of up to 50 stations. Search and data service outages
 can occur independently. See [service diagnostics](noaa-services.md#access-notes).
 
 Open the downloaded file with the [pandas reader](../reference/readers.md).
-The CSV has no units row; request provenance retains the unit system.
+The CSV has no units row, so the requested unit system is kept in the frame's
+`attrs["usdata"]["properties"]["units"]`, and in the lockfile.
 See the [getting-started walkthrough](../getting-started.md) and
 [weather/streamflow example](https://usdata.dev/studies/weather-and-streamflow/).
 

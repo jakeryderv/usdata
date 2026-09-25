@@ -19,9 +19,14 @@ pandas and CF decoding normally handle. The one rewrite is notation: GRIB2
 `units` take the UDUNITS spelling CF metadata uses, `J kg-1` for ecCodes'
 `J kg**-1`, and keep the file's own spelling in `GRIB_units`.
 
-Every result carries a copy of the asset id and provenance under a `usdata`
-attribute. That is metadata about the source bytes, not a record of your
-analysis; see [provenance and drift](provenance-and-drift.md).
+Every result carries a copy of the asset id, its request properties, and its
+provenance under a `usdata` attribute. That is metadata about the source bytes,
+not a record of your analysis; see [provenance and drift](provenance-and-drift.md).
+The properties are the facts of the request the bytes leave out: an NCEI CSV
+has no units row, so its frame's `attrs["usdata"]["properties"]` says
+`{"units": "metric"}`, and a CO-OPS frame names its station, datum, units, and
+time zone there. They travel in the lockfile, so a restored file says the same
+([ADR 0043](../adr/0043-asset-properties.md)).
 
 Where a file leaves a variable's units missing or `unknown`, the NetCDF4 and
 GRIB2 readers fill `units` and `long_name` from the registry entry's variable

@@ -9,7 +9,9 @@ Require an ASCII alphanumeric string `station`, a positive integer `bin`, and
 both timestamps. IDs include `cb0102` (Cape Henry) and `CFR1624` (a historical
 survey station); preserve the published spelling. Unlike
 [water levels](noaa-coops.md), currents need no vertical `datum`.
-`units` is `metric` (default, **cm/s**) or `english` (**knots**).
+`units` is `metric` (default, **cm/s**) or `english` (**knots**); the CSV states
+neither, so the frame records it, with the station, bin, and time zone, in
+`attrs["usdata"]["properties"]`.
 Direction is delivered in degrees. Unknown parameters, geographic/text
 selectors, and `variables` are rejected. Availability of a station, bin, and
 time combination is checked when fetching.

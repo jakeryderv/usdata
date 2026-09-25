@@ -220,6 +220,13 @@ Rules:
   [ADR 0039](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0039-credentialed-sources.md).
 - Give assets stable ids: they become cache filenames and lockfile keys.
 - Set `size` and `time` on assets when the listing provides them.
+- Record in `properties` each fact of the request that the fetched bytes do not
+  state but a reader needs, such as the unit system, datum, or station:
+  `properties={"units": params.units}`. Keys are lowercase snake case naming the
+  fact, values are strings in the source's vocabulary, and a fact the file
+  states itself (a station column, a units row) is left out. Readers copy them
+  into `attrs["usdata"]["properties"]`, and never put a credential there
+  ([ADR 0043](../adr/0043-asset-properties.md)).
 - Do not write to the cache or create provenance. `usdata.fetch` does that.
 
 ## 4. Tests

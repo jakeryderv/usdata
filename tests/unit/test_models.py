@@ -4,6 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from usdata.models import (
+    Asset,
     BBox,
     Capabilities,
     Dataset,
@@ -258,3 +259,10 @@ def test_place_subset_is_a_separate_capability_that_defaults_to_false() -> None:
     assert Capabilities().place_subset is False
     keyed = Capabilities(place_subset=True)
     assert keyed.place_subset and not keyed.spatial_subset
+
+
+def test_asset_properties_default_empty_and_older_json_parses() -> None:
+    raw = {"id": "a", "dataset_id": "noaa:ghcn-daily", "href": "https://x/a", "protocol": "http"}
+    assert Asset.model_validate(raw).properties == {}
+    stated = Asset.model_validate({**raw, "properties": {"units": "metric"}})
+    assert Asset.model_validate_json(stated.model_dump_json()) == stated

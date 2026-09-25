@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from usdata.inspect import NetcdfVariable
-from usdata.readers import MissingReaderDependency, fill_registry_attrs
+from usdata.readers import MissingReaderDependency, fill_registry_attrs, source_attrs
 
 if TYPE_CHECKING:
     from usdata._fetch import FetchedAsset
@@ -42,10 +42,7 @@ def open_netcdf(fetched: FetchedAsset) -> Any:
         xarray.open_dataset(stream, engine="h5netcdf", chunks=None) as dataset,
     ):
         dataset.load()
-    dataset.attrs["usdata"] = {
-        "asset_id": fetched.asset.id,
-        "provenance": fetched.provenance.model_dump(mode="json"),
-    }
+    dataset.attrs["usdata"] = source_attrs(fetched)
     fill_registry_attrs(fetched, dataset)
     return dataset
 

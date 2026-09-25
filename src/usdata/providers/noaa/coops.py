@@ -227,6 +227,8 @@ class _CoopsStation(HttpProvider):
             protocol=Protocol.HTTP,
             media_type="text/csv",
             time=TimeRange(start=start, end=end),
+            # The CSV states none of these, so they travel with the asset (ADR 0043).
+            properties={"station": station, **params, "time_zone": "gmt"},
         )
 
     def _validate(self, path: Path, asset: Asset) -> None:

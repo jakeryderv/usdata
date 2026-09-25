@@ -46,3 +46,4 @@ is described in the guides and reference pages.
 - [0040: AQS daily summaries are selected by pollutant codes and one place, a year per request](0040-aqs-daily-selection.md)
 - [0041: Every dataset has a walkthrough and its own page; examples that answer a question are studies](0041-dataset-walkthroughs-and-studies.md)
 - [0042: One open method per format, and a bare `open()` that infers](0042-one-open-method-per-format.md)
+- [0043: Assets carry the request facts their bytes do not state](0043-asset-properties.md)
