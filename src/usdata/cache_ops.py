@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field, ValidationError
 from usdata import provenance
 from usdata.cache import asset_path, cache_dir
 from usdata.manifest import Lockfile, lockfile_path
-from usdata.models import Provenance
+from usdata.models import AwareUTC, Provenance, as_utc
 from usdata.provenance import SIDECAR_SUFFIX
 
 MANIFEST_GLOBS = ("*.yaml", "*.yml")
@@ -37,8 +37,8 @@ class CacheEntry(BaseModel):
     asset_id: str
     path: Path
     size: int = Field(ge=0, description="Bytes of the data file, excluding its sidecar")
-    modified_at: datetime = Field(description="Filesystem modification time, in UTC")
-    retrieved_at: datetime | None = Field(
+    modified_at: AwareUTC = Field(description="Filesystem modification time, in UTC")
+    retrieved_at: AwareUTC | None = Field(
         default=None,
         description="When the sidecar says the file was fetched; unset without a readable sidecar",
     )
@@ -131,11 +131,12 @@ def candidates(
         older_than: Keep entries younger than this age. Unfiltered when None.
         dataset: Keep only entries of this dataset id. Unfiltered when None.
         now: The moment ages are measured from; the current UTC time when omitted.
+            A naive value means UTC.
 
     Returns:
         The matching entries, in the order :func:`entries` returns them.
     """
-    moment = now or datetime.now(UTC)
+    moment = datetime.now(UTC) if now is None else as_utc(now)
     return [
         entry
         for entry in entries(root)

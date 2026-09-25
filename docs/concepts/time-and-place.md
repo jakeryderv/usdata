@@ -30,7 +30,7 @@ among assets you have already listed, with an explicit policy: a
 timezone-aware target, a tolerance measured from each asset's start, and a
 direction, either `nearest` or `at_or_before`. The closest eligible start wins;
 ties break by asset id. It performs no listing, download, or decoding, and it
-raises rather than skipping an asset with a missing or naive start time.
+raises rather than skipping an asset with a missing start time.
 
 `at_or_before` means the file **started** at or before the target, not that
 its acquisition had finished or that it was available by then. A scan can

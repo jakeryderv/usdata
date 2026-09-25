@@ -12,7 +12,7 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from usdata._files import atomic_write_text
-from usdata.models import Asset, BBox, Provenance, Query
+from usdata.models import Asset, AwareUTC, BBox, Provenance, Query
 from usdata.query import build_query
 from usdata.registry import Registry, default_registry
 
@@ -123,7 +123,7 @@ class Lockfile(BaseModel):
 
     manifest: str
     manifest_checksum: str = Field(description="sha256 of the manifest file when it was resolved")
-    generated_at: datetime
+    generated_at: AwareUTC
     usdata_version: str
     assets: list[LockedAsset] = Field(default_factory=list)
 

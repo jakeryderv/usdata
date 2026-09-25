@@ -114,8 +114,8 @@ def test_ties_are_order_independent_by_asset_then_dataset_id():
 
 def test_equivalent_instants_are_compared_in_utc_without_rewriting_assets():
     asset = candidate("exact")
-    original_start = TARGET.astimezone(timezone(timedelta(hours=-5)))
-    asset.time = TimeRange(start=original_start)
+    asset.time = TimeRange(start=TARGET.astimezone(timezone(timedelta(hours=-5))))
+    original_start = asset.time.start
     result = select_by_time(
         [asset],
         target=TARGET.astimezone(timezone(timedelta(hours=9))),
@@ -171,7 +171,10 @@ def test_invalid_policy_rejected_even_with_no_candidates(field, value, match):
         select_by_time([], **options)
 
 
-@pytest.mark.parametrize("time", [None, TimeRange(), TimeRange(start=TARGET.replace(tzinfo=None))])
+# A validated TimeRange cannot hold a naive start; model_construct skips that validation.
+@pytest.mark.parametrize(
+    "time", [None, TimeRange(), TimeRange.model_construct(start=TARGET.replace(tzinfo=None))]
+)
 def test_invalid_candidate_time_is_not_silently_skipped_after_exact_match(time):
     invalid = candidate("invalid")
     invalid.time = time

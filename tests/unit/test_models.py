@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 
 import pytest
 from pydantic import ValidationError
@@ -72,6 +72,23 @@ def test_time_range_overlap_with_open_bounds() -> None:
     assert TimeRange().overlaps(TimeRange(start=t(2000), end=t(2001)))
     with pytest.raises(ValidationError):
         TimeRange(start=t(2001), end=t(2000))
+
+
+def test_model_datetimes_are_stored_as_aware_utc() -> None:
+    naive = datetime(2024, 5, 6, 12)
+    eastern = datetime(2024, 5, 6, 7, tzinfo=timezone(timedelta(hours=-5)))  # 12:00 UTC
+    span = TimeRange(start=naive, end=eastern + timedelta(hours=1))
+    assert span == TimeRange(
+        start=datetime(2024, 5, 6, 12, tzinfo=UTC), end=datetime(2024, 5, 6, 13, tzinfo=UTC)
+    )
+    assert span.start is not None and span.start.tzinfo is UTC
+    assert span.end is not None and span.end.tzinfo is UTC
+    # A naive and an aware bound in the wrong order are a validation error, not a TypeError.
+    with pytest.raises(ValidationError, match="start must be <= end"):
+        TimeRange(start=naive, end=eastern - timedelta(minutes=1))
+    parsed = TimeRange.model_validate_json('{"start": "2024-05-06T12:00:00"}').start
+    assert parsed == datetime(2024, 5, 6, 12, tzinfo=UTC)
+    assert parsed is not None and parsed.tzinfo is UTC
 
 
 def _dataset(**overrides: object) -> Dataset:

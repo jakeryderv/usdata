@@ -47,6 +47,11 @@ def test_ordered_puts_start_time_first_then_id_and_timeless_last() -> None:
     assert ordered([]) == []
 
 
+def test_ordered_compares_naive_and_aware_starts_as_utc() -> None:
+    mixed = [asset("aware", LATER), asset("naive", EARLIER.replace(tzinfo=None))]
+    assert [a.id for a in ordered(mixed)] == ["naive", "aware"]
+
+
 @pytest.fixture
 def registry() -> Registry:
     reg = default_registry()

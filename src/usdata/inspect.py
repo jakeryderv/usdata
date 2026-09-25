@@ -13,7 +13,6 @@ import csv
 import gzip
 import io
 import os
-from datetime import datetime
 from enum import StrEnum
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -21,7 +20,7 @@ from typing import TYPE_CHECKING
 from pydantic import BaseModel, Field
 
 from usdata import provenance, readers
-from usdata.models import Protocol, Provenance
+from usdata.models import AwareUTC, Protocol, Provenance
 
 if TYPE_CHECKING:
     from usdata._fetch import FetchedAsset
@@ -164,7 +163,7 @@ class Summary(BaseModel):
     path: Path
     size: int = Field(ge=0, description="Bytes on disk now, not the size provenance recorded")
     format: AssetFormat
-    retrieved_at: datetime
+    retrieved_at: AwareUTC
     checksum: str
     source_url: str
     csv: CsvSummary | None = None

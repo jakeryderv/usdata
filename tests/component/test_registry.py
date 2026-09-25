@@ -17,6 +17,16 @@ def registry() -> Registry:
     return default_registry()
 
 
+def test_search_takes_a_naive_window_built_directly_as_utc(registry: Registry) -> None:
+    from datetime import UTC, datetime
+
+    from usdata.models import TimeRange
+
+    naive = registry.search(Query(time=TimeRange(start=datetime(2020, 1, 1))))
+    aware = registry.search(Query(time=TimeRange(start=datetime(2020, 1, 1, tzinfo=UTC))))
+    assert naive and naive == aware
+
+
 def test_bundled_registry_loads(registry: Registry) -> None:
     assert len(registry) >= 3
     assert "noaa:nexrad-level2" in registry

@@ -9,12 +9,21 @@ from __future__ import annotations
 
 import math
 import re
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 from pathlib import PurePosixPath
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
+
+
+def as_utc(value: datetime) -> datetime:
+    """The shared time policy: a naive datetime means UTC, an aware one converts to UTC."""
+    return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
+
+
+AwareUTC = Annotated[datetime, AfterValidator(as_utc)]
+"""A datetime field stored as aware UTC whatever it was given; see :func:`as_utc`."""
 
 
 class Protocol(StrEnum):
@@ -128,8 +137,8 @@ class TimeRange(BaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    start: datetime | None = None
-    end: datetime | None = None
+    start: AwareUTC | None = None
+    end: AwareUTC | None = None
 
     @model_validator(mode="after")
     def _ordered(self) -> TimeRange:
@@ -596,7 +605,7 @@ class TemporalSelection(BaseModel):
     candidates. Counts refer to the supplied candidates, not a remote catalog.
     """
 
-    target: datetime
+    target: AwareUTC
     tolerance: timedelta
     direction: Literal["nearest", "at_or_before"]
     asset: Asset | None
@@ -611,7 +620,7 @@ class Provenance(BaseModel):
     dataset_id: str
     provider: str
     source_url: str
-    retrieved_at: datetime
+    retrieved_at: AwareUTC
     checksum: str
     size: int = Field(ge=0)
     license: str | None = None

@@ -5,7 +5,7 @@ from __future__ import annotations
 import importlib
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from types import MappingProxyType, TracebackType
 from typing import Any, ClassVar, Literal, Self, TypeVar
@@ -13,7 +13,7 @@ from typing import Any, ClassVar, Literal, Self, TypeVar
 from pydantic import BaseModel, ValidationError
 from pydantic_core import ErrorDetails
 
-from usdata.models import Asset, Dataset, PartialFetch, Place, Provenance, Query
+from usdata.models import Asset, Dataset, PartialFetch, Place, Provenance, Query, as_utc
 from usdata.providers.credentials import Credentials
 
 QueryField = Literal["text", "bbox", "variables", "time"]
@@ -70,7 +70,7 @@ def required_credentials(dataset: Dataset, credentials: Credentials | None) -> C
 
 def to_utc(value: datetime) -> datetime:
     """Apply the shared time policy: naive datetimes mean UTC, aware ones convert to it."""
-    return value.replace(tzinfo=value.tzinfo or UTC).astimezone(UTC)
+    return as_utc(value)
 
 
 def described_params(model: type[BaseModel]) -> Mapping[str, str]:

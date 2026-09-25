@@ -33,10 +33,11 @@ asset id, then dataset id. Equivalent UTC instants compare equally across
 offsets and repeated daylight-saving wall times. An asset's `time.end` is not
 used.
 
-Every supplied asset must have an aware `time.start`, including assets that
-would not win. Missing or naive starts, invalid arguments, and duplicate
-`(dataset_id, id)` pairs raise `ValueError`; the helper does not skip or
-deduplicate. Repeated ids in different datasets are allowed.
+Every supplied asset must have a `time.start`, including assets that would not
+win. The models store every datetime as aware UTC, reading a naive one as UTC,
+so only a start that bypassed validation can be naive. Missing or naive starts,
+invalid arguments, and duplicate `(dataset_id, id)` pairs raise `ValueError`;
+the helper does not skip or deduplicate. Repeated ids in different datasets are allowed.
 
 ## Result
 

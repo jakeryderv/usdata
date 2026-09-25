@@ -226,4 +226,7 @@ def test_direct_query_uses_utc_independently_of_local_timezone(adapter, monkeypa
         time.tzset()
     assert [asset.id for asset in assets] == ["KTLX20240506_120000_V06"]
     assert assets == normalized
-    assert query.time is not None and query.time.start == start
+    # The model stores the naive start as the same instant in UTC.
+    stored = query.time.start if query.time is not None else None
+    assert stored == start.replace(tzinfo=start.tzinfo or UTC)
+    assert stored is not None and stored.tzinfo is UTC
