@@ -8,7 +8,7 @@
     "deploy:docs": "wrangler deploy --config docs.wrangler.jsonc"
   },
   "devDependencies": {
-    "wrangler": "4.132.0"
+    "wrangler": "4.136.3"
   },
   "overrides": {
     "workerd": "1.20260908.1",
