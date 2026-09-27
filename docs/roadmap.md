@@ -181,8 +181,8 @@ manifest source can keep the one asset nearest an instant, and the lockfile pins
 the choice so a restore never selects again
 ([ADR 0044](adr/0044-manifest-select-by-time.md)). Connecticut's pre-2022
 counties resolve as places, and sources still keyed by them refuse a planning
-region rather than returning nothing. Checksums have one canonical form, and part
-of the cache can live on another disk through a symlink.
+region rather than returning nothing or statewide rows alone. Checksums have one
+canonical form, and part of the cache can live on another disk through a symlink.
 
 The work now is breadth: more of the datasets people reach for, from more
 agencies, each verified by a live check and a worked example. 1.0 comes when

@@ -15,6 +15,10 @@ The documentation site assembles their preview automatically.
 ## [0.30.0](https://github.com/jakeryderv/usdata/releases/tag/v0.30.0) - 2026-09-27
 
 
+### Breaking
+
+- FEMA disaster declarations, AQS daily summaries, and NWS events, which still key Connecticut by its pre-2022 counties, now refuse a Connecticut planning region (exit 2, or `QueryError` in Python) and name the counties it overlaps, instead of returning nothing or statewide rows alone. Adapters for such sources call the new `Provider.refuse_planning_region`. ([#360](https://github.com/jakeryderv/usdata/issues/360))
+
 ### Added
 
 - A manifest source can keep only the one asset nearest an instant with `select: {time, within, direction}`, so pinning one radar volume or satellite scan no longer means copying its start time from a listing. `direction: at_or_before` keeps the scan under way at the instant; the lockfile pins the choice and a restore never selects again. ([#330](https://github.com/jakeryderv/usdata/issues/330))
@@ -26,7 +30,7 @@ The documentation site assembles their preview automatically.
 
 ### Fixed
 
-- Connecticut's eight counties before 2022, such as `Hartford County, CT` or `"09003"`, now resolve as locations beside the planning regions that replaced them. FEMA disaster declarations, AQS daily summaries, and NWS events, which still key Connecticut by those counties, refuse a planning region with the counties it overlaps instead of silently returning nothing or statewide rows alone. ([#360](https://github.com/jakeryderv/usdata/issues/360))
+- Connecticut's eight counties before 2022, such as `Hartford County, CT` or `"09003"`, now resolve as locations beside the planning regions that replaced them. ([#360](https://github.com/jakeryderv/usdata/issues/360))
 - A `noaa:coastwatch-sst` point query, or a box too small to hold a grid center, now selects the one cell at its middle instead of returning no assets.
 - GRIB2 `reference_time` and `valid_time` attributes keep the seconds a message states, so an MRMS analysis stamped `20:00:41` no longer reads as `20:00:00`.
 
