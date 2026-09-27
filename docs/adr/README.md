@@ -48,3 +48,4 @@ is described in the guides and reference pages.
 - [0042: One open method per format, and a bare `open()` that infers](0042-one-open-method-per-format.md)
 - [0043: Assets carry the request facts their bytes do not state](0043-asset-properties.md)
 - [0044: A manifest source can keep the asset nearest an instant](0044-manifest-select-by-time.md)
+- [0045: ACS 5-year estimates are selected by vintage, variables, and one place, and kept as served](0045-acs-5year-selection.md)

@@ -190,12 +190,21 @@ the catalog feels comprehensive and the contract feels settled, a judgment
 rather than a countdown ([versioning](versioning.md#path-to-10)). A new dataset
 that needs a core change makes it and says so in the changelog.
 
+Selected: [ACS 5-year estimates](https://github.com/jakeryderv/usdata/issues/379)
+from the Census Data API, the second source that needs a key and the second
+selected by place after FEMA. Its selection rules are in
+[ADR 0045](adr/0045-acs-5year-selection.md): an explicit vintage rather than a
+window, at most fifty variables, one state or county, and Connecticut's codes by
+vintage. Probing suggests ADR 0039 covers a single key sent as a query
+parameter without amendment; the adapter's contract checks will confirm it. The worked example gives the population and
+housing of the Oklahoma counties in the
+[disaster-declarations study](https://usdata.dev/studies/disaster-declarations/).
+
 ## Next
 
 Sources that need a key are supported since v0.26.0
-([ADR 0039](adr/0039-credentialed-sources.md)). A second one is the best test
-of whether those rules generalize; if its credential shape does not fit them,
-amend the ADR rather than bending the adapter.
+([ADR 0039](adr/0039-credentialed-sources.md)); the second one is selected
+above.
 
 Scope one dataset expansion around a concrete analysis use case. These are
 candidates to investigate, not selected implementations. Refine a candidate into
@@ -204,8 +213,6 @@ moving it to Now. Prefer additions that exercise a useful new access pattern or
 reuse an existing one while preserving the adapter, transport, cache/provenance,
 and optional-reader boundaries:
 
-- The [Census Data API](providers/census.md): a second source that needs a key,
-  on every request, and the natural second place-keyed source after FEMA.
 - [NASA access through earthaccess](https://github.com/jakeryderv/usdata/issues/9):
   satellite products behind an Earthdata login, a different credential shape
   and a heavier dependency, so a decision before an adapter.

@@ -17,11 +17,29 @@ variable definitions such as `.../2022/acs/acs5/variables/B01003_001E.json`.
 The API was previously usable without a key for light use, and an earlier
 version of the catalog entry said so.
 
-That makes Census a credentialed source, so it waits with the others on the
-[roadmap](../roadmap.md) rather than being the next anonymous one. Its
-geography is a state or county FIPS code (`for=county:113&in=state:40`), so
-when it is built it selects by place, not by box
-([ADR 0034](../adr/0034-query-keeps-the-resolved-place.md)).
+That makes Census a credentialed source. Its geography is a state or county
+FIPS code (`for=county:113&in=state:40`), so it selects by place, not by box
+([ADR 0034](../adr/0034-query-keeps-the-resolved-place.md)). `census:acs-5year`
+is selected on the [roadmap](../roadmap.md)
+([issue 379](https://github.com/jakeryderv/usdata/issues/379)), with its rules
+in [ADR 0045](../adr/0045-acs-5year-selection.md).
+
+Checked with a key on 2026-09-27, against `acs/acs5` vintages 2021 to 2023:
+
+- The response is a JSON array of arrays with a header row. Every value is a
+  string, and the geography columns follow the requested variables. It holds no
+  copy of the key, and identical requests return identical bytes.
+- A request takes at most fifty variables, `NAME` included; the fifty-first is
+  `400` with `error: 'get' is limited to 50 variables`.
+- An unknown variable is `400` with a plain-text message, and an unknown vintage
+  is a `404` HTML page. A missing or invalid key is a `302` to `missing_key.html`
+  or `invalid_key.html`. A geography the vintage lacks is `204` with an empty
+  body.
+- Connecticut is keyed by its eight old counties through vintage 2021 and by its
+  nine planning regions from vintage 2022.
+- Margins of error and some estimates are negative
+  [annotation codes](https://www.census.gov/data/developers/data-sets/acs-1year/notes-on-acs-estimate-and-annotation-values.html),
+  such as `-555555555` for a controlled estimate.
 
 --8<-- "_snippets/planned-datasets.md"
 
