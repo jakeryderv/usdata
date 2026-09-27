@@ -175,6 +175,15 @@ since settled by carrying the pre-2022 counties as places, and per-field GRIB2
 selectors, now part of
 [GRIB2 field names](https://github.com/jakeryderv/usdata/issues/331).
 
+Shipped in v0.30.0: the first of those friction themes,
+[nearest-scan selection](https://github.com/jakeryderv/usdata/issues/330). A
+manifest source can keep the one asset nearest an instant, and the lockfile pins
+the choice so a restore never selects again
+([ADR 0044](adr/0044-manifest-select-by-time.md)). Connecticut's pre-2022
+counties resolve as places, and sources still keyed by them refuse a planning
+region rather than returning nothing. Checksums have one canonical form, and part
+of the cache can live on another disk through a symlink.
+
 The work now is breadth: more of the datasets people reach for, from more
 agencies, each verified by a live check and a worked example. 1.0 comes when
 the catalog feels comprehensive and the contract feels settled, a judgment

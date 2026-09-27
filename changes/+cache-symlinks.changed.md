@@ -1,1 +1,0 @@
-Part of the cache can now live on another disk through a symlink: a cache path is checked against the root as written rather than after resolving symlinks, which asset ids still cannot escape. An asset id naming a provenance sidecar or a temporary file is refused.

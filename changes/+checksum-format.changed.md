@@ -1,1 +1,0 @@
-Checksums in assets, provenance, and lockfiles must be `sha256:` and 64 hex digits, and are stored in lowercase, so a hand-edited pin in capitals still names the same bytes and mirror object; any other form is refused when the record is read instead of failing every fetch against it.
