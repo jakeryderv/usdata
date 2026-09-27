@@ -12,6 +12,33 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.30.0](https://github.com/jakeryderv/usdata/releases/tag/v0.30.0) - 2026-09-27
+
+
+### Breaking
+
+- FEMA disaster declarations, AQS daily summaries, and NWS events, which still key Connecticut by its pre-2022 counties, now refuse a Connecticut planning region (exit 2, or `QueryError` in Python) and name the counties it overlaps, instead of returning nothing or statewide rows alone. Adapters for such sources call the new `Provider.refuse_planning_region`. ([#360](https://github.com/jakeryderv/usdata/issues/360))
+
+### Added
+
+- A manifest source can keep only the one asset nearest an instant with `select: {time, within, direction}`, so pinning one radar volume or satellite scan no longer means copying its start time from a listing. `direction: at_or_before` keeps the scan under way at the instant; the lockfile pins the choice and a restore never selects again. ([#330](https://github.com/jakeryderv/usdata/issues/330))
+
+### Changed
+
+- Checksums in assets, provenance, and lockfiles must be `sha256:` and 64 hex digits, and are stored in lowercase, so a hand-edited pin in capitals still names the same bytes and mirror object; any other form is refused when the record is read instead of failing every fetch against it.
+- Part of the cache can now live on another disk through a symlink: a cache path is checked against the root as written rather than after resolving symlinks, which asset ids still cannot escape. An asset id naming a provenance sidecar or a temporary file is refused.
+
+### Fixed
+
+- Connecticut's eight counties before 2022, such as `Hartford County, CT` or `"09003"`, now resolve as locations beside the planning regions that replaced them. ([#360](https://github.com/jakeryderv/usdata/issues/360))
+- A `noaa:coastwatch-sst` point query, or a box too small to hold a grid center, now selects the one cell at its middle instead of returning no assets.
+- GRIB2 `reference_time` and `valid_time` attributes keep the seconds a message states, so an MRMS analysis stamped `20:00:41` no longer reads as `20:00:00`.
+
+### Documentation
+
+- The Storm Events and SPC guides now say that their annual files are split by local date while windows select them by UTC year, so a window within a few hours of a new year fetches only one file, and how to widen it to fetch both. ([#349](https://github.com/jakeryderv/usdata/issues/349))
+- The how-it-works page says to run one fetch or pull per cache at a time, since nothing locks the cache.
+
 ## [0.29.0](https://github.com/jakeryderv/usdata/releases/tag/v0.29.0) - 2026-09-25
 
 
