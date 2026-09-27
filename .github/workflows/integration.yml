@@ -64,6 +64,7 @@ jobs:
           # Keyed sources read these (ADR 0039); anonymous ones ignore them.
           USDATA_AQS_EMAIL: ${{ secrets.USDATA_AQS_EMAIL }}
           USDATA_AQS_KEY: ${{ secrets.USDATA_AQS_KEY }}
+          USDATA_CENSUS_KEY: ${{ secrets.USDATA_CENSUS_KEY }}
         run: just test-live "$LIVE_TEST" --junitxml=reports/live.xml --durations=15
       - name: Summarize live results
         if: always()
@@ -97,6 +98,7 @@ jobs:
           NOTEBOOK: ${{ matrix.path }}
           USDATA_AQS_EMAIL: ${{ secrets.USDATA_AQS_EMAIL }}
           USDATA_AQS_KEY: ${{ secrets.USDATA_AQS_KEY }}
+          USDATA_CENSUS_KEY: ${{ secrets.USDATA_CENSUS_KEY }}
         run: just run-notebooks --notebook "$NOTEBOOK" --output-dir reports/notebooks
       - name: Summarize notebook results
         if: always()
@@ -135,6 +137,7 @@ jobs:
           USDATA_MIRROR_URL: https://data.usdata.dev
           USDATA_AQS_EMAIL: ${{ secrets.USDATA_AQS_EMAIL }}
           USDATA_AQS_KEY: ${{ secrets.USDATA_AQS_KEY }}
+          USDATA_CENSUS_KEY: ${{ secrets.USDATA_CENSUS_KEY }}
         run: uv run python scripts/restore_lockfiles.py --manifest "$MANIFEST" --output-dir reports/restore --cache "$RUNNER_TEMP/cache"
       - name: Mirror the pinned objects this restore proved (ADR 0030)
         # Only a passing restore on main uploads, and only objects the mirror lacks.

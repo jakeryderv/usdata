@@ -39,7 +39,7 @@ class FetchedAsset(BaseModel):
     def open(self) -> Any:
         """Open local data with the reader its format implies, with that reader's defaults.
 
-        CSV and ERDDAP CSV, HURDAT2 and AQS daily JSON return a pandas DataFrame;
+        CSV and ERDDAP CSV, HURDAT2, AQS daily JSON, and ACS tables return a pandas DataFrame;
         NetCDF4 and GRIB2 a loaded xarray Dataset; NEXRAD Level II an xarray
         DataTree. Provenance is kept in the result's ``attrs["usdata"]``. A file
         that needs options, or whose metadata leaves its format ambiguous, is

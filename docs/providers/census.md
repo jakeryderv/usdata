@@ -4,8 +4,6 @@ Provider id `census`. Homepage: https://www.census.gov/
 
 ## Access notes
 
-Every dataset from this provider is planned; catalog entries describe the intended scope.
-
 The [Census Data API](https://www.census.gov/data/developers.html) requires a
 key on every data request. Checked on 2026-09-18: a keyless query, such as
 `https://api.census.gov/data/2022/acs/acs5?get=NAME,B01003_001E&for=state:40`,
@@ -19,10 +17,14 @@ version of the catalog entry said so.
 
 That makes Census a credentialed source. Its geography is a state or county
 FIPS code (`for=county:113&in=state:40`), so it selects by place, not by box
-([ADR 0034](../adr/0034-query-keeps-the-resolved-place.md)). `census:acs-5year`
-is selected on the [roadmap](../roadmap.md)
-([issue 379](https://github.com/jakeryderv/usdata/issues/379)), with its rules
-in [ADR 0045](../adr/0045-acs-5year-selection.md).
+([ADR 0034](../adr/0034-query-keeps-the-resolved-place.md)). The
+[ACS 5-year estimates](census-acs-5year.md) are available, with their rules in
+[ADR 0045](../adr/0045-acs-5year-selection.md).
+
+This product uses the Census Bureau Data API but is not endorsed or certified
+by the Census Bureau. The
+[API terms](https://www.census.gov/data/developers/about/terms-of-service.html)
+ask every service that uses it to say so.
 
 Checked with a key on 2026-09-27, against `acs/acs5` vintages 2021 to 2023:
 
@@ -40,8 +42,6 @@ Checked with a key on 2026-09-27, against `acs/acs5` vintages 2021 to 2023:
 - Margins of error and some estimates are negative
   [annotation codes](https://www.census.gov/data/developers/data-sets/acs-1year/notes-on-acs-estimate-and-annotation-values.html),
   such as `-555555555` for a controlled estimate.
-
---8<-- "_snippets/planned-datasets.md"
 
 ## Datasets
 

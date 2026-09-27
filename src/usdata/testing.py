@@ -335,7 +335,8 @@ def check_declared_capabilities(
     variable = dataset.variables[0].name
     with _patched_client(unexpected_client), adapter_factory() as adapter:
         base = scenario_query
-        boxed = base.model_copy(update={"bbox": PROBE_BBOX})
+        # A scenario may name a place of its own; the bare-box probe must not keep it.
+        boxed = base.model_copy(update={"bbox": PROBE_BBOX, "place": None})
         placed = boxed.model_copy(update={"place": PROBE_PLACE})
         bare_box_refused = _refuses_bare_box(adapter, boxed)
         bbox_refused = bare_box_refused or _refuses(adapter, boxed, "bbox")
