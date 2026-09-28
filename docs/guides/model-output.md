@@ -67,8 +67,26 @@ is a valid GRIB2 file: `open()` reads it without `select`, since the
 fetch already selected. A manifest pins the byte ranges and the object's ETag
 and restores from them without re-reading the index; because listing a
 `messages` source resolves its ranges, `usdata pull dataset.yaml --dry-run`
-prices such a source at the bytes the ranges cover, not at the whole object. Each provider guide lists
-verified selectors:
+prices such a source at the bytes the ranges cover, not at the whole object.
+
+To see every selector a run's files hold, give `usdata messages` the same
+query without `messages`. It reads only each file's index and prints one line
+per field: asset id, message number, bytes, and the selector that names it.
+
+```sh
+usdata messages noaa:hrrr -p cycle=20 -p forecast_hour=0 \
+  --start 2024-05-06T20:00Z --end 2024-05-06T20:00Z | grep HLCY
+```
+
+```text
+hrrr.20240506.t20z.wrfsfcf00.grib2	131	1124894	HLCY:3000-0 m above ground:anl
+hrrr.20240506.t20z.wrfsfcf00.grib2	132	1816220	HLCY:1000-0 m above ground:anl
+```
+
+A selector may stop after its level text, as `HLCY:3000-0 m above ground`, to
+match whatever step each file holds. In Python, `usdata.list_messages(dataset,
+query)` returns the same listings. Each provider guide also lists verified
+selectors:
 [HRRR](../providers/noaa-hrrr.md#fetching-selected-messages),
 [GFS](../providers/noaa-gfs.md#fetching-selected-messages).
 

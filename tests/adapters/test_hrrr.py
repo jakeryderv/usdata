@@ -372,6 +372,47 @@ def test_an_absent_index_never_falls_back_to_the_whole_file(adapter) -> None:
         assert not any(str(call.request.url) == OBJECT_URL for call in fetched)
 
 
+def test_listing_messages_reads_only_the_index_of_a_whole_asset(adapter) -> None:
+    with respx.mock() as mock:
+        mock.get(LIST_URL).respond(200, text=listing([(KEY, len(OBJECT))]))
+        index = mock.get(f"{OBJECT_URL}.idx").respond(200, text=INDEX)
+        (asset,) = adapter.list_assets(query())
+        entries = adapter.list_messages(asset)
+        # The listed size is the object's, so no HEAD is needed, and the object is never read.
+        assert [call.request.method for call in mock.calls] == ["GET", "GET"]
+    assert index.call_count == 1
+    assert [entry.selector for entry in entries] == [
+        "REFC:entire atmosphere:anl",
+        "TMP:2 m above ground:anl",
+        "HLCY:3000-0 m above ground:anl",
+    ]
+    assert [(entry.number, entry.offset, entry.length) for entry in entries] == [
+        (1, 0, 40),
+        (2, 40, 40),
+        (3, 80, 40),
+    ]
+
+
+def test_listing_messages_of_a_partial_asset_describes_its_whole_object(adapter) -> None:
+    with respx.mock() as mock:
+        index = arm_partial(mock)
+        (asset,) = adapter.list_assets(query(messages=SELECTED))
+        entries = adapter.list_messages(asset)
+    assert asset.size == 80
+    assert index.call_count == 2
+    assert [entry.number for entry in entries] == [1, 2, 3]
+    assert entries[-1].byte_range.end == len(OBJECT) - 1
+
+
+def test_listing_messages_without_an_index_is_refused(adapter) -> None:
+    with respx.mock() as mock:
+        mock.get(LIST_URL).respond(200, text=listing([(KEY, len(OBJECT))]))
+        mock.get(f"{OBJECT_URL}.idx").respond(404)
+        (asset,) = adapter.list_assets(query())
+        with pytest.raises(QueryError, match="is not published"):
+            adapter.list_messages(asset)
+
+
 def test_an_unmatched_selector_names_it_and_lists_the_nearest(adapter) -> None:
     with respx.mock() as mock:
         arm_partial(mock)

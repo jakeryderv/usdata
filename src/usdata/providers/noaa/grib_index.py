@@ -21,7 +21,7 @@ field alone. That text may itself hold colons, as in
 Selection speaks the index's own vocabulary, not the ecCodes names the reader's
 ``select`` uses: ``TMP:2 m above ground``, optionally with a step text and then
 the further text, which is everything after the step, so every index line's
-``label`` is a selector for it. Nothing here performs I/O, so the caller
+``selector`` names it exactly. Nothing here performs I/O, so the caller
 fetches the index text and the object size and this module turns them into
 byte ranges. See ADR 0028.
 """
@@ -33,43 +33,12 @@ from difflib import get_close_matches
 
 from pydantic import BaseModel
 
-from usdata.models import ByteRange
+from usdata.models import IndexEntry
 from usdata.providers.base import QueryError
 
 INDEX_SUFFIX = ".idx"
 FIELDS = 6
 """Fields a line must have before the optional trailing ones some products add."""
-
-
-class IndexEntry(BaseModel):
-    """One field of one object, as its index line describes it.
-
-    ``number`` is the GRIB2 message the field belongs to and ``field`` its
-    position inside a message that holds several (``12.2``), or ``None`` for a
-    message holding one. Fields of one message share an offset and a length.
-    """
-
-    number: int
-    offset: int
-    length: int
-    short_name: str
-    level: str
-    step: str
-    field: int | None = None
-    extra: str = ""
-
-    @property
-    def byte_range(self) -> ByteRange:
-        """The inclusive byte interval this field's message occupies in the object."""
-        return ByteRange(start=self.offset, end=self.offset + self.length - 1)
-
-    @property
-    def label(self) -> str:
-        """The selector that names exactly this field, short name through the last text."""
-        parts = [self.short_name, self.level, self.step]
-        if self.extra:
-            parts.append(self.extra)
-        return ":".join(parts)
 
 
 class Selection(BaseModel):
@@ -115,7 +84,7 @@ def parse_selector(raw: str) -> Selector:
     """Read one ``VAR:level text`` selector, with an optional ``:step text[:further text]``.
 
     The further text runs to the end of the selector and may hold colons of
-    its own, so an index line's ``label`` always reads back as a selector.
+    its own, so an index line's ``selector`` always reads back as one.
 
     Args:
         raw: The selector as the caller wrote it, such as ``TMP:2 m above ground``.
@@ -272,7 +241,7 @@ def resolve(
             )
         text = selector.text if len(hits) == 1 else None
         for entry in hits:
-            chosen.setdefault(entry.number, Selection(entry=entry, selector=text or entry.label))
+            chosen.setdefault(entry.number, Selection(entry=entry, selector=text or entry.selector))
     return [chosen[number] for number in sorted(chosen)]
 
 

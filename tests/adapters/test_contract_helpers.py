@@ -5,6 +5,7 @@ from pathlib import Path
 
 import httpx
 import pytest
+from pydantic import BaseModel, Field
 
 from usdata.models import (
     Asset,
@@ -231,6 +232,31 @@ def test_declaring_place_subset_without_refusing_a_bare_box_is_rejected() -> Non
         check_declared_capabilities(
             dataset,
             lambda client=None: SidecarWriter(dataset, client),
+            scenario_query(),
+            scenario_query(),
+        )
+
+
+class MessageParams(BaseModel):
+    """Declares the one parameter a partial-fetch adapter selects messages through."""
+
+    messages: list[str] | None = Field(default=None, description="Messages to fetch.")
+
+
+class UnlistedMessages(SidecarWriter):
+    """Takes ``messages`` but never lists them, so a caller cannot learn what to ask for."""
+
+    params_model = MessageParams
+
+
+def test_declaring_partial_fetch_without_listing_messages_is_rejected() -> None:
+    dataset = SYNTHETIC.model_copy(
+        update={"capabilities": Capabilities(temporal_subset=True, partial_fetch=True)}
+    )
+    with pytest.raises(AssertionError, match="does not override list_messages"):
+        check_declared_capabilities(
+            dataset,
+            lambda client=None: UnlistedMessages(dataset, client),
             scenario_query(),
             scenario_query(),
         )

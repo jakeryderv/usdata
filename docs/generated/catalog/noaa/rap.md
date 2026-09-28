@@ -21,7 +21,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `cycle` | Required UTC initialization hour of the run, 0 to 23. |
 | `file` | File family: awp130 (default, 13 km CONUS pressure levels), awp130b (its secondary fields), prs (native-grid pressure levels), or nat (native levels). |
 | `forecast_hour` | Required forecast hour(s): an integer, list, or comma-separated string; 0 to 21, or 0 to 51 for the 03, 09, 15, and 21 UTC runs. |
-| `messages` | Optional GRIB2 messages to fetch instead of the whole file, spelled as the object's wgrib2 .idx sidecar spells them: 'SHORTNAME:level text', such as 'TMP:2 m above ground', with an optional ':step text'; one value, a list, or a comma-separated string. Short names are upper case and both fields match exactly. |
+| `messages` | Optional GRIB2 messages to fetch instead of the whole file, spelled as the object's wgrib2 .idx sidecar spells them: 'SHORTNAME:level text', such as 'TMP:2 m above ground', with an optional ':step text'; one value, a list, or a comma-separated string. Short names are upper case and both fields match exactly; 'usdata messages' lists every selector a query's files hold. |
 
 ### Variables
 

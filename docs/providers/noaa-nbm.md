@@ -71,6 +71,8 @@ short name onward, is a selector for that line. Selectors observed in the
 | 1-hour precipitation | `APCP:surface:0-1 hour acc fcst` |
 | Probability of more than 0.254 mm in 1 hour | `APCP:surface:0-1 hour acc fcst:prob >0.254:prob fcst 255/255` |
 
+For every selector a file publishes, run `usdata messages` with the query; see [listing a file's messages](noaa-hrrr.md#listing-a-files-messages).
+
 A selector that matches nothing names what the index publishes instead: the
 levels of an unmatched level, the steps of an unmatched step, and otherwise
 the further texts beside that step, where `none` is the plain field.
