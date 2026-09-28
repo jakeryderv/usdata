@@ -574,7 +574,10 @@ def verify(
         bool, typer.Option("--json", help="With --listing, emit the comparison as JSON on stdout.")
     ] = False,
 ) -> None:
-    """Check cached files against a manifest's lockfile. Exit 1 on any drift."""
+    """Check cached files, or with --listing today's source listings, against the lockfile.
+
+    Exit 1 on any drift.
+    """
     if as_json and not listing:
         typer.secho("--json applies to --listing only", err=True, fg="red")
         raise typer.Exit(code=2)
@@ -605,9 +608,6 @@ def _verify_listing(manifest: Path, *, as_json: bool) -> None:
     """Compare the lockfile with today's listings; exit 1 when a re-resolve would differ."""
     try:
         comparison = compare_manifest_listing(manifest)
-    except EmptySource as e:
-        typer.secho(str(e), err=True, fg="yellow")
-        raise typer.Exit(code=1) from None
     except (DatasetNotFound, UnknownDatasets, ManifestChanged, UnknownPlace, ValueError) as e:
         typer.secho(str(e), err=True, fg="red")
         raise typer.Exit(code=2) from None
