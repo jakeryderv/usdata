@@ -6,6 +6,8 @@ import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from importlib import import_module
+from importlib.util import find_spec
 from pathlib import Path
 from types import ModuleType
 
@@ -25,6 +27,11 @@ from usdata.models import (
 from usdata.protocols import http
 from usdata.providers import HttpProvider
 from usdata.registry import Registry
+
+# Test modules import eccodes directly, so load pyproj first here, as the GRIB reader
+# does: with the other order the interpreter aborts at exit (see _grib.import_eccodes).
+if find_spec("pyproj") is not None:
+    import_module("pyproj")
 
 
 @pytest.fixture(autouse=True)
