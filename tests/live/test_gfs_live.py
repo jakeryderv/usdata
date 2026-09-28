@@ -1,7 +1,6 @@
 """One GFS 1-degree analysis file: resolve with sizes, fetch, restore, and open CAPE."""
 
 from importlib.util import find_spec
-from typing import Any
 
 import pytest
 
@@ -67,8 +66,7 @@ def test_gfs_analysis_fetches_and_restores(restored: FetchedAsset) -> None:
 def test_gfs_surface_cape_opens_with_grib_reader(restored: FetchedAsset) -> None:
     if find_spec("eccodes") is None or find_spec("xarray") is None:
         pytest.skip("grib extra not installed")
-    options: dict[str, Any] = {"select": {"shortName": "cape", "typeOfLevel": "surface"}}
-    fields = restored.open(**options)
+    fields = restored.open_grib2(select={"shortName": "cape", "typeOfLevel": "surface"})
     (name,) = list(fields.data_vars)
     assert fields[name].shape == (181, 360)
     assert fields[name].attrs["units"].replace("**", "").replace(" ", "") in {"Jkg-1", "J/kg"}
