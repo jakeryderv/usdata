@@ -1,7 +1,6 @@
 """One HRRR surface analysis: whole-file fetch and restore, and a two-message partial fetch."""
 
 from importlib.util import find_spec
-from typing import Any
 
 import pytest
 
@@ -73,9 +72,7 @@ def test_hrrr_surface_analysis_fetches_and_restores(restored: FetchedAsset) -> N
 def test_hrrr_surface_cape_opens_with_grib_reader(restored: FetchedAsset) -> None:
     if find_spec("eccodes") is None or find_spec("xarray") is None:
         pytest.skip("grib extra not installed")
-    # The GRIB2 reader adds ``select``; the call stays dynamic so pyright passes before it lands.
-    options: dict[str, Any] = {"select": {"shortName": "cape", "typeOfLevel": "surface"}}
-    fields = restored.open(**options)
+    fields = restored.open_grib2(select={"shortName": "cape", "typeOfLevel": "surface"})
     (name,) = list(fields.data_vars)
     assert fields[name].shape == (1059, 1799)
     assert fields[name].attrs["units"].replace("**", "").replace(" ", "") in {"Jkg-1", "J/kg"}
@@ -122,6 +119,5 @@ def test_hrrr_partial_file_opens_as_two_fields(part: FetchedAsset) -> None:
     assert {name.split("_")[0] for name in fields.data_vars} == {"cape", "hlcy"}
     for name in fields.data_vars:
         assert fields[name].shape == (1059, 1799)
-    options: dict[str, Any] = {"select": {"shortName": "cape"}}
-    only_cape = part.open(**options)
+    only_cape = part.open_grib2(select={"shortName": "cape"})
     assert list(only_cape.data_vars) == ["cape"]
