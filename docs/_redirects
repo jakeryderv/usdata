@@ -37,6 +37,8 @@
 /generated/catalog/noaa/rap /providers/noaa-rap/ 301
 /generated/catalog/noaa/climate-normals/ /providers/noaa-normals/ 301
 /generated/catalog/noaa/climate-normals /providers/noaa-normals/ 301
+/generated/catalog/noaa/enso-indices/ /providers/noaa-enso-indices/ 301
+/generated/catalog/noaa/enso-indices /providers/noaa-enso-indices/ 301
 /generated/catalog/noaa/coops-currents/ /providers/noaa-coops-currents/ 301
 /generated/catalog/noaa/coops-currents /providers/noaa-coops-currents/ 301
 /generated/catalog/noaa/ersst/ /providers/noaa-ersst/ 301

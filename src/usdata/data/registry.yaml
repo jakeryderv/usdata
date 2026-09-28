@@ -1169,6 +1169,49 @@ datasets:
       - { name: "ssta", units: "degree_C", description: "Anomaly from the 1991-2020 ERSSTv6 climatology" }
     adapter: usdata.providers.noaa.ersst:Ersst
 
+  - id: noaa:enso-indices
+    provider: noaa
+    status: available
+    domain: climate
+    since: "0.33"
+    title: CPC ENSO Indices (RONI and ONI)
+    description: >-
+      The Climate Prediction Center's seasonal El Niño-Southern Oscillation indices: the
+      Relative Oceanic Niño Index (RONI), which NOAA has used for official ENSO monitoring
+      since 1 February 2026, and the traditional Oceanic Niño Index (ONI). Both are
+      three-month running means of Niño 3.4 sea surface temperature anomalies from ERSST v6;
+      RONI first subtracts the tropical mean anomaly. Each index is one whole plain-text table
+      from DJF 1950, rewritten in place each month, with no server-side selection.
+    keywords: [enso, el nino, la nina, oni, roni, nino 3.4, climate index, cpc, sea surface temperature]
+    protocol: http
+    homepage: https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso/roni/
+    license: US Government Work (public domain)
+    spatial_extent: { west: -170.0, south: -5.0, east: -120.0, north: 5.0 }
+    temporal_extent: { start: "1949-12-01T00:00:00Z" }
+    capabilities: { spatial_subset: false, temporal_subset: false, variable_subset: false }
+    summary: Seasonal El Niño indices, the official RONI and the traditional ONI
+    formats: [whitespace-delimited text (no reader)]
+    selection: One whole index table, every season from DJF 1950; select seasons locally
+    inputs: Optional index (roni or oni); no dates or geographic filters
+    reader: null
+    guide: docs/providers/noaa-enso-indices.md
+    examples:
+      - examples/datasets/noaa-enso-indices/noaa-enso-indices.ipynb
+    resolution:
+      spatial: "One value for the Niño 3.4 region, 5N-5S and 170W-120W"
+      temporal: "Overlapping three-month seasons, one per month"
+    update_frequency: "Monthly, by the 5th"
+    citation: >-
+      NOAA Climate Prediction Center, Relative Oceanic Niño Index and Oceanic Niño Index,
+      accessed via usdata
+    terms: https://www.weather.gov/disclaimer
+    variables:
+      - { name: "SEAS", description: "Three-month season, such as DJF" }
+      - { name: "YR", description: "Year of the season's middle month" }
+      - { name: "ANOM", units: "degree_C", description: "Index value: the season's anomaly" }
+      - { name: "TOTAL", units: "degree_C", description: "Niño 3.4 mean temperature; ONI table only" }
+    adapter: usdata.providers.noaa.enso:EnsoIndices
+
   - id: noaa:etopo
     provider: noaa
     status: planned

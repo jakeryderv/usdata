@@ -2028,6 +2028,78 @@
       }
     },
     {
+      "id": "noaa:enso-indices",
+      "title": "Seasonal El Ni\u00f1o indices, the official RONI and the traditional ONI",
+      "product": "CPC ENSO Indices (RONI and ONI)",
+      "description": "The Climate Prediction Center's seasonal El Ni\u00f1o-Southern Oscillation indices: the Relative Oceanic Ni\u00f1o Index (RONI), which NOAA has used for official ENSO monitoring since 1 February 2026, and the traditional Oceanic Ni\u00f1o Index (ONI). Both are three-month running means of Ni\u00f1o 3.4 sea surface temperature anomalies from ERSST v6; RONI first subtracts the tropical mean anomaly. Each index is one whole plain-text table from DJF 1950, rewritten in place each month, with no server-side selection.",
+      "provider": "NOAA",
+      "provider_id": "noaa",
+      "domain": "Climate",
+      "system": null,
+      "availability": "Source only",
+      "since": "0.33",
+      "keywords": [
+        "enso",
+        "el nino",
+        "la nina",
+        "oni",
+        "roni",
+        "nino 3.4",
+        "climate index",
+        "cpc",
+        "sea surface temperature"
+      ],
+      "formats": [
+        "whitespace-delimited text (no reader)"
+      ],
+      "selection": "One whole index table, every season from DJF 1950; select seasons locally",
+      "inputs": "Optional index (roni or oni); no dates or geographic filters",
+      "credentials": null,
+      "reader_extra": null,
+      "resolution": {
+        "spatial": "One value for the Ni\u00f1o 3.4 region, 5N-5S and 170W-120W",
+        "temporal": "Overlapping three-month seasons, one per month"
+      },
+      "update_frequency": "Monthly, by the 5th",
+      "latency": null,
+      "citation": "NOAA Climate Prediction Center, Relative Oceanic Ni\u00f1o Index and Oceanic Ni\u00f1o Index, accessed via usdata",
+      "terms": "https://www.weather.gov/disclaimer",
+      "homepage": "https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso/roni/",
+      "variables": [
+        {
+          "name": "SEAS",
+          "units": null,
+          "description": "Three-month season, such as DJF"
+        },
+        {
+          "name": "YR",
+          "units": null,
+          "description": "Year of the season's middle month"
+        },
+        {
+          "name": "ANOM",
+          "units": "degree_C",
+          "description": "Index value: the season's anomaly"
+        },
+        {
+          "name": "TOTAL",
+          "units": "degree_C",
+          "description": "Ni\u00f1o 3.4 mean temperature; ONI table only"
+        }
+      ],
+      "max_window": null,
+      "guide": "https://docs.usdata.dev/providers/noaa-enso-indices/",
+      "reference": "https://docs.usdata.dev/providers/noaa-enso-indices/#reference",
+      "page": "https://usdata.dev/datasets/noaa/enso-indices/",
+      "walkthrough": "examples/datasets/noaa-enso-indices/noaa-enso-indices.ipynb",
+      "studies": [],
+      "quickstart": {
+        "cli": "usdata fetch noaa:enso-indices",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:enso-indices\"),\n    build_query(\n    ),\n)\nprint(items[0].path)\n",
+        "manifest": "name: enso-indices\nsources:\n  - dataset: noaa:enso-indices\n    name: roni\n  - dataset: noaa:enso-indices\n    name: oni\n    params: {index: oni}\n"
+      }
+    },
+    {
       "id": "noaa:coops-currents",
       "title": "Coastal current speed and direction",
       "product": "CO-OPS Observed Currents",

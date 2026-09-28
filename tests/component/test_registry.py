@@ -183,7 +183,7 @@ def test_list_matches_a_format_case_insensitively(registry: Registry) -> None:
 def test_list_filters_by_reader_extra_or_bytes_only(registry: Registry) -> None:
     assert all(ds.reader == "pandas" for ds in registry.list(reader="pandas"))
     bytes_only = registry.list(reader="none")
-    assert [ds.id for ds in bytes_only] == ["noaa:nexrad-level3"]
+    assert [ds.id for ds in bytes_only] == ["noaa:nexrad-level3", "noaa:enso-indices"]
     assert all(ds.reader is None for ds in bytes_only)
 
 
