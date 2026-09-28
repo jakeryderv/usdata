@@ -28,7 +28,7 @@ import httpx
 from pydantic import BaseModel
 
 from usdata import __version__
-from usdata._grib import LIBRARY_HINT
+from usdata._grib import LIBRARY_HINT, import_eccodes
 from usdata.cache import ENV_VAR, cache_dir
 from usdata.mirror import ENV_VAR as MIRROR_ENV_VAR
 from usdata.models import READER_EXTRAS, Status
@@ -145,7 +145,8 @@ def _reader_check(extra: str) -> Check:
     modules: list[Any] = []
     for module in READER_MODULES[extra]:
         try:
-            modules.append(import_module(module))
+            # ecCodes goes through the reader's import, which orders it after pyproj.
+            modules.append(import_eccodes() if module == "eccodes" else import_module(module))
         except (ImportError, RuntimeError, OSError) as error:
             # eccodes imports and then fails to load its shared library.
             return Check(
