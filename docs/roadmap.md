@@ -198,6 +198,17 @@ population, housing, and income of Oklahoma's counties, with the ones the
 [disaster-declarations study](https://usdata.dev/studies/disaster-declarations/)
 joins marked.
 
+Shipped in v0.32.0: the second of those friction themes to ship, [checking a
+lockfile against today's
+listings](https://github.com/jakeryderv/usdata/issues/332). `usdata verify
+--listing`, or `compare_listing` in Python, lists every source as a fresh
+resolve would and reports the assets added, removed, or re-described since the
+lockfile was written, downloading nothing; the tornado-classification study's
+hand-built check now calls it, and the event-context study asserts it. The same
+release fixes a crash at exit in any process that read GRIB2 before importing
+pyproj, as opening a NEXRAD volume does: the ecCodes and pyproj wheels each
+bundle PROJ, and usdata now loads pyproj's copy first.
+
 The work now is breadth: more of the datasets people reach for, from more
 agencies, each verified by a live check and a worked example. 1.0 comes when
 the catalog feels comprehensive and the contract feels settled, a judgment

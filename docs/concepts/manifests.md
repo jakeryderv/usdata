@@ -51,11 +51,14 @@ discovery: it takes each pinned URL, checks whether the cached bytes match the
 pinned checksum, and downloads only what is missing or altered. Restoring into
 an empty directory on another machine is the same command with `--cache-dir`.
 
-`verify` is offline. It checks that the manifest still matches the checksum in
+`verify` is offline by default. It checks that the manifest still matches the checksum in
 the lockfile, then hashes every cached file against its pin. It exits 0 when
 all match, 1 when a file is missing or changed, and 2 when the manifest or
 lockfile is unreadable or mismatched. It does not query upstream and it says
-nothing about the scientific meaning of the data.
+nothing about the scientific meaning of the data. With `--listing` it instead
+asks every source what it lists today and compares that with the lockfile,
+downloading nothing; see
+[pin inputs](../guides/pin-inputs.md#would-a-re-resolve-pick-the-same-files).
 
 ```mermaid
 flowchart TD
