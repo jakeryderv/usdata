@@ -184,14 +184,15 @@ counties resolve as places, and sources still keyed by them refuse a planning
 region rather than returning nothing or statewide rows alone. Checksums have one
 canonical form, and part of the cache can live on another disk through a symlink.
 
-Shipped in v0.31.0: [ACS 5-year estimates](https://github.com/jakeryderv/usdata/issues/379)
-from the Census Data API, the second source that needs a key and the second
-selected by place after FEMA. A query names an explicit vintage rather than a
+Shipped in v0.31.0: [ACS 5-year
+estimates](https://github.com/jakeryderv/usdata/issues/379) from the Census Data
+API, the second source that needs a key and the third selected by place, after
+FEMA and the NWS warnings. A query names an explicit vintage rather than a
 window, one to fifty variables, and a state, its counties, or one county, and
 Connecticut is keyed by its old counties or its planning regions as the vintage
 has them ([ADR 0045](adr/0045-acs-5year-selection.md)). The key rides as a
-single query parameter, and ADR 0039 covered it without amendment: the contract
-checks pass unchanged. The
+single query parameter, and ADR 0039 covered it without amendment: the
+credential checks pass unchanged. The
 [walkthrough](https://usdata.dev/datasets/census/acs-5year/) gives the
 population, housing, and income of Oklahoma's counties, with the ones the
 [disaster-declarations study](https://usdata.dev/studies/disaster-declarations/)
