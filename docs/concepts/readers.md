@@ -30,7 +30,7 @@ zone there, with the datum for water levels and predictions and the bin for
 currents. They travel in the lockfile, so a restored file says the same
 ([ADR 0043](../adr/0043-asset-properties.md)).
 
-Where a file leaves a variable's units missing or `unknown`, the NetCDF4 and
+Where a file leaves a variable's units missing or `unknown`, the NetCDF and
 GRIB2 readers fill `units` and `long_name` from the registry entry's variable
 table, matching each data variable's name against the entry's names exactly and
 then case-insensitively. A decoded MRMS variable drops the product's level
@@ -58,7 +58,7 @@ to fit.
 `item.inspect()` returns a typed summary of a fetched file: where it came from,
 how large it is, the format that was recognized, and what that format holds. A
 CSV reports its columns and a row count read with the standard library, so it
-needs no extra; the count stops after 100,000 rows and says so. A NetCDF4 file
+needs no extra; the count stops after 100,000 rows and says so. A NetCDF file
 reports its data variables with dims, shape, units, and long name, and a GRIB2
 file reports every message with its `file_index`, `shortName`, the `base_name`
 the reader names its variable from, `name`, `typeOfLevel`, `level`, `step`,
@@ -142,14 +142,18 @@ sweep = radar["sweep_0"].to_dataset()
 print(sweep["DBZH"].attrs["units"])
 ```
 
-## NetCDF4 scenes
+## NetCDF files
 
 The netcdf extra returns an xarray Dataset of the file's root group. CF packed
 values, unsigned storage, fill values, and time coordinates are decoded;
 dimensions, units, projection metadata, and data-quality flags are retained.
-Quality filtering and projection are yours to do. Classic NetCDF3, arbitrary
-HDF5, nested groups, and lazy opening are not supported; use xarray on
-`item.path` for those.
+Quality filtering and projection are yours to do. NetCDF4 files open through
+h5netcdf and NetCDF3 classic or 64-bit offset files through scipy, chosen by the
+file's first bytes rather than its name. A time coordinate on a non-standard CF
+calendar, such as `360_day`, decodes to `cftime` dates rather than
+`datetime64`. Arbitrary HDF5, nested groups, and lazy opening are not
+supported; use xarray on `item.path` for those
+([ADR 0048](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0048-netcdf3-through-scipy.md)).
 
 ## GRIB2 fields
 

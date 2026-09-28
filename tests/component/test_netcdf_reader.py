@@ -248,3 +248,84 @@ def test_load_failure_still_closes_source(item, xr):
         item.open()
     assert captured[0].closed
     item.path.unlink()
+
+
+@pytest.fixture
+def classic(tmp_path, item, xr):
+    """A NetCDF3 file written the way ERSST's pre-2008 files are: scipy, a 360-day calendar."""
+    np = pytest.importorskip("numpy")
+    pytest.importorskip("scipy")
+    pytest.importorskip("cftime")
+
+    def write(file_format: str = "NETCDF3_CLASSIC") -> FetchedAsset:
+        grid = xr.Dataset(
+            {"sst": (("time", "lat", "lon"), np.array([[[26.5, 27.0], [28.25, np.nan]]]))},
+            coords={"time": [0.0], "lat": [-2.0, 0.0], "lon": [190.0, 192.0]},
+        )
+        grid.sst.attrs = {"units": "degree_C", "long_name": "Extended reconstructed SST"}
+        grid.time.attrs = {"units": "minutes since 1997-12-01 00:00", "calendar": "360_day"}
+        path = tmp_path / f"{file_format.lower()}.nc"
+        grid.to_netcdf(path, engine="scipy", format=file_format)
+        return item.model_copy(
+            update={"path": path, "asset": item.asset.model_copy(update={"id": path.name})}
+        )
+
+    return write
+
+
+@pytest.mark.parametrize(("file_format", "magic"), [("NETCDF3_CLASSIC", 1), ("NETCDF3_64BIT", 2)])
+def test_a_netcdf3_file_opens_through_scipy_with_its_calendar(classic, xr, file_format, magic):
+    fetched = classic(file_format)
+    assert fetched.path.read_bytes()[:4] == b"CDF" + bytes([magic])
+    before = fetched.path.read_bytes()
+    result = fetched.open()
+    assert isinstance(result, xr.Dataset)
+    assert result.sst.attrs["units"] == "degree_C"
+    assert float(result.sst.values[0, 1, 0]) == 28.25 and bool(result.sst.isnull()[0, 1, 1])
+    (stamp,) = result.time.values
+    assert type(stamp).__name__ == "Datetime360Day" and str(stamp) == "1997-12-01 00:00:00"
+    assert result.attrs["usdata"]["asset_id"] == fetched.asset.id
+    assert fetched.path.read_bytes() == before
+
+
+def test_a_netcdf3_file_is_read_from_a_closed_local_file_object(classic, xr):
+    fetched = classic()
+    captured = []
+    original = xr.open_dataset
+
+    def capture(source, **kwargs):
+        assert not isinstance(source, (str, Path))
+        assert kwargs == {"engine": "scipy", "chunks": None}
+        captured.append(source)
+        return original(source, **kwargs)
+
+    with patch.object(xr, "open_dataset", side_effect=capture):
+        fetched.open()
+    assert captured[0].closed
+
+
+def test_a_netcdf3_file_is_inspected_like_a_netcdf4_one(classic):
+    summary = classic().inspect()
+    assert summary.netcdf is not None
+    (sst,) = summary.netcdf.variables
+    assert (sst.name, sst.dims, sst.shape, sst.units) == (
+        "sst",
+        ["time", "lat", "lon"],
+        [1, 2, 2],
+        "degree_C",
+    )
+
+
+def test_only_a_netcdf3_file_needs_scipy(item, classic, xr):
+    fetched = classic()
+    real = __import__("importlib").import_module
+
+    def without_scipy(name):
+        if name == "scipy":
+            raise ModuleNotFoundError(name="scipy")
+        return real(name)
+
+    with patch("usdata._netcdf.import_module", side_effect=without_scipy):
+        assert item.open().CMI.attrs["units"] == "K"
+        with pytest.raises(MissingReaderDependency, match=r"scipy for NetCDF3"):
+            fetched.open()

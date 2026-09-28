@@ -1,0 +1,1 @@
+The `netcdf` extra opens NetCDF3 classic and 64-bit offset files as well as NetCDF4, choosing the engine from the file's first bytes, and decodes non-standard CF calendars such as `360_day` through cftime; the extra now installs scipy and cftime.

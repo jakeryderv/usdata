@@ -34,7 +34,7 @@ fetching. They are selected by format, independently of the transport used.
 | `testing` | The adapter contract as runnable checks: `check_provider_contract` holds any adapter, bundled or external, to the rules `providers` states. Imports pytest lazily. |
 | `protocols` | Transport clients with no dataset knowledge. `http.download` streams to disk atomically; `s3.list_objects` paginates ListObjectsV2 anonymously. |
 | `fetch` | Core loop: adapter resolves assets, cache is checked, bytes fetched, provenance written. |
-| `readers` | Local CSV, NEXRAD Level II, NetCDF4, GRIB2, HURDAT2, and AQS JSON opening behind optional extras; format inference, one typed function per format with options, units and source metadata, no fetching or cache writes. |
+| `readers` | Local CSV, NEXRAD Level II, NetCDF4 and NetCDF3, GRIB2, HURDAT2, and AQS JSON opening behind optional extras; format inference, one typed function per format with options, units and source metadata, no fetching or cache writes. |
 | `cache` | Cache directory resolution and content hashing. |
 | `messages` | Lists the GRIB2 fields a query's files hold, from their index sidecars through the adapter, without fetching the files; the vocabulary `messages` selects in. |
 | `provenance` | Builds and persists a `Provenance` record beside each fetched file. |

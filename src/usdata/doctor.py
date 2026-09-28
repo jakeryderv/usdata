@@ -39,7 +39,7 @@ from usdata.registry import Registry, default_registry
 READER_MODULES: dict[str, tuple[str, ...]] = {
     "pandas": ("pandas",),
     "radar": ("xradar",),
-    "netcdf": ("xarray", "h5netcdf"),
+    "netcdf": ("xarray", "h5netcdf", "scipy", "cftime"),
     "grib": ("eccodes", "xarray", "numpy"),
 }
 ENV_VARS = (ENV_VAR, "XDG_CACHE_HOME", MIRROR_ENV_VAR)

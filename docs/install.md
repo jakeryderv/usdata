@@ -12,7 +12,7 @@ python -m pip install "usdata[pandas]"
 | --- | --- | --- |
 | `pandas` | pandas | CSV, gzip CSV, ERDDAP CSV, HURDAT2 text, SPC and Storm Events tables |
 | `radar` | xradar | NEXRAD Level II volumes |
-| `netcdf` | xarray, h5netcdf | GOES ABI scenes and GLM detection files |
+| `netcdf` | xarray, h5netcdf, scipy, cftime | GOES ABI scenes, GLM detection files, and NetCDF3 classic files |
 | `grib` | ecCodes, xarray | MRMS, HRRR, and GFS GRIB2 fields |
 
 Combine extras as needed: `pip install "usdata[pandas,grib]"`. Without an extra,

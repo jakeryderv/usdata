@@ -43,7 +43,7 @@ dependencies = [
 [project.optional-dependencies]
 pandas = ["pandas>=2.2"]
 radar = ["xradar>=0.12.0"]
-netcdf = ["xarray>=2025.1", "h5netcdf[h5py]>=1.8.1"]
+netcdf = ["xarray>=2025.1", "h5netcdf[h5py]>=1.8.1", "scipy>=1.14", "cftime>=1.6.4"]
 grib = [
     "eccodes>=2.48",
     # The eccodes sdist metadata omits the library wheel that its own wheel declares.

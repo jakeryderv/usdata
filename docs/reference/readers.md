@@ -13,7 +13,7 @@ This page lists what to install, what `open()` infers, and what each format's me
 | AQS daily JSON | `open()` only | `pandas` | pandas DataFrame, one row per monitor, local day, and pollutant standard; `date_local` and `date_of_last_change` as naive dates, the header in `attrs["usdata"]["header"]` | `epa:aqs-daily` assets, or ids `aqs-daily_*.json` |
 | ACS table | `open()` only | `pandas` | pandas DataFrame, one row per geography; estimate and margin-of-error columns as numbers with annotation codes kept, other columns as text | `census:acs-5year` assets, or ids `acs5_*.json` |
 | NEXRAD Level II | `open_nexrad` | `radar` | xarray DataTree | `noaa:nexrad-level2` assets |
-| NetCDF4 | `open_netcdf` | `netcdf` | xarray Dataset | `application/x-netcdf`, `application/netcdf`, `application/x-netcdf4` |
+| NetCDF4, NetCDF3 | `open_netcdf` | `netcdf` | xarray Dataset | `application/x-netcdf`, `application/netcdf`, `application/x-netcdf4` |
 | GRIB2 | `open_grib2` | `grib` | xarray Dataset | `application/x-grib2`, `application/grib2`, `application/x-grib`, `application/wmo-grib2`; ids ending `.grib2`, `.grb2`, or their `.gz` forms when the media type is missing, generic, or gzip |
 
 `noaa:nexrad-level3` assets have no reader and `open()` raises
@@ -110,7 +110,7 @@ pandas inference and default missing-value parsing.
 | CSV, HURDAT2, AQS, ACS | `frame.attrs["usdata"]` | Asset id, the asset's request `properties` (a mapping, empty when it records none), and a JSON-compatible copy of its provenance |
 | CSV with a units row | `frame.attrs["units"]` | Units row, filtered to the selected columns |
 | NEXRAD Level II | `radar.attrs["usdata"]` | Asset id, `properties`, provenance, and `sweeps` listing the returned groups |
-| NetCDF4, GRIB2 | `dataset.attrs["usdata"]` | Asset id, `properties`, and provenance |
+| NetCDF, GRIB2 | `dataset.attrs["usdata"]` | Asset id, `properties`, and provenance |
 | GRIB2 | `dataset.attrs["usdata"]["messages"]` | Each variable name mapped to its message's `file_index`, `object_index`, `shortName`, `typeOfLevel`, `level`, and `step`, plus the `selector` a partial fetch asked for |
 | `grib2` | per-variable `attrs` | `units` in UDUNITS notation (`J kg-1` where ecCodes writes `J kg**-1`, with the file's spelling in `GRIB_units` whenever the two differ), `name`, `typeOfLevel`, `level`, discipline, category, and parameter numbers, packing type, reference and valid times, step; projection parameters on the Dataset for projected grids |
 
