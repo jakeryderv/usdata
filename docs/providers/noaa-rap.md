@@ -74,7 +74,10 @@ uv run usdata fetch noaa:rap \
 Those two fields are about 80 KB of the 18 MB file. RAP packs the wind
 components of each level into one GRIB2 message holding two fields, which
 the index numbers `12.1` and `12.2` at one offset; naming either fetches the
-message whole, and the reader opens both. The fetched file is the messages
+message whole, and the reader opens both. Each field keeps its own selector:
+asking for `VGRD:500 mb` records `UGRD:500 mb:anl` beside it for the field that
+came along, so `summary.grib2.variable_for("VGRD:500 mb")` names the V
+component and the U component is looked up by its index line. The fetched file is the messages
 concatenated, which is itself a valid GRIB2 file, and its lockfile entry pins
 the byte ranges and the object's ETag
 ([ADR 0028](https://github.com/jakeryderv/usdata/blob/main/docs/adr/0028-partial-grib2-fetch-through-index-files.md)).

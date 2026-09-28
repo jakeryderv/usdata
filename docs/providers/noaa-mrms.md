@@ -75,7 +75,10 @@ Files are opened with the `grib` extra, through `open()` or `open_grib2()`;
 see [readers and their limits](../reference/readers.md).
 ecCodes has no parameter tables for MRMS's local GRIB discipline, so the reader
 names the data variable from the product segment of the asset id, which is why
-asset ids keep the exact upstream filename. Values are stored with the source's
+asset ids keep the exact upstream filename. The name drops the nominal-height
+suffix: `RotationTrackML30min_00.50` opens as `RotationTrackML30min`. Each file
+holds that one variable, so `(name,) = grid.data_vars` finds it without
+spelling it. Values are stored with the source's
 sentinels: `-999` marks no coverage and `-99` marks no data within coverage in
 the files probed, and neither is a GRIB missing value, so mask them yourself
 before taking statistics. Files are gzipped; the reader decompresses in memory

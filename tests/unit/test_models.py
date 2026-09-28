@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta, timezone
+from typing import Any
 
 import pytest
 from pydantic import ValidationError
@@ -6,10 +7,13 @@ from pydantic import ValidationError
 from usdata.models import (
     Asset,
     BBox,
+    ByteRange,
     Capabilities,
     Dataset,
+    PartialFetch,
     Place,
     Protocol,
+    Provenance,
     Query,
     Status,
     TimeRange,
@@ -305,3 +309,48 @@ def test_a_checksum_is_sha256_in_lowercase_hex() -> None:
                 protocol=Protocol.HTTP,
                 checksum=bad,
             )
+
+
+def _partial(**update: Any) -> dict[str, Any]:
+    fields: dict[str, Any] = {
+        "object_url": "s3://noaa-rap-pds/rap.t20z.awp130pgrbf00.grib2",
+        "object_size": 300,
+        "object_etag": "etag",
+        "index_url": "s3://noaa-rap-pds/rap.t20z.awp130pgrbf00.grib2.idx",
+        "index_checksum": "sha256:" + "0" * 64,
+        "messages": [12, 13],
+        "ranges": [ByteRange(start=100, end=249), ByteRange(start=250, end=299)],
+        "selectors": ["UGRD:100 mb", "HGT:125 mb"],
+    }
+    return fields | update
+
+
+def test_a_partial_fetch_names_the_fields_of_every_message_or_none_of_them() -> None:
+    fields = [["UGRD:100 mb", "VGRD:100 mb:anl"], ["HGT:125 mb"]]
+    assert PartialFetch(**_partial(field_selectors=fields)).field_selectors == fields
+    assert PartialFetch(**_partial()).field_selectors == []
+    for wrong in ([["UGRD:100 mb"]], [["UGRD:100 mb"], []]):
+        with pytest.raises(ValueError, match="field selectors per message"):
+            PartialFetch(**_partial(field_selectors=wrong))
+
+
+def test_each_field_on_disk_pairs_with_its_selector_and_an_older_record_shares_one() -> None:
+    record = Provenance(
+        dataset_id="noaa:rap",
+        provider="noaa",
+        source_url="s3://noaa-rap-pds/rap.t20z.awp130pgrbf00.grib2#messages=12,13",
+        retrieved_at=datetime(2026, 9, 28, tzinfo=UTC),
+        checksum="sha256:" + "0" * 64,
+        size=200,
+        usdata_version="0",
+        selectors=["UGRD:100 mb", "HGT:125 mb"],
+        field_selectors=[["UGRD:100 mb", "VGRD:100 mb:anl"], ["HGT:125 mb"]],
+    )
+    assert [record.field_selector(0, 0), record.field_selector(0, 1)] == [
+        "UGRD:100 mb",
+        "VGRD:100 mb:anl",
+    ]
+    assert record.field_selector(1, 0) == "HGT:125 mb"
+    older = record.model_copy(update={"field_selectors": []})
+    assert [older.field_selector(0, 0), older.field_selector(0, 1)] == ["UGRD:100 mb"] * 2
+    assert older.field_selector(2, 0) is None

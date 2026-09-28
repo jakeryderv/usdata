@@ -54,3 +54,20 @@ def test_rap_messages_fetch_restore_and_open(tmp_path: Path) -> None:
     names = {fields[name].attrs.get("GRIB_shortName", name) for name in fields.data_vars}
     assert {"cape", "hlcy"} <= names or len(fields.data_vars) == 2
     assert fields.latitude.shape == (337, 451)
+
+
+def test_rap_wind_components_each_pair_with_their_own_selector(tmp_path: Path) -> None:
+    """Fields 92.1 and 92.2 share one message; each is looked up by the selector naming it."""
+    if find_spec("eccodes") is None or find_spec("xarray") is None:
+        pytest.skip("grib extra not installed")
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text(MANIFEST.replace(MESSAGES, "VGRD:500 mb"))
+    (item,) = pull(manifest, root=tmp_path / "cache").fetched
+    assert item.provenance.field_selectors == [["UGRD:500 mb:anl", "VGRD:500 mb"]]
+    summary = item.inspect().grib2
+    assert summary is not None
+    # Both fields share one level, so the naming rule keeps their bare short names.
+    assert summary.variable_for("VGRD:500 mb") == "v"
+    assert summary.variable_for("UGRD:500 mb:anl") == "u"
+    fields = item.open()
+    assert fields["v"].attrs["name"] == "V component of wind"

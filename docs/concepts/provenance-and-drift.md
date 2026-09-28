@@ -29,7 +29,7 @@ and says how in `transformations`, so the checksum can pin it. See
 ### Files fetched as byte ranges
 
 An asset fetched as part of a larger object, today the HRRR and GFS `messages`
-parameter, records five more fields plus one line under `transformations`. The
+parameter, records six more fields plus one line under `transformations`. The
 checksum and size still describe the local file, which is the selected GRIB2
 messages concatenated:
 
@@ -39,6 +39,7 @@ messages concatenated:
 | `index_checksum` | `sha256:<hex>` of that index text as it arrived. |
 | `ranges` | The inclusive `start` and `end` byte pairs that were fetched, in order. |
 | `selectors` | The index selector each of those ranges was fetched for, in the same order. |
+| `field_selectors` | For each of those ranges, the selector naming each field it holds, in order: one for most messages, two for a RAP message holding both wind components. Empty in a sidecar written before fields were recorded. |
 | `object_size` | Size of the whole object when the ranges were resolved. |
 | `object_etag` | The ETag that object carried, re-sent as `If-Match` on every later request. |
 | `transformations` | One entry, `grib2 messages 105,131 concatenated from <object url>`. |
@@ -49,6 +50,7 @@ messages concatenated:
   { "start": 96828629, "end": 97953522 }
 ],
 "selectors": ["CAPE:surface", "HLCY:3000-0 m above ground"],
+"field_selectors": [["CAPE:surface"], ["HLCY:3000-0 m above ground"]],
 "object_size": 150114757,
 "object_etag": "17ef4503533b3bd3b4c6338b7dddcf2c"
 ```

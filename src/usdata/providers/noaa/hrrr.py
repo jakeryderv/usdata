@@ -201,6 +201,7 @@ def pinned_partial(pinned: Provenance) -> PartialFetch:
             messages=[int(number) for number in numbers],
             ranges=list(pinned.ranges),
             selectors=list(pinned.selectors),
+            field_selectors=[list(fields) for fields in pinned.field_selectors],
         )
     except (ValidationError, ValueError) as error:
         raise QueryError(
@@ -381,6 +382,7 @@ class ModelRuns(HttpProvider):
             messages=[selection.entry.number for selection in chosen],
             ranges=[selection.entry.byte_range for selection in chosen],
             selectors=[selection.selector for selection in chosen],
+            field_selectors=[selection.fields for selection in chosen],
         )
         href = f"{whole.href}#{partial.fragment}"
         self._partials[href] = partial

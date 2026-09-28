@@ -197,10 +197,12 @@ sources:
         first = pull(manifest, root=root)
     (item,) = first.fetched
     assert item.path.read_bytes() == OBJECT[40:80]
+    assert item.provenance.field_selectors == [["CAPE:surface"]]
     item.path.unlink()
     with respx.mock(assert_all_called=False) as mock:
         listed = mock.get(LIST_URL)
         mock.get(OBJECT_URL).side_effect = ranged()
         restored = pull(manifest, root=root)
     assert restored.from_lockfile and listed.call_count == 0
+    assert restored.fetched[0].provenance.field_selectors == [["CAPE:surface"]]
     assert verify(manifest, root=root) == []

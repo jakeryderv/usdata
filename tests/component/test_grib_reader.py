@@ -90,6 +90,7 @@ def item(
     dataset_id="noaa:hrrr",
     messages: list[int] | None = None,
     selectors: list[str] | None = None,
+    field_selectors: list[list[str]] | None = None,
 ):
     path = tmp_path / name
     path.write_bytes(content)
@@ -107,6 +108,7 @@ def item(
             "index_checksum": "sha256:" + "0" * 64,
             "ranges": message_ranges(content),
             "selectors": selectors or [],
+            "field_selectors": field_selectors or [],
             "object_size": path.stat().st_size,
             "object_etag": "81198a73ad430c73adfbe3335421ea99",
         }
@@ -625,6 +627,62 @@ def test_a_message_holding_two_fields_yields_both_and_shares_one_index(tmp_path)
         (0, 12, "v"),
         (1, 226, "cape"),
     ]
+
+
+def packed_with_cape(tmp_path: Path) -> bytes:
+    """RAP message 12, UGRD and VGRD at 100 hPa in one message, then a single CAPE message."""
+    packed = multi_field_message(
+        tmp_path,
+        message(np.full(12, 5.0), param=131, level_type="isobaricInhPa", level=100),
+        message(np.full(12, -3.0), param=132, level_type="isobaricInhPa", level=100),
+    )
+    return packed + message(np.full(12, 1500.0), param=59, level_type="surface", level=0)
+
+
+def test_each_field_of_a_packed_message_pairs_with_its_own_selector(tmp_path) -> None:
+    from usdata import inspect_asset
+
+    fetched = item(
+        tmp_path,
+        packed_with_cape(tmp_path),
+        name="packed.grib2",
+        messages=[12, 226],
+        selectors=["UGRD:100 mb", "CAPE:surface"],
+        field_selectors=[["UGRD:100 mb", "VGRD:100 mb:anl"], ["CAPE:surface"]],
+    )
+    messages = fetched.open().attrs["usdata"]["messages"]
+    assert {name: m["selector"] for name, m in messages.items()} == {
+        "u_isobaricInhPa_100": "UGRD:100 mb",
+        "v_isobaricInhPa_100": "VGRD:100 mb:anl",
+        "cape_entireAtmosphere_0": "CAPE:surface",
+    }
+    summary = inspect_asset(fetched).grib2
+    assert summary is not None
+    assert [m.selector for m in summary.messages] == [
+        "UGRD:100 mb",
+        "VGRD:100 mb:anl",
+        "CAPE:surface",
+    ]
+    assert summary.variable_for("UGRD:100 mb") == "u_isobaricInhPa_100"
+    assert summary.variable_for("VGRD:100 mb:anl") == "v_isobaricInhPa_100"
+
+
+def test_a_record_without_field_selectors_still_refuses_to_guess_a_field(tmp_path) -> None:
+    """A lockfile pinned before fields were recorded restores and opens as it did."""
+    from usdata import inspect_asset
+
+    fetched = item(
+        tmp_path,
+        packed_with_cape(tmp_path),
+        name="packed.grib2",
+        messages=[12, 226],
+        selectors=["UGRD:100 mb", "CAPE:surface"],
+    )
+    summary = inspect_asset(fetched).grib2
+    assert summary is not None
+    assert summary.variable_for("CAPE:surface") == "cape_entireAtmosphere_0"
+    with pytest.raises(ValueError, match="holding 2 fields"):
+        summary.variable_for("UGRD:100 mb")
 
 
 def test_reference_and_valid_times_keep_the_messages_seconds(tmp_path) -> None:
