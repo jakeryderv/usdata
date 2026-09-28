@@ -12,6 +12,17 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.31.0](https://github.com/jakeryderv/usdata/releases/tag/v0.31.0) - 2026-09-28
+
+
+### Added
+
+- `census:acs-5year` adds the American Community Survey 5-year estimates from the Census Data API, the second dataset that needs a free key (`USDATA_CENSUS_KEY`): one to fifty variables for one vintage over a state, its counties, or one county, stored as served and read into a DataFrame with estimates as numbers and annotation codes kept. Connecticut is keyed by its old counties through vintage 2021 and its planning regions from 2022, and `usdata.query.planning_regions` maps a county to the regions it overlaps. ([#379](https://github.com/jakeryderv/usdata/issues/379))
+
+### Fixed
+
+- `usdata.testing.check_declared_capabilities` now clears the scenario's place when it probes a box that names none, so an adapter whose scenario query needs a `location` is still checked for refusing a bare box.
+
 ## [0.30.0](https://github.com/jakeryderv/usdata/releases/tag/v0.30.0) - 2026-09-27
 
 
