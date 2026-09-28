@@ -1125,19 +1125,49 @@ datasets:
 
   - id: noaa:ersst
     provider: noaa
-    status: planned
+    status: available
     domain: ocean-physics
-    target: later
-    title: ERSST Monthly Sea Surface Temperature
+    since: "0.33"
+    title: ERSST v6 Monthly Sea Surface Temperature
     description: >-
-      Extended Reconstructed SST v5: monthly global 2 degree analysis since
-      1854, one NetCDF per month in an NCEI HTTPS directory.
-    keywords: [sst, sea surface temperature, ocean, climate, ersst, monthly, netcdf]
+      Extended Reconstructed Sea Surface Temperature version 6: NCEI's monthly global
+      analysis on a 2 degree grid since January 1850, built from ship, buoy, and Argo
+      observations. One NetCDF4 file per month in an anonymous NCEI HTTPS directory, holding
+      sea surface temperature and its anomaly from the 1991-2020 ERSSTv6 climatology. Every
+      month a window touches is selected whole; there is no server-side spatial or variable
+      subsetting. Each monthly update writes the month just ended and rewrites the month
+      before it, so the newest file is preliminary.
+    keywords: [sst, sea surface temperature, ocean, climate, ersst, monthly, netcdf, enso, el nino]
     protocol: http
     homepage: https://www.ncei.noaa.gov/products/extended-reconstructed-sst
     license: US Government Work (public domain)
-    temporal_extent: { start: "1854-01-01T00:00:00Z" }
+    spatial_extent: { west: -180.0, south: -89.0, east: 180.0, north: 89.0 }
+    temporal_extent: { start: "1850-01-01T00:00:00Z" }
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
+    summary: Monthly global 2 degree sea surface temperature since 1850
+    formats: [NetCDF4]
+    selection: Whole global monthly files, one for every month the window touches
+    inputs: Both dates (selects the months they span)
+    reader: netcdf
+    guide: docs/providers/noaa-ersst.md
+    examples:
+      - examples/datasets/noaa-ersst/noaa-ersst.ipynb
+    resolution:
+      spatial: "2.0 degree grid"
+      temporal: "Monthly means"
+    update_frequency: >-
+      Monthly, around the third: each update writes the month just ended and rewrites the
+      month before it
+    citation: >-
+      Huang, B., X. Yin, T. Boyer, C. Liu, M. Menne, Y. D. Rao, T. Smith, R. Vose, and
+      H.-M. Zhang, 2025: Extended Reconstructed Sea Surface Temperature Version 6 (ERSSTv6):
+      Part I. An Artificial Neural Network Approach. Journal of Climate, 38, 1105-1121,
+      doi:10.1175/JCLI-D-23-0707.1
+    terms: https://www.ncei.noaa.gov/products/extended-reconstructed-sst
+    variables:
+      - { name: "sst", units: "degree_C", description: "Extended reconstructed sea surface temperature" }
+      - { name: "ssta", units: "degree_C", description: "Anomaly from the 1991-2020 ERSSTv6 climatology" }
+    adapter: usdata.providers.noaa.ersst:Ersst
 
   - id: noaa:etopo
     provider: noaa

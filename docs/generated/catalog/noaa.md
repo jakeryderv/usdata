@@ -16,6 +16,7 @@
 | <span id="noaamrms"></span>[MRMS gridded radar products](../../providers/noaa-mrms.md) | Released | GRIB2 (gzipped) | Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day |
 | <span id="noaahurdat2"></span>[Tropical cyclone best tracks](../../providers/noaa-hurdat2.md) | Released | HURDAT2 fixed-format text | The newest or a named revision of one whole basin file; filter track points locally |
 | <span id="noaaibtracs"></span>[Global tropical cyclone best tracks](../../providers/noaa-ibtracs.md) | Released | CSV with a units row, NetCDF4 | One whole subset file per query, from the newest or a pinned product version |
+| <span id="noaaersst"></span>[Monthly global 2 degree sea surface temperature since 1850](../../providers/noaa-ersst.md) | Source only | NetCDF4 | Whole global monthly files, one for every month the window touches |
 | <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](../../providers/noaa-coastwatch.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
 
 ### [NCEI Access Data Service](https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation)
@@ -107,15 +108,6 @@ Daily and monthly Arctic and Antarctic sea ice extent and concentration (NOAA@NS
 
 [Upstream information](https://nsidc.org/data/g02135)
 Domain: Snow and ice.
-
-### noaa:ersst
-
-**ERSST Monthly Sea Surface Temperature** · Planned · target later
-
-Extended Reconstructed SST v5: monthly global 2 degree analysis since 1854, one NetCDF per month in an NCEI HTTPS directory.
-
-[Upstream information](https://www.ncei.noaa.gov/products/extended-reconstructed-sst)
-Domain: Ocean physics.
 
 ### noaa:oisst
 

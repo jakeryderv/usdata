@@ -30,6 +30,7 @@ Each dataset has one page here: how to select it, what arrives, what the service
 | <span id="noaarap"></span>[RAP model output](../../providers/noaa-rap.md) | Released | GRIB2 | Files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file family |
 | <span id="noaaclimate-normals"></span>[30-year station climate normals](../../providers/noaa-normals.md) | Released | CSV | Hourly, daily, monthly, or annual/seasonal normals per station; optional month-day window except annual/seasonal; hourly returns whole days |
 | <span id="noaacoops-currents"></span>[Coastal current speed and direction](../../providers/noaa-coops-currents.md) | Released | CSV | Native six-minute observations for one station and explicit bin; at most 28 days |
+| <span id="noaaersst"></span>[Monthly global 2 degree sea surface temperature since 1850](../../providers/noaa-ersst.md) | Source only | NetCDF4 | Whole global monthly files, one for every month the window touches |
 | <span id="noaacoops-water-levels"></span>[Coastal water levels](../../providers/noaa-coops.md) | Released | CSV | Six-minute observations for one station and datum; at most 28 days |
 | <span id="noaacoops-tide-predictions"></span>[Coastal tide predictions](../../providers/noaa-coops-predictions.md) | Released | CSV | Predictions for one station and datum on a chosen interval; at most a year |
 | <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](../../providers/noaa-coastwatch.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
@@ -43,7 +44,7 @@ Each dataset has one page here: how to select it, what arrives, what the service
 
 | Provider | Released | Source only | Planned |
 |---|---:|---:|---:|
-| [NOAA](noaa.md) | 23 | 0 | 14 |
+| [NOAA](noaa.md) | 23 | 1 | 13 |
 | [USGS](usgs.md) | 2 | 0 | 1 |
 | [Census Bureau](census.md) | 1 | 0 | 0 |
 | [EPA](epa.md) | 1 | 0 | 0 |

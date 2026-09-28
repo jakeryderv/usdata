@@ -26,6 +26,7 @@ NOAA access is anonymous.
 | `hurdat2` | [Tropical cyclone best tracks](noaa-hurdat2.md) (v0.12.0) | One whole basin file per revision |
 | `ibtracs` | [Global tropical cyclone best tracks](noaa-ibtracs.md) (v0.20.0) | One whole subset file, CSV or NetCDF, from the newest or a pinned version |
 | `coastwatch-sst` | [Sea-surface temperature](noaa-coastwatch.md) | Spatial and temporal CSV subsets |
+| `ersst` | [ERSST v6 monthly sea surface temperature](noaa-ersst.md) (v0.33) | Whole global monthly NetCDF4 files |
 | `coops-water-levels` | [Observed coastal water levels](noaa-coops.md) (v0.10.0) | One station and datum, at most 28 days |
 | `coops-currents` | [Observed current speed and direction](noaa-coops-currents.md) (v0.24.0) | One station and explicit bin, at most 28 days |
 | `coops-tide-predictions` | [Tide predictions](noaa-coops-predictions.md) (v0.14.0) | One station, datum, and interval, at most a year |
@@ -70,6 +71,10 @@ See [RAP model output](noaa-rap.md).
 ### NBM
 
 See [NBM forecast guidance](noaa-nbm.md).
+
+## ERSST monthly sea surface temperature
+
+See [ERSST v6 monthly sea surface temperature](noaa-ersst.md).
 
 ## Storm Events annual tables
 

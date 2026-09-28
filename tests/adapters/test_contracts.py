@@ -23,6 +23,7 @@ from usdata.providers.epa.aqs import SERVICE_URL as AQS_URL
 from usdata.providers.epa.aqs import canonical
 from usdata.providers.fema.declarations import SERVICE_URL as FEMA_URL
 from usdata.providers.noaa.coastwatch import BASE, DATASET
+from usdata.providers.noaa.ersst import DIRECTORY_URL as ERSST_URL
 from usdata.providers.noaa.hurdat2 import DIRECTORY_URL as HURDAT_URL
 from usdata.providers.noaa.ibtracs import DIRECTORY_URL as IBTRACS_URL
 from usdata.providers.noaa.spc import PAGE_URL as SPC_PAGE
@@ -52,6 +53,7 @@ CASES = {
     "noaa:gfs": {"cycle": 12, "forecast_hour": 0, "resolution": "1p00"},
     "noaa:coastwatch-sst": {"bbox": (-80.08, 30.02, -80.02, 30.08)},
     "noaa:storm-events": {},
+    "noaa:ersst": {},
     "noaa:spc-tornado-reports": {},
     "noaa:hurdat2": {"basin": "pacific"},
     "noaa:ibtracs": {"subset": "sa"},
@@ -83,6 +85,7 @@ S3_KEYS = {
     "noaa:nbm": "blend.20240506/12/core/blend.t12z.core.f001.co.grib2",
 }
 STORM_NAME = "StormEvents_details-ftp_v1.0_d2024_c20260323.csv.gz"
+ERSST_NAME = "ersst.v6.202405.nc"
 HURDAT_NAME = "hurdat2-nepac-1949-2025-02272026.txt"
 IBTRACS_NAME = "ibtracs.SA.list.v04r01.csv"
 # HURDAT2 and IBTrACS publish the complete record per file, and ACS estimates are named by
@@ -221,6 +224,13 @@ def contract_transport(
             return httpx.Response(
                 200,
                 text='<table><tr><td><a href="data/2024_torn.csv">x (0.2 mb)</a></td></tr></table>',
+            )
+        if str(request.url) == ERSST_URL:
+            return httpx.Response(
+                200,
+                text=f'<table><tr><td><a href="{ERSST_NAME}">{ERSST_NAME}</a></td>'
+                f'<td align="right">2024-06-03 14:21</td><td align="right">{len(data)}</td>'
+                "</tr></table>",
             )
         if str(request.url) == DIRECTORY_URL:
             return httpx.Response(
