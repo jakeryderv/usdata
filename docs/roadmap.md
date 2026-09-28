@@ -184,27 +184,31 @@ counties resolve as places, and sources still keyed by them refuse a planning
 region rather than returning nothing or statewide rows alone. Checksums have one
 canonical form, and part of the cache can live on another disk through a symlink.
 
+Shipped in v0.31.0: [ACS 5-year estimates](https://github.com/jakeryderv/usdata/issues/379)
+from the Census Data API, the second source that needs a key and the second
+selected by place after FEMA. A query names an explicit vintage rather than a
+window, one to fifty variables, and a state, its counties, or one county, and
+Connecticut is keyed by its old counties or its planning regions as the vintage
+has them ([ADR 0045](adr/0045-acs-5year-selection.md)). The key rides as a
+single query parameter, and ADR 0039 covered it without amendment: the contract
+checks pass unchanged. The
+[walkthrough](https://usdata.dev/datasets/census/acs-5year/) gives the
+population, housing, and income of Oklahoma's counties, with the ones the
+[disaster-declarations study](https://usdata.dev/studies/disaster-declarations/)
+joins marked.
+
 The work now is breadth: more of the datasets people reach for, from more
 agencies, each verified by a live check and a worked example. 1.0 comes when
 the catalog feels comprehensive and the contract feels settled, a judgment
 rather than a countdown ([versioning](versioning.md#path-to-10)). A new dataset
 that needs a core change makes it and says so in the changelog.
 
-Selected: [ACS 5-year estimates](https://github.com/jakeryderv/usdata/issues/379)
-from the Census Data API, the second source that needs a key and the second
-selected by place after FEMA. Its selection rules are in
-[ADR 0045](adr/0045-acs-5year-selection.md): an explicit vintage rather than a
-window, at most fifty variables, one state or county, and Connecticut's codes by
-vintage. Probing suggests ADR 0039 covers a single key sent as a query
-parameter without amendment; the adapter's contract checks will confirm it. The worked example gives the population and
-housing of the Oklahoma counties in the
-[disaster-declarations study](https://usdata.dev/studies/disaster-declarations/).
-
 ## Next
 
 Sources that need a key are supported since v0.26.0
-([ADR 0039](adr/0039-credentialed-sources.md)); the second one is selected
-above.
+([ADR 0039](adr/0039-credentialed-sources.md)), and the second, Census, fit
+those rules as written. NASA's Earthdata login below would be the first to test
+a login rather than a key.
 
 Scope one dataset expansion around a concrete analysis use case. These are
 candidates to investigate, not selected implementations. Refine a candidate into

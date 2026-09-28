@@ -2,7 +2,7 @@
 
 ## Reference
 
-`census:acs-5year` · **Source only** · Install from [source](../install.md#source-installation) to use this dataset. American Community Survey 5-Year Estimates.
+`census:acs-5year` · **Released** · Included since usdata 0.31. American Community Survey 5-Year Estimates.
 
 ### At a glance
 
@@ -37,7 +37,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ### Catalog facts
 
-- Availability: Source only · intended for 0.31
+- Availability: since 0.31
 - Domain: Demographics
 - Spatial resolution: Detailed tables are available down to the block group; usdata selects states and counties
 - Temporal resolution: Five-year period estimates, one vintage per year

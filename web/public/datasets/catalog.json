@@ -1,5 +1,5 @@
 {
-  "version": "0.30.0",
+  "version": "0.31.0",
   "datasets": [
     {
       "id": "noaa:ghcn-daily",
@@ -3093,7 +3093,7 @@
       "provider_id": "census",
       "domain": "Demographics",
       "system": null,
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.31",
       "keywords": [
         "population",
