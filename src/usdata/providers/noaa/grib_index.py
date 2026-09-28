@@ -42,10 +42,17 @@ FIELDS = 6
 
 
 class Selection(BaseModel):
-    """One selected message and the index selector text that names exactly it."""
+    """One selected message, the selector text that names it, and one text per field it holds.
+
+    ``fields`` names each field of the message in index order, so the k-th
+    field on disk pairs with its k-th text: a field a selector named carries
+    that selector's text as ``selector`` would, and a field fetched only
+    because it shares the message carries its index line's own selector.
+    """
 
     entry: IndexEntry
     selector: str
+    fields: list[str]
 
 
 class Selector(BaseModel):
@@ -218,7 +225,8 @@ def resolve(
     the index line's own short name, level, and step text when the caller wrote
     a broader one that several messages answered. A message holding several
     fields is one selection however many of its fields were named, carrying the
-    first; its other fields travel with it, since a byte range cannot split them.
+    first; its other fields travel with it, since a byte range cannot split them,
+    and ``fields`` names every one of them.
 
     Args:
         entries: Every message of the object, as ``parse_index`` read them.
@@ -231,7 +239,8 @@ def resolve(
     Raises:
         QueryError: A selector matches no message, which is never a whole-file fetch.
     """
-    chosen: dict[int, Selection] = {}
+    # The first selector naming a field decides its text, keyed by the field's own position.
+    named: dict[tuple[int, int | None], tuple[IndexEntry, str]] = {}
     for selector in selectors:
         hits = [entry for entry in entries if selector.matches(entry)]
         if not hits:
@@ -241,7 +250,16 @@ def resolve(
             )
         text = selector.text if len(hits) == 1 else None
         for entry in hits:
-            chosen.setdefault(entry.number, Selection(entry=entry, selector=text or entry.selector))
+            named.setdefault((entry.number, entry.field), (entry, text or entry.selector))
+    chosen: dict[int, Selection] = {}
+    for (number, _), (entry, text) in named.items():
+        if number not in chosen:
+            fields = [
+                named.get((other.number, other.field), (other, other.selector))[1]
+                for other in entries
+                if other.number == number
+            ]
+            chosen[number] = Selection(entry=entry, selector=text, fields=fields)
     return [chosen[number] for number in sorted(chosen)]
 
 

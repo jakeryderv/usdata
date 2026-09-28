@@ -137,7 +137,8 @@ class Grib2Summary(BaseModel):
             KeyError: No message here was fetched for that selector; the message
                 lists the selectors that were.
             ValueError: That selector fetched a message holding several fields,
-                as RAP publishes wind components, and the record cannot say
+                as RAP publishes wind components, and the record was written
+                before each field's selector was recorded, so it cannot say
                 which field it named; the message lists their variables.
         """
         from usdata._grib import variable_names
@@ -158,7 +159,7 @@ class Grib2Summary(BaseModel):
             if message.selector == selector
         ]
         if len(matched) > 1:
-            # The record keeps one selector per byte range, and one range can hold several fields.
+            # An older record keeps one selector per range, and one range can hold several fields.
             raise ValueError(
                 f"selector {selector!r} fetched one message holding {len(matched)} fields "
                 f"({', '.join(matched)}); pick the variable by name"
@@ -333,24 +334,26 @@ def _paired(messages: list[GribMessage], record: Provenance) -> list[GribMessage
     """Each message as the fetch that took it described it, where provenance says.
 
     The file itself carries neither number nor selector: a partial fetch recorded
-    one message number and one selector per range, and ``file_index`` counts the
-    file's messages the same way, so the fields of a message that holds several
-    all pair with its number. A whole file, or a record that does not pair,
-    leaves both unset.
+    one message number per range and one selector per field, and ``file_index``
+    counts the file's messages the same way, so the fields of a message that
+    holds several all pair with its number and each with its own selector. A
+    whole file, or a record that does not pair, leaves both unset.
     """
     numbers = record.object_messages
     if not numbers or any(message.file_index >= len(numbers) for message in messages):
         return messages
-    selectors = record.selectors if len(record.selectors) == len(numbers) else []
-    return [
-        message.model_copy(
-            update={
-                "object_index": numbers[message.file_index],
-                "selector": selectors[message.file_index] if selectors else None,
-            }
+    paired = len(record.selectors) == len(numbers)
+    fields_seen: dict[int, int] = {}
+    result = []
+    for message in messages:
+        field = fields_seen[message.file_index] = fields_seen.get(message.file_index, -1) + 1
+        selector = record.field_selector(message.file_index, field) if paired else None
+        result.append(
+            message.model_copy(
+                update={"object_index": numbers[message.file_index], "selector": selector}
+            )
         )
-        for message in messages
-    ]
+    return result
 
 
 def _csv_summary(path: Path, *, units_row: bool = False) -> CsvSummary:

@@ -50,6 +50,7 @@ def record(
         index_checksum=None if partial is None else partial.index_checksum,
         ranges=[] if partial is None else list(partial.ranges),
         selectors=[] if partial is None else list(partial.selectors),
+        field_selectors=[] if partial is None else [list(f) for f in partial.field_selectors],
         object_size=None if partial is None else partial.object_size,
         object_etag=None if partial is None else partial.object_etag,
         credentials=[] if dataset.credentials is None else list(dataset.credentials.variables),

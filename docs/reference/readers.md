@@ -65,21 +65,34 @@ the `object #` column only when the file has one.
 A GRIB2 message can hold several fields; RAP packs wind components that way,
 and its index numbers them `12.1` and `12.2`. The reader opens every field
 (ecCodes multi-field support is switched on for the process when the reader
-loads), and the fields of one message share its `file_index`, `object_index`,
-and `selector`. A gzip-compressed file, which is how MRMS arrives, is read one
+loads). The fields of one message share its `file_index` and `object_index`,
+and each carries its own `selector`: the one that named it, or its index line's
+own selector when it was fetched only because it shares the message. A file
+pinned before fields were recorded gives them their message's one selector.
+A gzip-compressed file, which is how MRMS arrives, is read one
 field per message.
 
 ## GRIB2 selectors and variable names
 
-A partial fetch also records the index `selector` each message was fetched for,
+A partial fetch also records the index `selector` each field was fetched for,
 which `usdata inspect` prints in a `selector` column and the reader puts on each
 `messages` entry. `Grib2Summary.variable_for(selector)` turns one of those
 selectors into the variable name the naming rule above gives that message, so a
 notebook that asked for `CAPE:surface` can look up the `cape_surface_0` it became
 instead of guessing it; a selector this file holds no message for raises
-`KeyError` naming the ones it does. Both start from each message's `base_name`
+`KeyError` naming the ones it does, and one that names a field of a
+several-field message in a file pinned before fields were recorded raises
+`ValueError` rather than guess which field it meant. Both start from each message's `base_name`
 on `GribMessage`: its `shortName`, or for a parameter ecCodes has no name for,
 the MRMS product or `parameter_<discipline>_<category>_<number>`.
+
+An MRMS file is fetched by product, not by selector, so `variable_for` has
+nothing to look up there. Its one variable is the product without the
+nominal-height suffix the directory name carries, `RotationTrackML30min` for
+`RotationTrackML30min_00.50`; `(name,) = grid.data_vars` reads it without
+spelling it. The suffix is dropped because it is part of the directory
+name rather than the quantity, and one product, `LightningProbabilityNext30minGrid_scale_1`,
+has none.
 
 ## CSV identifier defaults
 

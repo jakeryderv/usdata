@@ -182,6 +182,28 @@ def test_fields_of_one_message_share_a_range_and_select_it_once() -> None:
     ]
 
 
+def test_every_field_of_a_selected_message_is_named_in_index_order() -> None:
+    """Each field pairs with the text that named it, or with its own line when none did."""
+    text = (
+        "11:0:d=x:VVEL:100 mb:anl:\n"
+        "12.1:100:d=x:UGRD:100 mb:anl:\n"
+        "12.2:100:d=x:VGRD:100 mb:anl:\n"
+        "13:250:d=x:HGT:125 mb:anl:\n"
+    )
+    parsed = parse_index(text, object_size=300, url=URL)
+    one = resolve(parsed, selectors("VGRD:100 mb", "HGT:125 mb"), url=URL)
+    assert [(s.entry.number, s.selector, s.fields) for s in one] == [
+        (12, "VGRD:100 mb", ["UGRD:100 mb:anl", "VGRD:100 mb"]),
+        (13, "HGT:125 mb", ["HGT:125 mb"]),
+    ]
+    both = resolve(parsed, selectors("VGRD:100 mb", "UGRD:100 mb"), url=URL)
+    assert [(s.selector, s.fields) for s in both] == [
+        ("VGRD:100 mb", ["UGRD:100 mb", "VGRD:100 mb"])
+    ]
+    broad = resolve(parsed, selectors("UGRD:100 mb:anl", "VGRD:100 mb:anl"), url=URL)
+    assert broad[0].fields == ["UGRD:100 mb:anl", "VGRD:100 mb:anl"]
+
+
 def test_a_further_index_text_is_named_to_be_selected_and_excluded_otherwise() -> None:
     """NBM lines carry a fourth text for ensemble spread and probability thresholds."""
     text = (

@@ -127,7 +127,8 @@ forecast hour a manifest names. `--json` gives the listings as records, and
 
 A selector asks in the index's vocabulary and the reader answers in ecCodes',
 and the fetch records which is which, so you never have to guess the pairing.
-Provenance stores one selector beside each fetched byte range, `usdata inspect`
+Provenance stores one selector beside each fetched byte range and one for each
+field that range holds, `usdata inspect`
 prints a `selector` column for a partial file, `attrs["usdata"]["messages"]`
 gives each variable a `selector`, and `summary.grib2.variable_for("CAPE:surface")`
 returns the variable name that selector produces, `cape_surface_0` for

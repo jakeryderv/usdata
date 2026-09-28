@@ -483,8 +483,11 @@ def open_grib2(
     needs_select = select is None and not fetched.provenance.is_partial
     object_messages = fetched.provenance.object_messages
     selectors = fetched.provenance.selectors if object_messages else []
+    fields_seen: dict[int, int] = {}
     for index, h in _messages(eccodes, fetched.path):
         count += 1
+        # Fields of one message share its index; the nth of them is the index's field n+1.
+        field = fields_seen[index] = fields_seen.get(index, -1) + 1
         if count > 1 and needs_select:
             continue
         hits = {key: _matched(eccodes, h, key, wanted) for key, wanted in options.items()}
@@ -538,7 +541,7 @@ def open_grib2(
             "step": attrs.get("step"),
         }
         if selectors:
-            message["selector"] = selectors[index]
+            message["selector"] = fetched.provenance.field_selector(index, field)
         short = base_name(
             message["shortName"], [attrs.get(key) for key in PARAMETER_KEYS], fetched.asset.id
         )

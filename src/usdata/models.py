@@ -619,6 +619,13 @@ class PartialFetch(BaseModel):
         default_factory=list,
         description="Index selector naming each of those messages, in the same order",
     )
+    field_selectors: list[list[str]] = Field(
+        default_factory=list,
+        description=(
+            "Index selector naming each field of each of those messages, in the same order; "
+            "a message holding several fields, as RAP packs wind components, has one per field"
+        ),
+    )
 
     @model_validator(mode="after")
     def _aligned(self) -> PartialFetch:
@@ -626,6 +633,10 @@ class PartialFetch(BaseModel):
             raise ValueError("a partial fetch needs one byte range per selected message")
         if self.selectors and len(self.selectors) != len(self.messages):
             raise ValueError("a partial fetch needs one selector per selected message")
+        if self.field_selectors and (
+            len(self.field_selectors) != len(self.messages) or not all(self.field_selectors)
+        ):
+            raise ValueError("a partial fetch needs one or more field selectors per message")
         if sorted(set(self.messages)) != self.messages:
             raise ValueError("selected messages must be ascending and distinct")
         return self
@@ -691,6 +702,13 @@ class Provenance(BaseModel):
         default_factory=list,
         description="Index selector each of those ranges was fetched for, in the same order",
     )
+    field_selectors: list[list[str]] = Field(
+        default_factory=list,
+        description=(
+            "Index selector naming each field each of those ranges holds, in the same order; "
+            "empty in a record written before fields were recorded"
+        ),
+    )
     object_size: int | None = Field(
         default=None, ge=0, description="Size of the whole object those ranges came from"
     )
@@ -715,6 +733,19 @@ class Provenance(BaseModel):
     def is_partial(self) -> bool:
         """Whether this record describes selected byte ranges rather than a whole object."""
         return any(entry.startswith(PARTIAL_TRANSFORMATION) for entry in self.transformations)
+
+    def field_selector(self, message: int, field: int) -> str | None:
+        """The selector one field on disk was fetched for, or ``None`` where none was recorded.
+
+        ``message`` counts the local file's messages from zero and ``field`` the
+        fields inside that message from zero, as a reader meets them. A record
+        that names no fields, as one written before they were recorded does,
+        gives every field of a message that message's one selector.
+        """
+        fields = self.field_selectors[message] if message < len(self.field_selectors) else []
+        if field < len(fields):
+            return fields[field]
+        return self.selectors[message] if message < len(self.selectors) else None
 
     @property
     def object_messages(self) -> list[int]:
