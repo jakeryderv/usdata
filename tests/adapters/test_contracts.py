@@ -54,6 +54,7 @@ CASES = {
     "noaa:coastwatch-sst": {"bbox": (-80.08, 30.02, -80.02, 30.08)},
     "noaa:storm-events": {},
     "noaa:ersst": {},
+    "noaa:enso-indices": {"index": "roni"},
     "noaa:spc-tornado-reports": {},
     "noaa:hurdat2": {"basin": "pacific"},
     "noaa:ibtracs": {"subset": "sa"},
@@ -88,9 +89,9 @@ STORM_NAME = "StormEvents_details-ftp_v1.0_d2024_c20260323.csv.gz"
 ERSST_NAME = "ersst.v6.202405.nc"
 HURDAT_NAME = "hurdat2-nepac-1949-2025-02272026.txt"
 IBTRACS_NAME = "ibtracs.SA.list.v04r01.csv"
-# HURDAT2 and IBTrACS publish the complete record per file, and ACS estimates are named by
-# vintage, so they reject a time filter.
-UNTIMED = {"noaa:hurdat2", "noaa:ibtracs", "census:acs-5year"}
+# HURDAT2, IBTrACS, and the CPC ENSO tables publish the complete record per file, and ACS
+# estimates are named by vintage, so they reject a time filter.
+UNTIMED = {"noaa:hurdat2", "noaa:ibtracs", "census:acs-5year", "noaa:enso-indices"}
 WINDOW = {"start": "2024-05-06T12:00Z", "end": "2024-05-06T12:05Z"}
 # The window each adapter enforces, named where the adapter defines or imports it. Reading
 # the constants is why this module imports provider packages, as the adapter tests do.

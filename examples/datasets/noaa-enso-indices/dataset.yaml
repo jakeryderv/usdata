@@ -1,0 +1,7 @@
+name: enso-indices
+sources:
+  - dataset: noaa:enso-indices
+    name: roni
+  - dataset: noaa:enso-indices
+    name: oni
+    params: {index: oni}

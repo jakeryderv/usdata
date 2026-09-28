@@ -27,6 +27,7 @@ NOAA access is anonymous.
 | `ibtracs` | [Global tropical cyclone best tracks](noaa-ibtracs.md) (v0.20.0) | One whole subset file, CSV or NetCDF, from the newest or a pinned version |
 | `coastwatch-sst` | [Sea-surface temperature](noaa-coastwatch.md) | Spatial and temporal CSV subsets |
 | `ersst` | [ERSST v6 monthly sea surface temperature](noaa-ersst.md) (v0.33) | Whole global monthly NetCDF4 files |
+| `enso-indices` | [CPC ENSO indices](noaa-enso-indices.md) (v0.33) | One whole index table, RONI or ONI, every season from 1950 |
 | `coops-water-levels` | [Observed coastal water levels](noaa-coops.md) (v0.10.0) | One station and datum, at most 28 days |
 | `coops-currents` | [Observed current speed and direction](noaa-coops-currents.md) (v0.24.0) | One station and explicit bin, at most 28 days |
 | `coops-tide-predictions` | [Tide predictions](noaa-coops-predictions.md) (v0.14.0) | One station, datum, and interval, at most a year |
@@ -75,6 +76,10 @@ See [NBM forecast guidance](noaa-nbm.md).
 ## ERSST monthly sea surface temperature
 
 See [ERSST v6 monthly sea surface temperature](noaa-ersst.md).
+
+## CPC ENSO indices
+
+See [CPC ENSO indices](noaa-enso-indices.md).
 
 ## Storm Events annual tables
 
