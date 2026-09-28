@@ -18,9 +18,10 @@ for ERSST v5. Probing on 2026-09-28 found three ERSST directories at NCEI:
   nowhere on the product page. Every file from 2008 onward is rewritten each
   month, and files before 2008 are classic NetCDF3 on a 360-day calendar.
 
-CPC's Oceanic Niño Index is still computed from v5, and the v5 files in the
-last directory reproduce CPC's monthly Niño 3.4 within 0.04 °C. v6's Niño 3.4
-three-month anomalies run 0.02 to 0.09 °C below ONI.
+CPC computes its ENSO indices from v6: the traditional Oceanic Niño Index,
+and since 1 February 2026 the Relative Oceanic Niño Index (RONI), which
+NOAA uses officially (NWS Public Information Statement 26-05). Only legacy
+index files remain on v5.
 
 ## Decision
 
@@ -28,9 +29,9 @@ three-month anomalies run 0.02 to 0.09 °C below ONI.
 The registry says what an agency publishes as current, and v6 is that. It is
 also the simpler source: one format and one calendar across 1850 to the
 present, an anomaly field on the 1991-2020 base, and files that are not
-rewritten every month. Matching the official ONI is left to a pinned CPC
-index, not to this dataset: the study compares the two and reports the gap
-instead of choosing a version for its agreement with ONI.
+rewritten every month, and it is what CPC's own indices are computed from.
+The official index itself, RONI, subtracts a tropical mean and is rescaled,
+so it is left to a pinned CPC table rather than rebuilt from these files.
 
 An asset is one whole monthly file, `ersst.v6.YYYYMM.nc`. A window selects
 every calendar month it touches, in UTC, and the asset's time is that whole
@@ -51,7 +52,7 @@ that changes without the file changing.
 
 ## Alternatives
 
-- **v5 from `pub/data/cmb`**, to match the official ONI. It would need a
+- **v5 from `pub/data/cmb`**, the only v5 directory still updated. It would need a
   NetCDF3 reader and cftime for the 360-day calendar (this was built and
   closed unmerged as #391). It would read a directory NCEI does not document,
   and every 2008+ pin would drift every month.

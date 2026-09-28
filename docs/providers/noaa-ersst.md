@@ -61,9 +61,13 @@ artificial neural network. v6 is the only version this adapter reads.
 - v6 is NetCDF4 for every month from 1850. v5's official directory stops at
   February 2026, and its files before 2008 are classic NetCDF3 on a 360-day
   calendar.
-- CPC's Oceanic Niño Index is still computed from v5. v6's Niño 3.4 three-month
-  anomalies run 0.02 to 0.09 °C below it: JJA 2026 is 1.78 against ONI 1.80,
-  and NDJ 1997 is 2.30 against 2.37.
+- CPC computes its ENSO indices from v6: the traditional Oceanic Niño Index,
+  on 30-year base periods centred on each era and updated every five years,
+  and the Relative Oceanic Niño Index (RONI), which NOAA has used officially
+  since 1 February 2026 (NWS Public Information Statement 26-05). RONI first
+  subtracts the 20°N-20°S tropical mean anomaly. A Niño 3.4 mean of `ssta`,
+  on its one fixed 1991-2020 base, is within 0.1 °C of ONI for recent seasons:
+  JJA 2026 is 1.78 against ONI 1.80. RONI for that season is 1.36.
 
 The directory listing shows how files are revised. Months from 1850 through 2007
 were written on 2025-05-02, and 2008 through January 2026 were rewritten once on
