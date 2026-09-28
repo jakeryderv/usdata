@@ -96,7 +96,9 @@ def import_eccodes() -> Any:
     imported later in the same process, both copies free the same memory as the
     interpreter exits, which aborts it with "double free or corruption" and exit
     status 134 after the work is done. Loading pyproj's copy first avoids it.
-    A pyproj that fails to import is left for whoever uses it to report.
+    A pyproj that fails to import is left for whoever uses it to report. This is
+    a workaround for https://github.com/ecmwf/eckit/issues/354; once an eckitlib
+    wheel no longer clashes with pyproj's PROJ, it can go.
 
     Raises:
         ModuleNotFoundError: eccodes is not installed.
