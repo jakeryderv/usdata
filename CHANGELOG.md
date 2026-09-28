@@ -12,6 +12,17 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.32.0](https://github.com/jakeryderv/usdata/releases/tag/v0.32.0) - 2026-09-28
+
+
+### Added
+
+- `usdata verify dataset.yaml --listing`, and `usdata.compare_listing(manifest)` in Python, compare a lockfile with what its sources list today, downloading nothing: per source, the assets a re-resolve would add or no longer find, and pinned assets whose href or reported size changed. It exits 1 on any difference, so a script can ask whether `pull --force` would pin the same files. ([#332](https://github.com/jakeryderv/usdata/issues/332))
+
+### Fixed
+
+- A process that reads GRIB2 and then imports pyproj, as opening a NEXRAD volume with the radar extra does, no longer aborts at exit with "double free or corruption": the eckitlib wheel behind ecCodes and pyproj's wheel each bundle PROJ, and the GRIB reader and `usdata doctor` now load pyproj's copy first when pyproj is installed. Code that imports `eccodes` itself before `pyproj` should import `pyproj` first.
+
 ## [0.31.0](https://github.com/jakeryderv/usdata/releases/tag/v0.31.0) - 2026-09-28
 
 
