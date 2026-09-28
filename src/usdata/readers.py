@@ -47,6 +47,12 @@ AQS_DATASET = "epa:aqs-daily"
 AQS_PREFIX = "aqs-daily_"
 """How an ``epa:aqs-daily`` asset id begins, so a copied file is still recognized."""
 
+ACS_DATASET = "census:acs-5year"
+"""The dataset whose Census Data API tables the ``acs`` reader opens."""
+
+ACS_PREFIX = "acs5_"
+"""How a ``census:acs-5year`` asset id begins, so a copied file is still recognized."""
+
 STORM_EVENTS_DATASET = "noaa:storm-events"
 """The dataset whose local timestamps the CSV reader pairs with UTC columns."""
 
@@ -388,12 +394,13 @@ def open_asset(fetched: FetchedAsset) -> Any:
 
     The reader is inferred from the asset's dataset, media type, and id:
     ``noaa:nexrad-level2`` volumes open as with ``open_nexrad``, HURDAT2 best
-    tracks and AQS daily-summary JSON by their dataset or filename, NetCDF4 as
+    tracks, AQS daily-summary JSON, and ACS tables by their dataset or filename, NetCDF4 as
     with ``open_netcdf``, GRIB2 as with ``open_grib2``, and CSV as with
     ``open_csv``, with its units row detected. Each takes its defaults; a file
     that needs options is opened with the function for its format instead.
-    HURDAT2 best-track text returns one row per track point, and AQS daily-summary
-    JSON one row per monitor, day, and standard; neither takes options.
+    HURDAT2 best-track text returns one row per track point, AQS daily-summary
+    JSON one row per monitor, day, and standard, and an ACS table one row per
+    geography; none takes options.
 
     Raises:
         UnsupportedFormat: Nothing about the asset names a format usdata reads.
@@ -411,6 +418,10 @@ def open_asset(fetched: FetchedAsset) -> Any:
         from usdata._aqs import open_aqs
 
         return open_aqs(fetched)
+    if dataset_id == ACS_DATASET or (name.startswith(ACS_PREFIX) and name.endswith(".json")):
+        from usdata._census import open_acs
+
+        return open_acs(fetched)
     if media_type in NETCDF_MEDIA_TYPES:
         return open_netcdf(fetched)
     if media_type in GRIB2_MEDIA_TYPES or (
@@ -424,7 +435,7 @@ def open_asset(fetched: FetchedAsset) -> Any:
     raise UnsupportedFormat(
         f"no reader for {fetched.asset.media_type!r}; supported formats are CSV, "
         "ERDDAP CSV, NetCDF4, GRIB2, NEXRAD Level II, HURDAT2 best tracks, "
-        "and AQS daily JSON. For a CSV with ambiguous metadata, use open_csv; "
+        "AQS daily JSON, and ACS tables. For a CSV with ambiguous metadata, use open_csv; "
         "otherwise use fetched.path with a format-specific reader"
     )
 

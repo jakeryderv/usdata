@@ -9,6 +9,7 @@ from usdata.query import (
     find_place,
     legacy_counties,
     parse_datetime,
+    planning_regions,
     resolve_place,
 )
 
@@ -115,6 +116,16 @@ def test_connecticuts_legacy_counties_resolve_beside_its_planning_regions(geoid,
     assert state.south <= county.south < county.north <= state.north
     # A legacy county is what the old-code sources want, so it maps to nothing further.
     assert legacy_counties(place) == ()
+
+
+def test_a_legacy_county_lists_the_planning_regions_it_shares_a_town_with() -> None:
+    hartford, _ = find_place("Hartford County, CT")
+    assert [r.geoid for r in planning_regions(hartford)] == ["09110", "09140", "09160"]
+    # The reverse of legacy_counties: each region names the county back.
+    for region in planning_regions(hartford):
+        assert hartford in legacy_counties(region)
+    assert planning_regions(find_place("Capitol Planning Region, CT")[0]) == ()
+    assert planning_regions(find_place("Osage County, OK")[0]) == ()
 
 
 def test_a_planning_region_lists_the_legacy_counties_it_shares_a_town_with() -> None:

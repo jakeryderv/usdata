@@ -18,6 +18,7 @@ import pytest
 from usdata import providers, testing
 from usdata.models import Query, Status
 from usdata.providers import Credentials, Provider, adapter_class
+from usdata.providers.census.acs import SERVICE_URL as CENSUS_URL
 from usdata.providers.epa.aqs import SERVICE_URL as AQS_URL
 from usdata.providers.epa.aqs import canonical
 from usdata.providers.fema.declarations import SERVICE_URL as FEMA_URL
@@ -61,6 +62,11 @@ CASES = {
     "fema:disaster-declarations": {"state": "OK"},
     "noaa:nws-vtec-events": {"ugc": "OKC113"},
     "epa:aqs-daily": {"parameters": "88101", "sites": "36-081-0124"},
+    "census:acs-5year": {
+        "location": "Oklahoma",
+        "variables": ["NAME", "B01003_001E"],
+        "vintage": 2023,
+    },
 }
 S3_KEYS = {
     "noaa:nexrad-level2": "2024/05/06/KTLX/KTLX20240506_120100_V06",
@@ -79,8 +85,9 @@ S3_KEYS = {
 STORM_NAME = "StormEvents_details-ftp_v1.0_d2024_c20260323.csv.gz"
 HURDAT_NAME = "hurdat2-nepac-1949-2025-02272026.txt"
 IBTRACS_NAME = "ibtracs.SA.list.v04r01.csv"
-# HURDAT2 and IBTrACS publish the complete record per file, so they reject a time filter.
-UNTIMED = {"noaa:hurdat2", "noaa:ibtracs"}
+# HURDAT2 and IBTrACS publish the complete record per file, and ACS estimates are named by
+# vintage, so they reject a time filter.
+UNTIMED = {"noaa:hurdat2", "noaa:ibtracs", "census:acs-5year"}
 WINDOW = {"start": "2024-05-06T12:00Z", "end": "2024-05-06T12:05Z"}
 # The window each adapter enforces, named where the adapter defines or imports it. Reading
 # the constants is why this module imports provider packages, as the adapter tests do.
@@ -153,6 +160,8 @@ def aqs_body(url: str) -> dict[str, object]:
 def contract_data(dataset_id: str) -> bytes:
     if dataset_id == "epa:aqs-daily":
         return canonical(aqs_body("https://aqs.epa.gov/data/api/dailyData/bySite"))
+    if dataset_id == "census:acs-5year":
+        return b'[["NAME","B01003_001E","state"],\n["Oklahoma","4019271","40"]]'
     if dataset_id == "noaa:coops-currents":
         return b"Date Time, Speed, Direction, Bin \n2024-05-06 12:02,17.3,285,4\n"
     if dataset_id == "noaa:coops-tide-predictions":
@@ -179,6 +188,11 @@ def contract_transport(
                 failed = {"status": "Failed", "error": ["param is missing"]}
                 return httpx.Response(400, json={"Header": [failed]})
             return httpx.Response(503 if fail else 200, json=aqs_body(str(request.url)))
+        if str(request.url).startswith(CENSUS_URL):
+            # The key rides in the query string too; without one the service redirects.
+            if "key" not in request.url.params:
+                return httpx.Response(302, headers={"location": "/data/missing_key.html"})
+            return httpx.Response(503 if fail else 200, content=data)
         if str(request.url) in downloads:
             return httpx.Response(503 if fail else 200, content=data)
         if dataset_id in S3_KEYS and request.url.params.get("list-type") == "2":

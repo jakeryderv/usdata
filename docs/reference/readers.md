@@ -11,6 +11,7 @@ This page lists what to install, what `open()` infers, and what each format's me
 | ERDDAP CSV | `open_csv` | `pandas` | pandas DataFrame with `attrs["units"]` | CSV media types on an asset whose protocol is ERDDAP, and `noaa:ibtracs` CSV assets, whose units row has the same layout; for IBTrACS only a single space or an empty field is missing, so the basin code `NA` stays text |
 | HURDAT2 | `open()` only | `pandas` | pandas DataFrame, one row per track point | `noaa:hurdat2` assets, or ids `hurdat2-*.txt` |
 | AQS daily JSON | `open()` only | `pandas` | pandas DataFrame, one row per monitor, local day, and pollutant standard; `date_local` and `date_of_last_change` as naive dates, the header in `attrs["usdata"]["header"]` | `epa:aqs-daily` assets, or ids `aqs-daily_*.json` |
+| ACS table | `open()` only | `pandas` | pandas DataFrame, one row per geography; estimate and margin-of-error columns as numbers with annotation codes kept, other columns as text | `census:acs-5year` assets, or ids `acs5_*.json` |
 | NEXRAD Level II | `open_nexrad` | `radar` | xarray DataTree | `noaa:nexrad-level2` assets |
 | NetCDF4 | `open_netcdf` | `netcdf` | xarray Dataset | `application/x-netcdf`, `application/netcdf`, `application/x-netcdf4` |
 | GRIB2 | `open_grib2` | `grib` | xarray Dataset | `application/x-grib2`, `application/grib2`, `application/x-grib`, `application/wmo-grib2`; ids ending `.grib2`, `.grb2`, or their `.gz` forms when the media type is missing, generic, or gzip |
@@ -25,7 +26,7 @@ This page lists what to install, what `open()` infers, and what each format's me
 `FetchedAsset`, and a function of the same name in `usdata.readers` that takes
 the fetched asset first. A method opens the file as that format whatever its
 metadata says, so it is also how a file with ambiguous metadata is opened.
-HURDAT2 and AQS files take no options and are opened with `open()`.
+HURDAT2, AQS, and ACS files take no options and are opened with `open()`.
 
 | Method | Returns | Option | Behavior |
 |---|---|---|---|
@@ -93,7 +94,7 @@ pandas inference and default missing-value parsing.
 
 | Format | Where | Contents |
 |---|---|---|
-| CSV, HURDAT2, AQS | `frame.attrs["usdata"]` | Asset id, the asset's request `properties` (a mapping, empty when it records none), and a JSON-compatible copy of its provenance |
+| CSV, HURDAT2, AQS, ACS | `frame.attrs["usdata"]` | Asset id, the asset's request `properties` (a mapping, empty when it records none), and a JSON-compatible copy of its provenance |
 | CSV with a units row | `frame.attrs["units"]` | Units row, filtered to the selected columns |
 | NEXRAD Level II | `radar.attrs["usdata"]` | Asset id, `properties`, provenance, and `sweeps` listing the returned groups |
 | NetCDF4, GRIB2 | `dataset.attrs["usdata"]` | Asset id, `properties`, and provenance |

@@ -1556,20 +1556,55 @@ datasets:
   # ---------------------------------------------------------------- Census
   - id: census:acs-5year
     provider: census
-    status: planned
+    status: available
     domain: demographics
-    target: later
+    since: "0.31"
     title: American Community Survey 5-Year Estimates
     description: >-
-      Population, housing, income, and demographic estimates for every
-      geography down to block group, via the Census Data API, selected by state
-      and county FIPS code rather than by box. Requires a free API key on every
-      data request; only the dataset and variable metadata are served without one.
-    keywords: [population, demographics, housing, income, acs, census]
+      Population, housing, income, and demographic estimates from the American
+      Community Survey's detailed tables, through the Census Data API: one row
+      per geography, for one to fifty API variables, including margins of error
+      and annotations. A query names a vintage, the last year of the five-year
+      period, rather than a window, and a state or county rather than a box;
+      a state can return its own row or one row per county. The delivered
+      variable set is open, tens of thousands of variables per vintage.
+      Requires a free API key on every data request; the response is stored as
+      served, since it carries no copy of the key.
+    keywords: [population, demographics, housing, income, acs, census, american community survey]
     protocol: http
     homepage: https://www.census.gov/data/developers/data-sets/acs-5year.html
     license: US Government Work (public domain)
-    capabilities: { spatial_subset: false, place_subset: true, temporal_subset: true, variable_subset: true }
+    capabilities: { spatial_subset: false, place_subset: true, temporal_subset: false, variable_subset: true }
+    credentials:
+      variables: [USDATA_CENSUS_KEY]
+      signup: https://api.census.gov/data/key_signup.html
+    summary: Five-year population, housing, and income estimates by state or county
+    formats: [JSON]
+    selection: One vintage's estimates for up to fifty variables over a state, its counties, or one county
+    inputs: A vintage; one to fifty variables; a state or county location
+    reader: pandas
+    guide: docs/providers/census-acs-5year.md
+    examples:
+      - examples/datasets/census-acs-5year/census-acs-5year.ipynb
+    resolution:
+      spatial: Detailed tables are available down to the block group; usdata selects states and counties
+      temporal: Five-year period estimates, one vintage per year
+    update_frequency: >-
+      Released once a year; the 2020-2024 estimates were released on 8 January 2026
+    citation: >-
+      U.S. Census Bureau, American Community Survey 5-Year Estimates, Detailed Tables, Census Data
+      API, accessed via usdata
+    terms: https://www.census.gov/data/developers/about/terms-of-service.html
+    variables:
+      - { name: "NAME", description: "Geographic area name, such as Osage County, Oklahoma" }
+      - { name: "B01003_001E", description: "Total population, estimate" }
+      - { name: "B01003_001M", description: "Total population, margin of error" }
+      - { name: "B25001_001E", description: "Housing units, estimate" }
+      - { name: "B25001_001M", description: "Housing units, margin of error" }
+      - { name: "B19013_001E", units: "US dollars of the vintage year", description: "Median household income in the past 12 months, inflation-adjusted to the vintage year, estimate" }
+      - { name: "state", description: "FIPS code of the state, appended by the service" }
+      - { name: "county", description: "FIPS code of the county within the state, appended by the service for county rows" }
+    adapter: usdata.providers.census.acs:Acs5Year
 
   # ---------------------------------------------------------------- USDA
   - id: usda:cropland-data-layer

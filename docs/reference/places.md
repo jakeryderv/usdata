@@ -82,9 +82,12 @@ town with, per the Census
 | Western Connecticut (`09190`) | Fairfield, Litchfield |
 
 `usdata.query.legacy_counties(place)` returns those counties for a region, and
-nothing for any other place. A source keyed by the old codes refuses a region
-with a message naming them, rather than answering it with nothing. A source
-that selects by rectangle takes either kind. The bundled `places.sources.json`
+nothing for any other place; `usdata.query.planning_regions(place)` returns the
+regions for a county, the reverse. A source keyed by the old codes refuses a
+region with a message naming them, rather than answering it with nothing. The
+ACS 5-year estimates follow Census geography by vintage: the counties through
+2021 and the regions from 2022, and each vintage refuses the other kind. A
+source that selects by rectangle takes either kind. The bundled `places.sources.json`
 records the 2021 archive and the crosswalk with their hashes; in `places.csv`
 the eight rows have kind `legacy_county`, and each region lists its counties
 in `legacy_counties`.

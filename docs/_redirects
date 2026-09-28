@@ -49,6 +49,8 @@
 /generated/catalog/usgs/earthquakes /providers/usgs-earthquakes/ 301
 /generated/catalog/usgs/water-daily/ /providers/usgs-water-daily/ 301
 /generated/catalog/usgs/water-daily /providers/usgs-water-daily/ 301
+/generated/catalog/census/acs-5year/ /providers/census-acs-5year/ 301
+/generated/catalog/census/acs-5year /providers/census-acs-5year/ 301
 /generated/catalog/epa/aqs-daily/ /providers/epa-aqs-daily/ 301
 /generated/catalog/epa/aqs-daily /providers/epa-aqs-daily/ 301
 /generated/catalog/fema/disaster-declarations/ /providers/fema-disaster-declarations/ 301

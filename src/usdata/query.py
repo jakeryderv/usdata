@@ -89,6 +89,24 @@ def legacy_counties(place: Place) -> tuple[Place, ...]:
     return tuple(table.places[geoid][0] for geoid in table.legacy.get(place.geoid, ()))
 
 
+def planning_regions(place: Place) -> tuple[Place, ...]:
+    """The Connecticut planning regions a pre-2022 county overlaps, or () for any other place.
+
+    The reverse of ``legacy_counties``, for a source that switched to the
+    regions in 2022, such as Census geography from that vintage on, and so has
+    no rows under an old county's code.
+
+    Args:
+        place: Any place from ``find_place`` or ``build_query``.
+
+    Returns:
+        The planning regions, in FIPS order, when ``place`` is a legacy county.
+    """
+    table = _places()
+    regions = sorted(region for region, counties in table.legacy.items() if place.geoid in counties)
+    return tuple(table.places[geoid][0] for geoid in regions)
+
+
 def resolve_place(name: str) -> BBox:
     """Resolve a state, qualified county name, or quoted two/five-digit FIPS code to its box."""
     return find_place(name)[1]

@@ -3085,6 +3085,101 @@
       "quickstart": null
     },
     {
+      "id": "census:acs-5year",
+      "title": "Five-year population, housing, and income estimates by state or county",
+      "product": "American Community Survey 5-Year Estimates",
+      "description": "Population, housing, income, and demographic estimates from the American Community Survey's detailed tables, through the Census Data API: one row per geography, for one to fifty API variables, including margins of error and annotations. A query names a vintage, the last year of the five-year period, rather than a window, and a state or county rather than a box; a state can return its own row or one row per county. The delivered variable set is open, tens of thousands of variables per vintage. Requires a free API key on every data request; the response is stored as served, since it carries no copy of the key.",
+      "provider": "Census Bureau",
+      "provider_id": "census",
+      "domain": "Demographics",
+      "system": null,
+      "availability": "Source only",
+      "since": "0.31",
+      "keywords": [
+        "population",
+        "demographics",
+        "housing",
+        "income",
+        "acs",
+        "census",
+        "american community survey"
+      ],
+      "formats": [
+        "JSON"
+      ],
+      "selection": "One vintage's estimates for up to fifty variables over a state, its counties, or one county",
+      "inputs": "A vintage; one to fifty variables; a state or county location",
+      "credentials": {
+        "variables": [
+          "USDATA_CENSUS_KEY"
+        ],
+        "signup": "https://api.census.gov/data/key_signup.html"
+      },
+      "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "Detailed tables are available down to the block group; usdata selects states and counties",
+        "temporal": "Five-year period estimates, one vintage per year"
+      },
+      "update_frequency": "Released once a year; the 2020-2024 estimates were released on 8 January 2026",
+      "latency": null,
+      "citation": "U.S. Census Bureau, American Community Survey 5-Year Estimates, Detailed Tables, Census Data API, accessed via usdata",
+      "terms": "https://www.census.gov/data/developers/about/terms-of-service.html",
+      "homepage": "https://www.census.gov/data/developers/data-sets/acs-5year.html",
+      "variables": [
+        {
+          "name": "NAME",
+          "units": null,
+          "description": "Geographic area name, such as Osage County, Oklahoma"
+        },
+        {
+          "name": "B01003_001E",
+          "units": null,
+          "description": "Total population, estimate"
+        },
+        {
+          "name": "B01003_001M",
+          "units": null,
+          "description": "Total population, margin of error"
+        },
+        {
+          "name": "B25001_001E",
+          "units": null,
+          "description": "Housing units, estimate"
+        },
+        {
+          "name": "B25001_001M",
+          "units": null,
+          "description": "Housing units, margin of error"
+        },
+        {
+          "name": "B19013_001E",
+          "units": "US dollars of the vintage year",
+          "description": "Median household income in the past 12 months, inflation-adjusted to the vintage year, estimate"
+        },
+        {
+          "name": "state",
+          "units": null,
+          "description": "FIPS code of the state, appended by the service"
+        },
+        {
+          "name": "county",
+          "units": null,
+          "description": "FIPS code of the county within the state, appended by the service for county rows"
+        }
+      ],
+      "max_window": null,
+      "guide": "https://docs.usdata.dev/providers/census-acs-5year/",
+      "reference": "https://docs.usdata.dev/providers/census-acs-5year/#reference",
+      "page": "https://usdata.dev/datasets/census/acs-5year/",
+      "walkthrough": "examples/datasets/census-acs-5year/census-acs-5year.ipynb",
+      "studies": [],
+      "quickstart": {
+        "cli": "usdata fetch census:acs-5year \\\n  --location Oklahoma \\\n  --vars NAME,B01003_001E,B01003_001M,B25001_001E,B25001_001M,B19013_001E,B19013_001M \\\n  -p vintage=2023 \\\n  -p geography=county",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"census:acs-5year\"),\n    build_query(\n        location=\"Oklahoma\",\n        variables=[\"NAME\", \"B01003_001E\", \"B01003_001M\", \"B25001_001E\", \"B25001_001M\", \"B19013_001E\", \"B19013_001M\"],\n        vintage=2023,\n        geography=\"county\",\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: oklahoma-counties-acs-2023\nsources:\n  - name: counties\n    dataset: census:acs-5year\n    location: Oklahoma\n    variables: [NAME, B01003_001E, B01003_001M, B25001_001E, B25001_001M, B19013_001E, B19013_001M]\n    params:\n      vintage: 2023\n      geography: county\n"
+      }
+    },
+    {
       "id": "epa:aqs-daily",
       "title": "Daily air pollutant summaries from regulatory monitors",
       "product": "Air Quality System Daily Summaries",
@@ -3534,45 +3629,6 @@
       "max_window": null,
       "guide": null,
       "reference": "https://docs.usdata.dev/generated/catalog/fema/",
-      "page": null,
-      "walkthrough": null,
-      "studies": [],
-      "quickstart": null
-    },
-    {
-      "id": "census:acs-5year",
-      "title": "American Community Survey 5-Year Estimates",
-      "product": "American Community Survey 5-Year Estimates",
-      "description": "Population, housing, income, and demographic estimates for every geography down to block group, via the Census Data API, selected by state and county FIPS code rather than by box. Requires a free API key on every data request; only the dataset and variable metadata are served without one.",
-      "provider": "Census Bureau",
-      "provider_id": "census",
-      "domain": "Demographics",
-      "system": null,
-      "availability": "Planned",
-      "since": null,
-      "keywords": [
-        "population",
-        "demographics",
-        "housing",
-        "income",
-        "acs",
-        "census"
-      ],
-      "formats": [],
-      "selection": null,
-      "inputs": null,
-      "credentials": null,
-      "reader_extra": null,
-      "resolution": null,
-      "update_frequency": null,
-      "latency": null,
-      "citation": null,
-      "terms": null,
-      "homepage": "https://www.census.gov/data/developers/data-sets/acs-5year.html",
-      "variables": [],
-      "max_window": null,
-      "guide": null,
-      "reference": "https://docs.usdata.dev/generated/catalog/census/",
       "page": null,
       "walkthrough": null,
       "studies": [],

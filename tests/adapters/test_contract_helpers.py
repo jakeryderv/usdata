@@ -25,6 +25,8 @@ from usdata.providers.noaa.storm_events import DIRECTORY_URL, StormEvents
 from usdata.query import build_query
 from usdata.registry import default_registry
 from usdata.testing import (
+    PROBE_BBOX,
+    PROBE_PLACE,
     check_declared_capabilities,
     check_fetch_lifecycle,
     check_provider_contract,
@@ -200,6 +202,15 @@ def test_a_place_keyed_adapter_passes_when_it_declares_place_subset() -> None:
     dataset = _keyed(place_subset=True)
     check_declared_capabilities(
         dataset, lambda client=None: PlaceKeyed(dataset, client), scenario_query(), scenario_query()
+    )
+
+
+def test_a_scenario_that_names_a_place_still_probes_a_bare_box() -> None:
+    """A source that needs a place to list at all can give its scenario one."""
+    dataset = _keyed(place_subset=True)
+    placed = scenario_query().model_copy(update={"place": PROBE_PLACE, "bbox": PROBE_BBOX})
+    check_declared_capabilities(
+        dataset, lambda client=None: PlaceKeyed(dataset, client), placed, placed
     )
 
 

@@ -8,17 +8,10 @@
 
 ## Implemented datasets
 
-None implemented yet.
+| Dataset | Availability | Files | What gets selected |
+|---|---|---|---|
+| <span id="censusacs-5year"></span>[Five-year population, housing, and income estimates by state or county](../../providers/census-acs-5year.md) | Source only | JSON | One vintage's estimates for up to fifty variables over a state, its counties, or one county |
 
 ## Planned datasets
 
-These entries are not implemented; they cannot fetch data.
-
-### census:acs-5year
-
-**American Community Survey 5-Year Estimates** · Planned · target later
-
-Population, housing, income, and demographic estimates for every geography down to block group, via the Census Data API, selected by state and county FIPS code rather than by box. Requires a free API key on every data request; only the dataset and variable metadata are served without one.
-
-[Upstream information](https://www.census.gov/data/developers/data-sets/acs-5year.html)
-Domain: Demographics.
+No planned datasets for this provider.

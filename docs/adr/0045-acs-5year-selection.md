@@ -103,8 +103,9 @@ negative annotation codes are left as the values they are. Each has a
 too few sample cases (`-999999999`, `-666666666`, `-222222222`), not applicable
 (`-888888888`), a median in an open-ended interval (`-333333333`), or a
 controlled estimate with no sampling error (`-555555555`). Replacing them all
-with missing values would lose which one applied. The guide lists the codes, and says to request the `EA`/`MA`
-annotation columns when the distinction matters.
+with missing values would lose which one applied. The guide lists the codes,
+and says to request the `EA`/`MA` annotation columns when the distinction
+matters.
 
 ## Consequences
 
@@ -124,3 +125,19 @@ credential is one variable, `USDATA_CENSUS_KEY`, sent as a query parameter, and
 the rules written for AQS's pair of variables cover it. That is the question
 this dataset was chosen to answer, and the contract checks settle it when the
 adapter lands; a failure there amends ADR 0039 rather than bending the adapter.
+
+## Amendment, 2026-09-27: every county in a state
+
+As first written, a state query asked for the state's own row
+(`for=state:SS`), while the Connecticut rule above spoke of a state query
+returning its counties. Both are wanted: the worked example needs one row per
+Oklahoma county, and seventy-seven county sources would be seventy-seven
+requests for what the service answers in one.
+
+A `geography` parameter, `state` or `county`, says what each row is. It
+defaults to the kind of place named, so a state gives its own row and a county
+its own, as before. `geography=county` with a state asks for
+`for=county:*&in=state:SS`, every county the vintage has in it, and its asset
+id ends the place with `-counties`, as in `acs5_2023_40-counties_<hash>.json`.
+`geography=state` with a county is refused. Tracts and block groups, when an
+example needs them, are further values of the same parameter.
