@@ -10,7 +10,6 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`nasa:gpm-imerg`](nasa.md#nasagpm-imerg) GPM IMERG Precipitation · Planned
 - [`noaa:billion-dollar-disasters`](noaa.md#noaabillion-dollar-disasters) Billion-Dollar Weather and Climate Disasters · Planned
 - [`noaa:cdr-ndvi`](noaa.md#noaacdr-ndvi) NDVI Climate Data Record · Planned
-- [`noaa:ersst`](noaa.md#noaaersst) ERSST Monthly Sea Surface Temperature · Planned
 - [`noaa:etopo`](noaa.md#noaaetopo) ETOPO 2022 Global Relief · Planned
 - [`noaa:ghcn-hourly`](noaa.md#noaaghcn-hourly) GHCN-Hourly Station Observations · Planned
 - [`noaa:igra`](noaa.md#noaaigra) IGRA Radiosonde Observations · Planned
@@ -24,6 +23,10 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`noaa:tsunami-events`](noaa.md#noaatsunami-events) Global Historical Tsunami Database · Planned
 - [`usda:cropland-data-layer`](usda.md#usdacropland-data-layer) Cropland Data Layer · Planned
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
+
+**Implemented, unreleased (planned 0.33)**
+
+- [`noaa:ersst`](noaa.md#noaaersst) ERSST v6 Monthly Sea Surface Temperature · Source only
 
 **Included since 0.31**
 

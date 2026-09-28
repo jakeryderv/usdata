@@ -1,0 +1,1 @@
+`noaa:ersst`: ERSST v6, NCEI's monthly global 2 degree sea surface temperature analysis since 1850, one NetCDF4 file for every month a window touches, with `sst` and its `ssta` anomaly from the 1991-2020 climatology.

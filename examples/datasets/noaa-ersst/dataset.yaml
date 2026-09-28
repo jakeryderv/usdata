@@ -1,0 +1,5 @@
+name: ersst-el-nino-onset
+sources:
+  - dataset: noaa:ersst
+    start: 2026-05-01
+    end: 2026-07-31

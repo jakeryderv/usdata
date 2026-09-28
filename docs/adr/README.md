@@ -51,3 +51,4 @@ is described in the guides and reference pages.
 - [0045: ACS 5-year estimates are selected by vintage, variables, and one place, and kept as served](0045-acs-5year-selection.md)
 - [0046: The messages a query's files hold are listed from their index sidecars](0046-listing-grib2-messages.md)
 - [0047: A partial fetch records a selector for every field it fetched](0047-a-selector-per-fetched-field.md)
+- [0048: ERSST is version 6, selected by whole calendar months](0048-ersst-v6-whole-months.md)
