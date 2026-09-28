@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import httpx
 import typer
@@ -20,6 +20,7 @@ from usdata.cli.doctor import doctor
 from usdata.cli.inspect import inspect
 from usdata.cli.progress import progress
 from usdata.manifest import lockfile_path
+from usdata.messages import list_messages
 from usdata.models import READER_EXTRAS_TEXT, Dataset, Status, describe_duration
 from usdata.providers import adapter_class, load_adapter
 from usdata.providers.base import NotImplementedProvider
@@ -65,6 +66,33 @@ _QUERY_FLAGS = {
     "text": None,
     "provider": None,
 }
+
+
+def _parse_params(
+    param: list[str] | None, command: str, flags: dict[str, str | None]
+) -> dict[str, Any]:
+    """``--param key=value`` pairs as a dict of strings; exit 2 on a malformed or reserved key.
+
+    ``flags`` maps each reserved query option to the flag ``command`` takes it
+    through, or to ``None`` when ``command`` does not take it.
+    """
+    params: dict[str, Any] = {}
+    for item in param or []:
+        key, sep, value = item.partition("=")
+        if not sep:
+            typer.secho(f"--param expects key=value, got {item!r}", err=True, fg="red")
+            raise typer.Exit(code=2)
+        if key in flags:
+            flag = flags[key]
+            hint = (
+                f"use {flag} instead of --param"
+                if flag is not None
+                else f"{command} does not support this option"
+            )
+            typer.secho(f"{key} is a reserved query option; {hint}", err=True, fg="red")
+            raise typer.Exit(code=2)
+        params[key] = value
+    return params
 
 
 def _size_phrase(known_bytes: int, unknown: int, *, sources: Iterable[str] = ()) -> str:
@@ -357,26 +385,7 @@ def fetch(
     ] = False,
 ) -> None:
     """Resolve a query against one dataset and download the matching assets."""
-    params: dict[str, str] = {}
-    for item in param or []:
-        key, sep, value = item.partition("=")
-        if not sep:
-            typer.secho(f"--param expects key=value, got {item!r}", err=True, fg="red")
-            raise typer.Exit(code=2)
-        if key in _QUERY_FLAGS:
-            flag = _QUERY_FLAGS[key]
-            hint = (
-                f"use {flag} instead of --param"
-                if flag is not None
-                else "fetch does not support this option"
-            )
-            typer.secho(
-                f"{key} is a reserved query option; {hint}",
-                err=True,
-                fg="red",
-            )
-            raise typer.Exit(code=2)
-        params[key] = value
+    params = _parse_params(param, "fetch", _QUERY_FLAGS)
     box = None
     if bbox:
         try:
@@ -435,6 +444,64 @@ def fetch(
     for f in fetched:
         tag = "cached" if f.from_cache else "fetched"
         typer.echo(f"{f.path}\t{tag}\t{f.provenance.size} bytes")
+
+
+_MESSAGES_FLAGS: dict[str, str | None] = {
+    key: flag if key in ("start", "end") else None for key, flag in _QUERY_FLAGS.items()
+}
+"""The query options ``messages`` takes: a model run is selected by its window alone."""
+
+
+@app.command()
+def messages(
+    dataset_id: Annotated[str, typer.Argument(help="Dataset id, e.g. noaa:hrrr")],
+    start: Annotated[str | None, typer.Option(help="ISO date or datetime.")] = None,
+    end: Annotated[
+        str | None,
+        typer.Option(help="ISO date or datetime; a date alone runs to the end of that UTC day."),
+    ] = None,
+    param: Annotated[
+        list[str] | None,
+        typer.Option("--param", "-p", help="Provider-specific key=value, repeatable."),
+    ] = None,
+    as_json: Annotated[
+        bool,
+        typer.Option("--json", help="Emit a JSON array of listings and nothing else on stdout."),
+    ] = False,
+) -> None:
+    """List the GRIB2 messages each file of a query holds, spelled as the messages param takes them.
+
+    One tab-separated line per field: asset id, message number, bytes, and the
+    selector that names exactly that field. Only the index sidecars are read.
+    """
+    params = _parse_params(param, "messages", _MESSAGES_FLAGS)
+    try:
+        ds = default_registry().get(dataset_id)
+        listings = list_messages(ds, build_query(start=start, end=end, **params))
+    except (DatasetNotFound, ValueError) as e:
+        typer.secho(str(e), err=True, fg="red")
+        raise typer.Exit(code=2) from None
+    except NotImplementedProvider as e:
+        typer.secho(str(e), err=True, fg="yellow")
+        raise typer.Exit(code=3) from None
+    except httpx.HTTPError as e:
+        typer.secho(f"request failed: {e}", err=True, fg="red")
+        raise typer.Exit(code=4) from None
+    if as_json:
+        typer.echo(json.dumps([listing.model_dump(mode="json") for listing in listings], indent=2))
+    else:
+        for listing in listings:
+            for entry in listing.messages:
+                number = entry.number if entry.field is None else f"{entry.number}.{entry.field}"
+                typer.echo(f"{listing.asset.id}\t{number}\t{entry.length}\t{entry.selector}")
+    count = sum(len(listing.messages) for listing in listings)
+    typer.echo(
+        f"{count} message(s) in {len(listings)} file(s); a selector may stop after its "
+        "level text, as CAPE:surface, to match every step",
+        err=True,
+    )
+    if not listings:
+        raise typer.Exit(code=1)
 
 
 def _print_plan(plan: Plan, *, as_json: bool, quiet: bool) -> None:

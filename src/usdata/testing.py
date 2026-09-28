@@ -54,6 +54,7 @@ from pathlib import Path
 
 import httpx
 
+from usdata.messages import PARTIAL_PARAM
 from usdata.models import BBox, Dataset, Place, Query, TimeRange
 from usdata.protocols import http, s3
 from usdata.providers import Credentials, MissingCredentials, Provider, QueryError
@@ -82,9 +83,6 @@ REFUSED: dict[QueryField, str] = {
 
 SELECTORS = frozenset({"site", "sites", "station", "stations", "nearest"})
 """Parameters naming a station or site. A bbox stands in for one wherever they are declared."""
-
-PARTIAL_PARAM = "messages"
-"""The parameter an adapter declaring ``partial_fetch`` asks for a byte subset through."""
 
 
 class TransportReached(Exception):
@@ -323,7 +321,8 @@ def check_declared_capabilities(
     and get a file of the declared media type back, so it is read from the
     adapter's declared parameters: an adapter that promises it declares
     ``messages``, and one that does not must not, since there would be no way
-    to ask.
+    to ask. The same adapter overrides ``list_messages``, which is how a
+    caller learns what to ask for.
     """
     dataset_id = dataset.id
 
@@ -348,6 +347,7 @@ def check_declared_capabilities(
         requires_window = _demands_window(adapter, base.model_copy(update={"time": None}))
         selects_by_site = bool(SELECTORS & set(adapter.accepted_params))
         selects_parts = PARTIAL_PARAM in adapter.accepted_params
+        lists_parts = type(adapter).list_messages is not Provider.list_messages
 
     assert variables_refused is not declared.variable_subset, (
         f"{dataset_id} declares variable_subset={declared.variable_subset} and "
@@ -362,6 +362,10 @@ def check_declared_capabilities(
     assert selects_parts is declared.partial_fetch, (
         f"{dataset_id} declares partial_fetch={declared.partial_fetch} and "
         f"{'declares' if selects_parts else 'declares no'} {PARTIAL_PARAM!r} parameter"
+    )
+    assert lists_parts is declared.partial_fetch, (
+        f"{dataset_id} declares partial_fetch={declared.partial_fetch} and "
+        f"{'overrides' if lists_parts else 'does not override'} list_messages"
     )
     assert bare_box_refused is declared.place_subset, (
         f"{dataset_id} declares place_subset={declared.place_subset} and "

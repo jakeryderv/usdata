@@ -90,6 +90,8 @@ index fails the query rather than falling back to the whole file.
 | 10 m wind components | `UGRD:10 m above ground`, `VGRD:10 m above ground` |
 | 2 m temperature and dewpoint | `TMP:2 m above ground`, `DPT:2 m above ground` |
 
+For every selector a file publishes, run `usdata messages` with the query; see [listing a file's messages](noaa-hrrr.md#listing-a-files-messages).
+
 The fetched file is those messages concatenated, which is itself a valid GRIB2
 file, and its lockfile entry pins the byte ranges and the object's ETag. A
 restore re-issues exactly those ranges without re-reading the index, and a

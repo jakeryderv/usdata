@@ -4,7 +4,7 @@ from importlib.util import find_spec
 
 import pytest
 
-from usdata import FetchedAsset, build_query, get
+from usdata import FetchedAsset, build_query, get, list_messages
 from usdata.providers import load_adapter
 from usdata.pull import pull, verify
 
@@ -62,6 +62,18 @@ def test_hrrr_listing_reports_sizes_before_download() -> None:
         "hrrr.20240506.t20z.wrfsfcf01.grib2",
     ]
     assert [asset.size for asset in listed] == [WHOLE_BYTES, 158_293_431]
+
+
+def test_hrrr_messages_lists_the_selectors_a_partial_fetch_takes() -> None:
+    query = build_query(
+        start="2024-05-06T20:00Z", end="2024-05-06T20:00Z", cycle=20, forecast_hour=0
+    )
+    (listing,) = list_messages(get("noaa:hrrr"), query)
+    by_selector = {entry.selector: entry for entry in listing.messages}
+    assert len(listing.messages) == 170
+    cape, helicity = by_selector["CAPE:surface:anl"], by_selector["HLCY:3000-0 m above ground:anl"]
+    assert (cape.number, helicity.number) == (105, 131)
+    assert cape.length + helicity.length == PART_BYTES
 
 
 def test_hrrr_surface_analysis_fetches_and_restores(restored: FetchedAsset) -> None:

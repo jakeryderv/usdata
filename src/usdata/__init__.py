@@ -13,6 +13,7 @@ except PackageNotFoundError:  # running from a source tree without an install
 from usdata._fetch import ChecksumMismatch, FetchedAsset, fetch, fetch_asset
 from usdata.cite import Citation, cite_dataset, cite_lockfile
 from usdata.inspect import inspect_asset, inspect_path
+from usdata.messages import MessageListing, list_messages
 from usdata.models import (
     Asset,
     BBox,
@@ -36,6 +37,7 @@ __all__ = [
     "Dataset",
     "DatasetNotFound",
     "FetchedAsset",
+    "MessageListing",
     "Place",
     "Provenance",
     "Query",
@@ -55,6 +57,7 @@ __all__ = [
     "get",
     "inspect_asset",
     "inspect_path",
+    "list_messages",
     "pull",
     "search",
     "select_by_time",

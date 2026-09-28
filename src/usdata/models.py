@@ -560,6 +560,42 @@ class ByteRange(BaseModel):
         return f"bytes={self.start}-{self.end}"
 
 
+class IndexEntry(BaseModel):
+    """One field of one GRIB2 object, as the object's wgrib2 ``.idx`` sidecar describes it.
+
+    ``number`` is the GRIB2 message the field belongs to and ``field`` its
+    position inside a message that holds several (``12.2``), or ``None`` for a
+    message holding one. Fields of one message share an offset and a length.
+    ``selector`` is the ``messages`` text that names exactly this field.
+    """
+
+    number: int = Field(ge=1, description="One-based GRIB2 message number in the object")
+    offset: int = Field(ge=0, description="Byte offset of the message in the object")
+    length: int = Field(gt=0, description="Bytes the message occupies")
+    short_name: str = Field(description="wgrib2 short name, such as CAPE")
+    level: str = Field(description="Level text, such as '2 m above ground'")
+    step: str = Field(description="Step text, such as 'anl' or '1 hour fcst'")
+    field: int | None = Field(
+        default=None, ge=1, description="Position inside a message holding several fields"
+    )
+    extra: str = Field(
+        default="", description="Further text some products add, such as 'ens std dev'"
+    )
+
+    @property
+    def byte_range(self) -> ByteRange:
+        """The inclusive byte interval this field's message occupies in the object."""
+        return ByteRange(start=self.offset, end=self.offset + self.length - 1)
+
+    @property
+    def selector(self) -> str:
+        """The ``messages`` selector naming exactly this field, short name through the last text."""
+        parts = [self.short_name, self.level, self.step]
+        if self.extra:
+            parts.append(self.extra)
+        return ":".join(parts)
+
+
 PARTIAL_FRAGMENT = "messages"
 """Href fragment key naming the GRIB2 messages a partial asset selects."""
 

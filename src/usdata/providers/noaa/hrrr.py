@@ -43,6 +43,7 @@ from usdata.models import (
     PARTIAL_FRAGMENT,
     Asset,
     Dataset,
+    IndexEntry,
     PartialFetch,
     Protocol,
     Provenance,
@@ -70,7 +71,8 @@ MESSAGES = (
     "Optional GRIB2 messages to fetch instead of the whole file, spelled as the object's "
     "wgrib2 .idx sidecar spells them: 'SHORTNAME:level text', such as "
     "'TMP:2 m above ground', with an optional ':step text'; one value, a list, or a "
-    "comma-separated string. Short names are upper case and both fields match exactly."
+    "comma-separated string. Short names are upper case and both fields match exactly; "
+    "'usdata messages' lists every selector a query's files hold."
 )
 
 
@@ -331,6 +333,19 @@ class ModelRuns(HttpProvider):
                 "cannot be selected; drop messages to fetch the whole file"
             ) from None
         return response.text, sha256_bytes(response.content)
+
+    def list_messages(self, asset: Asset) -> list[IndexEntry]:
+        """Every field in one listed object's ``.idx`` sidecar, without fetching the object.
+
+        A whole asset's listed size is the object's, so no HEAD is needed; a
+        partial asset's is its selection's, so its object's size is read first.
+        """
+        href = asset.href.partition("#")[0]
+        size = asset.size
+        if size is None or href != asset.href:
+            size = s3.head_object(href, self._http()).size
+        text, _ = self.index_text(f"{href}{grib_index.INDEX_SUFFIX}")
+        return grib_index.parse_index(text, object_size=size, url=href)
 
     def select_messages(self, whole: Asset, selectors: Sequence[str]) -> Asset:
         """Resolve message selectors against one object's index into a partial asset.

@@ -99,6 +99,32 @@ Common surface-file selectors, read from the 2024-05-06 20Z index:
 | 2 m temperature and dewpoint | `TMP:2 m above ground`, `DPT:2 m above ground` |
 | Mixed-layer CAPE (lowest 90 hPa) | `CAPE:90-0 mb above ground` |
 
+### Listing a file's messages
+
+The table is a starting point. `usdata messages` takes the same query and
+lists every field each resolved file's index describes, reading only the
+index, about 10 KB per file:
+
+```sh
+uv run usdata messages noaa:hrrr \
+  --start 2024-05-06T20:00Z --end 2024-05-06T20:00Z \
+  -p cycle=20 -p forecast_hour=0 | grep CAPE:
+```
+
+```text
+hrrr.20240506.t20z.wrfsfcf00.grib2	105	713566	CAPE:surface:anl
+hrrr.20240506.t20z.wrfsfcf00.grib2	148	727295	CAPE:180-0 mb above ground:anl
+hrrr.20240506.t20z.wrfsfcf00.grib2	152	627149	CAPE:90-0 mb above ground:anl
+hrrr.20240506.t20z.wrfsfcf00.grib2	154	735968	CAPE:255-0 mb above ground:anl
+hrrr.20240506.t20z.wrfsfcf00.grib2	158	1245084	CAPE:0-3000 m above ground:anl
+```
+
+Each line is the asset id, the message number, the bytes fetching that message
+costs, and a selector naming exactly that field. The step text, `anl` here and
+`1 hour fcst` in the next file, can be dropped so one selector matches every
+forecast hour a manifest names. `--json` gives the listings as records, and
+`usdata.list_messages(dataset, query)` returns them in Python.
+
 A selector asks in the index's vocabulary and the reader answers in ecCodes',
 and the fetch records which is which, so you never have to guess the pairing.
 Provenance stores one selector beside each fetched byte range, `usdata inspect`

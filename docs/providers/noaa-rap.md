@@ -62,6 +62,8 @@ describes. The sidecar is the key plus `.idx`. Selectors observed in the
 | Composite reflectivity | `REFC:entire atmosphere` |
 | 2 m temperature and dewpoint | `TMP:2 m above ground`, `DPT:2 m above ground` |
 
+For every selector a file publishes, run `usdata messages` with the query; see [listing a file's messages](noaa-hrrr.md#listing-a-files-messages).
+
 ```sh
 uv run usdata fetch noaa:rap \
   --start 2024-05-06T20:00Z --end 2024-05-06T20:00Z \

@@ -13,7 +13,16 @@ from typing import Any, ClassVar, Literal, Self, TypeVar
 from pydantic import BaseModel, ValidationError
 from pydantic_core import ErrorDetails
 
-from usdata.models import Asset, Dataset, PartialFetch, Place, Provenance, Query, as_utc
+from usdata.models import (
+    Asset,
+    Dataset,
+    IndexEntry,
+    PartialFetch,
+    Place,
+    Provenance,
+    Query,
+    as_utc,
+)
 from usdata.providers.credentials import Credentials
 from usdata.query import legacy_counties
 
@@ -312,6 +321,27 @@ class Provider(ABC):
             QueryError: The asset names a selection this adapter cannot reproduce.
         """
         return None
+
+    def list_messages(self, asset: Asset) -> list[IndexEntry]:
+        """Every field one listed object's index describes, read without fetching the object.
+
+        Only an adapter declaring ``partial_fetch`` overrides this: it is how a
+        caller finds the selectors ``messages`` accepts. The asset is one
+        ``list_assets`` returned; a partial asset describes its whole object.
+
+        Args:
+            asset: The asset whose object's index to read.
+
+        Returns:
+            One entry per field, in index order.
+
+        Raises:
+            NotImplementedError: The adapter selects no messages, so it reads no index.
+            QueryError: The object publishes no readable index.
+        """
+        raise NotImplementedError(
+            f"{type(self).__name__} fetches whole objects, so it lists no messages"
+        )
 
     @abstractmethod
     def fetch(self, asset: Asset, dest: Path) -> Path:

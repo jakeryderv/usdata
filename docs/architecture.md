@@ -36,6 +36,7 @@ fetching. They are selected by format, independently of the transport used.
 | `fetch` | Core loop: adapter resolves assets, cache is checked, bytes fetched, provenance written. |
 | `readers` | Local CSV, NEXRAD Level II, NetCDF4, GRIB2, HURDAT2, and AQS JSON opening behind optional extras; format inference, one typed function per format with options, units and source metadata, no fetching or cache writes. |
 | `cache` | Cache directory resolution and content hashing. |
+| `messages` | Lists the GRIB2 fields a query's files hold, from their index sidecars through the adapter, without fetching the files; the vocabulary `messages` selects in. |
 | `provenance` | Builds and persists a `Provenance` record beside each fetched file. |
 | `manifest` | `Manifest` (declared inputs) and `Lockfile` (what was actually fetched, with checksums). |
 | `pull` | Resolve a manifest through adapters and write the lockfile, or restore exactly what a lockfile pins; `verify` re-hashes against it. |

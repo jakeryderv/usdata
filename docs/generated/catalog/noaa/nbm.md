@@ -20,7 +20,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 |---|---|
 | `cycle` | Required UTC initialization hour of the run, 0 to 23. |
 | `forecast_hour` | Required forecast hour(s): an integer, list, or comma-separated string, 1 to 264; hourly to 36, then every 3 hours, then every 6, on a schedule that varies by cycle. |
-| `messages` | Optional GRIB2 messages to fetch instead of the whole file, spelled as the object's wgrib2 .idx sidecar spells them: 'SHORTNAME:level text', such as 'TMP:2 m above ground', with an optional ':step text'; one value, a list, or a comma-separated string. Short names are upper case and both fields match exactly. |
+| `messages` | Optional GRIB2 messages to fetch instead of the whole file, spelled as the object's wgrib2 .idx sidecar spells them: 'SHORTNAME:level text', such as 'TMP:2 m above ground', with an optional ':step text'; one value, a list, or a comma-separated string. Short names are upper case and both fields match exactly; 'usdata messages' lists every selector a query's files hold. |
 | `region` | Grid: co (default, 2.5 km CONUS), ak (Alaska), hi (Hawaii), pr (Puerto Rico), or gu (Guam). |
 
 ### Variables

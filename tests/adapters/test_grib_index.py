@@ -44,7 +44,7 @@ def test_lengths_come_from_the_next_offset_and_the_last_runs_to_the_object_end()
         (4000, 4999),
     ]
     assert parsed[1].byte_range.length == 1500
-    assert parsed[1].label == "TMP:2 m above ground:1 hour fcst"
+    assert parsed[1].selector == "TMP:2 m above ground:1 hour fcst"
 
 
 def test_blank_lines_and_trailing_fields_are_tolerated() -> None:
@@ -199,7 +199,7 @@ def test_a_further_index_text_is_named_to_be_selected_and_excluded_otherwise() -
         (2, "TMP:2 m above ground:1 hour fcst:ens std dev")
     ]
     assert [s.entry.number for s in resolve(parsed, selectors("APCP:surface"), url=URL)] == [4]
-    assert parsed[2].label == "APCP:surface:0-1 hour acc fcst:prob >0.254:prob fcst 255/255"
+    assert parsed[2].selector == "APCP:surface:0-1 hour acc fcst:prob >0.254:prob fcst 255/255"
     selector = parse_selector("TMP:2 m above ground:1 hour fcst:ens std dev")
     assert (selector.step, selector.extra) == ("1 hour fcst", "ens std dev")
 
@@ -214,13 +214,13 @@ def test_every_nbm_index_label_reads_back_as_a_selector_for_its_line() -> None:
     parsed = nbm_entries()
     assert len(parsed) == 300
     for entry in parsed:
-        selector = parse_selector(entry.label)
-        assert selector.text == entry.label
+        selector = parse_selector(entry.selector)
+        assert selector.text == entry.selector
         chosen = resolve(parsed, [selector], url=URL)
         # A level wgrib2 cannot name repeats one label, which then selects every such line.
-        twins = [other.number for other in parsed if other.label == entry.label]
+        twins = [other.number for other in parsed if other.selector == entry.selector]
         assert [s.entry.number for s in chosen] == twins
-        assert all(s.selector == entry.label for s in chosen)
+        assert all(s.selector == entry.selector for s in chosen)
 
 
 @pytest.mark.l2

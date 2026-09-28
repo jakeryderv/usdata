@@ -26,6 +26,12 @@ See [fetch and analyze](../guides/fetch-and-analyze.md) for complete workflows.
     options:
       members: [asset, path, provenance, from_cache, open, open_csv, open_nexrad, open_grib2, open_netcdf, inspect]
 
+## Listing GRIB2 messages
+
+::: usdata.list_messages
+::: usdata.MessageListing
+::: usdata.models.IndexEntry
+
 ## Inspecting a file
 
 ::: usdata.inspect_asset

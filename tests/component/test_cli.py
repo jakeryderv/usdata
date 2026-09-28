@@ -295,6 +295,77 @@ def test_fetch_dry_run_prints_sizes_and_a_total() -> None:
     assert result.stderr == "2 asset(s) matched, 300000001 bytes\n"
 
 
+MESSAGES_ARGS = [
+    "messages",
+    "noaa:hrrr",
+    "--start",
+    "2024-05-06T20:00Z",
+    "--end",
+    "2024-05-06T20:00Z",
+    "-p",
+    "cycle=20",
+    "-p",
+    "forecast_hour=0",
+]
+# Message 2 holds two fields, as RAP publishes wind components.
+HRRR_INDEX = (
+    "1:0:d=2024050620:CAPE:surface:anl:\n"
+    "2.1:40:d=2024050620:UGRD:10 m above ground:anl:\n"
+    "2.2:40:d=2024050620:VGRD:10 m above ground:anl:\n"
+)
+
+
+def _arm_messages(mock) -> None:
+    key = f"{HRRR_RUN}wrfsfcf00.grib2"
+    mock.get(HRRR_LIST_URL).respond(200, text=_hrrr_listing([(key, 100)]))
+    mock.get(f"https://{BUCKET}.s3.amazonaws.com/{key}.idx").respond(200, text=HRRR_INDEX)
+
+
+def test_messages_prints_one_selector_per_field() -> None:
+    with respx.mock() as mock:
+        _arm_messages(mock)
+        result = runner.invoke(app, MESSAGES_ARGS)
+    assert result.exit_code == 0, result.stderr
+    asset_id = "hrrr.20240506.t20z.wrfsfcf00.grib2"
+    assert result.stdout.splitlines() == [
+        f"{asset_id}\t1\t40\tCAPE:surface:anl",
+        f"{asset_id}\t2.1\t60\tUGRD:10 m above ground:anl",
+        f"{asset_id}\t2.2\t60\tVGRD:10 m above ground:anl",
+    ]
+    assert result.stderr.startswith("3 message(s) in 1 file(s);")
+
+
+def test_messages_json_emits_only_the_listings() -> None:
+    with respx.mock() as mock:
+        _arm_messages(mock)
+        result = runner.invoke(app, [*MESSAGES_ARGS, "--json"])
+    assert result.exit_code == 0
+    (listing,) = json.loads(result.stdout)
+    assert listing["asset"]["id"] == "hrrr.20240506.t20z.wrfsfcf00.grib2"
+    assert [(m["number"], m["field"], m["short_name"]) for m in listing["messages"]] == [
+        (1, None, "CAPE"),
+        (2, 1, "UGRD"),
+        (2, 2, "VGRD"),
+    ]
+
+
+@pytest.mark.parametrize(
+    ("args", "problem"),
+    [
+        (["messages", "noaa:ghcn-daily", "--start", "2024-05-06"], "no messages to list"),
+        ([*MESSAGES_ARGS, "-p", "messages=CAPE:surface"], "drop messages"),
+        ([*MESSAGES_ARGS, "-p", "location=Oklahoma"], "messages does not support this option"),
+        (["messages", "noaa:nope"], "noaa:nope"),
+    ],
+)
+def test_messages_exits_2_on_a_query_it_cannot_list(args, problem) -> None:
+    with respx.mock() as mock:
+        result = runner.invoke(app, args)
+        assert not mock.calls
+    assert result.exit_code == 2
+    assert problem in result.stderr
+
+
 def test_fetch_dry_run_marks_assets_whose_size_the_service_withholds() -> None:
     result = runner.invoke(app, GHCN_DRY_RUN_ARGS)
     assert result.exit_code == 0
