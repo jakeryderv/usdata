@@ -19,9 +19,10 @@ import gzip
 import re
 import warnings
 from collections.abc import Iterator, Mapping, Sequence
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from datetime import UTC, datetime
 from importlib import import_module
+from importlib.util import find_spec
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, NamedTuple
 
@@ -86,9 +87,29 @@ PROJECTION_KEYS = (
 )
 
 
+def import_eccodes() -> Any:
+    """Import the ecCodes bindings, loading pyproj first when it is installed.
+
+    The eckitlib wheel that the ecCodes library wheel depends on bundles its own
+    copy of the PROJ library, and so does pyproj's wheel, which xradar and many
+    analysis stacks bring in. When eckitlib's copy is loaded first and pyproj is
+    imported later in the same process, both copies free the same memory as the
+    interpreter exits, which aborts it with "double free or corruption" and exit
+    status 134 after the work is done. Loading pyproj's copy first avoids it.
+    A pyproj that fails to import is left for whoever uses it to report.
+
+    Raises:
+        ModuleNotFoundError: eccodes is not installed.
+    """
+    if find_spec("pyproj") is not None:
+        with suppress(ImportError, OSError):
+            import_module("pyproj")
+    return import_module("eccodes")
+
+
 def _modules() -> tuple[Any, Any, Any]:
     try:
-        eccodes = import_module("eccodes")
+        eccodes = import_eccodes()
         xarray = import_module("xarray")
         numpy = import_module("numpy")
     except ModuleNotFoundError as error:
