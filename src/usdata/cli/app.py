@@ -23,7 +23,15 @@ from usdata.manifest import lockfile_path
 from usdata.models import READER_EXTRAS_TEXT, Dataset, Status, describe_duration
 from usdata.providers import adapter_class, load_adapter
 from usdata.providers.base import NotImplementedProvider
-from usdata.pull import EmptySource, ManifestChanged, Plan, UnknownDatasets, UpstreamChanged
+from usdata.pull import (
+    EmptySource,
+    ListingComparison,
+    ManifestChanged,
+    Plan,
+    UnknownDatasets,
+    UpstreamChanged,
+)
+from usdata.pull import compare_listing as compare_manifest_listing
 from usdata.pull import plan as plan_manifest
 from usdata.pull import pull as pull_manifest
 from usdata.pull import verify as verify_manifest
@@ -554,12 +562,32 @@ def pull(
 def verify(
     manifest: Annotated[Path, typer.Argument(exists=True, dir_okay=False)],
     cache_dir: Annotated[Path | None, typer.Option(help="Override the cache directory.")] = None,
+    listing: Annotated[
+        bool,
+        typer.Option(
+            "--listing",
+            help="Instead of the cache, compare the lockfile with what each source lists today; "
+            "downloads nothing, but asks every source.",
+        ),
+    ] = False,
+    as_json: Annotated[
+        bool, typer.Option("--json", help="With --listing, emit the comparison as JSON on stdout.")
+    ] = False,
 ) -> None:
     """Check cached files against a manifest's lockfile. Exit 1 on any drift."""
+    if as_json and not listing:
+        typer.secho("--json applies to --listing only", err=True, fg="red")
+        raise typer.Exit(code=2)
+    if listing and cache_dir is not None:
+        typer.secho("--listing reads no cache; drop --cache-dir", err=True, fg="red")
+        raise typer.Exit(code=2)
     lock = lockfile_path(manifest)
     if not lock.exists():
         typer.secho(f"no lockfile at {lock}; run pull first", err=True, fg="red")
         raise typer.Exit(code=2)
+    if listing:
+        _verify_listing(manifest, as_json=as_json)
+        return
     try:
         drift = verify_manifest(manifest, root=cache_dir)
     except (ManifestChanged, ValueError, OSError) as e:
@@ -571,6 +599,57 @@ def verify(
         typer.secho(f"{len(drift)} asset(s) drifted from {lock.name}", err=True, fg="red")
         raise typer.Exit(code=1)
     typer.echo(f"all assets match {lock.name}", err=True)
+
+
+def _verify_listing(manifest: Path, *, as_json: bool) -> None:
+    """Compare the lockfile with today's listings; exit 1 when a re-resolve would differ."""
+    try:
+        comparison = compare_manifest_listing(manifest)
+    except EmptySource as e:
+        typer.secho(str(e), err=True, fg="yellow")
+        raise typer.Exit(code=1) from None
+    except (DatasetNotFound, UnknownDatasets, ManifestChanged, UnknownPlace, ValueError) as e:
+        typer.secho(str(e), err=True, fg="red")
+        raise typer.Exit(code=2) from None
+    except NotImplementedProvider as e:
+        typer.secho(str(e), err=True, fg="yellow")
+        raise typer.Exit(code=3) from None
+    except httpx.HTTPError as e:
+        typer.secho(f"listing failed: {e}", err=True, fg="red")
+        raise typer.Exit(code=4) from None
+    _print_listing(comparison, as_json=as_json)
+    if not comparison.matches:
+        raise typer.Exit(code=1)
+
+
+def _print_listing(comparison: ListingComparison, *, as_json: bool) -> None:
+    """One line per difference, a summary on stderr; or the whole comparison as JSON."""
+    name = comparison.lockfile.name
+    if as_json:
+        typer.echo(comparison.model_dump_json(indent=2))
+    else:
+        for source in comparison.sources:
+            for asset in source.added:
+                typer.echo(f"{source.source}\tadded\t{asset.id}\t{asset.href}")
+            for asset in source.removed:
+                typer.echo(f"{source.source}\tremoved\t{asset.id}\t{asset.href}")
+            for change in source.changed:
+                sizes = f"{_size(change.locked_size)} -> {_size(change.listed_size)} bytes"
+                typer.echo(f"{source.source}\tchanged\t{change.asset_id}\t{sizes}")
+    differing = [source.source for source in comparison.sources if not source.matches]
+    if differing:
+        typer.secho(
+            f"{len(differing)} source(s) list something other than {name} pins: "
+            f"{', '.join(differing)}. Pass pull --force to re-resolve.",
+            err=True,
+            fg="red",
+        )
+    else:
+        typer.echo(f"every source lists what {name} pins", err=True)
+
+
+def _size(value: int | None) -> str:
+    return "?" if value is None else str(value)
 
 
 app.command()(doctor)

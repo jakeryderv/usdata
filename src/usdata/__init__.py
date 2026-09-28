@@ -23,7 +23,7 @@ from usdata.models import (
     TemporalSelection,
     TimeRange,
 )
-from usdata.pull import pull, verify
+from usdata.pull import compare_listing, pull, verify
 from usdata.query import build_query
 from usdata.registry import DatasetNotFound, Registry, SearchResult, default_registry
 from usdata.selection import select_by_time
@@ -47,6 +47,7 @@ __all__ = [
     "build_query",
     "cite_dataset",
     "cite_lockfile",
+    "compare_listing",
     "datasets",
     "default_registry",
     "fetch",

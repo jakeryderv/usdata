@@ -157,6 +157,22 @@ class PullResult(BaseModel):
         return items[0]
 
 
+def _source_keys(entries: Iterable[LockedAsset]) -> list[str]:
+    """The manifest source key each lockfile entry belongs to, in entry order.
+
+    A lockfile written before sources had keys records none; such an entry falls
+    back to the one-based position of its dataset id among the datasets seen.
+    """
+    positions: dict[str, str] = {}
+    keys: list[str] = []
+    for entry in entries:
+        dataset_id = entry.asset.dataset_id
+        if dataset_id not in positions:
+            positions[dataset_id] = str(len(positions) + 1)
+        keys.append(entry.source or positions[dataset_id])
+    return keys
+
+
 def _by_source(pairs: Iterable[tuple[LockedAsset, FetchedAsset]]) -> dict[str, list[FetchedAsset]]:
     """Group fetched assets by the source key their lockfile entry records.
 
@@ -169,12 +185,9 @@ def _by_source(pairs: Iterable[tuple[LockedAsset, FetchedAsset]]) -> dict[str, l
     them and a forced pull rewrites the lockfile.
     """
     grouped: dict[str, list[FetchedAsset]] = {}
-    positions: dict[str, str] = {}
-    for entry, item in pairs:
-        dataset_id = entry.asset.dataset_id
-        if dataset_id not in positions:
-            positions[dataset_id] = str(len(positions) + 1)
-        grouped.setdefault(entry.source or positions[dataset_id], []).append(item)
+    pairs = list(pairs)
+    for key, (_, item) in zip(_source_keys([entry for entry, _ in pairs]), pairs, strict=True):
+        grouped.setdefault(key, []).append(item)
     by_id: dict[str, FetchedAsset] = {}
     for items in grouped.values():
         by_id.update({item.asset.id: item for item in items})
@@ -379,6 +392,123 @@ def plan(manifest_path: str | os.PathLike[str], *, registry: Registry | None = N
             assets = _listed(adapters[dataset.id], source)
             sources.append(SourcePlan(source=key, dataset_id=dataset.id, assets=assets))
     return Plan(manifest=manifest.name, sources=sources)
+
+
+class AssetChange(BaseModel):
+    """A pinned asset that today's listing still names, but describes differently."""
+
+    asset_id: str
+    locked_size: int | None = Field(description="Size the listing gave when the pin was written")
+    listed_size: int | None = Field(description="Size today's listing gives")
+    locked_href: str
+    listed_href: str
+
+
+class SourceComparison(BaseModel):
+    """How one source's pinned assets compare with what its adapter lists today."""
+
+    source: str = Field(description="The source's manifest key: its name, or its position")
+    dataset_id: str
+    added: list[Asset] = Field(description="Listed today and not pinned")
+    removed: list[Asset] = Field(description="Pinned and no longer listed")
+    changed: list[AssetChange] = Field(
+        description="Pinned and listed, with a different href, or a different size where both "
+        "the pin and the listing give one"
+    )
+    unchanged: int = Field(description="How many pinned assets are listed exactly as pinned")
+
+    @computed_field(description="Whether a re-resolve of this source would pin the same assets")
+    @property
+    def matches(self) -> bool:
+        """True when nothing was added, removed, or changed."""
+        return not (self.added or self.removed or self.changed)
+
+
+class ListingComparison(BaseModel):
+    """A lockfile against today's listings: whether a re-resolve would pin the same assets.
+
+    Nothing is downloaded, so the bytes are not compared: restore checks those,
+    and ``verify`` checks the cache. What this sees is the set of files, an
+    asset added, removed, or re-described since the lockfile was written.
+    """
+
+    manifest: str
+    lockfile: Path
+    sources: list[SourceComparison] = Field(description="One entry per manifest source, in order")
+
+    @computed_field(description="Whether a re-resolve of every source would pin the same assets")
+    @property
+    def matches(self) -> bool:
+        """True when every source matches."""
+        return all(source.matches for source in self.sources)
+
+
+def _changed(pinned: Asset, listed: Asset) -> AssetChange | None:
+    """How ``listed`` differs from the pin of the same id, or None when it does not."""
+    sizes_differ = None not in (pinned.size, listed.size) and pinned.size != listed.size
+    if not sizes_differ and pinned.href == listed.href:
+        return None
+    return AssetChange(
+        asset_id=pinned.id,
+        locked_size=pinned.size,
+        listed_size=listed.size,
+        locked_href=pinned.href,
+        listed_href=listed.href,
+    )
+
+
+def compare_listing(
+    manifest_path: str | os.PathLike[str], *, registry: Registry | None = None
+) -> ListingComparison:
+    """Compare a manifest's lockfile with what its sources list today; download nothing.
+
+    Every source is listed as ``plan`` lists it, ``select`` rules included, and
+    its assets are matched to the lockfile's entries for that source by id. An
+    asset only in the listing is ``added``, one only in the lockfile ``removed``,
+    and one in both with a different href, or a different size where both give
+    one, ``changed``. A listing that reports no size cannot show a size change;
+    restoring the pin checks the bytes themselves.
+
+    Args:
+        manifest_path: Path of the manifest YAML file, as a string or any ``os.PathLike``.
+        registry: Registry to resolve dataset ids against; the default one if omitted.
+
+    Returns:
+        A ``ListingComparison`` with one entry per manifest source.
+
+    Raises:
+        FileNotFoundError: The manifest has no lockfile yet.
+        ManifestChanged: The manifest changed since its lockfile was written.
+    """
+    manifest_path = Path(manifest_path)
+    lock_path = lockfile_path(manifest_path)
+    if not lock_path.exists():
+        raise FileNotFoundError(f"no lockfile at {lock_path}; run pull first")
+    lock = Lockfile.load(lock_path)
+    _check_manifest(manifest_path, lock)
+    pinned: dict[str, dict[str, Asset]] = {}
+    for key, entry in zip(_source_keys(lock.assets), lock.assets, strict=True):
+        pinned.setdefault(key, {})[entry.asset.id] = entry.asset
+    sources: list[SourceComparison] = []
+    for listed in plan(manifest_path, registry=registry).sources:
+        locked = pinned.get(listed.source, {})
+        today = {asset.id: asset for asset in listed.assets}
+        changes = [
+            change
+            for asset_id, asset in locked.items()
+            if asset_id in today and (change := _changed(asset, today[asset_id])) is not None
+        ]
+        sources.append(
+            SourceComparison(
+                source=listed.source,
+                dataset_id=listed.dataset_id,
+                added=[asset for asset in listed.assets if asset.id not in locked],
+                removed=[asset for asset_id, asset in locked.items() if asset_id not in today],
+                changed=changes,
+                unchanged=sum(1 for asset_id in locked if asset_id in today) - len(changes),
+            )
+        )
+    return ListingComparison(manifest=lock.manifest, lockfile=lock_path, sources=sources)
 
 
 def _selected(lock: Lockfile, update: Iterable[str]) -> set[str]:
