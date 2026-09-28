@@ -27,7 +27,8 @@ usdata verify dataset.yaml --cache-dir .data   # offline: manifest checksum and 
 ```
 
 The first pull writes the lockfile. Later pulls restore from it without
-repeating discovery. Verify never touches the network. Pull prints one
+repeating discovery. Verify never touches the network, unless `--listing` asks
+it to (below). Pull prints one
 tab-separated line per asset and a summary line on stderr; `--quiet` keeps the
 summary and drops the per-asset lines, and `--no-progress` turns off the
 terminal progress display without changing either.
@@ -41,6 +42,25 @@ against their pins:
 ```sh
 usdata pull dataset.yaml --cache-dir fresh && usdata verify dataset.yaml --cache-dir fresh
 ```
+
+## Would a re-resolve pick the same files?
+
+A restore never lists again, so it cannot see a file added to an archive after
+the lockfile was written, or one the listing no longer shows. To ask, compare
+the lockfile with today's listings:
+
+```sh
+usdata verify dataset.yaml --listing
+```
+
+Each source is listed exactly as a fresh resolve would list it, `select` rules
+included, and nothing is downloaded. A line per difference names the source
+and says whether an asset was `added`, `removed`, or `changed`: a different
+href, or a different size where both the listing and the pin give one. Exit 1
+means `pull --force` would pin something else. The bytes themselves are not
+compared: a restore checks those, and `verify` without `--listing` checks the
+cache. In Python, `usdata.compare_listing(manifest)` returns the same
+comparison, with `matches` true when nothing differs.
 
 ## What to commit and what to back up
 

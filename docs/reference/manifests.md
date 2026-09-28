@@ -143,6 +143,7 @@ behaviour, units, and limits are in the [provider notes](../providers/README.md)
 | `usdata pull dataset.yaml --update ID [--update ID]` | Accept new upstream bytes for the named asset or dataset ids only; rewrites only those pins. Exit 2 if a selector matches nothing, if combined with `--force`, or without a lockfile. |
 | `usdata pull dataset.yaml --force` | Re-resolve every source and replace the lockfile. Required after any edit to the manifest. |
 | `usdata verify dataset.yaml [--cache-dir DIR]` | Offline check of the manifest checksum and every cached file against the lockfile. |
+| `usdata verify dataset.yaml --listing [--json]` | List every source as a fresh resolve would, and compare with the lockfile: an asset `added` to or `removed` from a listing, or `changed` in href or reported size. Downloads nothing, but asks every source. Exit 1 on any difference. |
 | `USDATA_MIRROR_URL=https://... usdata pull dataset.yaml` | With a lockfile, restore any pin its source no longer serves from `<mirror>/sha256/<checksum>`, verified against the same pin and listed as `mirrored`; unset by default. |
 | `usdata fetch ... --force` | Re-download one query even when the cache has a valid copy. |
 

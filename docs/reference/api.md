@@ -42,10 +42,14 @@ See [fetch and analyze](../guides/fetch-and-analyze.md) for complete workflows.
 ::: usdata.pull.pull
 ::: usdata.pull.plan
 ::: usdata.pull.verify
+::: usdata.pull.compare_listing
 ::: usdata.pull.PullResult
 ::: usdata.pull.Plan
 ::: usdata.pull.SourcePlan
 ::: usdata.pull.Drift
+::: usdata.pull.ListingComparison
+::: usdata.pull.SourceComparison
+::: usdata.pull.AssetChange
 ::: usdata.manifest.Manifest
 ::: usdata.manifest.SourceSpec
 ::: usdata.manifest.Lockfile
