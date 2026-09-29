@@ -1,6 +1,7 @@
-name: goes18-infrared-scene
+name: goes-abi-scenes
 sources:
-  - dataset: noaa:goes-abi
+  - name: conus-infrared
+    dataset: noaa:goes-abi
     params:
       satellite: 18
       channel: 13
@@ -8,4 +9,14 @@ sources:
     select:
       time: 2024-05-06T12:00:00Z
       within: 5m
+      direction: nearest
+  - name: mesoscale-multiband
+    dataset: noaa:goes-abi
+    params:
+      satellite: 16
+      product: ABI-L2-MCMIPM
+      sector: M1
+    select:
+      time: 2024-05-06T22:00:00Z
+      within: 1m
       direction: nearest
