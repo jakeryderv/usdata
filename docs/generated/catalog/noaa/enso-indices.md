@@ -2,7 +2,7 @@
 
 ## Reference
 
-`noaa:enso-indices` · **Source only** · Install from [source](../install.md#source-installation) to use this dataset. CPC ENSO Indices (RONI and ONI).
+`noaa:enso-indices` · **Released** · Included since usdata 0.33. CPC ENSO Indices (RONI and ONI).
 
 ### At a glance
 
@@ -32,7 +32,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ### Catalog facts
 
-- Availability: Source only · intended for 0.33
+- Availability: since 0.33
 - Domain: Climate
 - Spatial resolution: One value for the Niño 3.4 region, 5N-5S and 170W-120W
 - Temporal resolution: Overlapping three-month seasons, one per month

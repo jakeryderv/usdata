@@ -4,21 +4,21 @@
 
 [Provider access notes](../../providers/noaa.md).
 
-**Released** is included in usdata 0.32.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
+**Released** is included in usdata 0.33.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
 
 ## Implemented datasets
 
 | Dataset | Availability | Files | What gets selected |
 |---|---|---|---|
-| <span id="noaagsom-station-files"></span>[Whole monthly station records, one file per station](../../providers/noaa-gsom-station-files.md) | Source only | CSV | One whole file per named station, every month and element it holds |
+| <span id="noaagsom-station-files"></span>[Whole monthly station records, one file per station](../../providers/noaa-gsom-station-files.md) | Released | CSV | One whole file per named station, every month and element it holds |
 | <span id="noaastorm-events"></span>[Storm Events details, fatalities, and locations](../../providers/noaa-storm-events.md) | Released | gzip CSV | Whole annual archives of one table; filter rows locally after downloading |
 | <span id="noaaspc-tornado-reports"></span>[SPC tornado, hail, and wind databases](../../providers/noaa-spc-tornado.md) | Released | CSV | Whole annual, half-decade, or decade files of one table; filter rows locally after downloading |
 | <span id="noaanws-vtec-events"></span>[NWS warnings and watches by county](../../providers/noaa-nws-vtec-events.md) | Released | CSV | Events issued for one county or UGC inside an inclusive UTC window; optionally one event type |
 | <span id="noaamrms"></span>[MRMS gridded radar products](../../providers/noaa-mrms.md) | Released | GRIB2 (gzipped) | Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day |
 | <span id="noaahurdat2"></span>[Tropical cyclone best tracks](../../providers/noaa-hurdat2.md) | Released | HURDAT2 fixed-format text | The newest or a named revision of one whole basin file; filter track points locally |
 | <span id="noaaibtracs"></span>[Global tropical cyclone best tracks](../../providers/noaa-ibtracs.md) | Released | CSV with a units row, NetCDF4 | One whole subset file per query, from the newest or a pinned product version |
-| <span id="noaaenso-indices"></span>[Seasonal El Niño indices, the official RONI and the traditional ONI](../../providers/noaa-enso-indices.md) | Source only | whitespace-delimited text (no reader) | One whole index table, every season from DJF 1950; select seasons locally |
-| <span id="noaaersst"></span>[Monthly global 2 degree sea surface temperature since 1850](../../providers/noaa-ersst.md) | Source only | NetCDF4 | Whole global monthly files, one for every month the window touches |
+| <span id="noaaenso-indices"></span>[Seasonal El Niño indices, the official RONI and the traditional ONI](../../providers/noaa-enso-indices.md) | Released | whitespace-delimited text (no reader) | One whole index table, every season from DJF 1950; select seasons locally |
+| <span id="noaaersst"></span>[Monthly global 2 degree sea surface temperature since 1850](../../providers/noaa-ersst.md) | Released | NetCDF4 | Whole global monthly files, one for every month the window touches |
 | <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](../../providers/noaa-coastwatch.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
 
 ### [NCEI Access Data Service](https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation)

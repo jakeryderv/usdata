@@ -4,7 +4,7 @@
 
 Each dataset has one page here: how to select it, what arrives, what the service does not say, and its generated reference. To browse datasets with previews and walkthroughs, use the [dataset grid on usdata.dev](https://usdata.dev/datasets/).
 
-**Released** is included in usdata 0.32.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
+**Released** is included in usdata 0.33.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
 
 ## Implemented datasets
 
@@ -14,7 +14,7 @@ Each dataset has one page here: how to select it, what arrives, what the service
 | <span id="noaagsom"></span>[Monthly station climate](../../providers/noaa-gsom.md) | Released | CSV | Complete UTC calendar months touched by the query; station and element filters |
 | <span id="noaagsoy"></span>[Annual station climate](../../providers/noaa-gsoy.md) | Released | CSV | Complete UTC calendar years touched by the query; station and element filters |
 | <span id="noaalcd"></span>[Hourly airport observations](../../providers/noaa-lcd.md) | Released | CSV | Every report on whole calendar days per station; optional column filters |
-| <span id="noaagsom-station-files"></span>[Whole monthly station records, one file per station](../../providers/noaa-gsom-station-files.md) | Source only | CSV | One whole file per named station, every month and element it holds |
+| <span id="noaagsom-station-files"></span>[Whole monthly station records, one file per station](../../providers/noaa-gsom-station-files.md) | Released | CSV | One whole file per named station, every month and element it holds |
 | <span id="noaastorm-events"></span>[Storm Events details, fatalities, and locations](../../providers/noaa-storm-events.md) | Released | gzip CSV | Whole annual archives of one table; filter rows locally after downloading |
 | <span id="noaaspc-tornado-reports"></span>[SPC tornado, hail, and wind databases](../../providers/noaa-spc-tornado.md) | Released | CSV | Whole annual, half-decade, or decade files of one table; filter rows locally after downloading |
 | <span id="noaanws-vtec-events"></span>[NWS warnings and watches by county](../../providers/noaa-nws-vtec-events.md) | Released | CSV | Events issued for one county or UGC inside an inclusive UTC window; optionally one event type |
@@ -30,9 +30,9 @@ Each dataset has one page here: how to select it, what arrives, what the service
 | <span id="noaanbm"></span>[NBM forecast guidance](../../providers/noaa-nbm.md) | Released | GRIB2 | Regional core files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and region |
 | <span id="noaarap"></span>[RAP model output](../../providers/noaa-rap.md) | Released | GRIB2 | Files, whole or by named GRIB2 message, chosen by run initialization window, cycle hour, forecast hours, and file family |
 | <span id="noaaclimate-normals"></span>[30-year station climate normals](../../providers/noaa-normals.md) | Released | CSV | Hourly, daily, monthly, or annual/seasonal normals per station; optional month-day window except annual/seasonal; hourly returns whole days |
-| <span id="noaaenso-indices"></span>[Seasonal El Niño indices, the official RONI and the traditional ONI](../../providers/noaa-enso-indices.md) | Source only | whitespace-delimited text (no reader) | One whole index table, every season from DJF 1950; select seasons locally |
+| <span id="noaaenso-indices"></span>[Seasonal El Niño indices, the official RONI and the traditional ONI](../../providers/noaa-enso-indices.md) | Released | whitespace-delimited text (no reader) | One whole index table, every season from DJF 1950; select seasons locally |
 | <span id="noaacoops-currents"></span>[Coastal current speed and direction](../../providers/noaa-coops-currents.md) | Released | CSV | Native six-minute observations for one station and explicit bin; at most 28 days |
-| <span id="noaaersst"></span>[Monthly global 2 degree sea surface temperature since 1850](../../providers/noaa-ersst.md) | Source only | NetCDF4 | Whole global monthly files, one for every month the window touches |
+| <span id="noaaersst"></span>[Monthly global 2 degree sea surface temperature since 1850](../../providers/noaa-ersst.md) | Released | NetCDF4 | Whole global monthly files, one for every month the window touches |
 | <span id="noaacoops-water-levels"></span>[Coastal water levels](../../providers/noaa-coops.md) | Released | CSV | Six-minute observations for one station and datum; at most 28 days |
 | <span id="noaacoops-tide-predictions"></span>[Coastal tide predictions](../../providers/noaa-coops-predictions.md) | Released | CSV | Predictions for one station and datum on a chosen interval; at most a year |
 | <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](../../providers/noaa-coastwatch.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
@@ -46,7 +46,7 @@ Each dataset has one page here: how to select it, what arrives, what the service
 
 | Provider | Released | Source only | Planned |
 |---|---:|---:|---:|
-| [NOAA](noaa.md) | 23 | 3 | 13 |
+| [NOAA](noaa.md) | 26 | 0 | 13 |
 | [USGS](usgs.md) | 2 | 0 | 1 |
 | [Census Bureau](census.md) | 1 | 0 | 0 |
 | [EPA](epa.md) | 1 | 0 | 0 |

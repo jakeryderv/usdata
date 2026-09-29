@@ -24,11 +24,11 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usda:cropland-data-layer`](usda.md#usdacropland-data-layer) Cropland Data Layer · Planned
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
 
-**Implemented, unreleased (planned 0.33)**
+**Included since 0.33**
 
-- [`noaa:enso-indices`](noaa.md#noaaenso-indices) CPC ENSO Indices (RONI and ONI) · Source only
-- [`noaa:ersst`](noaa.md#noaaersst) ERSST v6 Monthly Sea Surface Temperature · Source only
-- [`noaa:gsom-station-files`](noaa.md#noaagsom-station-files) Global Summary of the Month Station Files · Source only
+- [`noaa:enso-indices`](noaa.md#noaaenso-indices) CPC ENSO Indices (RONI and ONI) · Released
+- [`noaa:ersst`](noaa.md#noaaersst) ERSST v6 Monthly Sea Surface Temperature · Released
+- [`noaa:gsom-station-files`](noaa.md#noaagsom-station-files) Global Summary of the Month Station Files · Released
 
 **Included since 0.31**
 
