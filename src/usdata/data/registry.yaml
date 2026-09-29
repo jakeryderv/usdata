@@ -761,6 +761,7 @@ datasets:
     guide: docs/providers/noaa-gsom-station-files.md
     examples:
       - examples/datasets/noaa-gsom-station-files/noaa-gsom-station-files.ipynb
+      - examples/studies/el-nino-snowfall/el-nino-snowfall.ipynb
     resolution:
       spatial: "Land surface stations, derived from GHCN-Daily"
       temporal: "Monthly"
@@ -1242,6 +1243,7 @@ datasets:
     guide: docs/providers/noaa-enso-indices.md
     examples:
       - examples/datasets/noaa-enso-indices/noaa-enso-indices.ipynb
+      - examples/studies/el-nino-snowfall/el-nino-snowfall.ipynb
     resolution:
       spatial: "One value for the Niño 3.4 region, 5N-5S and 170W-120W"
       temporal: "Overlapping three-month seasons, one per month"
