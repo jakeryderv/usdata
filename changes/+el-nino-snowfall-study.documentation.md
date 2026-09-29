@@ -1,1 +1,0 @@
-Study: how strong El Niño winters have changed U.S. snowfall, from 315 USHCN stations' monthly records and CPC's official RONI, with where the traditional ONI would classify winters differently and what that suggests for 2026-27.

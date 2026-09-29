@@ -12,6 +12,24 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.33.0](https://github.com/jakeryderv/usdata/releases/tag/v0.33.0) - 2026-09-29
+
+
+### Added
+
+- `usdata messages`, and `usdata.list_messages(dataset, query)` in Python, list every GRIB2 field the files of a HRRR, GFS, RAP, or NBM query hold, read from their index sidecars without downloading the files: one line per field with its message number, its size, and the selector that names it in `messages`. ([#331](https://github.com/jakeryderv/usdata/issues/331))
+- `noaa:enso-indices`: CPC's seasonal ENSO index tables from DJF 1950, the Relative Oceanic Niño Index (RONI) that NOAA has used officially since February 2026 by default, and the traditional Oceanic Niño Index with `-p index=oni`.
+- `noaa:ersst`: ERSST v6, NCEI's monthly global 2 degree sea surface temperature analysis since 1850, one NetCDF4 file for every month a window touches, with `sst` and its `ssta` anomaly from the 1991-2020 climatology.
+- `noaa:gsom-station-files`: the Global Summary of the Month as NCEI's static per-station files, one whole monthly record of every element per station in metric units, for pulling many stations' long records without the Access Data Service. 315 stations arrive in under a minute.
+
+### Fixed
+
+- A partial GRIB2 fetch records a selector for every field it fetched, so `variable_for` names each wind component of a RAP message that holds both instead of refusing; `field_selectors` is a new, optional provenance field, and files pinned earlier open and restore as before. ([#354](https://github.com/jakeryderv/usdata/issues/354))
+
+### Documentation
+
+- Study: how strong El Niño winters have changed U.S. snowfall, from 315 USHCN stations' monthly records and CPC's official RONI, with where the traditional ONI would classify winters differently and what that suggests for 2026-27.
+
 ## [0.32.0](https://github.com/jakeryderv/usdata/releases/tag/v0.32.0) - 2026-09-28
 
 

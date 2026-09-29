@@ -209,6 +209,26 @@ release fixes a crash at exit in any process that read GRIB2 before importing
 pyproj, as opening a NEXRAD volume does: the ecCodes and pyproj wheels each
 bundle PROJ, and usdata now loads pyproj's copy first.
 
+Shipped in v0.33.0: the last of the walkthrough friction themes, [GRIB2 field
+names](https://github.com/jakeryderv/usdata/issues/331). `usdata messages`
+lists every selector a run's files hold, read from the index sidecars
+([ADR 0046](adr/0046-listing-grib2-messages.md)), and a partial fetch records a
+selector for every field, so `variable_for` names each of RAP's paired wind
+components ([ADR 0047](adr/0047-a-selector-per-fetched-field.md)). The same
+release adds three datasets for one question, [how strong El Niño winters have
+changed U.S. snowfall](https://github.com/jakeryderv/usdata/issues/390).
+`noaa:ersst` is ERSST v6, the version NCEI now publishes as current
+([ADR 0048](adr/0048-ersst-v6-whole-months.md)). `noaa:enso-indices` serves
+CPC's two ENSO tables, and defaults to the Relative Oceanic Niño Index, which
+NOAA has used officially since February 2026: for JJA 2026 it reads +1.36
+where the traditional ONI reads +1.80. `noaa:gsom-station-files` reads NCEI's
+static per-station GSOM files, after the Access Data Service stalled on long
+records for hundreds of stations
+([ADR 0049](adr/0049-gsom-whole-station-files.md)). The
+[El Niño snowfall study](https://usdata.dev/studies/el-nino-snowfall/) uses 158
+USHCN stations and finds the eight strong winters since 1949 brought the
+Pacific Northwest a median 57% of its usual snow and the southern Plains 184%.
+
 The work now is breadth: more of the datasets people reach for, from more
 agencies, each verified by a live check and a worked example. 1.0 comes when
 the catalog feels comprehensive and the contract feels settled, a judgment
@@ -232,6 +252,11 @@ and optional-reader boundaries:
 - [NASA access through earthaccess](https://github.com/jakeryderv/usdata/issues/9):
   satellite products behind an Earthdata login, a different credential shape
   and a heavier dependency, so a decision before an adapter.
+- [CFSv2 seasonal forecasts](https://github.com/jakeryderv/usdata/issues/396),
+  the dynamical outlook beside the El Niño study's composites, on the partial
+  GRIB2 fetch the model-run adapters already use.
+- [GHCN's station list and inventory](https://github.com/jakeryderv/usdata/issues/397),
+  so a study's station rule can run in its notebook against a pinned inventory.
 - Further USGS water data, such as instantaneous values and groundwater
   levels, which reuse the daily-values access pattern.
 - Further NCEI Access Data Service datasets, when a concrete comparison needs them.

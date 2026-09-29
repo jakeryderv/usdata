@@ -1,5 +1,5 @@
 {
-  "version": "0.32.0",
+  "version": "0.33.0",
   "datasets": [
     {
       "id": "noaa:ghcn-daily",
@@ -295,7 +295,7 @@
       "provider_id": "noaa",
       "domain": "Surface weather",
       "system": null,
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.33",
       "keywords": [
         "climate",
@@ -2109,7 +2109,7 @@
       "provider_id": "noaa",
       "domain": "Climate",
       "system": null,
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.33",
       "keywords": [
         "enso",
@@ -2255,7 +2255,7 @@
       "provider_id": "noaa",
       "domain": "Ocean physics",
       "system": null,
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.33",
       "keywords": [
         "sst",

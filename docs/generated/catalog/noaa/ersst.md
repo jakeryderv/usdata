@@ -2,7 +2,7 @@
 
 ## Reference
 
-`noaa:ersst` · **Source only** · Install from [source](../install.md#source-installation) to use this dataset. ERSST v6 Monthly Sea Surface Temperature.
+`noaa:ersst` · **Released** · Included since usdata 0.33. ERSST v6 Monthly Sea Surface Temperature.
 
 ### At a glance
 
@@ -25,7 +25,7 @@ This dataset accepts no provider-specific parameters.
 
 ### Catalog facts
 
-- Availability: Source only · intended for 0.33
+- Availability: since 0.33
 - Domain: Ocean physics
 - Spatial resolution: 2.0 degree grid
 - Temporal resolution: Monthly means
