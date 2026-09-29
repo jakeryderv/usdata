@@ -76,16 +76,13 @@ def _text(el: ET.Element, tag: str) -> str | None:
     return child.text if child is not None else None
 
 
-def list_objects(
-    bucket: str,
-    prefix: str,
-    client: httpx.Client | None = None,
-    page_size: int = 1000,
-) -> Iterator[S3Object]:
-    """Yield every object under ``prefix``, following continuation tokens."""
+def _pages(
+    bucket: str, params: dict[str, str | int], client: httpx.Client | None
+) -> Iterator[ET.Element]:
+    """Each ListObjectsV2 response page for ``params``, following continuation tokens."""
     own = client is None
     client = client or http.client()
-    params: dict[str, str | int] = {"list-type": 2, "prefix": prefix, "max-keys": page_size}
+    params = {"list-type": 2, **params}
     seen_tokens: set[str] = set()
     try:
         while True:
@@ -103,18 +100,7 @@ def list_objects(
                         "S3 listing repeated a continuation token", request=resp.request
                     )
                 seen_tokens.add(token)
-            for contents in root.iter(NS + "Contents"):
-                key = _text(contents, "Key")
-                if key is None:
-                    continue
-                etag = _text(contents, "ETag")
-                modified = _text(contents, "LastModified")
-                yield S3Object(
-                    key=key,
-                    size=int(_text(contents, "Size") or 0),
-                    etag=etag.strip('"') if etag else None,
-                    last_modified=datetime.fromisoformat(modified) if modified else None,
-                )
+            yield root
             if not truncated:
                 return
             assert token is not None
@@ -122,6 +108,60 @@ def list_objects(
     finally:
         if own:
             client.close()
+
+
+def _objects(root: ET.Element) -> Iterator[S3Object]:
+    """The objects one listing page names."""
+    for contents in root.iter(NS + "Contents"):
+        key = _text(contents, "Key")
+        if key is None:
+            continue
+        etag = _text(contents, "ETag")
+        modified = _text(contents, "LastModified")
+        yield S3Object(
+            key=key,
+            size=int(_text(contents, "Size") or 0),
+            etag=etag.strip('"') if etag else None,
+            last_modified=datetime.fromisoformat(modified) if modified else None,
+        )
+
+
+def list_objects(
+    bucket: str,
+    prefix: str,
+    client: httpx.Client | None = None,
+    page_size: int = 1000,
+) -> Iterator[S3Object]:
+    """Yield every object under ``prefix``, following continuation tokens."""
+    for root in _pages(bucket, {"prefix": prefix, "max-keys": page_size}, client):
+        yield from _objects(root)
+
+
+def list_directory(
+    bucket: str,
+    prefix: str,
+    client: httpx.Client | None = None,
+    page_size: int = 1000,
+) -> tuple[list[S3Object], list[str]]:
+    """The objects directly under ``prefix``, and the prefixes one ``/`` below it.
+
+    A ``/``-delimited listing: a key with a further ``/`` after ``prefix`` is
+    not returned itself but rolled up into its common prefix, so a directory
+    holding thousands of files costs one entry. ``prefix`` should end in ``/``
+    (or be empty, for the bucket's top level).
+
+    Returns:
+        The objects, and the sub-prefixes in listing order, each ending in ``/``.
+    """
+    params: dict[str, str | int] = {"prefix": prefix, "delimiter": "/", "max-keys": page_size}
+    objects: list[S3Object] = []
+    prefixes: list[str] = []
+    for root in _pages(bucket, params, client):
+        objects.extend(_objects(root))
+        for common in root.iter(NS + "CommonPrefixes"):
+            if (sub := _text(common, "Prefix")) is not None:
+                prefixes.append(sub)
+    return objects, prefixes
 
 
 def download(url: str, dest: Path, client: httpx.Client | None = None) -> Path:

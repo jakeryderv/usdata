@@ -26,6 +26,7 @@ Move a dataset between phases by editing its `target` in the registry.
 
 **Implemented, unreleased (planned 0.34)**
 
+- [`noaa:emergency-response-imagery`](noaa.md#noaaemergency-response-imagery) NGS Emergency Response Imagery · Source only
 - [`noaa:nws-damage-photos`](noaa.md#noaanws-damage-photos) NWS Damage Survey Photos · Source only
 - [`noaa:nws-damage-surveys`](noaa.md#noaanws-damage-surveys) NWS Damage Survey Points, Tornado Tracks, and Damage Areas · Source only
 

@@ -90,3 +90,31 @@ def test_head_object_reads_size_and_unquoted_etag_without_the_body() -> None:
     assert obj.size == 151_717_165
     assert obj.etag == "81198a73ad430c73adfbe3335421ea99"
     assert obj.last_modified is not None and obj.last_modified.hour == 12
+
+
+def test_a_delimited_listing_returns_direct_objects_and_sub_prefixes_across_pages() -> None:
+    namespace = 'xmlns="http://s3.amazonaws.com/doc/2006-03-01/"'
+    pages = [
+        f"<ListBucketResult {namespace}><IsTruncated>true</IsTruncated>"
+        "<NextContinuationToken>t1</NextContinuationToken>"
+        "<Contents><Key>event/a.tif</Key><Size>3</Size></Contents>"
+        "<CommonPrefixes><Prefix>event/flight/</Prefix></CommonPrefixes></ListBucketResult>",
+        f"<ListBucketResult {namespace}><IsTruncated>false</IsTruncated>"
+        "<CommonPrefixes><Prefix>event/raw/</Prefix></CommonPrefixes></ListBucketResult>",
+    ]
+    requests: list[httpx.Request] = []
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(200, text=pages[len(requests) - 1])
+
+    with httpx.Client(transport=httpx.MockTransport(respond)) as client:
+        objects, prefixes = s3.list_directory("example", "event/", client)
+        assert not client.is_closed
+    assert [(obj.key, obj.size) for obj in objects] == [("event/a.tif", 3)]
+    assert prefixes == ["event/flight/", "event/raw/"]
+    first = {"list-type": "2", "prefix": "event/", "delimiter": "/", "max-keys": "1000"}
+    assert [dict(request.url.params) for request in requests] == [
+        first,
+        {**first, "continuation-token": "t1"},
+    ]

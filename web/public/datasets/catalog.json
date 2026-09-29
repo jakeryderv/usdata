@@ -2932,6 +2932,79 @@
       }
     },
     {
+      "id": "noaa:emergency-response-imagery",
+      "title": "Post-event aerial imagery tiles",
+      "product": "NGS Emergency Response Imagery",
+      "description": "Aerial imagery the National Geodetic Survey flew after hurricanes, floods, fires, and tornadoes, and in yearly pre-event coastal surveys, in the public noaa-eri-pds S3 bucket (NOAA Open Data Dissemination). The bucket holds 52 event folders from Hurricane Katrina (2005) onward; only three are tornadoes (Joplin 2011, Illinois 2015, Nashville 2020). Each event holds folders of GeoTIFFs, usually one per flight: mosaic tiles named by their north-west corner, 90 or 45 arc-seconds on a side (2.5 km UTM tiles in 2009 and 2011), from 0.15 MB to 1.7 GB each, plus individually georeferenced frames in several events and one flight mosaic per folder in some recent ones. Select an event and optionally its folders; a bbox keeps files by the footprint their names give, and folders whose file names give none refuse it. Files are fetched whole and no reader is bundled.",
+      "provider": "NOAA",
+      "provider_id": "noaa",
+      "domain": "Natural hazards",
+      "system": null,
+      "availability": "Source only",
+      "since": "0.34",
+      "keywords": [
+        "aerial imagery",
+        "disaster response",
+        "damage assessment",
+        "hurricanes",
+        "tornado",
+        "floods",
+        "orthomosaic",
+        "geotiff",
+        "ngs",
+        "pre-event"
+      ],
+      "formats": [
+        "GeoTIFF"
+      ],
+      "selection": "Whole GeoTIFFs of one event folder, optionally by subfolder and by the footprint that tile names give",
+      "inputs": "An event folder; optionally collection folders and a bbox",
+      "credentials": null,
+      "reader_extra": null,
+      "resolution": {
+        "spatial": "Approximate ground sample distance stated per event, such as 35 cm (1.14 feet) for Katrina and Joplin, ~15 cm for Nashville, and 15 - 30 cm for Helene",
+        "temporal": "One or more flights per event, one folder per flight"
+      },
+      "update_frequency": "Manually when needed",
+      "latency": null,
+      "citation": "National Geodetic Survey, NOAA Emergency Response Imagery, accessed via usdata from https://registry.opendata.aws/noaa-eri",
+      "terms": "https://www.noaa.gov/information-technology/open-data-dissemination",
+      "homepage": "https://storms.ngs.noaa.gov/",
+      "variables": [
+        {
+          "name": "Red",
+          "units": null,
+          "description": "Red band, 8-bit"
+        },
+        {
+          "name": "Green",
+          "units": null,
+          "description": "Green band, 8-bit"
+        },
+        {
+          "name": "Blue",
+          "units": null,
+          "description": "Blue band, 8-bit"
+        },
+        {
+          "name": "Alpha",
+          "units": null,
+          "description": "Transparency band marking imaged pixels, in the collections that carry one"
+        }
+      ],
+      "max_window": null,
+      "guide": "https://docs.usdata.dev/providers/noaa-emergency-response-imagery/",
+      "reference": "https://docs.usdata.dev/providers/noaa-emergency-response-imagery/#reference",
+      "page": "https://usdata.dev/datasets/noaa/emergency-response-imagery/",
+      "walkthrough": "examples/datasets/noaa-emergency-response-imagery/noaa-emergency-response-imagery.ipynb",
+      "studies": [],
+      "quickstart": {
+        "cli": "usdata fetch noaa:emergency-response-imagery \\\n  --bbox -86.795,36.177,-86.785,36.185 \\\n  -p event=2020_Nashville_Tornado \\\n  -p collection=20200307a_RGB",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:emergency-response-imagery\"),\n    build_query(\n        bbox=(-86.795, 36.177, -86.785, 36.185),\n        event=\"2020_Nashville_Tornado\",\n        collection=\"20200307a_RGB\",\n    ),\n)\nprint(items[0].path)\n",
+        "manifest": "name: nashville-tornado-germantown\nsources:\n  - dataset: noaa:emergency-response-imagery\n    bbox: {west: -86.795, south: 36.177, east: -86.785, north: 36.185}\n    params:\n      event: 2020_Nashville_Tornado\n      collection: 20200307a_RGB\n"
+      }
+    },
+    {
       "id": "noaa:ghcn-hourly",
       "title": "GHCN-Hourly Station Observations",
       "product": "GHCN-Hourly Station Observations",

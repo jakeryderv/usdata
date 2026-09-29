@@ -3,7 +3,8 @@
 Start with the [dataset catalog](../generated/catalog/index.md) to choose data.
 The agency pages below explain access, service behavior, and research notes.
 
-- [NOAA](noaa.md): weather, climate, radar, satellites, and ocean observations.
+- [NOAA](noaa.md): weather, climate, radar, satellites, ocean observations, and
+  post-event aerial imagery.
 - [USGS](usgs.md): water observations and earthquakes.
 - [FEMA](fema.md): disaster declarations by state and county.
 - [EPA](epa.md): air quality monitoring, which needs a free key.

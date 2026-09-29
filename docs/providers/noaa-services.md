@@ -756,3 +756,82 @@ day at that station returned 61 rows of 125 columns: 24 `FM-15` hourly, 27
 columns to the named fields plus station, date, report type, and source.
 `units=metric` returned Celsius temperatures. The ids `13967` and
 `USW00013967` returned HTTP 200 with a header and no rows.
+
+## NGS emergency response imagery
+
+Probes on 2026-09-29 UTC against the anonymous `noaa-eri-pds` bucket in
+`us-east-1`, named on the [NODD registry page](https://registry.opendata.aws/noaa-eri/).
+The top level lists 52 event folders and three objects: an S3 browser page
+(`index.html`) and two Parquet files, `noaa_eri_pds.parquet` (15 MB, a listing)
+and `noaa_eri_stac.parquet` (16 MB, STAC items), both modified 2026-09-16. The
+adapter reads neither: they need a Parquet reader, and the listing is current
+without them.
+
+```sh
+curl --get 'https://noaa-eri-pds.s3.amazonaws.com/' \
+  --data-urlencode 'list-type=2' --data-urlencode 'delimiter=/'
+curl --get 'https://noaa-eri-pds.s3.amazonaws.com/' \
+  --data-urlencode 'list-type=2' --data-urlencode 'delimiter=/' \
+  --data-urlencode 'prefix=2020_Nashville_Tornado/20200307a_RGB/'
+curl --range 0-65535 --output /tmp/eri-head.tif \
+  'https://noaa-eri-pds.s3.amazonaws.com/2020_Nashville_Tornado/20200307a_RGB/20200307aC0852700w360900n.tif'
+```
+
+A full listing of every event prefix found 834,087 objects and about 39 TB:
+268,231 GeoTIFFs (20.6 TB), 279,879 raw camera JPEGs with as many `.geom`
+sidecars (10.2 TB, under `<flight>/raw/` since 2020), 511 tar archives
+(8.2 TB, under `<event>/downloads/`, the largest 126 GB), and per-flight VRT,
+tile-index shapefile, SQLite, MRF, FlatGeobuf, checksum, and README files. One
+Helene flight's README says its VRT and shapefile listed eight tiles the flight
+does not hold. Events range from 61 GeoTIFFs (Joplin, 2.1 GB) to 39,432
+(2023 pre-event surveys); the largest is Helene at 2.7 TB of GeoTIFFs.
+
+Of the 268,229 GeoTIFFs outside `raw/` and `downloads/`, 244,642 are named by
+a degrees-minutes-seconds corner, 1,609 by a UTM corner (Joplin and Irene,
+whose folders name zones 15 and 18, and the 2009 Nor'easter, whose folders name
+none), 41 are flight mosaics named after their folder, and the rest name no
+position: numbered frames of Wilma, Ernesto, Humberto, Gustav, and Ike;
+obliques of Arthur, Matthew, and the Louisiana floods; Sally's near-infrared
+frames; Nicole's `ortho-cogs`; and one Midwest-flood flight named by row and
+column (`mwflood-28-98.tif`).
+
+GeoTIFF headers, read with 64 KiB range requests, showed:
+
+- The name is the tile's north-west corner. Degree tiles extend 0.0001° past it
+  on every side: `20200307aC0852700w360900n.tif` spans 85.4501°W to 85.4249°W and
+  36.1249°N to 36.1501°N, 18,681 pixels square in WGS 84. Tiles are
+  0.0252° (90") square through 2020 and 0.0127° (45") from 2021. Some names
+  truncate a second: `20240927aC0853044w295830n.tif` starts at 85.5126°W, which
+  is 85°30'45" plus the buffer.
+- UTM tiles are 2,504 to 2,600.15 m square with offsets from the name of 1.75
+  to 50 m, varying within a folder (Joplin's 26 May flight is offset 25.6 m in
+  easting and 49.9 m in northing). They have no GeoKey directory, so the file
+  states no coordinate system; `may24JPEGtiles_UTMZone15` is the only record of
+  the zone.
+- Three tiles from each of the 319 folders with corner names, and a
+  containment check of three more in each of the 315 that can be placed, found
+  one tile size per folder, every header within 1" plus 0.0001° (or 50 m) of its
+  name, and every tile inside the footprint the adapter computes.
+- Compression is JPEG in every folder sampled through 2020 (three bands, four
+  with a transparency band in 2017 to 2019), LZW in post-event folders from 2021,
+  and Deflate in the pre-event surveys, all four bands. Helene tiles register
+  their tiepoint to pixel centres (`RasterPixelIsPoint`).
+- The 41 flight mosaics are 5 to 2,034 MB: 36 in WGS 84 at 0.00005° and five in
+  Web Mercator (EPSG:3857) at 2.39 m; the two Web Mercator mosaics checked
+  are BigTIFF.
+
+Flight folder dates are local dates. The raw frames of the Texas flood flight
+`20250710a` are all stamped 00:00 to 01:59 UTC on 11 July, and those of
+`20250711b` and `20250712b` run past midnight UTC into the next day; no frame
+was stamped earlier than its folder's date.
+
+Metadata pages probed the same day: the NODD registry entry and its
+[`noaa-eri.yaml`](https://github.com/awslabs/open-data-registry/blob/main/datasets/noaa-eri.yaml)
+("UpdateFrequency: Manually when needed"; "GeoTIFF & COG Imagery (COG Format
+available for recent events)"), the [NGS emergency response
+page](https://www.ngs.noaa.gov/RSD/erp.shtml), [storms.ngs.noaa.gov](https://storms.ngs.noaa.gov/)
+and its per-event pages (ground sample distance 35 cm for Katrina and Joplin,
+~15 cm for Nashville, 15 - 30 cm for Helene), and the Nashville
+[InPort record](https://www.fisheries.noaa.gov/inport/item/59027) (acquired
+2020-03-07 from 2,500 to 5,000 feet with a Trimble Digital Sensor System;
+horizontal accuracy not assessed, 3 to 5 m expected in flat terrain).

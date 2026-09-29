@@ -38,6 +38,7 @@ Each dataset has one page here: how to select it, what arrives, what the service
 | <span id="noaacoops-water-levels"></span>[Coastal water levels](../../providers/noaa-coops.md) | Released | CSV | Six-minute observations for one station and datum; at most 28 days |
 | <span id="noaacoops-tide-predictions"></span>[Coastal tide predictions](../../providers/noaa-coops-predictions.md) | Released | CSV | Predictions for one station and datum on a chosen interval; at most a year |
 | <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](../../providers/noaa-coastwatch.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
+| <span id="noaaemergency-response-imagery"></span>[Post-event aerial imagery tiles](../../providers/noaa-emergency-response-imagery.md) | Source only | GeoTIFF | Whole GeoTIFFs of one event folder, optionally by subfolder and by the footprint that tile names give |
 | <span id="usgsearthquakes"></span>[Earthquake events](../../providers/usgs-earthquakes.md) | Released | CSV | Events inside an inclusive UTC window and optional box, magnitude, and depth bounds |
 | <span id="usgswater-daily"></span>[Daily water observations](../../providers/usgs-water-daily.md) | Released | CSV | Site observations for inclusive local calendar dates; parameter and statistic filters |
 | <span id="censusacs-5year"></span>[Five-year population, housing, and income estimates by state or county](../../providers/census-acs-5year.md) | Released | JSON | One vintage's estimates for up to fifty variables over a state, its counties, or one county |
@@ -48,7 +49,7 @@ Each dataset has one page here: how to select it, what arrives, what the service
 
 | Provider | Released | Source only | Planned |
 |---|---:|---:|---:|
-| [NOAA](noaa.md) | 26 | 2 | 13 |
+| [NOAA](noaa.md) | 26 | 3 | 13 |
 | [USGS](usgs.md) | 2 | 0 | 1 |
 | [Census Bureau](census.md) | 1 | 0 | 0 |
 | [EPA](epa.md) | 1 | 0 | 0 |

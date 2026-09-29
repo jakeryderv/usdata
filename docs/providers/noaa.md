@@ -26,6 +26,7 @@ NOAA access is anonymous.
 | `nws-vtec-events` | [NWS watches and warnings by county](noaa-nws-vtec-events.md) | Events issued for one county or UGC inside a window, from IEM's archive |
 | `nws-damage-surveys` | [NWS damage surveys](noaa-nws-damage-surveys.md) (v0.34) | GeoJSON pages of one layer's points, tracks, or areas, cut by object-id range |
 | `nws-damage-photos` | [NWS damage survey photos](noaa-nws-damage-photos.md) (v0.34) | One JPEG or PNG per damage point attachment, at most 7 days |
+| `emergency-response-imagery` | [NGS emergency response imagery](noaa-emergency-response-imagery.md) (v0.34) | Whole post-event GeoTIFF tiles of one event, by folder and tile footprint |
 | `hurdat2` | [Tropical cyclone best tracks](noaa-hurdat2.md) (v0.12.0) | One whole basin file per revision |
 | `ibtracs` | [Global tropical cyclone best tracks](noaa-ibtracs.md) (v0.20.0) | One whole subset file, CSV or NetCDF, from the newest or a pinned version |
 | `coastwatch-sst` | [Sea-surface temperature](noaa-coastwatch.md) | Spatial and temporal CSV subsets |
@@ -100,6 +101,10 @@ See [NWS watches and warnings by county](noaa-nws-vtec-events.md).
 
 See [NWS damage surveys](noaa-nws-damage-surveys.md) and
 [NWS damage survey photos](noaa-nws-damage-photos.md).
+
+## NGS emergency response imagery
+
+See [NGS emergency response imagery](noaa-emergency-response-imagery.md).
 
 ## HURDAT2 best tracks
 
