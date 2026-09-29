@@ -26,6 +26,11 @@
       "summary": "Compare twelve months at Oklahoma City's airport with 1991–2020 station normals, including temperature-unit checks and monthly anomaly plots."
     },
     {
+      "slug": "el-nino-snowfall",
+      "title": "How have strong El Niño winters changed U.S. snowfall, and what does that suggest for 2026–27?",
+      "summary": "Classify every winter since 1949 by NOAA's official Relative Oceanic Niño Index, compare each long-record station's snowfall in strong El Niño winters with its usual winter across eight regions, and show where the traditional ONI would classify winters differently."
+    },
+    {
       "slug": "hourly-anomalies",
       "title": "How warm was Oklahoma City on 6 May 2024 compared with its hourly normals?",
       "summary": "Compare routine airport temperatures with 1991–2020 hourly normals in local standard time, make the matching tolerance explicit, and restore both pinned inputs into an empty cache."
@@ -64,6 +69,7 @@
     "datasets/noaa-mrms",
     "datasets/noaa-nexrad-level3",
     "studies/goes-mesoscale",
-    "studies/wildfire-smoke"
+    "studies/wildfire-smoke",
+    "studies/el-nino-snowfall"
   ]
 }

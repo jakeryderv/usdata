@@ -11,6 +11,7 @@
 - Required inputs: Station IDs; no dates, geographic filters, or variables
 - Open locally: `usdata[pandas]` · [Reader guide](../reference/readers.md)
 - On usdata.dev: [Whole monthly station records, one file per station](https://usdata.dev/datasets/noaa/gsom-station-files/), with a walkthrough
+- Studies: [How have strong El Niño winters changed U.S. snowfall, and what does that suggest for 2026–27?](https://usdata.dev/studies/el-nino-snowfall/)
 
 ### Parameters
 

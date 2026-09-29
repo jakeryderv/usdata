@@ -64,6 +64,7 @@ def test_committed_lockfiles_match_their_manifests(scripts):
         "datasets/noaa-nexrad-level3",
         "studies/goes-mesoscale",
         "studies/wildfire-smoke",
+        "studies/el-nino-snowfall",
     }
     assert [error for manifest in pinned for error in check.check_lockfile(manifest)] == []
     unpinned = {m.parent.name for m in (ROOT / "examples").glob("*/*/dataset.yaml")} - {

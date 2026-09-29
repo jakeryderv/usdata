@@ -17,6 +17,7 @@ examples/**/*.lock.json
 !examples/datasets/noaa-mrms/dataset.lock.json
 !examples/datasets/noaa-nexrad-level3/dataset.lock.json
 !examples/studies/wildfire-smoke/dataset.lock.json
+!examples/studies/el-nino-snowfall/dataset.lock.json
 .ipynb_checkpoints/
 reports/
 

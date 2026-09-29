@@ -11,6 +11,7 @@
 - Required inputs: Optional index (roni or oni); no dates or geographic filters
 - Open locally: Local files; no bundled reader for this format
 - On usdata.dev: [Seasonal El Niño indices, the official RONI and the traditional ONI](https://usdata.dev/datasets/noaa/enso-indices/), with a walkthrough
+- Studies: [How have strong El Niño winters changed U.S. snowfall, and what does that suggest for 2026–27?](https://usdata.dev/studies/el-nino-snowfall/)
 
 ### Parameters
 
