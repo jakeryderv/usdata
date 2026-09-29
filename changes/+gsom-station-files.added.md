@@ -1,0 +1,1 @@
+`noaa:gsom-station-files`: the Global Summary of the Month as NCEI's static per-station files, one whole monthly record of every element per station in metric units, for pulling many stations' long records without the Access Data Service. 315 stations arrive in under a minute.
