@@ -28,6 +28,7 @@ Move a dataset between phases by editing its `target` in the registry.
 
 - [`noaa:enso-indices`](noaa.md#noaaenso-indices) CPC ENSO Indices (RONI and ONI) · Source only
 - [`noaa:ersst`](noaa.md#noaaersst) ERSST v6 Monthly Sea Surface Temperature · Source only
+- [`noaa:gsom-station-files`](noaa.md#noaagsom-station-files) Global Summary of the Month Station Files · Source only
 
 **Included since 0.31**
 

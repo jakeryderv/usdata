@@ -14,6 +14,7 @@ Each dataset has one page here: how to select it, what arrives, what the service
 | <span id="noaagsom"></span>[Monthly station climate](../../providers/noaa-gsom.md) | Released | CSV | Complete UTC calendar months touched by the query; station and element filters |
 | <span id="noaagsoy"></span>[Annual station climate](../../providers/noaa-gsoy.md) | Released | CSV | Complete UTC calendar years touched by the query; station and element filters |
 | <span id="noaalcd"></span>[Hourly airport observations](../../providers/noaa-lcd.md) | Released | CSV | Every report on whole calendar days per station; optional column filters |
+| <span id="noaagsom-station-files"></span>[Whole monthly station records, one file per station](../../providers/noaa-gsom-station-files.md) | Source only | CSV | One whole file per named station, every month and element it holds |
 | <span id="noaastorm-events"></span>[Storm Events details, fatalities, and locations](../../providers/noaa-storm-events.md) | Released | gzip CSV | Whole annual archives of one table; filter rows locally after downloading |
 | <span id="noaaspc-tornado-reports"></span>[SPC tornado, hail, and wind databases](../../providers/noaa-spc-tornado.md) | Released | CSV | Whole annual, half-decade, or decade files of one table; filter rows locally after downloading |
 | <span id="noaanws-vtec-events"></span>[NWS warnings and watches by county](../../providers/noaa-nws-vtec-events.md) | Released | CSV | Events issued for one county or UGC inside an inclusive UTC window; optionally one event type |
@@ -45,7 +46,7 @@ Each dataset has one page here: how to select it, what arrives, what the service
 
 | Provider | Released | Source only | Planned |
 |---|---:|---:|---:|
-| [NOAA](noaa.md) | 23 | 2 | 13 |
+| [NOAA](noaa.md) | 23 | 3 | 13 |
 | [USGS](usgs.md) | 2 | 0 | 1 |
 | [Census Bureau](census.md) | 1 | 0 | 0 |
 | [EPA](epa.md) | 1 | 0 | 0 |

@@ -26,6 +26,7 @@ LIVE_EXTRAS = {
     "test_earthquakes_live": "pandas",
     "test_hurdat2_live": "pandas",
     "test_nws_vtec_live": "pandas",
+    "test_gsom_station_files_live": "pandas",
 }
 
 

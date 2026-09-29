@@ -287,6 +287,77 @@
       }
     },
     {
+      "id": "noaa:gsom-station-files",
+      "title": "Whole monthly station records, one file per station",
+      "product": "Global Summary of the Month Station Files",
+      "description": "The same Global Summary of the Month as noaa:gsom, as NCEI's static per-station files: one CSV per station holding its whole monthly record, every element with its attributes, in metric units. Each station is one plain HTTPS GET that does not go through the Access Data Service, which suits pulling many stations' long records. There is no selection by time, place, or element; name stations and select months and columns after opening. Variables are NCEI element codes, the catalog lists the common ones, and the delivered set is open and depends on the station.",
+      "provider": "NOAA",
+      "provider_id": "noaa",
+      "domain": "Surface weather",
+      "system": null,
+      "availability": "Source only",
+      "since": "0.33",
+      "keywords": [
+        "climate",
+        "monthly",
+        "stations",
+        "snowfall",
+        "temperature",
+        "precipitation",
+        "gsom",
+        "ncei"
+      ],
+      "formats": [
+        "CSV"
+      ],
+      "selection": "One whole file per named station, every month and element it holds",
+      "inputs": "Station IDs; no dates, geographic filters, or variables",
+      "credentials": null,
+      "reader_extra": "pandas",
+      "resolution": {
+        "spatial": "Land surface stations, derived from GHCN-Daily",
+        "temporal": "Monthly"
+      },
+      "update_frequency": "Weekly",
+      "latency": null,
+      "citation": "Lawrimore, Jay H.; Ray, Ron; Applequist, Scott; Korzeniewski, Bryant; Menne, Matthew J. (2016): Global Summary of the Month (GSOM), Version 1. NOAA National Centers for Environmental Information. https://doi.org/10.7289/V5QV3JJ5",
+      "terms": "https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00946/html",
+      "homepage": "https://www.ncei.noaa.gov/data/global-summary-of-the-month/",
+      "variables": [
+        {
+          "name": "PRCP",
+          "units": "mm",
+          "description": "Monthly precipitation total"
+        },
+        {
+          "name": "SNOW",
+          "units": "mm",
+          "description": "Monthly snowfall total"
+        },
+        {
+          "name": "SNOW_ATTRIBUTES",
+          "units": null,
+          "description": "Days missing, measurement, quality, and source flags for SNOW"
+        },
+        {
+          "name": "TAVG",
+          "units": "degrees Celsius",
+          "description": "Monthly mean temperature"
+        }
+      ],
+      "max_window": null,
+      "guide": "https://docs.usdata.dev/providers/noaa-gsom-station-files/",
+      "reference": "https://docs.usdata.dev/providers/noaa-gsom-station-files/#reference",
+      "page": "https://usdata.dev/datasets/noaa/gsom-station-files/",
+      "walkthrough": "examples/datasets/noaa-gsom-station-files/noaa-gsom-station-files.ipynb",
+      "studies": [],
+      "quickstart": {
+        "cli": "usdata fetch noaa:gsom-station-files -p stations=USW00094823,USW00014733",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:gsom-station-files\"),\n    build_query(\n        stations=[\"USW00094823\", \"USW00014733\"],\n    ),\n)\ndata = items[0].open()\n",
+        "manifest": "name: two-snowbelt-records\nsources:\n  - dataset: noaa:gsom-station-files\n    params: {stations: [USW00094823, USW00014733]}\n"
+      }
+    },
+    {
       "id": "noaa:storm-events",
       "title": "Storm Events details, fatalities, and locations",
       "product": "Storm Events Database",

@@ -8,6 +8,7 @@ NOAA access is anonymous.
 |---|---|---|
 | `ghcn-daily` | [Daily station observations](noaa-ghcn.md) | Station CSV for inclusive dates |
 | `gsom` | [Monthly station summaries](noaa-gsom.md) | Complete UTC months |
+| `gsom-station-files` | [GSOM station files](noaa-gsom-station-files.md) (v0.33) | One whole monthly record per station, every element |
 | `gsoy` | [Annual station summaries](noaa-gsoy.md) (v0.10.0) | Complete UTC years |
 | `climate-normals` | [30-year station normals](noaa-normals.md) (v0.11.0) | Whole-year or month-day windows per period |
 | `lcd` | [Hourly airport observations](noaa-lcd.md) (v0.14.0) | Every report on whole days per station chunk |

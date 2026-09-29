@@ -10,6 +10,7 @@
 
 | Dataset | Availability | Files | What gets selected |
 |---|---|---|---|
+| <span id="noaagsom-station-files"></span>[Whole monthly station records, one file per station](../../providers/noaa-gsom-station-files.md) | Source only | CSV | One whole file per named station, every month and element it holds |
 | <span id="noaastorm-events"></span>[Storm Events details, fatalities, and locations](../../providers/noaa-storm-events.md) | Released | gzip CSV | Whole annual archives of one table; filter rows locally after downloading |
 | <span id="noaaspc-tornado-reports"></span>[SPC tornado, hail, and wind databases](../../providers/noaa-spc-tornado.md) | Released | CSV | Whole annual, half-decade, or decade files of one table; filter rows locally after downloading |
 | <span id="noaanws-vtec-events"></span>[NWS warnings and watches by county](../../providers/noaa-nws-vtec-events.md) | Released | CSV | Events issued for one county or UGC inside an inclusive UTC window; optionally one event type |

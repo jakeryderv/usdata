@@ -41,6 +41,7 @@ CASES = {
     "noaa:coops-tide-predictions": {"station": "8518750", "datum": "MLLW"},
     "noaa:coops-currents": {"station": "cb0102", "bin": 4},
     "noaa:gsom": {"stations": "USW00013967"},
+    "noaa:gsom-station-files": {"stations": "USW00013967"},
     "noaa:gsoy": {"stations": "USW00013967"},
     "noaa:climate-normals": {"stations": "USW00013967"},
     "noaa:lcd": {"stations": "72353013967"},
@@ -89,9 +90,15 @@ STORM_NAME = "StormEvents_details-ftp_v1.0_d2024_c20260323.csv.gz"
 ERSST_NAME = "ersst.v6.202405.nc"
 HURDAT_NAME = "hurdat2-nepac-1949-2025-02272026.txt"
 IBTRACS_NAME = "ibtracs.SA.list.v04r01.csv"
-# HURDAT2, IBTrACS, and the CPC ENSO tables publish the complete record per file, and ACS
-# estimates are named by vintage, so they reject a time filter.
-UNTIMED = {"noaa:hurdat2", "noaa:ibtracs", "census:acs-5year", "noaa:enso-indices"}
+# HURDAT2, IBTrACS, the CPC ENSO tables, and the GSOM station files publish the complete
+# record per file, and ACS estimates are named by vintage, so they reject a time filter.
+UNTIMED = {
+    "noaa:hurdat2",
+    "noaa:ibtracs",
+    "census:acs-5year",
+    "noaa:enso-indices",
+    "noaa:gsom-station-files",
+}
 WINDOW = {"start": "2024-05-06T12:00Z", "end": "2024-05-06T12:05Z"}
 # The window each adapter enforces, named where the adapter defines or imports it. Reading
 # the constants is why this module imports provider packages, as the adapter tests do.

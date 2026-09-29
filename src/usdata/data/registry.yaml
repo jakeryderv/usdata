@@ -732,6 +732,51 @@ datasets:
       - { name: "TAVG", units: "degrees Celsius", description: "Monthly mean temperature (metric units)" }
     adapter: usdata.providers.noaa.gsom:GlobalSummaryMonthly
 
+  - id: noaa:gsom-station-files
+    provider: noaa
+    status: available
+    domain: surface-weather
+    since: "0.33"
+    title: Global Summary of the Month Station Files
+    description: >-
+      The same Global Summary of the Month as noaa:gsom, as NCEI's static per-station files:
+      one CSV per station holding its whole monthly record, every element with its attributes,
+      in metric units. Each station is one plain HTTPS GET that does not go through the Access
+      Data Service, which suits pulling many stations' long records. There is no selection by
+      time, place, or element; name stations and select months and columns after opening.
+      Variables are NCEI element codes, the catalog lists the common ones, and the delivered
+      set is open and depends on the station.
+    keywords: [climate, monthly, stations, snowfall, temperature, precipitation, gsom, ncei]
+    protocol: http
+    homepage: https://www.ncei.noaa.gov/data/global-summary-of-the-month/
+    license: US Government Work (public domain)
+    spatial_extent: { west: -180.0, south: -90.0, east: 180.0, north: 90.0 }
+    temporal_extent: { start: "1763-01-01T00:00:00Z" }
+    capabilities: { spatial_subset: false, temporal_subset: false, variable_subset: false }
+    summary: Whole monthly station records, one file per station
+    formats: [CSV]
+    selection: One whole file per named station, every month and element it holds
+    inputs: Station IDs; no dates, geographic filters, or variables
+    reader: pandas
+    guide: docs/providers/noaa-gsom-station-files.md
+    examples:
+      - examples/datasets/noaa-gsom-station-files/noaa-gsom-station-files.ipynb
+    resolution:
+      spatial: "Land surface stations, derived from GHCN-Daily"
+      temporal: "Monthly"
+    update_frequency: "Weekly"
+    citation: >-
+      Lawrimore, Jay H.; Ray, Ron; Applequist, Scott; Korzeniewski, Bryant; Menne, Matthew J.
+      (2016): Global Summary of the Month (GSOM), Version 1. NOAA National Centers for
+      Environmental Information. https://doi.org/10.7289/V5QV3JJ5
+    terms: https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00946/html
+    variables:
+      - { name: "PRCP", units: "mm", description: "Monthly precipitation total" }
+      - { name: "SNOW", units: "mm", description: "Monthly snowfall total" }
+      - { name: "SNOW_ATTRIBUTES", description: "Days missing, measurement, quality, and source flags for SNOW" }
+      - { name: "TAVG", units: "degrees Celsius", description: "Monthly mean temperature" }
+    adapter: usdata.providers.noaa.gsom_files:GsomStationFiles
+
   - id: noaa:gsoy
     provider: noaa
     status: available

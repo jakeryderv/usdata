@@ -52,3 +52,4 @@ is described in the guides and reference pages.
 - [0046: The messages a query's files hold are listed from their index sidecars](0046-listing-grib2-messages.md)
 - [0047: A partial fetch records a selector for every field it fetched](0047-a-selector-per-fetched-field.md)
 - [0048: ERSST is version 6, selected by whole calendar months](0048-ersst-v6-whole-months.md)
+- [0049: GSOM long records come from NCEI's static station files, as their own dataset](0049-gsom-whole-station-files.md)

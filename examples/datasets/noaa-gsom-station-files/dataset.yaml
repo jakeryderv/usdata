@@ -1,0 +1,4 @@
+name: two-snowbelt-records
+sources:
+  - dataset: noaa:gsom-station-files
+    params: {stations: [USW00094823, USW00014733]}
