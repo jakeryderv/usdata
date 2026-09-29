@@ -1,0 +1,17 @@
+name: april-2011-damage-surveys
+sources:
+  - name: tracks
+    dataset: noaa:nws-damage-surveys
+    # Tracks select on their start time in UTC; the outbreak's last tornadoes began
+    # after midnight UTC on 28 April.
+    start: 2011-04-27T00:00Z
+    end: 2011-04-28T12:00Z
+    # as_of reads the live-edited service as it stood then, so the pin cannot drift.
+    params: {layer: lines, as_of: "2026-09-29T00:00Z"}
+  - name: points
+    dataset: noaa:nws-damage-surveys
+    # Many 2011 points carry only their date, stamped 00:00 UTC, so the window
+    # starts there too.
+    start: 2011-04-27T00:00Z
+    end: 2011-04-28T12:00Z
+    params: {layer: points, as_of: "2026-09-29T00:00Z"}

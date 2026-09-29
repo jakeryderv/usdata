@@ -18,6 +18,8 @@ Each dataset has one page here: how to select it, what arrives, what the service
 | <span id="noaastorm-events"></span>[Storm Events details, fatalities, and locations](../../providers/noaa-storm-events.md) | Released | gzip CSV | Whole annual archives of one table; filter rows locally after downloading |
 | <span id="noaaspc-tornado-reports"></span>[SPC tornado, hail, and wind databases](../../providers/noaa-spc-tornado.md) | Released | CSV | Whole annual, half-decade, or decade files of one table; filter rows locally after downloading |
 | <span id="noaanws-vtec-events"></span>[NWS warnings and watches by county](../../providers/noaa-nws-vtec-events.md) | Released | CSV | Events issued for one county or UGC inside an inclusive UTC window; optionally one event type |
+| <span id="noaanws-damage-photos"></span>[Photos from NWS damage surveys, one file per damage point attachment](../../providers/noaa-nws-damage-photos.md) | Source only | JPEG, PNG | Each JPEG or PNG attached to a damage point with storm time in an inclusive UTC window of at most 7 days |
+| <span id="noaanws-damage-surveys"></span>[NWS damage survey points, tornado tracks, and damage areas](../../providers/noaa-nws-damage-surveys.md) | Source only | GeoJSON | One layer's features with storm time in an inclusive UTC window, optionally in a box; one page per object-id run |
 | <span id="noaanexrad-level2"></span>[NEXRAD radar scans](../../providers/noaa-nexrad.md) | Released | NEXRAD Level II | Whole radar scans by site and inclusive UTC scan-start time |
 | <span id="noaamrms"></span>[MRMS gridded radar products](../../providers/noaa-mrms.md) | Released | GRIB2 (gzipped) | Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day |
 | <span id="noaanexrad-level3"></span>[NEXRAD derived radar products](../../providers/noaa-nexrad-level3.md) | Released | NEXRAD Level III (no reader) | Whole product files by site, product code, and inclusive UTC scan time since 2020-03-30 |
@@ -46,7 +48,7 @@ Each dataset has one page here: how to select it, what arrives, what the service
 
 | Provider | Released | Source only | Planned |
 |---|---:|---:|---:|
-| [NOAA](noaa.md) | 26 | 0 | 13 |
+| [NOAA](noaa.md) | 26 | 2 | 13 |
 | [USGS](usgs.md) | 2 | 0 | 1 |
 | [Census Bureau](census.md) | 1 | 0 | 0 |
 | [EPA](epa.md) | 1 | 0 | 0 |

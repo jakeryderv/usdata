@@ -272,13 +272,14 @@ and optional-reader boundaries:
   [ADR 0030](adr/0030-content-addressed-mirror.md) answers none of those for
   it and does not preclude it.
 - NetCDF CDRs and static grids.
-- Geospatial severe-weather sources that share one blocker: NWS damage survey
-  points and polygons (an ArcGIS REST service), the NWS watch and warning
-  archive and SPC convective outlooks (shapefiles), and NLCD land cover and 3DEP
-  elevation (rasters). None can ship without a geospatial reader and, for the
-  damage surveys, an ArcGIS REST transport. Damage surveys plus the warning
-  archive would justify that decision: together they give true tornado path
-  geometry and warning verification for the labels the package already serves.
+- A geospatial reader. NWS damage surveys now ship as GeoJSON with no reader,
+  over the ArcGIS REST transport of
+  [ADR 0051](adr/0051-arcgis-feature-layers-and-damage-surveys.md). The NWS
+  watch and warning archive and SPC convective outlooks (shapefiles), and NLCD
+  land cover and 3DEP elevation (rasters), still wait on one. Damage surveys
+  plus the warning archive would justify that decision: together they give true
+  tornado path geometry and warning verification for the labels the package
+  already serves.
 - SPC mesoanalysis archives: images only, not machine-readable data.
 - Further agencies, live catalog discovery, and third-party registry extensions.
 - Format normalization and place-name lookup beyond states and counties.

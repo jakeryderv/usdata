@@ -31,6 +31,13 @@
 | <span id="noaalcd"></span>[Hourly airport observations](../../providers/noaa-lcd.md) | Released | CSV | Every report on whole calendar days per station; optional column filters |
 | <span id="noaaclimate-normals"></span>[30-year station climate normals](../../providers/noaa-normals.md) | Released | CSV | Hourly, daily, monthly, or annual/seasonal normals per station; optional month-day window except annual/seasonal; hourly returns whole days |
 
+### [NWS Damage Assessment Toolkit (DAT)](https://apps.dat.noaa.gov/StormDamage/DamageViewer/)
+
+| Dataset | Availability | Files | What gets selected |
+|---|---|---|---|
+| <span id="noaanws-damage-photos"></span>[Photos from NWS damage surveys, one file per damage point attachment](../../providers/noaa-nws-damage-photos.md) | Source only | JPEG, PNG | Each JPEG or PNG attached to a damage point with storm time in an inclusive UTC window of at most 7 days |
+| <span id="noaanws-damage-surveys"></span>[NWS damage survey points, tornado tracks, and damage areas](../../providers/noaa-nws-damage-surveys.md) | Source only | GeoJSON | One layer's features with storm time in an inclusive UTC window, optionally in a box; one page per object-id run |
+
 ### [Next Generation Weather Radar (NEXRAD)](https://www.ncei.noaa.gov/products/radar/next-generation-weather-radar)
 
 | Dataset | Availability | Files | What gets selected |

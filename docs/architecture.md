@@ -10,7 +10,7 @@ flowchart TD
     Dataset --> Core[Core fetch orchestration]
     Query --> Core
     Core --> Provider[Provider resolves assets and fetches bytes]
-    Provider --> Transport[HTTP, S3, or ERDDAP transport]
+    Provider --> Transport[HTTP, S3, ERDDAP, or ArcGIS transport]
     Transport --> Upstream[Upstream service]
     Core --> Cache[Verified local cache and provenance]
     Cache --> Reader[Optional format reader]
@@ -46,7 +46,9 @@ Provider-specific knowledge (endpoints, auth, quirks) lives in `docs/providers/<
 
 `protocols/` holds transport clients shared by adapters. `http` streams
 downloads; `s3` lists and reads public buckets over plain HTTPS with no AWS SDK.
-`erddap` reads grid metadata/axes and builds coordinate-based CSV subset URLs. `fetch` is the core loop that ties adapter,
+`erddap` reads grid metadata/axes and builds coordinate-based CSV subset URLs. `arcgis` builds
+ArcGIS feature-layer queries, lists object ids for pages cut by id range, and lists
+attachments. `fetch` is the core loop that ties adapter,
 cache, and provenance together; the CLI calls it rather than adapters directly.
 
 ## Boundaries

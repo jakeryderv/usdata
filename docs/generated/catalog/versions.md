@@ -24,6 +24,11 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`usda:cropland-data-layer`](usda.md#usdacropland-data-layer) Cropland Data Layer · Planned
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
 
+**Implemented, unreleased (planned 0.34)**
+
+- [`noaa:nws-damage-photos`](noaa.md#noaanws-damage-photos) NWS Damage Survey Photos · Source only
+- [`noaa:nws-damage-surveys`](noaa.md#noaanws-damage-surveys) NWS Damage Survey Points, Tornado Tracks, and Damage Areas · Source only
+
 **Included since 0.33**
 
 - [`noaa:enso-indices`](noaa.md#noaaenso-indices) CPC ENSO Indices (RONI and ONI) · Released
