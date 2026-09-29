@@ -131,9 +131,9 @@ sources:
 def test_goes16_multiband_scene_holds_every_band_of_the_single_channel_file(
     tmp_path: Path,
 ) -> None:
-    for dependency in ("xarray", "h5netcdf", "h5py", "numpy"):
+    for dependency in ("xarray", "h5netcdf", "h5py"):
         pytest.importorskip(dependency)
-    import numpy as np
+    np = pytest.importorskip("numpy")
 
     scene = restored_multiband_scene(tmp_path).open()
     for band in range(1, 17):
