@@ -283,7 +283,7 @@ the single-channel file of the same scan. The live tests fetch that MCMIP scene
 (4,505,610 bytes) and the same scan's ACTPM file (86,847 bytes), restore both
 into an empty cache, and compare channel 13 between the two imagery products.
 
-The [GOES-R product pages](https://www.goes-r.gov/products/overview.html)
+The GOES-R product pages (www.goes-r.gov/products/overview.html)
 state on 2026-09-29 that the site retires on 2026-09-30 and moves to
 nesdis.noaa.gov, so the dataset guide cites NCEI and the files instead.
 

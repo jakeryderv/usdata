@@ -194,9 +194,10 @@ rather than estimated.
   page](https://www.ncei.noaa.gov/products/goes-terrestrial-weather-abi-glm), whose
   channel table gives 0.5 km to 2 km nominal resolution by channel and an average
   five-minute scan frequency, and whose sector table gives full-disk files per day by
-  mode: 96 in Mode 3, 288 in Mode 4, 144 in Mode 6. The [ABI scan-mode
-  documentation](https://goes-r.noaa.gov/users/abiScanModeInfo.html) gives two
-  mesoscale sectors every 60 seconds or one every 30 seconds. MCMIP's 2 km grid and
+  mode: 96 in Mode 3, 288 in Mode 4, 144 in Mode 6, and 1,440 per day, one a minute,
+  for each of the two mesoscale sectors. NESDIS's [geostationary satellites
+  page](https://www.nesdis.noaa.gov/our-satellites/currently-flying/geostationary-satellites)
+  says the imager scans as frequently as every 30 seconds. MCMIP's 2 km grid and
   the cloud-top products' 2, 4, and 10 km come from the `spatial_resolution` attribute
   of the fetched files, probed in the service notes.
 - Products and sectors: the NCEI page's product type table, which lists ACHA, ACTP,
