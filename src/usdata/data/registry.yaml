@@ -55,7 +55,7 @@ systems:
   noaa:goes-r:
     name: "GOES-R Series"
     provider: noaa
-    homepage: https://www.goes-r.gov/
+    homepage: https://www.nesdis.noaa.gov/our-satellites/currently-flying/geostationary-satellites
   noaa:ncep-models:
     name: "NCEP model output"
     provider: noaa

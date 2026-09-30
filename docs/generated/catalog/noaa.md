@@ -46,7 +46,7 @@
 | <span id="noaanexrad-level2"></span>[NEXRAD radar scans](../../providers/noaa-nexrad.md) | Released | NEXRAD Level II | Whole radar scans by site and inclusive UTC scan-start time |
 | <span id="noaanexrad-level3"></span>[NEXRAD derived radar products](../../providers/noaa-nexrad-level3.md) | Released | NEXRAD Level III (no reader) | Whole product files by site, product code, and inclusive UTC scan time since 2020-03-30 |
 
-### [GOES-R Series](https://www.goes-r.gov/)
+### [GOES-R Series](https://www.nesdis.noaa.gov/our-satellites/currently-flying/geostationary-satellites)
 
 | Dataset | Availability | Files | What gets selected |
 |---|---|---|---|
