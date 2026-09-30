@@ -2,7 +2,7 @@
 
 ## Reference
 
-`noaa:emergency-response-imagery` · **Source only** · Install from [source](../install.md#source-installation) to use this dataset. NGS Emergency Response Imagery.
+`noaa:emergency-response-imagery` · **Released** · Included since usdata 0.34. NGS Emergency Response Imagery.
 
 ### At a glance
 
@@ -33,7 +33,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ### Catalog facts
 
-- Availability: Source only · intended for 0.34
+- Availability: since 0.34
 - Domain: Natural hazards
 - Spatial resolution: Approximate ground sample distance stated per event, such as 35 cm (1.14 feet) for Katrina and Joplin, ~15 cm for Nashville, and 15 - 30 cm for Helene
 - Temporal resolution: One or more flights per event, one folder per flight

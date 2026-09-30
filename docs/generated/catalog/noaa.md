@@ -4,7 +4,7 @@
 
 [Provider access notes](../../providers/noaa.md).
 
-**Released** is included in usdata 0.33.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
+**Released** is included in usdata 0.34.0. **Source only** is implemented in this checkout and requires a source installation. **Planned** cannot fetch data yet.
 
 ## Implemented datasets
 
@@ -20,7 +20,7 @@
 | <span id="noaaenso-indices"></span>[Seasonal El Niño indices, the official RONI and the traditional ONI](../../providers/noaa-enso-indices.md) | Released | whitespace-delimited text (no reader) | One whole index table, every season from DJF 1950; select seasons locally |
 | <span id="noaaersst"></span>[Monthly global 2 degree sea surface temperature since 1850](../../providers/noaa-ersst.md) | Released | NetCDF4 | Whole global monthly files, one for every month the window touches |
 | <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](../../providers/noaa-coastwatch.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
-| <span id="noaaemergency-response-imagery"></span>[Post-event aerial imagery tiles](../../providers/noaa-emergency-response-imagery.md) | Source only | GeoTIFF | Whole GeoTIFFs of one event folder, optionally by subfolder and by the footprint that tile names give |
+| <span id="noaaemergency-response-imagery"></span>[Post-event aerial imagery tiles](../../providers/noaa-emergency-response-imagery.md) | Released | GeoTIFF | Whole GeoTIFFs of one event folder, optionally by subfolder and by the footprint that tile names give |
 
 ### [NCEI Access Data Service](https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation)
 
@@ -36,8 +36,8 @@
 
 | Dataset | Availability | Files | What gets selected |
 |---|---|---|---|
-| <span id="noaanws-damage-photos"></span>[Photos from NWS damage surveys, one file per damage point attachment](../../providers/noaa-nws-damage-photos.md) | Source only | JPEG, PNG | Each JPEG or PNG attached to a damage point with storm time in an inclusive UTC window of at most 7 days |
-| <span id="noaanws-damage-surveys"></span>[NWS damage survey points, tornado tracks, and damage areas](../../providers/noaa-nws-damage-surveys.md) | Source only | GeoJSON | One layer's features with storm time in an inclusive UTC window, optionally in a box; one page per object-id run |
+| <span id="noaanws-damage-photos"></span>[Photos from NWS damage surveys, one file per damage point attachment](../../providers/noaa-nws-damage-photos.md) | Released | JPEG, PNG | Each JPEG or PNG attached to a damage point with storm time in an inclusive UTC window of at most 7 days |
+| <span id="noaanws-damage-surveys"></span>[NWS damage survey points, tornado tracks, and damage areas](../../providers/noaa-nws-damage-surveys.md) | Released | GeoJSON | One layer's features with storm time in an inclusive UTC window, optionally in a box; one page per object-id run |
 
 ### [Next Generation Weather Radar (NEXRAD)](https://www.ncei.noaa.gov/products/radar/next-generation-weather-radar)
 

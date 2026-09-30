@@ -12,6 +12,20 @@ The documentation site assembles their preview automatically.
 
 <!-- towncrier release notes start -->
 
+## [0.34.0](https://github.com/jakeryderv/usdata/releases/tag/v0.34.0) - 2026-09-30
+
+
+### Added
+
+- `noaa:emergency-response-imagery`: the National Geodetic Survey's post-event aerial imagery from the public `noaa-eri-pds` bucket, whole GeoTIFFs of one event (52 from Hurricane Katrina in 2005 onward, three of them tornadoes) with `-p event=2020_Nashville_Tornado`, optionally narrowed to flights with `-p collection=` and to the tiles a bbox meets, placed by the corner their names state. A selection larger than 25 GB is refused with where its bytes are, unless `-p max_gb=` allows it.
+- `noaa:goes-abi` now serves full-disk single-channel imagery (`ABI-L2-CMIPF`), 16-band Cloud and Moisture Imagery in one file per scene (`ABI-L2-MCMIPC`, `MCMIPF`, `MCMIPM`), and cloud-top height, temperature, pressure, and phase (`ACHA`, `ACHT`, `CTP`, `ACTP`) for each sector NOAA produces them in. `channel` is now required only for the single-channel `ABI-L2-CMIP` products and refused for the others; existing queries keep their meaning.
+- `noaa:nws-damage-surveys` and `noaa:nws-damage-photos`: NWS post-event damage surveys from the Damage Assessment Toolkit. The first serves rated damage points, tornado tracks, or damage areas as GeoJSON pages by storm time, box, office, and EF rating; the second serves each photo attached to a damage point as one file, with its size known before download. `-p as_of=` reads the live-edited service as it stood at an instant, so a pinned page cannot drift.
+- `usdata.protocols.arcgis` joins the adapter contract's transport helpers: ArcGIS REST feature-layer query URLs, layer metadata, object ids for pages cut by id range, feature and attachment listings, and a check that a downloaded GeoJSON page is whole.
+
+### Fixed
+
+- The GOES-R series now links to its NESDIS page, since goes-r.gov retires on 2026-09-30.
+
 ## [0.33.0](https://github.com/jakeryderv/usdata/releases/tag/v0.33.0) - 2026-09-29
 
 

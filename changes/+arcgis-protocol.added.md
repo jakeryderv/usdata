@@ -1,1 +1,0 @@
-`usdata.protocols.arcgis` joins the adapter contract's transport helpers: ArcGIS REST feature-layer query URLs, layer metadata, object ids for pages cut by id range, feature and attachment listings, and a check that a downloaded GeoJSON page is whole.
