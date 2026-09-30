@@ -128,7 +128,7 @@ regular grid from 55°N 230°E to 20°N 300°E; ecCodes reports its parameter as
 unknown (discipline 209). The live test downloads that file, checks the gzip
 and `GRIB` signatures, and restores it through a lockfile without relisting.
 
-## GOES ABI CONUS imagery
+## GOES ABI imagery and cloud-top products
 
 Bounded probes on 2026-09-08 listed 192 CMIPC files in one hour for each of
 GOES-16/18 (2024 day 127), GOES-17 (2022 day 127), and GOES-19 (2025 day 127).
@@ -169,6 +169,88 @@ seconds. Coordinates, projection, and metadata extent agree across these scans;
 this is measured coverage for this window, not a permanent location for M1.
 The live mesoscale test fetches the first scene and restores it into an empty
 cache, comparing exact bytes.
+
+Product probes on 2026-09-29 listed the top level of each bucket with a
+delimiter:
+
+```sh
+curl --get 'https://noaa-goes16.s3.amazonaws.com/' \
+  --data-urlencode 'list-type=2' \
+  --data-urlencode 'delimiter=/'
+```
+
+All four buckets hold the same ABI directories for these products:
+`CMIPC/F/M`, `MCMIPC/F/M`, `ACHAC/F/M`, `ACHTF/M` (no CONUS), `CTPC/F` (no
+mesoscale), and `ACTPC/F/M`, matching the sector column of NCEI's product type
+table. `ACHA2KMC/F/M` exists in `noaa-goes16`, `18`, and `19` but not in
+`noaa-goes17`. Listing `PRODUCT/2024/127/22/` in `noaa-goes16` for each product
+found one filename shape throughout, with the sector code after the product and
+a channel only in CMIP names:
+
+```text
+OR_ABI-L2-CMIPF-M6C01_G16_s20241272200205_e20241272209513_c20241272209574.nc
+OR_ABI-L2-MCMIPC-M6_G16_s20241272201173_e20241272203551_c20241272204067.nc
+OR_ABI-L2-MCMIPM1-M6_G16_s20241272200280_e20241272200350_c20241272200421.nc
+OR_ABI-L2-ACHAM1-M6_G16_s20241272200280_e20241272200338_c20241272201218.nc
+OR_ABI-L2-ACHTF-M6_G16_s20241272200205_e20241272209513_c20241272213066.nc
+OR_ABI-L2-CTPC-M6_G16_s20241272201173_e20241272203546_c20241272206329.nc
+OR_ABI-L2-ACTPM1-M6_G16_s20241272200280_e20241272200338_c20241272201009.nc
+```
+
+That hour held 12 files per CONUS selection, 6 per full-disk selection, and
+60 per mesoscale sector, each directory in one listing page except CMIPM
+(1,920 files). Each mesoscale directory split evenly between M1 and M2. Sizes
+per file: CMIPC 2.2–63 MB, CMIPF 9.0–301 MB, CMIPM 0.20–5.0 MB, MCMIPC 55–58 MB,
+MCMIPF 297–312 MB, MCMIPM 4.3–4.5 MB, ACHAC 0.29 MB, ACHAF 1.5 MB, ACHAM
+0.14 MB, ACHTF 28 MB, ACHTM 0.30–0.33 MB, CTPC 0.29 MB, CTPF 1.6 MB, ACTPC
+0.54–0.59 MB, ACTPF 3.0–3.1 MB, ACTPM 0.09–0.10 MB. Night MCMIPM scenes were
+smaller, 3.0–3.8 MB in the 06:00 and 10:00 UTC hours. A reproducible probe is:
+
+```sh
+curl --get 'https://noaa-goes16.s3.amazonaws.com/' \
+  --data-urlencode 'list-type=2' \
+  --data-urlencode 'prefix=ABI-L2-MCMIPM/2024/127/22/' \
+  --data-urlencode 'max-keys=1000'
+```
+
+The earliest scene per product and bucket came from listing `PRODUCT/` with a
+delimiter for years, then the first non-2000 year for days, the first day for
+hours, and the first hour with `max-keys=1`. GOES-16 holds each product's
+earliest scene:
+
+| Directories | GOES-16 | GOES-17 | GOES-18 | GOES-19 |
+|---|---|---|---|---|
+| CMIP, MCMIP | 2017 day 059 (Feb 28) | 2018 day 240 | 2022 day 131 | 2024 days 284–292 |
+| ACHAC/F/M, ACTPM | 2019 day 336 (Dec 2) | 2019 day 336 | 2022 day 131 | 2024 day 289 |
+| ACHTF/M, CTPC/F | 2019 day 339 (Dec 5) | 2019 day 339 | 2022 day 131 | 2024 day 289 |
+| ACTPC/F | 2017 day 136 (May 16) | 2018 day 239 | 2022 day 131 | 2024 day 289 |
+| ACHA2KMC/F/M | 2023 day 082 | none | 2023 day 086 | 2024 day 289 |
+
+The first ACTPC scene, `OR_ABI-L2-ACTPC-M4_G16_s20171360000221_e20171360000221_c20171360006337.nc`,
+is Mode 4 with equal start and end stamps. Only `noaa-goes16` has a `2000/`
+year of placeholder scenes, under the six CMIP and MCMIP directories and ACTPC
+and ACTPF; ACTPM and the height, temperature, and pressure directories have
+none. GOES-16's CMIPC and ACHAC listings end at 2025 day 097. Year folders per product in `noaa-goes16`: ACTPC has
+212 days in 2017 and every day of 2018 and 2019; ACHAC has 30 days in 2019;
+MCMIPC has 293 days in 2017.
+
+Opening one file of each product with the `netcdf` extra gave these main
+variables and `spatial_resolution` attributes: MCMIP `CMI_C01`–`CMI_C16` and
+`DQF_C01`–`DQF_C16` on a 2 km grid (500 × 500 mesoscale, 1500 × 2500 CONUS),
+units `1` for channels 1–6 and `K` for 7–16; ACHA `HT` (m) at 10 km CONUS and
+full disk, 4 km mesoscale (250 × 250); ACHT `TEMP` (K) at 2 km; CTP `PRES`
+(hPa) at 10 km; ACTP `Phase` at 2 km with `flag_values` 0–5 for
+`clear_sky liquid_water super_cooled_liquid_water mixed_phase ice unknown`. Every
+cloud-top file also has `DQF`. The M1 MCMIP scene above has `CMI_C13` and
+`DQF_C13` identical to `CMI` and `DQF` in
+`OR_ABI-L2-CMIPM1-M6C13_G16_s20241272200280_e20241272200349_c20241272200404.nc`,
+the single-channel file of the same scan. The live tests fetch that MCMIP scene
+(4,505,610 bytes) and the same scan's ACTPM file (86,847 bytes), restore both
+into an empty cache, and compare channel 13 between the two imagery products.
+
+The [GOES-R product pages](https://www.goes-r.gov/products/overview.html)
+state on 2026-09-29 that the site retires on 2026-09-30 and moves to
+nesdis.noaa.gov, so the dataset guide cites NCEI and the files instead.
 
 ## GOES GLM lightning detections
 

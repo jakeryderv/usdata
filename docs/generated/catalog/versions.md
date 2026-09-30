@@ -89,7 +89,7 @@ Move a dataset between phases by editing its `target` in the registry.
 
 **Included since 0.8**
 
-- [`noaa:goes-abi`](noaa.md#noaagoes-abi) GOES-R ABI Cloud and Moisture Imagery · Released
+- [`noaa:goes-abi`](noaa.md#noaagoes-abi) GOES-R ABI Imagery and Cloud-Top Products · Released
 - [`noaa:storm-events`](noaa.md#noaastorm-events) Storm Events Database · Released
 
 **Included since 0.7**

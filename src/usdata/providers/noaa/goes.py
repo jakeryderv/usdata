@@ -1,13 +1,15 @@
-"""GOES ABI Cloud and Moisture Imagery from anonymous NOAA S3 buckets.
+"""GOES ABI Level 2 imagery and cloud-top products from anonymous NOAA S3 buckets.
 
-Require ``satellite`` (16, 17, 18, or 19), ``channel`` (1--16 or C01--C16), and
-both timestamps at most seven days apart. ``product`` defaults to CONUS
-``ABI-L2-CMIPC``; ``ABI-L2-CMIPM`` requires ``sector=M1`` or ``M2``.
-Select whole single-channel NetCDF files by inclusive
-scan-start time, never by scan overlap.
-Geographic and variable subsetting are not available for these archived files.
-``list_scans`` is shared with the GLM adapter, which selects files under the
-same bucket layout by the same inclusive start-time rule.
+Require ``satellite`` (16, 17, 18, or 19) and both timestamps at most seven days
+apart. ``product`` names one bucket directory exactly and defaults to CONUS
+``ABI-L2-CMIPC``. The single-channel ``ABI-L2-CMIP*`` products require
+``channel`` (1--16 or C01--C16); every other product holds no channel choice and
+refuses one. Products ending in ``M`` are mesoscale and require ``sector=M1`` or
+``M2``; the rest refuse a sector. Select whole NetCDF files by inclusive
+scan-start time, never by scan overlap, from the first archived day of the
+product onward. Geographic and variable subsetting are not available for these
+archived files. ``list_scans`` is shared with the GLM adapter, which selects files
+under the same bucket layout by the same inclusive start-time rule.
 """
 
 from __future__ import annotations
@@ -28,11 +30,36 @@ from usdata.providers.http import HttpProvider
 from usdata.providers.params import choice, int_range
 
 PRODUCT = "ABI-L2-CMIPC"
-MESOSCALE_PRODUCT = "ABI-L2-CMIPM"
 PUBLIC_START = datetime(2017, 2, 28, tzinfo=UTC)
+HEIGHT_START = datetime(2019, 12, 2, tzinfo=UTC)
+TEMPERATURE_PRESSURE_START = datetime(2019, 12, 5, tzinfo=UTC)
+PHASE_START = datetime(2017, 5, 16, tzinfo=UTC)
+# The first UTC day each product directory holds a scene in any of the four buckets, found
+# by listing every bucket on 2026-09-29 (docs/providers/noaa-services.md). GOES-16 holds
+# each earliest scene; the year-2000 placeholder scenes sit before every one of these days.
+PRODUCT_START: dict[str, datetime] = {
+    "ABI-L2-CMIPC": PUBLIC_START,
+    "ABI-L2-CMIPF": PUBLIC_START,
+    "ABI-L2-CMIPM": PUBLIC_START,
+    "ABI-L2-MCMIPC": PUBLIC_START,
+    "ABI-L2-MCMIPF": PUBLIC_START,
+    "ABI-L2-MCMIPM": PUBLIC_START,
+    "ABI-L2-ACHAC": HEIGHT_START,
+    "ABI-L2-ACHAF": HEIGHT_START,
+    "ABI-L2-ACHAM": HEIGHT_START,
+    "ABI-L2-ACHTF": TEMPERATURE_PRESSURE_START,
+    "ABI-L2-ACHTM": TEMPERATURE_PRESSURE_START,
+    "ABI-L2-CTPC": TEMPERATURE_PRESSURE_START,
+    "ABI-L2-CTPF": TEMPERATURE_PRESSURE_START,
+    "ABI-L2-ACTPC": PHASE_START,
+    "ABI-L2-ACTPF": PHASE_START,
+    "ABI-L2-ACTPM": HEIGHT_START,  # Mesoscale phase began with cloud-top height.
+}
+CHANNEL_PRODUCTS = frozenset({"ABI-L2-CMIPC", "ABI-L2-CMIPF", "ABI-L2-CMIPM"})
 MAX_WINDOW = timedelta(days=7)
 KEY_RE = re.compile(
-    r"OR_ABI-L2-CMIP(?P<sector>C|M[12])-M[346]C(?P<channel>0[1-9]|1[0-6])"
+    r"OR_(?P<family>ABI-L2-(?:M?CMIP|ACHA|ACHT|CTP|ACTP))(?P<sector>[CF]|M[12])-M[346]"
+    r"(?:C(?P<channel>0[1-9]|1[0-6]))?"
     r"_G(?P<satellite>1[6-9])"
     r"_s(?P<start>\d{14})_e(?P<end>\d{14})_c\d{14}\.nc"
 )
@@ -47,23 +74,29 @@ def _timestamp(raw: str) -> datetime:
 
 
 class GoesAbiParams(BaseModel):
-    """Which satellite, which ABI channel, and which product one GOES query selects."""
+    """Which satellite, product, and channel or mesoscale sector one GOES query selects."""
 
     model_config = ConfigDict(extra="forbid")
 
     satellite: Annotated[int, int_range(16, 19)] = Field(
         description="Required GOES satellite number: 16, 17, 18, or 19."
     )
-    channel: Annotated[int, int_range(1, 16)] = Field(
-        description="Required ABI channel, 1 to 16 or C01 to C16."
-    )
-    product: Annotated[str, choice(PRODUCT, MESOSCALE_PRODUCT)] = Field(
+    product: Annotated[str, choice(*PRODUCT_START)] = Field(
         default=PRODUCT,
-        description="ABI-L2-CMIPC (CONUS, default) or ABI-L2-CMIPM (mesoscale).",
+        description=(
+            "ABI product directory, such as ABI-L2-MCMIPC: CMIP (one channel) or MCMIP "
+            "(16 channels) imagery, or cloud-top ACHA height, ACHT temperature (F and M only), "
+            "CTP pressure (C and F only), or ACTP phase, ending in C (CONUS), F (full disk), "
+            "or M (mesoscale). Default ABI-L2-CMIPC."
+        ),
+    )
+    channel: Annotated[int, int_range(1, 16)] | None = Field(
+        default=None,
+        description="ABI channel, 1 to 16 or C01 to C16. Required for ABI-L2-CMIP products only.",
     )
     sector: Annotated[str, choice("M1", "M2")] | None = Field(
         default=None,
-        description="Required for ABI-L2-CMIPM: M1 or M2. Omit for CONUS.",
+        description="Mesoscale sector M1 or M2. Required for products ending in M only.",
     )
 
     @field_validator("channel", mode="before")
@@ -74,12 +107,28 @@ class GoesAbiParams(BaseModel):
         return text[1:] if isinstance(text, str) and text.startswith("C") else text
 
     @model_validator(mode="after")
-    def _sector_matches_product(self) -> Self:
-        if self.product == MESOSCALE_PRODUCT and self.sector is None:
-            raise ValueError("sector=M1 or M2 is required for product=ABI-L2-CMIPM")
-        if self.product == PRODUCT and self.sector is not None:
-            raise ValueError("sector is only supported with product=ABI-L2-CMIPM")
+    def _selectors_match_product(self) -> Self:
+        product = self.product
+        problems: list[str] = []
+        if product in CHANNEL_PRODUCTS and self.channel is None:
+            problems.append(f"channel (1 to 16 or C01 to C16) is required for product={product}")
+        if product not in CHANNEL_PRODUCTS and self.channel is not None:
+            hint = " (its file holds all 16 bands)" if "MCMIP" in product else ""
+            problems.append(
+                f"channel is only supported with ABI-L2-CMIPC, CMIPF, or CMIPM, not {product}{hint}"
+            )
+        if product.endswith("M") and self.sector is None:
+            problems.append(f"sector=M1 or M2 is required for mesoscale product={product}")
+        if not product.endswith("M") and self.sector is not None:
+            problems.append(f"sector is only supported with mesoscale products, not {product}")
+        if problems:
+            raise ValueError("; ".join(problems))
         return self
+
+    @property
+    def scene(self) -> str:
+        """The filename's sector code: C, F, M1, or M2."""
+        return self.sector or self.product[-1]
 
 
 def list_scans(
@@ -130,7 +179,7 @@ def list_scans(
 
 
 class GoesAbi(HttpProvider):
-    """Single-channel CONUS or mesoscale ABI imagery with explicit sector selection."""
+    """Whole ABI product files with an explicit product and, where it has one, channel or sector."""
 
     params_model = GoesAbiParams
 
@@ -142,26 +191,28 @@ class GoesAbi(HttpProvider):
             "bbox",
             "text",
             "variables",
-            hint="archived GOES scenes are whole files; select satellite and channel",
+            hint="archived GOES scenes are whole files; select satellite, product, and channel",
         )
         start, end = self.utc_window(query)
         if end - start > MAX_WINDOW:
             raise QueryError("GOES requests must span at most 7 days; split longer intervals")
-        satellite, channel = params.satellite, params.channel
-        if end < PUBLIC_START:
-            raise QueryError("GOES ABI public observations begin on 2017-02-28")
-        start = max(start, PUBLIC_START)
+        product, satellite, channel = params.product, params.satellite, params.channel
+        first = PRODUCT_START[product]
+        if end < first:
+            raise QueryError(f"{product} files begin on {first:%Y-%m-%d}")
+        family, scene = product[:-1], params.scene
         return list_scans(
             self._http(),
             f"noaa-goes{satellite}",
-            params.product,
-            start,
+            product,
+            max(start, first),
             end,
             KEY_RE,
             lambda m: (
-                int(m["satellite"]) == satellite
-                and int(m["channel"]) == channel
-                and m["sector"] == (params.sector or "C")
+                m["family"] == family
+                and m["sector"] == scene
+                and int(m["satellite"]) == satellite
+                and (int(m["channel"]) if m["channel"] else None) == channel
             ),
             self.dataset.id,
         )

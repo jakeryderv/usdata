@@ -212,22 +212,25 @@ datasets:
     system: noaa:goes-r
     domain: weather-satellites
     since: "0.8"
-    title: GOES-R ABI Cloud and Moisture Imagery
+    title: GOES-R ABI Imagery and Cloud-Top Products
     description: >-
-      Single-channel CONUS (ABI-L2-CMIPC) and mesoscale (ABI-L2-CMIPM) imagery from
-      GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets. Select an explicit
-      satellite, channel, scan-start interval, and M1 or M2 for mesoscale; each asset is a complete
-      NetCDF scene with no geographic or variable subsetting.
-    keywords: [satellite, imagery, goes, abi, clouds, infrared, reflectance, netcdf, conus, mesoscale]
+      ABI Level 2 products from GOES-16, 17, 18, and 19 in anonymous NOAA S3 buckets:
+      single-channel (ABI-L2-CMIP) and 16-band (ABI-L2-MCMIP) Cloud and Moisture Imagery,
+      and cloud-top height (ACHA), temperature (ACHT), pressure (CTP), and phase (ACTP),
+      each in the CONUS, full-disk, and M1/M2 mesoscale sectors NOAA produces it for. Select
+      an explicit satellite, one product directory, a scan-start interval, a channel for
+      single-channel imagery, and M1 or M2 for mesoscale; each asset is a complete NetCDF
+      scene with no geographic or variable subsetting.
+    keywords: [satellite, imagery, goes, abi, clouds, cloud, infrared, reflectance, netcdf, conus, mesoscale, disk, multiband, height, pressure, phase]
     protocol: s3
     homepage: https://registry.opendata.aws/noaa-goes/
     license: US Government Work (public domain)
     temporal_extent: { start: "2017-02-28T00:00:00Z" }
     capabilities: { spatial_subset: false, temporal_subset: true, variable_subset: false }
-    summary: GOES CONUS and mesoscale imagery
+    summary: GOES ABI imagery, multiband scenes, and cloud-top products
     formats: [NetCDF4]
-    selection: Whole single-channel scenes by inclusive UTC scan-start time and explicit mesoscale sector
-    inputs: Satellite, channel, both timestamps; product and sector for mesoscale
+    selection: Whole scenes of one ABI product by inclusive UTC scan-start time, with one channel or mesoscale sector where the product has them
+    inputs: Satellite and both timestamps; product (default ABI-L2-CMIPC); channel for CMIP products; sector for mesoscale products
     reader: netcdf
     guide: docs/providers/noaa-goes.md
     examples:
@@ -235,16 +238,52 @@ datasets:
       - examples/studies/goes-mesoscale/goes-mesoscale.ipynb
       - examples/studies/event-context/event-context.ipynb
     resolution:
-      spatial: "0.5 km to 2 km at nadir, by ABI band"
-      temporal: "CONUS every 5 minutes; two mesoscale sectors every 60 seconds or one every 30 seconds"
+      spatial: "Imagery 0.5 km to 2 km at nadir by band, MCMIP bands on the 2 km grid; cloud-top products 2 km to 10 km at nadir"
+      temporal: "CONUS every 5 minutes; full disk every 10 minutes in Mode 6 (15 in Mode 3, 5 in Mode 4); two mesoscale sectors every 60 seconds or one every 30 seconds"
     update_frequency: "New data is added as soon as it's available"
     citation: >-
       NOAA Geostationary Operational Environmental Satellites (GOES) 16, 17, 18 & 19 was
       accessed on [date] from https://registry.opendata.aws/noaa-goes
     terms: https://www.noaa.gov/information-technology/open-data-dissemination
     variables:
-      - { name: "CMI", description: "Cloud and moisture imagery; reflectance factor or brightness temperature by band" }
-      - { name: "DQF", description: "Per-pixel data quality flags for CMI" }
+      - { name: "CMI", description: "CMIP cloud and moisture imagery; reflectance factor or brightness temperature by band" }
+      - { name: "DQF", units: "1", description: "Per-pixel data quality flags in CMIP and every cloud-top product" }
+      - { name: "CMI_C01", units: "1", description: "MCMIP band 1 (0.47 µm, blue visible) reflectance factor on the 2 km grid" }
+      - { name: "CMI_C02", units: "1", description: "MCMIP band 2 (0.64 µm, red visible) reflectance factor on the 2 km grid" }
+      - { name: "CMI_C03", units: "1", description: "MCMIP band 3 (0.86 µm, veggie near-infrared) reflectance factor on the 2 km grid" }
+      - { name: "CMI_C04", units: "1", description: "MCMIP band 4 (1.37 µm, cirrus near-infrared) reflectance factor on the 2 km grid" }
+      - { name: "CMI_C05", units: "1", description: "MCMIP band 5 (1.6 µm, snow/ice near-infrared) reflectance factor on the 2 km grid" }
+      - { name: "CMI_C06", units: "1", description: "MCMIP band 6 (2.2 µm, cloud particle size near-infrared) reflectance factor on the 2 km grid" }
+      - { name: "CMI_C07", units: "K", description: "MCMIP band 7 (3.9 µm, shortwave window infrared) brightness temperature on the 2 km grid" }
+      - { name: "CMI_C08", units: "K", description: "MCMIP band 8 (6.2 µm, upper-level water vapor) brightness temperature on the 2 km grid" }
+      - { name: "CMI_C09", units: "K", description: "MCMIP band 9 (6.9 µm, mid-level water vapor) brightness temperature on the 2 km grid" }
+      - { name: "CMI_C10", units: "K", description: "MCMIP band 10 (7.3 µm, lower-level water vapor) brightness temperature on the 2 km grid" }
+      - { name: "CMI_C11", units: "K", description: "MCMIP band 11 (8.4 µm, cloud-top phase infrared) brightness temperature on the 2 km grid" }
+      - { name: "CMI_C12", units: "K", description: "MCMIP band 12 (9.6 µm, ozone infrared) brightness temperature on the 2 km grid" }
+      - { name: "CMI_C13", units: "K", description: "MCMIP band 13 (10.3 µm, clean longwave window) brightness temperature on the 2 km grid" }
+      - { name: "CMI_C14", units: "K", description: "MCMIP band 14 (11.2 µm, longwave window) brightness temperature on the 2 km grid" }
+      - { name: "CMI_C15", units: "K", description: "MCMIP band 15 (12.3 µm, dirty longwave window) brightness temperature on the 2 km grid" }
+      - { name: "CMI_C16", units: "K", description: "MCMIP band 16 (13.3 µm, CO2 longwave infrared) brightness temperature on the 2 km grid" }
+      - { name: "DQF_C01", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C01" }
+      - { name: "DQF_C02", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C02" }
+      - { name: "DQF_C03", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C03" }
+      - { name: "DQF_C04", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C04" }
+      - { name: "DQF_C05", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C05" }
+      - { name: "DQF_C06", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C06" }
+      - { name: "DQF_C07", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C07" }
+      - { name: "DQF_C08", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C08" }
+      - { name: "DQF_C09", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C09" }
+      - { name: "DQF_C10", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C10" }
+      - { name: "DQF_C11", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C11" }
+      - { name: "DQF_C12", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C12" }
+      - { name: "DQF_C13", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C13" }
+      - { name: "DQF_C14", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C14" }
+      - { name: "DQF_C15", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C15" }
+      - { name: "DQF_C16", units: "1", description: "MCMIP per-pixel data quality flags for CMI_C16" }
+      - { name: "HT", units: "m", description: "ACHA cloud-top height" }
+      - { name: "TEMP", units: "K", description: "ACHT cloud-top temperature" }
+      - { name: "PRES", units: "hPa", description: "CTP cloud-top pressure" }
+      - { name: "Phase", units: "1", description: "ACTP cloud-top phase: clear sky, liquid water, supercooled liquid water, mixed phase, ice, or unknown" }
     limits: { max_window: P7D }
     adapter: usdata.providers.noaa.goes:GoesAbi
 

@@ -260,7 +260,7 @@ and optional-reader boundaries:
 - Further USGS water data, such as instantaneous values and groundwater
   levels, which reuse the daily-values access pattern.
 - Further NCEI Access Data Service datasets, when a concrete comparison needs them.
-- Additional GOES ABI products and sectors.
+- GOES ABI Level 1b radiances and the 2 km cloud-top variants, if a use case needs them.
 - Geospatial readers when a supported dataset and representative fixtures justify them.
 - A NEXRAD Level III reader, once the bytes-only adapter has a concrete decoding use case.
 

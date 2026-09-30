@@ -42,7 +42,7 @@
 
 | Dataset | Availability | Files | What gets selected |
 |---|---|---|---|
-| <span id="noaagoes-abi"></span>[GOES CONUS and mesoscale imagery](../../providers/noaa-goes.md) | Released | NetCDF4 | Whole single-channel scenes by inclusive UTC scan-start time and explicit mesoscale sector |
+| <span id="noaagoes-abi"></span>[GOES ABI imagery, multiband scenes, and cloud-top products](../../providers/noaa-goes.md) | Released | NetCDF4 | Whole scenes of one ABI product by inclusive UTC scan-start time, with one channel or mesoscale sector where the product has them |
 | <span id="noaagoes-glm"></span>[GOES lightning detections](../../providers/noaa-glm.md) | Released | NetCDF4 | Whole 20-second detection files by inclusive UTC file-start time, at most one day |
 
 ### [NCEP model output](https://www.nco.ncep.noaa.gov/pmb/products/)

@@ -1,4 +1,4 @@
-"""One small GOES-18 ABI CONUS NetCDF scene, with checksum-locked restoration."""
+"""Small real GOES ABI scenes (CONUS, mesoscale, multiband, cloud phase), restored by checksum."""
 
 from pathlib import Path
 
@@ -72,3 +72,80 @@ def test_goes18_scene_decodes_with_netcdf_reader(tmp_path: Path) -> None:
     assert scene.CMI.dims == ("y", "x")
     assert scene.attrs["usdata"]["provenance"]["checksum"] == item.provenance.checksum
     assert verify(tmp_path / "dataset.yaml", root=tmp_path / "cache") == []
+
+
+MULTIBAND = """name: goes-mesoscale-multiband-scene
+sources:
+  - dataset: noaa:goes-abi
+    start: 2024-05-06T22:00:28Z
+    end: 2024-05-06T22:00:28Z
+    params: {satellite: 16, product: ABI-L2-MCMIPM, sector: M1}
+"""
+
+
+def restored_multiband_scene(tmp_path: Path):
+    """The 4.5 MB 16-band M1 scene of the same scan as the mesoscale channel-13 test."""
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text(MULTIBAND)
+    result = pull(manifest, root=tmp_path / "first")
+    (item,) = result.fetched
+    assert item.asset.id == (
+        "OR_ABI-L2-MCMIPM1-M6_G16_s20241272200280_e20241272200350_c20241272200421.nc"
+    )
+    assert item.asset.size == 4505610 and item.path.stat().st_size == item.asset.size
+    assert item.path.read_bytes().startswith(b"\x89HDF\r\n\x1a\n")
+    restored = pull(manifest, root=tmp_path / "empty")
+    assert restored.from_lockfile and not restored.fetched[0].from_cache
+    assert restored.lockfile == result.lockfile
+    assert restored.fetched[0].path.read_bytes() == item.path.read_bytes()
+    assert verify(manifest, root=tmp_path / "empty") == []
+    return restored.fetched[0]
+
+
+def test_goes16_mesoscale_multiband_scene_restore(tmp_path: Path) -> None:
+    restored_multiband_scene(tmp_path)
+
+
+def test_goes16_mesoscale_cloud_top_phase_restore(tmp_path: Path) -> None:
+    manifest = tmp_path / "dataset.yaml"
+    manifest.write_text("""name: goes-mesoscale-cloud-phase
+sources:
+  - dataset: noaa:goes-abi
+    start: 2024-05-06T22:00:28Z
+    end: 2024-05-06T22:00:28Z
+    params: {satellite: 16, product: ABI-L2-ACTPM, sector: M1}
+""")
+    result = pull(manifest, root=tmp_path / "first")
+    (item,) = result.fetched
+    assert item.asset.id == (
+        "OR_ABI-L2-ACTPM1-M6_G16_s20241272200280_e20241272200338_c20241272201009.nc"
+    )
+    assert item.path.stat().st_size == item.asset.size
+    assert item.path.read_bytes().startswith(b"\x89HDF\r\n\x1a\n")
+    restored = pull(manifest, root=tmp_path / "empty")
+    assert restored.from_lockfile and restored.lockfile == result.lockfile
+    assert verify(manifest, root=tmp_path / "empty") == []
+
+
+@pytest.mark.netcdf
+def test_goes16_multiband_scene_holds_every_band_of_the_single_channel_file(
+    tmp_path: Path,
+) -> None:
+    for dependency in ("xarray", "h5netcdf", "h5py"):
+        pytest.importorskip(dependency)
+    np = pytest.importorskip("numpy")
+
+    scene = restored_multiband_scene(tmp_path).open()
+    for band in range(1, 17):
+        cmi = scene[f"CMI_C{band:02d}"]
+        assert cmi.dims == ("y", "x") and cmi.shape == (500, 500)
+        assert cmi.attrs["units"] == ("1" if band <= 6 else "K")
+    single_manifest = tmp_path / "single" / "dataset.yaml"
+    single_manifest.parent.mkdir()
+    single_manifest.write_text(
+        MULTIBAND.replace("product: ABI-L2-MCMIPM", "channel: 13, product: ABI-L2-CMIPM")
+    )
+    (single,) = pull(single_manifest, root=tmp_path / "single" / "cache").fetched
+    channel13 = single.open()
+    assert np.array_equal(scene["CMI_C13"].values, channel13["CMI"].values, equal_nan=True)
+    assert np.array_equal(scene["DQF_C13"].values, channel13["DQF"].values, equal_nan=True)
