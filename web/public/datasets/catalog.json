@@ -1,5 +1,5 @@
 {
-  "version": "0.33.0",
+  "version": "0.34.0",
   "datasets": [
     {
       "id": "noaa:ghcn-daily",
@@ -738,7 +738,7 @@
       "provider_id": "noaa",
       "domain": "Severe weather",
       "system": "NWS Damage Assessment Toolkit (DAT)",
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.34",
       "keywords": [
         "tornado",
@@ -796,7 +796,7 @@
       "provider_id": "noaa",
       "domain": "Severe weather",
       "system": "NWS Damage Assessment Toolkit (DAT)",
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.34",
       "keywords": [
         "tornado",
@@ -2940,7 +2940,7 @@
       "provider_id": "noaa",
       "domain": "Natural hazards",
       "system": null,
-      "availability": "Source only",
+      "availability": "Released",
       "since": "0.34",
       "keywords": [
         "aerial imagery",

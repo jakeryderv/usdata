@@ -2,7 +2,7 @@
 
 ## Reference
 
-`noaa:nws-damage-photos` · **Source only** · Install from [source](../install.md#source-installation) to use this dataset. NWS Damage Survey Photos.
+`noaa:nws-damage-photos` · **Released** · Included since usdata 0.34. NWS Damage Survey Photos.
 
 ### At a glance
 
@@ -31,7 +31,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ### Catalog facts
 
-- Availability: Source only · intended for 0.34
+- Availability: since 0.34
 - Domain: Severe weather
 - Spatial resolution: One photo or more per surveyed damage point
 - Temporal resolution: The storm time of the point the photo is attached to, in UTC

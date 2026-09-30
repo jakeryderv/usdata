@@ -2,7 +2,7 @@
 
 ## Reference
 
-`noaa:nws-damage-surveys` · **Source only** · Install from [source](../install.md#source-installation) to use this dataset. NWS Damage Survey Points, Tornado Tracks, and Damage Areas.
+`noaa:nws-damage-surveys` · **Released** · Included since usdata 0.34. NWS Damage Survey Points, Tornado Tracks, and Damage Areas.
 
 ### At a glance
 
@@ -50,7 +50,7 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 
 ### Catalog facts
 
-- Availability: Source only · intended for 0.34
+- Availability: since 0.34
 - Domain: Severe weather
 - Spatial resolution: One feature per surveyed damage point, tornado track, or damage area
 - Temporal resolution: Storm time to the minute, in UTC
