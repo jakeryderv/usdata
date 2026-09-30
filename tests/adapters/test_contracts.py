@@ -26,6 +26,7 @@ from usdata.providers.noaa.coastwatch import BASE, DATASET
 from usdata.providers.noaa.ersst import DIRECTORY_URL as ERSST_URL
 from usdata.providers.noaa.hurdat2 import DIRECTORY_URL as HURDAT_URL
 from usdata.providers.noaa.ibtracs import DIRECTORY_URL as IBTRACS_URL
+from usdata.providers.noaa.nws_damage import SERVICE_URL as DAT_URL
 from usdata.providers.noaa.spc import PAGE_URL as SPC_PAGE
 from usdata.providers.noaa.storm_events import DIRECTORY_URL
 from usdata.providers.usgs.daily import ITEMS_URL
@@ -65,6 +66,8 @@ CASES = {
     "noaa:nbm": {"cycle": 12, "forecast_hour": 1},
     "fema:disaster-declarations": {"state": "OK"},
     "noaa:nws-vtec-events": {"ugc": "OKC113"},
+    "noaa:nws-damage-surveys": {"layer": "lines"},
+    "noaa:nws-damage-photos": {},
     "epa:aqs-daily": {"parameters": "88101", "sites": "36-081-0124"},
     "census:acs-5year": {
         "location": "Oklahoma",
@@ -116,6 +119,7 @@ WINDOW_CONSTANTS = {
     "noaa:coops-water-levels": ("usdata.providers.noaa.coops", "MAX_INTERVAL"),
     "noaa:coops-tide-predictions": ("usdata.providers.noaa.coops", "MAX_PREDICTION_INTERVAL"),
     "noaa:coops-currents": ("usdata.providers.noaa.coops", "MAX_INTERVAL"),
+    "noaa:nws-damage-photos": ("usdata.providers.noaa.nws_damage", "MAX_WINDOW"),
 }
 
 
@@ -150,6 +154,34 @@ def adapter_factory(dataset_id: str) -> testing.AdapterFactory:
     return build
 
 
+GEOJSON = b'{"type":"FeatureCollection","features":[]}\n'
+DAT_LAYER = {
+    "maxRecordCount": 2000,
+    "objectIdField": "objectid",
+    "fields": [{"name": "objectid"}],
+    "supportedQueryFormats": "JSON, geoJSON",
+    "hasAttachments": True,
+    "advancedQueryCapabilities": {"supportsQueryAttachments": True},
+}
+
+
+def dat_answer(request: httpx.Request, data: bytes) -> httpx.Response | None:
+    """What the damage toolkit's layers answer: metadata, one id, its point, and its photo."""
+    if not str(request.url).startswith(DAT_URL) or request.url.params.get("f") != "json":
+        return None
+    if request.url.path.endswith("/queryAttachments"):
+        info = {"id": 11, "name": "photo.jpg", "contentType": "image/jpeg", "size": len(data)}
+        group = {"parentObjectId": 7, "parentGlobalId": "{P}", "attachmentInfos": [info]}
+        return httpx.Response(200, json={"attachmentGroups": [group]})
+    if request.url.params.get("returnIdsOnly") == "true":
+        return httpx.Response(200, json={"objectIdFieldName": "objectid", "objectIds": [7]})
+    if request.url.path.endswith("/query"):
+        attributes = {"objectid": 7, "globalid": "{P}", "stormdate": 1714996920000}
+        point = {"attributes": attributes, "geometry": {"x": -97.5, "y": 35.5}}
+        return httpx.Response(200, json={"features": [point]})
+    return httpx.Response(200, json=DAT_LAYER)
+
+
 AQS_ROW = {"state_code": "36", "county_code": "081", "site_number": "0124", "poc": 1}
 
 
@@ -173,6 +205,8 @@ def contract_data(dataset_id: str) -> bytes:
         return canonical(aqs_body("https://aqs.epa.gov/data/api/dailyData/bySite"))
     if dataset_id == "census:acs-5year":
         return b'[["NAME","B01003_001E","state"],\n["Oklahoma","4019271","40"]]'
+    if dataset_id == "noaa:nws-damage-surveys":
+        return GEOJSON
     if dataset_id == "noaa:coops-currents":
         return b"Date Time, Speed, Direction, Bin \n2024-05-06 12:02,17.3,285,4\n"
     if dataset_id == "noaa:coops-tide-predictions":
@@ -246,6 +280,8 @@ def contract_transport(
                 text=f'<table><tr><td><a href="{STORM_NAME}">{STORM_NAME}</a></td>'
                 f'<td>2026-03-23</td><td align="right">{len(data)}</td></tr></table>',
             )
+        if (answer := dat_answer(request, data)) is not None:
+            return answer
         if str(request.url).startswith(COUNT_URL):
             return httpx.Response(200, text="1")
         if str(request.url).startswith(FEMA_URL) and "$inlinecount" in request.url.params:

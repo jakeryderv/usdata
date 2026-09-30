@@ -34,6 +34,13 @@ NOAA publishes through several unrelated systems. The ones usdata touches:
   uses griddap CSV for `noaacwBLENDEDsstDNDaily`; see the details below.
   Use the shared HTTP client: live probes found that the service can reject
   the default httpx User-Agent with HTTP 403.
+- **ArcGIS REST feature services**: the NWS Damage Assessment Toolkit serves
+  damage points, tracks, and areas from
+  `services.dat.noaa.gov/arcgis/rest/services/nws_damageassessmenttoolkit/DamageViewer/FeatureServer`.
+  Anonymous. Reached via `usdata.protocols.arcgis`: SQL `where` clauses,
+  envelopes, GeoJSON output, pages cut by object-id range, `historicMoment`
+  reads of the archive, and `queryAttachments` (ADR 0051). Failures come back
+  as HTTP 200 with an `error` body; see the dated probes below.
 - **Other NCEI Access Data Service datasets** (GSOM, GSOY, LCD, normals)
   share the GHCN-Daily client. All require `startDate` and `endDate`; the
   daily normals dataset expects them inside a placeholder year such as 2010.
@@ -81,7 +88,7 @@ added once a concrete, anonymously accessible dataset has been verified.
 | Domain | What NOAA provides | Example products | Registry entries |
 |---|---|---|---|
 | Surface weather | Temperature, precipitation, wind, humidity, pressure, snowfall, station observations | GHCN-Daily, GHCN-Hourly, Local Climatological Data, GSOM/GSOY | `ghcn-daily`, `gsom`, `gsoy`, `lcd`, `ghcn-hourly` |
-| Severe weather | Tornadoes, hail, damaging wind, storm events, damage reports | Storm Events Database, Storm Data | `storm-events` |
+| Severe weather | Tornadoes, hail, damaging wind, storm events, damage reports | Storm Events Database, Storm Data, Damage Assessment Toolkit | `storm-events`, `spc-tornado-reports`, `nws-vtec-events`, `nws-damage-surveys`, `nws-damage-photos` |
 | Weather radar | Reflectivity, radial velocity, dual-pol variables, derived products | NEXRAD Level II, NEXRAD Level III, MRMS | `nexrad-level2`, `nexrad-level3`, `mrms` |
 | Weather satellites | Visible/IR imagery, clouds, lightning, fire, volcanic ash | GOES-R ABI, GOES GLM, POES, JPSS | `goes-abi`, `goes-glm` |
 | Tropical cyclones | Best tracks, intensity, pressure, wind radii | HURDAT2, IBTrACS, HURSAT | `hurdat2`, `ibtracs` |
@@ -100,6 +107,34 @@ added once a concrete, anonymously accessible dataset has been verified.
 | Paleoclimate | Tree rings, ice cores, sediments, corals | World Data Service for Paleoclimatology | `paleo-search` |
 | Space weather | Solar activity, solar wind, geomagnetic indices | SWPC real-time products, DSCOVR, GOES SUVI | `swpc-realtime` |
 | Land and environment | Vegetation, surface temperature, fire | Terrestrial Climate Data Records (NDVI, LAI) | `cdr-ndvi` |
+
+## NWS Damage Assessment Toolkit
+
+Probes on 2026-09-29 against the DamageViewer FeatureServer, recorded in full
+in the [surveys](noaa-nws-damage-surveys.md#probes) and
+[photos](noaa-nws-damage-photos.md#probes) guides. The findings that shaped
+[ADR 0051](../adr/0051-arcgis-feature-layers-and-damage-surveys.md):
+
+- Three layers, 240,169 points, 12,965 lines, 11,152 polygons; each serves at
+  most 2000 features per request (`maxRecordCount`), flags a capped page with
+  `exceededTransferLimit` in Esri JSON and GeoJSON, and lists every matching
+  object id in one answer (1.8 MB for all points).
+- Capabilities `Query,ChangeTracking`, and an archive from 25 November 2020:
+  `historicMoment` before it answers a count of 0, after it the layer as it
+  stood. Repeated GeoJSON requests returned identical bytes, with an `ETag`
+  equal to the body's SHA-256.
+- `queryAttachments` stops at 2000 attachments and does not flag it.
+- `TIMESTAMP 'YYYY-MM-DD HH:MM:SS.fff'` literals compare to the millisecond,
+  in UTC. The layers' advertised `timeExtent` (second century to 2029) is
+  stale; statistics give 1855-05-22 to the present.
+- The Experience Builder viewer at `apps.dat.noaa.gov/StormDamage/DamageViewer/`
+  states no terms; the NWS disclaimer applies.
+
+```sh
+B='https://services.dat.noaa.gov/arcgis/rest/services/nws_damageassessmenttoolkit/DamageViewer/FeatureServer'
+curl "$B?f=json"                                                   # 3 layers, capabilities Query,ChangeTracking
+curl -G "$B/0/query" --data-urlencode 'where=1=1' -d returnIdsOnly=true -d f=json | wc -c   # 1873070
+```
 
 ## MRMS gridded radar products
 

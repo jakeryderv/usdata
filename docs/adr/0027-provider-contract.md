@@ -1,7 +1,7 @@
 # 0027: The provider contract
 
 Status: accepted. Date: 2026-09-15. Extends [ADR 0001](0001-curated-registry-over-federated-search.md)
-and [ADR 0026](0026-one-registry-schema.md). Updated by [ADR 0043](0043-asset-properties.md).
+and [ADR 0026](0026-one-registry-schema.md). Updated by [ADR 0043](0043-asset-properties.md) and [ADR 0051](0051-arcgis-feature-layers-and-damage-surveys.md).
 
 ## Context
 
@@ -74,7 +74,9 @@ The adapter contract is a named, published surface. It is:
   `s3.parse_s3_url`, `s3.https_url`, and `S3Object`; `erddap.info`,
   `erddap.axis`, `erddap.griddap_url`, `GridInfo`, and `GridSlice`; and
   `listing.directory_entries`. They carry no dataset knowledge and an adapter
-  composes them.
+  composes them. Added since: the ArcGIS REST helpers in `arcgis`, `LayerInfo`,
+  `Attachment`, and `ServiceError`
+  ([ADR 0051](0051-arcgis-feature-layers-and-damage-surveys.md)).
 - **The registry entry fields an adapter needs**, on the `Dataset` model an
   adapter is constructed with: `id`, `provider`, `protocol`, `domain`, `status`,
   `adapter`, `capabilities`, `limits.max_window`, and `variables`. An adapter

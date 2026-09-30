@@ -54,3 +54,4 @@ is described in the guides and reference pages.
 - [0048: ERSST is version 6, selected by whole calendar months](0048-ersst-v6-whole-months.md)
 - [0049: GSOM long records come from NCEI's static station files, as their own dataset](0049-gsom-whole-station-files.md)
 - [0050: GOES ABI products are named by directory, and a channel or sector only where the product has one](0050-goes-abi-product-selection.md)
+- [0051: ArcGIS feature layers are paged by object-id range, delivered as GeoJSON, and pinned through the service's archive](0051-arcgis-feature-layers-and-damage-surveys.md)

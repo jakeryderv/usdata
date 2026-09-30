@@ -64,6 +64,10 @@ systems:
     name: "CO-OPS Data API"
     provider: noaa
     homepage: https://tidesandcurrents.noaa.gov/
+  noaa:dat:
+    name: "NWS Damage Assessment Toolkit (DAT)"
+    provider: noaa
+    homepage: https://apps.dat.noaa.gov/StormDamage/DamageViewer/
 
 datasets:
   # ---------------------------------------------------------------- NOAA
@@ -456,6 +460,118 @@ datasets:
       - { name: "sg", description: "Segment code: 1 a whole track, 2 a state segment, -9 extra county codes" }
       - { name: "mt", description: "Wind only, from 2006: EG estimated gust, MG measured gust, MS measured sustained, ES estimated sustained" }
     adapter: usdata.providers.noaa.spc:SpcTornadoReports
+
+  - id: noaa:nws-damage-surveys
+    provider: noaa
+    status: available
+    system: noaa:dat
+    domain: severe-weather
+    since: "0.34"
+    title: NWS Damage Survey Points, Tornado Tracks, and Damage Areas
+    description: >-
+      Post-event damage surveys by National Weather Service offices, from the Damage
+      Assessment Toolkit's public ArcGIS feature service: rated damage points (layer 0),
+      tornado tracks as lines (layer 1), and damage areas as polygons (layer 2). One layer
+      per query, selected by storm time in UTC, with server-side envelope, office, and EF
+      rating filters, delivered as GeoJSON pages of at most the layer's record limit, cut
+      by object-id range. The service is edited live and calls its data preliminary; an
+      as_of instant reads its archive, kept since November 2020, so a page cannot drift.
+      Most surveys date from 2010 on; offices have also entered historical reconstructions
+      back to 1855. Attributes differ by layer; the catalog lists the common ones.
+    keywords: [tornado, damage survey, damage assessment toolkit, dat, ef scale, tracks, paths, nws, geojson, arcgis]
+    protocol: http
+    homepage: https://apps.dat.noaa.gov/StormDamage/DamageViewer/
+    license: US Government Work (public domain)
+    temporal_extent: { start: "1855-05-22T00:00:00Z" }
+    capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: false }
+    summary: NWS damage survey points, tornado tracks, and damage areas
+    formats: [GeoJSON]
+    selection: One layer's features with storm time in an inclusive UTC window, optionally in a box; one page per object-id run
+    inputs: Both timestamps and a layer; optionally a bbox, offices, EF ratings, undated features, or as_of
+    reader: null
+    guide: docs/providers/noaa-nws-damage-surveys.md
+    examples:
+      - examples/datasets/noaa-nws-damage-surveys/noaa-nws-damage-surveys.ipynb
+    resolution:
+      spatial: "One feature per surveyed damage point, tornado track, or damage area"
+      temporal: "Storm time to the minute, in UTC"
+    update_frequency: >-
+      As offices finish surveys, with no schedule: "Once quality-controlled, the data
+      becomes available externally via a
+      public web portal, as well as public Geographic Information System (GIS) services"
+    citation: >-
+      NOAA National Weather Service, Damage Assessment Toolkit (DamageViewer feature
+      service), accessed via usdata
+    terms: https://www.weather.gov/disclaimer
+    variables:
+      - { name: objectid, description: "Feature id, unique within its layer; pages are cut by it" }
+      - { name: globalid, description: "Feature GUID, unique across the service" }
+      - { name: stormdate, units: "milliseconds since 1970-01-01 UTC", description: "Storm time; null on a few features, and the 1970-01-01T00:00Z placeholder on eleven points" }
+      - { name: starttime, units: "milliseconds since 1970-01-01 UTC", description: "Lines: when the tornado began; the window's field on lines" }
+      - { name: endtime, units: "milliseconds since 1970-01-01 UTC", description: "Lines: when the tornado ended" }
+      - { name: efscale, description: "Rating as text: EF0 to EF5, EF3+, EFU, UNKNOWN, N/A, TSTM/Wind, or Tropical" }
+      - { name: efnum, description: "Lines: EF number, -99 when unknown" }
+      - { name: office, description: "Points: surveying NWS office code" }
+      - { name: wfo, description: "Lines: surveying NWS office code, or several joined by commas" }
+      - { name: event_id, description: "An office's label for the event; often empty" }
+      - { name: damage_txt, description: "Points: EF-scale damage indicator, such as One- or Two-Family Residences (FR12)" }
+      - { name: dod_txt, description: "Points: degree of damage to that indicator, in words" }
+      - { name: windspeed, description: "Points: estimated wind speed as text; the service states no unit" }
+      - { name: length, description: "Lines and polygons: path length; the service states no unit" }
+      - { name: width, description: "Lines and polygons: path width; the service states no unit" }
+      - { name: injuries, units: "count", description: "Injuries" }
+      - { name: fatalities, units: "count", description: "Lines and polygons: fatalities; points call it deaths" }
+      - { name: image, description: "Points: file name of a photo taken there, often empty; the photos are noaa:nws-damage-photos" }
+      - { name: comments, description: "Surveyor's notes" }
+    adapter: usdata.providers.noaa.nws_damage:NwsDamageSurveys
+
+  - id: noaa:nws-damage-photos
+    provider: noaa
+    status: available
+    system: noaa:dat
+    domain: severe-weather
+    since: "0.34"
+    title: NWS Damage Survey Photos
+    description: >-
+      Photographs attached to the damage points of National Weather Service damage
+      surveys, from the Damage Assessment Toolkit's public ArcGIS feature service. Listing
+      finds the points whose storm time falls in a UTC window of at most seven days,
+      optionally in a box or by office and EF rating, then lists their attachments; each
+      JPEG or PNG is one asset with its listed size, its point's location and storm time,
+      and the point's id for joining to noaa:nws-damage-surveys. Older points often carry a
+      small thumbnail beside each photo, listed as served. The few files attached to
+      tracks and areas, mostly PDFs and other images, are not served.
+    keywords: [tornado, damage survey, photos, images, damage assessment toolkit, dat, ef scale, nws, arcgis]
+    protocol: http
+    homepage: https://apps.dat.noaa.gov/StormDamage/DamageViewer/
+    license: >-
+      Public domain as NWS information; third-party images are used under their providers'
+      licenses
+    temporal_extent: { start: "1974-04-03T00:00:00Z" }
+    capabilities: { spatial_subset: true, temporal_subset: true, variable_subset: false }
+    summary: Photos from NWS damage surveys, one file per damage point attachment
+    formats: [JPEG, PNG]
+    selection: Each JPEG or PNG attached to a damage point with storm time in an inclusive UTC window of at most 7 days
+    inputs: Both timestamps; optionally a bbox, offices, EF ratings, undated points, or as_of
+    reader: null
+    guide: docs/providers/noaa-nws-damage-photos.md
+    examples:
+      - examples/datasets/noaa-nws-damage-photos/noaa-nws-damage-photos.ipynb
+    resolution:
+      spatial: "One photo or more per surveyed damage point"
+      temporal: "The storm time of the point the photo is attached to, in UTC"
+    update_frequency: >-
+      As offices finish surveys, with no schedule: "Once quality-controlled, the data
+      becomes available externally via a
+      public web portal, as well as public Geographic Information System (GIS) services"
+    citation: >-
+      NOAA National Weather Service, Damage Assessment Toolkit (DamageViewer feature
+      service) damage point photographs, accessed via usdata
+    terms: https://www.weather.gov/disclaimer
+    variables:
+      - { name: image, description: "The attached photograph, JPEG or PNG, as served" }
+    limits: { max_window: P7D }
+    adapter: usdata.providers.noaa.nws_damage:NwsDamagePhotos
 
   - id: noaa:hurdat2
     provider: noaa

@@ -1,0 +1,10 @@
+name: phil-campbell-ef5-photos
+sources:
+  - name: photos
+    dataset: noaa:nws-damage-photos
+    # EF5 damage points in a few blocks of Phil Campbell, Alabama, on 27 April 2011.
+    # Points of that year often carry only their date, stamped 00:00 UTC.
+    start: 2011-04-27
+    end: 2011-04-28
+    bbox: {west: -87.740, south: 34.326, east: -87.734, north: 34.330}
+    params: {efscale: EF5, as_of: "2026-09-29T00:00Z"}
