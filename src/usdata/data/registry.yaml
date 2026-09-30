@@ -2094,6 +2094,67 @@ datasets:
       temporal_subset: false
       variable_subset: true
 
+  - id: noaa:emergency-response-imagery
+    provider: noaa
+    status: available
+    domain: natural-hazards
+    since: "0.34"
+    title: NGS Emergency Response Imagery
+    description: >-
+      Aerial imagery the National Geodetic Survey flew after hurricanes, floods, fires, and
+      tornadoes, and in yearly pre-event coastal surveys, in the public noaa-eri-pds S3 bucket
+      (NOAA Open Data Dissemination). The bucket holds 52 event folders from Hurricane Katrina
+      (2005) onward; only three are tornadoes (Joplin 2011, Illinois 2015, Nashville 2020). Each
+      event holds folders of GeoTIFFs, usually one per flight: mosaic tiles named by their
+      north-west corner, 90 or 45 arc-seconds on a side (2.5 km UTM tiles in 2009 and 2011),
+      from 0.15 MB to 1.7 GB each, plus individually georeferenced frames in several events
+      and one flight mosaic per folder in some recent ones. Select an event and optionally its
+      folders; a bbox keeps files by the footprint their names give, and folders whose file names
+      give none refuse it. Files are fetched whole and no reader is bundled.
+    keywords:
+      - aerial imagery
+      - disaster response
+      - damage assessment
+      - hurricanes
+      - tornado
+      - floods
+      - orthomosaic
+      - geotiff
+      - ngs
+      - pre-event
+    protocol: s3
+    homepage: https://storms.ngs.noaa.gov/
+    license: US Government Work (public domain)
+    spatial_extent: { west: -124.8, south: 17.6, east: -64.5, north: 48.5 }
+    temporal_extent: { start: "2005-08-30T00:00:00Z" }
+    capabilities: { spatial_subset: true, temporal_subset: false, variable_subset: false }
+    summary: Post-event aerial imagery tiles
+    formats: [GeoTIFF]
+    selection: >-
+      Whole GeoTIFFs of one event folder, optionally by subfolder and by the footprint that tile
+      names give
+    inputs: An event folder; optionally collection folders and a bbox
+    reader: null
+    guide: docs/providers/noaa-emergency-response-imagery.md
+    examples:
+      - examples/datasets/noaa-emergency-response-imagery/noaa-emergency-response-imagery.ipynb
+    resolution:
+      spatial: >-
+        Approximate ground sample distance stated per event, such as 35 cm (1.14 feet) for
+        Katrina and Joplin, ~15 cm for Nashville, and 15 - 30 cm for Helene
+      temporal: One or more flights per event, one folder per flight
+    update_frequency: Manually when needed
+    citation: >-
+      National Geodetic Survey, NOAA Emergency Response Imagery, accessed via usdata from
+      https://registry.opendata.aws/noaa-eri
+    terms: https://www.noaa.gov/information-technology/open-data-dissemination
+    variables:
+      - { name: Red, description: "Red band, 8-bit" }
+      - { name: Green, description: "Green band, 8-bit" }
+      - { name: Blue, description: "Blue band, 8-bit" }
+      - { name: Alpha, description: "Transparency band marking imaged pixels, in the collections that carry one" }
+    adapter: usdata.providers.noaa.eri:EmergencyResponseImagery
+
   - id: fema:disaster-declarations
     provider: fema
     status: available

@@ -188,6 +188,7 @@ def test_list_filters_by_reader_extra_or_bytes_only(registry: Registry) -> None:
         "noaa:nws-damage-photos",
         "noaa:nexrad-level3",
         "noaa:enso-indices",
+        "noaa:emergency-response-imagery",
     ]
     assert all(ds.reader is None for ds in bytes_only)
 

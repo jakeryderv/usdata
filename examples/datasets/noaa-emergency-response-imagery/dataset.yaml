@@ -1,0 +1,7 @@
+name: nashville-tornado-germantown
+sources:
+  - dataset: noaa:emergency-response-imagery
+    bbox: {west: -86.795, south: 36.177, east: -86.785, north: 36.185}
+    params:
+      event: 2020_Nashville_Tornado
+      collection: 20200307a_RGB

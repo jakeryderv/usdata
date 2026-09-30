@@ -58,6 +58,7 @@ CASES = {
     "noaa:ersst": {},
     "noaa:enso-indices": {"index": "roni"},
     "noaa:spc-tornado-reports": {},
+    "noaa:emergency-response-imagery": {"event": "2020_Nashville_Tornado"},
     "noaa:hurdat2": {"basin": "pacific"},
     "noaa:ibtracs": {"subset": "sa"},
     "usgs:water-daily": {"sites": "07164500"},
@@ -88,14 +89,18 @@ S3_KEYS = {
     "noaa:gfs": "gfs.20240506/12/atmos/gfs.t12z.pgrb2.1p00.f000",
     "noaa:rap": "rap.20240506/rap.t12z.awp130pgrbf00.grib2",
     "noaa:nbm": "blend.20240506/12/core/blend.t12z.core.f001.co.grib2",
+    "noaa:emergency-response-imagery": "2020_Nashville_Tornado/20200307a_RGB/"
+    "20200307aC0852700w360900n.tif",
 }
 STORM_NAME = "StormEvents_details-ftp_v1.0_d2024_c20260323.csv.gz"
 ERSST_NAME = "ersst.v6.202405.nc"
 HURDAT_NAME = "hurdat2-nepac-1949-2025-02272026.txt"
 IBTRACS_NAME = "ibtracs.SA.list.v04r01.csv"
 # HURDAT2, IBTrACS, the CPC ENSO tables, and the GSOM station files publish the complete
-# record per file, and ACS estimates are named by vintage, so they reject a time filter.
+# record per file, ACS estimates are named by vintage, and emergency response imagery
+# folders carry local flight dates, so they reject a time filter.
 UNTIMED = {
+    "noaa:emergency-response-imagery",
     "noaa:hurdat2",
     "noaa:ibtracs",
     "census:acs-5year",

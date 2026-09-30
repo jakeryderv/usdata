@@ -55,6 +55,8 @@
 /generated/catalog/noaa/coops-tide-predictions /providers/noaa-coops-predictions/ 301
 /generated/catalog/noaa/coastwatch-sst/ /providers/noaa-coastwatch/ 301
 /generated/catalog/noaa/coastwatch-sst /providers/noaa-coastwatch/ 301
+/generated/catalog/noaa/emergency-response-imagery/ /providers/noaa-emergency-response-imagery/ 301
+/generated/catalog/noaa/emergency-response-imagery /providers/noaa-emergency-response-imagery/ 301
 /generated/catalog/usgs/earthquakes/ /providers/usgs-earthquakes/ 301
 /generated/catalog/usgs/earthquakes /providers/usgs-earthquakes/ 301
 /generated/catalog/usgs/water-daily/ /providers/usgs-water-daily/ 301

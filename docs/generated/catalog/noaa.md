@@ -20,6 +20,7 @@
 | <span id="noaaenso-indices"></span>[Seasonal El Niño indices, the official RONI and the traditional ONI](../../providers/noaa-enso-indices.md) | Released | whitespace-delimited text (no reader) | One whole index table, every season from DJF 1950; select seasons locally |
 | <span id="noaaersst"></span>[Monthly global 2 degree sea surface temperature since 1850](../../providers/noaa-ersst.md) | Released | NetCDF4 | Whole global monthly files, one for every month the window touches |
 | <span id="noaacoastwatch-sst"></span>[Sea-surface temperature](../../providers/noaa-coastwatch.md) | Released | CSV with units row | Grid centers and timestamps inside the requested bounds; optional stride |
+| <span id="noaaemergency-response-imagery"></span>[Post-event aerial imagery tiles](../../providers/noaa-emergency-response-imagery.md) | Source only | GeoTIFF | Whole GeoTIFFs of one event folder, optionally by subfolder and by the footprint that tile names give |
 
 ### [NCEI Access Data Service](https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation)
 
