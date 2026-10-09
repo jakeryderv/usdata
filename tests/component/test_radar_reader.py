@@ -249,6 +249,7 @@ def test_incomplete_sweep_with_trailing_non_radial_record(tmp_path):
     "filename", ["example_nexrad_archive_msg1.bz2", "example_nexrad_archive_msg31_compressed.ar2v"]
 )
 def test_the_sweep_listing_agrees_with_what_the_decoder_returns(filename: str) -> None:
+    pytest.importorskip("xradar")
     item = radar_asset(FIXTURES / filename)
     sweeps = nexrad_sweeps(item.path)
     radar = item.open_nexrad()
@@ -264,6 +265,7 @@ def test_the_sweep_listing_agrees_with_what_the_decoder_returns(filename: str) -
 
 
 def test_a_legacy_volume_lists_split_cuts_and_states_no_vcp() -> None:
+    pytest.importorskip("xradar")
     summary = _radar.summary(FIXTURES / "example_nexrad_archive_msg1.bz2")
     assert summary.vcp is None
     assert [
@@ -280,6 +282,7 @@ def test_a_legacy_volume_lists_split_cuts_and_states_no_vcp() -> None:
 
 
 def test_a_modern_volume_carries_its_vcp_and_marks_an_incomplete_sweep() -> None:
+    pytest.importorskip("xradar")
     summary = _radar.summary(FIXTURES / "example_nexrad_archive_msg31_compressed.ar2v")
     assert summary.vcp == 11
     (sweep,) = summary.sweeps
@@ -288,6 +291,7 @@ def test_a_modern_volume_carries_its_vcp_and_marks_an_incomplete_sweep() -> None
 
 
 def test_listing_bytes_that_are_not_a_volume_is_a_value_error(tmp_path: Path) -> None:
+    pytest.importorskip("xradar")
     path = tmp_path / "KTLX20240507_021123_V06"
     path.write_bytes(b"AR2V0006." + bytes(40))
     with pytest.raises(ValueError, match="not a readable NEXRAD Level II volume"):
@@ -311,6 +315,7 @@ def sidecar_copy(tmp_path: Path, filename: str, dataset: str = "noaa:nexrad-leve
 
 
 def test_inspect_lists_a_level2_volume_and_leaves_level3_as_bytes(tmp_path: Path) -> None:
+    pytest.importorskip("xradar")
     summary = inspect_path(sidecar_copy(tmp_path, "example_nexrad_archive_msg1.bz2"))
     assert summary.format is AssetFormat.NEXRAD and summary.note is None
     assert summary.nexrad is not None and len(summary.nexrad.sweeps) == 7
@@ -320,6 +325,7 @@ def test_inspect_lists_a_level2_volume_and_leaves_level3_as_bytes(tmp_path: Path
 
 
 def test_inspect_notes_a_volume_that_does_not_decode(tmp_path: Path) -> None:
+    pytest.importorskip("xradar")
     path = tmp_path / "KTLX20240507_021123_V06"
     path.write_bytes(b"AR2V0006." + bytes(40))
     write(radar_asset(path).provenance, path)
@@ -329,6 +335,7 @@ def test_inspect_notes_a_volume_that_does_not_decode(tmp_path: Path) -> None:
 
 
 def test_the_cli_prints_the_vcp_and_the_sweep_table(tmp_path: Path) -> None:
+    pytest.importorskip("xradar")
     path = sidecar_copy(tmp_path, "example_nexrad_archive_msg31_compressed.ar2v")
     result = CliRunner().invoke(app, ["inspect", str(path)])
     assert result.exit_code == 0, result.output
@@ -337,3 +344,11 @@ def test_the_cli_prints_the_vcp_and_the_sweep_table(tmp_path: Path) -> None:
     assert (
         "0  1    0.48   DBZH ZDR PHIDP RHOHV  19:50:21  19:50:24  120   incomplete" in result.output
     )
+
+
+def test_inspect_without_the_extra_names_it_in_a_note(tmp_path: Path) -> None:
+    path = sidecar_copy(tmp_path, "example_nexrad_archive_msg1.bz2")
+    with patch("usdata._radar.import_module", side_effect=ModuleNotFoundError(name="xradar")):
+        summary = inspect_path(path)
+    assert summary.format is AssetFormat.NEXRAD and summary.nexrad is None
+    assert summary.note is not None and "usdata[radar]" in summary.note
