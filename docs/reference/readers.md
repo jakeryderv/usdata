@@ -44,6 +44,38 @@ The return types are declared for type checkers, so an editor knows what each
 method returns once the extra that provides the type is installed; `open()`
 returns `Any` because its result depends on the file.
 
+## NEXRAD sweeps
+
+`open_nexrad(sweep=...)` takes positions in the volume, not elevations. A
+split cut scans one angle twice, once for reflectivity and the dual-polarization
+moments and once for velocity and spectrum width, and SAILS or MRLE rescan the
+lowest angles inside a volume, so in a VCP 212 volume with three SAILS cuts the
+0.5° angle is sweeps 0, 1, 4, 5, 9, 10, 16, and 17. Which index holds which
+angle changes with the volume coverage pattern.
+
+`readers.nexrad_sweeps(path)` lists every sweep from the volume's metadata
+without decoding a moment, in under half the time decoding one sweep takes:
+its `index`, VCP cut (`elevation_number`), `fixed_angle`, the `moments`
+`open_nexrad` returns for it, `start` and `end` times, ray count, whether it is
+`complete`, and whether it is a `sails` or `mrle` rescan. `FetchedAsset.inspect()`
+returns the same list with the VCP number as `nexrad`, and `usdata inspect`
+prints it as a table. Choose sweeps there, then open them by index:
+
+```python
+from usdata.readers import nexrad_sweeps
+
+sweeps = nexrad_sweeps(item.path)
+lowest = min(sweep.fixed_angle for sweep in sweeps)
+velocity = [s.index for s in sweeps if s.fixed_angle == lowest and "VRADH" in s.moments]
+radar = item.open_nexrad(sweep=velocity)  # every lowest-angle velocity scan, SAILS included
+```
+
+`fixed_angle` is the VCP table's angle for the cut, the value `open_nexrad`
+puts in `sweep_fixed_angle`; a legacy volume with no VCP table gives its first
+ray's elevation and leaves `vcp`, `sails`, and `mrle` as `None`. A legacy
+volume's spectrum width is in the file but xradar 0.12 does not decode it, so
+the listing leaves `WRADH` out there too.
+
 ## GRIB2 variable names
 
 Variables are named by `shortName` when every selected message shares one

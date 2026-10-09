@@ -1,0 +1,1 @@
+NEXRAD Level II sweeps can be chosen by elevation: `usdata.readers.nexrad_sweeps(path)`, `FetchedAsset.inspect().nexrad`, and `usdata inspect` list each sweep's angle, moments, times, and SAILS or MRLE flag from metadata alone, for passing indices to `open_nexrad(sweep=...)`. The catalog now lists velocity (`VRADH`), spectrum width (`WRADH`), and clutter correction (`CCORH`).

@@ -42,6 +42,9 @@ See [fetch and analyze](../guides/fetch-and-analyze.md) for complete workflows.
 ::: usdata.inspect.NetcdfVariable
 ::: usdata.inspect.Grib2Summary
 ::: usdata.inspect.GribMessage
+::: usdata.inspect.NexradSummary
+::: usdata.inspect.NexradSweep
+::: usdata.readers.nexrad_sweeps
 
 ## Reproducible inputs
 

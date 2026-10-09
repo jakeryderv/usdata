@@ -1220,7 +1220,7 @@
       "id": "noaa:nexrad-level2",
       "title": "NEXRAD radar scans",
       "product": "NEXRAD Level II Radar",
-      "description": "Raw volume scans from the WSR-88D weather radar network, archived in the public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). One object per radar site per volume scan. No server-side subsetting; whole files are fetched. Select radars by site id, bbox, or nearest to a point. Moments vary by sweep and volume coverage pattern; the catalog lists the ones the radar example's lowest sweep carries. The extent spans the radars from the Aleutians to the Azores; Guam, Korea, and Okinawa lie beyond the antimeridian, outside it, and are reached by site id.",
+      "description": "Raw volume scans from the WSR-88D weather radar network, archived in the public unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). One object per radar site per volume scan. No server-side subsetting; whole files are fetched. Select radars by site id, bbox, or nearest to a point. Moments vary by sweep and volume coverage pattern: split cuts carry reflectivity and dual-pol moments on one sweep and velocity on the next, and a sweep listing says which sweep holds what. The extent spans the radars from the Aleutians to the Azores; Guam, Korea, and Okinawa lie beyond the antimeridian, outside it, and are reached by site id.",
       "provider": "NOAA",
       "provider_id": "noaa",
       "domain": "Weather radar",
@@ -1273,6 +1273,21 @@
           "name": "RHOHV",
           "units": "unitless",
           "description": "Correlation coefficient HV"
+        },
+        {
+          "name": "VRADH",
+          "units": "m/s",
+          "description": "Radial velocity of scatterers away from instrument H; Doppler sweeps only"
+        },
+        {
+          "name": "WRADH",
+          "units": "m/s",
+          "description": "Doppler spectrum width H; Doppler sweeps only"
+        },
+        {
+          "name": "CCORH",
+          "units": "unitless",
+          "description": "Clutter correction H; surveillance and batch sweeps"
         }
       ],
       "max_window": "31 days",

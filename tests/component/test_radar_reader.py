@@ -1,17 +1,21 @@
 import bz2
 import struct
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
 import pytest
 import respx
+from typer.testing import CliRunner
 
-from usdata import FetchedAsset
+from usdata import FetchedAsset, _radar, inspect_path
 from usdata.cache import sha256_file
+from usdata.cli import app
+from usdata.inspect import AssetFormat
 from usdata.models import Asset, Protocol, Provenance
-from usdata.readers import MissingReaderDependency, RadarDecodeError
+from usdata.provenance import write
+from usdata.readers import MissingReaderDependency, RadarDecodeError, nexrad_sweeps
 
 pytestmark = pytest.mark.radar
 
@@ -238,4 +242,98 @@ def test_incomplete_sweep_with_trailing_non_radial_record(tmp_path):
     xr.testing.assert_equal(opened["sweep_0"].azimuth, native["sweep_0"].azimuth)
     xr.testing.assert_equal(
         opened["sweep_0"].DBZH, native["sweep_0"].DBZH.where(native["sweep_0"].DBZH >= -32)
+    )
+
+
+@pytest.mark.parametrize(
+    "filename", ["example_nexrad_archive_msg1.bz2", "example_nexrad_archive_msg31_compressed.ar2v"]
+)
+def test_the_sweep_listing_agrees_with_what_the_decoder_returns(filename: str) -> None:
+    item = radar_asset(FIXTURES / filename)
+    sweeps = nexrad_sweeps(item.path)
+    radar = item.open_nexrad()
+    assert [f"sweep_{sweep.index}" for sweep in sweeps] == radar.attrs["usdata"]["sweeps"]
+    for sweep in sweeps:
+        decoded = radar[f"sweep_{sweep.index}"].ds
+        assert float(decoded["sweep_fixed_angle"]) == pytest.approx(sweep.fixed_angle)
+        moments = {name for name, variable in decoded.data_vars.items() if variable.ndim == 2}
+        assert set(sweep.moments) == moments
+        # The decoder holds times as floats, so its milliseconds can round one down.
+        first = decoded["time"].values.min().astype("datetime64[us]").item().replace(tzinfo=UTC)
+        assert abs(first - sweep.start) <= timedelta(milliseconds=1)
+
+
+def test_a_legacy_volume_lists_split_cuts_and_states_no_vcp() -> None:
+    summary = _radar.summary(FIXTURES / "example_nexrad_archive_msg1.bz2")
+    assert summary.vcp is None
+    assert [
+        (s.elevation_number, round(s.fixed_angle, 2), s.moments) for s in summary.sweeps[:3]
+    ] == [
+        (1, 0.48, ["DBZH"]),
+        # The width block is there, but xradar 0.12 does not return it for message 1.
+        (2, 0.48, ["VRADH"]),
+        (3, 1.49, ["DBZH"]),
+    ]
+    # KLOT20030101_000921: the file is named for the first ray's time.
+    assert summary.sweeps[0].start == datetime(2003, 1, 1, 0, 9, 21, 307000, tzinfo=UTC)
+    assert all(s.sails is None and s.mrle is None and s.complete for s in summary.sweeps)
+
+
+def test_a_modern_volume_carries_its_vcp_and_marks_an_incomplete_sweep() -> None:
+    summary = _radar.summary(FIXTURES / "example_nexrad_archive_msg31_compressed.ar2v")
+    assert summary.vcp == 11
+    (sweep,) = summary.sweeps
+    assert (sweep.rays, sweep.complete, sweep.sails, sweep.mrle) == (120, False, False, False)
+    assert sweep.moments == ["DBZH", "ZDR", "PHIDP", "RHOHV"]
+
+
+def test_listing_bytes_that_are_not_a_volume_is_a_value_error(tmp_path: Path) -> None:
+    path = tmp_path / "KTLX20240507_021123_V06"
+    path.write_bytes(b"AR2V0006." + bytes(40))
+    with pytest.raises(ValueError, match="not a readable NEXRAD Level II volume"):
+        nexrad_sweeps(path)
+
+
+def test_listing_without_the_extra_names_it() -> None:
+    with (
+        patch("usdata._radar.import_module", side_effect=ModuleNotFoundError(name="xradar")),
+        pytest.raises(MissingReaderDependency, match=r"usdata\[radar\]"),
+    ):
+        nexrad_sweeps(FIXTURES / "example_nexrad_archive_msg1.bz2")
+
+
+def sidecar_copy(tmp_path: Path, filename: str, dataset: str = "noaa:nexrad-level2") -> Path:
+    """A fixture copied into a cache-like folder with the provenance a fetch writes."""
+    path = tmp_path / filename
+    path.write_bytes((FIXTURES / filename).read_bytes())
+    write(radar_asset(path, dataset).provenance, path)
+    return path
+
+
+def test_inspect_lists_a_level2_volume_and_leaves_level3_as_bytes(tmp_path: Path) -> None:
+    summary = inspect_path(sidecar_copy(tmp_path, "example_nexrad_archive_msg1.bz2"))
+    assert summary.format is AssetFormat.NEXRAD and summary.note is None
+    assert summary.nexrad is not None and len(summary.nexrad.sweeps) == 7
+    assert summary.detail is summary.nexrad
+    level3 = radar_asset(FIXTURES / "example_nexrad_archive_msg1.bz2", "noaa:nexrad-level3")
+    assert level3.inspect().format is AssetFormat.BYTES
+
+
+def test_inspect_notes_a_volume_that_does_not_decode(tmp_path: Path) -> None:
+    path = tmp_path / "KTLX20240507_021123_V06"
+    path.write_bytes(b"AR2V0006." + bytes(40))
+    write(radar_asset(path).provenance, path)
+    summary = inspect_path(path)
+    assert summary.format is AssetFormat.NEXRAD and summary.nexrad is None
+    assert summary.note is not None and summary.note.startswith("not readable as nexrad")
+
+
+def test_the_cli_prints_the_vcp_and_the_sweep_table(tmp_path: Path) -> None:
+    path = sidecar_copy(tmp_path, "example_nexrad_archive_msg31_compressed.ar2v")
+    result = CliRunner().invoke(app, ["inspect", str(path)])
+    assert result.exit_code == 0, result.output
+    assert "vcp:" in result.output and "11" in result.output
+    assert "#  cut  angle  moments" in result.output
+    assert (
+        "0  1    0.48   DBZH ZDR PHIDP RHOHV  19:50:21  19:50:24  120   incomplete" in result.output
     )
