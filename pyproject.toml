@@ -86,6 +86,7 @@ examples = [
     "matplotlib>=3.9",
     "nbclient>=0.10",
     "pandas>=2.2",
+    "pyshp>=3.1",
 ]
 
 [build-system]

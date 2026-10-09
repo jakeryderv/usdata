@@ -1,0 +1,10 @@
+name: oklahoma-tornado-warnings-may-2024
+sources:
+  - name: oklahoma
+    dataset: noaa:nws-warnings
+    # A state, not a county: the service filters by state or issuing office.
+    location: Oklahoma
+    # Selected by ISSUED, the event's start, in UTC: 1 PM CDT on 6 May to 7 AM the next day.
+    start: 2024-05-06T18:00Z
+    end: 2024-05-07T12:00Z
+    params: {events: "TO.W,TO.A"}

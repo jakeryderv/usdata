@@ -936,6 +936,287 @@
       }
     },
     {
+      "id": "noaa:nws-warnings",
+      "title": "NWS watch, warning, and advisory polygons and areas",
+      "product": "NWS Watch, Warning, and Advisory Geometries",
+      "description": "Every National Weather Service watch, warning, and advisory with its geometry, as zipped shapefiles (with the same attributes as CSV) from the Iowa Environmental Mesonet's archive of NWS products; the NWS API itself keeps no archive. Storm-based warning polygons from 2002, and the counties and forecast zones each product was issued for, from 1986 for tornado, severe thunderstorm, flash flood, and marine warnings and from November 2005 for the rest, each row with VTEC phenomena, significance, event number, status, issue and expiry times, and the issuing product. A window selects events by their start time, not by when they were in effect, and is fetched as one zip per UTC month. Optionally narrowed by state, offices, event types, or to storm-based polygons; zips are rewritten in a canonical form so repeated fetches match.",
+      "provider": "NOAA",
+      "provider_id": "noaa",
+      "domain": "Severe weather",
+      "system": null,
+      "availability": "Source only",
+      "since": "0.35",
+      "keywords": [
+        "warnings",
+        "watches",
+        "advisories",
+        "vtec",
+        "nws",
+        "polygons",
+        "storm-based warnings",
+        "tornado warning",
+        "shapefile",
+        "verification"
+      ],
+      "formats": [
+        "zipped shapefile and CSV (no reader)"
+      ],
+      "selection": "Events starting inside an inclusive UTC window, one zip per UTC month; optionally one state or offices, event types, and polygon options",
+      "inputs": "Both timestamps; optionally a state location or wfo, events such as TO.W, storm_based, and followups",
+      "credentials": null,
+      "reader_extra": null,
+      "resolution": {
+        "spatial": "A storm-based warning polygon, or one county, parish, or forecast zone outline, per row",
+        "temporal": "Issue, expiry, and polygon times to the minute"
+      },
+      "update_frequency": "Not stated by IEM, which processes the live NWS product stream; rows change as later products update an event",
+      "latency": null,
+      "citation": "National Weather Service watch, warning, and advisory products, as archived and served by the Iowa Environmental Mesonet of Iowa State University, accessed via usdata",
+      "terms": "https://mesonet.agron.iastate.edu/disclaimer.php",
+      "homepage": "https://mesonet.agron.iastate.edu/request/gis/watchwarn.phtml",
+      "variables": [
+        {
+          "name": "WFO",
+          "units": null,
+          "description": "Issuing office, the four-letter id without its leading K or P"
+        },
+        {
+          "name": "ISSUED",
+          "units": "UTC, YYYYMMDDHHMM",
+          "description": "Event start as last updated; the window's field"
+        },
+        {
+          "name": "EXPIRED",
+          "units": "UTC, YYYYMMDDHHMM",
+          "description": "Event end as last updated"
+        },
+        {
+          "name": "INIT_ISS",
+          "units": "UTC, YYYYMMDDHHMM",
+          "description": "Time of the text product that started the event; never updated"
+        },
+        {
+          "name": "INIT_EXP",
+          "units": "UTC, YYYYMMDDHHMM",
+          "description": "Event end as first issued; never updated"
+        },
+        {
+          "name": "PHENOM",
+          "units": null,
+          "description": "Two-letter VTEC phenomena, such as TO or SV"
+        },
+        {
+          "name": "GTYPE",
+          "units": null,
+          "description": "P for a storm-based polygon, C for a county, parish, or zone"
+        },
+        {
+          "name": "SIG",
+          "units": null,
+          "description": "One-letter VTEC significance, such as W warning, A watch, Y advisory"
+        },
+        {
+          "name": "ETN",
+          "units": null,
+          "description": "VTEC event tracking number"
+        },
+        {
+          "name": "STATUS",
+          "units": null,
+          "description": "VTEC status of the event's latest update, such as NEW, CON, CAN, EXP, UPG"
+        },
+        {
+          "name": "NWS_UGC",
+          "units": null,
+          "description": "UGC code of a county or zone row; empty on polygons"
+        },
+        {
+          "name": "AREA_KM2",
+          "units": "km2",
+          "description": "Area IEM computed in an Albers projection"
+        },
+        {
+          "name": "UPDATED",
+          "units": "UTC, YYYYMMDDHHMM",
+          "description": "When NWS last updated the event"
+        },
+        {
+          "name": "HV_NWSLI",
+          "units": null,
+          "description": "Hydrologic VTEC: forecast point's NWS location id"
+        },
+        {
+          "name": "HV_SEV",
+          "units": null,
+          "description": "Hydrologic VTEC: flood severity at issuance"
+        },
+        {
+          "name": "HV_CAUSE",
+          "units": null,
+          "description": "Hydrologic VTEC: cause of the flood"
+        },
+        {
+          "name": "HV_REC",
+          "units": null,
+          "description": "Hydrologic VTEC: whether a record crest was expected at issuance"
+        },
+        {
+          "name": "EMERGENC",
+          "units": null,
+          "description": "Whether IEM's unofficial logic marks the event an emergency at any point"
+        },
+        {
+          "name": "POLY_BEG",
+          "units": "UTC, YYYYMMDDHHMM",
+          "description": "Polygon rows: when the polygon becomes valid"
+        },
+        {
+          "name": "POLY_END",
+          "units": "UTC, YYYYMMDDHHMM",
+          "description": "Polygon rows: when the polygon expires"
+        },
+        {
+          "name": "WINDTAG",
+          "units": "mph",
+          "description": "Polygon rows: impact-based wind gust tag"
+        },
+        {
+          "name": "HAILTAG",
+          "units": "inches",
+          "description": "Polygon rows: impact-based hail size tag"
+        },
+        {
+          "name": "TORNTAG",
+          "units": null,
+          "description": "Polygon rows: impact-based tornado tag, such as RADAR INDICATED or OBSERVED"
+        },
+        {
+          "name": "DAMAGTAG",
+          "units": null,
+          "description": "Polygon rows: impact-based damage threat tag, such as CONSIDERABLE"
+        },
+        {
+          "name": "PROD_ID",
+          "units": null,
+          "description": "IEM id of the issuing text product"
+        },
+        {
+          "name": "FCSTER",
+          "units": null,
+          "description": "Product signature, often the forecaster"
+        },
+        {
+          "name": "VTEC_YR",
+          "units": null,
+          "description": "Year the event's tracking number belongs to"
+        }
+      ],
+      "max_window": null,
+      "guide": "https://docs.usdata.dev/providers/noaa-nws-warnings/",
+      "reference": "https://docs.usdata.dev/providers/noaa-nws-warnings/#reference",
+      "page": "https://usdata.dev/datasets/noaa/nws-warnings/",
+      "walkthrough": "examples/datasets/noaa-nws-warnings/noaa-nws-warnings.ipynb",
+      "studies": [],
+      "quickstart": {
+        "cli": "usdata fetch noaa:nws-warnings \\\n  --location Oklahoma \\\n  --start 2024-05-06T18:00Z \\\n  --end 2024-05-07T12:00Z \\\n  -p events=TO.W,TO.A",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:nws-warnings\"),\n    build_query(\n        location=\"Oklahoma\",\n        start=\"2024-05-06T18:00Z\",\n        end=\"2024-05-07T12:00Z\",\n        events=\"TO.W,TO.A\",\n    ),\n)\nprint(items[0].path)\n",
+        "manifest": "name: oklahoma-tornado-warnings-may-2024\nsources:\n  - name: oklahoma\n    dataset: noaa:nws-warnings\n    # A state, not a county: the service filters by state or issuing office.\n    location: Oklahoma\n    # Selected by ISSUED, the event's start, in UTC: 1 PM CDT on 6 May to 7 AM the next day.\n    start: 2024-05-06T18:00Z\n    end: 2024-05-07T12:00Z\n    params: {events: \"TO.W,TO.A\"}\n"
+      }
+    },
+    {
+      "id": "noaa:spc-outlooks",
+      "title": "SPC convective and fire weather outlook areas",
+      "product": "SPC Convective and Fire Weather Outlooks",
+      "description": "Storm Prediction Center convective outlooks, Days 1 to 8, from 1987, and fire weather outlooks from 2006, as zipped shapefiles from the Iowa Environmental Mesonet's archive: one row per outlook area, with its day, valid period, product issuance time, threshold and category (categorical risk, tornado, wind, hail, or fire), and IEM's canonical issuance cycle. A window selects outlooks by when SPC issued them, every issuance and correction included, and is fetched as one zip per UTC month; an outlook that drew no area is a row with no geometry, and early years hold categorical areas only. Areas come as cake layers, each including the higher risks inside it, or as cookie cutters; zips are rewritten in a canonical form so repeated fetches match.",
+      "provider": "NOAA",
+      "provider_id": "noaa",
+      "domain": "Severe weather",
+      "system": null,
+      "availability": "Source only",
+      "since": "0.35",
+      "keywords": [
+        "spc",
+        "convective outlook",
+        "fire weather outlook",
+        "severe weather",
+        "risk",
+        "tornado",
+        "hail",
+        "wind",
+        "forecast",
+        "shapefile"
+      ],
+      "formats": [
+        "zipped shapefile (no reader)"
+      ],
+      "selection": "Outlooks issued inside an inclusive UTC window, one zip per UTC month; optionally outlook types, days, and geometry form",
+      "inputs": "Both timestamps; optionally outlooks (convective, fire), days, and geometry",
+      "credentials": null,
+      "reader_extra": null,
+      "resolution": {
+        "spatial": "One outlook area per row",
+        "temporal": "Each issuance; the Day 1 convective outlook at 01, 06, 13, 1630, and 20 UTC"
+      },
+      "update_frequency": "Not stated by IEM, which processes SPC's outlook products as they are issued",
+      "latency": null,
+      "citation": "NOAA/NWS Storm Prediction Center outlooks, as archived and served by the Iowa Environmental Mesonet of Iowa State University, accessed via usdata",
+      "terms": "https://mesonet.agron.iastate.edu/disclaimer.php",
+      "homepage": "https://mesonet.agron.iastate.edu/request/gis/outlooks.phtml",
+      "variables": [
+        {
+          "name": "ISSUE",
+          "units": "UTC, YYYYMMDDHHMM",
+          "description": "Start of the outlook's valid period"
+        },
+        {
+          "name": "EXPIRE",
+          "units": "UTC, YYYYMMDDHHMM",
+          "description": "End of the outlook's valid period"
+        },
+        {
+          "name": "PRODISS",
+          "units": "UTC, YYYYMMDDHHMM",
+          "description": "When SPC issued the product; the window's field"
+        },
+        {
+          "name": "TYPE",
+          "units": null,
+          "description": "C for convective, F for fire weather"
+        },
+        {
+          "name": "DAY",
+          "units": null,
+          "description": "Outlook day, 1 to 8"
+        },
+        {
+          "name": "THRESHOLD",
+          "units": null,
+          "description": "Threshold label: a risk such as TSTM, MRGL, SLGT, ENH, MDT, or HIGH, a probability such as 0.05, SIGN, or a fire risk such as ELEV or CRIT; empty for an outlook that drew no area"
+        },
+        {
+          "name": "CATEGORY",
+          "units": null,
+          "description": "What the threshold measures: CATEGORICAL, TORNADO, WIND, HAIL, ANY SEVERE, or FIRE WEATHER CATEGORICAL; empty for an outlook that drew no area"
+        },
+        {
+          "name": "CYCLE",
+          "units": null,
+          "description": "IEM's canonical issuance hour for the outlook, or -1 for one it superseded"
+        }
+      ],
+      "max_window": null,
+      "guide": "https://docs.usdata.dev/providers/noaa-spc-outlooks/",
+      "reference": "https://docs.usdata.dev/providers/noaa-spc-outlooks/#reference",
+      "page": "https://usdata.dev/datasets/noaa/spc-outlooks/",
+      "walkthrough": "examples/datasets/noaa-spc-outlooks/noaa-spc-outlooks.ipynb",
+      "studies": [],
+      "quickstart": {
+        "cli": "usdata fetch noaa:spc-outlooks \\\n  --start 2024-05-06T00:00Z \\\n  --end 2024-05-06T23:59Z \\\n  -p days=1",
+        "python": "from usdata import build_query, fetch, get\n\nitems = fetch(\n    get(\"noaa:spc-outlooks\"),\n    build_query(\n        start=\"2024-05-06T00:00Z\",\n        end=\"2024-05-06T23:59Z\",\n        days=1,\n    ),\n)\nprint(items[0].path)\n",
+        "manifest": "name: spc-day1-outlooks-6-may-2024\nsources:\n  # Selected by when SPC issued them, not the period they are valid for.\n  - name: layers\n    dataset: noaa:spc-outlooks\n    start: 2024-05-06T00:00Z\n    end: 2024-05-06T23:59Z\n    params: {days: 1}\n  - name: cutters\n    dataset: noaa:spc-outlooks\n    start: 2024-05-06T00:00Z\n    end: 2024-05-06T23:59Z\n    params: {days: 1, geometry: cookie_cutter}\n"
+      }
+    },
+    {
       "id": "noaa:nexrad-level2",
       "title": "NEXRAD radar scans",
       "product": "NEXRAD Level II Radar",
@@ -3072,45 +3353,6 @@
       "citation": null,
       "terms": null,
       "homepage": "https://www.ncei.noaa.gov/products/weather-balloon/integrated-global-radiosonde-archive",
-      "variables": [],
-      "max_window": null,
-      "guide": null,
-      "reference": "https://docs.usdata.dev/generated/catalog/noaa/",
-      "page": null,
-      "walkthrough": null,
-      "studies": [],
-      "quickstart": null
-    },
-    {
-      "id": "noaa:nws-warnings",
-      "title": "NWS Watch, Warning, and Advisory Archive",
-      "product": "NWS Watch, Warning, and Advisory Archive",
-      "description": "Every National Weather Service watch, warning, and advisory polygon with VTEC codes and issue, expiry, and update times, as one zipped shapefile per year. The maintained archive is the Iowa Environmental Mesonet's mirror of NWS products, not an NWS endpoint; the tornado and severe thunderstorm storm-based warnings for 2024 are 6.5 MB and all products 351 MB. Needs a shapefile reader.",
-      "provider": "NOAA",
-      "provider_id": "noaa",
-      "domain": "Severe weather",
-      "system": null,
-      "availability": "Planned",
-      "since": null,
-      "keywords": [
-        "warnings",
-        "watches",
-        "vtec",
-        "nws",
-        "verification",
-        "polygons"
-      ],
-      "formats": [],
-      "selection": null,
-      "inputs": null,
-      "credentials": null,
-      "reader_extra": null,
-      "resolution": null,
-      "update_frequency": null,
-      "latency": null,
-      "citation": null,
-      "terms": null,
-      "homepage": "https://mesonet.agron.iastate.edu/request/gis/watchwarn.phtml",
       "variables": [],
       "max_window": null,
       "guide": null,

@@ -14,7 +14,6 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`noaa:ghcn-hourly`](noaa.md#noaaghcn-hourly) GHCN-Hourly Station Observations · Planned
 - [`noaa:igra`](noaa.md#noaaigra) IGRA Radiosonde Observations · Planned
 - [`noaa:nclimdiv`](noaa.md#noaanclimdiv) nClimDiv Climate Divisional Data · Planned
-- [`noaa:nws-warnings`](noaa.md#noaanws-warnings) NWS Watch, Warning, and Advisory Archive · Planned
 - [`noaa:ocads`](noaa.md#noaaocads) Ocean Carbon and Acidification Data System · Planned
 - [`noaa:oisst`](noaa.md#noaaoisst) OISST Daily Sea Surface Temperature · Planned
 - [`noaa:paleo-search`](noaa.md#noaapaleo-search) World Data Service for Paleoclimatology · Planned
@@ -23,6 +22,11 @@ Move a dataset between phases by editing its `target` in the registry.
 - [`noaa:tsunami-events`](noaa.md#noaatsunami-events) Global Historical Tsunami Database · Planned
 - [`usda:cropland-data-layer`](usda.md#usdacropland-data-layer) Cropland Data Layer · Planned
 - [`usgs:3dep-elevation`](usgs.md#usgs3dep-elevation) 3DEP Elevation · Planned
+
+**Implemented, unreleased (planned 0.35)**
+
+- [`noaa:nws-warnings`](noaa.md#noaanws-warnings) NWS Watch, Warning, and Advisory Geometries · Source only
+- [`noaa:spc-outlooks`](noaa.md#noaaspc-outlooks) SPC Convective and Fire Weather Outlooks · Source only
 
 **Included since 0.34**
 

@@ -1,0 +1,13 @@
+name: spc-day1-outlooks-6-may-2024
+sources:
+  # Selected by when SPC issued them, not the period they are valid for.
+  - name: layers
+    dataset: noaa:spc-outlooks
+    start: 2024-05-06T00:00Z
+    end: 2024-05-06T23:59Z
+    params: {days: 1}
+  - name: cutters
+    dataset: noaa:spc-outlooks
+    start: 2024-05-06T00:00Z
+    end: 2024-05-06T23:59Z
+    params: {days: 1, geometry: cookie_cutter}

@@ -6,10 +6,12 @@ per dataset and the mock transport that answers it.
 """
 
 import pkgutil
+import zipfile
 from collections.abc import Callable
 from datetime import timedelta
 from importlib import import_module
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import cast
 
 import httpx
@@ -26,6 +28,7 @@ from usdata.providers.noaa.coastwatch import BASE, DATASET
 from usdata.providers.noaa.ersst import DIRECTORY_URL as ERSST_URL
 from usdata.providers.noaa.hurdat2 import DIRECTORY_URL as HURDAT_URL
 from usdata.providers.noaa.ibtracs import DIRECTORY_URL as IBTRACS_URL
+from usdata.providers.noaa.iem_gis import canonicalize
 from usdata.providers.noaa.nws_damage import SERVICE_URL as DAT_URL
 from usdata.providers.noaa.spc import PAGE_URL as SPC_PAGE
 from usdata.providers.noaa.storm_events import DIRECTORY_URL
@@ -67,6 +70,8 @@ CASES = {
     "noaa:nbm": {"cycle": 12, "forecast_hour": 1},
     "fema:disaster-declarations": {"state": "OK"},
     "noaa:nws-vtec-events": {"ugc": "OKC113"},
+    "noaa:nws-warnings": {"events": "TO.W"},
+    "noaa:spc-outlooks": {"days": 1},
     "noaa:nws-damage-surveys": {"layer": "lines"},
     "noaa:nws-damage-photos": {},
     "epa:aqs-daily": {"parameters": "88101", "sites": "36-081-0124"},
@@ -205,7 +210,23 @@ def aqs_body(url: str) -> dict[str, object]:
     }
 
 
+IEM_ZIPS = {"noaa:nws-warnings", "noaa:spc-outlooks"}
+"""Datasets whose adapters rewrite each zip canonically, so the bytes served must already be."""
+
+
+def iem_zip() -> bytes:
+    """A zip already in the IEM adapters' canonical form, which they write back unchanged."""
+    with TemporaryDirectory() as directory:
+        raw, out = Path(directory, "raw.zip"), Path(directory, "out.zip")
+        with zipfile.ZipFile(raw, "w") as archive:
+            archive.writestr("source.dbf", b"\x03\x50\x01\x01rows")
+        canonicalize(raw, out)
+        return out.read_bytes()
+
+
 def contract_data(dataset_id: str) -> bytes:
+    if dataset_id in IEM_ZIPS:
+        return iem_zip()
     if dataset_id == "epa:aqs-daily":
         return canonical(aqs_body("https://aqs.epa.gov/data/api/dailyData/bySite"))
     if dataset_id == "census:acs-5year":
