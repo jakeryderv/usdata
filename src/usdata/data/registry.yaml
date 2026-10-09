@@ -82,8 +82,9 @@ datasets:
       Raw volume scans from the WSR-88D weather radar network, archived in the public
       unidata-nexrad-level2 S3 bucket (NOAA Open Data Dissemination). One object per radar site
       per volume scan. No server-side subsetting; whole files are fetched. Select radars by site
-      id, bbox, or nearest to a point. Moments vary by sweep and volume coverage pattern; the
-      catalog lists the ones the radar example's lowest sweep carries. The extent spans the
+      id, bbox, or nearest to a point. Moments vary by sweep and volume coverage pattern:
+      split cuts carry reflectivity and dual-pol moments on one sweep and velocity on the
+      next, and a sweep listing says which sweep holds what. The extent spans the
       radars from the Aleutians to the Azores; Guam, Korea, and Okinawa lie beyond the
       antimeridian, outside it, and are reached by site id.
     keywords: [radar, weather, storms, tornado, precipitation, reflectivity, nexrad, wsr-88d]
@@ -116,6 +117,9 @@ datasets:
       - { name: "ZDR", units: "dB", description: "Log differential reflectivity H/V" }
       - { name: "PHIDP", units: "degrees", description: "Differential phase HV" }
       - { name: "RHOHV", units: "unitless", description: "Correlation coefficient HV" }
+      - { name: "VRADH", units: "m/s", description: "Radial velocity of scatterers away from instrument H; Doppler sweeps only" }
+      - { name: "WRADH", units: "m/s", description: "Doppler spectrum width H; Doppler sweeps only" }
+      - { name: "CCORH", units: "unitless", description: "Clutter correction H; surveillance and batch sweeps" }
     limits: { max_window: P31D }
     adapter: usdata.providers.noaa.nexrad:NexradLevel2
 

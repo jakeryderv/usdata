@@ -31,6 +31,9 @@ Pass these as `--param name=value` to the CLI, as `params:` entries in a manifes
 | `ZDR` | dB | Log differential reflectivity H/V |
 | `PHIDP` | degrees | Differential phase HV |
 | `RHOHV` | unitless | Correlation coefficient HV |
+| `VRADH` | m/s | Radial velocity of scatterers away from instrument H; Doppler sweeps only |
+| `WRADH` | m/s | Doppler spectrum width H; Doppler sweeps only |
+| `CCORH` | unitless | Clutter correction H; surveillance and batch sweeps |
 
 ### Catalog facts
 

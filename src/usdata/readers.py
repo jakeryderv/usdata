@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     import xarray as xr  # pyright: ignore[reportMissingImports]
 
     from usdata._fetch import FetchedAsset
-    from usdata.inspect import GribMessage
+    from usdata.inspect import GribMessage, NexradSweep
 
 NETCDF_MEDIA_TYPES = {"application/x-netcdf", "application/netcdf", "application/x-netcdf4"}
 GRIB2_MEDIA_TYPES = {
@@ -32,6 +32,8 @@ GRIB2_MEDIA_TYPES = {
     "application/wmo-grib2",
 }
 GRIB2_SUFFIXES = (".grib2", ".grib2.gz", ".grb2", ".grb2.gz")
+NEXRAD_LEVEL2 = "noaa:nexrad-level2"
+"""The dataset whose files ``open_nexrad`` decodes and ``nexrad_sweeps`` lists."""
 CSV_MEDIA_TYPES = {"text/csv", "application/csv"}
 GZIP_MEDIA_TYPES = {"application/gzip", "application/x-gzip"}
 OPAQUE_MEDIA_TYPES = {"", "application/octet-stream"} | GZIP_MEDIA_TYPES
@@ -408,7 +410,7 @@ def open_asset(fetched: FetchedAsset) -> Any:
     media_type = (fetched.asset.media_type or "").split(";", 1)[0].strip().lower()
     name = fetched.asset.id.lower()
     dataset_id = fetched.asset.dataset_id
-    if dataset_id in {"noaa:nexrad-level2", "noaa:nexrad-level3"}:
+    if dataset_id in {NEXRAD_LEVEL2, "noaa:nexrad-level3"}:
         return open_nexrad(fetched)
     if dataset_id == "noaa:hurdat2" or (name.startswith("hurdat2-") and name.endswith(".txt")):
         from usdata._hurdat2 import open_hurdat2
@@ -467,6 +469,33 @@ def open_nexrad(fetched: FetchedAsset, *, sweep: int | list[int] | None = None) 
     from usdata import _radar
 
     return _radar.open_nexrad(fetched, sweep=sweep)
+
+
+def nexrad_sweeps(path: str | os.PathLike[str]) -> list[NexradSweep]:
+    """List every sweep in a local NEXRAD Level II volume without decoding any moment.
+
+    A sweep index is a position in the volume, not an elevation: split cuts scan
+    one angle twice and SAILS rescans the lowest angle within a volume, so the
+    same index names different angles from one volume coverage pattern to the
+    next. Choose sweeps from this list by angle, moment, and time, then pass
+    their indices to ``open_nexrad(sweep=...)``. ``FetchedAsset.inspect()``
+    returns the same list, with the volume coverage pattern, as ``nexrad``.
+
+    Args:
+        path: A local Level II volume, whole-file gzip or bzip2 compressed or not,
+            written as a string or as any ``os.PathLike``. Nothing is fetched or
+            written.
+
+    Returns:
+        One entry per sweep in scan order.
+
+    Raises:
+        MissingReaderDependency: The radar extra is not installed.
+        ValueError: The file is not a readable NEXRAD Level II volume.
+    """
+    from usdata import _radar
+
+    return _radar.summary(Path(path)).sweeps
 
 
 def open_netcdf(fetched: FetchedAsset) -> xr.Dataset:

@@ -34,3 +34,20 @@ def test_point_query_selects_ktlx() -> None:
         )
     )
     assert assets and all(a.id.startswith("KTLX20240506_20") for a in assets)
+
+
+def test_a_sails_volume_lists_the_lowest_angle_eight_times(tmp_path: Path) -> None:
+    pytest.importorskip("xradar")
+    ds = default_registry().get("noaa:nexrad-level2")
+    adapter = load_adapter(ds)
+    assets = adapter.list_assets(
+        build_query(site="KTLX", start="2024-05-07T02:11:23Z", end="2024-05-07T02:11:23Z")
+    )
+    (asset,) = [a for a in assets if a.id == "KTLX20240507_021123_V06"]
+    volume = fetch_asset(ds, asset, root=tmp_path).inspect().nexrad
+    assert volume is not None and volume.vcp == 212 and len(volume.sweeps) == 23
+    lowest = [s for s in volume.sweeps if round(s.fixed_angle, 2) == 0.48]
+    # Four split cuts at 0.5 degrees, three of them SAILS rescans: velocity on every other one.
+    assert [s.index for s in lowest] == [0, 1, 4, 5, 9, 10, 16, 17]
+    assert [s.index for s in lowest if "VRADH" in s.moments] == [1, 5, 10, 17]
+    assert [s.sails for s in lowest] == [False, False] + [True] * 6

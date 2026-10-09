@@ -9,7 +9,7 @@ from typing import Annotated
 import typer
 
 from usdata.cache import cached_path
-from usdata.inspect import Summary, inspect_path
+from usdata.inspect import NexradSweep, Summary, inspect_path
 
 LABELS = ("path", "size", "format", "retrieved", "checksum", "source")
 """Provenance lines printed above the detail, padded to the longest label."""
@@ -83,7 +83,7 @@ def _echo_summary(summary: Summary) -> None:
 
 
 def _echo_detail(summary: Summary, width: int) -> None:
-    """One table per format: CSV columns, NetCDF variables, or GRIB2 messages."""
+    """One table per format: CSV columns, NetCDF variables, GRIB2 messages, or NEXRAD sweeps."""
     if (frame := summary.csv) is not None:
         counted = f"{frame.row_count:,}"
         if frame.truncated:
@@ -146,6 +146,36 @@ def _echo_detail(summary: Summary, width: int) -> None:
                 for message in fields.messages
             ],
         )
+
+    if (volume := summary.nexrad) is not None:
+        typer.echo(f"  {'vcp:':<{width}}{volume.vcp if volume.vcp is not None else 'not stated'}")
+        _echo_table(
+            "sweeps",
+            ["#", "cut", "angle", "moments", "start", "end", "rays", "notes"],
+            [
+                [
+                    str(sweep.index),
+                    str(sweep.elevation_number),
+                    f"{sweep.fixed_angle:.2f}",
+                    " ".join(sweep.moments),
+                    f"{sweep.start:%H:%M:%S}",
+                    f"{sweep.end:%H:%M:%S}",
+                    str(sweep.rays),
+                    _sweep_notes(sweep),
+                ]
+                for sweep in volume.sweeps
+            ],
+        )
+
+
+def _sweep_notes(sweep: NexradSweep) -> str:
+    """What sets a sweep apart from a plain cut: a rescan, or rays missing at its end."""
+    notes = [
+        *(["SAILS"] if sweep.sails else []),
+        *(["MRLE"] if sweep.mrle else []),
+        *([] if sweep.complete else ["incomplete"]),
+    ]
+    return ", ".join(notes)
 
 
 def _echo_table(label: str, headers: list[str], rows: list[list[str]]) -> None:

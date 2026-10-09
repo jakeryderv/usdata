@@ -3,8 +3,9 @@
 An inspection is local and read-only. It reads the file and the provenance
 beside it, never fetches, verifies, or writes anything, and never changes cached
 bytes. CSV is summarized with the standard library, so no extra is needed;
-NetCDF4 and GRIB2 use the same extras ``open`` does, and a missing one yields a
-summary whose detail is ``None`` and whose ``note`` names the extra to install.
+NetCDF4, GRIB2, and NEXRAD Level II use the same extras ``open`` does, and a
+missing one yields a summary whose detail is ``None`` and whose ``note`` names
+the extra to install.
 """
 
 from __future__ import annotations
@@ -39,6 +40,7 @@ class AssetFormat(StrEnum):
     CSV = "csv"
     NETCDF = "netcdf"
     GRIB2 = "grib2"
+    NEXRAD = "nexrad"
     BYTES = "bytes"
 
 
@@ -175,10 +177,57 @@ class Grib2Summary(BaseModel):
         )
 
 
+class NexradSweep(BaseModel):
+    """One sweep of a NEXRAD Level II volume, read from its metadata without decoding moments.
+
+    ``index`` is what ``open_nexrad(sweep=...)`` takes. It is not an elevation:
+    a split cut scans one angle twice, once for reflectivity and dual-pol
+    moments and once for velocity, and SAILS or MRLE rescan the lowest angle
+    several times a volume, so one angle can hold many indices. Choose sweeps
+    here by ``fixed_angle``, ``moments``, and ``start``, then open them by index.
+    """
+
+    index: int = Field(
+        ge=0, description="Zero-based position in the volume; what open_nexrad(sweep=...) takes"
+    )
+    elevation_number: int = Field(ge=1, description="The one-based VCP cut the sweep scans")
+    fixed_angle: float = Field(
+        description=(
+            "Elevation in degrees: the VCP table's angle for the cut, or the first ray's "
+            "where the volume carries no VCP table"
+        )
+    )
+    moments: list[str] = Field(
+        description=(
+            "Moments open_nexrad returns for the sweep, by its names; a legacy volume's "
+            "spectrum width is in the file but not decoded"
+        )
+    )
+    start: AwareUTC = Field(description="When the sweep's first ray was collected")
+    end: AwareUTC = Field(description="When its last ray was collected")
+    rays: int = Field(ge=0, description="Rays received")
+    complete: bool = Field(
+        description="The sweep reached its end; open_nexrad pads one that did not"
+    )
+    sails: bool | None = Field(
+        default=None, description="A SAILS low-level rescan; None where there is no VCP table"
+    )
+    mrle: bool | None = Field(
+        default=None, description="An MRLE mid-volume rescan; None where there is no VCP table"
+    )
+
+
+class NexradSummary(BaseModel):
+    """The volume coverage pattern and every sweep of a NEXRAD Level II volume, in scan order."""
+
+    vcp: int | None = Field(description="Volume coverage pattern number; None for a legacy volume")
+    sweeps: list[NexradSweep]
+
+
 class Summary(BaseModel):
     """What one fetched file is, where it came from, and what its format holds.
 
-    Exactly one of ``csv``, ``netcdf``, and ``grib2`` is set, or none of them
+    Exactly one of ``csv``, ``netcdf``, ``grib2``, and ``nexrad`` is set, or none of them
     when the format is bytes-only, its reader is unavailable, or the bytes no
     longer decode; ``note`` then says why. ``detail`` returns whichever is set.
     """
@@ -194,14 +243,15 @@ class Summary(BaseModel):
     csv: CsvSummary | None = None
     netcdf: NetcdfSummary | None = None
     grib2: Grib2Summary | None = None
+    nexrad: NexradSummary | None = None
     note: str | None = Field(
         default=None, description="Why a recognized format yielded no detail, when it did not"
     )
 
     @property
-    def detail(self) -> CsvSummary | NetcdfSummary | Grib2Summary | None:
+    def detail(self) -> CsvSummary | NetcdfSummary | Grib2Summary | NexradSummary | None:
         """The per-format detail, or None for a bytes-only file or an unavailable reader."""
-        return self.csv or self.netcdf or self.grib2
+        return self.csv or self.netcdf or self.grib2 or self.nexrad
 
 
 def inspect_asset(fetched: FetchedAsset) -> Summary:
@@ -221,7 +271,7 @@ def inspect_asset(fetched: FetchedAsset) -> Summary:
         fetched.path,
         fetched.asset.id,
         fetched.provenance,
-        _detect(fetched.asset.id, fetched.asset.media_type),
+        _detect(fetched.asset.id, fetched.asset.media_type, fetched.asset.dataset_id),
         fetched.asset.protocol,
     )
 
@@ -245,7 +295,11 @@ def inspect_path(path: str | os.PathLike[str]) -> Summary:
     local = Path(path)
     record = provenance.read(local)
     return _summarize(
-        local, local.name, record, _detect(local.name, None), _registered_protocol(record)
+        local,
+        local.name,
+        record,
+        _detect(local.name, None, record.dataset_id),
+        _registered_protocol(record),
     )
 
 
@@ -263,7 +317,7 @@ def _summarize(
     path: Path, asset_id: str, record: Provenance, fmt: AssetFormat, protocol: Protocol | None
 ) -> Summary:
     """One summary, with the detail its format allows and a note where it allows none."""
-    detail: CsvSummary | NetcdfSummary | Grib2Summary | None = None
+    detail: CsvSummary | NetcdfSummary | Grib2Summary | NexradSummary | None = None
     note: str | None = None
     if fmt is not AssetFormat.BYTES:
         try:
@@ -286,12 +340,19 @@ def _summarize(
         csv=detail if isinstance(detail, CsvSummary) else None,
         netcdf=detail if isinstance(detail, NetcdfSummary) else None,
         grib2=detail if isinstance(detail, Grib2Summary) else None,
+        nexrad=detail if isinstance(detail, NexradSummary) else None,
         note=note,
     )
 
 
-def _detect(name: str, media_type: str | None) -> AssetFormat:
-    """The format to summarize, from the media type where one says, and the name otherwise."""
+def _detect(name: str, media_type: str | None, dataset_id: str) -> AssetFormat:
+    """The format to summarize: the dataset's where it has one, then the media type, then the name.
+
+    NEXRAD Level II volumes are served as opaque bytes under names that state no
+    format, so they are known by their dataset, as ``open`` knows them.
+    """
+    if dataset_id == readers.NEXRAD_LEVEL2:
+        return AssetFormat.NEXRAD
     kind = (media_type or "").split(";", 1)[0].strip().lower()
     if kind in readers.GRIB2_MEDIA_TYPES:
         return AssetFormat.GRIB2
@@ -313,7 +374,7 @@ def _detect(name: str, media_type: str | None) -> AssetFormat:
 
 def _detail(
     path: Path, asset_id: str, fmt: AssetFormat, record: Provenance, protocol: Protocol | None
-) -> CsvSummary | NetcdfSummary | Grib2Summary:
+) -> CsvSummary | NetcdfSummary | Grib2Summary | NexradSummary:
     """The detail for one recognized format, reading only what that format needs.
 
     A GRIB2 inventory is given the asset id, which names a message ecCodes
@@ -325,6 +386,10 @@ def _detail(
         from usdata._netcdf import variables
 
         return NetcdfSummary(variables=variables(path))
+    if fmt is AssetFormat.NEXRAD:
+        from usdata._radar import summary
+
+        return summary(path)
     from usdata._grib import inventory
 
     return Grib2Summary(messages=_paired(inventory(path, asset_id), record))
@@ -397,6 +462,8 @@ __all__ = [
     "GribMessage",
     "NetcdfSummary",
     "NetcdfVariable",
+    "NexradSummary",
+    "NexradSweep",
     "Summary",
     "inspect_asset",
     "inspect_path",
