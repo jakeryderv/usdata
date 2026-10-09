@@ -57,5 +57,4 @@ is described in the guides and reference pages.
 - [0051: ArcGIS feature layers are paged by object-id range, delivered as GeoJSON, and pinned through the service's archive](0051-arcgis-feature-layers-and-damage-surveys.md)
 - [0052: Emergency response imagery is placed by tile names and one header per folder, and refuses a bbox where names place nothing](0052-eri-footprints-from-tile-names.md)
 - [0053: IEM warning and outlook archives are whole zipped shapefiles, one per UTC month, rewritten canonically](0053-iem-shapefile-archives.md)
-||||||| parent of f1e03ec (feat: list NEXRAD sweeps by angle, moments, and time before opening)
 - [0054: NEXRAD sweeps are chosen from a metadata listing and opened by index](0054-nexrad-sweep-listing.md)
