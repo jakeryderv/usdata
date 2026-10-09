@@ -20,6 +20,8 @@ Each dataset has one page here: how to select it, what arrives, what the service
 | <span id="noaanws-vtec-events"></span>[NWS warnings and watches by county](../../providers/noaa-nws-vtec-events.md) | Released | CSV | Events issued for one county or UGC inside an inclusive UTC window; optionally one event type |
 | <span id="noaanws-damage-photos"></span>[Photos from NWS damage surveys, one file per damage point attachment](../../providers/noaa-nws-damage-photos.md) | Released | JPEG, PNG | Each JPEG or PNG attached to a damage point with storm time in an inclusive UTC window of at most 7 days |
 | <span id="noaanws-damage-surveys"></span>[NWS damage survey points, tornado tracks, and damage areas](../../providers/noaa-nws-damage-surveys.md) | Released | GeoJSON | One layer's features with storm time in an inclusive UTC window, optionally in a box; one page per object-id run |
+| <span id="noaanws-warnings"></span>[NWS watch, warning, and advisory polygons and areas](../../providers/noaa-nws-warnings.md) | Source only | zipped shapefile and CSV (no reader) | Events starting inside an inclusive UTC window, one zip per UTC month; optionally one state or offices, event types, and polygon options |
+| <span id="noaaspc-outlooks"></span>[SPC convective and fire weather outlook areas](../../providers/noaa-spc-outlooks.md) | Source only | zipped shapefile (no reader) | Outlooks issued inside an inclusive UTC window, one zip per UTC month; optionally outlook types, days, and geometry form |
 | <span id="noaanexrad-level2"></span>[NEXRAD radar scans](../../providers/noaa-nexrad.md) | Released | NEXRAD Level II | Whole radar scans by site and inclusive UTC scan-start time |
 | <span id="noaamrms"></span>[MRMS gridded radar products](../../providers/noaa-mrms.md) | Released | GRIB2 (gzipped) | Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day |
 | <span id="noaanexrad-level3"></span>[NEXRAD derived radar products](../../providers/noaa-nexrad-level3.md) | Released | NEXRAD Level III (no reader) | Whole product files by site, product code, and inclusive UTC scan time since 2020-03-30 |
@@ -49,7 +51,7 @@ Each dataset has one page here: how to select it, what arrives, what the service
 
 | Provider | Released | Source only | Planned |
 |---|---:|---:|---:|
-| [NOAA](noaa.md) | 29 | 0 | 13 |
+| [NOAA](noaa.md) | 29 | 2 | 12 |
 | [USGS](usgs.md) | 2 | 0 | 1 |
 | [Census Bureau](census.md) | 1 | 0 | 0 |
 | [EPA](epa.md) | 1 | 0 | 0 |

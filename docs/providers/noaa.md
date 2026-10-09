@@ -24,6 +24,8 @@ NOAA access is anonymous.
 | `storm-events` | [Storm Events](noaa-storm-events.md) | Whole annual archives of the details, fatalities, or locations table |
 | `spc-tornado-reports` | [SPC tornado reports](noaa-spc-tornado.md) (v0.15.0) | Whole annual, half-decade, or decade files of the tornado, hail, or wind database |
 | `nws-vtec-events` | [NWS watches and warnings by county](noaa-nws-vtec-events.md) | Events issued for one county or UGC inside a window, from IEM's archive |
+| `nws-warnings` | [NWS watch, warning, and advisory geometries](noaa-nws-warnings.md) (v0.35) | One zipped shapefile per UTC month of every product issued, from IEM's archive, no reader |
+| `spc-outlooks` | [SPC convective and fire weather outlooks](noaa-spc-outlooks.md) (v0.35) | One zipped shapefile per UTC month of the outlooks issued, from IEM's archive, no reader |
 | `nws-damage-surveys` | [NWS damage surveys](noaa-nws-damage-surveys.md) (v0.34) | GeoJSON pages of one layer's points, tracks, or areas, cut by object-id range |
 | `nws-damage-photos` | [NWS damage survey photos](noaa-nws-damage-photos.md) (v0.34) | One JPEG or PNG per damage point attachment, at most 7 days |
 | `emergency-response-imagery` | [NGS emergency response imagery](noaa-emergency-response-imagery.md) (v0.34) | Whole post-event GeoTIFF tiles of one event, by folder and tile footprint |
@@ -96,6 +98,14 @@ See [SPC tornado reports](noaa-spc-tornado.md).
 ## NWS watches and warnings by county
 
 See [NWS watches and warnings by county](noaa-nws-vtec-events.md).
+
+## NWS watch, warning, and advisory geometries
+
+See [NWS watch, warning, and advisory geometries](noaa-nws-warnings.md).
+
+## SPC convective and fire weather outlooks
+
+See [SPC convective and fire weather outlooks](noaa-spc-outlooks.md).
 
 ## NWS damage surveys and photos
 

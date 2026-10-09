@@ -19,6 +19,10 @@
 /generated/catalog/noaa/nws-damage-photos /providers/noaa-nws-damage-photos/ 301
 /generated/catalog/noaa/nws-damage-surveys/ /providers/noaa-nws-damage-surveys/ 301
 /generated/catalog/noaa/nws-damage-surveys /providers/noaa-nws-damage-surveys/ 301
+/generated/catalog/noaa/nws-warnings/ /providers/noaa-nws-warnings/ 301
+/generated/catalog/noaa/nws-warnings /providers/noaa-nws-warnings/ 301
+/generated/catalog/noaa/spc-outlooks/ /providers/noaa-spc-outlooks/ 301
+/generated/catalog/noaa/spc-outlooks /providers/noaa-spc-outlooks/ 301
 /generated/catalog/noaa/nexrad-level2/ /providers/noaa-nexrad/ 301
 /generated/catalog/noaa/nexrad-level2 /providers/noaa-nexrad/ 301
 /generated/catalog/noaa/mrms/ /providers/noaa-mrms/ 301

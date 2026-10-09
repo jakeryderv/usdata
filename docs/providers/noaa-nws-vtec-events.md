@@ -11,7 +11,7 @@ none. A query there for May 2024 returns no features.
 One row is one event issued for one UGC, the NWS code for a county or a forecast
 zone: its issuance and expiry, its VTEC phenomena and significance, the issuing
 office, and the product id. There are no coordinates and no polygons; those are
-the planned [`noaa:nws-warnings`](../generated/catalog/noaa.md).
+[`noaa:nws-warnings`](noaa-nws-warnings.md), from the same archive.
 
 - A place is a named county: `--location "Osage County, OK"` or a quoted
   five-digit FIPS code. It becomes the county's UGC, the state's postal code,

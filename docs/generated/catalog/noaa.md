@@ -14,6 +14,8 @@
 | <span id="noaastorm-events"></span>[Storm Events details, fatalities, and locations](../../providers/noaa-storm-events.md) | Released | gzip CSV | Whole annual archives of one table; filter rows locally after downloading |
 | <span id="noaaspc-tornado-reports"></span>[SPC tornado, hail, and wind databases](../../providers/noaa-spc-tornado.md) | Released | CSV | Whole annual, half-decade, or decade files of one table; filter rows locally after downloading |
 | <span id="noaanws-vtec-events"></span>[NWS warnings and watches by county](../../providers/noaa-nws-vtec-events.md) | Released | CSV | Events issued for one county or UGC inside an inclusive UTC window; optionally one event type |
+| <span id="noaanws-warnings"></span>[NWS watch, warning, and advisory polygons and areas](../../providers/noaa-nws-warnings.md) | Source only | zipped shapefile and CSV (no reader) | Events starting inside an inclusive UTC window, one zip per UTC month; optionally one state or offices, event types, and polygon options |
+| <span id="noaaspc-outlooks"></span>[SPC convective and fire weather outlook areas](../../providers/noaa-spc-outlooks.md) | Source only | zipped shapefile (no reader) | Outlooks issued inside an inclusive UTC window, one zip per UTC month; optionally outlook types, days, and geometry form |
 | <span id="noaamrms"></span>[MRMS gridded radar products](../../providers/noaa-mrms.md) | Released | GRIB2 (gzipped) | Whole two-minute CONUS grids of one product by inclusive UTC file stamp, at most one day |
 | <span id="noaahurdat2"></span>[Tropical cyclone best tracks](../../providers/noaa-hurdat2.md) | Released | HURDAT2 fixed-format text | The newest or a named revision of one whole basin file; filter track points locally |
 | <span id="noaaibtracs"></span>[Global tropical cyclone best tracks](../../providers/noaa-ibtracs.md) | Released | CSV with a units row, NetCDF4 | One whole subset file per query, from the newest or a pinned product version |
@@ -91,15 +93,6 @@ Integrated Global Radiosonde Archive version 2: observed upper-air soundings fro
 
 [Upstream information](https://www.ncei.noaa.gov/products/weather-balloon/integrated-global-radiosonde-archive)
 Domain: Surface weather.
-
-### noaa:nws-warnings
-
-**NWS Watch, Warning, and Advisory Archive** · Planned · target later
-
-Every National Weather Service watch, warning, and advisory polygon with VTEC codes and issue, expiry, and update times, as one zipped shapefile per year. The maintained archive is the Iowa Environmental Mesonet's mirror of NWS products, not an NWS endpoint; the tornado and severe thunderstorm storm-based warnings for 2024 are 6.5 MB and all products 351 MB. Needs a shapefile reader.
-
-[Upstream information](https://mesonet.agron.iastate.edu/request/gis/watchwarn.phtml)
-Domain: Severe weather.
 
 ### noaa:nclimdiv
 
