@@ -11,8 +11,8 @@
   },
   "devDependencies": {
     "markdown-it": "15.0.2",
-    "sanitize-html": "2.17.7",
-    "wrangler": "4.144.0"
+    "sanitize-html": "2.18.0",
+    "wrangler": "4.148.0"
   },
   "overrides": {
     "workerd": "1.20260908.1",
