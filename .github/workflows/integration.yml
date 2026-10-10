@@ -71,7 +71,7 @@ jobs:
         env:
           LABEL: ${{ matrix.id }}
         run: python scripts/ci_summary.py --label "$LABEL" --junit reports/live.xml >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
           name: live-${{ matrix.id }}
@@ -105,7 +105,7 @@ jobs:
         env:
           LABEL: ${{ matrix.path }}
         run: python scripts/ci_summary.py --label "$LABEL" --notebooks reports/notebooks/summary.json >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
           name: notebook-${{ matrix.id }}
@@ -157,7 +157,7 @@ jobs:
         env:
           LABEL: restore ${{ matrix.id }}
         run: python scripts/ci_summary.py --label "$LABEL" --restore reports/restore/summary.json >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
           name: restore-${{ matrix.id }}
@@ -187,7 +187,7 @@ jobs:
       - name: Summarize minimum-dependency results
         if: always()
         run: python scripts/ci_summary.py --label minimum-dependencies --junit reports/minimum.xml >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
           name: minimum-dependencies
